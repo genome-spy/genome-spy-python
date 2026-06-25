@@ -233,3 +233,4 @@ CHANGELOG_STAGING.md
 .agents/
 .pre-commit-cache/
 .uv-cache/
+.cache/

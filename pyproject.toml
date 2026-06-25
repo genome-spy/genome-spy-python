@@ -11,6 +11,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "altair>=6.0.0",
     "ipykernel>=7.3.0",
     "ipywidgets>=8.1.8",
     "jupyter>=1.1.1",
@@ -18,6 +19,7 @@ dev = [
     "mypy>=1.16.1",
     "nbclient>=0.10.2",
     "nbformat>=5.10.4",
+    "pandas>=2.3.0",
     "pre-commit>=4.2.0",
     "pytest>=8.4.1",
     "ruff>=0.12.0",
@@ -29,6 +31,10 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/genome_spy"]
+artifacts = ["src/genome_spy/schema/genome-spy-schema.json"]
+
+[tool.genome-spy]
+core-version = "0.78.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
