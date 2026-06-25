@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-from genome_spy._utils import compact_json, is_mapping, pretty_json
+from genome_spy._utils import JsonSpec, compact_json, is_mapping, pretty_json
 from genome_spy.channels import Channel, channel
 
 DEFAULT_SCHEMA_URL = "https://cdn.jsdelivr.net/npm/@genome-spy/core/dist/schema.json"
@@ -15,6 +16,7 @@ DEFAULT_EMBED_URL = (
     "https://cdn.jsdelivr.net/npm/@genome-spy/core/dist/bundle/index.es.js"
 )
 MARK_TYPES = ("point", "rect", "rule", "tick", "text", "link")
+Y_SCALE_DEFAULTS = {"reverse": True}
 
 HTML_TEMPLATE = """
 <div id="{container_id}"></div>
@@ -56,6 +58,11 @@ HTML_TEMPLATE = """
 def _normalize_data(data: Any) -> Any:
     if data is None:
         return None
+    records = _records_from_data(data)
+    if records is not None:
+        return {"values": _json_safe(records)}
+    if hasattr(data, "to_dicts"):
+        return {"values": _json_safe(data.to_dicts())}
     if isinstance(data, list):
         return {"values": data}
     if is_mapping(data):
@@ -63,8 +70,79 @@ def _normalize_data(data: Any) -> Any:
     raise TypeError(f"Unsupported data value: {type(data)!r}")
 
 
-def _normalize_channel(value: Channel | str | dict[str, Any]) -> dict[str, Any]:
-    return channel(value).to_dict()
+def _json_safe(value: Any) -> Any:
+    if isinstance(value, float) and not math.isfinite(value):
+        return None
+    if isinstance(value, list):
+        return [_json_safe(item) for item in value]
+    if is_mapping(value):
+        return {key: _json_safe(item) for key, item in value.items()}
+    return value
+
+
+def _records_from_data(data: Any) -> list[dict[str, Any]] | None:
+    if isinstance(data, list):
+        return data
+    if is_mapping(data):
+        values = data.get("values")
+        if isinstance(values, list):
+            return values
+        return None
+    if hasattr(data, "to_dict"):
+        try:
+            records = data.to_dict(orient="records")
+        except TypeError:
+            return None
+        if isinstance(records, list):
+            return records
+    return None
+
+
+def _infer_field_type(field: str, data: Any) -> str | None:
+    records = _records_from_data(data)
+    if not records:
+        return None
+
+    for row in records[:100]:
+        if not is_mapping(row) or field not in row:
+            continue
+        value = row[field]
+        if value is None:
+            continue
+        if isinstance(value, bool):
+            return "nominal"
+        if isinstance(value, int | float):
+            return "quantitative"
+        return "nominal"
+    return None
+
+
+def _normalize_channel(
+    name: str, value: Channel | str | dict[str, Any], *, data: Any = None
+) -> dict[str, Any]:
+    definition = channel(value).to_dict()
+    if "type" not in definition and isinstance(definition.get("field"), str):
+        inferred_type = _infer_field_type(definition["field"], data)
+        if inferred_type is not None:
+            definition["type"] = inferred_type
+    if name == "y":
+        scale = definition.get("scale")
+        if scale is None:
+            definition["scale"] = dict(Y_SCALE_DEFAULTS)
+        elif is_mapping(scale) and "reverse" not in scale:
+            definition["scale"] = {**Y_SCALE_DEFAULTS, **scale}
+    if name in {"x2", "y2"} and definition.get("type") == "locus":
+        definition.pop("type")
+    return definition
+
+
+def _infer_encoding_name(value: Channel | str | dict[str, Any]) -> str:
+    if isinstance(value, Channel) and value.encoding_name is not None:
+        return value.encoding_name
+    raise TypeError(
+        "Positional encodings must be channel objects such as X(...), Y(...), "
+        "Color(...), or Size(...)."
+    )
 
 
 def _normalize_transform(transform: dict[str, Any]) -> dict[str, Any]:
@@ -106,9 +184,18 @@ class TopLevelSpec:
         spec.update(self._body_dict())
         return spec
 
+    @property
+    def spec(self) -> JsonSpec:
+        """Return the rendered GenomeSpy specification with JSON display."""
+        return JsonSpec(self.to_dict())
+
     def to_json(self, *, include_schema: bool = True) -> str:
         """Serialize the spec to formatted JSON."""
         return pretty_json(self.to_dict(include_schema=include_schema))
+
+    def __str__(self) -> str:
+        """Print charts as the JSON spec for notebook/debugging workflows."""
+        return self.to_json()
 
     def to_html(
         self,
@@ -189,7 +276,7 @@ class TopLevelSpec:
         raise NotImplementedError
 
 
-@dataclass(frozen=True, slots=True)
+@dataclass(frozen=True, slots=True, init=False)
 class Chart(TopLevelSpec):
     """A minimal immutable builder for single-view GenomeSpy core specs."""
 
@@ -197,7 +284,28 @@ class Chart(TopLevelSpec):
     mark: str | dict[str, Any] | None = None
     encoding: dict[str, dict[str, Any]] = field(default_factory=dict)
 
+    def __init__(
+        self,
+        data: Any = None,
+        mark: str | dict[str, Any] | None = None,
+        encoding: dict[str, dict[str, Any]] | None = None,
+        *,
+        properties_map: dict[str, Any] | None = None,
+        transform: list[dict[str, Any]] | None = None,
+        schema_url: str = DEFAULT_SCHEMA_URL,
+    ) -> None:
+        object.__setattr__(self, "properties_map", properties_map or {})
+        object.__setattr__(self, "transform", transform or [])
+        object.__setattr__(self, "schema_url", schema_url)
+        object.__setattr__(self, "data", data)
+        object.__setattr__(self, "mark", mark)
+        object.__setattr__(self, "encoding", encoding or {})
+
     def mark_point(self, **kwargs: Any) -> Chart:
+        return self._with_mark("point", **kwargs)
+
+    def mark_circle(self, **kwargs: Any) -> Chart:
+        """Set the mark to a point, whose default GenomeSpy shape is a circle."""
         return self._with_mark("point", **kwargs)
 
     def mark_rect(self, **kwargs: Any) -> Chart:
@@ -215,11 +323,21 @@ class Chart(TopLevelSpec):
     def mark_link(self, **kwargs: Any) -> Chart:
         return self._with_mark("link", **kwargs)
 
-    def encode(self, **kwargs: Channel | str | dict[str, Any]) -> Chart:
+    def encode(
+        self,
+        *args: Channel,
+        **kwargs: Channel | str | dict[str, Any],
+    ) -> Chart:
         """Return a new chart with merged channel encodings."""
+        for arg in args:
+            name = _infer_encoding_name(arg)
+            if name in kwargs:
+                raise TypeError(f"Encoding channel {name!r} was specified twice.")
+            kwargs[name] = arg
+
         merged = dict(self.encoding)
         for name, value in kwargs.items():
-            merged[name] = _normalize_channel(value)
+            merged[name] = _normalize_channel(name, value, data=self.data)
         return replace(self, encoding=merged)
 
     def _body_dict(self) -> dict[str, Any]:

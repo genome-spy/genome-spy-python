@@ -6,6 +6,7 @@ from genome_spy.api import (
     HConcatChart,
     JupyterChart,
     LayerChart,
+    Locus,
     Opacity,
     Size,
     Text,
@@ -19,10 +20,10 @@ from genome_spy.api import (
     concat,
     hconcat,
     layer,
+    locus,
     value,
     vconcat,
 )
-from genome_spy import datasets
 
 __all__ = [
     "__version__",
@@ -32,6 +33,7 @@ __all__ = [
     "HConcatChart",
     "JupyterChart",
     "LayerChart",
+    "Locus",
     "Opacity",
     "Size",
     "Text",
@@ -42,9 +44,9 @@ __all__ = [
     "Y",
     "Y2",
     "concat",
-    "datasets",
     "hconcat",
     "layer",
+    "locus",
     "value",
     "vconcat",
 ]

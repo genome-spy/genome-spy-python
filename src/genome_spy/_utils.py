@@ -31,6 +31,32 @@ def pretty_json(data: Any) -> str:
     return json.dumps(data, indent=2)
 
 
+class JsonSpec(dict[str, Any]):
+    """Dict-like object whose display representation is valid JSON."""
+
+    def __repr__(self) -> str:
+        return pretty_json(self)
+
+    def __str__(self) -> str:
+        return pretty_json(self)
+
+    def _repr_pretty_(self, printer: Any, cycle: bool) -> None:
+        """Pretty-print JSON in IPython/Jupyter text output."""
+        if cycle:
+            printer.text("JsonSpec(...)")
+            return
+        printer.text(pretty_json(self))
+
+    def _repr_mimebundle_(
+        self,
+        include: object | None = None,
+        exclude: object | None = None,
+    ) -> dict[str, str]:
+        """Display as indented JSON text in notebook frontends."""
+        del include, exclude
+        return {"text/plain": pretty_json(self)}
+
+
 def is_mapping(value: Any) -> bool:
     """Return whether ``value`` behaves like a mapping."""
     return isinstance(value, Mapping)

@@ -22,8 +22,9 @@ def test_altair_exposes_separate_html_and_jupyter_renderers() -> None:
     ).read_text(encoding="utf-8")
 
 
-def test_our_default_chart_display_remains_html_first() -> None:
+def test_our_default_chart_display_prefers_widget_with_html_fallback() -> None:
     chart_source = Path("src/genome_spy/chart.py").read_text(encoding="utf-8")
 
     assert 'return {"text/html": self.to_html()}' in chart_source
     assert "def widget(" in chart_source
+    assert "return self.widget()._repr_mimebundle_()" in chart_source

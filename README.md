@@ -37,35 +37,44 @@ A runnable example notebook is available at
 `chart.widget()` is also available for explicit `anywidget` usage, but plain
 `chart` display is the most portable default across notebook frontends.
 
-## Built-in Example Datasets
+## Altair-Style Examples
 
-The package includes a tiny Altair-style datasets interface for tutorials and
-tests:
+The public API aims to mirror Altair wherever GenomeSpy's grammar allows it.
+For now, example notebooks use Altair's datasets directly:
 
 ```python
-import genome_spy as gs
-from genome_spy.datasets import data
+import genome_spy as alt
+from altair.datasets import data
+
+source = data.penguins()
 
 chart = (
-    gs.Chart(data=data.point_features())
-    .mark_point(size=120)
+    alt.Chart(source)
+    .mark_circle()
     .encode(
-        x=gs.X("pos:Q"),
-        y=gs.Y("score:Q"),
-        color=gs.Color("category:N"),
+        alt.X("Flipper Length (mm)").scale(zero=False),
+        alt.Y("Body Mass (g)").scale(zero=False, padding=1),
+        alt.Size("Beak Depth (mm)").scale(zero=False),
+        color="Species",
     )
 )
 
 chart
 ```
 
-Current datasets:
+The goal is that many simple Altair examples should require only the first
+import line to change. GenomeSpy-specific genomic helpers such as
+`alt.Locus("chrom", "start")` remain available for locus-scaled genomic axes.
 
-- `data.point_features()`
-- `data.copy_number_segments()`
+A runnable Altair-style example is available in
+`notebooks/altair_penguins_style.ipynb`.
 
-Dataset examples are available in `notebooks/datasets_point_features.ipynb`
-and `notebooks/datasets_copy_number_segments.ipynb`.
+Architecture notes:
+
+- `plans/altair_schema_generation.md`: how Altair generates Python wrappers
+  from the Vega-Lite schema and how that maps to the GenomeSpy wrapper plan
+- `plans/genomespy_codegen_mapping.md`: how the local GenomeSpy codegen
+  scaffold matches and differs from Altair's machinery
 
 Reference implementations and upstream context live in `tmp/`:
 

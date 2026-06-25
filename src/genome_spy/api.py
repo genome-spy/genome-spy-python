@@ -1,6 +1,18 @@
 """Public API re-exports for the first implementation slice."""
 
-from genome_spy.channels import Color, Opacity, Size, Text, X, X2, Y, Y2, value
+from genome_spy.channels import (
+    Color,
+    Locus,
+    Opacity,
+    Size,
+    Text,
+    X,
+    X2,
+    Y,
+    Y2,
+    locus,
+    value,
+)
 from genome_spy.chart import (
     Chart,
     ConcatChart,
@@ -22,6 +34,7 @@ __all__ = [
     "HConcatChart",
     "JupyterChart",
     "LayerChart",
+    "Locus",
     "Opacity",
     "Size",
     "Text",
@@ -34,6 +47,7 @@ __all__ = [
     "concat",
     "hconcat",
     "layer",
+    "locus",
     "value",
     "vconcat",
 ]
