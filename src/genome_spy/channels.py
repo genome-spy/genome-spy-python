@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Self, cast
 
 from genome_spy._utils import is_mapping, parse_shorthand
 
@@ -19,25 +19,25 @@ class Channel:
         """Return the JSON-serializable channel definition."""
         return dict(self.definition)
 
-    def scale(self, **kwargs: Any) -> Channel:
+    def scale(self, **kwargs: Any) -> Self:
         """Return a channel with merged scale properties."""
         return self._with_nested("scale", kwargs)
 
-    def axis(self, **kwargs: Any) -> Channel:
+    def axis(self, **kwargs: Any) -> Self:
         """Return a channel with merged axis properties."""
         return self._with_nested("axis", kwargs)
 
-    def legend(self, **kwargs: Any) -> Channel:
+    def legend(self, **kwargs: Any) -> Self:
         """Return a channel with merged legend properties."""
         return self._with_nested("legend", kwargs)
 
-    def title(self, value: str | None) -> Channel:
+    def title(self, value: str | None) -> Self:
         """Return a channel with a title."""
         definition = self.to_dict()
         definition["title"] = value
-        return replace(self, definition=definition)
+        return self._replace_definition(definition)
 
-    def _with_nested(self, key: str, kwargs: dict[str, Any]) -> Channel:
+    def _with_nested(self, key: str, kwargs: dict[str, Any]) -> Self:
         definition = self.to_dict()
         previous = definition.get(key)
         if previous is None:
@@ -46,7 +46,12 @@ class Channel:
             definition[key] = {**previous, **kwargs}
         else:
             raise TypeError(f"Cannot merge {key!r} into non-mapping value.")
-        return replace(self, definition=definition)
+        return self._replace_definition(definition)
+
+    def _replace_definition(self, definition: dict[str, Any]) -> Self:
+        if type(self) is Channel:
+            return cast(Self, Channel(definition, self.encoding_name))
+        return self.__class__(definition)
 
 
 def channel(
@@ -82,38 +87,6 @@ def locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> Channel:
 def value(value: Any, /, **kwargs: Any) -> Channel:
     """Create a constant-value encoding channel."""
     return Channel({"value": value, **kwargs})
-
-
-def X(value: Channel | str | dict[str, Any], /, **kwargs: Any) -> Channel:
-    return channel(value, encoding_name="x", **kwargs)
-
-
-def Y(value: Channel | str | dict[str, Any], /, **kwargs: Any) -> Channel:
-    return channel(value, encoding_name="y", **kwargs)
-
-
-def X2(value: Channel | str | dict[str, Any], /, **kwargs: Any) -> Channel:
-    return channel(value, encoding_name="x2", **kwargs)
-
-
-def Y2(value: Channel | str | dict[str, Any], /, **kwargs: Any) -> Channel:
-    return channel(value, encoding_name="y2", **kwargs)
-
-
-def Color(value: Channel | str | dict[str, Any], /, **kwargs: Any) -> Channel:
-    return channel(value, encoding_name="color", **kwargs)
-
-
-def Size(value: Channel | str | dict[str, Any], /, **kwargs: Any) -> Channel:
-    return channel(value, encoding_name="size", **kwargs)
-
-
-def Text(value: Channel | str | dict[str, Any], /, **kwargs: Any) -> Channel:
-    return channel(value, encoding_name="text", **kwargs)
-
-
-def Opacity(value: Channel | str | dict[str, Any], /, **kwargs: Any) -> Channel:
-    return channel(value, encoding_name="opacity", **kwargs)
 
 
 def Locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> Channel:

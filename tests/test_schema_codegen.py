@@ -26,6 +26,7 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     definitions = generator.definitions()
     module = generator.generate_core_module()
     mixins_module = generator.generate_mark_mixins_module()
+    channels_module = generator.generate_channels_module()
 
     assert definitions[0].name == "mark-def"
     assert definitions[0].required == ("type",)
@@ -42,6 +43,7 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     assert "type: Any = Undefined" in module.source
     assert mixins_module.exports == ("MarkMethodMixin",)
     assert "class MarkMethodMixin" in mixins_module.source
+    assert channels_module.exports == ()
 
 
 def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
@@ -62,6 +64,13 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
             {
                 "$schema": "http://json-schema.org/draft-07/schema#",
                 "definitions": {
+                    "Encoding": {
+                        "type": "object",
+                        "properties": {
+                            "color": {"type": "object"},
+                            "x": {"type": "object"},
+                        },
+                    },
                     "MarkType": {"type": "string", "enum": ["point", "rect"]},
                     "UnitSpec": {
                         "type": "object",
@@ -102,6 +111,9 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
     mixins = (output_dir / "mixins.py").read_text(encoding="utf-8")
     assert "def mark_point" in mixins
     assert "def mark_rect" in mixins
+    channels = (output_dir / "channels.py").read_text(encoding="utf-8")
+    assert "class Color(Channel)" in channels
+    assert "class X(Channel)" in channels
     assert "SCHEMA_VERSION = '9.8.7'" in (output_dir / "__init__.py").read_text(
         encoding="utf-8"
     )

@@ -132,6 +132,7 @@ def write_schema_package(
     core_module = generator.generate_core_module()
     init_module = generator.generate_init_module(core_module.exports)
     mark_mixins_module = generator.generate_mark_mixins_module()
+    channels_module = generator.generate_channels_module()
 
     output_dir.mkdir(parents=True, exist_ok=True)
     schema_text = schema_path.read_text(encoding="utf-8").rstrip() + "\n"
@@ -139,6 +140,7 @@ def write_schema_package(
     (output_dir / "core.py").write_text(core_module.source, encoding="utf-8")
     (output_dir / "__init__.py").write_text(init_module.source, encoding="utf-8")
     (output_dir / "mixins.py").write_text(mark_mixins_module.source, encoding="utf-8")
+    (output_dir / "channels.py").write_text(channels_module.source, encoding="utf-8")
 
     if spec_reference_dir is not None:
         copy_spec_references(package_dir, spec_reference_dir, version)

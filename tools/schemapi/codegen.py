@@ -85,6 +85,19 @@ class SchemaWrapperGenerator:
             return ()
         return tuple(value for value in values if isinstance(value, str))
 
+    def encoding_channels(self) -> tuple[str, ...]:
+        """Return encoding names declared by the upstream ``Encoding`` object."""
+        definitions = self.rootschema.get("definitions", {})
+        if not isinstance(definitions, dict):
+            return ()
+        encoding_schema = definitions.get("Encoding", {})
+        if not isinstance(encoding_schema, dict):
+            return ()
+        properties = encoding_schema.get("properties", {})
+        if not isinstance(properties, dict):
+            return ()
+        return tuple(sorted(name for name in properties if isinstance(name, str)))
+
     def generate_core_module(self) -> GeneratedModule:
         """Generate a compact ``core.py``-style module."""
         exports: list[str] = ["GenomeSpySchema", "MARK_TYPES", "Root", "load_schema"]
@@ -174,6 +187,29 @@ class SchemaWrapperGenerator:
         )
         return GeneratedModule(source=source, exports=("MarkMethodMixin",))
 
+    def generate_channels_module(self) -> GeneratedModule:
+        """Generate named channel wrappers from the upstream encoding schema."""
+        exports: list[str] = []
+        classes: list[str] = []
+        for encoding_name in self.encoding_channels():
+            class_name = _class_name(encoding_name)
+            exports.append(class_name)
+            classes.append(_channel_class_source(class_name, encoding_name))
+        source = "\n".join(
+            [
+                GENERATED_HEADER,
+                "from __future__ import annotations",
+                "from typing import Any",
+                "",
+                "from genome_spy.channels import Channel, channel",
+                "",
+                *classes,
+                "__all__ = " + repr(exports),
+                "",
+            ]
+        )
+        return GeneratedModule(source=source, exports=tuple(exports))
+
 
 def _class_name(name: str) -> str:
     parts = re.split(r"[^0-9A-Za-z]+", name)
@@ -216,6 +252,18 @@ def _mark_method_source(mark_type: str) -> str:
         f'        """Set the chart mark to ``{mark_type}``."""\n'
         f"        return self._with_mark({mark_type!r}, **kwargs)  "
         "# type: ignore[attr-defined, no-any-return]"
+    )
+
+
+def _channel_class_source(class_name: str, encoding_name: str) -> str:
+    return (
+        f"class {class_name}(Channel):\n"
+        f'    """Generated wrapper for the ``{encoding_name}`` encoding channel."""\n\n'
+        "    def __init__(\n"
+        "        self, value: Channel | str | dict[str, Any], /, **kwargs: Any\n"
+        "    ) -> None:\n"
+        f"        wrapped = channel(value, encoding_name={encoding_name!r}, **kwargs)\n"
+        f"        super().__init__(wrapped.definition, encoding_name={encoding_name!r})\n"
     )
 
 

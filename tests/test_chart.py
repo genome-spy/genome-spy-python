@@ -9,11 +9,25 @@ import pytest
 
 from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
 from genome_spy.schema import SCHEMA_VERSION
+from genome_spy.schema.channels import X as GeneratedX
 from genome_spy.schemapi import SchemaValidationError
 
 
 def test_package_exposes_version() -> None:
     assert gs.__version__ == "0.1.0"
+
+
+def test_public_channel_wrapper_is_generated_and_fluent() -> None:
+    channel = gs.X("position:Q").scale(zero=False).title("Position")
+
+    assert isinstance(channel, GeneratedX)
+    assert channel.encoding_name == "x"
+    assert channel.to_dict() == {
+        "field": "position",
+        "type": "quantitative",
+        "scale": {"zero": False},
+        "title": "Position",
+    }
 
 
 def test_chart_serializes_core_spec() -> None:

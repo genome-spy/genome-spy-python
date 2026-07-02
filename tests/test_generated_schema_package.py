@@ -3,6 +3,7 @@ from __future__ import annotations
 import pytest
 
 from genome_spy.schema import MARK_TYPES, Root, UnitSpec, load_schema
+from genome_spy.schema import channels as generated_channels
 from genome_spy.schemapi import SchemaValidationError
 
 
@@ -37,3 +38,12 @@ def test_generated_schema_copy_is_deep_by_default() -> None:
     copied._kwds["transform"][0]["expr"] = "x > 1"
 
     assert original._kwds["transform"][0]["expr"] == "x > 0"
+
+
+def test_generated_channels_match_encoding_schema() -> None:
+    encoding_names = load_schema()["definitions"]["Encoding"]["properties"]
+
+    assert len(generated_channels.__all__) == len(encoding_names)
+    assert {channel.lower() for channel in generated_channels.__all__} == {
+        channel.lower() for channel in encoding_names
+    }
