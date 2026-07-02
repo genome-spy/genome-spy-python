@@ -25,13 +25,23 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     generator = SchemaWrapperGenerator(schema)
     definitions = generator.definitions()
     module = generator.generate_core_module()
+    mixins_module = generator.generate_mark_mixins_module()
 
     assert definitions[0].name == "mark-def"
     assert definitions[0].required == ("type",)
-    assert module.exports == ("GenomeSpySchema", "Root", "load_schema", "MarkDef")
+    assert module.exports == (
+        "GenomeSpySchema",
+        "MARK_TYPES",
+        "Root",
+        "load_schema",
+        "MarkDef",
+    )
+    assert "MARK_TYPES = ()" in module.source
     assert "class MarkDef" in module.source
     assert "class=Undefined" not in module.source
     assert "type: Any = Undefined" in module.source
+    assert mixins_module.exports == ("MarkMethodMixin",)
+    assert "class MarkMethodMixin" in mixins_module.source
 
 
 def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
@@ -52,13 +62,15 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
             {
                 "$schema": "http://json-schema.org/draft-07/schema#",
                 "definitions": {
+                    "MarkType": {"type": "string", "enum": ["point", "rect"]},
                     "UnitSpec": {
                         "type": "object",
                         "properties": {"mark": {"type": "string"}},
-                    }
+                    },
                 },
             }
-        ),
+        )
+        + "\n\n",
         encoding="utf-8",
     )
     (spec_dir / "root.d.ts").write_text(
@@ -73,7 +85,23 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
     )
 
     assert (output_dir / "genome-spy-schema.json").exists()
+    assert (
+        (output_dir / "genome-spy-schema.json")
+        .read_text(encoding="utf-8")
+        .endswith("}\n")
+    )
+    assert (
+        not (output_dir / "genome-spy-schema.json")
+        .read_text(encoding="utf-8")
+        .endswith("}\n\n")
+    )
     assert "class UnitSpec" in (output_dir / "core.py").read_text(encoding="utf-8")
+    assert "MARK_TYPES = ('point', 'rect')" in (output_dir / "core.py").read_text(
+        encoding="utf-8"
+    )
+    mixins = (output_dir / "mixins.py").read_text(encoding="utf-8")
+    assert "def mark_point" in mixins
+    assert "def mark_rect" in mixins
     assert "SCHEMA_VERSION = '9.8.7'" in (output_dir / "__init__.py").read_text(
         encoding="utf-8"
     )

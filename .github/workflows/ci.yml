@@ -19,3 +19,18 @@ jobs:
       - run: uv run ruff check .
       - run: uv run mypy src/
       - run: uv run pytest tests/ -x
+
+  codegen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: "3.11"
+      - run: uv sync --locked --dev
+      - run: uv run python tools/generate_schema_wrapper.py
+      - run: git diff --exit-code src/genome_spy/schema tools

@@ -4,18 +4,19 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field, replace
+from datetime import date, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 from uuid import uuid4
 
 from genome_spy._utils import JsonSpec, compact_json, is_mapping, pretty_json
 from genome_spy.channels import Channel, channel
+from genome_spy.schema import MARK_TYPES, SCHEMA_VERSION, Root, UnitSpec
+from genome_spy.schema.mixins import MarkMethodMixin
 
-DEFAULT_SCHEMA_URL = "https://cdn.jsdelivr.net/npm/@genome-spy/core/dist/schema.json"
-DEFAULT_EMBED_URL = (
-    "https://cdn.jsdelivr.net/npm/@genome-spy/core/dist/bundle/index.es.js"
-)
-MARK_TYPES = ("point", "rect", "rule", "tick", "text", "link")
+_CORE_DIST_URL = f"https://cdn.jsdelivr.net/npm/@genome-spy/core@{SCHEMA_VERSION}/dist"
+DEFAULT_SCHEMA_URL = f"{_CORE_DIST_URL}/schema.json"
+DEFAULT_EMBED_URL = f"{_CORE_DIST_URL}/bundle/index.es.js"
 Y_SCALE_DEFAULTS = {"reverse": True}
 
 HTML_TEMPLATE = """
@@ -71,8 +72,19 @@ def _normalize_data(data: Any) -> Any:
 
 
 def _json_safe(value: Any) -> Any:
+    if value is None:
+        return None
     if isinstance(value, float) and not math.isfinite(value):
         return None
+    if isinstance(value, datetime | date):
+        return value.isoformat()
+    if not isinstance(value, str | bytes) and hasattr(value, "item"):
+        try:
+            item = value.item()
+        except (AttributeError, TypeError, ValueError):
+            item = value
+        if item is not value:
+            return _json_safe(item)
     if isinstance(value, list):
         return [_json_safe(item) for item in value]
     if is_mapping(value):
@@ -159,21 +171,64 @@ class TopLevelSpec:
     transform: list[dict[str, Any]] = field(default_factory=list)
     schema_url: str = DEFAULT_SCHEMA_URL
 
-    def properties(self, **kwargs: Any) -> TopLevelSpec:
+    def properties(self, **kwargs: Any) -> Self:
         """Return a new spec with merged top-level properties."""
         merged = dict(self.properties_map)
         merged.update(kwargs)
         return replace(self, properties_map=merged)
 
-    def transform_filter(self, expression: str) -> TopLevelSpec:
+    def transform_filter(self, expression: str) -> Self:
         """Add a filter transform using a GenomeSpy expression string."""
         return self._append_transform({"type": "filter", "expr": expression})
 
-    def transform_formula(self, *, expr: str, as_: str) -> TopLevelSpec:
+    def transform_formula(self, *, expr: str, as_: str) -> Self:
         """Add a formula transform."""
         return self._append_transform({"type": "formula", "expr": expr, "as": as_})
 
-    def to_dict(self, *, include_schema: bool = True) -> dict[str, Any]:
+    def transform_aggregate(
+        self,
+        *,
+        groupby: list[str] | None = None,
+        fields: list[str] | None = None,
+        ops: list[str] | None = None,
+        as_: list[str] | None = None,
+    ) -> Self:
+        """Add a GenomeSpy aggregate transform."""
+        transform: dict[str, Any] = {"type": "aggregate"}
+        if groupby is not None:
+            transform["groupby"] = groupby
+        if fields is not None:
+            transform["fields"] = fields
+        if ops is not None:
+            transform["ops"] = ops
+        if as_ is not None:
+            transform["as"] = as_
+        return self._append_transform(transform)
+
+    def transform_stack(
+        self,
+        *,
+        groupby: list[str],
+        field: str | None = None,
+        sort: dict[str, Any] | None = None,
+        offset: str | None = None,
+        as_: list[str] | None = None,
+    ) -> Self:
+        """Add a GenomeSpy stack transform."""
+        transform: dict[str, Any] = {"type": "stack", "groupby": groupby}
+        if field is not None:
+            transform["field"] = field
+        if sort is not None:
+            transform["sort"] = dict(sort)
+        if offset is not None:
+            transform["offset"] = offset
+        if as_ is not None:
+            transform["as"] = as_
+        return self._append_transform(transform)
+
+    def to_dict(
+        self, *, include_schema: bool = True, validate: bool = True
+    ) -> dict[str, Any]:
         """Serialize the spec to a JSON-compatible dictionary."""
         spec: dict[str, Any] = {}
         if include_schema:
@@ -182,16 +237,18 @@ class TopLevelSpec:
         if self.transform:
             spec["transform"] = [dict(item) for item in self.transform]
         spec.update(self._body_dict())
-        return spec
+        return Root(**spec).to_dict(validate=validate)
 
     @property
     def spec(self) -> JsonSpec:
         """Return the rendered GenomeSpy specification with JSON display."""
         return JsonSpec(self.to_dict())
 
-    def to_json(self, *, include_schema: bool = True) -> str:
+    def to_json(self, *, include_schema: bool = True, validate: bool = True) -> str:
         """Serialize the spec to formatted JSON."""
-        return pretty_json(self.to_dict(include_schema=include_schema))
+        return pretty_json(
+            self.to_dict(include_schema=include_schema, validate=validate)
+        )
 
     def __str__(self) -> str:
         """Print charts as the JSON spec for notebook/debugging workflows."""
@@ -238,25 +295,16 @@ class TopLevelSpec:
             self,
             bundle_url=bundle_url,
             embed_options=embed_options,
-        )  # type: ignore[call-arg]
+        )
 
     def _repr_mimebundle_(
         self,
         include: object | None = None,
         exclude: object | None = None,
     ) -> object:
-        """Display the spec in notebook environments.
-
-        Prefer the anywidget path when available because notebook frontends
-        such as VS Code are more reliable with widget bundles than with inline
-        HTML that contains scripts. Fall back to HTML rendering if widget
-        construction is unavailable.
-        """
+        """Display the spec through the anywidget notebook renderer."""
         del include, exclude
-        try:
-            return self.widget()._repr_mimebundle_()
-        except ImportError:
-            return {"text/html": self.to_html()}
+        return self.widget()._repr_mimebundle_()
 
     def __add__(self, other: TopLevelSpec) -> LayerChart:
         return layer(self, other)
@@ -267,7 +315,7 @@ class TopLevelSpec:
     def __and__(self, other: TopLevelSpec) -> VConcatChart:
         return vconcat(self, other)
 
-    def _append_transform(self, transform: dict[str, Any]) -> TopLevelSpec:
+    def _append_transform(self, transform: dict[str, Any]) -> Self:
         merged = list(self.transform)
         merged.append(_normalize_transform(transform))
         return replace(self, transform=merged)
@@ -277,7 +325,7 @@ class TopLevelSpec:
 
 
 @dataclass(frozen=True, slots=True, init=False)
-class Chart(TopLevelSpec):
+class Chart(MarkMethodMixin, TopLevelSpec):
     """A minimal immutable builder for single-view GenomeSpy core specs."""
 
     data: Any = None
@@ -301,27 +349,9 @@ class Chart(TopLevelSpec):
         object.__setattr__(self, "mark", mark)
         object.__setattr__(self, "encoding", encoding or {})
 
-    def mark_point(self, **kwargs: Any) -> Chart:
-        return self._with_mark("point", **kwargs)
-
     def mark_circle(self, **kwargs: Any) -> Chart:
         """Set the mark to a point, whose default GenomeSpy shape is a circle."""
         return self._with_mark("point", **kwargs)
-
-    def mark_rect(self, **kwargs: Any) -> Chart:
-        return self._with_mark("rect", **kwargs)
-
-    def mark_rule(self, **kwargs: Any) -> Chart:
-        return self._with_mark("rule", **kwargs)
-
-    def mark_tick(self, **kwargs: Any) -> Chart:
-        return self._with_mark("tick", **kwargs)
-
-    def mark_text(self, **kwargs: Any) -> Chart:
-        return self._with_mark("text", **kwargs)
-
-    def mark_link(self, **kwargs: Any) -> Chart:
-        return self._with_mark("link", **kwargs)
 
     def encode(
         self,
@@ -349,7 +379,7 @@ class Chart(TopLevelSpec):
             spec["mark"] = self.mark
         if self.encoding:
             spec["encoding"] = dict(self.encoding)
-        return spec
+        return UnitSpec(**spec).to_dict(validate=False)
 
     def _with_mark(self, mark_type: str, **kwargs: Any) -> Chart:
         if mark_type not in MARK_TYPES:
@@ -372,7 +402,12 @@ class LayerChart(TopLevelSpec):
         return replace(self, layer=[*self.layer, other])
 
     def _body_dict(self) -> dict[str, Any]:
-        return {"layer": [child.to_dict(include_schema=False) for child in self.layer]}
+        return {
+            "layer": [
+                child.to_dict(include_schema=False, validate=False)
+                for child in self.layer
+            ]
+        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -386,7 +421,10 @@ class HConcatChart(TopLevelSpec):
 
     def _body_dict(self) -> dict[str, Any]:
         return {
-            "hconcat": [child.to_dict(include_schema=False) for child in self.hconcat]
+            "hconcat": [
+                child.to_dict(include_schema=False, validate=False)
+                for child in self.hconcat
+            ]
         }
 
 
@@ -401,7 +439,10 @@ class VConcatChart(TopLevelSpec):
 
     def _body_dict(self) -> dict[str, Any]:
         return {
-            "vconcat": [child.to_dict(include_schema=False) for child in self.vconcat]
+            "vconcat": [
+                child.to_dict(include_schema=False, validate=False)
+                for child in self.vconcat
+            ]
         }
 
 
@@ -414,7 +455,10 @@ class ConcatChart(TopLevelSpec):
 
     def _body_dict(self) -> dict[str, Any]:
         return {
-            "concat": [child.to_dict(include_schema=False) for child in self.concat],
+            "concat": [
+                child.to_dict(include_schema=False, validate=False)
+                for child in self.concat
+            ],
             "columns": self.columns,
         }
 

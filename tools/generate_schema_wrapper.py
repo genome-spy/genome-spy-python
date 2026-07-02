@@ -1,4 +1,11 @@
-"""Generate Python wrappers from a version-pinned GenomeSpy npm package."""
+"""Generate Python wrappers from a version-pinned GenomeSpy npm package.
+
+This module follows Altair's maintainer-time generation workflow: fetch the
+version-pinned upstream JavaScript package, write generated Python/schema
+artifacts into the package tree, and commit those artifacts. It is not a direct
+copy of Altair's generator; it is a GenomeSpy-specific implementation shaped to
+grow toward the same generated-schema plus handwritten-API architecture.
+"""
 
 from __future__ import annotations
 
@@ -124,11 +131,14 @@ def write_schema_package(
     generator = SchemaWrapperGenerator(schema, schema_version=version)
     core_module = generator.generate_core_module()
     init_module = generator.generate_init_module(core_module.exports)
+    mark_mixins_module = generator.generate_mark_mixins_module()
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(schema_path, output_dir / SCHEMA_FILENAME)
+    schema_text = schema_path.read_text(encoding="utf-8").rstrip() + "\n"
+    (output_dir / SCHEMA_FILENAME).write_text(schema_text, encoding="utf-8")
     (output_dir / "core.py").write_text(core_module.source, encoding="utf-8")
     (output_dir / "__init__.py").write_text(init_module.source, encoding="utf-8")
+    (output_dir / "mixins.py").write_text(mark_mixins_module.source, encoding="utf-8")
 
     if spec_reference_dir is not None:
         copy_spec_references(package_dir, spec_reference_dir, version)

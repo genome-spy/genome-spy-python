@@ -18,6 +18,7 @@ def load_schema() -> dict[str, Any]:
 
 
 _ROOT_SCHEMA = load_schema()
+MARK_TYPES = ("rect", "point", "rule", "tick", "text", "link")
 
 
 class GenomeSpySchema(SchemaBase):
@@ -5748,6 +5749,7 @@ class ZoomParams(GenomeSpySchema):
 
 __all__ = [
     "GenomeSpySchema",
+    "MARK_TYPES",
     "Root",
     "load_schema",
     "AggregateOp",

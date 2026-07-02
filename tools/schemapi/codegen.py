@@ -1,17 +1,19 @@
 """Minimal code generator scaffolding for GenomeSpy schema wrappers.
 
+The module is adapted from Altair's schema-generation architecture.
 Altair's generator is broad and mature: it walks Vega-Lite definitions,
 derives constructors, emits type annotations, generates channels, and wires
 runtime validation. This module is the GenomeSpy starting point. It currently
-summarizes JSON Schema definitions and emits simple wrapper class source; the
-interfaces are shaped so they can grow toward Altair's architecture.
+summarizes JSON Schema definitions and emits simple wrapper class source;
+the interfaces are shaped so they can grow toward Altair's architecture while
+accounting for GenomeSpy-specific schema conventions.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import keyword
 import re
+from dataclasses import dataclass
 from typing import Any
 
 
@@ -70,9 +72,22 @@ class SchemaWrapperGenerator:
             if isinstance(schema, dict)
         ]
 
+    def mark_types(self) -> tuple[str, ...]:
+        """Return mark names declared by the upstream ``MarkType`` enum."""
+        definitions = self.rootschema.get("definitions", {})
+        if not isinstance(definitions, dict):
+            return ()
+        mark_schema = definitions.get("MarkType", {})
+        if not isinstance(mark_schema, dict):
+            return ()
+        values = mark_schema.get("enum", [])
+        if not isinstance(values, list):
+            return ()
+        return tuple(value for value in values if isinstance(value, str))
+
     def generate_core_module(self) -> GeneratedModule:
         """Generate a compact ``core.py``-style module."""
-        exports: list[str] = ["GenomeSpySchema", "Root", "load_schema"]
+        exports: list[str] = ["GenomeSpySchema", "MARK_TYPES", "Root", "load_schema"]
         chunks = [
             GENERATED_HEADER,
             "from __future__ import annotations",
@@ -91,6 +106,7 @@ class SchemaWrapperGenerator:
             "    return cast(dict[str, Any], schema)",
             "",
             "_ROOT_SCHEMA = load_schema()",
+            "MARK_TYPES = " + repr(self.mark_types()),
             "",
             "class GenomeSpySchema(SchemaBase):",
             '    """Base class for generated GenomeSpy schema wrappers."""',
@@ -138,6 +154,26 @@ class SchemaWrapperGenerator:
         )
         return GeneratedModule(source=source, exports=exports)
 
+    def generate_mark_mixins_module(self) -> GeneratedModule:
+        """Generate chart mark methods from the upstream mark enum."""
+        methods = [_mark_method_source(mark_type) for mark_type in self.mark_types()]
+        source = "\n".join(
+            [
+                GENERATED_HEADER,
+                "from __future__ import annotations",
+                "from typing import Any, Self",
+                "",
+                "class MarkMethodMixin:",
+                '    """Grammar-derived mark methods for the handwritten chart API."""',
+                "",
+                *(methods or ["    pass"]),
+                "",
+                '__all__ = ["MarkMethodMixin"]',
+                "",
+            ]
+        )
+        return GeneratedModule(source=source, exports=("MarkMethodMixin",))
+
 
 def _class_name(name: str) -> str:
     parts = re.split(r"[^0-9A-Za-z]+", name)
@@ -170,6 +206,16 @@ def _schema_class_source(class_name: str, definition: SchemaDefinition) -> str:
         f"        {body}\n"
         f"        if kwds:\n"
         f"            self._kwds.update(kwds)\n"
+    )
+
+
+def _mark_method_source(mark_type: str) -> str:
+    method_name = mark_type.replace("-", "_")
+    return (
+        f"    def mark_{method_name}(self, **kwargs: Any) -> Self:\n"
+        f'        """Set the chart mark to ``{mark_type}``."""\n'
+        f"        return self._with_mark({mark_type!r}, **kwargs)  "
+        "# type: ignore[attr-defined, no-any-return]"
     )
 
 

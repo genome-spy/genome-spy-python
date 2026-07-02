@@ -2,6 +2,7 @@
 
 from genome_spy.schema.core import (
     GenomeSpySchema,
+    MARK_TYPES,
     Root,
     load_schema,
     AggregateOp,
@@ -225,6 +226,7 @@ SCHEMA_VERSION = "0.78.0"
 
 __all__ = [
     "GenomeSpySchema",
+    "MARK_TYPES",
     "Root",
     "load_schema",
     "AggregateOp",

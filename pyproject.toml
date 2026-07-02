@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "anywidget>=0.9.18",
+    "jsonschema>=4.26.0",
     "traitlets>=5.14.3",
 ]
 

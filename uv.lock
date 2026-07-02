@@ -519,6 +519,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "anywidget" },
+    { name = "jsonschema" },
     { name = "traitlets" },
 ]
 
@@ -541,6 +542,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "anywidget", specifier = ">=0.9.18" },
+    { name = "jsonschema", specifier = ">=4.26.0" },
     { name = "traitlets", specifier = ">=5.14.3" },
 ]
 

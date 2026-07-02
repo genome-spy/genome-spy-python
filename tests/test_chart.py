@@ -2,8 +2,14 @@ from __future__ import annotations
 
 import json
 import math
+from datetime import datetime
 
 import genome_spy as gs
+import pytest
+
+from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
+from genome_spy.schema import SCHEMA_VERSION
+from genome_spy.schemapi import SchemaValidationError
 
 
 def test_package_exposes_version() -> None:
@@ -24,7 +30,7 @@ def test_chart_serializes_core_spec() -> None:
     )
 
     assert chart.to_dict() == {
-        "$schema": "https://cdn.jsdelivr.net/npm/@genome-spy/core/dist/schema.json",
+        "$schema": DEFAULT_SCHEMA_URL,
         "description": "Simple point plot",
         "width": 320,
         "height": 180,
@@ -120,6 +126,69 @@ def test_altair_style_tick_shorthand_serializes() -> None:
     }
 
 
+def test_genomespy_style_stacked_bar_transforms_serialize() -> None:
+    chart = (
+        gs.Chart(
+            [
+                {"variety": "Manchuria", "site": "Waseca", "yield": 48.8},
+                {"variety": "Manchuria", "site": "Morris", "yield": 27.4},
+            ]
+        )
+        .transform_aggregate(
+            groupby=["variety", "site"],
+            fields=["yield"],
+            ops=["sum"],
+            as_=["yieldSum"],
+        )
+        .transform_stack(
+            field="yieldSum",
+            groupby=["variety"],
+            sort={"field": "site", "order": "ascending"},
+            as_=["yieldStart", "yieldEnd"],
+        )
+        .mark_rect()
+        .encode(
+            x=gs.X("yieldStart:Q").title("Sum of yield"),
+            x2="yieldEnd",
+            y=gs.Y("variety:N").scale(padding=0.1, reverse=False),
+            color="site:N",
+        )
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["transform"] == [
+        {
+            "type": "aggregate",
+            "groupby": ["variety", "site"],
+            "fields": ["yield"],
+            "ops": ["sum"],
+            "as": ["yieldSum"],
+        },
+        {
+            "type": "stack",
+            "field": "yieldSum",
+            "groupby": ["variety"],
+            "sort": {"field": "site", "order": "ascending"},
+            "as": ["yieldStart", "yieldEnd"],
+        },
+    ]
+    assert spec["mark"] == "rect"
+    assert spec["encoding"]["x"] == {
+        "field": "yieldStart",
+        "title": "Sum of yield",
+        "type": "quantitative",
+    }
+    assert spec["encoding"]["x2"] == {"field": "yieldEnd"}
+    assert spec["encoding"]["y"]["field"] == "variety"
+    assert spec["encoding"]["y"]["type"] == "nominal"
+    assert spec["encoding"]["y"]["scale"] == {"padding": 0.1, "reverse": False}
+    assert spec["encoding"]["color"] == {
+        "field": "site",
+        "type": "nominal",
+    }
+
+
 def test_y_scale_reverse_can_be_overridden() -> None:
     chart = (
         gs.Chart([{"x": 1, "y": 2}])
@@ -140,6 +209,17 @@ def test_dataframe_like_nan_values_are_serialized_as_null() -> None:
     chart = gs.Chart([{"x": math.nan, "y": 2}]).mark_point().encode(x="x:Q", y="y:Q")
 
     assert chart.to_dict()["data"]["values"] == [{"x": None, "y": 2}]
+
+
+def test_dataframe_like_datetime_values_are_json_safe() -> None:
+    chart = (
+        gs.Chart([{"x": 1, "when": datetime(1970, 1, 1)}]).mark_tick().encode(x="x:Q")
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["data"]["values"] == [{"x": 1, "when": "1970-01-01T00:00:00"}]
+    json.dumps(spec)
 
 
 def test_chart_spec_and_string_repr_expose_json_spec() -> None:
@@ -187,6 +267,13 @@ def test_to_html_embeds_genomespy_runtime() -> None:
     assert "dist/bundle/index.es.js" in html
     assert '"mark":"point"' in html
     assert json.dumps("x") in html
+
+
+def test_runtime_urls_match_generated_schema_version() -> None:
+    versioned_package = f"@genome-spy/core@{SCHEMA_VERSION}"
+
+    assert versioned_package in DEFAULT_SCHEMA_URL
+    assert versioned_package in DEFAULT_EMBED_URL
 
 
 def test_default_repr_uses_widget_bundle_when_available() -> None:
@@ -238,3 +325,12 @@ def test_grid_concat_helper_serializes_columns() -> None:
 
     assert spec["columns"] == 2
     assert len(spec["concat"]) == 2
+
+
+def test_chart_validates_complete_spec_by_default() -> None:
+    chart = gs.Chart([{"x": 1}], mark="not-a-mark").encode(x="x:Q")
+
+    with pytest.raises(SchemaValidationError, match="Invalid Root"):
+        chart.to_dict()
+
+    assert chart.to_dict(validate=False)["mark"] == "not-a-mark"
