@@ -6,6 +6,9 @@ from dataclasses import dataclass, field
 from typing import Any, Self, cast
 
 from genome_spy._utils import is_mapping, parse_shorthand
+from genome_spy.schemapi import SchemaBase
+
+_MISSING = object()
 
 
 @dataclass(frozen=True, slots=True)
@@ -19,33 +22,46 @@ class Channel:
         """Return the JSON-serializable channel definition."""
         return dict(self.definition)
 
-    def scale(self, **kwargs: Any) -> Self:
-        """Return a channel with merged scale properties."""
-        return self._with_nested("scale", kwargs)
-
-    def axis(self, **kwargs: Any) -> Self:
-        """Return a channel with merged axis properties."""
-        return self._with_nested("axis", kwargs)
-
-    def legend(self, **kwargs: Any) -> Self:
-        """Return a channel with merged legend properties."""
-        return self._with_nested("legend", kwargs)
-
     def title(self, value: str | None) -> Self:
         """Return a channel with a title."""
         definition = self.to_dict()
         definition["title"] = value
         return self._replace_definition(definition)
 
-    def _with_nested(self, key: str, kwargs: dict[str, Any]) -> Self:
+    def _with_nested(
+        self,
+        key: str,
+        value: SchemaBase | dict[str, Any] | None | object = _MISSING,
+        /,
+        **kwargs: Any,
+    ) -> Self:
         definition = self.to_dict()
-        previous = definition.get(key)
-        if previous is None:
-            definition[key] = dict(kwargs)
-        elif is_mapping(previous):
-            definition[key] = {**previous, **kwargs}
+        if value is _MISSING:
+            previous = definition.get(key)
+            if previous is None:
+                definition[key] = dict(kwargs)
+            elif is_mapping(previous):
+                definition[key] = {**previous, **kwargs}
+            else:
+                raise TypeError(f"Cannot merge {key!r} into non-mapping value.")
+            return self._replace_definition(definition)
+
+        if value is None:
+            if kwargs:
+                raise TypeError(f"Cannot merge keyword properties into null {key!r}.")
+            definition[key] = None
+            return self._replace_definition(definition)
+
+        if isinstance(value, SchemaBase):
+            nested = value.to_dict()
+        elif is_mapping(value):
+            nested = dict(cast(dict[str, Any], value))
         else:
-            raise TypeError(f"Cannot merge {key!r} into non-mapping value.")
+            raise TypeError(f"Unsupported nested {key!r} value: {type(value)!r}")
+
+        if kwargs:
+            nested.update(kwargs)
+        definition[key] = nested
         return self._replace_definition(definition)
 
     def _replace_definition(self, definition: dict[str, Any]) -> Self:

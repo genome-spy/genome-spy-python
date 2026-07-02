@@ -8,7 +8,7 @@ import genome_spy as gs
 import pytest
 
 from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
-from genome_spy.schema import SCHEMA_VERSION, UnitSpec
+from genome_spy.schema import GenomeAxis, Legend, SCHEMA_VERSION, Scale, UnitSpec
 from genome_spy.schema.channels import X as GeneratedX
 from genome_spy.schemapi import SchemaValidationError
 
@@ -38,6 +38,37 @@ def test_public_channel_wrapper_is_generated_and_fluent() -> None:
         "type": "quantitative",
         "scale": {"zero": False},
         "title": "Position",
+    }
+
+
+def test_generated_channel_nested_setters_accept_schema_wrappers() -> None:
+    channel = (
+        gs.X("position:Q")
+        .axis(GenomeAxis(title="Position axis"))
+        .scale(Scale(zero=False), padding=12)
+    )
+    color = gs.Color("species:N").legend(Legend(title="Species legend"))
+
+    assert channel.to_dict() == {
+        "field": "position",
+        "type": "quantitative",
+        "axis": {"title": "Position axis"},
+        "scale": {"zero": False, "padding": 12},
+    }
+    assert color.to_dict() == {
+        "field": "species",
+        "type": "nominal",
+        "legend": {"title": "Species legend"},
+    }
+
+
+def test_generated_channel_nested_setters_allow_null_override() -> None:
+    channel = gs.X("position:Q").axis(None)
+
+    assert channel.to_dict() == {
+        "field": "position",
+        "type": "quantitative",
+        "axis": None,
     }
 
 

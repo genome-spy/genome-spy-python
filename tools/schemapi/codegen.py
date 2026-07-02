@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import keyword
 import re
+from urllib.parse import unquote
 from dataclasses import dataclass
 from typing import Any
 
@@ -97,6 +98,32 @@ class SchemaWrapperGenerator:
         if not isinstance(properties, dict):
             return ()
         return tuple(sorted(name for name in properties if isinstance(name, str)))
+
+    def channel_nested_setters(self, encoding_name: str) -> tuple[tuple[str, str], ...]:
+        """Return nested setter properties available for an encoding channel."""
+        definitions = self.rootschema.get("definitions", {})
+        if not isinstance(definitions, dict):
+            return ()
+        encoding_schema = definitions.get("Encoding", {})
+        if not isinstance(encoding_schema, dict):
+            return ()
+        properties = encoding_schema.get("properties", {})
+        if not isinstance(properties, dict):
+            return ()
+        channel_schema = properties.get(encoding_name)
+        if not isinstance(channel_schema, dict):
+            return ()
+        resolved_properties = _resolve_properties(channel_schema, definitions)
+        setters: list[tuple[str, str]] = []
+        for property_name in ("axis", "scale", "legend"):
+            nested_schema = resolved_properties.get(property_name)
+            if not isinstance(nested_schema, dict):
+                continue
+            ref_name = _first_ref_name(nested_schema)
+            if ref_name is None:
+                continue
+            setters.append((property_name, _class_name(ref_name)))
+        return tuple(setters)
 
     def generate_core_module(self) -> GeneratedModule:
         """Generate a compact ``core.py``-style module."""
@@ -191,17 +218,34 @@ class SchemaWrapperGenerator:
         """Generate named channel wrappers from the upstream encoding schema."""
         exports: list[str] = []
         classes: list[str] = []
+        helper_class_names = {
+            class_name
+            for encoding_name in self.encoding_channels()
+            for _, class_name in self.channel_nested_setters(encoding_name)
+        }
         for encoding_name in self.encoding_channels():
             class_name = _class_name(encoding_name)
             exports.append(class_name)
-            classes.append(_channel_class_source(class_name, encoding_name))
+            classes.append(
+                _channel_class_source(
+                    class_name,
+                    encoding_name,
+                    nested_setters=self.channel_nested_setters(encoding_name),
+                )
+            )
+        helper_imports = ", ".join(sorted(helper_class_names))
         source = "\n".join(
             [
                 GENERATED_HEADER,
                 "from __future__ import annotations",
                 "from typing import Any",
                 "",
-                "from genome_spy.channels import Channel, channel",
+                "from genome_spy.channels import Channel, _MISSING, channel",
+                (
+                    "from genome_spy.schema.core import " + helper_imports
+                    if helper_imports
+                    else ""
+                ),
                 "",
                 *classes,
                 "__all__ = " + repr(exports),
@@ -219,6 +263,56 @@ def _class_name(name: str) -> str:
     if class_name[0].isdigit():
         return f"Schema{class_name}"
     return class_name
+
+
+def _ref_name(schema: dict[str, Any]) -> str | None:
+    ref = schema.get("$ref")
+    if not isinstance(ref, str):
+        return None
+    return unquote(ref.split("/")[-1])
+
+
+def _first_ref_name(schema: dict[str, Any]) -> str | None:
+    ref = _ref_name(schema)
+    if ref is not None:
+        return ref
+    for key in ("anyOf", "oneOf", "allOf"):
+        variants = schema.get(key, [])
+        if not isinstance(variants, list):
+            continue
+        for variant in variants:
+            if isinstance(variant, dict):
+                ref = _ref_name(variant)
+                if ref is not None:
+                    return ref
+    return None
+
+
+def _resolve_properties(
+    schema: dict[str, Any],
+    definitions: dict[str, Any],
+    *,
+    seen: frozenset[str] = frozenset(),
+) -> dict[str, Any]:
+    ref_name = _ref_name(schema)
+    if ref_name is not None:
+        target = definitions.get(ref_name)
+        if not isinstance(target, dict) or ref_name in seen:
+            return {}
+        return _resolve_properties(target, definitions, seen=seen | {ref_name})
+
+    resolved: dict[str, Any] = {}
+    properties = schema.get("properties", {})
+    if isinstance(properties, dict):
+        resolved.update(properties)
+    for key in ("anyOf", "oneOf", "allOf"):
+        variants = schema.get(key, [])
+        if not isinstance(variants, list):
+            continue
+        for variant in variants:
+            if isinstance(variant, dict):
+                resolved.update(_resolve_properties(variant, definitions, seen=seen))
+    return resolved
 
 
 def _schema_class_source(class_name: str, definition: SchemaDefinition) -> str:
@@ -255,7 +349,16 @@ def _mark_method_source(mark_type: str) -> str:
     )
 
 
-def _channel_class_source(class_name: str, encoding_name: str) -> str:
+def _channel_class_source(
+    class_name: str,
+    encoding_name: str,
+    *,
+    nested_setters: tuple[tuple[str, str], ...],
+) -> str:
+    methods = "".join(
+        _channel_nested_setter_source(class_name, property_name, schema_class_name)
+        for property_name, schema_class_name in nested_setters
+    )
     return (
         f"class {class_name}(Channel):\n"
         f'    """Generated wrapper for the ``{encoding_name}`` encoding channel."""\n\n'
@@ -264,6 +367,23 @@ def _channel_class_source(class_name: str, encoding_name: str) -> str:
         "    ) -> None:\n"
         f"        wrapped = channel(value, encoding_name={encoding_name!r}, **kwargs)\n"
         f"        super().__init__(wrapped.definition, encoding_name={encoding_name!r})\n"
+        f"{methods}"
+    )
+
+
+def _channel_nested_setter_source(
+    channel_class_name: str, property_name: str, schema_class_name: str
+) -> str:
+    return (
+        "\n"
+        f"    def {property_name}(\n"
+        f"        self,\n"
+        f"        value: {schema_class_name} | dict[str, Any] | None | object = _MISSING,\n"
+        f"        /,\n"
+        f"        **kwargs: Any,\n"
+        f"    ) -> {channel_class_name}:\n"
+        f'        """Return a channel with a ``{schema_class_name}`` {property_name}."""\n'
+        f"        return self._with_nested({property_name!r}, value, **kwargs)\n"
     )
 
 

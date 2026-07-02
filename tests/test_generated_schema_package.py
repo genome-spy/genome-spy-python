@@ -48,3 +48,10 @@ def test_generated_channels_match_encoding_schema() -> None:
     assert {channel.lower() for channel in generated_channels.__all__} == {
         channel.lower() for channel in encoding_names
     }
+
+
+def test_generated_channels_expose_schema_derived_nested_setters() -> None:
+    assert hasattr(generated_channels.X("field:Q"), "axis")
+    assert hasattr(generated_channels.X("field:Q"), "scale")
+    assert not hasattr(generated_channels.X("field:Q"), "legend")
+    assert hasattr(generated_channels.Color("field:N"), "legend")
