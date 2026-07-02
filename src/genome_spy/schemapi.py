@@ -61,6 +61,15 @@ class SchemaBase:
     def __init__(self, **kwds: Any) -> None:
         self._kwds = kwds
 
+    def __getattr__(self, name: str) -> Any:
+        """Expose stored schema properties as attributes."""
+        if name == "_kwds":
+            raise AttributeError(name)
+        try:
+            return self._kwds[name]
+        except KeyError:
+            raise AttributeError(name) from None
+
     def copy(self, *, deep: bool = True, **kwds: Any) -> Self:
         """Return a copy with optional keyword updates."""
         values = deepcopy(self._kwds) if deep else dict(self._kwds)

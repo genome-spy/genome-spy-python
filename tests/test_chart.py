@@ -8,13 +8,24 @@ import genome_spy as gs
 import pytest
 
 from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
-from genome_spy.schema import SCHEMA_VERSION
+from genome_spy.schema import SCHEMA_VERSION, UnitSpec
 from genome_spy.schema.channels import X as GeneratedX
 from genome_spy.schemapi import SchemaValidationError
 
 
 def test_package_exposes_version() -> None:
     assert gs.__version__ == "0.1.0"
+
+
+def test_chart_directly_inherits_generated_unit_spec() -> None:
+    original = gs.Chart([{"x": 1}], schema_url="https://example.test/schema.json")
+    marked = original.mark_point().encode(x="x:Q")
+
+    assert isinstance(original, UnitSpec)
+    assert isinstance(marked, UnitSpec)
+    assert "mark" not in original.to_dict(validate=False)
+    assert marked.to_dict()["mark"] == "point"
+    assert marked.to_dict()["$schema"] == "https://example.test/schema.json"
 
 
 def test_public_channel_wrapper_is_generated_and_fluent() -> None:

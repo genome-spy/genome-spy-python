@@ -13,6 +13,7 @@ from genome_spy._utils import JsonSpec, compact_json, is_mapping, pretty_json
 from genome_spy.channels import Channel, channel
 from genome_spy.schema import MARK_TYPES, SCHEMA_VERSION, Root, UnitSpec
 from genome_spy.schema.mixins import MarkMethodMixin
+from genome_spy.schemapi import Undefined, UndefinedType
 
 _CORE_DIST_URL = f"https://cdn.jsdelivr.net/npm/@genome-spy/core@{SCHEMA_VERSION}/dist"
 DEFAULT_SCHEMA_URL = f"{_CORE_DIST_URL}/schema.json"
@@ -163,19 +164,12 @@ def _normalize_transform(transform: dict[str, Any]) -> dict[str, Any]:
     return dict(transform)
 
 
-@dataclass(frozen=True, slots=True)
 class TopLevelSpec:
-    """Base class for top-level GenomeSpy specifications."""
-
-    properties_map: dict[str, Any] = field(default_factory=dict)
-    transform: list[dict[str, Any]] = field(default_factory=list)
-    schema_url: str = DEFAULT_SCHEMA_URL
+    """Shared behavior for top-level GenomeSpy specifications."""
 
     def properties(self, **kwargs: Any) -> Self:
         """Return a new spec with merged top-level properties."""
-        merged = dict(self.properties_map)
-        merged.update(kwargs)
-        return replace(self, properties_map=merged)
+        return self._with_properties(kwargs)
 
     def transform_filter(self, expression: str) -> Self:
         """Add a filter transform using a GenomeSpy expression string."""
@@ -230,14 +224,7 @@ class TopLevelSpec:
         self, *, include_schema: bool = True, validate: bool = True
     ) -> dict[str, Any]:
         """Serialize the spec to a JSON-compatible dictionary."""
-        spec: dict[str, Any] = {}
-        if include_schema:
-            spec["$schema"] = self.schema_url
-        spec.update(self.properties_map)
-        if self.transform:
-            spec["transform"] = [dict(item) for item in self.transform]
-        spec.update(self._body_dict())
-        return Root(**spec).to_dict(validate=validate)
+        raise NotImplementedError
 
     @property
     def spec(self) -> JsonSpec:
@@ -316,38 +303,47 @@ class TopLevelSpec:
         return vconcat(self, other)
 
     def _append_transform(self, transform: dict[str, Any]) -> Self:
-        merged = list(self.transform)
-        merged.append(_normalize_transform(transform))
-        return replace(self, transform=merged)
+        raise NotImplementedError
 
-    def _body_dict(self) -> dict[str, Any]:
+    def _with_properties(self, properties: dict[str, Any]) -> Self:
         raise NotImplementedError
 
 
-@dataclass(frozen=True, slots=True, init=False)
-class Chart(MarkMethodMixin, TopLevelSpec):
-    """A minimal immutable builder for single-view GenomeSpy core specs."""
-
-    data: Any = None
-    mark: str | dict[str, Any] | None = None
-    encoding: dict[str, dict[str, Any]] = field(default_factory=dict)
+class Chart(TopLevelSpec, MarkMethodMixin, UnitSpec):
+    """An immutable-style builder backed by generated ``UnitSpec`` state."""
 
     def __init__(
         self,
-        data: Any = None,
-        mark: str | dict[str, Any] | None = None,
-        encoding: dict[str, dict[str, Any]] | None = None,
+        data: Any = Undefined,
+        mark: str | dict[str, Any] | UndefinedType = Undefined,
+        encoding: dict[str, dict[str, Any]] | UndefinedType = Undefined,
         *,
         properties_map: dict[str, Any] | None = None,
-        transform: list[dict[str, Any]] | None = None,
+        transform: list[dict[str, Any]] | UndefinedType = Undefined,
         schema_url: str = DEFAULT_SCHEMA_URL,
+        **kwargs: Any,
     ) -> None:
-        object.__setattr__(self, "properties_map", properties_map or {})
-        object.__setattr__(self, "transform", transform or [])
-        object.__setattr__(self, "schema_url", schema_url)
-        object.__setattr__(self, "data", data)
-        object.__setattr__(self, "mark", mark)
-        object.__setattr__(self, "encoding", encoding or {})
+        if properties_map:
+            kwargs = {**properties_map, **kwargs}
+        UnitSpec.__init__(
+            self,
+            data=data,
+            mark=mark,
+            encoding=encoding,
+            transform=transform,
+            **kwargs,
+        )
+        self._schema_url = schema_url
+
+    def copy(self, *, deep: bool = True, **kwargs: Any) -> Self:
+        """Return a schema-backed copy while preserving the schema URL."""
+        copied = super().copy(deep=deep, **kwargs)
+        copied._schema_url = self._schema_url
+        return copied
+
+    def properties(self, **kwargs: Any) -> Self:
+        """Return a shallow copy with updated unit-spec properties."""
+        return self.copy(deep=False, **kwargs)
 
     def mark_circle(self, **kwargs: Any) -> Chart:
         """Set the mark to a point, whose default GenomeSpy shape is a circle."""
@@ -365,21 +361,29 @@ class Chart(MarkMethodMixin, TopLevelSpec):
                 raise TypeError(f"Encoding channel {name!r} was specified twice.")
             kwargs[name] = arg
 
-        merged = dict(self.encoding)
+        current_encoding = self._kwds.get("encoding", Undefined)
+        merged = {} if current_encoding is Undefined else dict(current_encoding)
+        data = self._kwds.get("data", Undefined)
         for name, value in kwargs.items():
-            merged[name] = _normalize_channel(name, value, data=self.data)
-        return replace(self, encoding=merged)
+            merged[name] = _normalize_channel(name, value, data=data)
+        return self.copy(deep=False, encoding=merged)
 
-    def _body_dict(self) -> dict[str, Any]:
-        spec: dict[str, Any] = {}
-        normalized_data = _normalize_data(self.data)
-        if normalized_data is not None:
-            spec["data"] = normalized_data
-        if self.mark is not None:
-            spec["mark"] = self.mark
-        if self.encoding:
-            spec["encoding"] = dict(self.encoding)
-        return UnitSpec(**spec).to_dict(validate=False)
+    def to_dict(
+        self, *, include_schema: bool = True, validate: bool = True
+    ) -> dict[str, Any]:
+        """Serialize and optionally validate the complete chart specification."""
+        values = dict(self._kwds)
+        data = values.get("data", Undefined)
+        if data is not Undefined:
+            normalized_data = _normalize_data(data)
+            if normalized_data is None:
+                values.pop("data")
+            else:
+                values["data"] = normalized_data
+        spec = UnitSpec(**values).to_dict(validate=False)
+        if include_schema:
+            spec["$schema"] = self._schema_url
+        return Root(**spec).to_dict(validate=validate)
 
     def _with_mark(self, mark_type: str, **kwargs: Any) -> Chart:
         if mark_type not in MARK_TYPES:
@@ -389,11 +393,49 @@ class Chart(MarkMethodMixin, TopLevelSpec):
             mark = {"type": mark_type, **kwargs}
         else:
             mark = mark_type
-        return replace(self, mark=mark)
+        return self.copy(deep=False, mark=mark)
+
+    def _append_transform(self, transform: dict[str, Any]) -> Self:
+        current = self._kwds.get("transform", Undefined)
+        merged = [] if current is Undefined else list(current)
+        merged.append(_normalize_transform(transform))
+        return self.copy(deep=False, transform=merged)
+
+    def _with_properties(self, properties: dict[str, Any]) -> Self:
+        return self.copy(deep=False, **properties)
 
 
 @dataclass(frozen=True, slots=True)
-class LayerChart(TopLevelSpec):
+class _CompositionSpec(TopLevelSpec):
+    properties_map: dict[str, Any] = field(default_factory=dict)
+    transform: list[dict[str, Any]] = field(default_factory=list)
+    schema_url: str = DEFAULT_SCHEMA_URL
+
+    def to_dict(
+        self, *, include_schema: bool = True, validate: bool = True
+    ) -> dict[str, Any]:
+        spec: dict[str, Any] = {}
+        if include_schema:
+            spec["$schema"] = self.schema_url
+        spec.update(self.properties_map)
+        if self.transform:
+            spec["transform"] = [dict(item) for item in self.transform]
+        spec.update(self._body_dict())
+        return Root(**spec).to_dict(validate=validate)
+
+    def _append_transform(self, transform: dict[str, Any]) -> Self:
+        merged = [*self.transform, _normalize_transform(transform)]
+        return replace(self, transform=merged)
+
+    def _with_properties(self, properties: dict[str, Any]) -> Self:
+        return replace(self, properties_map={**self.properties_map, **properties})
+
+    def _body_dict(self) -> dict[str, Any]:
+        raise NotImplementedError
+
+
+@dataclass(frozen=True, slots=True)
+class LayerChart(_CompositionSpec):
     """A layered GenomeSpy specification."""
 
     layer: list[TopLevelSpec] = field(default_factory=list)
@@ -411,7 +453,7 @@ class LayerChart(TopLevelSpec):
 
 
 @dataclass(frozen=True, slots=True)
-class HConcatChart(TopLevelSpec):
+class HConcatChart(_CompositionSpec):
     """A horizontally concatenated GenomeSpy specification."""
 
     hconcat: list[TopLevelSpec] = field(default_factory=list)
@@ -429,7 +471,7 @@ class HConcatChart(TopLevelSpec):
 
 
 @dataclass(frozen=True, slots=True)
-class VConcatChart(TopLevelSpec):
+class VConcatChart(_CompositionSpec):
     """A vertically concatenated GenomeSpy specification."""
 
     vconcat: list[TopLevelSpec] = field(default_factory=list)
@@ -447,7 +489,7 @@ class VConcatChart(TopLevelSpec):
 
 
 @dataclass(frozen=True, slots=True)
-class ConcatChart(TopLevelSpec):
+class ConcatChart(_CompositionSpec):
     """A grid-concatenated GenomeSpy specification."""
 
     concat: list[TopLevelSpec] = field(default_factory=list)
