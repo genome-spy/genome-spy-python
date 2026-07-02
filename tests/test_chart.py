@@ -8,7 +8,17 @@ import genome_spy as gs
 import pytest
 
 from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
-from genome_spy.schema import GenomeAxis, Legend, SCHEMA_VERSION, Scale, UnitSpec
+from genome_spy.schema import (
+    ConcatSpec,
+    GenomeAxis,
+    HConcatSpec,
+    LayerSpec,
+    Legend,
+    SCHEMA_VERSION,
+    Scale,
+    UnitSpec,
+    VConcatSpec,
+)
 from genome_spy.schema.channels import X as GeneratedX
 from genome_spy.schemapi import SchemaValidationError
 
@@ -363,6 +373,31 @@ def test_layer_operator_serializes_without_nested_schema() -> None:
     assert "$schema" not in spec["layer"][0]
     assert spec["layer"][0]["mark"] == "point"
     assert spec["layer"][1]["mark"] == {"type": "text", "dx": 6}
+
+
+def test_composition_charts_directly_inherit_generated_specs() -> None:
+    one = gs.Chart(data=[{"x": 1}]).mark_point().encode(x="x:Q")
+    two = gs.Chart(data=[{"x": 2}]).mark_point().encode(x="x:Q")
+
+    layered = one + two
+    horizontal = one | two
+    vertical = one & two
+    grid = gs.concat(one, two, columns=2)
+
+    assert isinstance(layered, LayerSpec)
+    assert isinstance(horizontal, HConcatSpec)
+    assert isinstance(vertical, VConcatSpec)
+    assert isinstance(grid, ConcatSpec)
+
+
+def test_composition_charts_preserve_custom_schema_url_on_copy() -> None:
+    one = gs.Chart(data=[{"x": 1}]).mark_point().encode(x="x:Q")
+    two = gs.Chart(data=[{"x": 2}]).mark_point().encode(x="x:Q")
+
+    chart = gs.LayerChart(layer=[one], schema_url="https://example.test/schema.json")
+    layered = chart + two
+
+    assert layered.to_dict()["$schema"] == "https://example.test/schema.json"
 
 
 def test_concat_operators_match_genomespy_core_keys() -> None:

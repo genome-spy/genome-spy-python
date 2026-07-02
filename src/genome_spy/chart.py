@@ -3,17 +3,25 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field, replace
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Self
+from typing import Any, ClassVar, Self, cast
 from uuid import uuid4
 
 from genome_spy._utils import JsonSpec, compact_json, is_mapping, pretty_json
 from genome_spy.channels import Channel, channel
-from genome_spy.schema import MARK_TYPES, SCHEMA_VERSION, Root, UnitSpec
+from genome_spy.schema import (
+    ConcatSpec,
+    HConcatSpec,
+    LayerSpec,
+    MARK_TYPES,
+    Root,
+    SCHEMA_VERSION,
+    UnitSpec,
+    VConcatSpec,
+)
 from genome_spy.schema.mixins import MarkMethodMixin
-from genome_spy.schemapi import Undefined, UndefinedType
+from genome_spy.schemapi import SchemaBase, Undefined, UndefinedType
 
 _CORE_DIST_URL = f"https://cdn.jsdelivr.net/npm/@genome-spy/core@{SCHEMA_VERSION}/dist"
 DEFAULT_SCHEMA_URL = f"{_CORE_DIST_URL}/schema.json"
@@ -405,133 +413,152 @@ class Chart(TopLevelSpec, MarkMethodMixin, UnitSpec):
         return self.copy(deep=False, **properties)
 
 
-@dataclass(frozen=True, slots=True)
 class _CompositionSpec(TopLevelSpec):
-    properties_map: dict[str, Any] = field(default_factory=dict)
-    transform: list[dict[str, Any]] = field(default_factory=list)
-    schema_url: str = DEFAULT_SCHEMA_URL
+    _schema_spec_cls: ClassVar[type]
+    _children_key: ClassVar[str]
+    _kwds: dict[str, Any]
+    _schema_url: str
+
+    def copy(self, *, deep: bool = True, **kwargs: Any) -> Self:
+        """Return a schema-backed copy while preserving the schema URL."""
+        copied = cast(Self, SchemaBase.copy(cast(Any, self), deep=deep, **kwargs))
+        copied._schema_url = self._schema_url
+        return copied
 
     def to_dict(
         self, *, include_schema: bool = True, validate: bool = True
     ) -> dict[str, Any]:
-        spec: dict[str, Any] = {}
+        values = dict(self._kwds)
+        children = values.get(self._children_key, Undefined)
+        if children is not Undefined:
+            values[self._children_key] = [
+                child.to_dict(include_schema=False, validate=False)
+                for child in children
+            ]
+        data = values.get("data", Undefined)
+        if data is not Undefined:
+            normalized_data = _normalize_data(data)
+            if normalized_data is None:
+                values.pop("data")
+            else:
+                values["data"] = normalized_data
+        spec = self._schema_spec_cls(**values).to_dict(validate=False)
         if include_schema:
-            spec["$schema"] = self.schema_url
-        spec.update(self.properties_map)
-        if self.transform:
-            spec["transform"] = [dict(item) for item in self.transform]
-        spec.update(self._body_dict())
+            spec["$schema"] = self._schema_url
         return Root(**spec).to_dict(validate=validate)
 
     def _append_transform(self, transform: dict[str, Any]) -> Self:
-        merged = [*self.transform, _normalize_transform(transform)]
-        return replace(self, transform=merged)
+        current = self._kwds.get("transform", Undefined)
+        merged = [] if current is Undefined else list(current)
+        merged.append(_normalize_transform(transform))
+        return self.copy(deep=False, transform=merged)
 
     def _with_properties(self, properties: dict[str, Any]) -> Self:
-        return replace(self, properties_map={**self.properties_map, **properties})
-
-    def _body_dict(self) -> dict[str, Any]:
-        raise NotImplementedError
+        return self.copy(deep=False, **properties)
 
 
-@dataclass(frozen=True, slots=True)
-class LayerChart(_CompositionSpec):
+class LayerChart(_CompositionSpec, LayerSpec):
     """A layered GenomeSpy specification."""
 
-    layer: list[TopLevelSpec] = field(default_factory=list)
+    _schema_spec_cls = LayerSpec
+    _children_key = "layer"
+
+    def __init__(
+        self,
+        layer: list[TopLevelSpec] | UndefinedType = Undefined,
+        *,
+        schema_url: str = DEFAULT_SCHEMA_URL,
+        **kwargs: Any,
+    ) -> None:
+        LayerSpec.__init__(self, layer=layer, **kwargs)
+        self._schema_url = schema_url
 
     def __add__(self, other: TopLevelSpec) -> LayerChart:
-        return replace(self, layer=[*self.layer, other])
-
-    def _body_dict(self) -> dict[str, Any]:
-        return {
-            "layer": [
-                child.to_dict(include_schema=False, validate=False)
-                for child in self.layer
-            ]
-        }
+        current = self._kwds.get("layer", Undefined)
+        merged = [] if current is Undefined else list(current)
+        merged.append(other)
+        return self.copy(deep=False, layer=merged)
 
 
-@dataclass(frozen=True, slots=True)
-class HConcatChart(_CompositionSpec):
+class HConcatChart(_CompositionSpec, HConcatSpec):
     """A horizontally concatenated GenomeSpy specification."""
 
-    hconcat: list[TopLevelSpec] = field(default_factory=list)
+    _schema_spec_cls = HConcatSpec
+    _children_key = "hconcat"
+
+    def __init__(
+        self,
+        hconcat: list[TopLevelSpec] | UndefinedType = Undefined,
+        *,
+        schema_url: str = DEFAULT_SCHEMA_URL,
+        **kwargs: Any,
+    ) -> None:
+        HConcatSpec.__init__(self, hconcat=hconcat, **kwargs)
+        self._schema_url = schema_url
 
     def __or__(self, other: TopLevelSpec) -> HConcatChart:
-        return replace(self, hconcat=[*self.hconcat, other])
-
-    def _body_dict(self) -> dict[str, Any]:
-        return {
-            "hconcat": [
-                child.to_dict(include_schema=False, validate=False)
-                for child in self.hconcat
-            ]
-        }
+        current = self._kwds.get("hconcat", Undefined)
+        merged = [] if current is Undefined else list(current)
+        merged.append(other)
+        return self.copy(deep=False, hconcat=merged)
 
 
-@dataclass(frozen=True, slots=True)
-class VConcatChart(_CompositionSpec):
+class VConcatChart(_CompositionSpec, VConcatSpec):
     """A vertically concatenated GenomeSpy specification."""
 
-    vconcat: list[TopLevelSpec] = field(default_factory=list)
+    _schema_spec_cls = VConcatSpec
+    _children_key = "vconcat"
+
+    def __init__(
+        self,
+        vconcat: list[TopLevelSpec] | UndefinedType = Undefined,
+        *,
+        schema_url: str = DEFAULT_SCHEMA_URL,
+        **kwargs: Any,
+    ) -> None:
+        VConcatSpec.__init__(self, vconcat=vconcat, **kwargs)
+        self._schema_url = schema_url
 
     def __and__(self, other: TopLevelSpec) -> VConcatChart:
-        return replace(self, vconcat=[*self.vconcat, other])
-
-    def _body_dict(self) -> dict[str, Any]:
-        return {
-            "vconcat": [
-                child.to_dict(include_schema=False, validate=False)
-                for child in self.vconcat
-            ]
-        }
+        current = self._kwds.get("vconcat", Undefined)
+        merged = [] if current is Undefined else list(current)
+        merged.append(other)
+        return self.copy(deep=False, vconcat=merged)
 
 
-@dataclass(frozen=True, slots=True)
-class ConcatChart(_CompositionSpec):
+class ConcatChart(_CompositionSpec, ConcatSpec):
     """A grid-concatenated GenomeSpy specification."""
 
-    concat: list[TopLevelSpec] = field(default_factory=list)
-    columns: int = 1
+    _schema_spec_cls = ConcatSpec
+    _children_key = "concat"
 
-    def _body_dict(self) -> dict[str, Any]:
-        return {
-            "concat": [
-                child.to_dict(include_schema=False, validate=False)
-                for child in self.concat
-            ],
-            "columns": self.columns,
-        }
+    def __init__(
+        self,
+        concat: list[TopLevelSpec] | UndefinedType = Undefined,
+        columns: int | UndefinedType = Undefined,
+        *,
+        schema_url: str = DEFAULT_SCHEMA_URL,
+        **kwargs: Any,
+    ) -> None:
+        ConcatSpec.__init__(self, concat=concat, columns=columns, **kwargs)
+        self._schema_url = schema_url
 
 
 def layer(*charts: TopLevelSpec, **kwargs: Any) -> LayerChart:
     """Compose a layered chart from multiple child charts."""
-    chart = LayerChart(layer=list(charts))
-    if kwargs:
-        return replace(chart, properties_map={**chart.properties_map, **kwargs})
-    return chart
+    return LayerChart(layer=list(charts), **kwargs)
 
 
 def hconcat(*charts: TopLevelSpec, **kwargs: Any) -> HConcatChart:
     """Compose a horizontally concatenated chart."""
-    chart = HConcatChart(hconcat=list(charts))
-    if kwargs:
-        return replace(chart, properties_map={**chart.properties_map, **kwargs})
-    return chart
+    return HConcatChart(hconcat=list(charts), **kwargs)
 
 
 def vconcat(*charts: TopLevelSpec, **kwargs: Any) -> VConcatChart:
     """Compose a vertically concatenated chart."""
-    chart = VConcatChart(vconcat=list(charts))
-    if kwargs:
-        return replace(chart, properties_map={**chart.properties_map, **kwargs})
-    return chart
+    return VConcatChart(vconcat=list(charts), **kwargs)
 
 
 def concat(*charts: TopLevelSpec, columns: int, **kwargs: Any) -> ConcatChart:
     """Compose a grid concatenation."""
-    chart = ConcatChart(concat=list(charts), columns=columns)
-    if kwargs:
-        return replace(chart, properties_map={**chart.properties_map, **kwargs})
-    return chart
+    return ConcatChart(concat=list(charts), columns=columns, **kwargs)
