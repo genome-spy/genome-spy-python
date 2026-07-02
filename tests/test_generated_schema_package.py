@@ -1,8 +1,18 @@
 from __future__ import annotations
 
+import inspect
+
 import pytest
 
-from genome_spy.schema import MARK_TYPES, SCHEMA_VERSION, Root, UnitSpec, load_schema
+from genome_spy.schema import (
+    MARK_TYPES,
+    SCHEMA_VERSION,
+    ColorDef,
+    PositionDef,
+    Root,
+    UnitSpec,
+    load_schema,
+)
 from genome_spy.schema import channels as generated_channels
 from genome_spy.schemapi import SchemaValidationError
 
@@ -23,6 +33,30 @@ def test_generated_schema_wrappers_serialize_keyword_properties() -> None:
         "mark": "point",
         "width": 320,
     }
+
+
+def test_generated_wrappers_resolve_constructor_properties_through_refs() -> None:
+    color = ColorDef(field="species", type="nominal", legend={"title": "Species"})
+    position = PositionDef(field="x", type="quantitative", axis={"title": "X axis"})
+
+    assert color.to_dict(validate=False) == {
+        "field": "species",
+        "type": "nominal",
+        "legend": {"title": "Species"},
+    }
+    assert position.to_dict(validate=False) == {
+        "field": "x",
+        "type": "quantitative",
+        "axis": {"title": "X axis"},
+    }
+
+    color_signature = inspect.signature(ColorDef.__init__)
+    position_signature = inspect.signature(PositionDef.__init__)
+
+    assert "field" in color_signature.parameters
+    assert "legend" in color_signature.parameters
+    assert "axis" in position_signature.parameters
+    assert "pos" in position_signature.parameters
 
 
 def test_generated_schema_wrappers_validate_by_default() -> None:

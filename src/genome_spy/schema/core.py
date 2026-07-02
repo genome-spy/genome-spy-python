@@ -649,8 +649,34 @@ class Binding(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("Binding", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        autocomplete: Any = Undefined,
+        debounce: Any = Undefined,
+        description: Any = Undefined,
+        input: Any = Undefined,
+        labels: Any = Undefined,
+        max: Any = Undefined,
+        min: Any = Undefined,
+        name: Any = Undefined,
+        options: Any = Undefined,
+        placeholder: Any = Undefined,
+        step: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            autocomplete=autocomplete,
+            debounce=debounce,
+            description=description,
+            input=input,
+            labels=labels,
+            max=max,
+            min=min,
+            name=name,
+            options=options,
+            placeholder=placeholder,
+            step=step,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -793,8 +819,38 @@ class ColorDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("ColorDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        condition: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            condition=condition,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            field=field,
+            format=format,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -804,8 +860,14 @@ class ColorSchemeConfig(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("ColorSchemeConfig", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        count: Any = Undefined,
+        extent: Any = Undefined,
+        name: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(count=count, extent=extent, name=name)
         if kwds:
             self._kwds.update(kwds)
 
@@ -908,8 +970,32 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         "Conditional<MarkPropExprDef<Type>>", {}
     )
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        empty: Any = Undefined,
+        expr: Any = Undefined,
+        param: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            description=description,
+            domainInert=domainInert,
+            empty=empty,
+            expr=expr,
+            param=param,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -921,8 +1007,32 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         "Conditional<MarkPropExprDef<TypeForShape>>", {}
     )
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        empty: Any = Undefined,
+        expr: Any = Undefined,
+        param: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            description=description,
+            domainInert=domainInert,
+            empty=empty,
+            expr=expr,
+            param=param,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -934,8 +1044,34 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
         "Conditional<MarkPropFieldDef<Type>>", {}
     )
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        empty: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
+        param: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            domainInert=domainInert,
+            empty=empty,
+            field=field,
+            format=format,
+            legend=legend,
+            param=param,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -947,8 +1083,34 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
         "Conditional<MarkPropFieldDef<TypeForShape>>", {}
     )
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        empty: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
+        param: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            domainInert=domainInert,
+            empty=empty,
+            field=field,
+            format=format,
+            legend=legend,
+            param=param,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -958,8 +1120,32 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("Conditional<ScaleDatumDef>", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        empty: Any = Undefined,
+        param: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            empty=empty,
+            param=param,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -971,8 +1157,18 @@ class ConditionalValueDefNumberExprRef(GenomeSpySchema):
         "Conditional<ValueDef<(number|ExprRef)>>", {}
     )
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        empty: Any = Undefined,
+        param: Any = Undefined,
+        title: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description, empty=empty, param=param, title=title, value=value
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -984,8 +1180,18 @@ class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
         "Conditional<ValueDef<(string|null|ExprRef)>>", {}
     )
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        empty: Any = Undefined,
+        param: Any = Undefined,
+        title: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description, empty=empty, param=param, title=title, value=value
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -1243,8 +1449,92 @@ class CoreRootSpec(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("CoreRootSpec", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        assembly: Any = Undefined,
+        axes: Any = Undefined,
+        background: Any = Undefined,
+        baseUrl: Any = Undefined,
+        columns: Any = Undefined,
+        concat: Any = Undefined,
+        config: Any = Undefined,
+        cursor: Any = Undefined,
+        data: Any = Undefined,
+        datasets: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        encoding: Any = Undefined,
+        genome: Any = Undefined,
+        genomes: Any = Undefined,
+        hconcat: Any = Undefined,
+        height: Any = Undefined,
+        layer: Any = Undefined,
+        legends: Any = Undefined,
+        mark: Any = Undefined,
+        multiscale: Any = Undefined,
+        name: Any = Undefined,
+        opacity: Any = Undefined,
+        padding: Any = Undefined,
+        params: Any = Undefined,
+        resolve: Any = Undefined,
+        scales: Any = Undefined,
+        separator: Any = Undefined,
+        spacing: Any = Undefined,
+        stops: Any = Undefined,
+        templates: Any = Undefined,
+        theme: Any = Undefined,
+        title: Any = Undefined,
+        transform: Any = Undefined,
+        vconcat: Any = Undefined,
+        view: Any = Undefined,
+        viewportHeight: Any = Undefined,
+        viewportWidth: Any = Undefined,
+        visible: Any = Undefined,
+        width: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            assembly=assembly,
+            axes=axes,
+            background=background,
+            baseUrl=baseUrl,
+            columns=columns,
+            concat=concat,
+            config=config,
+            cursor=cursor,
+            data=data,
+            datasets=datasets,
+            description=description,
+            domainInert=domainInert,
+            encoding=encoding,
+            genome=genome,
+            genomes=genomes,
+            hconcat=hconcat,
+            height=height,
+            layer=layer,
+            legends=legends,
+            mark=mark,
+            multiscale=multiscale,
+            name=name,
+            opacity=opacity,
+            padding=padding,
+            params=params,
+            resolve=resolve,
+            scales=scales,
+            separator=separator,
+            spacing=spacing,
+            stops=stops,
+            templates=templates,
+            theme=theme,
+            title=title,
+            transform=transform,
+            vconcat=vconcat,
+            view=view,
+            viewportHeight=viewportHeight,
+            viewportWidth=viewportWidth,
+            visible=visible,
+            width=width,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -1304,8 +1594,28 @@ class Data(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("Data", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        dynamicCallbackSource: Any = Undefined,
+        format: Any = Undefined,
+        lazy: Any = Undefined,
+        name: Any = Undefined,
+        sequence: Any = Undefined,
+        url: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            dynamicCallbackSource=dynamicCallbackSource,
+            format=format,
+            lazy=lazy,
+            name=name,
+            sequence=sequence,
+            url=url,
+            values=values,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -1315,8 +1625,22 @@ class DataFormat(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("DataFormat", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        columns: Any = Undefined,
+        delimiter: Any = Undefined,
+        parse: Any = Undefined,
+        property: Any = Undefined,
+        type: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            columns=columns,
+            delimiter=delimiter,
+            parse=parse,
+            property=property,
+            type=type,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -1326,8 +1650,26 @@ class DataSource(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("DataSource", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        dynamicCallbackSource: Any = Undefined,
+        format: Any = Undefined,
+        lazy: Any = Undefined,
+        name: Any = Undefined,
+        url: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            dynamicCallbackSource=dynamicCallbackSource,
+            format=format,
+            lazy=lazy,
+            name=name,
+            url=url,
+            values=values,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -1348,8 +1690,8 @@ class DomainValue(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("DomainValue", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(self, expr: Any = Undefined, **kwds: Any) -> None:
+        super().__init__(expr=expr)
         if kwds:
             self._kwds.update(kwds)
 
@@ -1773,8 +2115,24 @@ class FilterParams(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("FilterParams", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        empty: Any = Undefined,
+        expr: Any = Undefined,
+        fields: Any = Undefined,
+        param: Any = Undefined,
+        type: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            empty=empty,
+            expr=expr,
+            fields=fields,
+            param=param,
+            type=type,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -1933,8 +2291,14 @@ class Generator(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("Generator", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        name: Any = Undefined,
+        sequence: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(description=description, name=name, sequence=sequence)
         if kwds:
             self._kwds.update(kwds)
 
@@ -2107,8 +2471,14 @@ class GenomeConfig(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("GenomeConfig", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        contigs: Any = Undefined,
+        name: Any = Undefined,
+        url: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(contigs=contigs, name=name, url=url)
         if kwds:
             self._kwds.update(kwds)
 
@@ -2129,8 +2499,10 @@ class GenomeDefinition(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("GenomeDefinition", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self, contigs: Any = Undefined, url: Any = Undefined, **kwds: Any
+    ) -> None:
+        super().__init__(contigs=contigs, url=url)
         if kwds:
             self._kwds.update(kwds)
 
@@ -2349,8 +2721,10 @@ class IndexUrlSourceRef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("IndexUrlSourceRef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self, expr: Any = Undefined, template: Any = Undefined, **kwds: Any
+    ) -> None:
+        super().__init__(expr=expr, template=template)
         if kwds:
             self._kwds.update(kwds)
 
@@ -2457,8 +2831,10 @@ class InlineLocusAssembly(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("InlineLocusAssembly", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self, contigs: Any = Undefined, url: Any = Undefined, **kwds: Any
+    ) -> None:
+        super().__init__(contigs=contigs, url=url)
         if kwds:
             self._kwds.update(kwds)
 
@@ -2525,8 +2901,14 @@ class KeyDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("KeyDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        field: Any = Undefined,
+        title: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(description=description, field=field, title=title)
         if kwds:
             self._kwds.update(kwds)
 
@@ -2614,8 +2996,48 @@ class LazyDataParams(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("LazyDataParams", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        addChrPrefix: Any = Undefined,
+        axis: Any = Undefined,
+        channel: Any = Undefined,
+        columns: Any = Undefined,
+        count: Any = Undefined,
+        dataType: Any = Undefined,
+        debounce: Any = Undefined,
+        debounceDomainChange: Any = Undefined,
+        debounceMode: Any = Undefined,
+        format: Any = Undefined,
+        indexUrl: Any = Undefined,
+        parse: Any = Undefined,
+        pixelsPerBin: Any = Undefined,
+        sizeMode: Any = Undefined,
+        type: Any = Undefined,
+        url: Any = Undefined,
+        values: Any = Undefined,
+        windowSize: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            addChrPrefix=addChrPrefix,
+            axis=axis,
+            channel=channel,
+            columns=columns,
+            count=count,
+            dataType=dataType,
+            debounce=debounce,
+            debounceDomainChange=debounceDomainChange,
+            debounceMode=debounceMode,
+            format=format,
+            indexUrl=indexUrl,
+            parse=parse,
+            pixelsPerBin=pixelsPerBin,
+            sizeMode=sizeMode,
+            type=type,
+            url=url,
+            values=values,
+            windowSize=windowSize,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3010,8 +3432,38 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
         "MarkPropDef<(string|null),TypeForShape>", {}
     )
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        condition: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            condition=condition,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            field=field,
+            format=format,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3021,8 +3473,38 @@ class MarkPropDefStringNull(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("MarkPropDef<(string|null)>", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        condition: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            condition=condition,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            field=field,
+            format=format,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3032,8 +3514,38 @@ class MarkPropDefNumber(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("MarkPropDef<number>", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        condition: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            condition=condition,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            field=field,
+            format=format,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3074,8 +3586,178 @@ class MarkProps(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("MarkProps", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        align: Any = Undefined,
+        angle: Any = Undefined,
+        arcFadingDistance: Any = Undefined,
+        arcHeightFactor: Any = Undefined,
+        baseline: Any = Undefined,
+        buildIndex: Any = Undefined,
+        clampApex: Any = Undefined,
+        clip: Any = Undefined,
+        color: Any = Undefined,
+        cornerRadius: Any = Undefined,
+        cornerRadiusBottomLeft: Any = Undefined,
+        cornerRadiusBottomRight: Any = Undefined,
+        cornerRadiusTopLeft: Any = Undefined,
+        cornerRadiusTopRight: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
+        cursor: Any = Undefined,
+        dx: Any = Undefined,
+        dy: Any = Undefined,
+        fill: Any = Undefined,
+        fillGradientStrength: Any = Undefined,
+        fillOpacity: Any = Undefined,
+        filled: Any = Undefined,
+        fitToBand: Any = Undefined,
+        flushX: Any = Undefined,
+        flushY: Any = Undefined,
+        font: Any = Undefined,
+        fontStyle: Any = Undefined,
+        fontWeight: Any = Undefined,
+        geometricZoomBound: Any = Undefined,
+        hatch: Any = Undefined,
+        inwardStroke: Any = Undefined,
+        linkShape: Any = Undefined,
+        logoLetters: Any = Undefined,
+        maxChordLength: Any = Undefined,
+        minArcHeight: Any = Undefined,
+        minBufferSize: Any = Undefined,
+        minHeight: Any = Undefined,
+        minLength: Any = Undefined,
+        minOpacity: Any = Undefined,
+        minPickingSize: Any = Undefined,
+        minWidth: Any = Undefined,
+        noFadingOnPointSelection: Any = Undefined,
+        opacity: Any = Undefined,
+        orient: Any = Undefined,
+        paddingX: Any = Undefined,
+        paddingY: Any = Undefined,
+        sampleFacetPadding: Any = Undefined,
+        segments: Any = Undefined,
+        semanticScore: Any = Undefined,
+        semanticZoomFraction: Any = Undefined,
+        shadowBlur: Any = Undefined,
+        shadowColor: Any = Undefined,
+        shadowOffsetX: Any = Undefined,
+        shadowOffsetY: Any = Undefined,
+        shadowOpacity: Any = Undefined,
+        shape: Any = Undefined,
+        size: Any = Undefined,
+        squeeze: Any = Undefined,
+        stroke: Any = Undefined,
+        strokeCap: Any = Undefined,
+        strokeDash: Any = Undefined,
+        strokeDashOffset: Any = Undefined,
+        strokeOpacity: Any = Undefined,
+        strokeWidth: Any = Undefined,
+        style: Any = Undefined,
+        text: Any = Undefined,
+        thickness: Any = Undefined,
+        tooltip: Any = Undefined,
+        type: Any = Undefined,
+        viewportEdgeFadeDistanceBottom: Any = Undefined,
+        viewportEdgeFadeDistanceLeft: Any = Undefined,
+        viewportEdgeFadeDistanceRight: Any = Undefined,
+        viewportEdgeFadeDistanceTop: Any = Undefined,
+        viewportEdgeFadeWidthBottom: Any = Undefined,
+        viewportEdgeFadeWidthLeft: Any = Undefined,
+        viewportEdgeFadeWidthRight: Any = Undefined,
+        viewportEdgeFadeWidthTop: Any = Undefined,
+        x: Any = Undefined,
+        x2: Any = Undefined,
+        xOffset: Any = Undefined,
+        y: Any = Undefined,
+        y2: Any = Undefined,
+        yOffset: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            align=align,
+            angle=angle,
+            arcFadingDistance=arcFadingDistance,
+            arcHeightFactor=arcHeightFactor,
+            baseline=baseline,
+            buildIndex=buildIndex,
+            clampApex=clampApex,
+            clip=clip,
+            color=color,
+            cornerRadius=cornerRadius,
+            cornerRadiusBottomLeft=cornerRadiusBottomLeft,
+            cornerRadiusBottomRight=cornerRadiusBottomRight,
+            cornerRadiusTopLeft=cornerRadiusTopLeft,
+            cornerRadiusTopRight=cornerRadiusTopRight,
+            cullByVisibleRange=cullByVisibleRange,
+            cursor=cursor,
+            dx=dx,
+            dy=dy,
+            fill=fill,
+            fillGradientStrength=fillGradientStrength,
+            fillOpacity=fillOpacity,
+            filled=filled,
+            fitToBand=fitToBand,
+            flushX=flushX,
+            flushY=flushY,
+            font=font,
+            fontStyle=fontStyle,
+            fontWeight=fontWeight,
+            geometricZoomBound=geometricZoomBound,
+            hatch=hatch,
+            inwardStroke=inwardStroke,
+            linkShape=linkShape,
+            logoLetters=logoLetters,
+            maxChordLength=maxChordLength,
+            minArcHeight=minArcHeight,
+            minBufferSize=minBufferSize,
+            minHeight=minHeight,
+            minLength=minLength,
+            minOpacity=minOpacity,
+            minPickingSize=minPickingSize,
+            minWidth=minWidth,
+            noFadingOnPointSelection=noFadingOnPointSelection,
+            opacity=opacity,
+            orient=orient,
+            paddingX=paddingX,
+            paddingY=paddingY,
+            sampleFacetPadding=sampleFacetPadding,
+            segments=segments,
+            semanticScore=semanticScore,
+            semanticZoomFraction=semanticZoomFraction,
+            shadowBlur=shadowBlur,
+            shadowColor=shadowColor,
+            shadowOffsetX=shadowOffsetX,
+            shadowOffsetY=shadowOffsetY,
+            shadowOpacity=shadowOpacity,
+            shape=shape,
+            size=size,
+            squeeze=squeeze,
+            stroke=stroke,
+            strokeCap=strokeCap,
+            strokeDash=strokeDash,
+            strokeDashOffset=strokeDashOffset,
+            strokeOpacity=strokeOpacity,
+            strokeWidth=strokeWidth,
+            style=style,
+            text=text,
+            thickness=thickness,
+            tooltip=tooltip,
+            type=type,
+            viewportEdgeFadeDistanceBottom=viewportEdgeFadeDistanceBottom,
+            viewportEdgeFadeDistanceLeft=viewportEdgeFadeDistanceLeft,
+            viewportEdgeFadeDistanceRight=viewportEdgeFadeDistanceRight,
+            viewportEdgeFadeDistanceTop=viewportEdgeFadeDistanceTop,
+            viewportEdgeFadeWidthBottom=viewportEdgeFadeWidthBottom,
+            viewportEdgeFadeWidthLeft=viewportEdgeFadeWidthLeft,
+            viewportEdgeFadeWidthRight=viewportEdgeFadeWidthRight,
+            viewportEdgeFadeWidthTop=viewportEdgeFadeWidthTop,
+            x=x,
+            x2=x2,
+            xOffset=xOffset,
+            y=y,
+            y2=y2,
+            yOffset=yOffset,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3138,8 +3820,26 @@ class MultiUrlSourceRef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("MultiUrlSourceRef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        attach: Any = Undefined,
+        expr: Any = Undefined,
+        field: Any = Undefined,
+        maxValues: Any = Undefined,
+        onLoadError: Any = Undefined,
+        template: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            attach=attach,
+            expr=expr,
+            field=field,
+            maxValues=maxValues,
+            onLoadError=onLoadError,
+            template=template,
+            values=values,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3234,8 +3934,15 @@ class MultiscaleStopsDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("MultiscaleStopsDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        channel: Any = Undefined,
+        fade: Any = Undefined,
+        metric: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(channel=channel, fade=fade, metric=metric, values=values)
         if kwds:
             self._kwds.update(kwds)
 
@@ -3262,8 +3969,10 @@ class NamedGenomeConfig(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("NamedGenomeConfig", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self, contigs: Any = Undefined, url: Any = Undefined, **kwds: Any
+    ) -> None:
+        super().__init__(contigs=contigs, url=url)
         if kwds:
             self._kwds.update(kwds)
 
@@ -3284,8 +3993,38 @@ class NumericMarkPropDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("NumericMarkPropDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        condition: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            condition=condition,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            field=field,
+            format=format,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3295,8 +4034,8 @@ class NumericStopDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("NumericStopDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(self, expr: Any = Undefined, **kwds: Any) -> None:
+        super().__init__(expr=expr)
         if kwds:
             self._kwds.update(kwds)
 
@@ -3306,8 +4045,14 @@ class NumericValueDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("NumericValueDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        title: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(description=description, title=title, value=value)
         if kwds:
             self._kwds.update(kwds)
 
@@ -3375,8 +4120,15 @@ class PaddingConfig(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("PaddingConfig", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        bottom: Any = Undefined,
+        left: Any = Undefined,
+        right: Any = Undefined,
+        top: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(bottom=bottom, left=left, right=right, top=top)
         if kwds:
             self._kwds.update(kwds)
 
@@ -3404,8 +4156,30 @@ class Parameter(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("Parameter", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        bind: Any = Undefined,
+        description: Any = Undefined,
+        expr: Any = Undefined,
+        name: Any = Undefined,
+        persist: Any = Undefined,
+        push: Any = Undefined,
+        ruler: Any = Undefined,
+        select: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            bind=bind,
+            description=description,
+            expr=expr,
+            name=name,
+            persist=persist,
+            push=push,
+            ruler=ruler,
+            select=select,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3640,8 +4414,42 @@ class Position2Def(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("Position2Def", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        axis: Any = Undefined,
+        band: Any = Undefined,
+        chrom: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        expr: Any = Undefined,
+        field: Any = Undefined,
+        offset: Any = Undefined,
+        pos: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            axis=axis,
+            band=band,
+            chrom=chrom,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            expr=expr,
+            field=field,
+            offset=offset,
+            pos=pos,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3684,8 +4492,42 @@ class PositionDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("PositionDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        axis: Any = Undefined,
+        band: Any = Undefined,
+        chrom: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        expr: Any = Undefined,
+        field: Any = Undefined,
+        offset: Any = Undefined,
+        pos: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            axis=axis,
+            band=band,
+            chrom=chrom,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            expr=expr,
+            field=field,
+            offset=offset,
+            pos=pos,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -3757,8 +4599,14 @@ class PositionValueDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("PositionValueDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        title: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(description=description, title=title, value=value)
         if kwds:
             self._kwds.update(kwds)
 
@@ -4181,8 +5029,10 @@ class RulerChannelValue(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerChannelValue", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self, chrom: Any = Undefined, pos: Any = Undefined, **kwds: Any
+    ) -> None:
+        super().__init__(chrom=chrom, pos=pos)
         if kwds:
             self._kwds.update(kwds)
 
@@ -4620,8 +5470,14 @@ class SearchDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("SearchDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        field: Any = Undefined,
+        title: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(description=description, field=field, title=title)
         if kwds:
             self._kwds.update(kwds)
 
@@ -4868,8 +5724,38 @@ class ShapeDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("ShapeDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        condition: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            condition=condition,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            field=field,
+            format=format,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -4879,8 +5765,26 @@ class SingleUrlSourceRef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("SingleUrlSourceRef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        attach: Any = Undefined,
+        expr: Any = Undefined,
+        field: Any = Undefined,
+        maxValues: Any = Undefined,
+        onLoadError: Any = Undefined,
+        template: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            attach=attach,
+            expr=expr,
+            field=field,
+            maxValues=maxValues,
+            onLoadError=onLoadError,
+            template=template,
+            values=values,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -4992,8 +5896,24 @@ class StringFieldDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("StringFieldDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            domainInert=domainInert,
+            field=field,
+            format=format,
+            title=title,
+            type=type,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -5533,8 +6453,36 @@ class TextDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("TextDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        band: Any = Undefined,
+        datum: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        expr: Any = Undefined,
+        field: Any = Undefined,
+        format: Any = Undefined,
+        resolutionChannel: Any = Undefined,
+        scale: Any = Undefined,
+        title: Any = Undefined,
+        type: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            expr=expr,
+            field=field,
+            format=format,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -5910,8 +6858,10 @@ class Tooltip(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("Tooltip", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self, handler: Any = Undefined, params: Any = Undefined, **kwds: Any
+    ) -> None:
+        super().__init__(handler=handler, params=params)
         if kwds:
             self._kwds.update(kwds)
 
@@ -5921,8 +6871,130 @@ class TransformParams(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("TransformParams", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        asChrom: Any = Undefined,
+        asEnd: Any = Undefined,
+        asKey: Any = Undefined,
+        asMidpoint: Any = Undefined,
+        asStart: Any = Undefined,
+        asValue: Any = Undefined,
+        baseField: Any = Undefined,
+        cardinality: Any = Undefined,
+        channel: Any = Undefined,
+        chrom: Any = Undefined,
+        columnPadding: Any = Undefined,
+        columnRegex: Any = Undefined,
+        columns: Any = Undefined,
+        description: Any = Undefined,
+        direction: Any = Undefined,
+        ellipsis: Any = Undefined,
+        empty: Any = Undefined,
+        end: Any = Undefined,
+        exons: Any = Undefined,
+        expr: Any = Undefined,
+        field: Any = Undefined,
+        fields: Any = Undefined,
+        font: Any = Undefined,
+        fontSize: Any = Undefined,
+        fontStyle: Any = Undefined,
+        fontWeight: Any = Undefined,
+        groupby: Any = Undefined,
+        index: Any = Undefined,
+        labelOffset: Any = Undefined,
+        labelWidth: Any = Undefined,
+        lane: Any = Undefined,
+        limit: Any = Undefined,
+        offset: Any = Undefined,
+        ops: Any = Undefined,
+        padding: Any = Undefined,
+        param: Any = Undefined,
+        pos: Any = Undefined,
+        pos2: Any = Undefined,
+        preference: Any = Undefined,
+        preferredOrder: Any = Undefined,
+        regex: Any = Undefined,
+        rowPadding: Any = Undefined,
+        score: Any = Undefined,
+        separator: Any = Undefined,
+        size: Any = Undefined,
+        skipInvalidInput: Any = Undefined,
+        skipRegex: Any = Undefined,
+        sort: Any = Undefined,
+        spacing: Any = Undefined,
+        start: Any = Undefined,
+        symbolOffset: Any = Undefined,
+        symbolSize: Any = Undefined,
+        symbolStrokeWidth: Any = Undefined,
+        type: Any = Undefined,
+        weight: Any = Undefined,
+        width: Any = Undefined,
+        xOffset: Any = Undefined,
+        yExtent: Any = Undefined,
+        yOffset: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            asChrom=asChrom,
+            asEnd=asEnd,
+            asKey=asKey,
+            asMidpoint=asMidpoint,
+            asStart=asStart,
+            asValue=asValue,
+            baseField=baseField,
+            cardinality=cardinality,
+            channel=channel,
+            chrom=chrom,
+            columnPadding=columnPadding,
+            columnRegex=columnRegex,
+            columns=columns,
+            description=description,
+            direction=direction,
+            ellipsis=ellipsis,
+            empty=empty,
+            end=end,
+            exons=exons,
+            expr=expr,
+            field=field,
+            fields=fields,
+            font=font,
+            fontSize=fontSize,
+            fontStyle=fontStyle,
+            fontWeight=fontWeight,
+            groupby=groupby,
+            index=index,
+            labelOffset=labelOffset,
+            labelWidth=labelWidth,
+            lane=lane,
+            limit=limit,
+            offset=offset,
+            ops=ops,
+            padding=padding,
+            param=param,
+            pos=pos,
+            pos2=pos2,
+            preference=preference,
+            preferredOrder=preferredOrder,
+            regex=regex,
+            rowPadding=rowPadding,
+            score=score,
+            separator=separator,
+            size=size,
+            skipInvalidInput=skipInvalidInput,
+            skipRegex=skipRegex,
+            sort=sort,
+            spacing=spacing,
+            start=start,
+            symbolOffset=symbolOffset,
+            symbolSize=symbolSize,
+            symbolStrokeWidth=symbolStrokeWidth,
+            type=type,
+            weight=weight,
+            width=width,
+            xOffset=xOffset,
+            yExtent=yExtent,
+            yOffset=yOffset,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -6118,8 +7190,30 @@ class UrlSourceRef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("UrlSourceRef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        attach: Any = Undefined,
+        expr: Any = Undefined,
+        field: Any = Undefined,
+        maxValues: Any = Undefined,
+        onLoadError: Any = Undefined,
+        template: Any = Undefined,
+        type: Any = Undefined,
+        urlsFromFile: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            attach=attach,
+            expr=expr,
+            field=field,
+            maxValues=maxValues,
+            onLoadError=onLoadError,
+            template=template,
+            type=type,
+            urlsFromFile=urlsFromFile,
+            values=values,
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -6473,8 +7567,17 @@ class ViewOpacityDef(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("ViewOpacityDef", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        channel: Any = Undefined,
+        expr: Any = Undefined,
+        unitsPerPixel: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            channel=channel, expr=expr, unitsPerPixel=unitsPerPixel, values=values
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -6484,8 +7587,80 @@ class ViewSpec(GenomeSpySchema):
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("ViewSpec", {})
 
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
+    def __init__(
+        self,
+        axes: Any = Undefined,
+        baseUrl: Any = Undefined,
+        columns: Any = Undefined,
+        concat: Any = Undefined,
+        config: Any = Undefined,
+        cursor: Any = Undefined,
+        data: Any = Undefined,
+        description: Any = Undefined,
+        domainInert: Any = Undefined,
+        encoding: Any = Undefined,
+        hconcat: Any = Undefined,
+        height: Any = Undefined,
+        layer: Any = Undefined,
+        legends: Any = Undefined,
+        mark: Any = Undefined,
+        multiscale: Any = Undefined,
+        name: Any = Undefined,
+        opacity: Any = Undefined,
+        padding: Any = Undefined,
+        params: Any = Undefined,
+        resolve: Any = Undefined,
+        scales: Any = Undefined,
+        separator: Any = Undefined,
+        spacing: Any = Undefined,
+        stops: Any = Undefined,
+        templates: Any = Undefined,
+        title: Any = Undefined,
+        transform: Any = Undefined,
+        vconcat: Any = Undefined,
+        view: Any = Undefined,
+        viewportHeight: Any = Undefined,
+        viewportWidth: Any = Undefined,
+        visible: Any = Undefined,
+        width: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            axes=axes,
+            baseUrl=baseUrl,
+            columns=columns,
+            concat=concat,
+            config=config,
+            cursor=cursor,
+            data=data,
+            description=description,
+            domainInert=domainInert,
+            encoding=encoding,
+            hconcat=hconcat,
+            height=height,
+            layer=layer,
+            legends=legends,
+            mark=mark,
+            multiscale=multiscale,
+            name=name,
+            opacity=opacity,
+            padding=padding,
+            params=params,
+            resolve=resolve,
+            scales=scales,
+            separator=separator,
+            spacing=spacing,
+            stops=stops,
+            templates=templates,
+            title=title,
+            transform=transform,
+            vconcat=vconcat,
+            view=view,
+            viewportHeight=viewportHeight,
+            viewportWidth=viewportWidth,
+            visible=visible,
+            width=width,
+        )
         if kwds:
             self._kwds.update(kwds)
 

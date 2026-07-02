@@ -62,14 +62,18 @@ class SchemaWrapperGenerator:
         self.rootschema = rootschema
         self.schema_version = schema_version
 
+    @property
+    def _definitions_map(self) -> dict[str, Any]:
+        definitions = self.rootschema.get("definitions", {})
+        if isinstance(definitions, dict):
+            return definitions
+        return {}
+
     def definitions(self) -> list[SchemaDefinition]:
         """Return named schema definitions in deterministic order."""
-        definitions = self.rootschema.get("definitions", {})
-        if not isinstance(definitions, dict):
-            return []
         return [
             SchemaDefinition(name, schema)
-            for name, schema in sorted(definitions.items())
+            for name, schema in sorted(self._definitions_map.items())
             if isinstance(schema, dict)
         ]
 
@@ -101,10 +105,7 @@ class SchemaWrapperGenerator:
 
     def channel_nested_setters(self, encoding_name: str) -> tuple[tuple[str, str], ...]:
         """Return nested setter properties available for an encoding channel."""
-        definitions = self.rootschema.get("definitions", {})
-        if not isinstance(definitions, dict):
-            return ()
-        encoding_schema = definitions.get("Encoding", {})
+        encoding_schema = self._definitions_map.get("Encoding", {})
         if not isinstance(encoding_schema, dict):
             return ()
         properties = encoding_schema.get("properties", {})
@@ -113,7 +114,7 @@ class SchemaWrapperGenerator:
         channel_schema = properties.get(encoding_name)
         if not isinstance(channel_schema, dict):
             return ()
-        resolved_properties = _resolve_properties(channel_schema, definitions)
+        resolved_properties = _resolve_properties(channel_schema, self._definitions_map)
         setters: list[tuple[str, str]] = []
         for property_name in ("axis", "scale", "legend"):
             nested_schema = resolved_properties.get(property_name)
@@ -169,7 +170,13 @@ class SchemaWrapperGenerator:
                 class_name = f"{class_name}Def"
             seen_class_names.add(class_name)
             exports.append(class_name)
-            chunks.append(_schema_class_source(class_name, definition))
+            chunks.append(
+                _schema_class_source(
+                    class_name,
+                    definition,
+                    definitions_map=self._definitions_map,
+                )
+            )
 
         all_line = "__all__ = " + repr(exports)
         return GeneratedModule(
@@ -315,10 +322,21 @@ def _resolve_properties(
     return resolved
 
 
-def _schema_class_source(class_name: str, definition: SchemaDefinition) -> str:
+def _resolved_identifier_properties(
+    schema: dict[str, Any], definitions: dict[str, Any]
+) -> tuple[str, ...]:
+    return tuple(sorted(_resolve_properties(schema, definitions)))
+
+
+def _schema_class_source(
+    class_name: str,
+    definition: SchemaDefinition,
+    *,
+    definitions_map: dict[str, Any],
+) -> str:
     arg_names = [
         name
-        for name in definition.properties
+        for name in _resolved_identifier_properties(definition.schema, definitions_map)
         if name.isidentifier() and not keyword.iskeyword(name)
     ]
     args = ", ".join(f"{name}: Any = Undefined" for name in arg_names)
