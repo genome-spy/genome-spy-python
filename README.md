@@ -66,8 +66,32 @@ The goal is that many simple Altair examples should require only the first
 import line to change. GenomeSpy-specific genomic helpers such as
 `alt.Locus("chrom", "start")` remain available for locus-scaled genomic axes.
 
-A runnable Altair-style example is available in
-`notebooks/altair_penguins_style.ipynb`.
+Runnable Altair-style examples:
+
+- `notebooks/altair_penguins_style.ipynb`
+- `notebooks/altair_cars_tick.ipynb`
+
+The cars tick notebook mirrors this Altair example:
+
+```python
+import genome_spy as alt
+from altair.datasets import data
+
+source = data.cars()
+
+alt.Chart(source).mark_tick().encode(
+    x="Horsepower:Q",
+    y="Cylinders:O",
+)
+```
+
+GenomeSpy-native grammar examples:
+
+- `notebooks/altair_stacked_bar_plot.ipynb`
+
+The stacked-bar notebook uses Altair's barley dataset but follows GenomeSpy's
+own stacked-bar grammar: explicit `aggregate` and `stack` transforms generate
+the fields that are then encoded with `x`/`x2` or `y`/`y2`.
 
 Architecture notes:
 
@@ -75,6 +99,24 @@ Architecture notes:
   from the Vega-Lite schema and how that maps to the GenomeSpy wrapper plan
 - `plans/genomespy_codegen_mapping.md`: how the local GenomeSpy codegen
   scaffold matches and differs from Altair's machinery
+
+## Schema Generation
+
+Generated schema wrappers are committed to git and shipped with the package,
+following Altair's workflow. Normal users installing `genome-spy-python` should
+not need npm.
+
+Maintainers regenerate wrappers only when updating the pinned GenomeSpy core
+version:
+
+```bash
+uv run python tools/generate_schema_wrapper.py
+```
+
+That command requires `npm` on `PATH`, fetches the version-pinned
+`@genome-spy/core` package temporarily, writes `src/genome_spy/schema/`, and
+then removes the temporary npm package. The local `tmp/genome-spy` checkout is
+reference-only and is not a codegen source of truth.
 
 Reference implementations and upstream context live in `tmp/`:
 
