@@ -33,4 +33,5 @@ jobs:
           python-version: "3.11"
       - run: uv sync --locked --dev
       - run: uv run python tools/generate_schema_wrapper.py
+      - run: uv run ruff format src/genome_spy/schema
       - run: git diff --exit-code src/genome_spy/schema tools

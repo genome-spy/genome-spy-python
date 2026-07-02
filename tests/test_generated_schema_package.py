@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from genome_spy.schema import MARK_TYPES, Root, UnitSpec, load_schema
+from genome_spy.schema import MARK_TYPES, SCHEMA_VERSION, Root, UnitSpec, load_schema
 from genome_spy.schema import channels as generated_channels
 from genome_spy.schemapi import SchemaValidationError
 
@@ -14,6 +14,7 @@ def test_generated_schema_package_loads_real_genomespy_schema() -> None:
     assert len(schema["definitions"]) >= 200
     assert "UnitSpec" in schema["definitions"]
     assert MARK_TYPES == ("rect", "point", "rule", "tick", "text", "link")
+    assert SCHEMA_VERSION == "0.80.0"
 
 
 def test_generated_schema_wrappers_serialize_keyword_properties() -> None:

@@ -115,6 +115,7 @@ class Axis(GenomeSpySchema):
         minExtent: Any = Undefined,
         offset: Any = Undefined,
         orient: Any = Undefined,
+        placement: Any = Undefined,
         style: Any = Undefined,
         tickCap: Any = Undefined,
         tickColor: Any = Undefined,
@@ -127,6 +128,7 @@ class Axis(GenomeSpySchema):
         ticks: Any = Undefined,
         title: Any = Undefined,
         titleColor: Any = Undefined,
+        titleFit: Any = Undefined,
         titleFont: Any = Undefined,
         titleFontSize: Any = Undefined,
         titleFontStyle: Any = Undefined,
@@ -167,6 +169,7 @@ class Axis(GenomeSpySchema):
             minExtent=minExtent,
             offset=offset,
             orient=orient,
+            placement=placement,
             style=style,
             tickCap=tickCap,
             tickColor=tickColor,
@@ -179,6 +182,7 @@ class Axis(GenomeSpySchema):
             ticks=ticks,
             title=title,
             titleColor=titleColor,
+            titleFit=titleFit,
             titleFont=titleFont,
             titleFontSize=titleFontSize,
             titleFontStyle=titleFontStyle,
@@ -251,6 +255,7 @@ class AxisConfig(GenomeSpySchema):
         minExtent: Any = Undefined,
         offset: Any = Undefined,
         orient: Any = Undefined,
+        placement: Any = Undefined,
         style: Any = Undefined,
         tickCap: Any = Undefined,
         tickColor: Any = Undefined,
@@ -263,6 +268,7 @@ class AxisConfig(GenomeSpySchema):
         ticks: Any = Undefined,
         title: Any = Undefined,
         titleColor: Any = Undefined,
+        titleFit: Any = Undefined,
         titleFont: Any = Undefined,
         titleFontSize: Any = Undefined,
         titleFontStyle: Any = Undefined,
@@ -326,6 +332,7 @@ class AxisConfig(GenomeSpySchema):
             minExtent=minExtent,
             offset=offset,
             orient=orient,
+            placement=placement,
             style=style,
             tickCap=tickCap,
             tickColor=tickColor,
@@ -338,6 +345,7 @@ class AxisConfig(GenomeSpySchema):
             ticks=ticks,
             title=title,
             titleColor=titleColor,
+            titleFit=titleFit,
             titleFont=titleFont,
             titleFontSize=titleFontSize,
             titleFontStyle=titleFontStyle,
@@ -368,6 +376,17 @@ class AxisOrient(GenomeSpySchema):
     """Generated wrapper for ``AxisOrient``."""
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("AxisOrient", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class AxisPlacement(GenomeSpySchema):
+    """Generated wrapper for ``AxisPlacement``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("AxisPlacement", {})
 
     def __init__(self, **kwds: Any) -> None:
         super().__init__()
@@ -822,6 +841,7 @@ class ConcatSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        axes: Any = Undefined,
         baseUrl: Any = Undefined,
         columns: Any = Undefined,
         concat: Any = Undefined,
@@ -832,6 +852,7 @@ class ConcatSpec(GenomeSpySchema):
         domainInert: Any = Undefined,
         encoding: Any = Undefined,
         height: Any = Undefined,
+        legends: Any = Undefined,
         name: Any = Undefined,
         padding: Any = Undefined,
         params: Any = Undefined,
@@ -849,6 +870,7 @@ class ConcatSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            axes=axes,
             baseUrl=baseUrl,
             columns=columns,
             concat=concat,
@@ -859,6 +881,7 @@ class ConcatSpec(GenomeSpySchema):
             domainInert=domainInert,
             encoding=encoding,
             height=height,
+            legends=legends,
             name=name,
             padding=padding,
             params=params,
@@ -1054,6 +1077,8 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
         domainInert: Any = Undefined,
         empty: Any = Undefined,
         field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
         param: Any = Undefined,
         resolutionChannel: Any = Undefined,
         scale: Any = Undefined,
@@ -1066,6 +1091,8 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
             domainInert=domainInert,
             empty=empty,
             field=field,
+            format=format,
+            legend=legend,
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
@@ -1089,6 +1116,8 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
         domainInert: Any = Undefined,
         empty: Any = Undefined,
         field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
         param: Any = Undefined,
         resolutionChannel: Any = Undefined,
         scale: Any = Undefined,
@@ -1101,6 +1130,8 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
             domainInert=domainInert,
             empty=empty,
             field=field,
+            format=format,
+            legend=legend,
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
@@ -1567,6 +1598,8 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
         description: Any = Undefined,
         domainInert: Any = Undefined,
         field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
         resolutionChannel: Any = Undefined,
         scale: Any = Undefined,
         title: Any = Undefined,
@@ -1578,6 +1611,8 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
             description=description,
             domainInert=domainInert,
             field=field,
+            format=format,
+            legend=legend,
             resolutionChannel=resolutionChannel,
             scale=scale,
             title=title,
@@ -1600,6 +1635,8 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
         description: Any = Undefined,
         domainInert: Any = Undefined,
         field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
         resolutionChannel: Any = Undefined,
         scale: Any = Undefined,
         title: Any = Undefined,
@@ -1611,6 +1648,8 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
             description=description,
             domainInert=domainInert,
             field=field,
+            format=format,
+            legend=legend,
             resolutionChannel=resolutionChannel,
             scale=scale,
             title=title,
@@ -1635,6 +1674,8 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
         description: Any = Undefined,
         domainInert: Any = Undefined,
         field: Any = Undefined,
+        format: Any = Undefined,
+        legend: Any = Undefined,
         resolutionChannel: Any = Undefined,
         scale: Any = Undefined,
         title: Any = Undefined,
@@ -1646,6 +1687,8 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
             description=description,
             domainInert=domainInert,
             field=field,
+            format=format,
+            legend=legend,
             resolutionChannel=resolutionChannel,
             scale=scale,
             title=title,
@@ -1955,6 +1998,7 @@ class GenomeAxis(GenomeSpySchema):
         minExtent: Any = Undefined,
         offset: Any = Undefined,
         orient: Any = Undefined,
+        placement: Any = Undefined,
         style: Any = Undefined,
         tickCap: Any = Undefined,
         tickColor: Any = Undefined,
@@ -1967,6 +2011,7 @@ class GenomeAxis(GenomeSpySchema):
         ticks: Any = Undefined,
         title: Any = Undefined,
         titleColor: Any = Undefined,
+        titleFit: Any = Undefined,
         titleFont: Any = Undefined,
         titleFontSize: Any = Undefined,
         titleFontStyle: Any = Undefined,
@@ -2030,6 +2075,7 @@ class GenomeAxis(GenomeSpySchema):
             minExtent=minExtent,
             offset=offset,
             orient=orient,
+            placement=placement,
             style=style,
             tickCap=tickCap,
             tickColor=tickColor,
@@ -2042,6 +2088,7 @@ class GenomeAxis(GenomeSpySchema):
             ticks=ticks,
             title=title,
             titleColor=titleColor,
+            titleFit=titleFit,
             titleFont=titleFont,
             titleFontSize=titleFontSize,
             titleFontStyle=titleFontStyle,
@@ -2107,6 +2154,8 @@ class GenomeSpyConfig(GenomeSpySchema):
         axisTop: Any = Undefined,
         axisX: Any = Undefined,
         axisY: Any = Undefined,
+        legend: Any = Undefined,
+        legendTrack: Any = Undefined,
         link: Any = Undefined,
         mark: Any = Undefined,
         point: Any = Undefined,
@@ -2134,6 +2183,8 @@ class GenomeSpyConfig(GenomeSpySchema):
             axisTop=axisTop,
             axisX=axisX,
             axisY=axisY,
+            legend=legend,
+            legendTrack=legendTrack,
             link=link,
             mark=mark,
             point=point,
@@ -2191,6 +2242,7 @@ class HConcatSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        axes: Any = Undefined,
         baseUrl: Any = Undefined,
         config: Any = Undefined,
         cursor: Any = Undefined,
@@ -2200,6 +2252,7 @@ class HConcatSpec(GenomeSpySchema):
         encoding: Any = Undefined,
         hconcat: Any = Undefined,
         height: Any = Undefined,
+        legends: Any = Undefined,
         name: Any = Undefined,
         padding: Any = Undefined,
         params: Any = Undefined,
@@ -2217,6 +2270,7 @@ class HConcatSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            axes=axes,
             baseUrl=baseUrl,
             config=config,
             cursor=cursor,
@@ -2226,6 +2280,7 @@ class HConcatSpec(GenomeSpySchema):
             encoding=encoding,
             hconcat=hconcat,
             height=height,
+            legends=legends,
             name=name,
             padding=padding,
             params=params,
@@ -2285,6 +2340,28 @@ class ImportSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(config=config, name=name, params=params, visible=visible)
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class IndexUrlSourceRef(GenomeSpySchema):
+    """Generated wrapper for ``IndexUrlSourceRef``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("IndexUrlSourceRef", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class IndexUrlTemplate(GenomeSpySchema):
+    """Generated wrapper for ``IndexUrlTemplate``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("IndexUrlTemplate", {})
+
+    def __init__(self, template: Any = Undefined, **kwds: Any) -> None:
+        super().__init__(template=template)
         if kwds:
             self._kwds.update(kwds)
 
@@ -2406,6 +2483,7 @@ class IntervalSelectionConfig(GenomeSpySchema):
         self,
         clear: Any = Undefined,
         encodings: Any = Undefined,
+        extent: Any = Undefined,
         mark: Any = Undefined,
         on: Any = Undefined,
         type: Any = Undefined,
@@ -2413,7 +2491,13 @@ class IntervalSelectionConfig(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
-            clear=clear, encodings=encodings, mark=mark, on=on, type=type, zoom=zoom
+            clear=clear,
+            encodings=encodings,
+            extent=extent,
+            mark=mark,
+            on=on,
+            type=type,
+            zoom=zoom,
         )
         if kwds:
             self._kwds.update(kwds)
@@ -2454,6 +2538,7 @@ class LayerSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        axes: Any = Undefined,
         baseUrl: Any = Undefined,
         config: Any = Undefined,
         cursor: Any = Undefined,
@@ -2463,6 +2548,7 @@ class LayerSpec(GenomeSpySchema):
         encoding: Any = Undefined,
         height: Any = Undefined,
         layer: Any = Undefined,
+        legends: Any = Undefined,
         name: Any = Undefined,
         opacity: Any = Undefined,
         padding: Any = Undefined,
@@ -2480,6 +2566,7 @@ class LayerSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            axes=axes,
             baseUrl=baseUrl,
             config=config,
             cursor=cursor,
@@ -2489,6 +2576,7 @@ class LayerSpec(GenomeSpySchema):
             encoding=encoding,
             height=height,
             layer=layer,
+            legends=legends,
             name=name,
             opacity=opacity,
             padding=padding,
@@ -2525,6 +2613,183 @@ class LazyDataParams(GenomeSpySchema):
     """Generated wrapper for ``LazyDataParams``."""
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("LazyDataParams", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class Legend(GenomeSpySchema):
+    """Generated wrapper for ``Legend``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("Legend", {})
+
+    def __init__(
+        self,
+        backgroundFill: Any = Undefined,
+        backgroundFillOpacity: Any = Undefined,
+        backgroundStroke: Any = Undefined,
+        backgroundStrokeOpacity: Any = Undefined,
+        backgroundStrokeWidth: Any = Undefined,
+        columns: Any = Undefined,
+        direction: Any = Undefined,
+        labelLimit: Any = Undefined,
+        offset: Any = Undefined,
+        orient: Any = Undefined,
+        padding: Any = Undefined,
+        style: Any = Undefined,
+        symbolSize: Any = Undefined,
+        symbolType: Any = Undefined,
+        title: Any = Undefined,
+        titleOrient: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            backgroundFill=backgroundFill,
+            backgroundFillOpacity=backgroundFillOpacity,
+            backgroundStroke=backgroundStroke,
+            backgroundStrokeOpacity=backgroundStrokeOpacity,
+            backgroundStrokeWidth=backgroundStrokeWidth,
+            columns=columns,
+            direction=direction,
+            labelLimit=labelLimit,
+            offset=offset,
+            orient=orient,
+            padding=padding,
+            style=style,
+            symbolSize=symbolSize,
+            symbolType=symbolType,
+            title=title,
+            titleOrient=titleOrient,
+            values=values,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class LegendConfig(GenomeSpySchema):
+    """Generated wrapper for ``LegendConfig``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("LegendConfig", {})
+
+    def __init__(
+        self,
+        backgroundFill: Any = Undefined,
+        backgroundFillOpacity: Any = Undefined,
+        backgroundStroke: Any = Undefined,
+        backgroundStrokeOpacity: Any = Undefined,
+        backgroundStrokeWidth: Any = Undefined,
+        columnPadding: Any = Undefined,
+        columns: Any = Undefined,
+        direction: Any = Undefined,
+        disable: Any = Undefined,
+        labelAlign: Any = Undefined,
+        labelBaseline: Any = Undefined,
+        labelColor: Any = Undefined,
+        labelFont: Any = Undefined,
+        labelFontSize: Any = Undefined,
+        labelFontStyle: Any = Undefined,
+        labelFontWeight: Any = Undefined,
+        labelLimit: Any = Undefined,
+        labelOffset: Any = Undefined,
+        offset: Any = Undefined,
+        orient: Any = Undefined,
+        padding: Any = Undefined,
+        rowPadding: Any = Undefined,
+        spacing: Any = Undefined,
+        style: Any = Undefined,
+        symbolBaseFillColor: Any = Undefined,
+        symbolBaseStrokeColor: Any = Undefined,
+        symbolOffset: Any = Undefined,
+        symbolSize: Any = Undefined,
+        symbolStrokeWidth: Any = Undefined,
+        symbolType: Any = Undefined,
+        title: Any = Undefined,
+        titleColor: Any = Undefined,
+        titleFont: Any = Undefined,
+        titleFontSize: Any = Undefined,
+        titleFontStyle: Any = Undefined,
+        titleFontWeight: Any = Undefined,
+        titleLimit: Any = Undefined,
+        titleOrient: Any = Undefined,
+        titlePadding: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            backgroundFill=backgroundFill,
+            backgroundFillOpacity=backgroundFillOpacity,
+            backgroundStroke=backgroundStroke,
+            backgroundStrokeOpacity=backgroundStrokeOpacity,
+            backgroundStrokeWidth=backgroundStrokeWidth,
+            columnPadding=columnPadding,
+            columns=columns,
+            direction=direction,
+            disable=disable,
+            labelAlign=labelAlign,
+            labelBaseline=labelBaseline,
+            labelColor=labelColor,
+            labelFont=labelFont,
+            labelFontSize=labelFontSize,
+            labelFontStyle=labelFontStyle,
+            labelFontWeight=labelFontWeight,
+            labelLimit=labelLimit,
+            labelOffset=labelOffset,
+            offset=offset,
+            orient=orient,
+            padding=padding,
+            rowPadding=rowPadding,
+            spacing=spacing,
+            style=style,
+            symbolBaseFillColor=symbolBaseFillColor,
+            symbolBaseStrokeColor=symbolBaseStrokeColor,
+            symbolOffset=symbolOffset,
+            symbolSize=symbolSize,
+            symbolStrokeWidth=symbolStrokeWidth,
+            symbolType=symbolType,
+            title=title,
+            titleColor=titleColor,
+            titleFont=titleFont,
+            titleFontSize=titleFontSize,
+            titleFontStyle=titleFontStyle,
+            titleFontWeight=titleFontWeight,
+            titleLimit=titleLimit,
+            titleOrient=titleOrient,
+            titlePadding=titlePadding,
+            values=values,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class LegendDirection(GenomeSpySchema):
+    """Generated wrapper for ``LegendDirection``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("LegendDirection", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class LegendOrient(GenomeSpySchema):
+    """Generated wrapper for ``LegendOrient``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("LegendOrient", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class LegendTitleOrient(GenomeSpySchema):
+    """Generated wrapper for ``LegendTitleOrient``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("LegendTitleOrient", {})
 
     def __init__(self, **kwds: Any) -> None:
         super().__init__()
@@ -2574,6 +2839,7 @@ class LinkConfig(GenomeSpySchema):
         clampApex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         linkShape: Any = Undefined,
         maxChordLength: Any = Undefined,
@@ -2602,6 +2868,7 @@ class LinkConfig(GenomeSpySchema):
             clampApex=clampApex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             linkShape=linkShape,
             maxChordLength=maxChordLength,
@@ -2639,6 +2906,7 @@ class LinkProps(GenomeSpySchema):
         clampApex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         linkShape: Any = Undefined,
         maxChordLength: Any = Undefined,
@@ -2668,6 +2936,7 @@ class LinkProps(GenomeSpySchema):
             clampApex=clampApex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             linkShape=linkShape,
             maxChordLength=maxChordLength,
@@ -2703,6 +2972,7 @@ class MarkConfig(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         minBufferSize: Any = Undefined,
         opacity: Any = Undefined,
@@ -2718,6 +2988,7 @@ class MarkConfig(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             minBufferSize=minBufferSize,
             opacity=opacity,
@@ -2862,6 +3133,17 @@ class MergeFacetsParams(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+class MultiUrlSourceRef(GenomeSpySchema):
+    """Generated wrapper for ``MultiUrlSourceRef``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("MultiUrlSourceRef", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
 class MultiscaleSpec(GenomeSpySchema):
     """Generated wrapper for ``MultiscaleSpec``."""
 
@@ -2869,6 +3151,7 @@ class MultiscaleSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        axes: Any = Undefined,
         baseUrl: Any = Undefined,
         config: Any = Undefined,
         cursor: Any = Undefined,
@@ -2877,6 +3160,7 @@ class MultiscaleSpec(GenomeSpySchema):
         domainInert: Any = Undefined,
         encoding: Any = Undefined,
         height: Any = Undefined,
+        legends: Any = Undefined,
         multiscale: Any = Undefined,
         name: Any = Undefined,
         opacity: Any = Undefined,
@@ -2896,6 +3180,7 @@ class MultiscaleSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            axes=axes,
             baseUrl=baseUrl,
             config=config,
             cursor=cursor,
@@ -2904,6 +3189,7 @@ class MultiscaleSpec(GenomeSpySchema):
             domainInert=domainInert,
             encoding=encoding,
             height=height,
+            legends=legends,
             multiscale=multiscale,
             name=name,
             opacity=opacity,
@@ -3039,6 +3325,51 @@ class OtherDataFormat(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+class PackLegendLabelsParams(GenomeSpySchema):
+    """Generated wrapper for ``PackLegendLabelsParams``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("PackLegendLabelsParams", {})
+
+    def __init__(
+        self,
+        columnPadding: Any = Undefined,
+        columns: Any = Undefined,
+        description: Any = Undefined,
+        direction: Any = Undefined,
+        fontSize: Any = Undefined,
+        labelOffset: Any = Undefined,
+        labelWidth: Any = Undefined,
+        rowPadding: Any = Undefined,
+        symbolOffset: Any = Undefined,
+        symbolSize: Any = Undefined,
+        symbolStrokeWidth: Any = Undefined,
+        type: Any = Undefined,
+        xOffset: Any = Undefined,
+        yExtent: Any = Undefined,
+        yOffset: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            columnPadding=columnPadding,
+            columns=columns,
+            description=description,
+            direction=direction,
+            fontSize=fontSize,
+            labelOffset=labelOffset,
+            labelWidth=labelWidth,
+            rowPadding=rowPadding,
+            symbolOffset=symbolOffset,
+            symbolSize=symbolSize,
+            symbolStrokeWidth=symbolStrokeWidth,
+            type=type,
+            xOffset=xOffset,
+            yExtent=yExtent,
+            yOffset=yOffset,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+
 class PaddingConfig(GenomeSpySchema):
     """Generated wrapper for ``PaddingConfig``."""
 
@@ -3141,6 +3472,7 @@ class PointConfig(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         dx: Any = Undefined,
         dy: Any = Undefined,
@@ -3174,6 +3506,7 @@ class PointConfig(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             dx=dx,
             dy=dy,
@@ -3216,6 +3549,7 @@ class PointProps(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         dx: Any = Undefined,
         dy: Any = Undefined,
@@ -3250,6 +3584,7 @@ class PointProps(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             dx=dx,
             dy=dy,
@@ -3509,6 +3844,7 @@ class RectConfig(GenomeSpySchema):
         cornerRadiusBottomRight: Any = Undefined,
         cornerRadiusTopLeft: Any = Undefined,
         cornerRadiusTopRight: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         fill: Any = Undefined,
         fillOpacity: Any = Undefined,
@@ -3546,6 +3882,7 @@ class RectConfig(GenomeSpySchema):
             cornerRadiusBottomRight=cornerRadiusBottomRight,
             cornerRadiusTopLeft=cornerRadiusTopLeft,
             cornerRadiusTopRight=cornerRadiusTopRight,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             fill=fill,
             fillOpacity=fillOpacity,
@@ -3592,6 +3929,7 @@ class RectProps(GenomeSpySchema):
         cornerRadiusBottomRight: Any = Undefined,
         cornerRadiusTopLeft: Any = Undefined,
         cornerRadiusTopRight: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         fill: Any = Undefined,
         fillOpacity: Any = Undefined,
@@ -3630,6 +3968,7 @@ class RectProps(GenomeSpySchema):
             cornerRadiusBottomRight=cornerRadiusBottomRight,
             cornerRadiusTopLeft=cornerRadiusTopLeft,
             cornerRadiusTopRight=cornerRadiusTopRight,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             fill=fill,
             fillOpacity=fillOpacity,
@@ -3735,6 +4074,7 @@ class RuleConfig(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         minBufferSize: Any = Undefined,
         minLength: Any = Undefined,
@@ -3757,6 +4097,7 @@ class RuleConfig(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             minBufferSize=minBufferSize,
             minLength=minLength,
@@ -3788,6 +4129,7 @@ class RuleProps(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         minBufferSize: Any = Undefined,
         minLength: Any = Undefined,
@@ -3811,6 +4153,7 @@ class RuleProps(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             minBufferSize=minBufferSize,
             minLength=minLength,
@@ -3829,6 +4172,204 @@ class RuleProps(GenomeSpySchema):
             y2=y2,
             yOffset=yOffset,
         )
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerChannelValue(GenomeSpySchema):
+    """Generated wrapper for ``RulerChannelValue``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerChannelValue", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerClear(GenomeSpySchema):
+    """Generated wrapper for ``RulerClear``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerClear", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerConfig(GenomeSpySchema):
+    """Generated wrapper for ``RulerConfig``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerConfig", {})
+
+    def __init__(
+        self,
+        clear: Any = Undefined,
+        display: Any = Undefined,
+        encodings: Any = Undefined,
+        extent: Any = Undefined,
+        mark: Any = Undefined,
+        on: Any = Undefined,
+        snap: Any = Undefined,
+        source: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            clear=clear,
+            display=display,
+            encodings=encodings,
+            extent=extent,
+            mark=mark,
+            on=on,
+            snap=snap,
+            source=source,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerDisplay(GenomeSpySchema):
+    """Generated wrapper for ``RulerDisplay``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerDisplay", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerEventConfig(GenomeSpySchema):
+    """Generated wrapper for ``RulerEventConfig``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerEventConfig", {})
+
+    def __init__(
+        self, filter: Any = Undefined, type: Any = Undefined, **kwds: Any
+    ) -> None:
+        super().__init__(filter=filter, type=type)
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerEventType(GenomeSpySchema):
+    """Generated wrapper for ``RulerEventType``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerEventType", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerExtent(GenomeSpySchema):
+    """Generated wrapper for ``RulerExtent``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerExtent", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerInitMapping(GenomeSpySchema):
+    """Generated wrapper for ``RulerInitMapping``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerInitMapping", {})
+
+    def __init__(self, x: Any = Undefined, y: Any = Undefined, **kwds: Any) -> None:
+        super().__init__(x=x, y=y)
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerMarkConfig(GenomeSpySchema):
+    """Generated wrapper for ``RulerMarkConfig``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerMarkConfig", {})
+
+    def __init__(
+        self,
+        fill: Any = Undefined,
+        fillOpacity: Any = Undefined,
+        opacity: Any = Undefined,
+        shadowBlur: Any = Undefined,
+        shadowColor: Any = Undefined,
+        shadowOffsetX: Any = Undefined,
+        shadowOffsetY: Any = Undefined,
+        shadowOpacity: Any = Undefined,
+        stroke: Any = Undefined,
+        strokeDash: Any = Undefined,
+        strokeWidth: Any = Undefined,
+        zindex: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            fill=fill,
+            fillOpacity=fillOpacity,
+            opacity=opacity,
+            shadowBlur=shadowBlur,
+            shadowColor=shadowColor,
+            shadowOffsetX=shadowOffsetX,
+            shadowOffsetY=shadowOffsetY,
+            shadowOpacity=shadowOpacity,
+            stroke=stroke,
+            strokeDash=strokeDash,
+            strokeWidth=strokeWidth,
+            zindex=zindex,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerParameter(GenomeSpySchema):
+    """Generated wrapper for ``RulerParameter``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerParameter", {})
+
+    def __init__(
+        self,
+        description: Any = Undefined,
+        name: Any = Undefined,
+        persist: Any = Undefined,
+        push: Any = Undefined,
+        ruler: Any = Undefined,
+        value: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            name=name,
+            persist=persist,
+            push=push,
+            ruler=ruler,
+            value=value,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerSnap(GenomeSpySchema):
+    """Generated wrapper for ``RulerSnap``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerSnap", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class RulerSource(GenomeSpySchema):
+    """Generated wrapper for ``RulerSource``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("RulerSource", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
         if kwds:
             self._kwds.update(kwds)
 
@@ -4144,6 +4685,17 @@ class SelectionDomainRef(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+class SelectionExtent(GenomeSpySchema):
+    """Generated wrapper for ``SelectionExtent``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("SelectionExtent", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
 class SelectionFilterParams(GenomeSpySchema):
     """Generated wrapper for ``SelectionFilterParams``."""
 
@@ -4226,6 +4778,7 @@ class SeparatorProps(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         includePlotMargin: Any = Undefined,
         minBufferSize: Any = Undefined,
@@ -4251,6 +4804,7 @@ class SeparatorProps(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             includePlotMargin=includePlotMargin,
             minBufferSize=minBufferSize,
@@ -4320,13 +4874,31 @@ class ShapeDef(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+class SingleUrlSourceRef(GenomeSpySchema):
+    """Generated wrapper for ``SingleUrlSourceRef``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("SingleUrlSourceRef", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
 class SizeDef(GenomeSpySchema):
     """Generated wrapper for ``SizeDef``."""
 
     _schema = _ROOT_SCHEMA.get("definitions", {}).get("SizeDef", {})
 
-    def __init__(self, grow: Any = Undefined, px: Any = Undefined, **kwds: Any) -> None:
-        super().__init__(grow=grow, px=px)
+    def __init__(
+        self,
+        grow: Any = Undefined,
+        maxPx: Any = Undefined,
+        minPx: Any = Undefined,
+        px: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(grow=grow, maxPx=maxPx, minPx=minPx, px=px)
         if kwds:
             self._kwds.update(kwds)
 
@@ -4438,6 +5010,11 @@ class StyleConfig(GenomeSpySchema):
         angle: Any = Undefined,
         arcFadingDistance: Any = Undefined,
         arcHeightFactor: Any = Undefined,
+        backgroundFill: Any = Undefined,
+        backgroundFillOpacity: Any = Undefined,
+        backgroundStroke: Any = Undefined,
+        backgroundStrokeOpacity: Any = Undefined,
+        backgroundStrokeWidth: Any = Undefined,
         baseline: Any = Undefined,
         buildIndex: Any = Undefined,
         chromGrid: Any = Undefined,
@@ -4466,12 +5043,17 @@ class StyleConfig(GenomeSpySchema):
         clampApex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        columnPadding: Any = Undefined,
+        columns: Any = Undefined,
         cornerRadius: Any = Undefined,
         cornerRadiusBottomLeft: Any = Undefined,
         cornerRadiusBottomRight: Any = Undefined,
         cornerRadiusTopLeft: Any = Undefined,
         cornerRadiusTopRight: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
+        direction: Any = Undefined,
+        disable: Any = Undefined,
         domain: Any = Undefined,
         domainCap: Any = Undefined,
         domainColor: Any = Undefined,
@@ -4512,6 +5094,7 @@ class StyleConfig(GenomeSpySchema):
         labelFontStyle: Any = Undefined,
         labelFontWeight: Any = Undefined,
         labelLimit: Any = Undefined,
+        labelOffset: Any = Undefined,
         labelPadding: Any = Undefined,
         labels: Any = Undefined,
         linkShape: Any = Undefined,
@@ -4530,8 +5113,12 @@ class StyleConfig(GenomeSpySchema):
         offset: Any = Undefined,
         opacity: Any = Undefined,
         orient: Any = Undefined,
+        padding: Any = Undefined,
         paddingX: Any = Undefined,
         paddingY: Any = Undefined,
+        placement: Any = Undefined,
+        reserve: Any = Undefined,
+        rowPadding: Any = Undefined,
         sampleFacetPadding: Any = Undefined,
         segments: Any = Undefined,
         semanticScore: Any = Undefined,
@@ -4543,6 +5130,7 @@ class StyleConfig(GenomeSpySchema):
         shadowOpacity: Any = Undefined,
         shape: Any = Undefined,
         size: Any = Undefined,
+        spacing: Any = Undefined,
         squeeze: Any = Undefined,
         stroke: Any = Undefined,
         strokeCap: Any = Undefined,
@@ -4551,6 +5139,19 @@ class StyleConfig(GenomeSpySchema):
         strokeOpacity: Any = Undefined,
         strokeWidth: Any = Undefined,
         style: Any = Undefined,
+        subtitle: Any = Undefined,
+        subtitleColor: Any = Undefined,
+        subtitleFont: Any = Undefined,
+        subtitleFontSize: Any = Undefined,
+        subtitleFontStyle: Any = Undefined,
+        subtitleFontWeight: Any = Undefined,
+        subtitlePadding: Any = Undefined,
+        symbolBaseFillColor: Any = Undefined,
+        symbolBaseStrokeColor: Any = Undefined,
+        symbolOffset: Any = Undefined,
+        symbolSize: Any = Undefined,
+        symbolStrokeWidth: Any = Undefined,
+        symbolType: Any = Undefined,
         text: Any = Undefined,
         thickness: Any = Undefined,
         tickCap: Any = Undefined,
@@ -4564,11 +5165,14 @@ class StyleConfig(GenomeSpySchema):
         ticks: Any = Undefined,
         title: Any = Undefined,
         titleColor: Any = Undefined,
+        titleFit: Any = Undefined,
         titleFont: Any = Undefined,
         titleFontSize: Any = Undefined,
         titleFontStyle: Any = Undefined,
         titleFontWeight: Any = Undefined,
+        titleLimit: Any = Undefined,
         titleOpacity: Any = Undefined,
+        titleOrient: Any = Undefined,
         titlePadding: Any = Undefined,
         tooltip: Any = Undefined,
         values: Any = Undefined,
@@ -4595,6 +5199,11 @@ class StyleConfig(GenomeSpySchema):
             angle=angle,
             arcFadingDistance=arcFadingDistance,
             arcHeightFactor=arcHeightFactor,
+            backgroundFill=backgroundFill,
+            backgroundFillOpacity=backgroundFillOpacity,
+            backgroundStroke=backgroundStroke,
+            backgroundStrokeOpacity=backgroundStrokeOpacity,
+            backgroundStrokeWidth=backgroundStrokeWidth,
             baseline=baseline,
             buildIndex=buildIndex,
             chromGrid=chromGrid,
@@ -4623,12 +5232,17 @@ class StyleConfig(GenomeSpySchema):
             clampApex=clampApex,
             clip=clip,
             color=color,
+            columnPadding=columnPadding,
+            columns=columns,
             cornerRadius=cornerRadius,
             cornerRadiusBottomLeft=cornerRadiusBottomLeft,
             cornerRadiusBottomRight=cornerRadiusBottomRight,
             cornerRadiusTopLeft=cornerRadiusTopLeft,
             cornerRadiusTopRight=cornerRadiusTopRight,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
+            direction=direction,
+            disable=disable,
             domain=domain,
             domainCap=domainCap,
             domainColor=domainColor,
@@ -4669,6 +5283,7 @@ class StyleConfig(GenomeSpySchema):
             labelFontStyle=labelFontStyle,
             labelFontWeight=labelFontWeight,
             labelLimit=labelLimit,
+            labelOffset=labelOffset,
             labelPadding=labelPadding,
             labels=labels,
             linkShape=linkShape,
@@ -4687,8 +5302,12 @@ class StyleConfig(GenomeSpySchema):
             offset=offset,
             opacity=opacity,
             orient=orient,
+            padding=padding,
             paddingX=paddingX,
             paddingY=paddingY,
+            placement=placement,
+            reserve=reserve,
+            rowPadding=rowPadding,
             sampleFacetPadding=sampleFacetPadding,
             segments=segments,
             semanticScore=semanticScore,
@@ -4700,6 +5319,7 @@ class StyleConfig(GenomeSpySchema):
             shadowOpacity=shadowOpacity,
             shape=shape,
             size=size,
+            spacing=spacing,
             squeeze=squeeze,
             stroke=stroke,
             strokeCap=strokeCap,
@@ -4708,6 +5328,19 @@ class StyleConfig(GenomeSpySchema):
             strokeOpacity=strokeOpacity,
             strokeWidth=strokeWidth,
             style=style,
+            subtitle=subtitle,
+            subtitleColor=subtitleColor,
+            subtitleFont=subtitleFont,
+            subtitleFontSize=subtitleFontSize,
+            subtitleFontStyle=subtitleFontStyle,
+            subtitleFontWeight=subtitleFontWeight,
+            subtitlePadding=subtitlePadding,
+            symbolBaseFillColor=symbolBaseFillColor,
+            symbolBaseStrokeColor=symbolBaseStrokeColor,
+            symbolOffset=symbolOffset,
+            symbolSize=symbolSize,
+            symbolStrokeWidth=symbolStrokeWidth,
+            symbolType=symbolType,
             text=text,
             thickness=thickness,
             tickCap=tickCap,
@@ -4721,11 +5354,14 @@ class StyleConfig(GenomeSpySchema):
             ticks=ticks,
             title=title,
             titleColor=titleColor,
+            titleFit=titleFit,
             titleFont=titleFont,
             titleFontSize=titleFontSize,
             titleFontStyle=titleFontStyle,
             titleFontWeight=titleFontWeight,
+            titleLimit=titleLimit,
             titleOpacity=titleOpacity,
+            titleOrient=titleOrient,
             titlePadding=titlePadding,
             tooltip=tooltip,
             values=values,
@@ -4810,6 +5446,7 @@ class TextConfig(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         dx: Any = Undefined,
         dy: Any = Undefined,
@@ -4852,6 +5489,7 @@ class TextConfig(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             dx=dx,
             dy=dy,
@@ -4914,6 +5552,7 @@ class TextProps(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         dx: Any = Undefined,
         dy: Any = Undefined,
@@ -4957,6 +5596,7 @@ class TextProps(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             dx=dx,
             dy=dy,
@@ -5006,6 +5646,7 @@ class TickConfig(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         minBufferSize: Any = Undefined,
         minLength: Any = Undefined,
@@ -5027,6 +5668,7 @@ class TickConfig(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             minBufferSize=minBufferSize,
             minLength=minLength,
@@ -5057,6 +5699,7 @@ class TickProps(GenomeSpySchema):
         buildIndex: Any = Undefined,
         clip: Any = Undefined,
         color: Any = Undefined,
+        cullByVisibleRange: Any = Undefined,
         cursor: Any = Undefined,
         minBufferSize: Any = Undefined,
         minLength: Any = Undefined,
@@ -5079,6 +5722,7 @@ class TickProps(GenomeSpySchema):
             buildIndex=buildIndex,
             clip=clip,
             color=color,
+            cullByVisibleRange=cullByVisibleRange,
             cursor=cursor,
             minBufferSize=minBufferSize,
             minLength=minLength,
@@ -5121,7 +5765,15 @@ class Title(GenomeSpySchema):
         frame: Any = Undefined,
         offset: Any = Undefined,
         orient: Any = Undefined,
+        reserve: Any = Undefined,
         style: Any = Undefined,
+        subtitle: Any = Undefined,
+        subtitleColor: Any = Undefined,
+        subtitleFont: Any = Undefined,
+        subtitleFontSize: Any = Undefined,
+        subtitleFontStyle: Any = Undefined,
+        subtitleFontWeight: Any = Undefined,
+        subtitlePadding: Any = Undefined,
         text: Any = Undefined,
         zindex: Any = Undefined,
         **kwds: Any,
@@ -5141,7 +5793,15 @@ class Title(GenomeSpySchema):
             frame=frame,
             offset=offset,
             orient=orient,
+            reserve=reserve,
             style=style,
+            subtitle=subtitle,
+            subtitleColor=subtitleColor,
+            subtitleFont=subtitleFont,
+            subtitleFontSize=subtitleFontSize,
+            subtitleFontStyle=subtitleFontStyle,
+            subtitleFontWeight=subtitleFontWeight,
+            subtitlePadding=subtitlePadding,
             text=text,
             zindex=zindex,
         )
@@ -5181,7 +5841,15 @@ class TitleConfig(GenomeSpySchema):
         frame: Any = Undefined,
         offset: Any = Undefined,
         orient: Any = Undefined,
+        reserve: Any = Undefined,
         style: Any = Undefined,
+        subtitle: Any = Undefined,
+        subtitleColor: Any = Undefined,
+        subtitleFont: Any = Undefined,
+        subtitleFontSize: Any = Undefined,
+        subtitleFontStyle: Any = Undefined,
+        subtitleFontWeight: Any = Undefined,
+        subtitlePadding: Any = Undefined,
         zindex: Any = Undefined,
         **kwds: Any,
     ) -> None:
@@ -5200,7 +5868,15 @@ class TitleConfig(GenomeSpySchema):
             frame=frame,
             offset=offset,
             orient=orient,
+            reserve=reserve,
             style=style,
+            subtitle=subtitle,
+            subtitleColor=subtitleColor,
+            subtitleFont=subtitleFont,
+            subtitleFontSize=subtitleFontSize,
+            subtitleFontStyle=subtitleFontStyle,
+            subtitleFontWeight=subtitleFontWeight,
+            subtitlePadding=subtitlePadding,
             zindex=zindex,
         )
         if kwds:
@@ -5251,6 +5927,39 @@ class TransformParams(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+class TruncateTextParams(GenomeSpySchema):
+    """Generated wrapper for ``TruncateTextParams``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("TruncateTextParams", {})
+
+    def __init__(
+        self,
+        description: Any = Undefined,
+        ellipsis: Any = Undefined,
+        field: Any = Undefined,
+        font: Any = Undefined,
+        fontSize: Any = Undefined,
+        fontStyle: Any = Undefined,
+        fontWeight: Any = Undefined,
+        limit: Any = Undefined,
+        type: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            ellipsis=ellipsis,
+            field=field,
+            font=font,
+            fontSize=fontSize,
+            fontStyle=fontStyle,
+            fontWeight=fontWeight,
+            limit=limit,
+            type=type,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+
 class Type(GenomeSpySchema):
     """Generated wrapper for ``Type``."""
 
@@ -5280,6 +5989,7 @@ class UnitSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        axes: Any = Undefined,
         baseUrl: Any = Undefined,
         config: Any = Undefined,
         cursor: Any = Undefined,
@@ -5288,6 +5998,7 @@ class UnitSpec(GenomeSpySchema):
         domainInert: Any = Undefined,
         encoding: Any = Undefined,
         height: Any = Undefined,
+        legends: Any = Undefined,
         mark: Any = Undefined,
         name: Any = Undefined,
         opacity: Any = Undefined,
@@ -5306,6 +6017,7 @@ class UnitSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            axes=axes,
             baseUrl=baseUrl,
             config=config,
             cursor=cursor,
@@ -5314,6 +6026,7 @@ class UnitSpec(GenomeSpySchema):
             domainInert=domainInert,
             encoding=encoding,
             height=height,
+            legends=legends,
             mark=mark,
             name=name,
             opacity=opacity,
@@ -5400,6 +6113,44 @@ class UrlList(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+class UrlSourceRef(GenomeSpySchema):
+    """Generated wrapper for ``UrlSourceRef``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("UrlSourceRef", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class UrlTemplate(GenomeSpySchema):
+    """Generated wrapper for ``UrlTemplate``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("UrlTemplate", {})
+
+    def __init__(
+        self,
+        attach: Any = Undefined,
+        field: Any = Undefined,
+        maxValues: Any = Undefined,
+        onLoadError: Any = Undefined,
+        template: Any = Undefined,
+        values: Any = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            attach=attach,
+            field=field,
+            maxValues=maxValues,
+            onLoadError=onLoadError,
+            template=template,
+            values=values,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+
 class VConcatSpec(GenomeSpySchema):
     """Generated wrapper for ``VConcatSpec``."""
 
@@ -5407,6 +6158,7 @@ class VConcatSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        axes: Any = Undefined,
         baseUrl: Any = Undefined,
         config: Any = Undefined,
         cursor: Any = Undefined,
@@ -5415,6 +6167,7 @@ class VConcatSpec(GenomeSpySchema):
         domainInert: Any = Undefined,
         encoding: Any = Undefined,
         height: Any = Undefined,
+        legends: Any = Undefined,
         name: Any = Undefined,
         padding: Any = Undefined,
         params: Any = Undefined,
@@ -5433,6 +6186,7 @@ class VConcatSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            axes=axes,
             baseUrl=baseUrl,
             config=config,
             cursor=cursor,
@@ -5441,6 +6195,7 @@ class VConcatSpec(GenomeSpySchema):
             domainInert=domainInert,
             encoding=encoding,
             height=height,
+            legends=legends,
             name=name,
             padding=padding,
             params=params,
@@ -5664,13 +6419,17 @@ class ViewBackground(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
-class ViewBackgroundProps(GenomeSpySchema):
-    """Generated wrapper for ``ViewBackgroundProps``."""
+class ViewConfig(GenomeSpySchema):
+    """Generated wrapper for ``ViewConfig``."""
 
-    _schema = _ROOT_SCHEMA.get("definitions", {}).get("ViewBackgroundProps", {})
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("ViewConfig", {})
 
     def __init__(
         self,
+        continuousHeight: Any = Undefined,
+        continuousWidth: Any = Undefined,
+        discreteHeight: Any = Undefined,
+        discreteWidth: Any = Undefined,
         fill: Any = Undefined,
         fillOpacity: Any = Undefined,
         shadowBlur: Any = Undefined,
@@ -5678,6 +6437,7 @@ class ViewBackgroundProps(GenomeSpySchema):
         shadowOffsetX: Any = Undefined,
         shadowOffsetY: Any = Undefined,
         shadowOpacity: Any = Undefined,
+        step: Any = Undefined,
         stroke: Any = Undefined,
         strokeOpacity: Any = Undefined,
         strokeWidth: Any = Undefined,
@@ -5686,6 +6446,10 @@ class ViewBackgroundProps(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            continuousHeight=continuousHeight,
+            continuousWidth=continuousWidth,
+            discreteHeight=discreteHeight,
+            discreteWidth=discreteWidth,
             fill=fill,
             fillOpacity=fillOpacity,
             shadowBlur=shadowBlur,
@@ -5693,23 +6457,13 @@ class ViewBackgroundProps(GenomeSpySchema):
             shadowOffsetX=shadowOffsetX,
             shadowOffsetY=shadowOffsetY,
             shadowOpacity=shadowOpacity,
+            step=step,
             stroke=stroke,
             strokeOpacity=strokeOpacity,
             strokeWidth=strokeWidth,
             strokeZindex=strokeZindex,
             zindex=zindex,
         )
-        if kwds:
-            self._kwds.update(kwds)
-
-
-class ViewConfig(GenomeSpySchema):
-    """Generated wrapper for ``ViewConfig``."""
-
-    _schema = _ROOT_SCHEMA.get("definitions", {}).get("ViewConfig", {})
-
-    def __init__(self, **kwds: Any) -> None:
-        super().__init__()
         if kwds:
             self._kwds.update(kwds)
 
@@ -5759,6 +6513,7 @@ __all__ = [
     "AxisConfig",
     "AxisGenomeData",
     "AxisOrient",
+    "AxisPlacement",
     "AxisTicksData",
     "BamData",
     "Baseline",
@@ -5842,6 +6597,8 @@ __all__ = [
     "HandledTooltip",
     "IdentifierParams",
     "ImportSpec",
+    "IndexUrlSourceRef",
+    "IndexUrlTemplate",
     "IndexedFastaData",
     "InlineData",
     "InlineDataset",
@@ -5855,6 +6612,11 @@ __all__ = [
     "LayerSpec",
     "LazyData",
     "LazyDataParams",
+    "Legend",
+    "LegendConfig",
+    "LegendDirection",
+    "LegendOrient",
+    "LegendTitleOrient",
     "LinearizeGenomicCoordinateParams",
     "LinkConfig",
     "LinkProps",
@@ -5867,6 +6629,7 @@ __all__ = [
     "MarkType",
     "MeasureTextParams",
     "MergeFacetsParams",
+    "MultiUrlSourceRef",
     "MultiscaleSpec",
     "MultiscaleStops",
     "MultiscaleStopsDef",
@@ -5877,6 +6640,7 @@ __all__ = [
     "NumericStopDef",
     "NumericValueDef",
     "OtherDataFormat",
+    "PackLegendLabelsParams",
     "PaddingConfig",
     "Paddings",
     "Parameter",
@@ -5903,6 +6667,18 @@ __all__ = [
     "ResolutionBehavior",
     "RuleConfig",
     "RuleProps",
+    "RulerChannelValue",
+    "RulerClear",
+    "RulerConfig",
+    "RulerDisplay",
+    "RulerEventConfig",
+    "RulerEventType",
+    "RulerExtent",
+    "RulerInitMapping",
+    "RulerMarkConfig",
+    "RulerParameter",
+    "RulerSnap",
+    "RulerSource",
     "SampleParams",
     "Scalar",
     "ScalarDomain",
@@ -5916,6 +6692,7 @@ __all__ = [
     "SecondaryChromPosDef",
     "SecondaryPositionalChannel",
     "SelectionDomainRef",
+    "SelectionExtent",
     "SelectionFilterParams",
     "SelectionInitIntervalMapping",
     "SelectionParameter",
@@ -5924,6 +6701,7 @@ __all__ = [
     "SequenceGenerator",
     "SequenceParams",
     "ShapeDef",
+    "SingleUrlSourceRef",
     "SizeDef",
     "SortOrder",
     "StackParams",
@@ -5945,6 +6723,7 @@ __all__ = [
     "TitleOrient",
     "Tooltip",
     "TransformParams",
+    "TruncateTextParams",
     "Type",
     "TypeForShape",
     "UnitSpec",
@@ -5953,6 +6732,8 @@ __all__ = [
     "UrlGenomeDefinition",
     "UrlImport",
     "UrlList",
+    "UrlSourceRef",
+    "UrlTemplate",
     "VConcatSpec",
     "ValueDefNumber",
     "ValueDefString",
@@ -5962,7 +6743,6 @@ __all__ = [
     "VariableParameter",
     "VcfData",
     "ViewBackground",
-    "ViewBackgroundProps",
     "ViewConfig",
     "ViewOpacityDef",
     "ViewSpec",

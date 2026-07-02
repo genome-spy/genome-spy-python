@@ -35,7 +35,7 @@ packages = ["src/genome_spy"]
 artifacts = ["src/genome_spy/schema/genome-spy-schema.json"]
 
 [tool.genome-spy]
-core-version = "0.78.0"
+core-version = "0.80.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
