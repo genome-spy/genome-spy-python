@@ -12,11 +12,14 @@ from genome_spy._utils import JsonSpec, compact_json, is_mapping, pretty_json
 from genome_spy.channels import Channel, channel
 from genome_spy.schema import (
     ConcatSpec,
+    GenomeAxis,
     HConcatSpec,
     LayerSpec,
+    Legend,
     MARK_TYPES,
     Root,
     SCHEMA_VERSION,
+    Scale,
     UnitSpec,
     VConcatSpec,
 )
@@ -455,6 +458,30 @@ class _CompositionSpec(TopLevelSpec):
 
     def _with_properties(self, properties: dict[str, Any]) -> Self:
         return self.copy(deep=False, **properties)
+
+    def resolve_axis(self, **kwargs: GenomeAxis | dict[str, Any] | None) -> Self:
+        """Return a copy with merged composition-level axis resolutions."""
+        return self._merge_resolution("axes", kwargs)
+
+    def resolve_scale(self, **kwargs: Scale | dict[str, Any] | None) -> Self:
+        """Return a copy with merged composition-level scale resolutions."""
+        return self._merge_resolution("scales", kwargs)
+
+    def resolve_legend(self, **kwargs: Legend | dict[str, Any] | None) -> Self:
+        """Return a copy with merged composition-level legend resolutions."""
+        return self._merge_resolution("legends", kwargs)
+
+    def _merge_resolution(self, key: str, updates: dict[str, Any]) -> Self:
+        current = self._kwds.get(key, Undefined)
+        merged: dict[str, Any] = {} if current is Undefined else dict(current)
+        for name, value in updates.items():
+            if isinstance(value, SchemaBase):
+                merged[name] = value.to_dict(validate=False)
+            elif is_mapping(value):
+                merged[name] = dict(value)
+            else:
+                merged[name] = value
+        return self.copy(deep=False, **{key: merged})
 
 
 class LayerChart(_CompositionSpec, LayerSpec):

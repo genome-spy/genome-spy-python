@@ -400,6 +400,35 @@ def test_composition_charts_preserve_custom_schema_url_on_copy() -> None:
     assert layered.to_dict()["$schema"] == "https://example.test/schema.json"
 
 
+def test_composition_charts_expose_resolution_ergonomics() -> None:
+    one = (
+        gs.Chart(data=[{"x": 1, "species": "a"}])
+        .mark_point()
+        .encode(x="x:Q", color="species:N")
+    )
+    two = (
+        gs.Chart(data=[{"x": 2, "species": "b"}])
+        .mark_point()
+        .encode(x="x:Q", color="species:N")
+    )
+
+    chart = (
+        (one | two)
+        .resolve_scale(x=Scale(reverse=True), color={"scheme": "blues"})
+        .resolve_axis(x=GenomeAxis(title="Shared x"))
+        .resolve_legend(color=Legend(title="Species"))
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["scales"] == {
+        "x": {"reverse": True},
+        "color": {"scheme": "blues"},
+    }
+    assert spec["axes"] == {"x": {"title": "Shared x"}}
+    assert spec["legends"] == {"color": {"title": "Species"}}
+
+
 def test_concat_operators_match_genomespy_core_keys() -> None:
     left = gs.Chart(data=[{"x": 1}]).mark_point().encode(x="x:Q")
     right = gs.Chart(data=[{"x": 2}]).mark_point().encode(x="x:Q")
