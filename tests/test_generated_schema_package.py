@@ -6,10 +6,14 @@ import pytest
 
 from genome_spy.schema import (
     MARK_TYPES,
+    ColorSchemeConfig,
     SCHEMA_VERSION,
     ColorDef,
+    GenomeAxis,
+    Legend,
     PositionDef,
     Root,
+    Scale,
     UnitSpec,
     load_schema,
 )
@@ -57,6 +61,40 @@ def test_generated_wrappers_resolve_constructor_properties_through_refs() -> Non
     assert "legend" in color_signature.parameters
     assert "axis" in position_signature.parameters
     assert "pos" in position_signature.parameters
+
+
+def test_generated_wrappers_expose_fluent_with_methods() -> None:
+    legend = Legend().with_title("Species legend").with_padding(8)
+    scale = Scale().with_zero(False).with_scheme(ColorSchemeConfig(name="blues"))
+    axis = GenomeAxis().with_title("Position axis").with_grid(True)
+
+    assert legend.to_dict(validate=False) == {"title": "Species legend", "padding": 8}
+    assert scale.to_dict(validate=False) == {
+        "zero": False,
+        "scheme": {"name": "blues"},
+    }
+    assert axis.to_dict(validate=False) == {
+        "title": "Position axis",
+        "grid": True,
+    }
+
+
+def test_generated_wrappers_with_methods_merge_nested_helper_kwargs() -> None:
+    color = ColorDef(field="species", type="nominal").with_legend(title="Species")
+    position = PositionDef(field="x", type="quantitative").with_scale(
+        Scale(zero=False), padding=4
+    )
+
+    assert color.to_dict(validate=False) == {
+        "field": "species",
+        "type": "nominal",
+        "legend": {"title": "Species"},
+    }
+    assert position.to_dict(validate=False) == {
+        "field": "x",
+        "type": "quantitative",
+        "scale": {"zero": False, "padding": 4},
+    }
 
 
 def test_generated_schema_wrappers_validate_by_default() -> None:

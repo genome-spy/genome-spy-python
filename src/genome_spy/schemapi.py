@@ -76,6 +76,26 @@ class SchemaBase:
         merged = {**values, **kwds}
         return self.__class__(**merged)
 
+    def _with_property(
+        self, name: str, value: Any = Undefined, /, **kwargs: Any
+    ) -> Self:
+        """Return a shallow copy with one schema property updated."""
+        if kwargs:
+            if value is Undefined:
+                merged_value: Any = dict(kwargs)
+            elif value is None:
+                raise TypeError(f"Cannot merge keyword properties into null {name!r}.")
+            elif isinstance(value, SchemaBase):
+                merged_value = value.to_dict(validate=False)
+                merged_value.update(kwargs)
+            elif isinstance(value, dict):
+                merged_value = dict(value)
+                merged_value.update(kwargs)
+            else:
+                raise TypeError(f"Unsupported nested {name!r} value: {type(value)!r}")
+            return self.copy(deep=False, **{name: merged_value})
+        return self.copy(deep=False, **{name: value})
+
     def to_dict(self, *, validate: bool = True) -> dict[str, Any]:
         """Serialize this schema wrapper to a JSON-compatible dictionary."""
         result = {

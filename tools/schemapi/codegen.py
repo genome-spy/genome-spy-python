@@ -328,6 +328,19 @@ def _resolved_identifier_properties(
     return tuple(sorted(_resolve_properties(schema, definitions)))
 
 
+def _resolved_property_refs(
+    schema: dict[str, Any], definitions: dict[str, Any]
+) -> dict[str, str | None]:
+    properties = _resolve_properties(schema, definitions)
+    return {
+        name: _class_name(ref_name)
+        if (ref_name := _first_ref_name(property_schema))
+        else None
+        for name, property_schema in properties.items()
+        if isinstance(property_schema, dict)
+    }
+
+
 def _schema_class_source(
     class_name: str,
     definition: SchemaDefinition,
@@ -345,6 +358,15 @@ def _schema_class_source(
 
     assignments = ", ".join(f"{name}={name}" for name in arg_names)
     body = f"super().__init__({assignments})" if assignments else "super().__init__()"
+    property_refs = _resolved_property_refs(definition.schema, definitions_map)
+    methods = "".join(
+        _schema_property_method_source(
+            class_name,
+            property_name,
+            nested_schema_class_name=property_refs.get(property_name),
+        )
+        for property_name in arg_names
+    )
 
     return (
         f"class {class_name}(GenomeSpySchema):\n"
@@ -354,6 +376,7 @@ def _schema_class_source(
         f"        {body}\n"
         f"        if kwds:\n"
         f"            self._kwds.update(kwds)\n"
+        f"{methods}"
     )
 
 
@@ -402,6 +425,33 @@ def _channel_nested_setter_source(
         f"    ) -> {channel_class_name}:\n"
         f'        """Return a channel with a ``{schema_class_name}`` {property_name}."""\n'
         f"        return self._with_nested({property_name!r}, value, **kwargs)\n"
+    )
+
+
+def _schema_property_method_source(
+    class_name: str,
+    property_name: str,
+    *,
+    nested_schema_class_name: str | None,
+) -> str:
+    method_name = f"with_{property_name}"
+    if nested_schema_class_name is None:
+        return (
+            "\n"
+            f"    def {method_name}(self, value: Any) -> {class_name}:\n"
+            f'        """Return a copy with ``{property_name}`` updated."""\n'
+            f"        return self._with_property({property_name!r}, value)\n"
+        )
+    return (
+        "\n"
+        f"    def {method_name}(\n"
+        f"        self,\n"
+        f"        value: {nested_schema_class_name} | dict[str, Any] | None | Any = Undefined,\n"
+        f"        /,\n"
+        f"        **kwargs: Any,\n"
+        f"    ) -> {class_name}:\n"
+        f'        """Return a copy with a ``{nested_schema_class_name}`` {property_name}."""\n'
+        f"        return self._with_property({property_name!r}, value, **kwargs)\n"
     )
 
 

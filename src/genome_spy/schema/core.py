@@ -67,6 +67,26 @@ class AggregateParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> AggregateParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_fields(self, value: Any) -> AggregateParams:
+        """Return a copy with ``fields`` updated."""
+        return self._with_property("fields", value)
+
+    def with_groupby(self, value: Any) -> AggregateParams:
+        """Return a copy with ``groupby`` updated."""
+        return self._with_property("groupby", value)
+
+    def with_ops(self, value: Any) -> AggregateParams:
+        """Return a copy with ``ops`` updated."""
+        return self._with_property("ops", value)
+
+    def with_type(self, value: Any) -> AggregateParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class Align(GenomeSpySchema):
     """Generated wrapper for ``Align``."""
@@ -194,6 +214,255 @@ class Axis(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_domain(self, value: Any) -> Axis:
+        """Return a copy with ``domain`` updated."""
+        return self._with_property("domain", value)
+
+    def with_domainCap(self, value: Any) -> Axis:
+        """Return a copy with ``domainCap`` updated."""
+        return self._with_property("domainCap", value)
+
+    def with_domainColor(self, value: Any) -> Axis:
+        """Return a copy with ``domainColor`` updated."""
+        return self._with_property("domainColor", value)
+
+    def with_domainDash(self, value: Any) -> Axis:
+        """Return a copy with ``domainDash`` updated."""
+        return self._with_property("domainDash", value)
+
+    def with_domainDashOffset(self, value: Any) -> Axis:
+        """Return a copy with ``domainDashOffset`` updated."""
+        return self._with_property("domainDashOffset", value)
+
+    def with_domainWidth(self, value: Any) -> Axis:
+        """Return a copy with ``domainWidth`` updated."""
+        return self._with_property("domainWidth", value)
+
+    def with_format(self, value: Any) -> Axis:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_grid(self, value: Any) -> Axis:
+        """Return a copy with ``grid`` updated."""
+        return self._with_property("grid", value)
+
+    def with_gridCap(self, value: Any) -> Axis:
+        """Return a copy with ``gridCap`` updated."""
+        return self._with_property("gridCap", value)
+
+    def with_gridColor(self, value: Any) -> Axis:
+        """Return a copy with ``gridColor`` updated."""
+        return self._with_property("gridColor", value)
+
+    def with_gridDash(self, value: Any) -> Axis:
+        """Return a copy with ``gridDash`` updated."""
+        return self._with_property("gridDash", value)
+
+    def with_gridDashOffset(self, value: Any) -> Axis:
+        """Return a copy with ``gridDashOffset`` updated."""
+        return self._with_property("gridDashOffset", value)
+
+    def with_gridOpacity(self, value: Any) -> Axis:
+        """Return a copy with ``gridOpacity`` updated."""
+        return self._with_property("gridOpacity", value)
+
+    def with_gridWidth(self, value: Any) -> Axis:
+        """Return a copy with ``gridWidth`` updated."""
+        return self._with_property("gridWidth", value)
+
+    def with_labelAlign(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Axis:
+        """Return a copy with a ``Align`` labelAlign."""
+        return self._with_property("labelAlign", value, **kwargs)
+
+    def with_labelAngle(self, value: Any) -> Axis:
+        """Return a copy with ``labelAngle`` updated."""
+        return self._with_property("labelAngle", value)
+
+    def with_labelBaseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Axis:
+        """Return a copy with a ``Baseline`` labelBaseline."""
+        return self._with_property("labelBaseline", value, **kwargs)
+
+    def with_labelColor(self, value: Any) -> Axis:
+        """Return a copy with ``labelColor`` updated."""
+        return self._with_property("labelColor", value)
+
+    def with_labelFont(self, value: Any) -> Axis:
+        """Return a copy with ``labelFont`` updated."""
+        return self._with_property("labelFont", value)
+
+    def with_labelFontSize(self, value: Any) -> Axis:
+        """Return a copy with ``labelFontSize`` updated."""
+        return self._with_property("labelFontSize", value)
+
+    def with_labelFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Axis:
+        """Return a copy with a ``FontStyle`` labelFontStyle."""
+        return self._with_property("labelFontStyle", value, **kwargs)
+
+    def with_labelFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Axis:
+        """Return a copy with a ``FontWeight`` labelFontWeight."""
+        return self._with_property("labelFontWeight", value, **kwargs)
+
+    def with_labelLimit(self, value: Any) -> Axis:
+        """Return a copy with ``labelLimit`` updated."""
+        return self._with_property("labelLimit", value)
+
+    def with_labelPadding(self, value: Any) -> Axis:
+        """Return a copy with ``labelPadding`` updated."""
+        return self._with_property("labelPadding", value)
+
+    def with_labels(self, value: Any) -> Axis:
+        """Return a copy with ``labels`` updated."""
+        return self._with_property("labels", value)
+
+    def with_maxExtent(self, value: Any) -> Axis:
+        """Return a copy with ``maxExtent`` updated."""
+        return self._with_property("maxExtent", value)
+
+    def with_minExtent(self, value: Any) -> Axis:
+        """Return a copy with ``minExtent`` updated."""
+        return self._with_property("minExtent", value)
+
+    def with_offset(self, value: Any) -> Axis:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_orient(
+        self,
+        value: AxisOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Axis:
+        """Return a copy with a ``AxisOrient`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_placement(
+        self,
+        value: AxisPlacement | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Axis:
+        """Return a copy with a ``AxisPlacement`` placement."""
+        return self._with_property("placement", value, **kwargs)
+
+    def with_style(self, value: Any) -> Axis:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tickCap(self, value: Any) -> Axis:
+        """Return a copy with ``tickCap`` updated."""
+        return self._with_property("tickCap", value)
+
+    def with_tickColor(self, value: Any) -> Axis:
+        """Return a copy with ``tickColor`` updated."""
+        return self._with_property("tickColor", value)
+
+    def with_tickCount(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Axis:
+        """Return a copy with a ``ExprRef`` tickCount."""
+        return self._with_property("tickCount", value, **kwargs)
+
+    def with_tickDash(self, value: Any) -> Axis:
+        """Return a copy with ``tickDash`` updated."""
+        return self._with_property("tickDash", value)
+
+    def with_tickDashOffset(self, value: Any) -> Axis:
+        """Return a copy with ``tickDashOffset`` updated."""
+        return self._with_property("tickDashOffset", value)
+
+    def with_tickMinStep(self, value: Any) -> Axis:
+        """Return a copy with ``tickMinStep`` updated."""
+        return self._with_property("tickMinStep", value)
+
+    def with_tickSize(self, value: Any) -> Axis:
+        """Return a copy with ``tickSize`` updated."""
+        return self._with_property("tickSize", value)
+
+    def with_tickWidth(self, value: Any) -> Axis:
+        """Return a copy with ``tickWidth`` updated."""
+        return self._with_property("tickWidth", value)
+
+    def with_ticks(self, value: Any) -> Axis:
+        """Return a copy with ``ticks`` updated."""
+        return self._with_property("ticks", value)
+
+    def with_title(self, value: Any) -> Axis:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_titleColor(self, value: Any) -> Axis:
+        """Return a copy with ``titleColor`` updated."""
+        return self._with_property("titleColor", value)
+
+    def with_titleFit(self, value: Any) -> Axis:
+        """Return a copy with ``titleFit`` updated."""
+        return self._with_property("titleFit", value)
+
+    def with_titleFont(self, value: Any) -> Axis:
+        """Return a copy with ``titleFont`` updated."""
+        return self._with_property("titleFont", value)
+
+    def with_titleFontSize(self, value: Any) -> Axis:
+        """Return a copy with ``titleFontSize`` updated."""
+        return self._with_property("titleFontSize", value)
+
+    def with_titleFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Axis:
+        """Return a copy with a ``FontStyle`` titleFontStyle."""
+        return self._with_property("titleFontStyle", value, **kwargs)
+
+    def with_titleFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Axis:
+        """Return a copy with a ``FontWeight`` titleFontWeight."""
+        return self._with_property("titleFontWeight", value, **kwargs)
+
+    def with_titleOpacity(self, value: Any) -> Axis:
+        """Return a copy with ``titleOpacity`` updated."""
+        return self._with_property("titleOpacity", value)
+
+    def with_titlePadding(self, value: Any) -> Axis:
+        """Return a copy with ``titlePadding`` updated."""
+        return self._with_property("titlePadding", value)
+
+    def with_values(self, value: Any) -> Axis:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
+
+    def with_zindex(self, value: Any) -> Axis:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
 
 
 class AxisConfig(GenomeSpySchema):
@@ -358,6 +627,362 @@ class AxisConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_chromGrid(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromGrid`` updated."""
+        return self._with_property("chromGrid", value)
+
+    def with_chromGridCap(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromGridCap`` updated."""
+        return self._with_property("chromGridCap", value)
+
+    def with_chromGridColor(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromGridColor`` updated."""
+        return self._with_property("chromGridColor", value)
+
+    def with_chromGridDash(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromGridDash`` updated."""
+        return self._with_property("chromGridDash", value)
+
+    def with_chromGridDashOffset(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromGridDashOffset`` updated."""
+        return self._with_property("chromGridDashOffset", value)
+
+    def with_chromGridFillEven(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromGridFillEven`` updated."""
+        return self._with_property("chromGridFillEven", value)
+
+    def with_chromGridFillOdd(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromGridFillOdd`` updated."""
+        return self._with_property("chromGridFillOdd", value)
+
+    def with_chromGridOpacity(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromGridOpacity`` updated."""
+        return self._with_property("chromGridOpacity", value)
+
+    def with_chromGridWidth(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromGridWidth`` updated."""
+        return self._with_property("chromGridWidth", value)
+
+    def with_chromLabelAlign(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``Align`` chromLabelAlign."""
+        return self._with_property("chromLabelAlign", value, **kwargs)
+
+    def with_chromLabelColor(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromLabelColor`` updated."""
+        return self._with_property("chromLabelColor", value)
+
+    def with_chromLabelFont(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromLabelFont`` updated."""
+        return self._with_property("chromLabelFont", value)
+
+    def with_chromLabelFontSize(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromLabelFontSize`` updated."""
+        return self._with_property("chromLabelFontSize", value)
+
+    def with_chromLabelFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``FontStyle`` chromLabelFontStyle."""
+        return self._with_property("chromLabelFontStyle", value, **kwargs)
+
+    def with_chromLabelFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``FontWeight`` chromLabelFontWeight."""
+        return self._with_property("chromLabelFontWeight", value, **kwargs)
+
+    def with_chromLabelPadding(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromLabelPadding`` updated."""
+        return self._with_property("chromLabelPadding", value)
+
+    def with_chromLabels(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromLabels`` updated."""
+        return self._with_property("chromLabels", value)
+
+    def with_chromTickColor(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromTickColor`` updated."""
+        return self._with_property("chromTickColor", value)
+
+    def with_chromTickDash(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromTickDash`` updated."""
+        return self._with_property("chromTickDash", value)
+
+    def with_chromTickDashOffset(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromTickDashOffset`` updated."""
+        return self._with_property("chromTickDashOffset", value)
+
+    def with_chromTickSize(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromTickSize`` updated."""
+        return self._with_property("chromTickSize", value)
+
+    def with_chromTickWidth(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromTickWidth`` updated."""
+        return self._with_property("chromTickWidth", value)
+
+    def with_chromTicks(self, value: Any) -> AxisConfig:
+        """Return a copy with ``chromTicks`` updated."""
+        return self._with_property("chromTicks", value)
+
+    def with_domain(self, value: Any) -> AxisConfig:
+        """Return a copy with ``domain`` updated."""
+        return self._with_property("domain", value)
+
+    def with_domainCap(self, value: Any) -> AxisConfig:
+        """Return a copy with ``domainCap`` updated."""
+        return self._with_property("domainCap", value)
+
+    def with_domainColor(self, value: Any) -> AxisConfig:
+        """Return a copy with ``domainColor`` updated."""
+        return self._with_property("domainColor", value)
+
+    def with_domainDash(self, value: Any) -> AxisConfig:
+        """Return a copy with ``domainDash`` updated."""
+        return self._with_property("domainDash", value)
+
+    def with_domainDashOffset(self, value: Any) -> AxisConfig:
+        """Return a copy with ``domainDashOffset`` updated."""
+        return self._with_property("domainDashOffset", value)
+
+    def with_domainWidth(self, value: Any) -> AxisConfig:
+        """Return a copy with ``domainWidth`` updated."""
+        return self._with_property("domainWidth", value)
+
+    def with_format(self, value: Any) -> AxisConfig:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_grid(self, value: Any) -> AxisConfig:
+        """Return a copy with ``grid`` updated."""
+        return self._with_property("grid", value)
+
+    def with_gridCap(self, value: Any) -> AxisConfig:
+        """Return a copy with ``gridCap`` updated."""
+        return self._with_property("gridCap", value)
+
+    def with_gridColor(self, value: Any) -> AxisConfig:
+        """Return a copy with ``gridColor`` updated."""
+        return self._with_property("gridColor", value)
+
+    def with_gridDash(self, value: Any) -> AxisConfig:
+        """Return a copy with ``gridDash`` updated."""
+        return self._with_property("gridDash", value)
+
+    def with_gridDashOffset(self, value: Any) -> AxisConfig:
+        """Return a copy with ``gridDashOffset`` updated."""
+        return self._with_property("gridDashOffset", value)
+
+    def with_gridOpacity(self, value: Any) -> AxisConfig:
+        """Return a copy with ``gridOpacity`` updated."""
+        return self._with_property("gridOpacity", value)
+
+    def with_gridWidth(self, value: Any) -> AxisConfig:
+        """Return a copy with ``gridWidth`` updated."""
+        return self._with_property("gridWidth", value)
+
+    def with_labelAlign(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``Align`` labelAlign."""
+        return self._with_property("labelAlign", value, **kwargs)
+
+    def with_labelAngle(self, value: Any) -> AxisConfig:
+        """Return a copy with ``labelAngle`` updated."""
+        return self._with_property("labelAngle", value)
+
+    def with_labelBaseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``Baseline`` labelBaseline."""
+        return self._with_property("labelBaseline", value, **kwargs)
+
+    def with_labelColor(self, value: Any) -> AxisConfig:
+        """Return a copy with ``labelColor`` updated."""
+        return self._with_property("labelColor", value)
+
+    def with_labelFont(self, value: Any) -> AxisConfig:
+        """Return a copy with ``labelFont`` updated."""
+        return self._with_property("labelFont", value)
+
+    def with_labelFontSize(self, value: Any) -> AxisConfig:
+        """Return a copy with ``labelFontSize`` updated."""
+        return self._with_property("labelFontSize", value)
+
+    def with_labelFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``FontStyle`` labelFontStyle."""
+        return self._with_property("labelFontStyle", value, **kwargs)
+
+    def with_labelFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``FontWeight`` labelFontWeight."""
+        return self._with_property("labelFontWeight", value, **kwargs)
+
+    def with_labelLimit(self, value: Any) -> AxisConfig:
+        """Return a copy with ``labelLimit`` updated."""
+        return self._with_property("labelLimit", value)
+
+    def with_labelPadding(self, value: Any) -> AxisConfig:
+        """Return a copy with ``labelPadding`` updated."""
+        return self._with_property("labelPadding", value)
+
+    def with_labels(self, value: Any) -> AxisConfig:
+        """Return a copy with ``labels`` updated."""
+        return self._with_property("labels", value)
+
+    def with_maxExtent(self, value: Any) -> AxisConfig:
+        """Return a copy with ``maxExtent`` updated."""
+        return self._with_property("maxExtent", value)
+
+    def with_minExtent(self, value: Any) -> AxisConfig:
+        """Return a copy with ``minExtent`` updated."""
+        return self._with_property("minExtent", value)
+
+    def with_offset(self, value: Any) -> AxisConfig:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_orient(
+        self,
+        value: AxisOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``AxisOrient`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_placement(
+        self,
+        value: AxisPlacement | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``AxisPlacement`` placement."""
+        return self._with_property("placement", value, **kwargs)
+
+    def with_style(self, value: Any) -> AxisConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tickCap(self, value: Any) -> AxisConfig:
+        """Return a copy with ``tickCap`` updated."""
+        return self._with_property("tickCap", value)
+
+    def with_tickColor(self, value: Any) -> AxisConfig:
+        """Return a copy with ``tickColor`` updated."""
+        return self._with_property("tickColor", value)
+
+    def with_tickCount(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``ExprRef`` tickCount."""
+        return self._with_property("tickCount", value, **kwargs)
+
+    def with_tickDash(self, value: Any) -> AxisConfig:
+        """Return a copy with ``tickDash`` updated."""
+        return self._with_property("tickDash", value)
+
+    def with_tickDashOffset(self, value: Any) -> AxisConfig:
+        """Return a copy with ``tickDashOffset`` updated."""
+        return self._with_property("tickDashOffset", value)
+
+    def with_tickMinStep(self, value: Any) -> AxisConfig:
+        """Return a copy with ``tickMinStep`` updated."""
+        return self._with_property("tickMinStep", value)
+
+    def with_tickSize(self, value: Any) -> AxisConfig:
+        """Return a copy with ``tickSize`` updated."""
+        return self._with_property("tickSize", value)
+
+    def with_tickWidth(self, value: Any) -> AxisConfig:
+        """Return a copy with ``tickWidth`` updated."""
+        return self._with_property("tickWidth", value)
+
+    def with_ticks(self, value: Any) -> AxisConfig:
+        """Return a copy with ``ticks`` updated."""
+        return self._with_property("ticks", value)
+
+    def with_title(self, value: Any) -> AxisConfig:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_titleColor(self, value: Any) -> AxisConfig:
+        """Return a copy with ``titleColor`` updated."""
+        return self._with_property("titleColor", value)
+
+    def with_titleFit(self, value: Any) -> AxisConfig:
+        """Return a copy with ``titleFit`` updated."""
+        return self._with_property("titleFit", value)
+
+    def with_titleFont(self, value: Any) -> AxisConfig:
+        """Return a copy with ``titleFont`` updated."""
+        return self._with_property("titleFont", value)
+
+    def with_titleFontSize(self, value: Any) -> AxisConfig:
+        """Return a copy with ``titleFontSize`` updated."""
+        return self._with_property("titleFontSize", value)
+
+    def with_titleFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``FontStyle`` titleFontStyle."""
+        return self._with_property("titleFontStyle", value, **kwargs)
+
+    def with_titleFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisConfig:
+        """Return a copy with a ``FontWeight`` titleFontWeight."""
+        return self._with_property("titleFontWeight", value, **kwargs)
+
+    def with_titleOpacity(self, value: Any) -> AxisConfig:
+        """Return a copy with ``titleOpacity`` updated."""
+        return self._with_property("titleOpacity", value)
+
+    def with_titlePadding(self, value: Any) -> AxisConfig:
+        """Return a copy with ``titlePadding`` updated."""
+        return self._with_property("titlePadding", value)
+
+    def with_values(self, value: Any) -> AxisConfig:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
+
+    def with_zindex(self, value: Any) -> AxisConfig:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
+
 
 class AxisGenomeData(GenomeSpySchema):
     """Generated wrapper for ``AxisGenomeData``."""
@@ -370,6 +995,19 @@ class AxisGenomeData(GenomeSpySchema):
         super().__init__(channel=channel, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisGenomeData:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_type(self, value: Any) -> AxisGenomeData:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class AxisOrient(GenomeSpySchema):
@@ -410,6 +1048,28 @@ class AxisTicksData(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axis(
+        self,
+        value: Axis | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisTicksData:
+        """Return a copy with a ``Axis`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> AxisTicksData:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_type(self, value: Any) -> AxisTicksData:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class BamData(GenomeSpySchema):
     """Generated wrapper for ``BamData``."""
@@ -441,6 +1101,63 @@ class BamData(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BamData:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_debounce(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BamData:
+        """Return a copy with a ``ExprRef`` debounce."""
+        return self._with_property("debounce", value, **kwargs)
+
+    def with_debounceDomainChange(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BamData:
+        """Return a copy with a ``ExprRef`` debounceDomainChange."""
+        return self._with_property("debounceDomainChange", value, **kwargs)
+
+    def with_debounceMode(self, value: Any) -> BamData:
+        """Return a copy with ``debounceMode`` updated."""
+        return self._with_property("debounceMode", value)
+
+    def with_indexUrl(
+        self,
+        value: IndexUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BamData:
+        """Return a copy with a ``IndexUrlSourceRef`` indexUrl."""
+        return self._with_property("indexUrl", value, **kwargs)
+
+    def with_type(self, value: Any) -> BamData:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_url(
+        self,
+        value: SingleUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BamData:
+        """Return a copy with a ``SingleUrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
+    def with_windowSize(self, value: Any) -> BamData:
+        """Return a copy with ``windowSize`` updated."""
+        return self._with_property("windowSize", value)
+
 
 class Baseline(GenomeSpySchema):
     """Generated wrapper for ``Baseline``."""
@@ -465,6 +1182,19 @@ class BedDataFormat(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_parse(
+        self,
+        value: Parse | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BedDataFormat:
+        """Return a copy with a ``Parse`` parse."""
+        return self._with_property("parse", value, **kwargs)
+
+    def with_type(self, value: Any) -> BedDataFormat:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class BedpeDataFormat(GenomeSpySchema):
     """Generated wrapper for ``BedpeDataFormat``."""
@@ -481,6 +1211,23 @@ class BedpeDataFormat(GenomeSpySchema):
         super().__init__(columns=columns, parse=parse, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_columns(self, value: Any) -> BedpeDataFormat:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_parse(
+        self,
+        value: Parse | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BedpeDataFormat:
+        """Return a copy with a ``Parse`` parse."""
+        return self._with_property("parse", value, **kwargs)
+
+    def with_type(self, value: Any) -> BedpeDataFormat:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class BigBedData(GenomeSpySchema):
@@ -511,6 +1258,59 @@ class BigBedData(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigBedData:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_debounce(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigBedData:
+        """Return a copy with a ``ExprRef`` debounce."""
+        return self._with_property("debounce", value, **kwargs)
+
+    def with_debounceDomainChange(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigBedData:
+        """Return a copy with a ``ExprRef`` debounceDomainChange."""
+        return self._with_property("debounceDomainChange", value, **kwargs)
+
+    def with_debounceMode(self, value: Any) -> BigBedData:
+        """Return a copy with ``debounceMode`` updated."""
+        return self._with_property("debounceMode", value)
+
+    def with_type(self, value: Any) -> BigBedData:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_url(
+        self,
+        value: MultiUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigBedData:
+        """Return a copy with a ``MultiUrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
+    def with_windowSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigBedData:
+        """Return a copy with a ``ExprRef`` windowSize."""
+        return self._with_property("windowSize", value, **kwargs)
+
 
 class BigWigData(GenomeSpySchema):
     """Generated wrapper for ``BigWigData``."""
@@ -540,6 +1340,59 @@ class BigWigData(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigWigData:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_debounce(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigWigData:
+        """Return a copy with a ``ExprRef`` debounce."""
+        return self._with_property("debounce", value, **kwargs)
+
+    def with_debounceDomainChange(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigWigData:
+        """Return a copy with a ``ExprRef`` debounceDomainChange."""
+        return self._with_property("debounceDomainChange", value, **kwargs)
+
+    def with_debounceMode(self, value: Any) -> BigWigData:
+        """Return a copy with ``debounceMode`` updated."""
+        return self._with_property("debounceMode", value)
+
+    def with_pixelsPerBin(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigWigData:
+        """Return a copy with a ``ExprRef`` pixelsPerBin."""
+        return self._with_property("pixelsPerBin", value, **kwargs)
+
+    def with_type(self, value: Any) -> BigWigData:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_url(
+        self,
+        value: MultiUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BigWigData:
+        """Return a copy with a ``MultiUrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
 
 class BindCheckbox(GenomeSpySchema):
     """Generated wrapper for ``BindCheckbox``."""
@@ -559,6 +1412,22 @@ class BindCheckbox(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_debounce(self, value: Any) -> BindCheckbox:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
+
+    def with_description(self, value: Any) -> BindCheckbox:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_input(self, value: Any) -> BindCheckbox:
+        """Return a copy with ``input`` updated."""
+        return self._with_property("input", value)
+
+    def with_name(self, value: Any) -> BindCheckbox:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
 
 
 class BindInput(GenomeSpySchema):
@@ -587,6 +1456,30 @@ class BindInput(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_autocomplete(self, value: Any) -> BindInput:
+        """Return a copy with ``autocomplete`` updated."""
+        return self._with_property("autocomplete", value)
+
+    def with_debounce(self, value: Any) -> BindInput:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
+
+    def with_description(self, value: Any) -> BindInput:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_input(self, value: Any) -> BindInput:
+        """Return a copy with ``input`` updated."""
+        return self._with_property("input", value)
+
+    def with_name(self, value: Any) -> BindInput:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_placeholder(self, value: Any) -> BindInput:
+        """Return a copy with ``placeholder`` updated."""
+        return self._with_property("placeholder", value)
+
 
 class BindRadioSelect(GenomeSpySchema):
     """Generated wrapper for ``BindRadioSelect``."""
@@ -613,6 +1506,30 @@ class BindRadioSelect(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_debounce(self, value: Any) -> BindRadioSelect:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
+
+    def with_description(self, value: Any) -> BindRadioSelect:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_input(self, value: Any) -> BindRadioSelect:
+        """Return a copy with ``input`` updated."""
+        return self._with_property("input", value)
+
+    def with_labels(self, value: Any) -> BindRadioSelect:
+        """Return a copy with ``labels`` updated."""
+        return self._with_property("labels", value)
+
+    def with_name(self, value: Any) -> BindRadioSelect:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_options(self, value: Any) -> BindRadioSelect:
+        """Return a copy with ``options`` updated."""
+        return self._with_property("options", value)
 
 
 class BindRange(GenomeSpySchema):
@@ -642,6 +1559,34 @@ class BindRange(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_debounce(self, value: Any) -> BindRange:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
+
+    def with_description(self, value: Any) -> BindRange:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_input(self, value: Any) -> BindRange:
+        """Return a copy with ``input`` updated."""
+        return self._with_property("input", value)
+
+    def with_max(self, value: Any) -> BindRange:
+        """Return a copy with ``max`` updated."""
+        return self._with_property("max", value)
+
+    def with_min(self, value: Any) -> BindRange:
+        """Return a copy with ``min`` updated."""
+        return self._with_property("min", value)
+
+    def with_name(self, value: Any) -> BindRange:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_step(self, value: Any) -> BindRange:
+        """Return a copy with ``step`` updated."""
+        return self._with_property("step", value)
 
 
 class Binding(GenomeSpySchema):
@@ -679,6 +1624,50 @@ class Binding(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_autocomplete(self, value: Any) -> Binding:
+        """Return a copy with ``autocomplete`` updated."""
+        return self._with_property("autocomplete", value)
+
+    def with_debounce(self, value: Any) -> Binding:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
+
+    def with_description(self, value: Any) -> Binding:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_input(self, value: Any) -> Binding:
+        """Return a copy with ``input`` updated."""
+        return self._with_property("input", value)
+
+    def with_labels(self, value: Any) -> Binding:
+        """Return a copy with ``labels`` updated."""
+        return self._with_property("labels", value)
+
+    def with_max(self, value: Any) -> Binding:
+        """Return a copy with ``max`` updated."""
+        return self._with_property("max", value)
+
+    def with_min(self, value: Any) -> Binding:
+        """Return a copy with ``min`` updated."""
+        return self._with_property("min", value)
+
+    def with_name(self, value: Any) -> Binding:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_options(self, value: Any) -> Binding:
+        """Return a copy with ``options`` updated."""
+        return self._with_property("options", value)
+
+    def with_placeholder(self, value: Any) -> Binding:
+        """Return a copy with ``placeholder`` updated."""
+        return self._with_property("placeholder", value)
+
+    def with_step(self, value: Any) -> Binding:
+        """Return a copy with ``step`` updated."""
+        return self._with_property("step", value)
 
 
 class BrushConfig(GenomeSpySchema):
@@ -722,6 +1711,92 @@ class BrushConfig(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_clip(self, value: Any) -> BrushConfig:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BrushConfig:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_fill(self, value: Any) -> BrushConfig:
+        """Return a copy with ``fill`` updated."""
+        return self._with_property("fill", value)
+
+    def with_fillOpacity(self, value: Any) -> BrushConfig:
+        """Return a copy with ``fillOpacity`` updated."""
+        return self._with_property("fillOpacity", value)
+
+    def with_measure(self, value: Any) -> BrushConfig:
+        """Return a copy with ``measure`` updated."""
+        return self._with_property("measure", value)
+
+    def with_shadowBlur(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BrushConfig:
+        """Return a copy with a ``ExprRef`` shadowBlur."""
+        return self._with_property("shadowBlur", value, **kwargs)
+
+    def with_shadowColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BrushConfig:
+        """Return a copy with a ``ExprRef`` shadowColor."""
+        return self._with_property("shadowColor", value, **kwargs)
+
+    def with_shadowOffsetX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BrushConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetX."""
+        return self._with_property("shadowOffsetX", value, **kwargs)
+
+    def with_shadowOffsetY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BrushConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetY."""
+        return self._with_property("shadowOffsetY", value, **kwargs)
+
+    def with_shadowOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> BrushConfig:
+        """Return a copy with a ``ExprRef`` shadowOpacity."""
+        return self._with_property("shadowOpacity", value, **kwargs)
+
+    def with_stroke(self, value: Any) -> BrushConfig:
+        """Return a copy with ``stroke`` updated."""
+        return self._with_property("stroke", value)
+
+    def with_strokeOpacity(self, value: Any) -> BrushConfig:
+        """Return a copy with ``strokeOpacity`` updated."""
+        return self._with_property("strokeOpacity", value)
+
+    def with_strokeWidth(self, value: Any) -> BrushConfig:
+        """Return a copy with ``strokeWidth`` updated."""
+        return self._with_property("strokeWidth", value)
+
+    def with_zindex(self, value: Any) -> BrushConfig:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
 
 
 class BuiltInThemeName(GenomeSpySchema):
@@ -782,6 +1857,75 @@ class ChromPosDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axis(
+        self,
+        value: GenomeAxis | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ChromPosDef:
+        """Return a copy with a ``GenomeAxis`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_band(self, value: Any) -> ChromPosDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_chrom(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ChromPosDef:
+        """Return a copy with a ``FieldName`` chrom."""
+        return self._with_property("chrom", value, **kwargs)
+
+    def with_description(self, value: Any) -> ChromPosDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ChromPosDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_offset(self, value: Any) -> ChromPosDef:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_pos(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ChromPosDef:
+        """Return a copy with a ``FieldName`` pos."""
+        return self._with_property("pos", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ChromPosDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ChromPosDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ChromPosDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(self, value: Any) -> ChromPosDef:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class ChromosomalLocus(GenomeSpySchema):
     """Generated wrapper for ``ChromosomalLocus``."""
@@ -794,6 +1938,14 @@ class ChromosomalLocus(GenomeSpySchema):
         super().__init__(chrom=chrom, pos=pos)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_chrom(self, value: Any) -> ChromosomalLocus:
+        """Return a copy with ``chrom`` updated."""
+        return self._with_property("chrom", value)
+
+    def with_pos(self, value: Any) -> ChromosomalLocus:
+        """Return a copy with ``pos`` updated."""
+        return self._with_property("pos", value)
 
 
 class CollectParams(GenomeSpySchema):
@@ -812,6 +1964,27 @@ class CollectParams(GenomeSpySchema):
         super().__init__(description=description, groupby=groupby, sort=sort, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> CollectParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_groupby(self, value: Any) -> CollectParams:
+        """Return a copy with ``groupby`` updated."""
+        return self._with_property("groupby", value)
+
+    def with_sort(
+        self,
+        value: CompareParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CollectParams:
+        """Return a copy with a ``CompareParams`` sort."""
+        return self._with_property("sort", value, **kwargs)
+
+    def with_type(self, value: Any) -> CollectParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class ColorDef(GenomeSpySchema):
@@ -854,6 +2027,96 @@ class ColorDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> ColorDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_condition(
+        self,
+        value: ConditionalMarkPropFieldDefType
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ColorDef:
+        """Return a copy with a ``ConditionalMarkPropFieldDefType`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ColorDef:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> ColorDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ColorDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(self, value: Any) -> ColorDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> ColorDef:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ColorDef:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ColorDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ColorDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ColorDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ColorDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ColorDef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class ColorSchemeConfig(GenomeSpySchema):
     """Generated wrapper for ``ColorSchemeConfig``."""
@@ -871,6 +2134,18 @@ class ColorSchemeConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_count(self, value: Any) -> ColorSchemeConfig:
+        """Return a copy with ``count`` updated."""
+        return self._with_property("count", value)
+
+    def with_extent(self, value: Any) -> ColorSchemeConfig:
+        """Return a copy with ``extent`` updated."""
+        return self._with_property("extent", value)
+
+    def with_name(self, value: Any) -> ColorSchemeConfig:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
 
 class CompareParams(GenomeSpySchema):
     """Generated wrapper for ``CompareParams``."""
@@ -883,6 +2158,24 @@ class CompareParams(GenomeSpySchema):
         super().__init__(field=field, order=order)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_field(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CompareParams:
+        """Return a copy with a ``Field`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_order(
+        self,
+        value: SortOrder | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CompareParams:
+        """Return a copy with a ``SortOrder`` order."""
+        return self._with_property("order", value, **kwargs)
 
 
 class ComplexDomain(GenomeSpySchema):
@@ -962,6 +2255,165 @@ class ConcatSpec(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axes(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``axes`` updated."""
+        return self._with_property("axes", value)
+
+    def with_baseUrl(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``baseUrl`` updated."""
+        return self._with_property("baseUrl", value)
+
+    def with_columns(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_concat(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``concat`` updated."""
+        return self._with_property("concat", value)
+
+    def with_config(
+        self,
+        value: GenomeSpyConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``GenomeSpyConfig`` config."""
+        return self._with_property("config", value, **kwargs)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_data(
+        self,
+        value: Data | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``Data`` data."""
+        return self._with_property("data", value, **kwargs)
+
+    def with_description(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_encoding(
+        self,
+        value: Encoding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``Encoding`` encoding."""
+        return self._with_property("encoding", value, **kwargs)
+
+    def with_height(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``SizeDef`` height."""
+        return self._with_property("height", value, **kwargs)
+
+    def with_legends(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``legends`` updated."""
+        return self._with_property("legends", value)
+
+    def with_name(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_padding(
+        self,
+        value: PaddingConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``PaddingConfig`` padding."""
+        return self._with_property("padding", value, **kwargs)
+
+    def with_params(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
+    def with_resolve(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``resolve`` updated."""
+        return self._with_property("resolve", value)
+
+    def with_scales(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``scales`` updated."""
+        return self._with_property("scales", value)
+
+    def with_separator(
+        self,
+        value: SeparatorProps | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``SeparatorProps`` separator."""
+        return self._with_property("separator", value, **kwargs)
+
+    def with_spacing(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``spacing`` updated."""
+        return self._with_property("spacing", value)
+
+    def with_templates(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``templates`` updated."""
+        return self._with_property("templates", value)
+
+    def with_title(
+        self,
+        value: Title | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``Title`` title."""
+        return self._with_property("title", value, **kwargs)
+
+    def with_transform(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``transform`` updated."""
+        return self._with_property("transform", value)
+
+    def with_viewportHeight(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``SizeDef`` viewportHeight."""
+        return self._with_property("viewportHeight", value, **kwargs)
+
+    def with_viewportWidth(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``SizeDef`` viewportWidth."""
+        return self._with_property("viewportWidth", value, **kwargs)
+
+    def with_visible(self, value: Any) -> ConcatSpec:
+        """Return a copy with ``visible`` updated."""
+        return self._with_property("visible", value)
+
+    def with_width(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``SizeDef`` width."""
+        return self._with_property("width", value, **kwargs)
+
 
 class ConditionalMarkPropExprDefType(GenomeSpySchema):
     """Generated wrapper for ``Conditional<MarkPropExprDef<Type>>``."""
@@ -999,6 +2451,61 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> ConditionalMarkPropExprDefType:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(self, value: Any) -> ConditionalMarkPropExprDefType:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ConditionalMarkPropExprDefType:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(self, value: Any) -> ConditionalMarkPropExprDefType:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_expr(self, value: Any) -> ConditionalMarkPropExprDefType:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_param(self, value: Any) -> ConditionalMarkPropExprDefType:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropExprDefType:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropExprDefType:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ConditionalMarkPropExprDefType:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropExprDefType:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``Conditional<MarkPropExprDef<TypeForShape>>``."""
@@ -1035,6 +2542,61 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_band(self, value: Any) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(self, value: Any) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(self, value: Any) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_expr(self, value: Any) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_param(self, value: Any) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class ConditionalMarkPropFieldDefType(GenomeSpySchema):
@@ -1075,6 +2637,70 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(self, value: Any) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_field(self, value: Any) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_param(self, value: Any) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``Conditional<MarkPropFieldDef<TypeForShape>>``."""
@@ -1114,6 +2740,70 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(self, value: Any) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_field(self, value: Any) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_param(self, value: Any) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: TypeForShape | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``TypeForShape`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class ConditionalScaleDatumDef(GenomeSpySchema):
     """Generated wrapper for ``Conditional<ScaleDatumDef>``."""
@@ -1149,6 +2839,66 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> ConditionalScaleDatumDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalScaleDatumDef:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> ConditionalScaleDatumDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ConditionalScaleDatumDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(self, value: Any) -> ConditionalScaleDatumDef:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_param(self, value: Any) -> ConditionalScaleDatumDef:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalScaleDatumDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalScaleDatumDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ConditionalScaleDatumDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalScaleDatumDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class ConditionalValueDefNumberExprRef(GenomeSpySchema):
     """Generated wrapper for ``Conditional<ValueDef<(number|ExprRef)>>``."""
@@ -1172,6 +2922,31 @@ class ConditionalValueDefNumberExprRef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> ConditionalValueDefNumberExprRef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_empty(self, value: Any) -> ConditionalValueDefNumberExprRef:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_param(self, value: Any) -> ConditionalValueDefNumberExprRef:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_title(self, value: Any) -> ConditionalValueDefNumberExprRef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalValueDefNumberExprRef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
     """Generated wrapper for ``Conditional<ValueDef<(string|null|ExprRef)>>``."""
@@ -1194,6 +2969,31 @@ class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> ConditionalValueDefStringNullExprRef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_empty(self, value: Any) -> ConditionalValueDefStringNullExprRef:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_param(self, value: Any) -> ConditionalValueDefStringNullExprRef:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_title(self, value: Any) -> ConditionalValueDefStringNullExprRef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalValueDefStringNullExprRef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
@@ -1232,6 +3032,61 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(self, value: Any) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(self, value: Any) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_expr(self, value: Any) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_param(self, value: Any) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<MarkPropExprDef<TypeForShape>>``."""
@@ -1268,6 +3123,65 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_band(self, value: Any) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(
+        self, value: Any
+    ) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(
+        self, value: Any
+    ) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(self, value: Any) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_expr(self, value: Any) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_param(self, value: Any) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
@@ -1308,6 +3222,70 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(self, value: Any) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_field(self, value: Any) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_param(self, value: Any) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<MarkPropFieldDef<TypeForShape>>``."""
@@ -1347,6 +3325,84 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(
+        self, value: Any
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(
+        self, value: Any
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(
+        self, value: Any
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_field(
+        self, value: Any
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(
+        self, value: Any
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_param(
+        self, value: Any
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(
+        self, value: Any
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: TypeForShape | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``TypeForShape`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class ConditionalParameterScaleDatumDef(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<ScaleDatumDef>``."""
@@ -1384,6 +3440,66 @@ class ConditionalParameterScaleDatumDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_empty(self, value: Any) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_param(self, value: Any) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class ConditionalParameterValueDefNumberExprRef(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<ValueDef<(number|ExprRef)>>``."""
@@ -1406,6 +3522,31 @@ class ConditionalParameterValueDefNumberExprRef(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> ConditionalParameterValueDefNumberExprRef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_empty(self, value: Any) -> ConditionalParameterValueDefNumberExprRef:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_param(self, value: Any) -> ConditionalParameterValueDefNumberExprRef:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_title(self, value: Any) -> ConditionalParameterValueDefNumberExprRef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterValueDefNumberExprRef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class ConditionalParameterValueDefStringNullExprRef(GenomeSpySchema):
@@ -1430,6 +3571,33 @@ class ConditionalParameterValueDefStringNullExprRef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(
+        self, value: Any
+    ) -> ConditionalParameterValueDefStringNullExprRef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_empty(self, value: Any) -> ConditionalParameterValueDefStringNullExprRef:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_param(self, value: Any) -> ConditionalParameterValueDefStringNullExprRef:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_title(self, value: Any) -> ConditionalParameterValueDefStringNullExprRef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterValueDefStringNullExprRef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class Contig(GenomeSpySchema):
     """Generated wrapper for ``Contig``."""
@@ -1442,6 +3610,14 @@ class Contig(GenomeSpySchema):
         super().__init__(name=name, size=size)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_name(self, value: Any) -> Contig:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_size(self, value: Any) -> Contig:
+        """Return a copy with ``size`` updated."""
+        return self._with_property("size", value)
 
 
 class CoreRootSpec(GenomeSpySchema):
@@ -1538,6 +3714,251 @@ class CoreRootSpec(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_assembly(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``assembly`` updated."""
+        return self._with_property("assembly", value)
+
+    def with_axes(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``axes`` updated."""
+        return self._with_property("axes", value)
+
+    def with_background(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``background`` updated."""
+        return self._with_property("background", value)
+
+    def with_baseUrl(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``baseUrl`` updated."""
+        return self._with_property("baseUrl", value)
+
+    def with_columns(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_concat(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``concat`` updated."""
+        return self._with_property("concat", value)
+
+    def with_config(
+        self,
+        value: GenomeSpyConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``GenomeSpyConfig`` config."""
+        return self._with_property("config", value, **kwargs)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_data(
+        self,
+        value: Data | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``Data`` data."""
+        return self._with_property("data", value, **kwargs)
+
+    def with_datasets(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``datasets`` updated."""
+        return self._with_property("datasets", value)
+
+    def with_description(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_encoding(
+        self,
+        value: Encoding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``Encoding`` encoding."""
+        return self._with_property("encoding", value, **kwargs)
+
+    def with_genome(
+        self,
+        value: GenomeConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``GenomeConfig`` genome."""
+        return self._with_property("genome", value, **kwargs)
+
+    def with_genomes(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``genomes`` updated."""
+        return self._with_property("genomes", value)
+
+    def with_hconcat(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``hconcat`` updated."""
+        return self._with_property("hconcat", value)
+
+    def with_height(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``SizeDef`` height."""
+        return self._with_property("height", value, **kwargs)
+
+    def with_layer(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``layer`` updated."""
+        return self._with_property("layer", value)
+
+    def with_legends(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``legends`` updated."""
+        return self._with_property("legends", value)
+
+    def with_mark(
+        self,
+        value: MarkType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``MarkType`` mark."""
+        return self._with_property("mark", value, **kwargs)
+
+    def with_multiscale(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``multiscale`` updated."""
+        return self._with_property("multiscale", value)
+
+    def with_name(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_opacity(
+        self,
+        value: ViewOpacityDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``ViewOpacityDef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_padding(
+        self,
+        value: PaddingConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``PaddingConfig`` padding."""
+        return self._with_property("padding", value, **kwargs)
+
+    def with_params(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
+    def with_resolve(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``resolve`` updated."""
+        return self._with_property("resolve", value)
+
+    def with_scales(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``scales`` updated."""
+        return self._with_property("scales", value)
+
+    def with_separator(
+        self,
+        value: SeparatorProps | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``SeparatorProps`` separator."""
+        return self._with_property("separator", value, **kwargs)
+
+    def with_spacing(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``spacing`` updated."""
+        return self._with_property("spacing", value)
+
+    def with_stops(
+        self,
+        value: MultiscaleStopsDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``MultiscaleStopsDef`` stops."""
+        return self._with_property("stops", value, **kwargs)
+
+    def with_templates(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``templates`` updated."""
+        return self._with_property("templates", value)
+
+    def with_theme(
+        self,
+        value: BuiltInThemeName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``BuiltInThemeName`` theme."""
+        return self._with_property("theme", value, **kwargs)
+
+    def with_title(
+        self,
+        value: Title | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``Title`` title."""
+        return self._with_property("title", value, **kwargs)
+
+    def with_transform(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``transform`` updated."""
+        return self._with_property("transform", value)
+
+    def with_vconcat(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``vconcat`` updated."""
+        return self._with_property("vconcat", value)
+
+    def with_view(
+        self,
+        value: ViewBackground | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``ViewBackground`` view."""
+        return self._with_property("view", value, **kwargs)
+
+    def with_viewportHeight(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``SizeDef`` viewportHeight."""
+        return self._with_property("viewportHeight", value, **kwargs)
+
+    def with_viewportWidth(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``SizeDef`` viewportWidth."""
+        return self._with_property("viewportWidth", value, **kwargs)
+
+    def with_visible(self, value: Any) -> CoreRootSpec:
+        """Return a copy with ``visible`` updated."""
+        return self._with_property("visible", value)
+
+    def with_width(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``SizeDef`` width."""
+        return self._with_property("width", value, **kwargs)
+
 
 class CoverageParams(GenomeSpySchema):
     """Generated wrapper for ``CoverageParams``."""
@@ -1571,6 +3992,62 @@ class CoverageParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_asChrom(self, value: Any) -> CoverageParams:
+        """Return a copy with ``asChrom`` updated."""
+        return self._with_property("asChrom", value)
+
+    def with_asEnd(self, value: Any) -> CoverageParams:
+        """Return a copy with ``asEnd`` updated."""
+        return self._with_property("asEnd", value)
+
+    def with_asStart(self, value: Any) -> CoverageParams:
+        """Return a copy with ``asStart`` updated."""
+        return self._with_property("asStart", value)
+
+    def with_chrom(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoverageParams:
+        """Return a copy with a ``Field`` chrom."""
+        return self._with_property("chrom", value, **kwargs)
+
+    def with_description(self, value: Any) -> CoverageParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_end(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoverageParams:
+        """Return a copy with a ``Field`` end."""
+        return self._with_property("end", value, **kwargs)
+
+    def with_start(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoverageParams:
+        """Return a copy with a ``Field`` start."""
+        return self._with_property("start", value, **kwargs)
+
+    def with_type(self, value: Any) -> CoverageParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_weight(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoverageParams:
+        """Return a copy with a ``Field`` weight."""
+        return self._with_property("weight", value, **kwargs)
+
 
 class CsvDataFormat(GenomeSpySchema):
     """Generated wrapper for ``CsvDataFormat``."""
@@ -1587,6 +4064,23 @@ class CsvDataFormat(GenomeSpySchema):
         super().__init__(columns=columns, parse=parse, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_columns(self, value: Any) -> CsvDataFormat:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_parse(
+        self,
+        value: Parse | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CsvDataFormat:
+        """Return a copy with a ``Parse`` parse."""
+        return self._with_property("parse", value, **kwargs)
+
+    def with_type(self, value: Any) -> CsvDataFormat:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class Data(GenomeSpySchema):
@@ -1619,6 +4113,63 @@ class Data(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> Data:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_dynamicCallbackSource(self, value: Any) -> Data:
+        """Return a copy with ``dynamicCallbackSource`` updated."""
+        return self._with_property("dynamicCallbackSource", value)
+
+    def with_format(
+        self,
+        value: DataFormat | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Data:
+        """Return a copy with a ``DataFormat`` format."""
+        return self._with_property("format", value, **kwargs)
+
+    def with_lazy(
+        self,
+        value: LazyDataParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Data:
+        """Return a copy with a ``LazyDataParams`` lazy."""
+        return self._with_property("lazy", value, **kwargs)
+
+    def with_name(self, value: Any) -> Data:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_sequence(
+        self,
+        value: SequenceParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Data:
+        """Return a copy with a ``SequenceParams`` sequence."""
+        return self._with_property("sequence", value, **kwargs)
+
+    def with_url(
+        self,
+        value: UrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Data:
+        """Return a copy with a ``UrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
+    def with_values(
+        self,
+        value: InlineDataset | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Data:
+        """Return a copy with a ``InlineDataset`` values."""
+        return self._with_property("values", value, **kwargs)
+
 
 class DataFormat(GenomeSpySchema):
     """Generated wrapper for ``DataFormat``."""
@@ -1643,6 +4194,31 @@ class DataFormat(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_columns(self, value: Any) -> DataFormat:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_delimiter(self, value: Any) -> DataFormat:
+        """Return a copy with ``delimiter`` updated."""
+        return self._with_property("delimiter", value)
+
+    def with_parse(
+        self,
+        value: Parse | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> DataFormat:
+        """Return a copy with a ``Parse`` parse."""
+        return self._with_property("parse", value, **kwargs)
+
+    def with_property(self, value: Any) -> DataFormat:
+        """Return a copy with ``property`` updated."""
+        return self._with_property("property", value)
+
+    def with_type(self, value: Any) -> DataFormat:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class DataSource(GenomeSpySchema):
@@ -1673,6 +4249,54 @@ class DataSource(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> DataSource:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_dynamicCallbackSource(self, value: Any) -> DataSource:
+        """Return a copy with ``dynamicCallbackSource`` updated."""
+        return self._with_property("dynamicCallbackSource", value)
+
+    def with_format(
+        self,
+        value: DataFormat | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> DataSource:
+        """Return a copy with a ``DataFormat`` format."""
+        return self._with_property("format", value, **kwargs)
+
+    def with_lazy(
+        self,
+        value: LazyDataParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> DataSource:
+        """Return a copy with a ``LazyDataParams`` lazy."""
+        return self._with_property("lazy", value, **kwargs)
+
+    def with_name(self, value: Any) -> DataSource:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_url(
+        self,
+        value: UrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> DataSource:
+        """Return a copy with a ``UrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
+    def with_values(
+        self,
+        value: InlineDataset | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> DataSource:
+        """Return a copy with a ``InlineDataset`` values."""
+        return self._with_property("values", value, **kwargs)
+
 
 class DomEventType(GenomeSpySchema):
     """Generated wrapper for ``DomEventType``."""
@@ -1694,6 +4318,10 @@ class DomainValue(GenomeSpySchema):
         super().__init__(expr=expr)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_expr(self, value: Any) -> DomainValue:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
 
 
 class DomainValueArray(GenomeSpySchema):
@@ -1724,6 +4352,27 @@ class DsvDataFormat(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_columns(self, value: Any) -> DsvDataFormat:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_delimiter(self, value: Any) -> DsvDataFormat:
+        """Return a copy with ``delimiter`` updated."""
+        return self._with_property("delimiter", value)
+
+    def with_parse(
+        self,
+        value: Parse | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> DsvDataFormat:
+        """Return a copy with a ``Parse`` parse."""
+        return self._with_property("parse", value, **kwargs)
+
+    def with_type(self, value: Any) -> DsvDataFormat:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class DynamicCallbackData(GenomeSpySchema):
     """Generated wrapper for ``DynamicCallbackData``."""
@@ -1747,6 +4396,27 @@ class DynamicCallbackData(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> DynamicCallbackData:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_dynamicCallbackSource(self, value: Any) -> DynamicCallbackData:
+        """Return a copy with ``dynamicCallbackSource`` updated."""
+        return self._with_property("dynamicCallbackSource", value)
+
+    def with_format(
+        self,
+        value: DataFormat | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> DynamicCallbackData:
+        """Return a copy with a ``DataFormat`` format."""
+        return self._with_property("format", value, **kwargs)
+
+    def with_name(self, value: Any) -> DynamicCallbackData:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
 
 class DynamicOpacity(GenomeSpySchema):
     """Generated wrapper for ``DynamicOpacity``."""
@@ -1763,6 +4433,23 @@ class DynamicOpacity(GenomeSpySchema):
         super().__init__(channel=channel, unitsPerPixel=unitsPerPixel, values=values)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> DynamicOpacity:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_unitsPerPixel(self, value: Any) -> DynamicOpacity:
+        """Return a copy with ``unitsPerPixel`` updated."""
+        return self._with_property("unitsPerPixel", value)
+
+    def with_values(self, value: Any) -> DynamicOpacity:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
 
 
 class Encoding(GenomeSpySchema):
@@ -1825,6 +4512,203 @@ class Encoding(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_angle(
+        self,
+        value: NumericMarkPropDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``NumericMarkPropDef`` angle."""
+        return self._with_property("angle", value, **kwargs)
+
+    def with_color(
+        self,
+        value: ColorDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``ColorDef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_dx(
+        self,
+        value: NumericMarkPropDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``NumericMarkPropDef`` dx."""
+        return self._with_property("dx", value, **kwargs)
+
+    def with_dy(
+        self,
+        value: NumericMarkPropDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``NumericMarkPropDef`` dy."""
+        return self._with_property("dy", value, **kwargs)
+
+    def with_facetIndex(
+        self,
+        value: FieldDefWithoutScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``FieldDefWithoutScale`` facetIndex."""
+        return self._with_property("facetIndex", value, **kwargs)
+
+    def with_fill(
+        self,
+        value: ColorDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``ColorDef`` fill."""
+        return self._with_property("fill", value, **kwargs)
+
+    def with_fillOpacity(
+        self,
+        value: NumericMarkPropDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``NumericMarkPropDef`` fillOpacity."""
+        return self._with_property("fillOpacity", value, **kwargs)
+
+    def with_key(
+        self,
+        value: KeyDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``KeyDef`` key."""
+        return self._with_property("key", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: NumericMarkPropDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``NumericMarkPropDef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_sample(
+        self,
+        value: FieldDefWithoutScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``FieldDefWithoutScale`` sample."""
+        return self._with_property("sample", value, **kwargs)
+
+    def with_search(
+        self,
+        value: SearchDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``SearchDef`` search."""
+        return self._with_property("search", value, **kwargs)
+
+    def with_semanticScore(self, value: Any) -> Encoding:
+        """Return a copy with ``semanticScore`` updated."""
+        return self._with_property("semanticScore", value)
+
+    def with_shape(
+        self,
+        value: ShapeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``ShapeDef`` shape."""
+        return self._with_property("shape", value, **kwargs)
+
+    def with_size(
+        self,
+        value: NumericMarkPropDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``NumericMarkPropDef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_stroke(
+        self,
+        value: ColorDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``ColorDef`` stroke."""
+        return self._with_property("stroke", value, **kwargs)
+
+    def with_strokeOpacity(
+        self,
+        value: NumericMarkPropDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``NumericMarkPropDef`` strokeOpacity."""
+        return self._with_property("strokeOpacity", value, **kwargs)
+
+    def with_strokeWidth(
+        self,
+        value: NumericMarkPropDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``NumericMarkPropDef`` strokeWidth."""
+        return self._with_property("strokeWidth", value, **kwargs)
+
+    def with_text(
+        self,
+        value: TextDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``TextDef`` text."""
+        return self._with_property("text", value, **kwargs)
+
+    def with_uniqueId(
+        self,
+        value: FieldDefWithoutScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``FieldDefWithoutScale`` uniqueId."""
+        return self._with_property("uniqueId", value, **kwargs)
+
+    def with_x(self, value: Any) -> Encoding:
+        """Return a copy with ``x`` updated."""
+        return self._with_property("x", value)
+
+    def with_x2(
+        self,
+        value: Position2Def | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``Position2Def`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_y(
+        self,
+        value: PositionDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``PositionDef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: Position2Def | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Encoding:
+        """Return a copy with a ``Position2Def`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
 
 class EventConfig(GenomeSpySchema):
     """Generated wrapper for ``EventConfig``."""
@@ -1837,6 +4721,19 @@ class EventConfig(GenomeSpySchema):
         super().__init__(filter=filter, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_filter(self, value: Any) -> EventConfig:
+        """Return a copy with ``filter`` updated."""
+        return self._with_property("filter", value)
+
+    def with_type(
+        self,
+        value: DomEventType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> EventConfig:
+        """Return a copy with a ``DomEventType`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class ExprDef(GenomeSpySchema):
@@ -1859,6 +4756,31 @@ class ExprDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> ExprDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(self, value: Any) -> ExprDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_expr(self, value: Any) -> ExprDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_title(self, value: Any) -> ExprDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ExprDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class ExprFilterParams(GenomeSpySchema):
     """Generated wrapper for ``ExprFilterParams``."""
@@ -1876,6 +4798,18 @@ class ExprFilterParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> ExprFilterParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_expr(self, value: Any) -> ExprFilterParams:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_type(self, value: Any) -> ExprFilterParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class ExprRef(GenomeSpySchema):
     """Generated wrapper for ``ExprRef``."""
@@ -1886,6 +4820,10 @@ class ExprRef(GenomeSpySchema):
         super().__init__(expr=expr)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_expr(self, value: Any) -> ExprRef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
 
 
 class Field(GenomeSpySchema):
@@ -1914,6 +4852,18 @@ class FieldDefWithoutScale(GenomeSpySchema):
         super().__init__(description=description, field=field, title=title)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> FieldDefWithoutScale:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_field(self, value: Any) -> FieldDefWithoutScale:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_title(self, value: Any) -> FieldDefWithoutScale:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
 
 
 class FieldName(GenomeSpySchema):
@@ -1963,6 +4913,84 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
         if kwds:
             self._kwds.update(kwds)
 
+    def with_condition(
+        self,
+        value: ConditionalValueDefStringNullExprRef
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with a ``ConditionalValueDefStringNullExprRef`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_description(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
     """Generated wrapper for ``FieldOrDatumDefWithCondition<MarkPropFieldDef<Type>,number>``."""
@@ -1999,6 +5027,84 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_condition(
+        self,
+        value: ConditionalValueDefNumberExprRef
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with a ``ConditionalValueDefNumberExprRef`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_description(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
@@ -2039,6 +5145,84 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
         if kwds:
             self._kwds.update(kwds)
 
+    def with_condition(
+        self,
+        value: ConditionalValueDefStringNullExprRef
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with a ``ConditionalValueDefStringNullExprRef`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_description(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: TypeForShape | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
+        """Return a copy with a ``TypeForShape`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class FieldOrDatumDefWithConditionScaleDatumDefStringNull(GenomeSpySchema):
     """Generated wrapper for ``FieldOrDatumDefWithCondition<ScaleDatumDef,(string|null)>``."""
@@ -2073,6 +5257,78 @@ class FieldOrDatumDefWithConditionScaleDatumDefStringNull(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_band(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_condition(
+        self,
+        value: ConditionalValueDefStringNullExprRef
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
+        """Return a copy with a ``ConditionalValueDefStringNullExprRef`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class FieldOrDatumDefWithConditionScaleDatumDefNumber(GenomeSpySchema):
@@ -2109,6 +5365,74 @@ class FieldOrDatumDefWithConditionScaleDatumDefNumber(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_condition(
+        self,
+        value: ConditionalValueDefNumberExprRef
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
+        """Return a copy with a ``ConditionalValueDefNumberExprRef`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(
+        self, value: Any
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class FilterParams(GenomeSpySchema):
     """Generated wrapper for ``FilterParams``."""
@@ -2135,6 +5459,30 @@ class FilterParams(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> FilterParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_empty(self, value: Any) -> FilterParams:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_expr(self, value: Any) -> FilterParams:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_fields(self, value: Any) -> FilterParams:
+        """Return a copy with ``fields`` updated."""
+        return self._with_property("fields", value)
+
+    def with_param(self, value: Any) -> FilterParams:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_type(self, value: Any) -> FilterParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class FilterScoredLabelsParams(GenomeSpySchema):
@@ -2171,6 +5519,71 @@ class FilterScoredLabelsParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_asMidpoint(self, value: Any) -> FilterScoredLabelsParams:
+        """Return a copy with ``asMidpoint`` updated."""
+        return self._with_property("asMidpoint", value)
+
+    def with_channel(self, value: Any) -> FilterScoredLabelsParams:
+        """Return a copy with ``channel`` updated."""
+        return self._with_property("channel", value)
+
+    def with_description(self, value: Any) -> FilterScoredLabelsParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_lane(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FilterScoredLabelsParams:
+        """Return a copy with a ``Field`` lane."""
+        return self._with_property("lane", value, **kwargs)
+
+    def with_padding(self, value: Any) -> FilterScoredLabelsParams:
+        """Return a copy with ``padding`` updated."""
+        return self._with_property("padding", value)
+
+    def with_pos(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FilterScoredLabelsParams:
+        """Return a copy with a ``Field`` pos."""
+        return self._with_property("pos", value, **kwargs)
+
+    def with_pos2(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FilterScoredLabelsParams:
+        """Return a copy with a ``Field`` pos2."""
+        return self._with_property("pos2", value, **kwargs)
+
+    def with_score(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FilterScoredLabelsParams:
+        """Return a copy with a ``Field`` score."""
+        return self._with_property("score", value, **kwargs)
+
+    def with_type(self, value: Any) -> FilterScoredLabelsParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_width(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FilterScoredLabelsParams:
+        """Return a copy with a ``Field`` width."""
+        return self._with_property("width", value, **kwargs)
+
 
 class FlattenCompressedExonsParams(GenomeSpySchema):
     """Generated wrapper for ``FlattenCompressedExonsParams``."""
@@ -2190,6 +5603,32 @@ class FlattenCompressedExonsParams(GenomeSpySchema):
         super().__init__(description=description, exons=exons, start=start, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> FlattenCompressedExonsParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_exons(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FlattenCompressedExonsParams:
+        """Return a copy with a ``Field`` exons."""
+        return self._with_property("exons", value, **kwargs)
+
+    def with_start(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FlattenCompressedExonsParams:
+        """Return a copy with a ``Field`` start."""
+        return self._with_property("start", value, **kwargs)
+
+    def with_type(self, value: Any) -> FlattenCompressedExonsParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class FlattenDelimitedParams(GenomeSpySchema):
@@ -2211,6 +5650,27 @@ class FlattenDelimitedParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> FlattenDelimitedParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_field(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FlattenDelimitedParams:
+        """Return a copy with a ``Field`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_separator(self, value: Any) -> FlattenDelimitedParams:
+        """Return a copy with ``separator`` updated."""
+        return self._with_property("separator", value)
+
+    def with_type(self, value: Any) -> FlattenDelimitedParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class FlattenParams(GenomeSpySchema):
     """Generated wrapper for ``FlattenParams``."""
@@ -2229,6 +5689,27 @@ class FlattenParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> FlattenParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_fields(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FlattenParams:
+        """Return a copy with a ``Field`` fields."""
+        return self._with_property("fields", value, **kwargs)
+
+    def with_index(self, value: Any) -> FlattenParams:
+        """Return a copy with ``index`` updated."""
+        return self._with_property("index", value)
+
+    def with_type(self, value: Any) -> FlattenParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class FlattenSequenceParams(GenomeSpySchema):
     """Generated wrapper for ``FlattenSequenceParams``."""
@@ -2245,6 +5726,23 @@ class FlattenSequenceParams(GenomeSpySchema):
         super().__init__(description=description, field=field, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> FlattenSequenceParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_field(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> FlattenSequenceParams:
+        """Return a copy with a ``Field`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_type(self, value: Any) -> FlattenSequenceParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class FontStyle(GenomeSpySchema):
@@ -2285,6 +5783,18 @@ class FormulaParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> FormulaParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_expr(self, value: Any) -> FormulaParams:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_type(self, value: Any) -> FormulaParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class Generator(GenomeSpySchema):
     """Generated wrapper for ``Generator``."""
@@ -2301,6 +5811,23 @@ class Generator(GenomeSpySchema):
         super().__init__(description=description, name=name, sequence=sequence)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> Generator:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_name(self, value: Any) -> Generator:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_sequence(
+        self,
+        value: SequenceParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Generator:
+        """Return a copy with a ``SequenceParams`` sequence."""
+        return self._with_property("sequence", value, **kwargs)
 
 
 class GenomeAxis(GenomeSpySchema):
@@ -2465,6 +5992,362 @@ class GenomeAxis(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_chromGrid(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromGrid`` updated."""
+        return self._with_property("chromGrid", value)
+
+    def with_chromGridCap(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromGridCap`` updated."""
+        return self._with_property("chromGridCap", value)
+
+    def with_chromGridColor(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromGridColor`` updated."""
+        return self._with_property("chromGridColor", value)
+
+    def with_chromGridDash(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromGridDash`` updated."""
+        return self._with_property("chromGridDash", value)
+
+    def with_chromGridDashOffset(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromGridDashOffset`` updated."""
+        return self._with_property("chromGridDashOffset", value)
+
+    def with_chromGridFillEven(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromGridFillEven`` updated."""
+        return self._with_property("chromGridFillEven", value)
+
+    def with_chromGridFillOdd(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromGridFillOdd`` updated."""
+        return self._with_property("chromGridFillOdd", value)
+
+    def with_chromGridOpacity(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromGridOpacity`` updated."""
+        return self._with_property("chromGridOpacity", value)
+
+    def with_chromGridWidth(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromGridWidth`` updated."""
+        return self._with_property("chromGridWidth", value)
+
+    def with_chromLabelAlign(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``Align`` chromLabelAlign."""
+        return self._with_property("chromLabelAlign", value, **kwargs)
+
+    def with_chromLabelColor(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromLabelColor`` updated."""
+        return self._with_property("chromLabelColor", value)
+
+    def with_chromLabelFont(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromLabelFont`` updated."""
+        return self._with_property("chromLabelFont", value)
+
+    def with_chromLabelFontSize(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromLabelFontSize`` updated."""
+        return self._with_property("chromLabelFontSize", value)
+
+    def with_chromLabelFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``FontStyle`` chromLabelFontStyle."""
+        return self._with_property("chromLabelFontStyle", value, **kwargs)
+
+    def with_chromLabelFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``FontWeight`` chromLabelFontWeight."""
+        return self._with_property("chromLabelFontWeight", value, **kwargs)
+
+    def with_chromLabelPadding(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromLabelPadding`` updated."""
+        return self._with_property("chromLabelPadding", value)
+
+    def with_chromLabels(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromLabels`` updated."""
+        return self._with_property("chromLabels", value)
+
+    def with_chromTickColor(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromTickColor`` updated."""
+        return self._with_property("chromTickColor", value)
+
+    def with_chromTickDash(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromTickDash`` updated."""
+        return self._with_property("chromTickDash", value)
+
+    def with_chromTickDashOffset(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromTickDashOffset`` updated."""
+        return self._with_property("chromTickDashOffset", value)
+
+    def with_chromTickSize(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromTickSize`` updated."""
+        return self._with_property("chromTickSize", value)
+
+    def with_chromTickWidth(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromTickWidth`` updated."""
+        return self._with_property("chromTickWidth", value)
+
+    def with_chromTicks(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``chromTicks`` updated."""
+        return self._with_property("chromTicks", value)
+
+    def with_domain(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``domain`` updated."""
+        return self._with_property("domain", value)
+
+    def with_domainCap(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``domainCap`` updated."""
+        return self._with_property("domainCap", value)
+
+    def with_domainColor(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``domainColor`` updated."""
+        return self._with_property("domainColor", value)
+
+    def with_domainDash(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``domainDash`` updated."""
+        return self._with_property("domainDash", value)
+
+    def with_domainDashOffset(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``domainDashOffset`` updated."""
+        return self._with_property("domainDashOffset", value)
+
+    def with_domainWidth(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``domainWidth`` updated."""
+        return self._with_property("domainWidth", value)
+
+    def with_format(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_grid(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``grid`` updated."""
+        return self._with_property("grid", value)
+
+    def with_gridCap(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``gridCap`` updated."""
+        return self._with_property("gridCap", value)
+
+    def with_gridColor(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``gridColor`` updated."""
+        return self._with_property("gridColor", value)
+
+    def with_gridDash(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``gridDash`` updated."""
+        return self._with_property("gridDash", value)
+
+    def with_gridDashOffset(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``gridDashOffset`` updated."""
+        return self._with_property("gridDashOffset", value)
+
+    def with_gridOpacity(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``gridOpacity`` updated."""
+        return self._with_property("gridOpacity", value)
+
+    def with_gridWidth(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``gridWidth`` updated."""
+        return self._with_property("gridWidth", value)
+
+    def with_labelAlign(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``Align`` labelAlign."""
+        return self._with_property("labelAlign", value, **kwargs)
+
+    def with_labelAngle(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``labelAngle`` updated."""
+        return self._with_property("labelAngle", value)
+
+    def with_labelBaseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``Baseline`` labelBaseline."""
+        return self._with_property("labelBaseline", value, **kwargs)
+
+    def with_labelColor(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``labelColor`` updated."""
+        return self._with_property("labelColor", value)
+
+    def with_labelFont(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``labelFont`` updated."""
+        return self._with_property("labelFont", value)
+
+    def with_labelFontSize(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``labelFontSize`` updated."""
+        return self._with_property("labelFontSize", value)
+
+    def with_labelFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``FontStyle`` labelFontStyle."""
+        return self._with_property("labelFontStyle", value, **kwargs)
+
+    def with_labelFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``FontWeight`` labelFontWeight."""
+        return self._with_property("labelFontWeight", value, **kwargs)
+
+    def with_labelLimit(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``labelLimit`` updated."""
+        return self._with_property("labelLimit", value)
+
+    def with_labelPadding(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``labelPadding`` updated."""
+        return self._with_property("labelPadding", value)
+
+    def with_labels(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``labels`` updated."""
+        return self._with_property("labels", value)
+
+    def with_maxExtent(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``maxExtent`` updated."""
+        return self._with_property("maxExtent", value)
+
+    def with_minExtent(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``minExtent`` updated."""
+        return self._with_property("minExtent", value)
+
+    def with_offset(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_orient(
+        self,
+        value: AxisOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``AxisOrient`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_placement(
+        self,
+        value: AxisPlacement | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``AxisPlacement`` placement."""
+        return self._with_property("placement", value, **kwargs)
+
+    def with_style(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tickCap(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``tickCap`` updated."""
+        return self._with_property("tickCap", value)
+
+    def with_tickColor(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``tickColor`` updated."""
+        return self._with_property("tickColor", value)
+
+    def with_tickCount(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``ExprRef`` tickCount."""
+        return self._with_property("tickCount", value, **kwargs)
+
+    def with_tickDash(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``tickDash`` updated."""
+        return self._with_property("tickDash", value)
+
+    def with_tickDashOffset(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``tickDashOffset`` updated."""
+        return self._with_property("tickDashOffset", value)
+
+    def with_tickMinStep(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``tickMinStep`` updated."""
+        return self._with_property("tickMinStep", value)
+
+    def with_tickSize(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``tickSize`` updated."""
+        return self._with_property("tickSize", value)
+
+    def with_tickWidth(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``tickWidth`` updated."""
+        return self._with_property("tickWidth", value)
+
+    def with_ticks(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``ticks`` updated."""
+        return self._with_property("ticks", value)
+
+    def with_title(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_titleColor(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``titleColor`` updated."""
+        return self._with_property("titleColor", value)
+
+    def with_titleFit(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``titleFit`` updated."""
+        return self._with_property("titleFit", value)
+
+    def with_titleFont(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``titleFont`` updated."""
+        return self._with_property("titleFont", value)
+
+    def with_titleFontSize(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``titleFontSize`` updated."""
+        return self._with_property("titleFontSize", value)
+
+    def with_titleFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``FontStyle`` titleFontStyle."""
+        return self._with_property("titleFontStyle", value, **kwargs)
+
+    def with_titleFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeAxis:
+        """Return a copy with a ``FontWeight`` titleFontWeight."""
+        return self._with_property("titleFontWeight", value, **kwargs)
+
+    def with_titleOpacity(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``titleOpacity`` updated."""
+        return self._with_property("titleOpacity", value)
+
+    def with_titlePadding(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``titlePadding`` updated."""
+        return self._with_property("titlePadding", value)
+
+    def with_values(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
+
+    def with_zindex(self, value: Any) -> GenomeAxis:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
+
 
 class GenomeConfig(GenomeSpySchema):
     """Generated wrapper for ``GenomeConfig``."""
@@ -2482,6 +6365,18 @@ class GenomeConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_contigs(self, value: Any) -> GenomeConfig:
+        """Return a copy with ``contigs`` updated."""
+        return self._with_property("contigs", value)
+
+    def with_name(self, value: Any) -> GenomeConfig:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_url(self, value: Any) -> GenomeConfig:
+        """Return a copy with ``url`` updated."""
+        return self._with_property("url", value)
+
 
 class GenomeConfigBase(GenomeSpySchema):
     """Generated wrapper for ``GenomeConfigBase``."""
@@ -2492,6 +6387,10 @@ class GenomeConfigBase(GenomeSpySchema):
         super().__init__(name=name)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_name(self, value: Any) -> GenomeConfigBase:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
 
 
 class GenomeDefinition(GenomeSpySchema):
@@ -2505,6 +6404,14 @@ class GenomeDefinition(GenomeSpySchema):
         super().__init__(contigs=contigs, url=url)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_contigs(self, value: Any) -> GenomeDefinition:
+        """Return a copy with ``contigs`` updated."""
+        return self._with_property("contigs", value)
+
+    def with_url(self, value: Any) -> GenomeDefinition:
+        """Return a copy with ``url`` updated."""
+        return self._with_property("url", value)
 
 
 class GenomeSpyConfig(GenomeSpySchema):
@@ -2573,6 +6480,235 @@ class GenomeSpyConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axis(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_axisBottom(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisBottom."""
+        return self._with_property("axisBottom", value, **kwargs)
+
+    def with_axisIndex(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisIndex."""
+        return self._with_property("axisIndex", value, **kwargs)
+
+    def with_axisLeft(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisLeft."""
+        return self._with_property("axisLeft", value, **kwargs)
+
+    def with_axisLocus(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisLocus."""
+        return self._with_property("axisLocus", value, **kwargs)
+
+    def with_axisNominal(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisNominal."""
+        return self._with_property("axisNominal", value, **kwargs)
+
+    def with_axisOrdinal(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisOrdinal."""
+        return self._with_property("axisOrdinal", value, **kwargs)
+
+    def with_axisQuantitative(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisQuantitative."""
+        return self._with_property("axisQuantitative", value, **kwargs)
+
+    def with_axisRight(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisRight."""
+        return self._with_property("axisRight", value, **kwargs)
+
+    def with_axisTop(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisTop."""
+        return self._with_property("axisTop", value, **kwargs)
+
+    def with_axisX(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisX."""
+        return self._with_property("axisX", value, **kwargs)
+
+    def with_axisY(
+        self,
+        value: AxisConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``AxisConfig`` axisY."""
+        return self._with_property("axisY", value, **kwargs)
+
+    def with_legend(
+        self,
+        value: LegendConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``LegendConfig`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_legendTrack(
+        self,
+        value: LegendConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``LegendConfig`` legendTrack."""
+        return self._with_property("legendTrack", value, **kwargs)
+
+    def with_link(
+        self,
+        value: LinkConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``LinkConfig`` link."""
+        return self._with_property("link", value, **kwargs)
+
+    def with_mark(
+        self,
+        value: MarkConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``MarkConfig`` mark."""
+        return self._with_property("mark", value, **kwargs)
+
+    def with_point(
+        self,
+        value: PointConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``PointConfig`` point."""
+        return self._with_property("point", value, **kwargs)
+
+    def with_range(
+        self,
+        value: RangeConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``RangeConfig`` range."""
+        return self._with_property("range", value, **kwargs)
+
+    def with_rect(
+        self,
+        value: RectConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``RectConfig`` rect."""
+        return self._with_property("rect", value, **kwargs)
+
+    def with_rule(
+        self,
+        value: RuleConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``RuleConfig`` rule."""
+        return self._with_property("rule", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: ScaleConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``ScaleConfig`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_style(self, value: Any) -> GenomeSpyConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_text(
+        self,
+        value: TextConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``TextConfig`` text."""
+        return self._with_property("text", value, **kwargs)
+
+    def with_tick(
+        self,
+        value: TickConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``TickConfig`` tick."""
+        return self._with_property("tick", value, **kwargs)
+
+    def with_title(
+        self,
+        value: TitleConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``TitleConfig`` title."""
+        return self._with_property("title", value, **kwargs)
+
+    def with_view(
+        self,
+        value: ViewConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a copy with a ``ViewConfig`` view."""
+        return self._with_property("view", value, **kwargs)
+
 
 class Gff3Data(GenomeSpySchema):
     """Generated wrapper for ``Gff3Data``."""
@@ -2605,6 +6741,67 @@ class Gff3Data(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_addChrPrefix(self, value: Any) -> Gff3Data:
+        """Return a copy with ``addChrPrefix`` updated."""
+        return self._with_property("addChrPrefix", value)
+
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Gff3Data:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_debounce(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Gff3Data:
+        """Return a copy with a ``ExprRef`` debounce."""
+        return self._with_property("debounce", value, **kwargs)
+
+    def with_debounceDomainChange(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Gff3Data:
+        """Return a copy with a ``ExprRef`` debounceDomainChange."""
+        return self._with_property("debounceDomainChange", value, **kwargs)
+
+    def with_debounceMode(self, value: Any) -> Gff3Data:
+        """Return a copy with ``debounceMode`` updated."""
+        return self._with_property("debounceMode", value)
+
+    def with_indexUrl(
+        self,
+        value: IndexUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Gff3Data:
+        """Return a copy with a ``IndexUrlSourceRef`` indexUrl."""
+        return self._with_property("indexUrl", value, **kwargs)
+
+    def with_type(self, value: Any) -> Gff3Data:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_url(
+        self,
+        value: MultiUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Gff3Data:
+        """Return a copy with a ``MultiUrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
+    def with_windowSize(self, value: Any) -> Gff3Data:
+        """Return a copy with ``windowSize`` updated."""
+        return self._with_property("windowSize", value)
 
 
 class HConcatSpec(GenomeSpySchema):
@@ -2671,6 +6868,161 @@ class HConcatSpec(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axes(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``axes`` updated."""
+        return self._with_property("axes", value)
+
+    def with_baseUrl(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``baseUrl`` updated."""
+        return self._with_property("baseUrl", value)
+
+    def with_config(
+        self,
+        value: GenomeSpyConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``GenomeSpyConfig`` config."""
+        return self._with_property("config", value, **kwargs)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_data(
+        self,
+        value: Data | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``Data`` data."""
+        return self._with_property("data", value, **kwargs)
+
+    def with_description(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_encoding(
+        self,
+        value: Encoding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``Encoding`` encoding."""
+        return self._with_property("encoding", value, **kwargs)
+
+    def with_hconcat(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``hconcat`` updated."""
+        return self._with_property("hconcat", value)
+
+    def with_height(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``SizeDef`` height."""
+        return self._with_property("height", value, **kwargs)
+
+    def with_legends(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``legends`` updated."""
+        return self._with_property("legends", value)
+
+    def with_name(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_padding(
+        self,
+        value: PaddingConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``PaddingConfig`` padding."""
+        return self._with_property("padding", value, **kwargs)
+
+    def with_params(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
+    def with_resolve(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``resolve`` updated."""
+        return self._with_property("resolve", value)
+
+    def with_scales(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``scales`` updated."""
+        return self._with_property("scales", value)
+
+    def with_separator(
+        self,
+        value: SeparatorProps | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``SeparatorProps`` separator."""
+        return self._with_property("separator", value, **kwargs)
+
+    def with_spacing(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``spacing`` updated."""
+        return self._with_property("spacing", value)
+
+    def with_templates(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``templates`` updated."""
+        return self._with_property("templates", value)
+
+    def with_title(
+        self,
+        value: Title | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``Title`` title."""
+        return self._with_property("title", value, **kwargs)
+
+    def with_transform(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``transform`` updated."""
+        return self._with_property("transform", value)
+
+    def with_viewportHeight(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``SizeDef`` viewportHeight."""
+        return self._with_property("viewportHeight", value, **kwargs)
+
+    def with_viewportWidth(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``SizeDef`` viewportWidth."""
+        return self._with_property("viewportWidth", value, **kwargs)
+
+    def with_visible(self, value: Any) -> HConcatSpec:
+        """Return a copy with ``visible`` updated."""
+        return self._with_property("visible", value)
+
+    def with_width(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``SizeDef`` width."""
+        return self._with_property("width", value, **kwargs)
+
 
 class HandledTooltip(GenomeSpySchema):
     """Generated wrapper for ``HandledTooltip``."""
@@ -2684,6 +7036,14 @@ class HandledTooltip(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_handler(self, value: Any) -> HandledTooltip:
+        """Return a copy with ``handler`` updated."""
+        return self._with_property("handler", value)
+
+    def with_params(self, value: Any) -> HandledTooltip:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
 
 class IdentifierParams(GenomeSpySchema):
     """Generated wrapper for ``IdentifierParams``."""
@@ -2696,6 +7056,14 @@ class IdentifierParams(GenomeSpySchema):
         super().__init__(description=description, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> IdentifierParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_type(self, value: Any) -> IdentifierParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class ImportSpec(GenomeSpySchema):
@@ -2715,6 +7083,27 @@ class ImportSpec(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_config(
+        self,
+        value: GenomeSpyConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ImportSpec:
+        """Return a copy with a ``GenomeSpyConfig`` config."""
+        return self._with_property("config", value, **kwargs)
+
+    def with_name(self, value: Any) -> ImportSpec:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_params(self, value: Any) -> ImportSpec:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
+    def with_visible(self, value: Any) -> ImportSpec:
+        """Return a copy with ``visible`` updated."""
+        return self._with_property("visible", value)
+
 
 class IndexUrlSourceRef(GenomeSpySchema):
     """Generated wrapper for ``IndexUrlSourceRef``."""
@@ -2728,6 +7117,14 @@ class IndexUrlSourceRef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_expr(self, value: Any) -> IndexUrlSourceRef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_template(self, value: Any) -> IndexUrlSourceRef:
+        """Return a copy with ``template`` updated."""
+        return self._with_property("template", value)
+
 
 class IndexUrlTemplate(GenomeSpySchema):
     """Generated wrapper for ``IndexUrlTemplate``."""
@@ -2738,6 +7135,10 @@ class IndexUrlTemplate(GenomeSpySchema):
         super().__init__(template=template)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_template(self, value: Any) -> IndexUrlTemplate:
+        """Return a copy with ``template`` updated."""
+        return self._with_property("template", value)
 
 
 class IndexedFastaData(GenomeSpySchema):
@@ -2770,6 +7171,63 @@ class IndexedFastaData(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IndexedFastaData:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_debounce(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IndexedFastaData:
+        """Return a copy with a ``ExprRef`` debounce."""
+        return self._with_property("debounce", value, **kwargs)
+
+    def with_debounceDomainChange(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IndexedFastaData:
+        """Return a copy with a ``ExprRef`` debounceDomainChange."""
+        return self._with_property("debounceDomainChange", value, **kwargs)
+
+    def with_debounceMode(self, value: Any) -> IndexedFastaData:
+        """Return a copy with ``debounceMode`` updated."""
+        return self._with_property("debounceMode", value)
+
+    def with_indexUrl(
+        self,
+        value: IndexUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IndexedFastaData:
+        """Return a copy with a ``IndexUrlSourceRef`` indexUrl."""
+        return self._with_property("indexUrl", value, **kwargs)
+
+    def with_type(self, value: Any) -> IndexedFastaData:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_url(
+        self,
+        value: SingleUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IndexedFastaData:
+        """Return a copy with a ``SingleUrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
+    def with_windowSize(self, value: Any) -> IndexedFastaData:
+        """Return a copy with ``windowSize`` updated."""
+        return self._with_property("windowSize", value)
+
 
 class InlineData(GenomeSpySchema):
     """Generated wrapper for ``InlineData``."""
@@ -2789,6 +7247,32 @@ class InlineData(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> InlineData:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_format(
+        self,
+        value: DataFormat | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> InlineData:
+        """Return a copy with a ``DataFormat`` format."""
+        return self._with_property("format", value, **kwargs)
+
+    def with_name(self, value: Any) -> InlineData:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_values(
+        self,
+        value: InlineDataset | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> InlineData:
+        """Return a copy with a ``InlineDataset`` values."""
+        return self._with_property("values", value, **kwargs)
 
 
 class InlineDataset(GenomeSpySchema):
@@ -2814,6 +7298,14 @@ class InlineGenomeConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_contigs(self, value: Any) -> InlineGenomeConfig:
+        """Return a copy with ``contigs`` updated."""
+        return self._with_property("contigs", value)
+
+    def with_name(self, value: Any) -> InlineGenomeConfig:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
 
 class InlineGenomeDefinition(GenomeSpySchema):
     """Generated wrapper for ``InlineGenomeDefinition``."""
@@ -2824,6 +7316,10 @@ class InlineGenomeDefinition(GenomeSpySchema):
         super().__init__(contigs=contigs)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_contigs(self, value: Any) -> InlineGenomeDefinition:
+        """Return a copy with ``contigs`` updated."""
+        return self._with_property("contigs", value)
 
 
 class InlineLocusAssembly(GenomeSpySchema):
@@ -2837,6 +7333,14 @@ class InlineLocusAssembly(GenomeSpySchema):
         super().__init__(contigs=contigs, url=url)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_contigs(self, value: Any) -> InlineLocusAssembly:
+        """Return a copy with ``contigs`` updated."""
+        return self._with_property("contigs", value)
+
+    def with_url(self, value: Any) -> InlineLocusAssembly:
+        """Return a copy with ``url`` updated."""
+        return self._with_property("url", value)
 
 
 class InteractionEventType(GenomeSpySchema):
@@ -2878,6 +7382,59 @@ class IntervalSelectionConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_clear(
+        self,
+        value: DomEventType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IntervalSelectionConfig:
+        """Return a copy with a ``DomEventType`` clear."""
+        return self._with_property("clear", value, **kwargs)
+
+    def with_encodings(self, value: Any) -> IntervalSelectionConfig:
+        """Return a copy with ``encodings`` updated."""
+        return self._with_property("encodings", value)
+
+    def with_extent(
+        self,
+        value: SelectionExtent | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IntervalSelectionConfig:
+        """Return a copy with a ``SelectionExtent`` extent."""
+        return self._with_property("extent", value, **kwargs)
+
+    def with_mark(
+        self,
+        value: BrushConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IntervalSelectionConfig:
+        """Return a copy with a ``BrushConfig`` mark."""
+        return self._with_property("mark", value, **kwargs)
+
+    def with_on(
+        self,
+        value: DomEventType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IntervalSelectionConfig:
+        """Return a copy with a ``DomEventType`` on."""
+        return self._with_property("on", value, **kwargs)
+
+    def with_type(self, value: Any) -> IntervalSelectionConfig:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_zoom(
+        self,
+        value: DomEventType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> IntervalSelectionConfig:
+        """Return a copy with a ``DomEventType`` zoom."""
+        return self._with_property("zoom", value, **kwargs)
+
 
 class JsonDataFormat(GenomeSpySchema):
     """Generated wrapper for ``JsonDataFormat``."""
@@ -2895,6 +7452,23 @@ class JsonDataFormat(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_parse(
+        self,
+        value: Parse | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> JsonDataFormat:
+        """Return a copy with a ``Parse`` parse."""
+        return self._with_property("parse", value, **kwargs)
+
+    def with_property(self, value: Any) -> JsonDataFormat:
+        """Return a copy with ``property`` updated."""
+        return self._with_property("property", value)
+
+    def with_type(self, value: Any) -> JsonDataFormat:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class KeyDef(GenomeSpySchema):
     """Generated wrapper for ``KeyDef``."""
@@ -2911,6 +7485,18 @@ class KeyDef(GenomeSpySchema):
         super().__init__(description=description, field=field, title=title)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> KeyDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_field(self, value: Any) -> KeyDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_title(self, value: Any) -> KeyDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
 
 
 class LayerSpec(GenomeSpySchema):
@@ -2977,6 +7563,166 @@ class LayerSpec(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axes(self, value: Any) -> LayerSpec:
+        """Return a copy with ``axes`` updated."""
+        return self._with_property("axes", value)
+
+    def with_baseUrl(self, value: Any) -> LayerSpec:
+        """Return a copy with ``baseUrl`` updated."""
+        return self._with_property("baseUrl", value)
+
+    def with_config(
+        self,
+        value: GenomeSpyConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``GenomeSpyConfig`` config."""
+        return self._with_property("config", value, **kwargs)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_data(
+        self,
+        value: Data | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``Data`` data."""
+        return self._with_property("data", value, **kwargs)
+
+    def with_description(self, value: Any) -> LayerSpec:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> LayerSpec:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_encoding(
+        self,
+        value: Encoding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``Encoding`` encoding."""
+        return self._with_property("encoding", value, **kwargs)
+
+    def with_height(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``SizeDef`` height."""
+        return self._with_property("height", value, **kwargs)
+
+    def with_layer(self, value: Any) -> LayerSpec:
+        """Return a copy with ``layer`` updated."""
+        return self._with_property("layer", value)
+
+    def with_legends(self, value: Any) -> LayerSpec:
+        """Return a copy with ``legends`` updated."""
+        return self._with_property("legends", value)
+
+    def with_name(self, value: Any) -> LayerSpec:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_opacity(
+        self,
+        value: ViewOpacityDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``ViewOpacityDef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_padding(
+        self,
+        value: PaddingConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``PaddingConfig`` padding."""
+        return self._with_property("padding", value, **kwargs)
+
+    def with_params(self, value: Any) -> LayerSpec:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
+    def with_resolve(self, value: Any) -> LayerSpec:
+        """Return a copy with ``resolve`` updated."""
+        return self._with_property("resolve", value)
+
+    def with_scales(self, value: Any) -> LayerSpec:
+        """Return a copy with ``scales`` updated."""
+        return self._with_property("scales", value)
+
+    def with_templates(self, value: Any) -> LayerSpec:
+        """Return a copy with ``templates`` updated."""
+        return self._with_property("templates", value)
+
+    def with_title(
+        self,
+        value: Title | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``Title`` title."""
+        return self._with_property("title", value, **kwargs)
+
+    def with_transform(self, value: Any) -> LayerSpec:
+        """Return a copy with ``transform`` updated."""
+        return self._with_property("transform", value)
+
+    def with_view(
+        self,
+        value: ViewBackground | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``ViewBackground`` view."""
+        return self._with_property("view", value, **kwargs)
+
+    def with_viewportHeight(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``SizeDef`` viewportHeight."""
+        return self._with_property("viewportHeight", value, **kwargs)
+
+    def with_viewportWidth(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``SizeDef`` viewportWidth."""
+        return self._with_property("viewportWidth", value, **kwargs)
+
+    def with_visible(self, value: Any) -> LayerSpec:
+        """Return a copy with ``visible`` updated."""
+        return self._with_property("visible", value)
+
+    def with_width(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``SizeDef`` width."""
+        return self._with_property("width", value, **kwargs)
+
 
 class LazyData(GenomeSpySchema):
     """Generated wrapper for ``LazyData``."""
@@ -2989,6 +7735,19 @@ class LazyData(GenomeSpySchema):
         super().__init__(description=description, lazy=lazy)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> LazyData:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_lazy(
+        self,
+        value: LazyDataParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyData:
+        """Return a copy with a ``LazyDataParams`` lazy."""
+        return self._with_property("lazy", value, **kwargs)
 
 
 class LazyDataParams(GenomeSpySchema):
@@ -3041,6 +7800,123 @@ class LazyDataParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_addChrPrefix(self, value: Any) -> LazyDataParams:
+        """Return a copy with ``addChrPrefix`` updated."""
+        return self._with_property("addChrPrefix", value)
+
+    def with_axis(
+        self,
+        value: Axis | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyDataParams:
+        """Return a copy with a ``Axis`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyDataParams:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_columns(self, value: Any) -> LazyDataParams:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_count(self, value: Any) -> LazyDataParams:
+        """Return a copy with ``count`` updated."""
+        return self._with_property("count", value)
+
+    def with_dataType(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyDataParams:
+        """Return a copy with a ``Type`` dataType."""
+        return self._with_property("dataType", value, **kwargs)
+
+    def with_debounce(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyDataParams:
+        """Return a copy with a ``ExprRef`` debounce."""
+        return self._with_property("debounce", value, **kwargs)
+
+    def with_debounceDomainChange(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyDataParams:
+        """Return a copy with a ``ExprRef`` debounceDomainChange."""
+        return self._with_property("debounceDomainChange", value, **kwargs)
+
+    def with_debounceMode(self, value: Any) -> LazyDataParams:
+        """Return a copy with ``debounceMode`` updated."""
+        return self._with_property("debounceMode", value)
+
+    def with_format(self, value: Any) -> LazyDataParams:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_indexUrl(
+        self,
+        value: IndexUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyDataParams:
+        """Return a copy with a ``IndexUrlSourceRef`` indexUrl."""
+        return self._with_property("indexUrl", value, **kwargs)
+
+    def with_parse(
+        self,
+        value: Parse | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyDataParams:
+        """Return a copy with a ``Parse`` parse."""
+        return self._with_property("parse", value, **kwargs)
+
+    def with_pixelsPerBin(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyDataParams:
+        """Return a copy with a ``ExprRef`` pixelsPerBin."""
+        return self._with_property("pixelsPerBin", value, **kwargs)
+
+    def with_sizeMode(self, value: Any) -> LazyDataParams:
+        """Return a copy with ``sizeMode`` updated."""
+        return self._with_property("sizeMode", value)
+
+    def with_type(self, value: Any) -> LazyDataParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_url(
+        self,
+        value: MultiUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LazyDataParams:
+        """Return a copy with a ``MultiUrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
+    def with_values(self, value: Any) -> LazyDataParams:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
+
+    def with_windowSize(self, value: Any) -> LazyDataParams:
+        """Return a copy with ``windowSize`` updated."""
+        return self._with_property("windowSize", value)
+
 
 class Legend(GenomeSpySchema):
     """Generated wrapper for ``Legend``."""
@@ -3089,6 +7965,89 @@ class Legend(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_backgroundFill(self, value: Any) -> Legend:
+        """Return a copy with ``backgroundFill`` updated."""
+        return self._with_property("backgroundFill", value)
+
+    def with_backgroundFillOpacity(self, value: Any) -> Legend:
+        """Return a copy with ``backgroundFillOpacity`` updated."""
+        return self._with_property("backgroundFillOpacity", value)
+
+    def with_backgroundStroke(self, value: Any) -> Legend:
+        """Return a copy with ``backgroundStroke`` updated."""
+        return self._with_property("backgroundStroke", value)
+
+    def with_backgroundStrokeOpacity(self, value: Any) -> Legend:
+        """Return a copy with ``backgroundStrokeOpacity`` updated."""
+        return self._with_property("backgroundStrokeOpacity", value)
+
+    def with_backgroundStrokeWidth(self, value: Any) -> Legend:
+        """Return a copy with ``backgroundStrokeWidth`` updated."""
+        return self._with_property("backgroundStrokeWidth", value)
+
+    def with_columns(self, value: Any) -> Legend:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_direction(
+        self,
+        value: LegendDirection | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Legend:
+        """Return a copy with a ``LegendDirection`` direction."""
+        return self._with_property("direction", value, **kwargs)
+
+    def with_labelLimit(self, value: Any) -> Legend:
+        """Return a copy with ``labelLimit`` updated."""
+        return self._with_property("labelLimit", value)
+
+    def with_offset(self, value: Any) -> Legend:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_orient(
+        self,
+        value: LegendOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Legend:
+        """Return a copy with a ``LegendOrient`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_padding(self, value: Any) -> Legend:
+        """Return a copy with ``padding`` updated."""
+        return self._with_property("padding", value)
+
+    def with_style(self, value: Any) -> Legend:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_symbolSize(self, value: Any) -> Legend:
+        """Return a copy with ``symbolSize`` updated."""
+        return self._with_property("symbolSize", value)
+
+    def with_symbolType(self, value: Any) -> Legend:
+        """Return a copy with ``symbolType`` updated."""
+        return self._with_property("symbolType", value)
+
+    def with_title(self, value: Any) -> Legend:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_titleOrient(
+        self,
+        value: LegendTitleOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Legend:
+        """Return a copy with a ``LegendTitleOrient`` titleOrient."""
+        return self._with_property("titleOrient", value, **kwargs)
+
+    def with_values(self, value: Any) -> Legend:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
 
 
 class LegendConfig(GenomeSpySchema):
@@ -3185,6 +8144,216 @@ class LegendConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_backgroundFill(self, value: Any) -> LegendConfig:
+        """Return a copy with ``backgroundFill`` updated."""
+        return self._with_property("backgroundFill", value)
+
+    def with_backgroundFillOpacity(self, value: Any) -> LegendConfig:
+        """Return a copy with ``backgroundFillOpacity`` updated."""
+        return self._with_property("backgroundFillOpacity", value)
+
+    def with_backgroundStroke(self, value: Any) -> LegendConfig:
+        """Return a copy with ``backgroundStroke`` updated."""
+        return self._with_property("backgroundStroke", value)
+
+    def with_backgroundStrokeOpacity(self, value: Any) -> LegendConfig:
+        """Return a copy with ``backgroundStrokeOpacity`` updated."""
+        return self._with_property("backgroundStrokeOpacity", value)
+
+    def with_backgroundStrokeWidth(self, value: Any) -> LegendConfig:
+        """Return a copy with ``backgroundStrokeWidth`` updated."""
+        return self._with_property("backgroundStrokeWidth", value)
+
+    def with_columnPadding(self, value: Any) -> LegendConfig:
+        """Return a copy with ``columnPadding`` updated."""
+        return self._with_property("columnPadding", value)
+
+    def with_columns(self, value: Any) -> LegendConfig:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_direction(
+        self,
+        value: LegendDirection | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``LegendDirection`` direction."""
+        return self._with_property("direction", value, **kwargs)
+
+    def with_disable(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``ExprRef`` disable."""
+        return self._with_property("disable", value, **kwargs)
+
+    def with_labelAlign(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``Align`` labelAlign."""
+        return self._with_property("labelAlign", value, **kwargs)
+
+    def with_labelBaseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``Baseline`` labelBaseline."""
+        return self._with_property("labelBaseline", value, **kwargs)
+
+    def with_labelColor(self, value: Any) -> LegendConfig:
+        """Return a copy with ``labelColor`` updated."""
+        return self._with_property("labelColor", value)
+
+    def with_labelFont(self, value: Any) -> LegendConfig:
+        """Return a copy with ``labelFont`` updated."""
+        return self._with_property("labelFont", value)
+
+    def with_labelFontSize(self, value: Any) -> LegendConfig:
+        """Return a copy with ``labelFontSize`` updated."""
+        return self._with_property("labelFontSize", value)
+
+    def with_labelFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``FontStyle`` labelFontStyle."""
+        return self._with_property("labelFontStyle", value, **kwargs)
+
+    def with_labelFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``FontWeight`` labelFontWeight."""
+        return self._with_property("labelFontWeight", value, **kwargs)
+
+    def with_labelLimit(self, value: Any) -> LegendConfig:
+        """Return a copy with ``labelLimit`` updated."""
+        return self._with_property("labelLimit", value)
+
+    def with_labelOffset(self, value: Any) -> LegendConfig:
+        """Return a copy with ``labelOffset`` updated."""
+        return self._with_property("labelOffset", value)
+
+    def with_offset(self, value: Any) -> LegendConfig:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_orient(
+        self,
+        value: LegendOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``LegendOrient`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_padding(self, value: Any) -> LegendConfig:
+        """Return a copy with ``padding`` updated."""
+        return self._with_property("padding", value)
+
+    def with_rowPadding(self, value: Any) -> LegendConfig:
+        """Return a copy with ``rowPadding`` updated."""
+        return self._with_property("rowPadding", value)
+
+    def with_spacing(self, value: Any) -> LegendConfig:
+        """Return a copy with ``spacing`` updated."""
+        return self._with_property("spacing", value)
+
+    def with_style(self, value: Any) -> LegendConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_symbolBaseFillColor(self, value: Any) -> LegendConfig:
+        """Return a copy with ``symbolBaseFillColor`` updated."""
+        return self._with_property("symbolBaseFillColor", value)
+
+    def with_symbolBaseStrokeColor(self, value: Any) -> LegendConfig:
+        """Return a copy with ``symbolBaseStrokeColor`` updated."""
+        return self._with_property("symbolBaseStrokeColor", value)
+
+    def with_symbolOffset(self, value: Any) -> LegendConfig:
+        """Return a copy with ``symbolOffset`` updated."""
+        return self._with_property("symbolOffset", value)
+
+    def with_symbolSize(self, value: Any) -> LegendConfig:
+        """Return a copy with ``symbolSize`` updated."""
+        return self._with_property("symbolSize", value)
+
+    def with_symbolStrokeWidth(self, value: Any) -> LegendConfig:
+        """Return a copy with ``symbolStrokeWidth`` updated."""
+        return self._with_property("symbolStrokeWidth", value)
+
+    def with_symbolType(self, value: Any) -> LegendConfig:
+        """Return a copy with ``symbolType`` updated."""
+        return self._with_property("symbolType", value)
+
+    def with_title(self, value: Any) -> LegendConfig:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_titleColor(self, value: Any) -> LegendConfig:
+        """Return a copy with ``titleColor`` updated."""
+        return self._with_property("titleColor", value)
+
+    def with_titleFont(self, value: Any) -> LegendConfig:
+        """Return a copy with ``titleFont`` updated."""
+        return self._with_property("titleFont", value)
+
+    def with_titleFontSize(self, value: Any) -> LegendConfig:
+        """Return a copy with ``titleFontSize`` updated."""
+        return self._with_property("titleFontSize", value)
+
+    def with_titleFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``FontStyle`` titleFontStyle."""
+        return self._with_property("titleFontStyle", value, **kwargs)
+
+    def with_titleFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``FontWeight`` titleFontWeight."""
+        return self._with_property("titleFontWeight", value, **kwargs)
+
+    def with_titleLimit(self, value: Any) -> LegendConfig:
+        """Return a copy with ``titleLimit`` updated."""
+        return self._with_property("titleLimit", value)
+
+    def with_titleOrient(
+        self,
+        value: LegendTitleOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LegendConfig:
+        """Return a copy with a ``LegendTitleOrient`` titleOrient."""
+        return self._with_property("titleOrient", value, **kwargs)
+
+    def with_titlePadding(self, value: Any) -> LegendConfig:
+        """Return a copy with ``titlePadding`` updated."""
+        return self._with_property("titlePadding", value)
+
+    def with_values(self, value: Any) -> LegendConfig:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
+
 
 class LegendDirection(GenomeSpySchema):
     """Generated wrapper for ``LegendDirection``."""
@@ -3246,6 +8415,40 @@ class LinearizeGenomicCoordinateParams(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_channel(self, value: Any) -> LinearizeGenomicCoordinateParams:
+        """Return a copy with ``channel`` updated."""
+        return self._with_property("channel", value)
+
+    def with_chrom(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinearizeGenomicCoordinateParams:
+        """Return a copy with a ``Field`` chrom."""
+        return self._with_property("chrom", value, **kwargs)
+
+    def with_description(self, value: Any) -> LinearizeGenomicCoordinateParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_offset(self, value: Any) -> LinearizeGenomicCoordinateParams:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_pos(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinearizeGenomicCoordinateParams:
+        """Return a copy with a ``Field`` pos."""
+        return self._with_property("pos", value, **kwargs)
+
+    def with_type(self, value: Any) -> LinearizeGenomicCoordinateParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class LinkConfig(GenomeSpySchema):
@@ -3313,6 +8516,205 @@ class LinkConfig(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_arcFadingDistance(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` arcFadingDistance."""
+        return self._with_property("arcFadingDistance", value, **kwargs)
+
+    def with_arcHeightFactor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` arcHeightFactor."""
+        return self._with_property("arcHeightFactor", value, **kwargs)
+
+    def with_buildIndex(self, value: Any) -> LinkConfig:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clampApex(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` clampApex."""
+        return self._with_property("clampApex", value, **kwargs)
+
+    def with_clip(self, value: Any) -> LinkConfig:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> LinkConfig:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_linkShape(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` linkShape."""
+        return self._with_property("linkShape", value, **kwargs)
+
+    def with_maxChordLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` maxChordLength."""
+        return self._with_property("maxChordLength", value, **kwargs)
+
+    def with_minArcHeight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` minArcHeight."""
+        return self._with_property("minArcHeight", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> LinkConfig:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minPickingSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` minPickingSize."""
+        return self._with_property("minPickingSize", value, **kwargs)
+
+    def with_noFadingOnPointSelection(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` noFadingOnPointSelection."""
+        return self._with_property("noFadingOnPointSelection", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_orient(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_segments(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` segments."""
+        return self._with_property("segments", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_style(self, value: Any) -> LinkConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> LinkConfig:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> LinkConfig:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
 
 
 class LinkProps(GenomeSpySchema):
@@ -3383,6 +8785,209 @@ class LinkProps(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_arcFadingDistance(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` arcFadingDistance."""
+        return self._with_property("arcFadingDistance", value, **kwargs)
+
+    def with_arcHeightFactor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` arcHeightFactor."""
+        return self._with_property("arcHeightFactor", value, **kwargs)
+
+    def with_buildIndex(self, value: Any) -> LinkProps:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clampApex(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` clampApex."""
+        return self._with_property("clampApex", value, **kwargs)
+
+    def with_clip(self, value: Any) -> LinkProps:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> LinkProps:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_linkShape(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` linkShape."""
+        return self._with_property("linkShape", value, **kwargs)
+
+    def with_maxChordLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` maxChordLength."""
+        return self._with_property("maxChordLength", value, **kwargs)
+
+    def with_minArcHeight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` minArcHeight."""
+        return self._with_property("minArcHeight", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> LinkProps:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minPickingSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` minPickingSize."""
+        return self._with_property("minPickingSize", value, **kwargs)
+
+    def with_noFadingOnPointSelection(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` noFadingOnPointSelection."""
+        return self._with_property("noFadingOnPointSelection", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_orient(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_segments(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` segments."""
+        return self._with_property("segments", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_style(self, value: Any) -> LinkProps:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_type(self, value: Any) -> LinkProps:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> LinkProps:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> LinkProps:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class MarkConfig(GenomeSpySchema):
     """Generated wrapper for ``MarkConfig``."""
@@ -3423,6 +9028,88 @@ class MarkConfig(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_buildIndex(self, value: Any) -> MarkConfig:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> MarkConfig:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkConfig:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> MarkConfig:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkConfig:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> MarkConfig:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkConfig:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_style(self, value: Any) -> MarkConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkConfig:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkConfig:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> MarkConfig:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkConfig:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> MarkConfig:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
 
 
 class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
@@ -3467,6 +9154,96 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_condition(
+        self,
+        value: ConditionalMarkPropFieldDefTypeForShape
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with a ``ConditionalMarkPropFieldDefTypeForShape`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(self, value: Any) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class MarkPropDefStringNull(GenomeSpySchema):
     """Generated wrapper for ``MarkPropDef<(string|null)>``."""
@@ -3507,6 +9284,96 @@ class MarkPropDefStringNull(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_band(self, value: Any) -> MarkPropDefStringNull:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_condition(
+        self,
+        value: ConditionalMarkPropFieldDefType
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNull:
+        """Return a copy with a ``ConditionalMarkPropFieldDefType`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNull:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> MarkPropDefStringNull:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> MarkPropDefStringNull:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(self, value: Any) -> MarkPropDefStringNull:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> MarkPropDefStringNull:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNull:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNull:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNull:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> MarkPropDefStringNull:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNull:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefStringNull:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class MarkPropDefNumber(GenomeSpySchema):
@@ -3549,6 +9416,96 @@ class MarkPropDefNumber(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> MarkPropDefNumber:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_condition(
+        self,
+        value: ConditionalMarkPropFieldDefType
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefNumber:
+        """Return a copy with a ``ConditionalMarkPropFieldDefType`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefNumber:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> MarkPropDefNumber:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> MarkPropDefNumber:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(self, value: Any) -> MarkPropDefNumber:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> MarkPropDefNumber:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefNumber:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefNumber:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefNumber:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> MarkPropDefNumber:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefNumber:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropDefNumber:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class MarkPropExprDef(GenomeSpySchema):
     """Generated wrapper for ``MarkPropExprDef``."""
@@ -3579,6 +9536,53 @@ class MarkPropExprDef(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_band(self, value: Any) -> MarkPropExprDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(self, value: Any) -> MarkPropExprDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> MarkPropExprDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_expr(self, value: Any) -> MarkPropExprDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropExprDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropExprDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> MarkPropExprDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropExprDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class MarkProps(GenomeSpySchema):
@@ -3761,6 +9765,638 @@ class MarkProps(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_align(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``Align`` align."""
+        return self._with_property("align", value, **kwargs)
+
+    def with_angle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` angle."""
+        return self._with_property("angle", value, **kwargs)
+
+    def with_arcFadingDistance(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` arcFadingDistance."""
+        return self._with_property("arcFadingDistance", value, **kwargs)
+
+    def with_arcHeightFactor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` arcHeightFactor."""
+        return self._with_property("arcHeightFactor", value, **kwargs)
+
+    def with_baseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``Baseline`` baseline."""
+        return self._with_property("baseline", value, **kwargs)
+
+    def with_buildIndex(self, value: Any) -> MarkProps:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clampApex(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` clampApex."""
+        return self._with_property("clampApex", value, **kwargs)
+
+    def with_clip(self, value: Any) -> MarkProps:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cornerRadius(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` cornerRadius."""
+        return self._with_property("cornerRadius", value, **kwargs)
+
+    def with_cornerRadiusBottomLeft(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` cornerRadiusBottomLeft."""
+        return self._with_property("cornerRadiusBottomLeft", value, **kwargs)
+
+    def with_cornerRadiusBottomRight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` cornerRadiusBottomRight."""
+        return self._with_property("cornerRadiusBottomRight", value, **kwargs)
+
+    def with_cornerRadiusTopLeft(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` cornerRadiusTopLeft."""
+        return self._with_property("cornerRadiusTopLeft", value, **kwargs)
+
+    def with_cornerRadiusTopRight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` cornerRadiusTopRight."""
+        return self._with_property("cornerRadiusTopRight", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> MarkProps:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_dx(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` dx."""
+        return self._with_property("dx", value, **kwargs)
+
+    def with_dy(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` dy."""
+        return self._with_property("dy", value, **kwargs)
+
+    def with_fill(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` fill."""
+        return self._with_property("fill", value, **kwargs)
+
+    def with_fillGradientStrength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` fillGradientStrength."""
+        return self._with_property("fillGradientStrength", value, **kwargs)
+
+    def with_fillOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` fillOpacity."""
+        return self._with_property("fillOpacity", value, **kwargs)
+
+    def with_filled(self, value: Any) -> MarkProps:
+        """Return a copy with ``filled`` updated."""
+        return self._with_property("filled", value)
+
+    def with_fitToBand(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` fitToBand."""
+        return self._with_property("fitToBand", value, **kwargs)
+
+    def with_flushX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` flushX."""
+        return self._with_property("flushX", value, **kwargs)
+
+    def with_flushY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` flushY."""
+        return self._with_property("flushY", value, **kwargs)
+
+    def with_font(self, value: Any) -> MarkProps:
+        """Return a copy with ``font`` updated."""
+        return self._with_property("font", value)
+
+    def with_fontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``FontStyle`` fontStyle."""
+        return self._with_property("fontStyle", value, **kwargs)
+
+    def with_fontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``FontWeight`` fontWeight."""
+        return self._with_property("fontWeight", value, **kwargs)
+
+    def with_geometricZoomBound(self, value: Any) -> MarkProps:
+        """Return a copy with ``geometricZoomBound`` updated."""
+        return self._with_property("geometricZoomBound", value)
+
+    def with_hatch(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` hatch."""
+        return self._with_property("hatch", value, **kwargs)
+
+    def with_inwardStroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` inwardStroke."""
+        return self._with_property("inwardStroke", value, **kwargs)
+
+    def with_linkShape(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` linkShape."""
+        return self._with_property("linkShape", value, **kwargs)
+
+    def with_logoLetters(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` logoLetters."""
+        return self._with_property("logoLetters", value, **kwargs)
+
+    def with_maxChordLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` maxChordLength."""
+        return self._with_property("maxChordLength", value, **kwargs)
+
+    def with_minArcHeight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` minArcHeight."""
+        return self._with_property("minArcHeight", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> MarkProps:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minHeight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` minHeight."""
+        return self._with_property("minHeight", value, **kwargs)
+
+    def with_minLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` minLength."""
+        return self._with_property("minLength", value, **kwargs)
+
+    def with_minOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` minOpacity."""
+        return self._with_property("minOpacity", value, **kwargs)
+
+    def with_minPickingSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` minPickingSize."""
+        return self._with_property("minPickingSize", value, **kwargs)
+
+    def with_minWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` minWidth."""
+        return self._with_property("minWidth", value, **kwargs)
+
+    def with_noFadingOnPointSelection(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` noFadingOnPointSelection."""
+        return self._with_property("noFadingOnPointSelection", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_orient(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_paddingX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` paddingX."""
+        return self._with_property("paddingX", value, **kwargs)
+
+    def with_paddingY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` paddingY."""
+        return self._with_property("paddingY", value, **kwargs)
+
+    def with_sampleFacetPadding(self, value: Any) -> MarkProps:
+        """Return a copy with ``sampleFacetPadding`` updated."""
+        return self._with_property("sampleFacetPadding", value)
+
+    def with_segments(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` segments."""
+        return self._with_property("segments", value, **kwargs)
+
+    def with_semanticScore(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` semanticScore."""
+        return self._with_property("semanticScore", value, **kwargs)
+
+    def with_semanticZoomFraction(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` semanticZoomFraction."""
+        return self._with_property("semanticZoomFraction", value, **kwargs)
+
+    def with_shadowBlur(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` shadowBlur."""
+        return self._with_property("shadowBlur", value, **kwargs)
+
+    def with_shadowColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` shadowColor."""
+        return self._with_property("shadowColor", value, **kwargs)
+
+    def with_shadowOffsetX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` shadowOffsetX."""
+        return self._with_property("shadowOffsetX", value, **kwargs)
+
+    def with_shadowOffsetY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` shadowOffsetY."""
+        return self._with_property("shadowOffsetY", value, **kwargs)
+
+    def with_shadowOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` shadowOpacity."""
+        return self._with_property("shadowOpacity", value, **kwargs)
+
+    def with_shape(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` shape."""
+        return self._with_property("shape", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_squeeze(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` squeeze."""
+        return self._with_property("squeeze", value, **kwargs)
+
+    def with_stroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` stroke."""
+        return self._with_property("stroke", value, **kwargs)
+
+    def with_strokeCap(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` strokeCap."""
+        return self._with_property("strokeCap", value, **kwargs)
+
+    def with_strokeDash(self, value: Any) -> MarkProps:
+        """Return a copy with ``strokeDash`` updated."""
+        return self._with_property("strokeDash", value)
+
+    def with_strokeDashOffset(self, value: Any) -> MarkProps:
+        """Return a copy with ``strokeDashOffset`` updated."""
+        return self._with_property("strokeDashOffset", value)
+
+    def with_strokeOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` strokeOpacity."""
+        return self._with_property("strokeOpacity", value, **kwargs)
+
+    def with_strokeWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` strokeWidth."""
+        return self._with_property("strokeWidth", value, **kwargs)
+
+    def with_style(self, value: Any) -> MarkProps:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_text(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``Scalar`` text."""
+        return self._with_property("text", value, **kwargs)
+
+    def with_thickness(self, value: Any) -> MarkProps:
+        """Return a copy with ``thickness`` updated."""
+        return self._with_property("thickness", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_type(self, value: Any) -> MarkProps:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_viewportEdgeFadeDistanceBottom(self, value: Any) -> MarkProps:
+        """Return a copy with ``viewportEdgeFadeDistanceBottom`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceBottom", value)
+
+    def with_viewportEdgeFadeDistanceLeft(self, value: Any) -> MarkProps:
+        """Return a copy with ``viewportEdgeFadeDistanceLeft`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceLeft", value)
+
+    def with_viewportEdgeFadeDistanceRight(self, value: Any) -> MarkProps:
+        """Return a copy with ``viewportEdgeFadeDistanceRight`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceRight", value)
+
+    def with_viewportEdgeFadeDistanceTop(self, value: Any) -> MarkProps:
+        """Return a copy with ``viewportEdgeFadeDistanceTop`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceTop", value)
+
+    def with_viewportEdgeFadeWidthBottom(self, value: Any) -> MarkProps:
+        """Return a copy with ``viewportEdgeFadeWidthBottom`` updated."""
+        return self._with_property("viewportEdgeFadeWidthBottom", value)
+
+    def with_viewportEdgeFadeWidthLeft(self, value: Any) -> MarkProps:
+        """Return a copy with ``viewportEdgeFadeWidthLeft`` updated."""
+        return self._with_property("viewportEdgeFadeWidthLeft", value)
+
+    def with_viewportEdgeFadeWidthRight(self, value: Any) -> MarkProps:
+        """Return a copy with ``viewportEdgeFadeWidthRight`` updated."""
+        return self._with_property("viewportEdgeFadeWidthRight", value)
+
+    def with_viewportEdgeFadeWidthTop(self, value: Any) -> MarkProps:
+        """Return a copy with ``viewportEdgeFadeWidthTop`` updated."""
+        return self._with_property("viewportEdgeFadeWidthTop", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> MarkProps:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> MarkProps:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class MarkType(GenomeSpySchema):
     """Generated wrapper for ``MarkType``."""
@@ -3801,6 +10437,54 @@ class MeasureTextParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> MeasureTextParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_field(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MeasureTextParams:
+        """Return a copy with a ``Field`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_font(self, value: Any) -> MeasureTextParams:
+        """Return a copy with ``font`` updated."""
+        return self._with_property("font", value)
+
+    def with_fontSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MeasureTextParams:
+        """Return a copy with a ``ExprRef`` fontSize."""
+        return self._with_property("fontSize", value, **kwargs)
+
+    def with_fontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MeasureTextParams:
+        """Return a copy with a ``FontStyle`` fontStyle."""
+        return self._with_property("fontStyle", value, **kwargs)
+
+    def with_fontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MeasureTextParams:
+        """Return a copy with a ``FontWeight`` fontWeight."""
+        return self._with_property("fontWeight", value, **kwargs)
+
+    def with_type(self, value: Any) -> MeasureTextParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class MergeFacetsParams(GenomeSpySchema):
     """Generated wrapper for ``MergeFacetsParams``."""
@@ -3813,6 +10497,14 @@ class MergeFacetsParams(GenomeSpySchema):
         super().__init__(description=description, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> MergeFacetsParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_type(self, value: Any) -> MergeFacetsParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class MultiUrlSourceRef(GenomeSpySchema):
@@ -3842,6 +10534,44 @@ class MultiUrlSourceRef(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_attach(self, value: Any) -> MultiUrlSourceRef:
+        """Return a copy with ``attach`` updated."""
+        return self._with_property("attach", value)
+
+    def with_expr(self, value: Any) -> MultiUrlSourceRef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_field(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiUrlSourceRef:
+        """Return a copy with a ``FieldName`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_maxValues(self, value: Any) -> MultiUrlSourceRef:
+        """Return a copy with ``maxValues`` updated."""
+        return self._with_property("maxValues", value)
+
+    def with_onLoadError(self, value: Any) -> MultiUrlSourceRef:
+        """Return a copy with ``onLoadError`` updated."""
+        return self._with_property("onLoadError", value)
+
+    def with_template(self, value: Any) -> MultiUrlSourceRef:
+        """Return a copy with ``template`` updated."""
+        return self._with_property("template", value)
+
+    def with_values(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiUrlSourceRef:
+        """Return a copy with a ``ExprRef`` values."""
+        return self._with_property("values", value, **kwargs)
 
 
 class MultiscaleSpec(GenomeSpySchema):
@@ -3910,6 +10640,175 @@ class MultiscaleSpec(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axes(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``axes`` updated."""
+        return self._with_property("axes", value)
+
+    def with_baseUrl(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``baseUrl`` updated."""
+        return self._with_property("baseUrl", value)
+
+    def with_config(
+        self,
+        value: GenomeSpyConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``GenomeSpyConfig`` config."""
+        return self._with_property("config", value, **kwargs)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_data(
+        self,
+        value: Data | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``Data`` data."""
+        return self._with_property("data", value, **kwargs)
+
+    def with_description(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_encoding(
+        self,
+        value: Encoding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``Encoding`` encoding."""
+        return self._with_property("encoding", value, **kwargs)
+
+    def with_height(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``SizeDef`` height."""
+        return self._with_property("height", value, **kwargs)
+
+    def with_legends(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``legends`` updated."""
+        return self._with_property("legends", value)
+
+    def with_multiscale(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``multiscale`` updated."""
+        return self._with_property("multiscale", value)
+
+    def with_name(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_opacity(
+        self,
+        value: ViewOpacityDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``ViewOpacityDef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_padding(
+        self,
+        value: PaddingConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``PaddingConfig`` padding."""
+        return self._with_property("padding", value, **kwargs)
+
+    def with_params(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
+    def with_resolve(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``resolve`` updated."""
+        return self._with_property("resolve", value)
+
+    def with_scales(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``scales`` updated."""
+        return self._with_property("scales", value)
+
+    def with_stops(
+        self,
+        value: MultiscaleStopsDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``MultiscaleStopsDef`` stops."""
+        return self._with_property("stops", value, **kwargs)
+
+    def with_templates(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``templates`` updated."""
+        return self._with_property("templates", value)
+
+    def with_title(
+        self,
+        value: Title | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``Title`` title."""
+        return self._with_property("title", value, **kwargs)
+
+    def with_transform(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``transform`` updated."""
+        return self._with_property("transform", value)
+
+    def with_view(
+        self,
+        value: ViewBackground | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``ViewBackground`` view."""
+        return self._with_property("view", value, **kwargs)
+
+    def with_viewportHeight(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``SizeDef`` viewportHeight."""
+        return self._with_property("viewportHeight", value, **kwargs)
+
+    def with_viewportWidth(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``SizeDef`` viewportWidth."""
+        return self._with_property("viewportWidth", value, **kwargs)
+
+    def with_visible(self, value: Any) -> MultiscaleSpec:
+        """Return a copy with ``visible`` updated."""
+        return self._with_property("visible", value)
+
+    def with_width(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``SizeDef`` width."""
+        return self._with_property("width", value, **kwargs)
+
 
 class MultiscaleStops(GenomeSpySchema):
     """Generated wrapper for ``MultiscaleStops``."""
@@ -3927,6 +10826,27 @@ class MultiscaleStops(GenomeSpySchema):
         super().__init__(channel=channel, fade=fade, metric=metric, values=values)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleStops:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_fade(self, value: Any) -> MultiscaleStops:
+        """Return a copy with ``fade`` updated."""
+        return self._with_property("fade", value)
+
+    def with_metric(self, value: Any) -> MultiscaleStops:
+        """Return a copy with ``metric`` updated."""
+        return self._with_property("metric", value)
+
+    def with_values(self, value: Any) -> MultiscaleStops:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
 
 
 class MultiscaleStopsDef(GenomeSpySchema):
@@ -3946,6 +10866,27 @@ class MultiscaleStopsDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleStopsDef:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_fade(self, value: Any) -> MultiscaleStopsDef:
+        """Return a copy with ``fade`` updated."""
+        return self._with_property("fade", value)
+
+    def with_metric(self, value: Any) -> MultiscaleStopsDef:
+        """Return a copy with ``metric`` updated."""
+        return self._with_property("metric", value)
+
+    def with_values(self, value: Any) -> MultiscaleStopsDef:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
+
 
 class NamedData(GenomeSpySchema):
     """Generated wrapper for ``NamedData``."""
@@ -3963,6 +10904,23 @@ class NamedData(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> NamedData:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_format(
+        self,
+        value: DataFormat | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> NamedData:
+        """Return a copy with a ``DataFormat`` format."""
+        return self._with_property("format", value, **kwargs)
+
+    def with_name(self, value: Any) -> NamedData:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
 
 class NamedGenomeConfig(GenomeSpySchema):
     """Generated wrapper for ``NamedGenomeConfig``."""
@@ -3975,6 +10933,14 @@ class NamedGenomeConfig(GenomeSpySchema):
         super().__init__(contigs=contigs, url=url)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_contigs(self, value: Any) -> NamedGenomeConfig:
+        """Return a copy with ``contigs`` updated."""
+        return self._with_property("contigs", value)
+
+    def with_url(self, value: Any) -> NamedGenomeConfig:
+        """Return a copy with ``url`` updated."""
+        return self._with_property("url", value)
 
 
 class NumericDomain(GenomeSpySchema):
@@ -4028,6 +10994,96 @@ class NumericMarkPropDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> NumericMarkPropDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_condition(
+        self,
+        value: ConditionalMarkPropFieldDefType
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> NumericMarkPropDef:
+        """Return a copy with a ``ConditionalMarkPropFieldDefType`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> NumericMarkPropDef:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> NumericMarkPropDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> NumericMarkPropDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(self, value: Any) -> NumericMarkPropDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> NumericMarkPropDef:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> NumericMarkPropDef:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> NumericMarkPropDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> NumericMarkPropDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> NumericMarkPropDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> NumericMarkPropDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> NumericMarkPropDef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class NumericStopDef(GenomeSpySchema):
     """Generated wrapper for ``NumericStopDef``."""
@@ -4038,6 +11094,10 @@ class NumericStopDef(GenomeSpySchema):
         super().__init__(expr=expr)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_expr(self, value: Any) -> NumericStopDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
 
 
 class NumericValueDef(GenomeSpySchema):
@@ -4056,6 +11116,23 @@ class NumericValueDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> NumericValueDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_title(self, value: Any) -> NumericValueDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> NumericValueDef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class OtherDataFormat(GenomeSpySchema):
     """Generated wrapper for ``OtherDataFormat``."""
@@ -4068,6 +11145,19 @@ class OtherDataFormat(GenomeSpySchema):
         super().__init__(parse=parse, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_parse(
+        self,
+        value: Parse | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> OtherDataFormat:
+        """Return a copy with a ``Parse`` parse."""
+        return self._with_property("parse", value, **kwargs)
+
+    def with_type(self, value: Any) -> OtherDataFormat:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class PackLegendLabelsParams(GenomeSpySchema):
@@ -4114,6 +11204,86 @@ class PackLegendLabelsParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_columnPadding(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``columnPadding`` updated."""
+        return self._with_property("columnPadding", value)
+
+    def with_columns(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_description(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_direction(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``direction`` updated."""
+        return self._with_property("direction", value)
+
+    def with_fontSize(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``fontSize`` updated."""
+        return self._with_property("fontSize", value)
+
+    def with_labelOffset(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``labelOffset`` updated."""
+        return self._with_property("labelOffset", value)
+
+    def with_labelWidth(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PackLegendLabelsParams:
+        """Return a copy with a ``Field`` labelWidth."""
+        return self._with_property("labelWidth", value, **kwargs)
+
+    def with_rowPadding(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``rowPadding`` updated."""
+        return self._with_property("rowPadding", value)
+
+    def with_symbolOffset(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``symbolOffset`` updated."""
+        return self._with_property("symbolOffset", value)
+
+    def with_symbolSize(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PackLegendLabelsParams:
+        """Return a copy with a ``Field`` symbolSize."""
+        return self._with_property("symbolSize", value, **kwargs)
+
+    def with_symbolStrokeWidth(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PackLegendLabelsParams:
+        """Return a copy with a ``Field`` symbolStrokeWidth."""
+        return self._with_property("symbolStrokeWidth", value, **kwargs)
+
+    def with_type(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_xOffset(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_yExtent(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PackLegendLabelsParams:
+        """Return a copy with a ``ExprRef`` yExtent."""
+        return self._with_property("yExtent", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> PackLegendLabelsParams:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class PaddingConfig(GenomeSpySchema):
     """Generated wrapper for ``PaddingConfig``."""
@@ -4132,6 +11302,22 @@ class PaddingConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_bottom(self, value: Any) -> PaddingConfig:
+        """Return a copy with ``bottom`` updated."""
+        return self._with_property("bottom", value)
+
+    def with_left(self, value: Any) -> PaddingConfig:
+        """Return a copy with ``left`` updated."""
+        return self._with_property("left", value)
+
+    def with_right(self, value: Any) -> PaddingConfig:
+        """Return a copy with ``right`` updated."""
+        return self._with_property("right", value)
+
+    def with_top(self, value: Any) -> PaddingConfig:
+        """Return a copy with ``top`` updated."""
+        return self._with_property("top", value)
+
 
 class Paddings(GenomeSpySchema):
     """Generated wrapper for ``Paddings``."""
@@ -4149,6 +11335,22 @@ class Paddings(GenomeSpySchema):
         super().__init__(bottom=bottom, left=left, right=right, top=top)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_bottom(self, value: Any) -> Paddings:
+        """Return a copy with ``bottom`` updated."""
+        return self._with_property("bottom", value)
+
+    def with_left(self, value: Any) -> Paddings:
+        """Return a copy with ``left`` updated."""
+        return self._with_property("left", value)
+
+    def with_right(self, value: Any) -> Paddings:
+        """Return a copy with ``right`` updated."""
+        return self._with_property("right", value)
+
+    def with_top(self, value: Any) -> Paddings:
+        """Return a copy with ``top`` updated."""
+        return self._with_property("top", value)
 
 
 class Parameter(GenomeSpySchema):
@@ -4182,6 +11384,62 @@ class Parameter(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_bind(
+        self,
+        value: Binding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Parameter:
+        """Return a copy with a ``Binding`` bind."""
+        return self._with_property("bind", value, **kwargs)
+
+    def with_description(self, value: Any) -> Parameter:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_expr(self, value: Any) -> Parameter:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_name(self, value: Any) -> Parameter:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_persist(self, value: Any) -> Parameter:
+        """Return a copy with ``persist`` updated."""
+        return self._with_property("persist", value)
+
+    def with_push(self, value: Any) -> Parameter:
+        """Return a copy with ``push`` updated."""
+        return self._with_property("push", value)
+
+    def with_ruler(
+        self,
+        value: RulerConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Parameter:
+        """Return a copy with a ``RulerConfig`` ruler."""
+        return self._with_property("ruler", value, **kwargs)
+
+    def with_select(
+        self,
+        value: SelectionType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Parameter:
+        """Return a copy with a ``SelectionType`` select."""
+        return self._with_property("select", value, **kwargs)
+
+    def with_value(
+        self,
+        value: RulerInitMapping | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Parameter:
+        """Return a copy with a ``RulerInitMapping`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class Parse(GenomeSpySchema):
@@ -4233,6 +11491,49 @@ class PileupParams(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> PileupParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_end(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PileupParams:
+        """Return a copy with a ``Field`` end."""
+        return self._with_property("end", value, **kwargs)
+
+    def with_preference(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PileupParams:
+        """Return a copy with a ``Field`` preference."""
+        return self._with_property("preference", value, **kwargs)
+
+    def with_preferredOrder(self, value: Any) -> PileupParams:
+        """Return a copy with ``preferredOrder`` updated."""
+        return self._with_property("preferredOrder", value)
+
+    def with_spacing(self, value: Any) -> PileupParams:
+        """Return a copy with ``spacing`` updated."""
+        return self._with_property("spacing", value)
+
+    def with_start(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PileupParams:
+        """Return a copy with a ``Field`` start."""
+        return self._with_property("start", value, **kwargs)
+
+    def with_type(self, value: Any) -> PileupParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class PointConfig(GenomeSpySchema):
@@ -4310,6 +11611,235 @@ class PointConfig(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_angle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` angle."""
+        return self._with_property("angle", value, **kwargs)
+
+    def with_buildIndex(self, value: Any) -> PointConfig:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> PointConfig:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> PointConfig:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_dx(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` dx."""
+        return self._with_property("dx", value, **kwargs)
+
+    def with_dy(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` dy."""
+        return self._with_property("dy", value, **kwargs)
+
+    def with_fill(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` fill."""
+        return self._with_property("fill", value, **kwargs)
+
+    def with_fillGradientStrength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` fillGradientStrength."""
+        return self._with_property("fillGradientStrength", value, **kwargs)
+
+    def with_fillOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` fillOpacity."""
+        return self._with_property("fillOpacity", value, **kwargs)
+
+    def with_filled(self, value: Any) -> PointConfig:
+        """Return a copy with ``filled`` updated."""
+        return self._with_property("filled", value)
+
+    def with_geometricZoomBound(self, value: Any) -> PointConfig:
+        """Return a copy with ``geometricZoomBound`` updated."""
+        return self._with_property("geometricZoomBound", value)
+
+    def with_inwardStroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` inwardStroke."""
+        return self._with_property("inwardStroke", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> PointConfig:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minPickingSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` minPickingSize."""
+        return self._with_property("minPickingSize", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_sampleFacetPadding(self, value: Any) -> PointConfig:
+        """Return a copy with ``sampleFacetPadding`` updated."""
+        return self._with_property("sampleFacetPadding", value)
+
+    def with_semanticScore(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` semanticScore."""
+        return self._with_property("semanticScore", value, **kwargs)
+
+    def with_semanticZoomFraction(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` semanticZoomFraction."""
+        return self._with_property("semanticZoomFraction", value, **kwargs)
+
+    def with_shape(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` shape."""
+        return self._with_property("shape", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_stroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` stroke."""
+        return self._with_property("stroke", value, **kwargs)
+
+    def with_strokeOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` strokeOpacity."""
+        return self._with_property("strokeOpacity", value, **kwargs)
+
+    def with_strokeWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` strokeWidth."""
+        return self._with_property("strokeWidth", value, **kwargs)
+
+    def with_style(self, value: Any) -> PointConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> PointConfig:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> PointConfig:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
 
 
 class PointProps(GenomeSpySchema):
@@ -4390,6 +11920,239 @@ class PointProps(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_angle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` angle."""
+        return self._with_property("angle", value, **kwargs)
+
+    def with_buildIndex(self, value: Any) -> PointProps:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> PointProps:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> PointProps:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_dx(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` dx."""
+        return self._with_property("dx", value, **kwargs)
+
+    def with_dy(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` dy."""
+        return self._with_property("dy", value, **kwargs)
+
+    def with_fill(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` fill."""
+        return self._with_property("fill", value, **kwargs)
+
+    def with_fillGradientStrength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` fillGradientStrength."""
+        return self._with_property("fillGradientStrength", value, **kwargs)
+
+    def with_fillOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` fillOpacity."""
+        return self._with_property("fillOpacity", value, **kwargs)
+
+    def with_filled(self, value: Any) -> PointProps:
+        """Return a copy with ``filled`` updated."""
+        return self._with_property("filled", value)
+
+    def with_geometricZoomBound(self, value: Any) -> PointProps:
+        """Return a copy with ``geometricZoomBound`` updated."""
+        return self._with_property("geometricZoomBound", value)
+
+    def with_inwardStroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` inwardStroke."""
+        return self._with_property("inwardStroke", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> PointProps:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minPickingSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` minPickingSize."""
+        return self._with_property("minPickingSize", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_sampleFacetPadding(self, value: Any) -> PointProps:
+        """Return a copy with ``sampleFacetPadding`` updated."""
+        return self._with_property("sampleFacetPadding", value)
+
+    def with_semanticScore(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` semanticScore."""
+        return self._with_property("semanticScore", value, **kwargs)
+
+    def with_semanticZoomFraction(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` semanticZoomFraction."""
+        return self._with_property("semanticZoomFraction", value, **kwargs)
+
+    def with_shape(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` shape."""
+        return self._with_property("shape", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_stroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` stroke."""
+        return self._with_property("stroke", value, **kwargs)
+
+    def with_strokeOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` strokeOpacity."""
+        return self._with_property("strokeOpacity", value, **kwargs)
+
+    def with_strokeWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` strokeWidth."""
+        return self._with_property("strokeWidth", value, **kwargs)
+
+    def with_style(self, value: Any) -> PointProps:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_type(self, value: Any) -> PointProps:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> PointProps:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> PointProps:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class PointSelectionConfig(GenomeSpySchema):
     """Generated wrapper for ``PointSelectionConfig``."""
@@ -4407,6 +12170,32 @@ class PointSelectionConfig(GenomeSpySchema):
         super().__init__(clear=clear, on=on, toggle=toggle, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_clear(
+        self,
+        value: DomEventType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointSelectionConfig:
+        """Return a copy with a ``DomEventType`` clear."""
+        return self._with_property("clear", value, **kwargs)
+
+    def with_on(
+        self,
+        value: DomEventType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PointSelectionConfig:
+        """Return a copy with a ``DomEventType`` on."""
+        return self._with_property("on", value, **kwargs)
+
+    def with_toggle(self, value: Any) -> PointSelectionConfig:
+        """Return a copy with ``toggle`` updated."""
+        return self._with_property("toggle", value)
+
+    def with_type(self, value: Any) -> PointSelectionConfig:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class Position2Def(GenomeSpySchema):
@@ -4453,6 +12242,106 @@ class Position2Def(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axis(
+        self,
+        value: GenomeAxis | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Position2Def:
+        """Return a copy with a ``GenomeAxis`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_band(self, value: Any) -> Position2Def:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_chrom(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Position2Def:
+        """Return a copy with a ``FieldName`` chrom."""
+        return self._with_property("chrom", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Position2Def:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> Position2Def:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> Position2Def:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_expr(self, value: Any) -> Position2Def:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_field(self, value: Any) -> Position2Def:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_offset(self, value: Any) -> Position2Def:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_pos(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Position2Def:
+        """Return a copy with a ``FieldName`` pos."""
+        return self._with_property("pos", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Position2Def:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Position2Def:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> Position2Def:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Position2Def:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Position2Def:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class PositionDatumDef(GenomeSpySchema):
     """Generated wrapper for ``PositionDatumDef``."""
@@ -4485,6 +12374,67 @@ class PositionDatumDef(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_axis(
+        self,
+        value: GenomeAxis | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDatumDef:
+        """Return a copy with a ``GenomeAxis`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_band(self, value: Any) -> PositionDatumDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDatumDef:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> PositionDatumDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> PositionDatumDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDatumDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDatumDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> PositionDatumDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDatumDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class PositionDef(GenomeSpySchema):
@@ -4531,6 +12481,106 @@ class PositionDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axis(
+        self,
+        value: GenomeAxis | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDef:
+        """Return a copy with a ``GenomeAxis`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_band(self, value: Any) -> PositionDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_chrom(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDef:
+        """Return a copy with a ``FieldName`` chrom."""
+        return self._with_property("chrom", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDef:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> PositionDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> PositionDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_expr(self, value: Any) -> PositionDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_field(self, value: Any) -> PositionDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_offset(self, value: Any) -> PositionDef:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_pos(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDef:
+        """Return a copy with a ``FieldName`` pos."""
+        return self._with_property("pos", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> PositionDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionDef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class PositionExprDef(GenomeSpySchema):
     """Generated wrapper for ``PositionExprDef``."""
@@ -4559,6 +12609,44 @@ class PositionExprDef(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_axis(
+        self,
+        value: GenomeAxis | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionExprDef:
+        """Return a copy with a ``GenomeAxis`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_band(self, value: Any) -> PositionExprDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(self, value: Any) -> PositionExprDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> PositionExprDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_expr(self, value: Any) -> PositionExprDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_title(self, value: Any) -> PositionExprDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionExprDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class PositionFieldDef(GenomeSpySchema):
@@ -4593,6 +12681,62 @@ class PositionFieldDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axis(
+        self,
+        value: GenomeAxis | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionFieldDef:
+        """Return a copy with a ``GenomeAxis`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_band(self, value: Any) -> PositionFieldDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(self, value: Any) -> PositionFieldDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> PositionFieldDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(self, value: Any) -> PositionFieldDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionFieldDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionFieldDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> PositionFieldDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionFieldDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class PositionValueDef(GenomeSpySchema):
     """Generated wrapper for ``PositionValueDef``."""
@@ -4609,6 +12753,23 @@ class PositionValueDef(GenomeSpySchema):
         super().__init__(description=description, title=title, value=value)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> PositionValueDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_title(self, value: Any) -> PositionValueDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> PositionValueDef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class PositionalChannel(GenomeSpySchema):
@@ -4649,6 +12810,18 @@ class ProjectParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> ProjectParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_fields(self, value: Any) -> ProjectParams:
+        """Return a copy with ``fields`` updated."""
+        return self._with_property("fields", value)
+
+    def with_type(self, value: Any) -> ProjectParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class RangeConfig(GenomeSpySchema):
     """Generated wrapper for ``RangeConfig``."""
@@ -4675,6 +12848,45 @@ class RangeConfig(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_angle(self, value: Any) -> RangeConfig:
+        """Return a copy with ``angle`` updated."""
+        return self._with_property("angle", value)
+
+    def with_diverging(
+        self,
+        value: ColorSchemeConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RangeConfig:
+        """Return a copy with a ``ColorSchemeConfig`` diverging."""
+        return self._with_property("diverging", value, **kwargs)
+
+    def with_heatmap(
+        self,
+        value: ColorSchemeConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RangeConfig:
+        """Return a copy with a ``ColorSchemeConfig`` heatmap."""
+        return self._with_property("heatmap", value, **kwargs)
+
+    def with_ramp(
+        self,
+        value: ColorSchemeConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RangeConfig:
+        """Return a copy with a ``ColorSchemeConfig`` ramp."""
+        return self._with_property("ramp", value, **kwargs)
+
+    def with_shape(self, value: Any) -> RangeConfig:
+        """Return a copy with ``shape`` updated."""
+        return self._with_property("shape", value)
+
+    def with_size(self, value: Any) -> RangeConfig:
+        """Return a copy with ``size`` updated."""
+        return self._with_property("size", value)
 
 
 class RectConfig(GenomeSpySchema):
@@ -4760,6 +12972,281 @@ class RectConfig(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_buildIndex(self, value: Any) -> RectConfig:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> RectConfig:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cornerRadius(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` cornerRadius."""
+        return self._with_property("cornerRadius", value, **kwargs)
+
+    def with_cornerRadiusBottomLeft(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` cornerRadiusBottomLeft."""
+        return self._with_property("cornerRadiusBottomLeft", value, **kwargs)
+
+    def with_cornerRadiusBottomRight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` cornerRadiusBottomRight."""
+        return self._with_property("cornerRadiusBottomRight", value, **kwargs)
+
+    def with_cornerRadiusTopLeft(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` cornerRadiusTopLeft."""
+        return self._with_property("cornerRadiusTopLeft", value, **kwargs)
+
+    def with_cornerRadiusTopRight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` cornerRadiusTopRight."""
+        return self._with_property("cornerRadiusTopRight", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> RectConfig:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_fill(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` fill."""
+        return self._with_property("fill", value, **kwargs)
+
+    def with_fillOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` fillOpacity."""
+        return self._with_property("fillOpacity", value, **kwargs)
+
+    def with_filled(self, value: Any) -> RectConfig:
+        """Return a copy with ``filled`` updated."""
+        return self._with_property("filled", value)
+
+    def with_hatch(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` hatch."""
+        return self._with_property("hatch", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> RectConfig:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minHeight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` minHeight."""
+        return self._with_property("minHeight", value, **kwargs)
+
+    def with_minOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` minOpacity."""
+        return self._with_property("minOpacity", value, **kwargs)
+
+    def with_minWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` minWidth."""
+        return self._with_property("minWidth", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_shadowBlur(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` shadowBlur."""
+        return self._with_property("shadowBlur", value, **kwargs)
+
+    def with_shadowColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` shadowColor."""
+        return self._with_property("shadowColor", value, **kwargs)
+
+    def with_shadowOffsetX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetX."""
+        return self._with_property("shadowOffsetX", value, **kwargs)
+
+    def with_shadowOffsetY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetY."""
+        return self._with_property("shadowOffsetY", value, **kwargs)
+
+    def with_shadowOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` shadowOpacity."""
+        return self._with_property("shadowOpacity", value, **kwargs)
+
+    def with_stroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` stroke."""
+        return self._with_property("stroke", value, **kwargs)
+
+    def with_strokeOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` strokeOpacity."""
+        return self._with_property("strokeOpacity", value, **kwargs)
+
+    def with_strokeWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` strokeWidth."""
+        return self._with_property("strokeWidth", value, **kwargs)
+
+    def with_style(self, value: Any) -> RectConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> RectConfig:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> RectConfig:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
 
 
 class RectProps(GenomeSpySchema):
@@ -4848,6 +13335,285 @@ class RectProps(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_buildIndex(self, value: Any) -> RectProps:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> RectProps:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cornerRadius(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` cornerRadius."""
+        return self._with_property("cornerRadius", value, **kwargs)
+
+    def with_cornerRadiusBottomLeft(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` cornerRadiusBottomLeft."""
+        return self._with_property("cornerRadiusBottomLeft", value, **kwargs)
+
+    def with_cornerRadiusBottomRight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` cornerRadiusBottomRight."""
+        return self._with_property("cornerRadiusBottomRight", value, **kwargs)
+
+    def with_cornerRadiusTopLeft(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` cornerRadiusTopLeft."""
+        return self._with_property("cornerRadiusTopLeft", value, **kwargs)
+
+    def with_cornerRadiusTopRight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` cornerRadiusTopRight."""
+        return self._with_property("cornerRadiusTopRight", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> RectProps:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_fill(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` fill."""
+        return self._with_property("fill", value, **kwargs)
+
+    def with_fillOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` fillOpacity."""
+        return self._with_property("fillOpacity", value, **kwargs)
+
+    def with_filled(self, value: Any) -> RectProps:
+        """Return a copy with ``filled`` updated."""
+        return self._with_property("filled", value)
+
+    def with_hatch(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` hatch."""
+        return self._with_property("hatch", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> RectProps:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minHeight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` minHeight."""
+        return self._with_property("minHeight", value, **kwargs)
+
+    def with_minOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` minOpacity."""
+        return self._with_property("minOpacity", value, **kwargs)
+
+    def with_minWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` minWidth."""
+        return self._with_property("minWidth", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_shadowBlur(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` shadowBlur."""
+        return self._with_property("shadowBlur", value, **kwargs)
+
+    def with_shadowColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` shadowColor."""
+        return self._with_property("shadowColor", value, **kwargs)
+
+    def with_shadowOffsetX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` shadowOffsetX."""
+        return self._with_property("shadowOffsetX", value, **kwargs)
+
+    def with_shadowOffsetY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` shadowOffsetY."""
+        return self._with_property("shadowOffsetY", value, **kwargs)
+
+    def with_shadowOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` shadowOpacity."""
+        return self._with_property("shadowOpacity", value, **kwargs)
+
+    def with_stroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` stroke."""
+        return self._with_property("stroke", value, **kwargs)
+
+    def with_strokeOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` strokeOpacity."""
+        return self._with_property("strokeOpacity", value, **kwargs)
+
+    def with_strokeWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` strokeWidth."""
+        return self._with_property("strokeWidth", value, **kwargs)
+
+    def with_style(self, value: Any) -> RectProps:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_type(self, value: Any) -> RectProps:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> RectProps:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> RectProps:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class RegexExtractParams(GenomeSpySchema):
     """Generated wrapper for ``RegexExtractParams``."""
@@ -4872,6 +13638,31 @@ class RegexExtractParams(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> RegexExtractParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_field(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RegexExtractParams:
+        """Return a copy with a ``Field`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_regex(self, value: Any) -> RegexExtractParams:
+        """Return a copy with ``regex`` updated."""
+        return self._with_property("regex", value)
+
+    def with_skipInvalidInput(self, value: Any) -> RegexExtractParams:
+        """Return a copy with ``skipInvalidInput`` updated."""
+        return self._with_property("skipInvalidInput", value)
+
+    def with_type(self, value: Any) -> RegexExtractParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class RegexFoldParams(GenomeSpySchema):
@@ -4899,6 +13690,30 @@ class RegexFoldParams(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_asKey(self, value: Any) -> RegexFoldParams:
+        """Return a copy with ``asKey`` updated."""
+        return self._with_property("asKey", value)
+
+    def with_asValue(self, value: Any) -> RegexFoldParams:
+        """Return a copy with ``asValue`` updated."""
+        return self._with_property("asValue", value)
+
+    def with_columnRegex(self, value: Any) -> RegexFoldParams:
+        """Return a copy with ``columnRegex`` updated."""
+        return self._with_property("columnRegex", value)
+
+    def with_description(self, value: Any) -> RegexFoldParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_skipRegex(self, value: Any) -> RegexFoldParams:
+        """Return a copy with ``skipRegex`` updated."""
+        return self._with_property("skipRegex", value)
+
+    def with_type(self, value: Any) -> RegexFoldParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class ResolutionBehavior(GenomeSpySchema):
@@ -4966,6 +13781,141 @@ class RuleConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_buildIndex(self, value: Any) -> RuleConfig:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> RuleConfig:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> RuleConfig:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> RuleConfig:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` minLength."""
+        return self._with_property("minLength", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_strokeCap(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` strokeCap."""
+        return self._with_property("strokeCap", value, **kwargs)
+
+    def with_strokeDash(self, value: Any) -> RuleConfig:
+        """Return a copy with ``strokeDash`` updated."""
+        return self._with_property("strokeDash", value)
+
+    def with_strokeDashOffset(self, value: Any) -> RuleConfig:
+        """Return a copy with ``strokeDashOffset`` updated."""
+        return self._with_property("strokeDashOffset", value)
+
+    def with_style(self, value: Any) -> RuleConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> RuleConfig:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> RuleConfig:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class RuleProps(GenomeSpySchema):
     """Generated wrapper for ``RuleProps``."""
@@ -5023,6 +13973,145 @@ class RuleProps(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_buildIndex(self, value: Any) -> RuleProps:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> RuleProps:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> RuleProps:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> RuleProps:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` minLength."""
+        return self._with_property("minLength", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_strokeCap(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` strokeCap."""
+        return self._with_property("strokeCap", value, **kwargs)
+
+    def with_strokeDash(self, value: Any) -> RuleProps:
+        """Return a copy with ``strokeDash`` updated."""
+        return self._with_property("strokeDash", value)
+
+    def with_strokeDashOffset(self, value: Any) -> RuleProps:
+        """Return a copy with ``strokeDashOffset`` updated."""
+        return self._with_property("strokeDashOffset", value)
+
+    def with_style(self, value: Any) -> RuleProps:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_type(self, value: Any) -> RuleProps:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> RuleProps:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> RuleProps:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class RulerChannelValue(GenomeSpySchema):
     """Generated wrapper for ``RulerChannelValue``."""
@@ -5035,6 +14124,14 @@ class RulerChannelValue(GenomeSpySchema):
         super().__init__(chrom=chrom, pos=pos)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_chrom(self, value: Any) -> RulerChannelValue:
+        """Return a copy with ``chrom`` updated."""
+        return self._with_property("chrom", value)
+
+    def with_pos(self, value: Any) -> RulerChannelValue:
+        """Return a copy with ``pos`` updated."""
+        return self._with_property("pos", value)
 
 
 class RulerClear(GenomeSpySchema):
@@ -5078,6 +14175,73 @@ class RulerConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_clear(
+        self,
+        value: RulerClear | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerConfig:
+        """Return a copy with a ``RulerClear`` clear."""
+        return self._with_property("clear", value, **kwargs)
+
+    def with_display(
+        self,
+        value: RulerDisplay | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerConfig:
+        """Return a copy with a ``RulerDisplay`` display."""
+        return self._with_property("display", value, **kwargs)
+
+    def with_encodings(self, value: Any) -> RulerConfig:
+        """Return a copy with ``encodings`` updated."""
+        return self._with_property("encodings", value)
+
+    def with_extent(
+        self,
+        value: RulerExtent | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerConfig:
+        """Return a copy with a ``RulerExtent`` extent."""
+        return self._with_property("extent", value, **kwargs)
+
+    def with_mark(
+        self,
+        value: RulerMarkConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerConfig:
+        """Return a copy with a ``RulerMarkConfig`` mark."""
+        return self._with_property("mark", value, **kwargs)
+
+    def with_on(
+        self,
+        value: RulerEventType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerConfig:
+        """Return a copy with a ``RulerEventType`` on."""
+        return self._with_property("on", value, **kwargs)
+
+    def with_snap(
+        self,
+        value: RulerSnap | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerConfig:
+        """Return a copy with a ``RulerSnap`` snap."""
+        return self._with_property("snap", value, **kwargs)
+
+    def with_source(
+        self,
+        value: RulerSource | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerConfig:
+        """Return a copy with a ``RulerSource`` source."""
+        return self._with_property("source", value, **kwargs)
+
 
 class RulerDisplay(GenomeSpySchema):
     """Generated wrapper for ``RulerDisplay``."""
@@ -5101,6 +14265,19 @@ class RulerEventConfig(GenomeSpySchema):
         super().__init__(filter=filter, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_filter(self, value: Any) -> RulerEventConfig:
+        """Return a copy with ``filter`` updated."""
+        return self._with_property("filter", value)
+
+    def with_type(
+        self,
+        value: RulerEventType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerEventConfig:
+        """Return a copy with a ``RulerEventType`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class RulerEventType(GenomeSpySchema):
@@ -5134,6 +14311,24 @@ class RulerInitMapping(GenomeSpySchema):
         super().__init__(x=x, y=y)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_x(
+        self,
+        value: RulerChannelValue | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerInitMapping:
+        """Return a copy with a ``RulerChannelValue`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_y(
+        self,
+        value: RulerChannelValue | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerInitMapping:
+        """Return a copy with a ``RulerChannelValue`` y."""
+        return self._with_property("y", value, **kwargs)
 
 
 class RulerMarkConfig(GenomeSpySchema):
@@ -5174,6 +14369,79 @@ class RulerMarkConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_fill(self, value: Any) -> RulerMarkConfig:
+        """Return a copy with ``fill`` updated."""
+        return self._with_property("fill", value)
+
+    def with_fillOpacity(self, value: Any) -> RulerMarkConfig:
+        """Return a copy with ``fillOpacity`` updated."""
+        return self._with_property("fillOpacity", value)
+
+    def with_opacity(self, value: Any) -> RulerMarkConfig:
+        """Return a copy with ``opacity`` updated."""
+        return self._with_property("opacity", value)
+
+    def with_shadowBlur(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` shadowBlur."""
+        return self._with_property("shadowBlur", value, **kwargs)
+
+    def with_shadowColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` shadowColor."""
+        return self._with_property("shadowColor", value, **kwargs)
+
+    def with_shadowOffsetX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetX."""
+        return self._with_property("shadowOffsetX", value, **kwargs)
+
+    def with_shadowOffsetY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetY."""
+        return self._with_property("shadowOffsetY", value, **kwargs)
+
+    def with_shadowOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` shadowOpacity."""
+        return self._with_property("shadowOpacity", value, **kwargs)
+
+    def with_stroke(self, value: Any) -> RulerMarkConfig:
+        """Return a copy with ``stroke`` updated."""
+        return self._with_property("stroke", value)
+
+    def with_strokeDash(self, value: Any) -> RulerMarkConfig:
+        """Return a copy with ``strokeDash`` updated."""
+        return self._with_property("strokeDash", value)
+
+    def with_strokeWidth(self, value: Any) -> RulerMarkConfig:
+        """Return a copy with ``strokeWidth`` updated."""
+        return self._with_property("strokeWidth", value)
+
+    def with_zindex(self, value: Any) -> RulerMarkConfig:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
+
 
 class RulerParameter(GenomeSpySchema):
     """Generated wrapper for ``RulerParameter``."""
@@ -5200,6 +14468,40 @@ class RulerParameter(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> RulerParameter:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_name(self, value: Any) -> RulerParameter:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_persist(self, value: Any) -> RulerParameter:
+        """Return a copy with ``persist`` updated."""
+        return self._with_property("persist", value)
+
+    def with_push(self, value: Any) -> RulerParameter:
+        """Return a copy with ``push`` updated."""
+        return self._with_property("push", value)
+
+    def with_ruler(
+        self,
+        value: RulerConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerParameter:
+        """Return a copy with a ``RulerConfig`` ruler."""
+        return self._with_property("ruler", value, **kwargs)
+
+    def with_value(
+        self,
+        value: RulerInitMapping | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> RulerParameter:
+        """Return a copy with a ``RulerInitMapping`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class RulerSnap(GenomeSpySchema):
@@ -5239,6 +14541,18 @@ class SampleParams(GenomeSpySchema):
         super().__init__(description=description, size=size, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> SampleParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_size(self, value: Any) -> SampleParams:
+        """Return a copy with ``size`` updated."""
+        return self._with_property("size", value)
+
+    def with_type(self, value: Any) -> SampleParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class Scalar(GenomeSpySchema):
@@ -5329,6 +14643,140 @@ class Scale(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_align(self, value: Any) -> Scale:
+        """Return a copy with ``align`` updated."""
+        return self._with_property("align", value)
+
+    def with_assembly(
+        self,
+        value: InlineLocusAssembly | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Scale:
+        """Return a copy with a ``InlineLocusAssembly`` assembly."""
+        return self._with_property("assembly", value, **kwargs)
+
+    def with_base(self, value: Any) -> Scale:
+        """Return a copy with ``base`` updated."""
+        return self._with_property("base", value)
+
+    def with_bins(self, value: Any) -> Scale:
+        """Return a copy with ``bins`` updated."""
+        return self._with_property("bins", value)
+
+    def with_clamp(self, value: Any) -> Scale:
+        """Return a copy with ``clamp`` updated."""
+        return self._with_property("clamp", value)
+
+    def with_constant(self, value: Any) -> Scale:
+        """Return a copy with ``constant`` updated."""
+        return self._with_property("constant", value)
+
+    def with_domain(
+        self,
+        value: ScalarDomain | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Scale:
+        """Return a copy with a ``ScalarDomain`` domain."""
+        return self._with_property("domain", value, **kwargs)
+
+    def with_domainMax(self, value: Any) -> Scale:
+        """Return a copy with ``domainMax`` updated."""
+        return self._with_property("domainMax", value)
+
+    def with_domainMid(self, value: Any) -> Scale:
+        """Return a copy with ``domainMid`` updated."""
+        return self._with_property("domainMid", value)
+
+    def with_domainMin(self, value: Any) -> Scale:
+        """Return a copy with ``domainMin`` updated."""
+        return self._with_property("domainMin", value)
+
+    def with_domainTransition(self, value: Any) -> Scale:
+        """Return a copy with ``domainTransition`` updated."""
+        return self._with_property("domainTransition", value)
+
+    def with_exponent(self, value: Any) -> Scale:
+        """Return a copy with ``exponent`` updated."""
+        return self._with_property("exponent", value)
+
+    def with_interpolate(
+        self,
+        value: ScaleInterpolate | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Scale:
+        """Return a copy with a ``ScaleInterpolate`` interpolate."""
+        return self._with_property("interpolate", value, **kwargs)
+
+    def with_name(self, value: Any) -> Scale:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_nice(self, value: Any) -> Scale:
+        """Return a copy with ``nice`` updated."""
+        return self._with_property("nice", value)
+
+    def with_numberingOffset(self, value: Any) -> Scale:
+        """Return a copy with ``numberingOffset`` updated."""
+        return self._with_property("numberingOffset", value)
+
+    def with_padding(self, value: Any) -> Scale:
+        """Return a copy with ``padding`` updated."""
+        return self._with_property("padding", value)
+
+    def with_paddingInner(self, value: Any) -> Scale:
+        """Return a copy with ``paddingInner`` updated."""
+        return self._with_property("paddingInner", value)
+
+    def with_paddingOuter(self, value: Any) -> Scale:
+        """Return a copy with ``paddingOuter`` updated."""
+        return self._with_property("paddingOuter", value)
+
+    def with_range(self, value: Any) -> Scale:
+        """Return a copy with ``range`` updated."""
+        return self._with_property("range", value)
+
+    def with_reverse(self, value: Any) -> Scale:
+        """Return a copy with ``reverse`` updated."""
+        return self._with_property("reverse", value)
+
+    def with_round(self, value: Any) -> Scale:
+        """Return a copy with ``round`` updated."""
+        return self._with_property("round", value)
+
+    def with_scheme(
+        self,
+        value: SchemeParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Scale:
+        """Return a copy with a ``SchemeParams`` scheme."""
+        return self._with_property("scheme", value, **kwargs)
+
+    def with_type(
+        self,
+        value: ScaleType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Scale:
+        """Return a copy with a ``ScaleType`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_zero(self, value: Any) -> Scale:
+        """Return a copy with ``zero`` updated."""
+        return self._with_property("zero", value)
+
+    def with_zoom(
+        self,
+        value: ZoomParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Scale:
+        """Return a copy with a ``ZoomParams`` zoom."""
+        return self._with_property("zoom", value, **kwargs)
+
 
 class ScaleConfig(GenomeSpySchema):
     """Generated wrapper for ``ScaleConfig``."""
@@ -5412,6 +14860,187 @@ class ScaleConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_align(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``align`` updated."""
+        return self._with_property("align", value)
+
+    def with_assembly(
+        self,
+        value: InlineLocusAssembly | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ScaleConfig:
+        """Return a copy with a ``InlineLocusAssembly`` assembly."""
+        return self._with_property("assembly", value, **kwargs)
+
+    def with_base(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``base`` updated."""
+        return self._with_property("base", value)
+
+    def with_bins(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``bins`` updated."""
+        return self._with_property("bins", value)
+
+    def with_clamp(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``clamp`` updated."""
+        return self._with_property("clamp", value)
+
+    def with_constant(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``constant`` updated."""
+        return self._with_property("constant", value)
+
+    def with_domain(
+        self,
+        value: ScalarDomain | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ScaleConfig:
+        """Return a copy with a ``ScalarDomain`` domain."""
+        return self._with_property("domain", value, **kwargs)
+
+    def with_domainMax(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``domainMax`` updated."""
+        return self._with_property("domainMax", value)
+
+    def with_domainMid(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``domainMid`` updated."""
+        return self._with_property("domainMid", value)
+
+    def with_domainMin(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``domainMin`` updated."""
+        return self._with_property("domainMin", value)
+
+    def with_domainTransition(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``domainTransition`` updated."""
+        return self._with_property("domainTransition", value)
+
+    def with_exponent(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``exponent`` updated."""
+        return self._with_property("exponent", value)
+
+    def with_index(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``index`` updated."""
+        return self._with_property("index", value)
+
+    def with_interpolate(
+        self,
+        value: ScaleInterpolate | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ScaleConfig:
+        """Return a copy with a ``ScaleInterpolate`` interpolate."""
+        return self._with_property("interpolate", value, **kwargs)
+
+    def with_locus(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``locus`` updated."""
+        return self._with_property("locus", value)
+
+    def with_name(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_nice(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``nice`` updated."""
+        return self._with_property("nice", value)
+
+    def with_nominal(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``nominal`` updated."""
+        return self._with_property("nominal", value)
+
+    def with_nominalColorScheme(
+        self,
+        value: ColorSchemeConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ScaleConfig:
+        """Return a copy with a ``ColorSchemeConfig`` nominalColorScheme."""
+        return self._with_property("nominalColorScheme", value, **kwargs)
+
+    def with_numberingOffset(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``numberingOffset`` updated."""
+        return self._with_property("numberingOffset", value)
+
+    def with_ordinal(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``ordinal`` updated."""
+        return self._with_property("ordinal", value)
+
+    def with_ordinalColorScheme(
+        self,
+        value: ColorSchemeConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ScaleConfig:
+        """Return a copy with a ``ColorSchemeConfig`` ordinalColorScheme."""
+        return self._with_property("ordinalColorScheme", value, **kwargs)
+
+    def with_padding(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``padding`` updated."""
+        return self._with_property("padding", value)
+
+    def with_paddingInner(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``paddingInner`` updated."""
+        return self._with_property("paddingInner", value)
+
+    def with_paddingOuter(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``paddingOuter`` updated."""
+        return self._with_property("paddingOuter", value)
+
+    def with_quantitative(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``quantitative`` updated."""
+        return self._with_property("quantitative", value)
+
+    def with_quantitativeColorScheme(
+        self,
+        value: ColorSchemeConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ScaleConfig:
+        """Return a copy with a ``ColorSchemeConfig`` quantitativeColorScheme."""
+        return self._with_property("quantitativeColorScheme", value, **kwargs)
+
+    def with_range(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``range`` updated."""
+        return self._with_property("range", value)
+
+    def with_reverse(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``reverse`` updated."""
+        return self._with_property("reverse", value)
+
+    def with_round(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``round`` updated."""
+        return self._with_property("round", value)
+
+    def with_scheme(
+        self,
+        value: SchemeParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ScaleConfig:
+        """Return a copy with a ``SchemeParams`` scheme."""
+        return self._with_property("scheme", value, **kwargs)
+
+    def with_type(
+        self,
+        value: ScaleType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ScaleConfig:
+        """Return a copy with a ``ScaleType`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_zero(self, value: Any) -> ScaleConfig:
+        """Return a copy with ``zero`` updated."""
+        return self._with_property("zero", value)
+
+    def with_zoom(
+        self,
+        value: ZoomParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ScaleConfig:
+        """Return a copy with a ``ZoomParams`` zoom."""
+        return self._with_property("zoom", value, **kwargs)
+
 
 class ScaleInterpolate(GenomeSpySchema):
     """Generated wrapper for ``ScaleInterpolate``."""
@@ -5435,6 +15064,14 @@ class ScaleInterpolateParams(GenomeSpySchema):
         super().__init__(gamma=gamma, type=type)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_gamma(self, value: Any) -> ScaleInterpolateParams:
+        """Return a copy with ``gamma`` updated."""
+        return self._with_property("gamma", value)
+
+    def with_type(self, value: Any) -> ScaleInterpolateParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class ScaleType(GenomeSpySchema):
@@ -5464,6 +15101,18 @@ class SchemeParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_count(self, value: Any) -> SchemeParams:
+        """Return a copy with ``count`` updated."""
+        return self._with_property("count", value)
+
+    def with_extent(self, value: Any) -> SchemeParams:
+        """Return a copy with ``extent`` updated."""
+        return self._with_property("extent", value)
+
+    def with_name(self, value: Any) -> SchemeParams:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
 
 class SearchDef(GenomeSpySchema):
     """Generated wrapper for ``SearchDef``."""
@@ -5480,6 +15129,18 @@ class SearchDef(GenomeSpySchema):
         super().__init__(description=description, field=field, title=title)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> SearchDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_field(self, value: Any) -> SearchDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_title(self, value: Any) -> SearchDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
 
 
 class SecondaryChromPosDef(GenomeSpySchema):
@@ -5512,6 +15173,53 @@ class SecondaryChromPosDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axis(
+        self,
+        value: GenomeAxis | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SecondaryChromPosDef:
+        """Return a copy with a ``GenomeAxis`` axis."""
+        return self._with_property("axis", value, **kwargs)
+
+    def with_band(self, value: Any) -> SecondaryChromPosDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_chrom(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SecondaryChromPosDef:
+        """Return a copy with a ``FieldName`` chrom."""
+        return self._with_property("chrom", value, **kwargs)
+
+    def with_description(self, value: Any) -> SecondaryChromPosDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> SecondaryChromPosDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_offset(self, value: Any) -> SecondaryChromPosDef:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_pos(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SecondaryChromPosDef:
+        """Return a copy with a ``FieldName`` pos."""
+        return self._with_property("pos", value, **kwargs)
+
+    def with_title(self, value: Any) -> SecondaryChromPosDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
 
 class SecondaryPositionalChannel(GenomeSpySchema):
     """Generated wrapper for ``SecondaryPositionalChannel``."""
@@ -5539,6 +15247,23 @@ class SelectionDomainRef(GenomeSpySchema):
         super().__init__(encoding=encoding, initial=initial, param=param)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_encoding(self, value: Any) -> SelectionDomainRef:
+        """Return a copy with ``encoding`` updated."""
+        return self._with_property("encoding", value)
+
+    def with_initial(
+        self,
+        value: ScalarDomain | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SelectionDomainRef:
+        """Return a copy with a ``ScalarDomain`` initial."""
+        return self._with_property("initial", value, **kwargs)
+
+    def with_param(self, value: Any) -> SelectionDomainRef:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
 
 
 class SelectionExtent(GenomeSpySchema):
@@ -5572,6 +15297,26 @@ class SelectionFilterParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> SelectionFilterParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_empty(self, value: Any) -> SelectionFilterParams:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_fields(self, value: Any) -> SelectionFilterParams:
+        """Return a copy with ``fields`` updated."""
+        return self._with_property("fields", value)
+
+    def with_param(self, value: Any) -> SelectionFilterParams:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_type(self, value: Any) -> SelectionFilterParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class SelectionInitIntervalMapping(GenomeSpySchema):
     """Generated wrapper for ``SelectionInitIntervalMapping``."""
@@ -5584,6 +15329,14 @@ class SelectionInitIntervalMapping(GenomeSpySchema):
         super().__init__(x=x, y=y)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_x(self, value: Any) -> SelectionInitIntervalMapping:
+        """Return a copy with ``x`` updated."""
+        return self._with_property("x", value)
+
+    def with_y(self, value: Any) -> SelectionInitIntervalMapping:
+        """Return a copy with ``y`` updated."""
+        return self._with_property("y", value)
 
 
 class SelectionParameter(GenomeSpySchema):
@@ -5611,6 +15364,40 @@ class SelectionParameter(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> SelectionParameter:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_name(self, value: Any) -> SelectionParameter:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_persist(self, value: Any) -> SelectionParameter:
+        """Return a copy with ``persist`` updated."""
+        return self._with_property("persist", value)
+
+    def with_push(self, value: Any) -> SelectionParameter:
+        """Return a copy with ``push`` updated."""
+        return self._with_property("push", value)
+
+    def with_select(
+        self,
+        value: SelectionType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SelectionParameter:
+        """Return a copy with a ``SelectionType`` select."""
+        return self._with_property("select", value, **kwargs)
+
+    def with_value(
+        self,
+        value: SelectionInitIntervalMapping | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SelectionParameter:
+        """Return a copy with a ``SelectionInitIntervalMapping`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class SelectionType(GenomeSpySchema):
@@ -5684,6 +15471,153 @@ class SeparatorProps(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_buildIndex(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_includePlotMargin(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``includePlotMargin`` updated."""
+        return self._with_property("includePlotMargin", value)
+
+    def with_minBufferSize(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` minLength."""
+        return self._with_property("minLength", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_strokeCap(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` strokeCap."""
+        return self._with_property("strokeCap", value, **kwargs)
+
+    def with_strokeDash(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``strokeDash`` updated."""
+        return self._with_property("strokeDash", value)
+
+    def with_strokeDashOffset(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``strokeDashOffset`` updated."""
+        return self._with_property("strokeDashOffset", value)
+
+    def with_style(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_type(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
+    def with_zindex(self, value: Any) -> SeparatorProps:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
+
 
 class SequenceGenerator(GenomeSpySchema):
     """Generated wrapper for ``SequenceGenerator``."""
@@ -5701,6 +15635,23 @@ class SequenceGenerator(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> SequenceGenerator:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_name(self, value: Any) -> SequenceGenerator:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_sequence(
+        self,
+        value: SequenceParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SequenceGenerator:
+        """Return a copy with a ``SequenceParams`` sequence."""
+        return self._with_property("sequence", value, **kwargs)
+
 
 class SequenceParams(GenomeSpySchema):
     """Generated wrapper for ``SequenceParams``."""
@@ -5717,6 +15668,33 @@ class SequenceParams(GenomeSpySchema):
         super().__init__(start=start, step=step, stop=stop)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_start(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SequenceParams:
+        """Return a copy with a ``ExprRef`` start."""
+        return self._with_property("start", value, **kwargs)
+
+    def with_step(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SequenceParams:
+        """Return a copy with a ``ExprRef`` step."""
+        return self._with_property("step", value, **kwargs)
+
+    def with_stop(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SequenceParams:
+        """Return a copy with a ``ExprRef`` stop."""
+        return self._with_property("stop", value, **kwargs)
 
 
 class ShapeDef(GenomeSpySchema):
@@ -5759,6 +15737,96 @@ class ShapeDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> ShapeDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_condition(
+        self,
+        value: ConditionalMarkPropFieldDefTypeForShape
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ShapeDef:
+        """Return a copy with a ``ConditionalMarkPropFieldDefTypeForShape`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ShapeDef:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> ShapeDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ShapeDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(self, value: Any) -> ShapeDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> ShapeDef:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_legend(
+        self,
+        value: Legend | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ShapeDef:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ShapeDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ShapeDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> ShapeDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ShapeDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ShapeDef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class SingleUrlSourceRef(GenomeSpySchema):
     """Generated wrapper for ``SingleUrlSourceRef``."""
@@ -5788,6 +15856,44 @@ class SingleUrlSourceRef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_attach(self, value: Any) -> SingleUrlSourceRef:
+        """Return a copy with ``attach`` updated."""
+        return self._with_property("attach", value)
+
+    def with_expr(self, value: Any) -> SingleUrlSourceRef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_field(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SingleUrlSourceRef:
+        """Return a copy with a ``FieldName`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_maxValues(self, value: Any) -> SingleUrlSourceRef:
+        """Return a copy with ``maxValues`` updated."""
+        return self._with_property("maxValues", value)
+
+    def with_onLoadError(self, value: Any) -> SingleUrlSourceRef:
+        """Return a copy with ``onLoadError`` updated."""
+        return self._with_property("onLoadError", value)
+
+    def with_template(self, value: Any) -> SingleUrlSourceRef:
+        """Return a copy with ``template`` updated."""
+        return self._with_property("template", value)
+
+    def with_values(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> SingleUrlSourceRef:
+        """Return a copy with a ``ExprRef`` values."""
+        return self._with_property("values", value, **kwargs)
+
 
 class SizeDef(GenomeSpySchema):
     """Generated wrapper for ``SizeDef``."""
@@ -5805,6 +15911,22 @@ class SizeDef(GenomeSpySchema):
         super().__init__(grow=grow, maxPx=maxPx, minPx=minPx, px=px)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_grow(self, value: Any) -> SizeDef:
+        """Return a copy with ``grow`` updated."""
+        return self._with_property("grow", value)
+
+    def with_maxPx(self, value: Any) -> SizeDef:
+        """Return a copy with ``maxPx`` updated."""
+        return self._with_property("maxPx", value)
+
+    def with_minPx(self, value: Any) -> SizeDef:
+        """Return a copy with ``minPx`` updated."""
+        return self._with_property("minPx", value)
+
+    def with_px(self, value: Any) -> SizeDef:
+        """Return a copy with ``px`` updated."""
+        return self._with_property("px", value)
 
 
 class SortOrder(GenomeSpySchema):
@@ -5848,6 +15970,53 @@ class StackParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_baseField(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StackParams:
+        """Return a copy with a ``Field`` baseField."""
+        return self._with_property("baseField", value, **kwargs)
+
+    def with_cardinality(self, value: Any) -> StackParams:
+        """Return a copy with ``cardinality`` updated."""
+        return self._with_property("cardinality", value)
+
+    def with_description(self, value: Any) -> StackParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_field(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StackParams:
+        """Return a copy with a ``Field`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_groupby(self, value: Any) -> StackParams:
+        """Return a copy with ``groupby`` updated."""
+        return self._with_property("groupby", value)
+
+    def with_offset(self, value: Any) -> StackParams:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_sort(
+        self,
+        value: CompareParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StackParams:
+        """Return a copy with a ``CompareParams`` sort."""
+        return self._with_property("sort", value, **kwargs)
+
+    def with_type(self, value: Any) -> StackParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
 
 class Step(GenomeSpySchema):
     """Generated wrapper for ``Step``."""
@@ -5858,6 +16027,10 @@ class Step(GenomeSpySchema):
         super().__init__(step=step)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_step(self, value: Any) -> Step:
+        """Return a copy with ``step`` updated."""
+        return self._with_property("step", value)
 
 
 class StringDatumDef(GenomeSpySchema):
@@ -5890,6 +16063,58 @@ class StringDatumDef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_band(self, value: Any) -> StringDatumDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StringDatumDef:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> StringDatumDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_format(self, value: Any) -> StringDatumDef:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StringDatumDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StringDatumDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> StringDatumDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StringDatumDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
 
 class StringFieldDef(GenomeSpySchema):
     """Generated wrapper for ``StringFieldDef``."""
@@ -5916,6 +16141,35 @@ class StringFieldDef(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> StringFieldDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> StringFieldDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_field(self, value: Any) -> StringFieldDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> StringFieldDef:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_title(self, value: Any) -> StringFieldDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StringFieldDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
 
 
 class StyleConfig(GenomeSpySchema):
@@ -6304,6 +16558,1135 @@ class StyleConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_align(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``Align`` align."""
+        return self._with_property("align", value, **kwargs)
+
+    def with_anchor(
+        self,
+        value: TitleAnchor | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``TitleAnchor`` anchor."""
+        return self._with_property("anchor", value, **kwargs)
+
+    def with_angle(self, value: Any) -> StyleConfig:
+        """Return a copy with ``angle`` updated."""
+        return self._with_property("angle", value)
+
+    def with_arcFadingDistance(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` arcFadingDistance."""
+        return self._with_property("arcFadingDistance", value, **kwargs)
+
+    def with_arcHeightFactor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` arcHeightFactor."""
+        return self._with_property("arcHeightFactor", value, **kwargs)
+
+    def with_backgroundFill(self, value: Any) -> StyleConfig:
+        """Return a copy with ``backgroundFill`` updated."""
+        return self._with_property("backgroundFill", value)
+
+    def with_backgroundFillOpacity(self, value: Any) -> StyleConfig:
+        """Return a copy with ``backgroundFillOpacity`` updated."""
+        return self._with_property("backgroundFillOpacity", value)
+
+    def with_backgroundStroke(self, value: Any) -> StyleConfig:
+        """Return a copy with ``backgroundStroke`` updated."""
+        return self._with_property("backgroundStroke", value)
+
+    def with_backgroundStrokeOpacity(self, value: Any) -> StyleConfig:
+        """Return a copy with ``backgroundStrokeOpacity`` updated."""
+        return self._with_property("backgroundStrokeOpacity", value)
+
+    def with_backgroundStrokeWidth(self, value: Any) -> StyleConfig:
+        """Return a copy with ``backgroundStrokeWidth`` updated."""
+        return self._with_property("backgroundStrokeWidth", value)
+
+    def with_baseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``Baseline`` baseline."""
+        return self._with_property("baseline", value, **kwargs)
+
+    def with_buildIndex(self, value: Any) -> StyleConfig:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_chromGrid(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromGrid`` updated."""
+        return self._with_property("chromGrid", value)
+
+    def with_chromGridCap(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromGridCap`` updated."""
+        return self._with_property("chromGridCap", value)
+
+    def with_chromGridColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromGridColor`` updated."""
+        return self._with_property("chromGridColor", value)
+
+    def with_chromGridDash(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromGridDash`` updated."""
+        return self._with_property("chromGridDash", value)
+
+    def with_chromGridDashOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromGridDashOffset`` updated."""
+        return self._with_property("chromGridDashOffset", value)
+
+    def with_chromGridFillEven(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromGridFillEven`` updated."""
+        return self._with_property("chromGridFillEven", value)
+
+    def with_chromGridFillOdd(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromGridFillOdd`` updated."""
+        return self._with_property("chromGridFillOdd", value)
+
+    def with_chromGridOpacity(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromGridOpacity`` updated."""
+        return self._with_property("chromGridOpacity", value)
+
+    def with_chromGridWidth(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromGridWidth`` updated."""
+        return self._with_property("chromGridWidth", value)
+
+    def with_chromLabelAlign(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``Align`` chromLabelAlign."""
+        return self._with_property("chromLabelAlign", value, **kwargs)
+
+    def with_chromLabelColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromLabelColor`` updated."""
+        return self._with_property("chromLabelColor", value)
+
+    def with_chromLabelFont(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromLabelFont`` updated."""
+        return self._with_property("chromLabelFont", value)
+
+    def with_chromLabelFontSize(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromLabelFontSize`` updated."""
+        return self._with_property("chromLabelFontSize", value)
+
+    def with_chromLabelFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontStyle`` chromLabelFontStyle."""
+        return self._with_property("chromLabelFontStyle", value, **kwargs)
+
+    def with_chromLabelFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontWeight`` chromLabelFontWeight."""
+        return self._with_property("chromLabelFontWeight", value, **kwargs)
+
+    def with_chromLabelPadding(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromLabelPadding`` updated."""
+        return self._with_property("chromLabelPadding", value)
+
+    def with_chromLabels(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromLabels`` updated."""
+        return self._with_property("chromLabels", value)
+
+    def with_chromTickColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromTickColor`` updated."""
+        return self._with_property("chromTickColor", value)
+
+    def with_chromTickDash(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromTickDash`` updated."""
+        return self._with_property("chromTickDash", value)
+
+    def with_chromTickDashOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromTickDashOffset`` updated."""
+        return self._with_property("chromTickDashOffset", value)
+
+    def with_chromTickSize(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromTickSize`` updated."""
+        return self._with_property("chromTickSize", value)
+
+    def with_chromTickWidth(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromTickWidth`` updated."""
+        return self._with_property("chromTickWidth", value)
+
+    def with_chromTicks(self, value: Any) -> StyleConfig:
+        """Return a copy with ``chromTicks`` updated."""
+        return self._with_property("chromTicks", value)
+
+    def with_clampApex(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` clampApex."""
+        return self._with_property("clampApex", value, **kwargs)
+
+    def with_clip(self, value: Any) -> StyleConfig:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(self, value: Any) -> StyleConfig:
+        """Return a copy with ``color`` updated."""
+        return self._with_property("color", value)
+
+    def with_columnPadding(self, value: Any) -> StyleConfig:
+        """Return a copy with ``columnPadding`` updated."""
+        return self._with_property("columnPadding", value)
+
+    def with_columns(self, value: Any) -> StyleConfig:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_cornerRadius(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` cornerRadius."""
+        return self._with_property("cornerRadius", value, **kwargs)
+
+    def with_cornerRadiusBottomLeft(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` cornerRadiusBottomLeft."""
+        return self._with_property("cornerRadiusBottomLeft", value, **kwargs)
+
+    def with_cornerRadiusBottomRight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` cornerRadiusBottomRight."""
+        return self._with_property("cornerRadiusBottomRight", value, **kwargs)
+
+    def with_cornerRadiusTopLeft(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` cornerRadiusTopLeft."""
+        return self._with_property("cornerRadiusTopLeft", value, **kwargs)
+
+    def with_cornerRadiusTopRight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` cornerRadiusTopRight."""
+        return self._with_property("cornerRadiusTopRight", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> StyleConfig:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_direction(
+        self,
+        value: LegendDirection | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``LegendDirection`` direction."""
+        return self._with_property("direction", value, **kwargs)
+
+    def with_disable(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` disable."""
+        return self._with_property("disable", value, **kwargs)
+
+    def with_domain(self, value: Any) -> StyleConfig:
+        """Return a copy with ``domain`` updated."""
+        return self._with_property("domain", value)
+
+    def with_domainCap(self, value: Any) -> StyleConfig:
+        """Return a copy with ``domainCap`` updated."""
+        return self._with_property("domainCap", value)
+
+    def with_domainColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``domainColor`` updated."""
+        return self._with_property("domainColor", value)
+
+    def with_domainDash(self, value: Any) -> StyleConfig:
+        """Return a copy with ``domainDash`` updated."""
+        return self._with_property("domainDash", value)
+
+    def with_domainDashOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``domainDashOffset`` updated."""
+        return self._with_property("domainDashOffset", value)
+
+    def with_domainWidth(self, value: Any) -> StyleConfig:
+        """Return a copy with ``domainWidth`` updated."""
+        return self._with_property("domainWidth", value)
+
+    def with_dx(self, value: Any) -> StyleConfig:
+        """Return a copy with ``dx`` updated."""
+        return self._with_property("dx", value)
+
+    def with_dy(self, value: Any) -> StyleConfig:
+        """Return a copy with ``dy`` updated."""
+        return self._with_property("dy", value)
+
+    def with_fill(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` fill."""
+        return self._with_property("fill", value, **kwargs)
+
+    def with_fillGradientStrength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` fillGradientStrength."""
+        return self._with_property("fillGradientStrength", value, **kwargs)
+
+    def with_fillOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` fillOpacity."""
+        return self._with_property("fillOpacity", value, **kwargs)
+
+    def with_filled(self, value: Any) -> StyleConfig:
+        """Return a copy with ``filled`` updated."""
+        return self._with_property("filled", value)
+
+    def with_fitToBand(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` fitToBand."""
+        return self._with_property("fitToBand", value, **kwargs)
+
+    def with_flushX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` flushX."""
+        return self._with_property("flushX", value, **kwargs)
+
+    def with_flushY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` flushY."""
+        return self._with_property("flushY", value, **kwargs)
+
+    def with_font(self, value: Any) -> StyleConfig:
+        """Return a copy with ``font`` updated."""
+        return self._with_property("font", value)
+
+    def with_fontSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` fontSize."""
+        return self._with_property("fontSize", value, **kwargs)
+
+    def with_fontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontStyle`` fontStyle."""
+        return self._with_property("fontStyle", value, **kwargs)
+
+    def with_fontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontWeight`` fontWeight."""
+        return self._with_property("fontWeight", value, **kwargs)
+
+    def with_format(self, value: Any) -> StyleConfig:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_frame(
+        self,
+        value: TitleFrame | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``TitleFrame`` frame."""
+        return self._with_property("frame", value, **kwargs)
+
+    def with_geometricZoomBound(self, value: Any) -> StyleConfig:
+        """Return a copy with ``geometricZoomBound`` updated."""
+        return self._with_property("geometricZoomBound", value)
+
+    def with_grid(self, value: Any) -> StyleConfig:
+        """Return a copy with ``grid`` updated."""
+        return self._with_property("grid", value)
+
+    def with_gridCap(self, value: Any) -> StyleConfig:
+        """Return a copy with ``gridCap`` updated."""
+        return self._with_property("gridCap", value)
+
+    def with_gridColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``gridColor`` updated."""
+        return self._with_property("gridColor", value)
+
+    def with_gridDash(self, value: Any) -> StyleConfig:
+        """Return a copy with ``gridDash`` updated."""
+        return self._with_property("gridDash", value)
+
+    def with_gridDashOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``gridDashOffset`` updated."""
+        return self._with_property("gridDashOffset", value)
+
+    def with_gridOpacity(self, value: Any) -> StyleConfig:
+        """Return a copy with ``gridOpacity`` updated."""
+        return self._with_property("gridOpacity", value)
+
+    def with_gridWidth(self, value: Any) -> StyleConfig:
+        """Return a copy with ``gridWidth`` updated."""
+        return self._with_property("gridWidth", value)
+
+    def with_hatch(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` hatch."""
+        return self._with_property("hatch", value, **kwargs)
+
+    def with_inwardStroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` inwardStroke."""
+        return self._with_property("inwardStroke", value, **kwargs)
+
+    def with_labelAlign(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``Align`` labelAlign."""
+        return self._with_property("labelAlign", value, **kwargs)
+
+    def with_labelAngle(self, value: Any) -> StyleConfig:
+        """Return a copy with ``labelAngle`` updated."""
+        return self._with_property("labelAngle", value)
+
+    def with_labelBaseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``Baseline`` labelBaseline."""
+        return self._with_property("labelBaseline", value, **kwargs)
+
+    def with_labelColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``labelColor`` updated."""
+        return self._with_property("labelColor", value)
+
+    def with_labelFont(self, value: Any) -> StyleConfig:
+        """Return a copy with ``labelFont`` updated."""
+        return self._with_property("labelFont", value)
+
+    def with_labelFontSize(self, value: Any) -> StyleConfig:
+        """Return a copy with ``labelFontSize`` updated."""
+        return self._with_property("labelFontSize", value)
+
+    def with_labelFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontStyle`` labelFontStyle."""
+        return self._with_property("labelFontStyle", value, **kwargs)
+
+    def with_labelFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontWeight`` labelFontWeight."""
+        return self._with_property("labelFontWeight", value, **kwargs)
+
+    def with_labelLimit(self, value: Any) -> StyleConfig:
+        """Return a copy with ``labelLimit`` updated."""
+        return self._with_property("labelLimit", value)
+
+    def with_labelOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``labelOffset`` updated."""
+        return self._with_property("labelOffset", value)
+
+    def with_labelPadding(self, value: Any) -> StyleConfig:
+        """Return a copy with ``labelPadding`` updated."""
+        return self._with_property("labelPadding", value)
+
+    def with_labels(self, value: Any) -> StyleConfig:
+        """Return a copy with ``labels`` updated."""
+        return self._with_property("labels", value)
+
+    def with_linkShape(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` linkShape."""
+        return self._with_property("linkShape", value, **kwargs)
+
+    def with_logoLetters(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` logoLetters."""
+        return self._with_property("logoLetters", value, **kwargs)
+
+    def with_maxChordLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` maxChordLength."""
+        return self._with_property("maxChordLength", value, **kwargs)
+
+    def with_maxExtent(self, value: Any) -> StyleConfig:
+        """Return a copy with ``maxExtent`` updated."""
+        return self._with_property("maxExtent", value)
+
+    def with_minArcHeight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` minArcHeight."""
+        return self._with_property("minArcHeight", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> StyleConfig:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minExtent(self, value: Any) -> StyleConfig:
+        """Return a copy with ``minExtent`` updated."""
+        return self._with_property("minExtent", value)
+
+    def with_minHeight(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` minHeight."""
+        return self._with_property("minHeight", value, **kwargs)
+
+    def with_minLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` minLength."""
+        return self._with_property("minLength", value, **kwargs)
+
+    def with_minOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` minOpacity."""
+        return self._with_property("minOpacity", value, **kwargs)
+
+    def with_minPickingSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` minPickingSize."""
+        return self._with_property("minPickingSize", value, **kwargs)
+
+    def with_minWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` minWidth."""
+        return self._with_property("minWidth", value, **kwargs)
+
+    def with_noFadingOnPointSelection(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` noFadingOnPointSelection."""
+        return self._with_property("noFadingOnPointSelection", value, **kwargs)
+
+    def with_offset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_orient(
+        self,
+        value: AxisOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``AxisOrient`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_padding(self, value: Any) -> StyleConfig:
+        """Return a copy with ``padding`` updated."""
+        return self._with_property("padding", value)
+
+    def with_paddingX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` paddingX."""
+        return self._with_property("paddingX", value, **kwargs)
+
+    def with_paddingY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` paddingY."""
+        return self._with_property("paddingY", value, **kwargs)
+
+    def with_placement(
+        self,
+        value: AxisPlacement | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``AxisPlacement`` placement."""
+        return self._with_property("placement", value, **kwargs)
+
+    def with_reserve(self, value: Any) -> StyleConfig:
+        """Return a copy with ``reserve`` updated."""
+        return self._with_property("reserve", value)
+
+    def with_rowPadding(self, value: Any) -> StyleConfig:
+        """Return a copy with ``rowPadding`` updated."""
+        return self._with_property("rowPadding", value)
+
+    def with_sampleFacetPadding(self, value: Any) -> StyleConfig:
+        """Return a copy with ``sampleFacetPadding`` updated."""
+        return self._with_property("sampleFacetPadding", value)
+
+    def with_segments(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` segments."""
+        return self._with_property("segments", value, **kwargs)
+
+    def with_semanticScore(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` semanticScore."""
+        return self._with_property("semanticScore", value, **kwargs)
+
+    def with_semanticZoomFraction(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` semanticZoomFraction."""
+        return self._with_property("semanticZoomFraction", value, **kwargs)
+
+    def with_shadowBlur(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` shadowBlur."""
+        return self._with_property("shadowBlur", value, **kwargs)
+
+    def with_shadowColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` shadowColor."""
+        return self._with_property("shadowColor", value, **kwargs)
+
+    def with_shadowOffsetX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetX."""
+        return self._with_property("shadowOffsetX", value, **kwargs)
+
+    def with_shadowOffsetY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetY."""
+        return self._with_property("shadowOffsetY", value, **kwargs)
+
+    def with_shadowOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` shadowOpacity."""
+        return self._with_property("shadowOpacity", value, **kwargs)
+
+    def with_shape(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` shape."""
+        return self._with_property("shape", value, **kwargs)
+
+    def with_size(self, value: Any) -> StyleConfig:
+        """Return a copy with ``size`` updated."""
+        return self._with_property("size", value)
+
+    def with_spacing(self, value: Any) -> StyleConfig:
+        """Return a copy with ``spacing`` updated."""
+        return self._with_property("spacing", value)
+
+    def with_squeeze(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` squeeze."""
+        return self._with_property("squeeze", value, **kwargs)
+
+    def with_stroke(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` stroke."""
+        return self._with_property("stroke", value, **kwargs)
+
+    def with_strokeCap(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` strokeCap."""
+        return self._with_property("strokeCap", value, **kwargs)
+
+    def with_strokeDash(self, value: Any) -> StyleConfig:
+        """Return a copy with ``strokeDash`` updated."""
+        return self._with_property("strokeDash", value)
+
+    def with_strokeDashOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``strokeDashOffset`` updated."""
+        return self._with_property("strokeDashOffset", value)
+
+    def with_strokeOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` strokeOpacity."""
+        return self._with_property("strokeOpacity", value, **kwargs)
+
+    def with_strokeWidth(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` strokeWidth."""
+        return self._with_property("strokeWidth", value, **kwargs)
+
+    def with_style(self, value: Any) -> StyleConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_subtitle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` subtitle."""
+        return self._with_property("subtitle", value, **kwargs)
+
+    def with_subtitleColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` subtitleColor."""
+        return self._with_property("subtitleColor", value, **kwargs)
+
+    def with_subtitleFont(self, value: Any) -> StyleConfig:
+        """Return a copy with ``subtitleFont`` updated."""
+        return self._with_property("subtitleFont", value)
+
+    def with_subtitleFontSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` subtitleFontSize."""
+        return self._with_property("subtitleFontSize", value, **kwargs)
+
+    def with_subtitleFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontStyle`` subtitleFontStyle."""
+        return self._with_property("subtitleFontStyle", value, **kwargs)
+
+    def with_subtitleFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontWeight`` subtitleFontWeight."""
+        return self._with_property("subtitleFontWeight", value, **kwargs)
+
+    def with_subtitlePadding(self, value: Any) -> StyleConfig:
+        """Return a copy with ``subtitlePadding`` updated."""
+        return self._with_property("subtitlePadding", value)
+
+    def with_symbolBaseFillColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``symbolBaseFillColor`` updated."""
+        return self._with_property("symbolBaseFillColor", value)
+
+    def with_symbolBaseStrokeColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``symbolBaseStrokeColor`` updated."""
+        return self._with_property("symbolBaseStrokeColor", value)
+
+    def with_symbolOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``symbolOffset`` updated."""
+        return self._with_property("symbolOffset", value)
+
+    def with_symbolSize(self, value: Any) -> StyleConfig:
+        """Return a copy with ``symbolSize`` updated."""
+        return self._with_property("symbolSize", value)
+
+    def with_symbolStrokeWidth(self, value: Any) -> StyleConfig:
+        """Return a copy with ``symbolStrokeWidth`` updated."""
+        return self._with_property("symbolStrokeWidth", value)
+
+    def with_symbolType(self, value: Any) -> StyleConfig:
+        """Return a copy with ``symbolType`` updated."""
+        return self._with_property("symbolType", value)
+
+    def with_text(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``Scalar`` text."""
+        return self._with_property("text", value, **kwargs)
+
+    def with_thickness(self, value: Any) -> StyleConfig:
+        """Return a copy with ``thickness`` updated."""
+        return self._with_property("thickness", value)
+
+    def with_tickCap(self, value: Any) -> StyleConfig:
+        """Return a copy with ``tickCap`` updated."""
+        return self._with_property("tickCap", value)
+
+    def with_tickColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``tickColor`` updated."""
+        return self._with_property("tickColor", value)
+
+    def with_tickCount(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` tickCount."""
+        return self._with_property("tickCount", value, **kwargs)
+
+    def with_tickDash(self, value: Any) -> StyleConfig:
+        """Return a copy with ``tickDash`` updated."""
+        return self._with_property("tickDash", value)
+
+    def with_tickDashOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``tickDashOffset`` updated."""
+        return self._with_property("tickDashOffset", value)
+
+    def with_tickMinStep(self, value: Any) -> StyleConfig:
+        """Return a copy with ``tickMinStep`` updated."""
+        return self._with_property("tickMinStep", value)
+
+    def with_tickSize(self, value: Any) -> StyleConfig:
+        """Return a copy with ``tickSize`` updated."""
+        return self._with_property("tickSize", value)
+
+    def with_tickWidth(self, value: Any) -> StyleConfig:
+        """Return a copy with ``tickWidth`` updated."""
+        return self._with_property("tickWidth", value)
+
+    def with_ticks(self, value: Any) -> StyleConfig:
+        """Return a copy with ``ticks`` updated."""
+        return self._with_property("ticks", value)
+
+    def with_title(self, value: Any) -> StyleConfig:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_titleColor(self, value: Any) -> StyleConfig:
+        """Return a copy with ``titleColor`` updated."""
+        return self._with_property("titleColor", value)
+
+    def with_titleFit(self, value: Any) -> StyleConfig:
+        """Return a copy with ``titleFit`` updated."""
+        return self._with_property("titleFit", value)
+
+    def with_titleFont(self, value: Any) -> StyleConfig:
+        """Return a copy with ``titleFont`` updated."""
+        return self._with_property("titleFont", value)
+
+    def with_titleFontSize(self, value: Any) -> StyleConfig:
+        """Return a copy with ``titleFontSize`` updated."""
+        return self._with_property("titleFontSize", value)
+
+    def with_titleFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontStyle`` titleFontStyle."""
+        return self._with_property("titleFontStyle", value, **kwargs)
+
+    def with_titleFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``FontWeight`` titleFontWeight."""
+        return self._with_property("titleFontWeight", value, **kwargs)
+
+    def with_titleLimit(self, value: Any) -> StyleConfig:
+        """Return a copy with ``titleLimit`` updated."""
+        return self._with_property("titleLimit", value)
+
+    def with_titleOpacity(self, value: Any) -> StyleConfig:
+        """Return a copy with ``titleOpacity`` updated."""
+        return self._with_property("titleOpacity", value)
+
+    def with_titleOrient(
+        self,
+        value: LegendTitleOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``LegendTitleOrient`` titleOrient."""
+        return self._with_property("titleOrient", value, **kwargs)
+
+    def with_titlePadding(self, value: Any) -> StyleConfig:
+        """Return a copy with ``titlePadding`` updated."""
+        return self._with_property("titlePadding", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_values(self, value: Any) -> StyleConfig:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
+
+    def with_viewportEdgeFadeDistanceBottom(self, value: Any) -> StyleConfig:
+        """Return a copy with ``viewportEdgeFadeDistanceBottom`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceBottom", value)
+
+    def with_viewportEdgeFadeDistanceLeft(self, value: Any) -> StyleConfig:
+        """Return a copy with ``viewportEdgeFadeDistanceLeft`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceLeft", value)
+
+    def with_viewportEdgeFadeDistanceRight(self, value: Any) -> StyleConfig:
+        """Return a copy with ``viewportEdgeFadeDistanceRight`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceRight", value)
+
+    def with_viewportEdgeFadeDistanceTop(self, value: Any) -> StyleConfig:
+        """Return a copy with ``viewportEdgeFadeDistanceTop`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceTop", value)
+
+    def with_viewportEdgeFadeWidthBottom(self, value: Any) -> StyleConfig:
+        """Return a copy with ``viewportEdgeFadeWidthBottom`` updated."""
+        return self._with_property("viewportEdgeFadeWidthBottom", value)
+
+    def with_viewportEdgeFadeWidthLeft(self, value: Any) -> StyleConfig:
+        """Return a copy with ``viewportEdgeFadeWidthLeft`` updated."""
+        return self._with_property("viewportEdgeFadeWidthLeft", value)
+
+    def with_viewportEdgeFadeWidthRight(self, value: Any) -> StyleConfig:
+        """Return a copy with ``viewportEdgeFadeWidthRight`` updated."""
+        return self._with_property("viewportEdgeFadeWidthRight", value)
+
+    def with_viewportEdgeFadeWidthTop(self, value: Any) -> StyleConfig:
+        """Return a copy with ``viewportEdgeFadeWidthTop`` updated."""
+        return self._with_property("viewportEdgeFadeWidthTop", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> StyleConfig:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
+    def with_zindex(self, value: Any) -> StyleConfig:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
+
 
 class TabixTsvData(GenomeSpySchema):
     """Generated wrapper for ``TabixTsvData``."""
@@ -6341,6 +17724,80 @@ class TabixTsvData(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_addChrPrefix(self, value: Any) -> TabixTsvData:
+        """Return a copy with ``addChrPrefix`` updated."""
+        return self._with_property("addChrPrefix", value)
+
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TabixTsvData:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_columns(self, value: Any) -> TabixTsvData:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_debounce(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TabixTsvData:
+        """Return a copy with a ``ExprRef`` debounce."""
+        return self._with_property("debounce", value, **kwargs)
+
+    def with_debounceDomainChange(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TabixTsvData:
+        """Return a copy with a ``ExprRef`` debounceDomainChange."""
+        return self._with_property("debounceDomainChange", value, **kwargs)
+
+    def with_debounceMode(self, value: Any) -> TabixTsvData:
+        """Return a copy with ``debounceMode`` updated."""
+        return self._with_property("debounceMode", value)
+
+    def with_indexUrl(
+        self,
+        value: IndexUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TabixTsvData:
+        """Return a copy with a ``IndexUrlSourceRef`` indexUrl."""
+        return self._with_property("indexUrl", value, **kwargs)
+
+    def with_parse(
+        self,
+        value: Parse | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TabixTsvData:
+        """Return a copy with a ``Parse`` parse."""
+        return self._with_property("parse", value, **kwargs)
+
+    def with_type(self, value: Any) -> TabixTsvData:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_url(
+        self,
+        value: MultiUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TabixTsvData:
+        """Return a copy with a ``MultiUrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
+    def with_windowSize(self, value: Any) -> TabixTsvData:
+        """Return a copy with ``windowSize`` updated."""
+        return self._with_property("windowSize", value)
+
 
 class TemplateImport(GenomeSpySchema):
     """Generated wrapper for ``TemplateImport``."""
@@ -6351,6 +17808,10 @@ class TemplateImport(GenomeSpySchema):
         super().__init__(template=template)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_template(self, value: Any) -> TemplateImport:
+        """Return a copy with ``template`` updated."""
+        return self._with_property("template", value)
 
 
 class TextConfig(GenomeSpySchema):
@@ -6447,6 +17908,276 @@ class TextConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_align(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``Align`` align."""
+        return self._with_property("align", value, **kwargs)
+
+    def with_angle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` angle."""
+        return self._with_property("angle", value, **kwargs)
+
+    def with_baseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``Baseline`` baseline."""
+        return self._with_property("baseline", value, **kwargs)
+
+    def with_buildIndex(self, value: Any) -> TextConfig:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> TextConfig:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> TextConfig:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_dx(self, value: Any) -> TextConfig:
+        """Return a copy with ``dx`` updated."""
+        return self._with_property("dx", value)
+
+    def with_dy(self, value: Any) -> TextConfig:
+        """Return a copy with ``dy`` updated."""
+        return self._with_property("dy", value)
+
+    def with_fitToBand(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` fitToBand."""
+        return self._with_property("fitToBand", value, **kwargs)
+
+    def with_flushX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` flushX."""
+        return self._with_property("flushX", value, **kwargs)
+
+    def with_flushY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` flushY."""
+        return self._with_property("flushY", value, **kwargs)
+
+    def with_font(self, value: Any) -> TextConfig:
+        """Return a copy with ``font`` updated."""
+        return self._with_property("font", value)
+
+    def with_fontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``FontStyle`` fontStyle."""
+        return self._with_property("fontStyle", value, **kwargs)
+
+    def with_fontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``FontWeight`` fontWeight."""
+        return self._with_property("fontWeight", value, **kwargs)
+
+    def with_logoLetters(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` logoLetters."""
+        return self._with_property("logoLetters", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> TextConfig:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_paddingX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` paddingX."""
+        return self._with_property("paddingX", value, **kwargs)
+
+    def with_paddingY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` paddingY."""
+        return self._with_property("paddingY", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_squeeze(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` squeeze."""
+        return self._with_property("squeeze", value, **kwargs)
+
+    def with_style(self, value: Any) -> TextConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_text(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``Scalar`` text."""
+        return self._with_property("text", value, **kwargs)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_viewportEdgeFadeDistanceBottom(self, value: Any) -> TextConfig:
+        """Return a copy with ``viewportEdgeFadeDistanceBottom`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceBottom", value)
+
+    def with_viewportEdgeFadeDistanceLeft(self, value: Any) -> TextConfig:
+        """Return a copy with ``viewportEdgeFadeDistanceLeft`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceLeft", value)
+
+    def with_viewportEdgeFadeDistanceRight(self, value: Any) -> TextConfig:
+        """Return a copy with ``viewportEdgeFadeDistanceRight`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceRight", value)
+
+    def with_viewportEdgeFadeDistanceTop(self, value: Any) -> TextConfig:
+        """Return a copy with ``viewportEdgeFadeDistanceTop`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceTop", value)
+
+    def with_viewportEdgeFadeWidthBottom(self, value: Any) -> TextConfig:
+        """Return a copy with ``viewportEdgeFadeWidthBottom`` updated."""
+        return self._with_property("viewportEdgeFadeWidthBottom", value)
+
+    def with_viewportEdgeFadeWidthLeft(self, value: Any) -> TextConfig:
+        """Return a copy with ``viewportEdgeFadeWidthLeft`` updated."""
+        return self._with_property("viewportEdgeFadeWidthLeft", value)
+
+    def with_viewportEdgeFadeWidthRight(self, value: Any) -> TextConfig:
+        """Return a copy with ``viewportEdgeFadeWidthRight`` updated."""
+        return self._with_property("viewportEdgeFadeWidthRight", value)
+
+    def with_viewportEdgeFadeWidthTop(self, value: Any) -> TextConfig:
+        """Return a copy with ``viewportEdgeFadeWidthTop`` updated."""
+        return self._with_property("viewportEdgeFadeWidthTop", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> TextConfig:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> TextConfig:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class TextDef(GenomeSpySchema):
     """Generated wrapper for ``TextDef``."""
@@ -6485,6 +18216,79 @@ class TextDef(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_band(self, value: Any) -> TextDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_datum(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextDef:
+        """Return a copy with a ``Scalar`` datum."""
+        return self._with_property("datum", value, **kwargs)
+
+    def with_description(self, value: Any) -> TextDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> TextDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_expr(self, value: Any) -> TextDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_field(self, value: Any) -> TextDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def with_format(self, value: Any) -> TextDef:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_resolutionChannel(
+        self,
+        value: ChannelWithScale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextDef:
+        """Return a copy with a ``ChannelWithScale`` resolutionChannel."""
+        return self._with_property("resolutionChannel", value, **kwargs)
+
+    def with_scale(
+        self,
+        value: Scale | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextDef:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: Any) -> TextDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(
+        self,
+        value: Type | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextDef:
+        """Return a copy with a ``Type`` type."""
+        return self._with_property("type", value, **kwargs)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextDef:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class TextProps(GenomeSpySchema):
@@ -6583,6 +18387,280 @@ class TextProps(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_align(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``Align`` align."""
+        return self._with_property("align", value, **kwargs)
+
+    def with_angle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` angle."""
+        return self._with_property("angle", value, **kwargs)
+
+    def with_baseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``Baseline`` baseline."""
+        return self._with_property("baseline", value, **kwargs)
+
+    def with_buildIndex(self, value: Any) -> TextProps:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> TextProps:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> TextProps:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_dx(self, value: Any) -> TextProps:
+        """Return a copy with ``dx`` updated."""
+        return self._with_property("dx", value)
+
+    def with_dy(self, value: Any) -> TextProps:
+        """Return a copy with ``dy`` updated."""
+        return self._with_property("dy", value)
+
+    def with_fitToBand(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` fitToBand."""
+        return self._with_property("fitToBand", value, **kwargs)
+
+    def with_flushX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` flushX."""
+        return self._with_property("flushX", value, **kwargs)
+
+    def with_flushY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` flushY."""
+        return self._with_property("flushY", value, **kwargs)
+
+    def with_font(self, value: Any) -> TextProps:
+        """Return a copy with ``font`` updated."""
+        return self._with_property("font", value)
+
+    def with_fontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``FontStyle`` fontStyle."""
+        return self._with_property("fontStyle", value, **kwargs)
+
+    def with_fontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``FontWeight`` fontWeight."""
+        return self._with_property("fontWeight", value, **kwargs)
+
+    def with_logoLetters(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` logoLetters."""
+        return self._with_property("logoLetters", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> TextProps:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_paddingX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` paddingX."""
+        return self._with_property("paddingX", value, **kwargs)
+
+    def with_paddingY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` paddingY."""
+        return self._with_property("paddingY", value, **kwargs)
+
+    def with_size(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` size."""
+        return self._with_property("size", value, **kwargs)
+
+    def with_squeeze(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` squeeze."""
+        return self._with_property("squeeze", value, **kwargs)
+
+    def with_style(self, value: Any) -> TextProps:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_text(
+        self,
+        value: Scalar | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``Scalar`` text."""
+        return self._with_property("text", value, **kwargs)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_type(self, value: Any) -> TextProps:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_viewportEdgeFadeDistanceBottom(self, value: Any) -> TextProps:
+        """Return a copy with ``viewportEdgeFadeDistanceBottom`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceBottom", value)
+
+    def with_viewportEdgeFadeDistanceLeft(self, value: Any) -> TextProps:
+        """Return a copy with ``viewportEdgeFadeDistanceLeft`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceLeft", value)
+
+    def with_viewportEdgeFadeDistanceRight(self, value: Any) -> TextProps:
+        """Return a copy with ``viewportEdgeFadeDistanceRight`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceRight", value)
+
+    def with_viewportEdgeFadeDistanceTop(self, value: Any) -> TextProps:
+        """Return a copy with ``viewportEdgeFadeDistanceTop`` updated."""
+        return self._with_property("viewportEdgeFadeDistanceTop", value)
+
+    def with_viewportEdgeFadeWidthBottom(self, value: Any) -> TextProps:
+        """Return a copy with ``viewportEdgeFadeWidthBottom`` updated."""
+        return self._with_property("viewportEdgeFadeWidthBottom", value)
+
+    def with_viewportEdgeFadeWidthLeft(self, value: Any) -> TextProps:
+        """Return a copy with ``viewportEdgeFadeWidthLeft`` updated."""
+        return self._with_property("viewportEdgeFadeWidthLeft", value)
+
+    def with_viewportEdgeFadeWidthRight(self, value: Any) -> TextProps:
+        """Return a copy with ``viewportEdgeFadeWidthRight`` updated."""
+        return self._with_property("viewportEdgeFadeWidthRight", value)
+
+    def with_viewportEdgeFadeWidthTop(self, value: Any) -> TextProps:
+        """Return a copy with ``viewportEdgeFadeWidthTop`` updated."""
+        return self._with_property("viewportEdgeFadeWidthTop", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_x2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` x2."""
+        return self._with_property("x2", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> TextProps:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_y2(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` y2."""
+        return self._with_property("y2", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> TextProps:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class TickConfig(GenomeSpySchema):
     """Generated wrapper for ``TickConfig``."""
@@ -6635,6 +18713,122 @@ class TickConfig(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_buildIndex(self, value: Any) -> TickConfig:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> TickConfig:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> TickConfig:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> TickConfig:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` minLength."""
+        return self._with_property("minLength", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_orient(self, value: Any) -> TickConfig:
+        """Return a copy with ``orient`` updated."""
+        return self._with_property("orient", value)
+
+    def with_strokeCap(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` strokeCap."""
+        return self._with_property("strokeCap", value, **kwargs)
+
+    def with_strokeDash(self, value: Any) -> TickConfig:
+        """Return a copy with ``strokeDash`` updated."""
+        return self._with_property("strokeDash", value)
+
+    def with_strokeDashOffset(self, value: Any) -> TickConfig:
+        """Return a copy with ``strokeDashOffset`` updated."""
+        return self._with_property("strokeDashOffset", value)
+
+    def with_style(self, value: Any) -> TickConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_thickness(self, value: Any) -> TickConfig:
+        """Return a copy with ``thickness`` updated."""
+        return self._with_property("thickness", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickConfig:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> TickConfig:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> TickConfig:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
 
 
 class TickProps(GenomeSpySchema):
@@ -6690,6 +18884,126 @@ class TickProps(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_buildIndex(self, value: Any) -> TickProps:
+        """Return a copy with ``buildIndex`` updated."""
+        return self._with_property("buildIndex", value)
+
+    def with_clip(self, value: Any) -> TickProps:
+        """Return a copy with ``clip`` updated."""
+        return self._with_property("clip", value)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_cullByVisibleRange(self, value: Any) -> TickProps:
+        """Return a copy with ``cullByVisibleRange`` updated."""
+        return self._with_property("cullByVisibleRange", value)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_minBufferSize(self, value: Any) -> TickProps:
+        """Return a copy with ``minBufferSize`` updated."""
+        return self._with_property("minBufferSize", value)
+
+    def with_minLength(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` minLength."""
+        return self._with_property("minLength", value, **kwargs)
+
+    def with_opacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_orient(self, value: Any) -> TickProps:
+        """Return a copy with ``orient`` updated."""
+        return self._with_property("orient", value)
+
+    def with_strokeCap(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` strokeCap."""
+        return self._with_property("strokeCap", value, **kwargs)
+
+    def with_strokeDash(self, value: Any) -> TickProps:
+        """Return a copy with ``strokeDash`` updated."""
+        return self._with_property("strokeDash", value)
+
+    def with_strokeDashOffset(self, value: Any) -> TickProps:
+        """Return a copy with ``strokeDashOffset`` updated."""
+        return self._with_property("strokeDashOffset", value)
+
+    def with_style(self, value: Any) -> TickProps:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_thickness(self, value: Any) -> TickProps:
+        """Return a copy with ``thickness`` updated."""
+        return self._with_property("thickness", value)
+
+    def with_tooltip(
+        self,
+        value: Tooltip | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickProps:
+        """Return a copy with a ``Tooltip`` tooltip."""
+        return self._with_property("tooltip", value, **kwargs)
+
+    def with_type(self, value: Any) -> TickProps:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_x(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` x."""
+        return self._with_property("x", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> TickProps:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_y(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` y."""
+        return self._with_property("y", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> TickProps:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
 
 
 class Title(GenomeSpySchema):
@@ -6755,6 +19069,186 @@ class Title(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_align(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``Align`` align."""
+        return self._with_property("align", value, **kwargs)
+
+    def with_anchor(
+        self,
+        value: TitleAnchor | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``TitleAnchor`` anchor."""
+        return self._with_property("anchor", value, **kwargs)
+
+    def with_angle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``ExprRef`` angle."""
+        return self._with_property("angle", value, **kwargs)
+
+    def with_baseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``Baseline`` baseline."""
+        return self._with_property("baseline", value, **kwargs)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_dx(self, value: Any) -> Title:
+        """Return a copy with ``dx`` updated."""
+        return self._with_property("dx", value)
+
+    def with_dy(self, value: Any) -> Title:
+        """Return a copy with ``dy`` updated."""
+        return self._with_property("dy", value)
+
+    def with_font(self, value: Any) -> Title:
+        """Return a copy with ``font`` updated."""
+        return self._with_property("font", value)
+
+    def with_fontSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``ExprRef`` fontSize."""
+        return self._with_property("fontSize", value, **kwargs)
+
+    def with_fontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``FontStyle`` fontStyle."""
+        return self._with_property("fontStyle", value, **kwargs)
+
+    def with_fontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``FontWeight`` fontWeight."""
+        return self._with_property("fontWeight", value, **kwargs)
+
+    def with_frame(
+        self,
+        value: TitleFrame | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``TitleFrame`` frame."""
+        return self._with_property("frame", value, **kwargs)
+
+    def with_offset(self, value: Any) -> Title:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_orient(
+        self,
+        value: TitleOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``TitleOrient`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_reserve(self, value: Any) -> Title:
+        """Return a copy with ``reserve`` updated."""
+        return self._with_property("reserve", value)
+
+    def with_style(self, value: Any) -> Title:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_subtitle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``ExprRef`` subtitle."""
+        return self._with_property("subtitle", value, **kwargs)
+
+    def with_subtitleColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``ExprRef`` subtitleColor."""
+        return self._with_property("subtitleColor", value, **kwargs)
+
+    def with_subtitleFont(self, value: Any) -> Title:
+        """Return a copy with ``subtitleFont`` updated."""
+        return self._with_property("subtitleFont", value)
+
+    def with_subtitleFontSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``ExprRef`` subtitleFontSize."""
+        return self._with_property("subtitleFontSize", value, **kwargs)
+
+    def with_subtitleFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``FontStyle`` subtitleFontStyle."""
+        return self._with_property("subtitleFontStyle", value, **kwargs)
+
+    def with_subtitleFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``FontWeight`` subtitleFontWeight."""
+        return self._with_property("subtitleFontWeight", value, **kwargs)
+
+    def with_subtitlePadding(self, value: Any) -> Title:
+        """Return a copy with ``subtitlePadding`` updated."""
+        return self._with_property("subtitlePadding", value)
+
+    def with_text(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Title:
+        """Return a copy with a ``ExprRef`` text."""
+        return self._with_property("text", value, **kwargs)
+
+    def with_zindex(self, value: Any) -> Title:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
 
 
 class TitleAnchor(GenomeSpySchema):
@@ -6830,6 +19324,177 @@ class TitleConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_align(
+        self,
+        value: Align | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``Align`` align."""
+        return self._with_property("align", value, **kwargs)
+
+    def with_anchor(
+        self,
+        value: TitleAnchor | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``TitleAnchor`` anchor."""
+        return self._with_property("anchor", value, **kwargs)
+
+    def with_angle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``ExprRef`` angle."""
+        return self._with_property("angle", value, **kwargs)
+
+    def with_baseline(
+        self,
+        value: Baseline | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``Baseline`` baseline."""
+        return self._with_property("baseline", value, **kwargs)
+
+    def with_color(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``ExprRef`` color."""
+        return self._with_property("color", value, **kwargs)
+
+    def with_dx(self, value: Any) -> TitleConfig:
+        """Return a copy with ``dx`` updated."""
+        return self._with_property("dx", value)
+
+    def with_dy(self, value: Any) -> TitleConfig:
+        """Return a copy with ``dy`` updated."""
+        return self._with_property("dy", value)
+
+    def with_font(self, value: Any) -> TitleConfig:
+        """Return a copy with ``font`` updated."""
+        return self._with_property("font", value)
+
+    def with_fontSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``ExprRef`` fontSize."""
+        return self._with_property("fontSize", value, **kwargs)
+
+    def with_fontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``FontStyle`` fontStyle."""
+        return self._with_property("fontStyle", value, **kwargs)
+
+    def with_fontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``FontWeight`` fontWeight."""
+        return self._with_property("fontWeight", value, **kwargs)
+
+    def with_frame(
+        self,
+        value: TitleFrame | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``TitleFrame`` frame."""
+        return self._with_property("frame", value, **kwargs)
+
+    def with_offset(self, value: Any) -> TitleConfig:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_orient(
+        self,
+        value: TitleOrient | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``TitleOrient`` orient."""
+        return self._with_property("orient", value, **kwargs)
+
+    def with_reserve(self, value: Any) -> TitleConfig:
+        """Return a copy with ``reserve`` updated."""
+        return self._with_property("reserve", value)
+
+    def with_style(self, value: Any) -> TitleConfig:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_subtitle(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``ExprRef`` subtitle."""
+        return self._with_property("subtitle", value, **kwargs)
+
+    def with_subtitleColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``ExprRef`` subtitleColor."""
+        return self._with_property("subtitleColor", value, **kwargs)
+
+    def with_subtitleFont(self, value: Any) -> TitleConfig:
+        """Return a copy with ``subtitleFont`` updated."""
+        return self._with_property("subtitleFont", value)
+
+    def with_subtitleFontSize(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``ExprRef`` subtitleFontSize."""
+        return self._with_property("subtitleFontSize", value, **kwargs)
+
+    def with_subtitleFontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``FontStyle`` subtitleFontStyle."""
+        return self._with_property("subtitleFontStyle", value, **kwargs)
+
+    def with_subtitleFontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TitleConfig:
+        """Return a copy with a ``FontWeight`` subtitleFontWeight."""
+        return self._with_property("subtitleFontWeight", value, **kwargs)
+
+    def with_subtitlePadding(self, value: Any) -> TitleConfig:
+        """Return a copy with ``subtitlePadding`` updated."""
+        return self._with_property("subtitlePadding", value)
+
+    def with_zindex(self, value: Any) -> TitleConfig:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
+
 
 class TitleFrame(GenomeSpySchema):
     """Generated wrapper for ``TitleFrame``."""
@@ -6864,6 +19529,14 @@ class Tooltip(GenomeSpySchema):
         super().__init__(handler=handler, params=params)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_handler(self, value: Any) -> Tooltip:
+        """Return a copy with ``handler`` updated."""
+        return self._with_property("handler", value)
+
+    def with_params(self, value: Any) -> Tooltip:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
 
 
 class TransformParams(GenomeSpySchema):
@@ -6998,6 +19671,342 @@ class TransformParams(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_asChrom(self, value: Any) -> TransformParams:
+        """Return a copy with ``asChrom`` updated."""
+        return self._with_property("asChrom", value)
+
+    def with_asEnd(self, value: Any) -> TransformParams:
+        """Return a copy with ``asEnd`` updated."""
+        return self._with_property("asEnd", value)
+
+    def with_asKey(self, value: Any) -> TransformParams:
+        """Return a copy with ``asKey`` updated."""
+        return self._with_property("asKey", value)
+
+    def with_asMidpoint(self, value: Any) -> TransformParams:
+        """Return a copy with ``asMidpoint`` updated."""
+        return self._with_property("asMidpoint", value)
+
+    def with_asStart(self, value: Any) -> TransformParams:
+        """Return a copy with ``asStart`` updated."""
+        return self._with_property("asStart", value)
+
+    def with_asValue(self, value: Any) -> TransformParams:
+        """Return a copy with ``asValue`` updated."""
+        return self._with_property("asValue", value)
+
+    def with_baseField(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` baseField."""
+        return self._with_property("baseField", value, **kwargs)
+
+    def with_cardinality(self, value: Any) -> TransformParams:
+        """Return a copy with ``cardinality`` updated."""
+        return self._with_property("cardinality", value)
+
+    def with_channel(self, value: Any) -> TransformParams:
+        """Return a copy with ``channel`` updated."""
+        return self._with_property("channel", value)
+
+    def with_chrom(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` chrom."""
+        return self._with_property("chrom", value, **kwargs)
+
+    def with_columnPadding(self, value: Any) -> TransformParams:
+        """Return a copy with ``columnPadding`` updated."""
+        return self._with_property("columnPadding", value)
+
+    def with_columnRegex(self, value: Any) -> TransformParams:
+        """Return a copy with ``columnRegex`` updated."""
+        return self._with_property("columnRegex", value)
+
+    def with_columns(self, value: Any) -> TransformParams:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_description(self, value: Any) -> TransformParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_direction(self, value: Any) -> TransformParams:
+        """Return a copy with ``direction`` updated."""
+        return self._with_property("direction", value)
+
+    def with_ellipsis(self, value: Any) -> TransformParams:
+        """Return a copy with ``ellipsis`` updated."""
+        return self._with_property("ellipsis", value)
+
+    def with_empty(self, value: Any) -> TransformParams:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def with_end(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` end."""
+        return self._with_property("end", value, **kwargs)
+
+    def with_exons(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` exons."""
+        return self._with_property("exons", value, **kwargs)
+
+    def with_expr(self, value: Any) -> TransformParams:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_field(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_fields(self, value: Any) -> TransformParams:
+        """Return a copy with ``fields`` updated."""
+        return self._with_property("fields", value)
+
+    def with_font(self, value: Any) -> TransformParams:
+        """Return a copy with ``font`` updated."""
+        return self._with_property("font", value)
+
+    def with_fontSize(self, value: Any) -> TransformParams:
+        """Return a copy with ``fontSize`` updated."""
+        return self._with_property("fontSize", value)
+
+    def with_fontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``FontStyle`` fontStyle."""
+        return self._with_property("fontStyle", value, **kwargs)
+
+    def with_fontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``FontWeight`` fontWeight."""
+        return self._with_property("fontWeight", value, **kwargs)
+
+    def with_groupby(self, value: Any) -> TransformParams:
+        """Return a copy with ``groupby`` updated."""
+        return self._with_property("groupby", value)
+
+    def with_index(self, value: Any) -> TransformParams:
+        """Return a copy with ``index`` updated."""
+        return self._with_property("index", value)
+
+    def with_labelOffset(self, value: Any) -> TransformParams:
+        """Return a copy with ``labelOffset`` updated."""
+        return self._with_property("labelOffset", value)
+
+    def with_labelWidth(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` labelWidth."""
+        return self._with_property("labelWidth", value, **kwargs)
+
+    def with_lane(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` lane."""
+        return self._with_property("lane", value, **kwargs)
+
+    def with_limit(self, value: Any) -> TransformParams:
+        """Return a copy with ``limit`` updated."""
+        return self._with_property("limit", value)
+
+    def with_offset(self, value: Any) -> TransformParams:
+        """Return a copy with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def with_ops(self, value: Any) -> TransformParams:
+        """Return a copy with ``ops`` updated."""
+        return self._with_property("ops", value)
+
+    def with_padding(self, value: Any) -> TransformParams:
+        """Return a copy with ``padding`` updated."""
+        return self._with_property("padding", value)
+
+    def with_param(self, value: Any) -> TransformParams:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def with_pos(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` pos."""
+        return self._with_property("pos", value, **kwargs)
+
+    def with_pos2(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` pos2."""
+        return self._with_property("pos2", value, **kwargs)
+
+    def with_preference(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` preference."""
+        return self._with_property("preference", value, **kwargs)
+
+    def with_preferredOrder(self, value: Any) -> TransformParams:
+        """Return a copy with ``preferredOrder`` updated."""
+        return self._with_property("preferredOrder", value)
+
+    def with_regex(self, value: Any) -> TransformParams:
+        """Return a copy with ``regex`` updated."""
+        return self._with_property("regex", value)
+
+    def with_rowPadding(self, value: Any) -> TransformParams:
+        """Return a copy with ``rowPadding`` updated."""
+        return self._with_property("rowPadding", value)
+
+    def with_score(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` score."""
+        return self._with_property("score", value, **kwargs)
+
+    def with_separator(self, value: Any) -> TransformParams:
+        """Return a copy with ``separator`` updated."""
+        return self._with_property("separator", value)
+
+    def with_size(self, value: Any) -> TransformParams:
+        """Return a copy with ``size`` updated."""
+        return self._with_property("size", value)
+
+    def with_skipInvalidInput(self, value: Any) -> TransformParams:
+        """Return a copy with ``skipInvalidInput`` updated."""
+        return self._with_property("skipInvalidInput", value)
+
+    def with_skipRegex(self, value: Any) -> TransformParams:
+        """Return a copy with ``skipRegex`` updated."""
+        return self._with_property("skipRegex", value)
+
+    def with_sort(
+        self,
+        value: CompareParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``CompareParams`` sort."""
+        return self._with_property("sort", value, **kwargs)
+
+    def with_spacing(self, value: Any) -> TransformParams:
+        """Return a copy with ``spacing`` updated."""
+        return self._with_property("spacing", value)
+
+    def with_start(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` start."""
+        return self._with_property("start", value, **kwargs)
+
+    def with_symbolOffset(self, value: Any) -> TransformParams:
+        """Return a copy with ``symbolOffset`` updated."""
+        return self._with_property("symbolOffset", value)
+
+    def with_symbolSize(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` symbolSize."""
+        return self._with_property("symbolSize", value, **kwargs)
+
+    def with_symbolStrokeWidth(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` symbolStrokeWidth."""
+        return self._with_property("symbolStrokeWidth", value, **kwargs)
+
+    def with_type(self, value: Any) -> TransformParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_weight(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` weight."""
+        return self._with_property("weight", value, **kwargs)
+
+    def with_width(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``Field`` width."""
+        return self._with_property("width", value, **kwargs)
+
+    def with_xOffset(self, value: Any) -> TransformParams:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
+    def with_yExtent(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TransformParams:
+        """Return a copy with a ``ExprRef`` yExtent."""
+        return self._with_property("yExtent", value, **kwargs)
+
+    def with_yOffset(self, value: Any) -> TransformParams:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
+
 
 class TruncateTextParams(GenomeSpySchema):
     """Generated wrapper for ``TruncateTextParams``."""
@@ -7030,6 +20039,57 @@ class TruncateTextParams(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> TruncateTextParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_ellipsis(self, value: Any) -> TruncateTextParams:
+        """Return a copy with ``ellipsis`` updated."""
+        return self._with_property("ellipsis", value)
+
+    def with_field(
+        self,
+        value: Field | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TruncateTextParams:
+        """Return a copy with a ``Field`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_font(self, value: Any) -> TruncateTextParams:
+        """Return a copy with ``font`` updated."""
+        return self._with_property("font", value)
+
+    def with_fontSize(self, value: Any) -> TruncateTextParams:
+        """Return a copy with ``fontSize`` updated."""
+        return self._with_property("fontSize", value)
+
+    def with_fontStyle(
+        self,
+        value: FontStyle | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TruncateTextParams:
+        """Return a copy with a ``FontStyle`` fontStyle."""
+        return self._with_property("fontStyle", value, **kwargs)
+
+    def with_fontWeight(
+        self,
+        value: FontWeight | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> TruncateTextParams:
+        """Return a copy with a ``FontWeight`` fontWeight."""
+        return self._with_property("fontWeight", value, **kwargs)
+
+    def with_limit(self, value: Any) -> TruncateTextParams:
+        """Return a copy with ``limit`` updated."""
+        return self._with_property("limit", value)
+
+    def with_type(self, value: Any) -> TruncateTextParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class Type(GenomeSpySchema):
@@ -7118,6 +20178,171 @@ class UnitSpec(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axes(self, value: Any) -> UnitSpec:
+        """Return a copy with ``axes`` updated."""
+        return self._with_property("axes", value)
+
+    def with_baseUrl(self, value: Any) -> UnitSpec:
+        """Return a copy with ``baseUrl`` updated."""
+        return self._with_property("baseUrl", value)
+
+    def with_config(
+        self,
+        value: GenomeSpyConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``GenomeSpyConfig`` config."""
+        return self._with_property("config", value, **kwargs)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_data(
+        self,
+        value: Data | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``Data`` data."""
+        return self._with_property("data", value, **kwargs)
+
+    def with_description(self, value: Any) -> UnitSpec:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> UnitSpec:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_encoding(
+        self,
+        value: Encoding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``Encoding`` encoding."""
+        return self._with_property("encoding", value, **kwargs)
+
+    def with_height(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``SizeDef`` height."""
+        return self._with_property("height", value, **kwargs)
+
+    def with_legends(self, value: Any) -> UnitSpec:
+        """Return a copy with ``legends`` updated."""
+        return self._with_property("legends", value)
+
+    def with_mark(
+        self,
+        value: MarkType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``MarkType`` mark."""
+        return self._with_property("mark", value, **kwargs)
+
+    def with_name(self, value: Any) -> UnitSpec:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_opacity(
+        self,
+        value: ViewOpacityDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``ViewOpacityDef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_padding(
+        self,
+        value: PaddingConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``PaddingConfig`` padding."""
+        return self._with_property("padding", value, **kwargs)
+
+    def with_params(self, value: Any) -> UnitSpec:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
+    def with_resolve(self, value: Any) -> UnitSpec:
+        """Return a copy with ``resolve`` updated."""
+        return self._with_property("resolve", value)
+
+    def with_scales(self, value: Any) -> UnitSpec:
+        """Return a copy with ``scales`` updated."""
+        return self._with_property("scales", value)
+
+    def with_templates(self, value: Any) -> UnitSpec:
+        """Return a copy with ``templates`` updated."""
+        return self._with_property("templates", value)
+
+    def with_title(
+        self,
+        value: Title | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``Title`` title."""
+        return self._with_property("title", value, **kwargs)
+
+    def with_transform(self, value: Any) -> UnitSpec:
+        """Return a copy with ``transform`` updated."""
+        return self._with_property("transform", value)
+
+    def with_view(
+        self,
+        value: ViewBackground | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``ViewBackground`` view."""
+        return self._with_property("view", value, **kwargs)
+
+    def with_viewportHeight(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``SizeDef`` viewportHeight."""
+        return self._with_property("viewportHeight", value, **kwargs)
+
+    def with_viewportWidth(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``SizeDef`` viewportWidth."""
+        return self._with_property("viewportWidth", value, **kwargs)
+
+    def with_visible(self, value: Any) -> UnitSpec:
+        """Return a copy with ``visible`` updated."""
+        return self._with_property("visible", value)
+
+    def with_width(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``SizeDef`` width."""
+        return self._with_property("width", value, **kwargs)
+
 
 class UrlData(GenomeSpySchema):
     """Generated wrapper for ``UrlData``."""
@@ -7136,6 +20361,32 @@ class UrlData(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> UrlData:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_format(
+        self,
+        value: DataFormat | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UrlData:
+        """Return a copy with a ``DataFormat`` format."""
+        return self._with_property("format", value, **kwargs)
+
+    def with_name(self, value: Any) -> UrlData:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_url(
+        self,
+        value: UrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UrlData:
+        """Return a copy with a ``UrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
 
 class UrlGenomeConfig(GenomeSpySchema):
     """Generated wrapper for ``UrlGenomeConfig``."""
@@ -7149,6 +20400,14 @@ class UrlGenomeConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_name(self, value: Any) -> UrlGenomeConfig:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_url(self, value: Any) -> UrlGenomeConfig:
+        """Return a copy with ``url`` updated."""
+        return self._with_property("url", value)
+
 
 class UrlGenomeDefinition(GenomeSpySchema):
     """Generated wrapper for ``UrlGenomeDefinition``."""
@@ -7160,6 +20419,10 @@ class UrlGenomeDefinition(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_url(self, value: Any) -> UrlGenomeDefinition:
+        """Return a copy with ``url`` updated."""
+        return self._with_property("url", value)
+
 
 class UrlImport(GenomeSpySchema):
     """Generated wrapper for ``UrlImport``."""
@@ -7170,6 +20433,10 @@ class UrlImport(GenomeSpySchema):
         super().__init__(url=url)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_url(self, value: Any) -> UrlImport:
+        """Return a copy with ``url`` updated."""
+        return self._with_property("url", value)
 
 
 class UrlList(GenomeSpySchema):
@@ -7183,6 +20450,14 @@ class UrlList(GenomeSpySchema):
         super().__init__(type=type, urlsFromFile=urlsFromFile)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_type(self, value: Any) -> UrlList:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_urlsFromFile(self, value: Any) -> UrlList:
+        """Return a copy with ``urlsFromFile`` updated."""
+        return self._with_property("urlsFromFile", value)
 
 
 class UrlSourceRef(GenomeSpySchema):
@@ -7217,6 +20492,52 @@ class UrlSourceRef(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_attach(self, value: Any) -> UrlSourceRef:
+        """Return a copy with ``attach`` updated."""
+        return self._with_property("attach", value)
+
+    def with_expr(self, value: Any) -> UrlSourceRef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_field(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UrlSourceRef:
+        """Return a copy with a ``FieldName`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_maxValues(self, value: Any) -> UrlSourceRef:
+        """Return a copy with ``maxValues`` updated."""
+        return self._with_property("maxValues", value)
+
+    def with_onLoadError(self, value: Any) -> UrlSourceRef:
+        """Return a copy with ``onLoadError`` updated."""
+        return self._with_property("onLoadError", value)
+
+    def with_template(self, value: Any) -> UrlSourceRef:
+        """Return a copy with ``template`` updated."""
+        return self._with_property("template", value)
+
+    def with_type(self, value: Any) -> UrlSourceRef:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_urlsFromFile(self, value: Any) -> UrlSourceRef:
+        """Return a copy with ``urlsFromFile`` updated."""
+        return self._with_property("urlsFromFile", value)
+
+    def with_values(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UrlSourceRef:
+        """Return a copy with a ``ExprRef`` values."""
+        return self._with_property("values", value, **kwargs)
+
 
 class UrlTemplate(GenomeSpySchema):
     """Generated wrapper for ``UrlTemplate``."""
@@ -7243,6 +20564,40 @@ class UrlTemplate(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_attach(self, value: Any) -> UrlTemplate:
+        """Return a copy with ``attach`` updated."""
+        return self._with_property("attach", value)
+
+    def with_field(
+        self,
+        value: FieldName | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UrlTemplate:
+        """Return a copy with a ``FieldName`` field."""
+        return self._with_property("field", value, **kwargs)
+
+    def with_maxValues(self, value: Any) -> UrlTemplate:
+        """Return a copy with ``maxValues`` updated."""
+        return self._with_property("maxValues", value)
+
+    def with_onLoadError(self, value: Any) -> UrlTemplate:
+        """Return a copy with ``onLoadError`` updated."""
+        return self._with_property("onLoadError", value)
+
+    def with_template(self, value: Any) -> UrlTemplate:
+        """Return a copy with ``template`` updated."""
+        return self._with_property("template", value)
+
+    def with_values(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UrlTemplate:
+        """Return a copy with a ``ExprRef`` values."""
+        return self._with_property("values", value, **kwargs)
 
 
 class VConcatSpec(GenomeSpySchema):
@@ -7309,6 +20664,161 @@ class VConcatSpec(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axes(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``axes`` updated."""
+        return self._with_property("axes", value)
+
+    def with_baseUrl(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``baseUrl`` updated."""
+        return self._with_property("baseUrl", value)
+
+    def with_config(
+        self,
+        value: GenomeSpyConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``GenomeSpyConfig`` config."""
+        return self._with_property("config", value, **kwargs)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_data(
+        self,
+        value: Data | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``Data`` data."""
+        return self._with_property("data", value, **kwargs)
+
+    def with_description(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_encoding(
+        self,
+        value: Encoding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``Encoding`` encoding."""
+        return self._with_property("encoding", value, **kwargs)
+
+    def with_height(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``SizeDef`` height."""
+        return self._with_property("height", value, **kwargs)
+
+    def with_legends(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``legends`` updated."""
+        return self._with_property("legends", value)
+
+    def with_name(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_padding(
+        self,
+        value: PaddingConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``PaddingConfig`` padding."""
+        return self._with_property("padding", value, **kwargs)
+
+    def with_params(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
+    def with_resolve(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``resolve`` updated."""
+        return self._with_property("resolve", value)
+
+    def with_scales(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``scales`` updated."""
+        return self._with_property("scales", value)
+
+    def with_separator(
+        self,
+        value: SeparatorProps | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``SeparatorProps`` separator."""
+        return self._with_property("separator", value, **kwargs)
+
+    def with_spacing(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``spacing`` updated."""
+        return self._with_property("spacing", value)
+
+    def with_templates(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``templates`` updated."""
+        return self._with_property("templates", value)
+
+    def with_title(
+        self,
+        value: Title | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``Title`` title."""
+        return self._with_property("title", value, **kwargs)
+
+    def with_transform(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``transform`` updated."""
+        return self._with_property("transform", value)
+
+    def with_vconcat(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``vconcat`` updated."""
+        return self._with_property("vconcat", value)
+
+    def with_viewportHeight(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``SizeDef`` viewportHeight."""
+        return self._with_property("viewportHeight", value, **kwargs)
+
+    def with_viewportWidth(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``SizeDef`` viewportWidth."""
+        return self._with_property("viewportWidth", value, **kwargs)
+
+    def with_visible(self, value: Any) -> VConcatSpec:
+        """Return a copy with ``visible`` updated."""
+        return self._with_property("visible", value)
+
+    def with_width(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``SizeDef`` width."""
+        return self._with_property("width", value, **kwargs)
+
 
 class ValueDefNumber(GenomeSpySchema):
     """Generated wrapper for ``ValueDef<number>``."""
@@ -7326,6 +20836,23 @@ class ValueDefNumber(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_description(self, value: Any) -> ValueDefNumber:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_title(self, value: Any) -> ValueDefNumber:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ValueDefNumber:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class ValueDefString(GenomeSpySchema):
     """Generated wrapper for ``ValueDef<string>``."""
@@ -7342,6 +20869,23 @@ class ValueDefString(GenomeSpySchema):
         super().__init__(description=description, title=title, value=value)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_description(self, value: Any) -> ValueDefString:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_title(self, value: Any) -> ValueDefString:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ValueDefString:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class ValueDefWithConditionStringNullType(GenomeSpySchema):
@@ -7365,6 +20909,35 @@ class ValueDefWithConditionStringNullType(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_condition(
+        self,
+        value: ConditionalMarkPropFieldDefType
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ValueDefWithConditionStringNullType:
+        """Return a copy with a ``ConditionalMarkPropFieldDefType`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_description(self, value: Any) -> ValueDefWithConditionStringNullType:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_title(self, value: Any) -> ValueDefWithConditionStringNullType:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ValueDefWithConditionStringNullType:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class ValueDefWithConditionStringNullTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``ValueDefWithCondition<(string|null),TypeForShape>``."""
@@ -7387,6 +20960,37 @@ class ValueDefWithConditionStringNullTypeForShape(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_condition(
+        self,
+        value: ConditionalMarkPropFieldDefTypeForShape
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ValueDefWithConditionStringNullTypeForShape:
+        """Return a copy with a ``ConditionalMarkPropFieldDefTypeForShape`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_description(
+        self, value: Any
+    ) -> ValueDefWithConditionStringNullTypeForShape:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_title(self, value: Any) -> ValueDefWithConditionStringNullTypeForShape:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ValueDefWithConditionStringNullTypeForShape:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
+
 
 class ValueDefWithConditionNumberType(GenomeSpySchema):
     """Generated wrapper for ``ValueDefWithCondition<number,Type>``."""
@@ -7408,6 +21012,35 @@ class ValueDefWithConditionNumberType(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_condition(
+        self,
+        value: ConditionalMarkPropFieldDefType
+        | dict[str, Any]
+        | None
+        | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ValueDefWithConditionNumberType:
+        """Return a copy with a ``ConditionalMarkPropFieldDefType`` condition."""
+        return self._with_property("condition", value, **kwargs)
+
+    def with_description(self, value: Any) -> ValueDefWithConditionNumberType:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_title(self, value: Any) -> ValueDefWithConditionNumberType:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_value(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ValueDefWithConditionNumberType:
+        """Return a copy with a ``ExprRef`` value."""
+        return self._with_property("value", value, **kwargs)
 
 
 class VariableParameter(GenomeSpySchema):
@@ -7437,6 +21070,39 @@ class VariableParameter(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_bind(
+        self,
+        value: Binding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VariableParameter:
+        """Return a copy with a ``Binding`` bind."""
+        return self._with_property("bind", value, **kwargs)
+
+    def with_description(self, value: Any) -> VariableParameter:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_expr(self, value: Any) -> VariableParameter:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_name(self, value: Any) -> VariableParameter:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_persist(self, value: Any) -> VariableParameter:
+        """Return a copy with ``persist`` updated."""
+        return self._with_property("persist", value)
+
+    def with_push(self, value: Any) -> VariableParameter:
+        """Return a copy with ``push`` updated."""
+        return self._with_property("push", value)
+
+    def with_value(self, value: Any) -> VariableParameter:
+        """Return a copy with ``value`` updated."""
+        return self._with_property("value", value)
 
 
 class VcfData(GenomeSpySchema):
@@ -7470,6 +21136,67 @@ class VcfData(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_addChrPrefix(self, value: Any) -> VcfData:
+        """Return a copy with ``addChrPrefix`` updated."""
+        return self._with_property("addChrPrefix", value)
+
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VcfData:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_debounce(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VcfData:
+        """Return a copy with a ``ExprRef`` debounce."""
+        return self._with_property("debounce", value, **kwargs)
+
+    def with_debounceDomainChange(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VcfData:
+        """Return a copy with a ``ExprRef`` debounceDomainChange."""
+        return self._with_property("debounceDomainChange", value, **kwargs)
+
+    def with_debounceMode(self, value: Any) -> VcfData:
+        """Return a copy with ``debounceMode`` updated."""
+        return self._with_property("debounceMode", value)
+
+    def with_indexUrl(
+        self,
+        value: IndexUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VcfData:
+        """Return a copy with a ``IndexUrlSourceRef`` indexUrl."""
+        return self._with_property("indexUrl", value, **kwargs)
+
+    def with_type(self, value: Any) -> VcfData:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def with_url(
+        self,
+        value: MultiUrlSourceRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VcfData:
+        """Return a copy with a ``MultiUrlSourceRef`` url."""
+        return self._with_property("url", value, **kwargs)
+
+    def with_windowSize(self, value: Any) -> VcfData:
+        """Return a copy with ``windowSize`` updated."""
+        return self._with_property("windowSize", value)
 
 
 class ViewBackground(GenomeSpySchema):
@@ -7511,6 +21238,83 @@ class ViewBackground(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_fill(self, value: Any) -> ViewBackground:
+        """Return a copy with ``fill`` updated."""
+        return self._with_property("fill", value)
+
+    def with_fillOpacity(self, value: Any) -> ViewBackground:
+        """Return a copy with ``fillOpacity`` updated."""
+        return self._with_property("fillOpacity", value)
+
+    def with_shadowBlur(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewBackground:
+        """Return a copy with a ``ExprRef`` shadowBlur."""
+        return self._with_property("shadowBlur", value, **kwargs)
+
+    def with_shadowColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewBackground:
+        """Return a copy with a ``ExprRef`` shadowColor."""
+        return self._with_property("shadowColor", value, **kwargs)
+
+    def with_shadowOffsetX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewBackground:
+        """Return a copy with a ``ExprRef`` shadowOffsetX."""
+        return self._with_property("shadowOffsetX", value, **kwargs)
+
+    def with_shadowOffsetY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewBackground:
+        """Return a copy with a ``ExprRef`` shadowOffsetY."""
+        return self._with_property("shadowOffsetY", value, **kwargs)
+
+    def with_shadowOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewBackground:
+        """Return a copy with a ``ExprRef`` shadowOpacity."""
+        return self._with_property("shadowOpacity", value, **kwargs)
+
+    def with_stroke(self, value: Any) -> ViewBackground:
+        """Return a copy with ``stroke`` updated."""
+        return self._with_property("stroke", value)
+
+    def with_strokeOpacity(self, value: Any) -> ViewBackground:
+        """Return a copy with ``strokeOpacity`` updated."""
+        return self._with_property("strokeOpacity", value)
+
+    def with_strokeWidth(self, value: Any) -> ViewBackground:
+        """Return a copy with ``strokeWidth`` updated."""
+        return self._with_property("strokeWidth", value)
+
+    def with_strokeZindex(self, value: Any) -> ViewBackground:
+        """Return a copy with ``strokeZindex`` updated."""
+        return self._with_property("strokeZindex", value)
+
+    def with_style(self, value: Any) -> ViewBackground:
+        """Return a copy with ``style`` updated."""
+        return self._with_property("style", value)
+
+    def with_zindex(self, value: Any) -> ViewBackground:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
 
 
 class ViewConfig(GenomeSpySchema):
@@ -7561,6 +21365,109 @@ class ViewConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_continuousHeight(self, value: Any) -> ViewConfig:
+        """Return a copy with ``continuousHeight`` updated."""
+        return self._with_property("continuousHeight", value)
+
+    def with_continuousWidth(self, value: Any) -> ViewConfig:
+        """Return a copy with ``continuousWidth`` updated."""
+        return self._with_property("continuousWidth", value)
+
+    def with_discreteHeight(
+        self,
+        value: Step | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewConfig:
+        """Return a copy with a ``Step`` discreteHeight."""
+        return self._with_property("discreteHeight", value, **kwargs)
+
+    def with_discreteWidth(
+        self,
+        value: Step | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewConfig:
+        """Return a copy with a ``Step`` discreteWidth."""
+        return self._with_property("discreteWidth", value, **kwargs)
+
+    def with_fill(self, value: Any) -> ViewConfig:
+        """Return a copy with ``fill`` updated."""
+        return self._with_property("fill", value)
+
+    def with_fillOpacity(self, value: Any) -> ViewConfig:
+        """Return a copy with ``fillOpacity`` updated."""
+        return self._with_property("fillOpacity", value)
+
+    def with_shadowBlur(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewConfig:
+        """Return a copy with a ``ExprRef`` shadowBlur."""
+        return self._with_property("shadowBlur", value, **kwargs)
+
+    def with_shadowColor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewConfig:
+        """Return a copy with a ``ExprRef`` shadowColor."""
+        return self._with_property("shadowColor", value, **kwargs)
+
+    def with_shadowOffsetX(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetX."""
+        return self._with_property("shadowOffsetX", value, **kwargs)
+
+    def with_shadowOffsetY(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewConfig:
+        """Return a copy with a ``ExprRef`` shadowOffsetY."""
+        return self._with_property("shadowOffsetY", value, **kwargs)
+
+    def with_shadowOpacity(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewConfig:
+        """Return a copy with a ``ExprRef`` shadowOpacity."""
+        return self._with_property("shadowOpacity", value, **kwargs)
+
+    def with_step(self, value: Any) -> ViewConfig:
+        """Return a copy with ``step`` updated."""
+        return self._with_property("step", value)
+
+    def with_stroke(self, value: Any) -> ViewConfig:
+        """Return a copy with ``stroke`` updated."""
+        return self._with_property("stroke", value)
+
+    def with_strokeOpacity(self, value: Any) -> ViewConfig:
+        """Return a copy with ``strokeOpacity`` updated."""
+        return self._with_property("strokeOpacity", value)
+
+    def with_strokeWidth(self, value: Any) -> ViewConfig:
+        """Return a copy with ``strokeWidth`` updated."""
+        return self._with_property("strokeWidth", value)
+
+    def with_strokeZindex(self, value: Any) -> ViewConfig:
+        """Return a copy with ``strokeZindex`` updated."""
+        return self._with_property("strokeZindex", value)
+
+    def with_zindex(self, value: Any) -> ViewConfig:
+        """Return a copy with ``zindex`` updated."""
+        return self._with_property("zindex", value)
+
 
 class ViewOpacityDef(GenomeSpySchema):
     """Generated wrapper for ``ViewOpacityDef``."""
@@ -7580,6 +21487,27 @@ class ViewOpacityDef(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_channel(
+        self,
+        value: PrimaryPositionalChannel | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewOpacityDef:
+        """Return a copy with a ``PrimaryPositionalChannel`` channel."""
+        return self._with_property("channel", value, **kwargs)
+
+    def with_expr(self, value: Any) -> ViewOpacityDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_unitsPerPixel(self, value: Any) -> ViewOpacityDef:
+        """Return a copy with ``unitsPerPixel`` updated."""
+        return self._with_property("unitsPerPixel", value)
+
+    def with_values(self, value: Any) -> ViewOpacityDef:
+        """Return a copy with ``values`` updated."""
+        return self._with_property("values", value)
 
 
 class ViewSpec(GenomeSpySchema):
@@ -7664,6 +21592,217 @@ class ViewSpec(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
+    def with_axes(self, value: Any) -> ViewSpec:
+        """Return a copy with ``axes`` updated."""
+        return self._with_property("axes", value)
+
+    def with_baseUrl(self, value: Any) -> ViewSpec:
+        """Return a copy with ``baseUrl`` updated."""
+        return self._with_property("baseUrl", value)
+
+    def with_columns(self, value: Any) -> ViewSpec:
+        """Return a copy with ``columns`` updated."""
+        return self._with_property("columns", value)
+
+    def with_concat(self, value: Any) -> ViewSpec:
+        """Return a copy with ``concat`` updated."""
+        return self._with_property("concat", value)
+
+    def with_config(
+        self,
+        value: GenomeSpyConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``GenomeSpyConfig`` config."""
+        return self._with_property("config", value, **kwargs)
+
+    def with_cursor(
+        self,
+        value: ExprRef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``ExprRef`` cursor."""
+        return self._with_property("cursor", value, **kwargs)
+
+    def with_data(
+        self,
+        value: Data | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``Data`` data."""
+        return self._with_property("data", value, **kwargs)
+
+    def with_description(self, value: Any) -> ViewSpec:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: Any) -> ViewSpec:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_encoding(
+        self,
+        value: Encoding | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``Encoding`` encoding."""
+        return self._with_property("encoding", value, **kwargs)
+
+    def with_hconcat(self, value: Any) -> ViewSpec:
+        """Return a copy with ``hconcat`` updated."""
+        return self._with_property("hconcat", value)
+
+    def with_height(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``SizeDef`` height."""
+        return self._with_property("height", value, **kwargs)
+
+    def with_layer(self, value: Any) -> ViewSpec:
+        """Return a copy with ``layer`` updated."""
+        return self._with_property("layer", value)
+
+    def with_legends(self, value: Any) -> ViewSpec:
+        """Return a copy with ``legends`` updated."""
+        return self._with_property("legends", value)
+
+    def with_mark(
+        self,
+        value: MarkType | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``MarkType`` mark."""
+        return self._with_property("mark", value, **kwargs)
+
+    def with_multiscale(self, value: Any) -> ViewSpec:
+        """Return a copy with ``multiscale`` updated."""
+        return self._with_property("multiscale", value)
+
+    def with_name(self, value: Any) -> ViewSpec:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_opacity(
+        self,
+        value: ViewOpacityDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``ViewOpacityDef`` opacity."""
+        return self._with_property("opacity", value, **kwargs)
+
+    def with_padding(
+        self,
+        value: PaddingConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``PaddingConfig`` padding."""
+        return self._with_property("padding", value, **kwargs)
+
+    def with_params(self, value: Any) -> ViewSpec:
+        """Return a copy with ``params`` updated."""
+        return self._with_property("params", value)
+
+    def with_resolve(self, value: Any) -> ViewSpec:
+        """Return a copy with ``resolve`` updated."""
+        return self._with_property("resolve", value)
+
+    def with_scales(self, value: Any) -> ViewSpec:
+        """Return a copy with ``scales`` updated."""
+        return self._with_property("scales", value)
+
+    def with_separator(
+        self,
+        value: SeparatorProps | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``SeparatorProps`` separator."""
+        return self._with_property("separator", value, **kwargs)
+
+    def with_spacing(self, value: Any) -> ViewSpec:
+        """Return a copy with ``spacing`` updated."""
+        return self._with_property("spacing", value)
+
+    def with_stops(
+        self,
+        value: MultiscaleStopsDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``MultiscaleStopsDef`` stops."""
+        return self._with_property("stops", value, **kwargs)
+
+    def with_templates(self, value: Any) -> ViewSpec:
+        """Return a copy with ``templates`` updated."""
+        return self._with_property("templates", value)
+
+    def with_title(
+        self,
+        value: Title | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``Title`` title."""
+        return self._with_property("title", value, **kwargs)
+
+    def with_transform(self, value: Any) -> ViewSpec:
+        """Return a copy with ``transform`` updated."""
+        return self._with_property("transform", value)
+
+    def with_vconcat(self, value: Any) -> ViewSpec:
+        """Return a copy with ``vconcat`` updated."""
+        return self._with_property("vconcat", value)
+
+    def with_view(
+        self,
+        value: ViewBackground | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``ViewBackground`` view."""
+        return self._with_property("view", value, **kwargs)
+
+    def with_viewportHeight(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``SizeDef`` viewportHeight."""
+        return self._with_property("viewportHeight", value, **kwargs)
+
+    def with_viewportWidth(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``SizeDef`` viewportWidth."""
+        return self._with_property("viewportWidth", value, **kwargs)
+
+    def with_visible(self, value: Any) -> ViewSpec:
+        """Return a copy with ``visible`` updated."""
+        return self._with_property("visible", value)
+
+    def with_width(
+        self,
+        value: SizeDef | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``SizeDef`` width."""
+        return self._with_property("width", value, **kwargs)
+
 
 class ZoomParams(GenomeSpySchema):
     """Generated wrapper for ``ZoomParams``."""
@@ -7674,6 +21813,15 @@ class ZoomParams(GenomeSpySchema):
         super().__init__(extent=extent)
         if kwds:
             self._kwds.update(kwds)
+
+    def with_extent(
+        self,
+        value: ScalarDomain | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ZoomParams:
+        """Return a copy with a ``ScalarDomain`` extent."""
+        return self._with_property("extent", value, **kwargs)
 
 
 __all__ = [
