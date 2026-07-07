@@ -226,6 +226,12 @@ plans/
 scratchbook.md
 CHANGELOG_STAGING.md
 
+# Documentation build output and generated gallery artifacts
+docs/_build/
+docs/gallery/
+docs/_static/gallery/
+docs/_static/specs/
+
 # Keep Codex/Claude skill files but ignore other local state
 .claude/*
 !.claude/skills/

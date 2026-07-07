@@ -1,0 +1,55 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          python-version: "3.11"
+      # Example modules that back the gallery need the example runtime
+      # (pandas/numpy) plus the docs toolchain.
+      - run: uv sync --locked --group docs --group dev
+      # Render real chart screenshots for the gallery cards. Best-effort: if the
+      # headless render fails, docs_gallery falls back to SVG posters and the
+      # build still succeeds.
+      - name: Render gallery thumbnails
+        continue-on-error: true
+        run: |
+          uv run --with playwright playwright install --with-deps chromium
+          uv run --with playwright python tools/render_thumbnails.py
+      - run: uv run sphinx-build -b html -W --keep-going docs docs/_build/html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/_build/html
+
+  # Publish only on a released version (or manual dispatch), so the public docs
+  # track releases while pushes to main are validated as a build check.
+  deploy:
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
