@@ -29,12 +29,10 @@ Constraints:
 Don't assume. Surface tradeoffs. State assumptions explicitly. Push back when warranted.
 
 ### 2. Simplicity First
-Minimum code that solves the problem. No speculative features, no premature abstractions.
-IF YOU WRITE 200 LINES AND IT COULD BE 50, REWRITE IT.
+Minimum code that solves the problem. No speculative features, no premature abstractions. IF YOU WRITE 200 LINES AND IT COULD BE 50, REWRITE IT.
 
 ### 3. Surgical Changes
-Touch only what you must. Match existing style. Remove orphaned imports/variables your
-changes created. Don't clean up unrelated code.
+Touch only what you must. Match existing style. Remove orphaned imports/variables your changes created. Don't clean up unrelated code.
 
 ### 4. Goal-Driven Execution
 Transform tasks into verifiable goals. State a brief plan for multi-step tasks.
