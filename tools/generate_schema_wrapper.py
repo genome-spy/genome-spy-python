@@ -130,7 +130,13 @@ def write_schema_package(
     schema = load_schema(schema_path)
     generator = SchemaWrapperGenerator(schema, schema_version=version)
     core_module = generator.generate_core_module()
-    init_module = generator.generate_init_module(core_module.exports)
+    typing_module = generator.generate_typing_module()
+    kwds_module = generator.generate_kwds_module()
+    init_module = generator.generate_init_module(
+        core_module.exports,
+        typing_module.exports,
+        kwds_module.exports,
+    )
     mark_mixins_module = generator.generate_mark_mixins_module()
     channels_module = generator.generate_channels_module()
 
@@ -138,6 +144,8 @@ def write_schema_package(
     schema_text = schema_path.read_text(encoding="utf-8").rstrip() + "\n"
     (output_dir / SCHEMA_FILENAME).write_text(schema_text, encoding="utf-8")
     (output_dir / "core.py").write_text(core_module.source, encoding="utf-8")
+    (output_dir / "_typing.py").write_text(typing_module.source, encoding="utf-8")
+    (output_dir / "_kwds.py").write_text(kwds_module.source, encoding="utf-8")
     (output_dir / "__init__.py").write_text(init_module.source, encoding="utf-8")
     (output_dir / "mixins.py").write_text(mark_mixins_module.source, encoding="utf-8")
     (output_dir / "channels.py").write_text(channels_module.source, encoding="utf-8")

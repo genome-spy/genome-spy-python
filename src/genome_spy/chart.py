@@ -12,14 +12,18 @@ from genome_spy._utils import JsonSpec, compact_json, is_mapping, pretty_json
 from genome_spy.channels import Channel, channel
 from genome_spy.schema import (
     ConcatSpec,
+    EncodingKwds,
     GenomeAxis,
+    GenomeAxisKwds,
     HConcatSpec,
     LayerSpec,
     Legend,
+    LegendKwds,
     MARK_TYPES,
     Root,
     SCHEMA_VERSION,
     Scale,
+    ScaleKwds,
     UnitSpec,
     VConcatSpec,
 )
@@ -327,7 +331,7 @@ class Chart(TopLevelSpec, MarkMethodMixin, UnitSpec):
         self,
         data: Any = Undefined,
         mark: str | dict[str, Any] | UndefinedType = Undefined,
-        encoding: dict[str, dict[str, Any]] | UndefinedType = Undefined,
+        encoding: EncodingKwds | UndefinedType = Undefined,
         *,
         properties_map: dict[str, Any] | None = None,
         transform: list[dict[str, Any]] | UndefinedType = Undefined,
@@ -339,8 +343,8 @@ class Chart(TopLevelSpec, MarkMethodMixin, UnitSpec):
         UnitSpec.__init__(
             self,
             data=data,
-            mark=mark,
-            encoding=encoding,
+            mark=cast(Any, mark),
+            encoding=cast(Any, encoding),
             transform=transform,
             **kwargs,
         )
@@ -459,15 +463,15 @@ class _CompositionSpec(TopLevelSpec):
     def _with_properties(self, properties: dict[str, Any]) -> Self:
         return self.copy(deep=False, **properties)
 
-    def resolve_axis(self, **kwargs: GenomeAxis | dict[str, Any] | None) -> Self:
+    def resolve_axis(self, **kwargs: GenomeAxis | GenomeAxisKwds | None) -> Self:
         """Return a copy with merged composition-level axis resolutions."""
         return self._merge_resolution("axes", kwargs)
 
-    def resolve_scale(self, **kwargs: Scale | dict[str, Any] | None) -> Self:
+    def resolve_scale(self, **kwargs: Scale | ScaleKwds | None) -> Self:
         """Return a copy with merged composition-level scale resolutions."""
         return self._merge_resolution("scales", kwargs)
 
-    def resolve_legend(self, **kwargs: Legend | dict[str, Any] | None) -> Self:
+    def resolve_legend(self, **kwargs: Legend | LegendKwds | None) -> Self:
         """Return a copy with merged composition-level legend resolutions."""
         return self._merge_resolution("legends", kwargs)
 
@@ -497,7 +501,7 @@ class LayerChart(_CompositionSpec, LayerSpec):
         schema_url: str = DEFAULT_SCHEMA_URL,
         **kwargs: Any,
     ) -> None:
-        LayerSpec.__init__(self, layer=layer, **kwargs)
+        LayerSpec.__init__(self, layer=cast(Any, layer), **kwargs)
         self._schema_url = schema_url
 
     def __add__(self, other: TopLevelSpec) -> LayerChart:
@@ -520,7 +524,7 @@ class HConcatChart(_CompositionSpec, HConcatSpec):
         schema_url: str = DEFAULT_SCHEMA_URL,
         **kwargs: Any,
     ) -> None:
-        HConcatSpec.__init__(self, hconcat=hconcat, **kwargs)
+        HConcatSpec.__init__(self, hconcat=cast(Any, hconcat), **kwargs)
         self._schema_url = schema_url
 
     def __or__(self, other: TopLevelSpec) -> HConcatChart:
@@ -543,7 +547,7 @@ class VConcatChart(_CompositionSpec, VConcatSpec):
         schema_url: str = DEFAULT_SCHEMA_URL,
         **kwargs: Any,
     ) -> None:
-        VConcatSpec.__init__(self, vconcat=vconcat, **kwargs)
+        VConcatSpec.__init__(self, vconcat=cast(Any, vconcat), **kwargs)
         self._schema_url = schema_url
 
     def __and__(self, other: TopLevelSpec) -> VConcatChart:
@@ -567,7 +571,12 @@ class ConcatChart(_CompositionSpec, ConcatSpec):
         schema_url: str = DEFAULT_SCHEMA_URL,
         **kwargs: Any,
     ) -> None:
-        ConcatSpec.__init__(self, concat=concat, columns=columns, **kwargs)
+        ConcatSpec.__init__(
+            self,
+            concat=cast(Any, concat),
+            columns=columns,
+            **kwargs,
+        )
         self._schema_url = schema_url
 
 

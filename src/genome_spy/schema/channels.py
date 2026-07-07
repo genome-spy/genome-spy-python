@@ -5,6 +5,7 @@ from typing import Any
 
 from genome_spy.channels import Channel, _MISSING, channel
 from genome_spy.schema.core import GenomeAxis, Legend, Scale
+from genome_spy.schema._kwds import GenomeAxisKwds, LegendKwds, ScaleKwds
 
 
 class Angle(Channel):
@@ -16,7 +17,7 @@ class Angle(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Angle:
@@ -25,7 +26,7 @@ class Angle(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Angle:
@@ -42,7 +43,7 @@ class Color(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Color:
@@ -51,7 +52,7 @@ class Color(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Color:
@@ -68,7 +69,7 @@ class Dx(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Dx:
@@ -77,7 +78,7 @@ class Dx(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Dx:
@@ -94,7 +95,7 @@ class Dy(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Dy:
@@ -103,7 +104,7 @@ class Dy(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Dy:
@@ -128,7 +129,7 @@ class Fill(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Fill:
@@ -137,7 +138,7 @@ class Fill(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Fill:
@@ -154,7 +155,7 @@ class FillOpacity(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> FillOpacity:
@@ -163,7 +164,7 @@ class FillOpacity(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> FillOpacity:
@@ -188,7 +189,7 @@ class Opacity(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Opacity:
@@ -197,7 +198,7 @@ class Opacity(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Opacity:
@@ -238,7 +239,7 @@ class Shape(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Shape:
@@ -247,7 +248,7 @@ class Shape(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Shape:
@@ -264,7 +265,7 @@ class Size(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Size:
@@ -273,7 +274,7 @@ class Size(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Size:
@@ -290,7 +291,7 @@ class Stroke(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Stroke:
@@ -299,7 +300,7 @@ class Stroke(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Stroke:
@@ -316,7 +317,7 @@ class StrokeOpacity(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> StrokeOpacity:
@@ -325,7 +326,7 @@ class StrokeOpacity(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> StrokeOpacity:
@@ -342,7 +343,7 @@ class StrokeWidth(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> StrokeWidth:
@@ -351,7 +352,7 @@ class StrokeWidth(Channel):
 
     def legend(
         self,
-        value: Legend | dict[str, Any] | None | object = _MISSING,
+        value: Legend | LegendKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> StrokeWidth:
@@ -368,7 +369,7 @@ class Text(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Text:
@@ -393,7 +394,7 @@ class X(Channel):
 
     def axis(
         self,
-        value: GenomeAxis | dict[str, Any] | None | object = _MISSING,
+        value: GenomeAxis | GenomeAxisKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> X:
@@ -402,7 +403,7 @@ class X(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> X:
@@ -419,7 +420,7 @@ class X2(Channel):
 
     def axis(
         self,
-        value: GenomeAxis | dict[str, Any] | None | object = _MISSING,
+        value: GenomeAxis | GenomeAxisKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> X2:
@@ -428,7 +429,7 @@ class X2(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> X2:
@@ -445,7 +446,7 @@ class Y(Channel):
 
     def axis(
         self,
-        value: GenomeAxis | dict[str, Any] | None | object = _MISSING,
+        value: GenomeAxis | GenomeAxisKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Y:
@@ -454,7 +455,7 @@ class Y(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Y:
@@ -471,7 +472,7 @@ class Y2(Channel):
 
     def axis(
         self,
-        value: GenomeAxis | dict[str, Any] | None | object = _MISSING,
+        value: GenomeAxis | GenomeAxisKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Y2:
@@ -480,7 +481,7 @@ class Y2(Channel):
 
     def scale(
         self,
-        value: Scale | dict[str, Any] | None | object = _MISSING,
+        value: Scale | ScaleKwds | None | object = _MISSING,
         /,
         **kwargs: Any,
     ) -> Y2:
