@@ -255,6 +255,31 @@ def test_genomespy_style_stacked_bar_transforms_serialize() -> None:
     }
 
 
+def test_locus_interval_chart_serializes_secondary_locus_channel() -> None:
+    chart = (
+        gs.Chart(
+            [{"chrom": "chr1", "start": 100_000, "end": 180_000, "feature": "promoter"}]
+        )
+        .mark_rect()
+        .encode(
+            x=gs.Locus("chrom", "start", scale={"assembly": "hg38"}),
+            x2=gs.Locus("chrom", "end"),
+            y=gs.Y("feature:N").scale(reverse=False),
+            color="feature:N",
+        )
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["encoding"]["x"] == {
+        "chrom": "chrom",
+        "pos": "start",
+        "type": "locus",
+        "scale": {"assembly": "hg38"},
+    }
+    assert spec["encoding"]["x2"] == {"chrom": "chrom", "pos": "end"}
+
+
 def test_y_scale_reverse_can_be_overridden() -> None:
     chart = (
         gs.Chart([{"x": 1, "y": 2}])

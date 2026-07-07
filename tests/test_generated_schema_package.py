@@ -5,16 +5,23 @@ import inspect
 import pytest
 
 from genome_spy.schema import (
+    AxesKwds,
+    CompareParamsKwds,
+    HandledTooltipKwds,
     MARK_TYPES,
     ColorSchemeConfig,
+    ResolveKwds,
     SCHEMA_VERSION,
     ColorDef,
     GenomeAxis,
     Legend,
     PositionDef,
+    PointProps,
     Root,
     Scale,
+    SchemeParamsKwds,
     UnitSpec,
+    ViewOpacityDef,
     load_schema,
 )
 from genome_spy.schema import channels as generated_channels
@@ -95,6 +102,51 @@ def test_generated_wrappers_with_methods_merge_nested_helper_kwargs() -> None:
         "type": "quantitative",
         "scale": {"zero": False, "padding": 4},
     }
+
+
+def test_generated_wrappers_accept_composition_resolution_mappings() -> None:
+    axes: AxesKwds = {"x": {"title": "Shared x"}}
+    resolve: ResolveKwds = {"scale": {"color": "shared"}}
+    spec = (
+        UnitSpec(mark="point")
+        .with_axes(axes)
+        .with_legends({"color": {"title": "Species"}})
+        .with_resolve(resolve)
+        .with_scales({"color": {"scheme": "blues"}})
+    )
+
+    assert spec.to_dict(validate=False) == {
+        "mark": "point",
+        "axes": {"x": {"title": "Shared x"}},
+        "legends": {"color": {"title": "Species"}},
+        "resolve": {"scale": {"color": "shared"}},
+        "scales": {"color": {"scheme": "blues"}},
+    }
+
+
+def test_generated_kwds_helpers_cover_repeated_helper_objects() -> None:
+    sort: CompareParamsKwds = {"field": "value", "order": "descending"}
+    scheme: SchemeParamsKwds = {"name": "blues"}
+    tooltip: HandledTooltipKwds = {"handler": "toggleTooltip", "params": {"mode": "x"}}
+
+    point = PointProps(type="point", tooltip=tooltip).to_dict(validate=False)
+    opacity = ViewOpacityDef(
+        type="viewOpacity",
+        values=[0.2, 0.8],
+        sort=sort,
+    ).to_dict(validate=False)
+    scale = Scale(scheme=scheme).to_dict(validate=False)
+
+    assert point["tooltip"] == {
+        "handler": "toggleTooltip",
+        "params": {"mode": "x"},
+    }
+    assert opacity == {
+        "type": "viewOpacity",
+        "values": [0.2, 0.8],
+        "sort": {"field": "value", "order": "descending"},
+    }
+    assert scale == {"scheme": {"name": "blues"}}
 
 
 def test_generated_schema_wrappers_validate_by_default() -> None:
