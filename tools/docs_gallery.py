@@ -38,6 +38,14 @@ CATEGORIES: dict[str, tuple[int, str]] = {
         30,
         "Coverage, peak, and gene-annotation tracks sharing a genomic axis.",
     ),
+    "Copy number": (
+        35,
+        "Allele-specific copy-number profiles on a genome-wide axis, from real hosted data.",
+    ),
+    "Variants": (
+        25,
+        "Somatic alterations across a cohort and sequence features along a gene.",
+    ),
     "Populations": (
         40,
         "Ancestry and population-structure views such as admixture bars.",
