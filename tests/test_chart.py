@@ -479,3 +479,22 @@ def test_chart_validates_complete_spec_by_default() -> None:
         chart.to_dict()
 
     assert chart.to_dict(validate=False)["mark"] == "not-a-mark"
+
+
+def test_secondary_channels_never_carry_type() -> None:
+    # x2/y2 only take field/value in GenomeSpy's schema; an inferred `type`
+    # there is invalid, so it must be stripped (and the full spec must validate).
+    chart = (
+        gs.Chart([{"s": 10, "e": 20, "v": 3}])
+        .mark_rect()
+        .encode(
+            x=gs.X("s:Q"),
+            x2=gs.X2("e"),
+            y=gs.Y("v:Q").scale(reverse=False, zero=True),
+            y2=gs.Y2("v"),
+        )
+    )
+
+    encoding = chart.to_dict()["encoding"]
+    assert "type" not in encoding["x2"]
+    assert "type" not in encoding["y2"]

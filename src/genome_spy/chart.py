@@ -149,7 +149,11 @@ def _normalize_channel(
     name: str, value: Channel | str | dict[str, Any], *, data: Any = None
 ) -> dict[str, Any]:
     definition = channel(value).to_dict()
-    if "type" not in definition and isinstance(definition.get("field"), str):
+    # Secondary positional channels (x2/y2) only carry field/value in GenomeSpy's
+    # schema; a `type` is invalid there, so never infer or keep one for them.
+    if name in {"x2", "y2"}:
+        definition.pop("type", None)
+    elif "type" not in definition and isinstance(definition.get("field"), str):
         inferred_type = _infer_field_type(definition["field"], data)
         if inferred_type is not None:
             definition["type"] = inferred_type
@@ -159,8 +163,6 @@ def _normalize_channel(
             definition["scale"] = dict(Y_SCALE_DEFAULTS)
         elif is_mapping(scale) and "reverse" not in scale:
             definition["scale"] = {**Y_SCALE_DEFAULTS, **scale}
-    if name in {"x2", "y2"} and definition.get("type") == "locus":
-        definition.pop("type")
     return definition
 
 
