@@ -57,6 +57,7 @@ class Example:
     category: str
     tags: tuple[str, ...]
     order: int
+    height: int
     source: str
     spec: dict
 
@@ -115,6 +116,7 @@ def collect_example(path: Path) -> Example:
         category=meta.get("category", "Basics"),
         tags=tuple(meta.get("tags", ())),
         order=int(meta.get("order", 100)),
+        height=int(meta.get("height", 400)),
         source=path.read_text(encoding="utf-8"),
         spec=chart.to_dict(),
     )

@@ -96,9 +96,48 @@ def _gallery_index_md(examples: list[core.Example]) -> str:
 def _detail_md(example: core.Example, bundle_url: str) -> str:
     spec_url = f"../_static/specs/{example.name}.json"
     tags = " ".join(f"`{t}`" for t in example.tags)
+    # Render the live chart inside an iframe. GenomeSpy reports hover tooltips
+    # reliably only in a clean document; embedded directly in the themed Sphinx
+    # page they are suppressed. The iframe is a fresh document (like the notebook),
+    # isolated from the theme's CSS. Its srcdoc base URL is the parent page, so the
+    # relative spec URL resolves the same as elsewhere.
+    #
+    # The example charts set no width/height, so (like GenomeSpy's own docs) the
+    # chart fills its container. The iframe has a fixed size, so it never resizes.
+    #
+    # GenomeSpy paints once and then grows the canvas to fill the container a
+    # moment later (an internal two-phase render). To avoid a visible size jump,
+    # the chart is kept hidden until its size settles, then faded in.
+    inner = (
+        '<!doctype html><html><head><meta charset="utf-8">'
+        "<style>html,body{margin:0;height:100%;overflow:hidden;background:#fff}"
+        "#c{width:100%;height:100%;opacity:0;transition:opacity .2s ease}"
+        "#load{position:absolute;inset:0;display:flex;align-items:center;"
+        "justify-content:center;color:#8a97a8;font:14px/1.4 Lato,system-ui,sans-serif}"
+        "</style></head>"
+        '<body><div id="load">Loading chart…</div><div id="c"></div>'
+        '<script type="module">'
+        f"import {{ embed }} from '{bundle_url}';"
+        "const c = document.getElementById('c');"
+        f"const spec = await fetch('{spec_url}').then(r => r.json());"
+        "await embed(c, spec, {});"
+        # Reveal once the canvas size has been stable across a couple of frames,
+        # with a safety timeout so it always appears.
+        "let last = -1, stable = 0;"
+        "const reveal = () => { c.style.opacity = '1';"
+        " const l = document.getElementById('load'); if (l) l.remove(); };"
+        "const iv = setInterval(() => {"
+        " const cv = c.querySelector('canvas'); if (!cv) return;"
+        " const w = Math.round(cv.getBoundingClientRect().width);"
+        " if (w === last && w > 0) { if (++stable >= 2) { clearInterval(iv); reveal(); } }"
+        " else { stable = 0; last = w; } }, 120);"
+        "setTimeout(() => { clearInterval(iv); reveal(); }, 4000);"
+        "</script></body></html>"
+    )
     embed = (
-        f'<div class="gs-live-embed" data-spec="{spec_url}" '
-        f'data-bundle="{html.escape(bundle_url)}" data-autoload="1"></div>'
+        f'<iframe class="gs-embed-frame" loading="lazy" style="height:{example.height}px" '
+        f'title="{html.escape(example.title)}" '
+        f'srcdoc="{html.escape(inner, quote=True)}"></iframe>'
     )
     parts = [
         "---",

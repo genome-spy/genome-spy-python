@@ -53,7 +53,6 @@ html_title = "genome-spy-python"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_css_files = ["genomespy.css"]
-html_js_files = ["gallery-hydrate.js"]
 html_show_sourcelink = False
 
 html_theme_options = {

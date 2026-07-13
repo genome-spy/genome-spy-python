@@ -1,17 +1,16 @@
-"""Render real static thumbnails of gallery examples with a headless browser.
+"""Render static gallery thumbnails with a headless browser.
 
 GenomeSpy renders to a WebGL/canvas surface, so there is no pure-Python way to
-rasterize a chart; a headless browser is the correct tool (the same approach
-Altair uses via vl-convert for its own renderer). This script mounts each
-example's live chart with the pinned GenomeSpy bundle and screenshots it to
-``docs/assets/generated/thumbs/<name>.png``.
+rasterize a chart; a headless browser is the correct tool. For each gallery
+example this mounts the live chart with the pinned GenomeSpy bundle and
+screenshots it to a PNG thumbnail. The example charts set no width/height, so the
+chart fills the fixed-size capture box.
 
-Network is required (the browser imports the ``@genome-spy/core`` CDN bundle),
-so this runs in CI rather than as part of every local build. When no PNG exists,
-``docs_gallery.py`` falls back to a generated SVG poster, so the site still
-builds offline.
+Network is required (the browser imports the ``@genome-spy/core`` CDN bundle), so
+this runs in CI rather than as part of every local build. When no PNG exists,
+``docs_gallery.py`` falls back to a generated SVG poster.
 
-Usage (CI):
+Usage:
     uv run --with playwright playwright install --with-deps chromium
     uv run --with playwright python tools/render_thumbnails.py
 """
@@ -24,6 +23,10 @@ import sys
 from pathlib import Path
 
 _TOOLS = Path(__file__).resolve().parent
+
+# Capture-box size; the sizeless charts fill it, giving a consistent card image.
+CARD_WIDTH = 720
+CARD_HEIGHT = 405
 
 
 def _load_gallery():
@@ -39,7 +42,7 @@ def _load_gallery():
 
 _PAGE_TEMPLATE = """<!doctype html>
 <html><head><meta charset="utf-8">
-<style>html,body{{margin:0;background:#fff}}#c{{display:inline-block}}</style>
+<style>html,body{{margin:0;height:100%;background:#fff}}#c{{width:{width}px;height:{height}px}}</style>
 </head><body><div id="c"></div>
 <script type="module">
 import {{ embed }} from "{bundle}";
@@ -74,11 +77,14 @@ def main() -> int:
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(
-            viewport={"width": 900, "height": 520}, device_scale_factor=2
+            viewport={"width": 1000, "height": 900}, device_scale_factor=2
         )
         for example in examples:
             html = _PAGE_TEMPLATE.format(
-                bundle=bundle_url, spec=json.dumps(example.spec)
+                width=CARD_WIDTH,
+                height=CARD_HEIGHT,
+                bundle=bundle_url,
+                spec=json.dumps(example.spec),
             )
             page.set_content(html, wait_until="load")
             try:
@@ -87,10 +93,11 @@ def main() -> int:
                 err = page.evaluate("window.__gsError || 'timed out'")
                 print(f"[thumb] {example.name}: render failed ({err})", file=sys.stderr)
                 continue
-            page.wait_for_timeout(600)  # let the first frame settle
-            out = gallery.THUMBS_DIR / f"{example.name}.png"
-            page.locator("#c").screenshot(path=str(out))
-            print(f"[thumb] {example.name} -> {out.name}")
+            page.wait_for_timeout(900)  # let async data and the first frame settle
+            page.locator("#c").screenshot(
+                path=str(gallery.THUMBS_DIR / f"{example.name}.png")
+            )
+            print(f"[thumb] {example.name}")
             rendered += 1
         browser.close()
 
