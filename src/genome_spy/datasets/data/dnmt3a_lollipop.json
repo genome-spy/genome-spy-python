@@ -1,0 +1,567 @@
+{
+  "gene": "DNMT3A",
+  "transcript": "NM_022552",
+  "protein_length": 912,
+  "total_samples": 193,
+  "mutated_samples": 47,
+  "mutation_rate": 24.35,
+  "features": [
+    {
+      "position": 315,
+      "count": 1,
+      "class": "Frame_Shift_Del",
+      "labels": [
+        "M315fs"
+      ],
+      "label": "M315fs",
+      "is_hotspot": false
+    },
+    {
+      "position": 320,
+      "count": 1,
+      "class": "Nonsense_Mutation",
+      "labels": [
+        "R320*"
+      ],
+      "label": "R320*",
+      "is_hotspot": false
+    },
+    {
+      "position": 468,
+      "count": 1,
+      "class": "Missense_Mutation",
+      "labels": [
+        "K468R"
+      ],
+      "label": "K468R",
+      "is_hotspot": false
+    },
+    {
+      "position": 477,
+      "count": 1,
+      "class": "Splice_Site",
+      "labels": [
+        "E477*"
+      ],
+      "label": "E477*",
+      "is_hotspot": false
+    },
+    {
+      "position": 485,
+      "count": 1,
+      "class": "Nonsense_Mutation",
+      "labels": [
+        "Q485*"
+      ],
+      "label": "Q485*",
+      "is_hotspot": false
+    },
+    {
+      "position": 497,
+      "count": 1,
+      "class": "Missense_Mutation",
+      "labels": [
+        "C497Y"
+      ],
+      "label": "C497Y",
+      "is_hotspot": false
+    },
+    {
+      "position": 505,
+      "count": 1,
+      "class": "Nonsense_Mutation",
+      "labels": [
+        "E505*"
+      ],
+      "label": "E505*",
+      "is_hotspot": false
+    },
+    {
+      "position": 515,
+      "count": 1,
+      "class": "Nonsense_Mutation",
+      "labels": [
+        "Q515*"
+      ],
+      "label": "Q515*",
+      "is_hotspot": false
+    },
+    {
+      "position": 590,
+      "count": 1,
+      "class": "Frame_Shift_Del",
+      "labels": [
+        "G590fs"
+      ],
+      "label": "G590fs",
+      "is_hotspot": false
+    },
+    {
+      "position": 615,
+      "count": 2,
+      "class": "Nonsense_Mutation",
+      "labels": [
+        "Q615*",
+        "Q615fs"
+      ],
+      "label": "Q615* / Q615fs",
+      "is_hotspot": false
+    },
+    {
+      "position": 646,
+      "count": 1,
+      "class": "Splice_Site",
+      "labels": [
+        "G646V"
+      ],
+      "label": "G646V",
+      "is_hotspot": false
+    },
+    {
+      "position": 718,
+      "count": 1,
+      "class": "Missense_Mutation",
+      "labels": [
+        "P718L"
+      ],
+      "label": "P718L",
+      "is_hotspot": false
+    },
+    {
+      "position": 723,
+      "count": 1,
+      "class": "Frame_Shift_Del",
+      "labels": [
+        "L723fs"
+      ],
+      "label": "L723fs",
+      "is_hotspot": false
+    },
+    {
+      "position": 729,
+      "count": 2,
+      "class": "Missense_Mutation",
+      "labels": [
+        "R729Q",
+        "R729W"
+      ],
+      "label": "R729Q / R729W",
+      "is_hotspot": false
+    },
+    {
+      "position": 736,
+      "count": 2,
+      "class": "Missense_Mutation",
+      "labels": [
+        "R736H"
+      ],
+      "label": "R736H",
+      "is_hotspot": false
+    },
+    {
+      "position": 741,
+      "count": 1,
+      "class": "Missense_Mutation",
+      "labels": [
+        "A741V"
+      ],
+      "label": "A741V",
+      "is_hotspot": false
+    },
+    {
+      "position": 781,
+      "count": 1,
+      "class": "Missense_Mutation",
+      "labels": [
+        "D781G"
+      ],
+      "label": "D781G",
+      "is_hotspot": false
+    },
+    {
+      "position": 792,
+      "count": 1,
+      "class": "Missense_Mutation",
+      "labels": [
+        "R792H"
+      ],
+      "label": "R792H",
+      "is_hotspot": false
+    },
+    {
+      "position": 803,
+      "count": 1,
+      "class": "Splice_Site",
+      "labels": [
+        "R803S"
+      ],
+      "label": "R803S",
+      "is_hotspot": false
+    },
+    {
+      "position": 829,
+      "count": 1,
+      "class": "Missense_Mutation",
+      "labels": [
+        "K829R"
+      ],
+      "label": "K829R",
+      "is_hotspot": false
+    },
+    {
+      "position": 882,
+      "count": 27,
+      "class": "Missense_Mutation",
+      "labels": [
+        "R882C",
+        "R882H",
+        "R882P"
+      ],
+      "label": "R882C / R882H / R882P",
+      "is_hotspot": true
+    },
+    {
+      "position": 909,
+      "count": 1,
+      "class": "Missense_Mutation",
+      "labels": [
+        "F909C"
+      ],
+      "label": "F909C",
+      "is_hotspot": false
+    }
+  ],
+  "variants": [
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882C",
+      "sample": "TCGA-AB-2802"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2809"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882C",
+      "sample": "TCGA-AB-2816"
+    },
+    {
+      "position": 803,
+      "class": "Splice_Site",
+      "aa_change": "R803S",
+      "sample": "TCGA-AB-2818"
+    },
+    {
+      "position": 736,
+      "class": "Missense_Mutation",
+      "aa_change": "R736H",
+      "sample": "TCGA-AB-2824"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2825"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882P",
+      "sample": "TCGA-AB-2830"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2833"
+    },
+    {
+      "position": 515,
+      "class": "Nonsense_Mutation",
+      "aa_change": "Q515*",
+      "sample": "TCGA-AB-2839"
+    },
+    {
+      "position": 615,
+      "class": "Frame_Shift_Del",
+      "aa_change": "Q615fs",
+      "sample": "TCGA-AB-2851"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2853"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2859"
+    },
+    {
+      "position": 615,
+      "class": "Nonsense_Mutation",
+      "aa_change": "Q615*",
+      "sample": "TCGA-AB-2861"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2863"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2864"
+    },
+    {
+      "position": 829,
+      "class": "Missense_Mutation",
+      "aa_change": "K829R",
+      "sample": "TCGA-AB-2867"
+    },
+    {
+      "position": 468,
+      "class": "Missense_Mutation",
+      "aa_change": "K468R",
+      "sample": "TCGA-AB-2867"
+    },
+    {
+      "position": 485,
+      "class": "Nonsense_Mutation",
+      "aa_change": "Q485*",
+      "sample": "TCGA-AB-2869"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2873"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2884"
+    },
+    {
+      "position": 718,
+      "class": "Missense_Mutation",
+      "aa_change": "P718L",
+      "sample": "TCGA-AB-2887"
+    },
+    {
+      "position": 729,
+      "class": "Missense_Mutation",
+      "aa_change": "R729Q",
+      "sample": "TCGA-AB-2891"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2895"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2896"
+    },
+    {
+      "position": 792,
+      "class": "Missense_Mutation",
+      "aa_change": "R792H",
+      "sample": "TCGA-AB-2898"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882C",
+      "sample": "TCGA-AB-2908"
+    },
+    {
+      "position": 729,
+      "class": "Missense_Mutation",
+      "aa_change": "R729W",
+      "sample": "TCGA-AB-2912"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882C",
+      "sample": "TCGA-AB-2916"
+    },
+    {
+      "position": 497,
+      "class": "Missense_Mutation",
+      "aa_change": "C497Y",
+      "sample": "TCGA-AB-2919"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2925"
+    },
+    {
+      "position": 781,
+      "class": "Missense_Mutation",
+      "aa_change": "D781G",
+      "sample": "TCGA-AB-2928"
+    },
+    {
+      "position": 320,
+      "class": "Nonsense_Mutation",
+      "aa_change": "R320*",
+      "sample": "TCGA-AB-2928"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882C",
+      "sample": "TCGA-AB-2931"
+    },
+    {
+      "position": 736,
+      "class": "Missense_Mutation",
+      "aa_change": "R736H",
+      "sample": "TCGA-AB-2934"
+    },
+    {
+      "position": 646,
+      "class": "Splice_Site",
+      "aa_change": "G646V",
+      "sample": "TCGA-AB-2934"
+    },
+    {
+      "position": 315,
+      "class": "Frame_Shift_Del",
+      "aa_change": "M315fs",
+      "sample": "TCGA-AB-2938"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2945"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2947"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2949"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2955"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2965"
+    },
+    {
+      "position": 590,
+      "class": "Frame_Shift_Del",
+      "aa_change": "G590fs",
+      "sample": "TCGA-AB-2966"
+    },
+    {
+      "position": 505,
+      "class": "Nonsense_Mutation",
+      "aa_change": "E505*",
+      "sample": "TCGA-AB-2967"
+    },
+    {
+      "position": 741,
+      "class": "Missense_Mutation",
+      "aa_change": "A741V",
+      "sample": "TCGA-AB-2968"
+    },
+    {
+      "position": 477,
+      "class": "Splice_Site",
+      "aa_change": "E477*",
+      "sample": "TCGA-AB-2968"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882C",
+      "sample": "TCGA-AB-2974"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2975"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882C",
+      "sample": "TCGA-AB-2981"
+    },
+    {
+      "position": 882,
+      "class": "Missense_Mutation",
+      "aa_change": "R882H",
+      "sample": "TCGA-AB-2987"
+    },
+    {
+      "position": 909,
+      "class": "Missense_Mutation",
+      "aa_change": "F909C",
+      "sample": "TCGA-AB-2988"
+    },
+    {
+      "position": 723,
+      "class": "Frame_Shift_Del",
+      "aa_change": "L723fs",
+      "sample": "TCGA-AB-2993"
+    }
+  ],
+  "domains": [
+    {
+      "name": "Dnmt3b_related",
+      "start": 290,
+      "end": 377,
+      "color": "#e78973"
+    },
+    {
+      "name": "ADDz_Dnmt3a",
+      "start": 476,
+      "end": 612,
+      "color": "#8094ee"
+    },
+    {
+      "name": "AdoMet_MTases",
+      "start": 634,
+      "end": 905,
+      "color": "#f7c57a"
+    }
+  ],
+  "backbone": {
+    "start": 1,
+    "end": 912,
+    "color": "#a8b5b6"
+  }
+}

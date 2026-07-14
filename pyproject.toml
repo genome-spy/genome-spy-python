@@ -15,8 +15,10 @@ docs = [
     "sphinx>=7.3",
     "pydata-sphinx-theme>=0.15",
     "myst-parser>=3.0",
+    "scipy>=1.14.0",
     "sphinx-design>=0.6",
     "sphinx-copybutton>=0.5",
+    "statsmodels>=0.14.2",
 ]
 dev = [
     "altair>=6.0.0",
@@ -31,6 +33,8 @@ dev = [
     "pre-commit>=4.2.0",
     "pytest>=8.4.1",
     "ruff>=0.12.0",
+    "scipy>=1.14.0",
+    "statsmodels>=0.14.2",
 ]
 
 [build-system]
@@ -39,7 +43,11 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/genome_spy"]
-artifacts = ["src/genome_spy/schema/genome-spy-schema.json"]
+artifacts = [
+    "src/genome_spy/schema/genome-spy-schema.json",
+    "src/genome_spy/datasets/data/*.csv",
+    "src/genome_spy/datasets/data/*.json",
+]
 
 [tool.genome-spy]
 core-version = "0.80.0"

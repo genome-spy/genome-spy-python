@@ -61,3 +61,7 @@
   `fix(docs-gallery)` slice: Playwright now waits for live charts to settle,
   scales them into the fixed card viewport more reliably, and the docs tests
   cover the renderer layout helper plus PNG-required thumbnail behavior.
+- Committed the public API/data ergonomics slice as `feat(api)`: added
+  Altair-style helper constructors, schema-backed lazy data builders, packaged
+  example datasets, airway preprocessing helpers, and the corresponding chart
+  and dataset regression coverage plus dependency/artifact updates.

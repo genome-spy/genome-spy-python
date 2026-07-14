@@ -28,6 +28,33 @@ class Channel:
         definition["title"] = value
         return self._replace_definition(definition)
 
+    def axis(
+        self,
+        value: SchemaBase | dict[str, Any] | None | object = _MISSING,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a channel with an ``axis`` configuration."""
+        return self._with_nested("axis", value, **kwargs)
+
+    def scale(
+        self,
+        value: SchemaBase | dict[str, Any] | None | object = _MISSING,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a channel with a ``scale`` configuration."""
+        return self._with_nested("scale", value, **kwargs)
+
+    def legend(
+        self,
+        value: SchemaBase | dict[str, Any] | None | object = _MISSING,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a channel with a ``legend`` configuration."""
+        return self._with_nested("legend", value, **kwargs)
+
     def _with_nested(
         self,
         key: str,
@@ -71,7 +98,7 @@ class Channel:
 
 
 def channel(
-    value: Channel | str | dict[str, Any],
+    value: Channel | SchemaBase | str | dict[str, Any],
     /,
     *,
     encoding_name: str | None = None,
@@ -81,6 +108,8 @@ def channel(
     if isinstance(value, Channel):
         definition = value.to_dict()
         encoding_name = encoding_name or value.encoding_name
+    elif isinstance(value, SchemaBase):
+        definition = value.to_dict(validate=False)
     elif isinstance(value, str):
         definition = parse_shorthand(value)
     elif is_mapping(value):

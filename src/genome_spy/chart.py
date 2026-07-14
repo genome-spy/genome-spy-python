@@ -13,17 +13,11 @@ from genome_spy.channels import Channel, channel
 from genome_spy.schema import (
     ConcatSpec,
     EncodingKwds,
-    GenomeAxis,
-    GenomeAxisKwds,
     HConcatSpec,
     LayerSpec,
-    Legend,
-    LegendKwds,
     MARK_TYPES,
     Root,
     SCHEMA_VERSION,
-    Scale,
-    ScaleKwds,
     UnitSpec,
     VConcatSpec,
 )
@@ -75,6 +69,8 @@ HTML_TEMPLATE = """
 def _normalize_data(data: Any) -> Any:
     if data is None:
         return None
+    if isinstance(data, SchemaBase):
+        return data.to_dict(validate=False)
     records = _records_from_data(data)
     if records is not None:
         return {"values": _json_safe(records)}
@@ -146,8 +142,13 @@ def _infer_field_type(field: str, data: Any) -> str | None:
 
 
 def _normalize_channel(
-    name: str, value: Channel | str | dict[str, Any], *, data: Any = None
-) -> dict[str, Any]:
+    name: str,
+    value: Channel | SchemaBase | str | dict[str, Any] | None,
+    *,
+    data: Any = None,
+) -> dict[str, Any] | None:
+    if value is None:
+        return None
     definition = channel(value).to_dict()
     # Secondary positional channels (x2/y2) only carry field/value in GenomeSpy's
     # schema; a `type` is invalid there, so never infer or keep one for them.
@@ -166,7 +167,7 @@ def _normalize_channel(
     return definition
 
 
-def _infer_encoding_name(value: Channel | str | dict[str, Any]) -> str:
+def _infer_encoding_name(value: Channel | SchemaBase | str | dict[str, Any]) -> str:
     if isinstance(value, Channel) and value.encoding_name is not None:
         return value.encoding_name
     raise TypeError(
@@ -175,7 +176,21 @@ def _infer_encoding_name(value: Channel | str | dict[str, Any]) -> str:
     )
 
 
-def _normalize_transform(transform: dict[str, Any]) -> dict[str, Any]:
+def _merge_encoding_definitions(
+    current_encoding: Any,
+    updates: dict[str, Channel | SchemaBase | str | dict[str, Any] | None],
+    *,
+    data: Any,
+) -> dict[str, Any]:
+    merged = {} if current_encoding is Undefined else dict(current_encoding)
+    for name, value in updates.items():
+        merged[name] = _normalize_channel(name, value, data=data)
+    return merged
+
+
+def _normalize_transform(transform: SchemaBase | dict[str, Any]) -> dict[str, Any]:
+    if isinstance(transform, SchemaBase):
+        return transform.to_dict(validate=False)
     if not is_mapping(transform):
         raise TypeError(f"Unsupported transform value: {type(transform)!r}")
     return dict(transform)
@@ -188,13 +203,124 @@ class TopLevelSpec:
         """Return a new spec with merged top-level properties."""
         return self._with_properties(kwargs)
 
+    def transform(self, *transforms: SchemaBase | dict[str, Any]) -> Self:
+        """Add one or more arbitrary GenomeSpy transforms.
+
+        Description:
+            Use this generic method when GenomeSpy supports a transform that
+            does not yet have a dedicated handwritten helper in the Python API.
+            Each transform may be a raw mapping or a generated schema wrapper.
+
+        Args:
+            *transforms: One or more transform definitions.
+
+        Returns:
+            A new spec with the transforms appended in order.
+
+        Raises:
+            TypeError: If a transform is not a mapping or schema wrapper.
+
+        Example:
+            >>> chart.transform({"type": "collect", "sort": {"field": ["x"]}})
+        """
+
+        result = self
+        for transform in transforms:
+            result = result._append_transform(_normalize_transform(transform))
+        return result
+
     def transform_filter(self, expression: str) -> Self:
         """Add a filter transform using a GenomeSpy expression string."""
         return self._append_transform({"type": "filter", "expr": expression})
 
+    def transform_collect(self, *, sort: dict[str, Any] | None = None) -> Self:
+        """Add a collect transform."""
+        transform: dict[str, Any] = {"type": "collect"}
+        if sort is not None:
+            transform["sort"] = dict(sort)
+        return self._append_transform(transform)
+
+    def transform_flatten(
+        self,
+        *,
+        fields: list[str],
+        as_: list[str] | None = None,
+        index: str | None = None,
+    ) -> Self:
+        """Add a flatten transform."""
+        transform: dict[str, Any] = {"type": "flatten", "fields": fields}
+        if as_ is not None:
+            transform["as"] = as_
+        if index is not None:
+            transform["index"] = index
+        return self._append_transform(transform)
+
+    def transform_flatten_compressed_exons(self, *, start: str) -> Self:
+        """Add a flattenCompressedExons transform."""
+        return self._append_transform(
+            {"type": "flattenCompressedExons", "start": start}
+        )
+
     def transform_formula(self, *, expr: str, as_: str) -> Self:
         """Add a formula transform."""
         return self._append_transform({"type": "formula", "expr": expr, "as": as_})
+
+    def transform_linearize_genomic_coordinate(
+        self, *, chrom: str, pos: str, as_: str
+    ) -> Self:
+        """Add a linearizeGenomicCoordinate transform."""
+        return self._append_transform(
+            {
+                "type": "linearizeGenomicCoordinate",
+                "chrom": chrom,
+                "pos": pos,
+                "as": as_,
+            }
+        )
+
+    def transform_measure_text(
+        self,
+        *,
+        field: str,
+        as_: str,
+        fontSize: float | None = None,
+        fontWeight: str | None = None,
+        font: str | None = None,
+    ) -> Self:
+        """Add a measureText transform."""
+        transform: dict[str, Any] = {
+            "type": "measureText",
+            "field": field,
+            "as": as_,
+        }
+        if fontSize is not None:
+            transform["fontSize"] = fontSize
+        if fontWeight is not None:
+            transform["fontWeight"] = fontWeight
+        if font is not None:
+            transform["font"] = font
+        return self._append_transform(transform)
+
+    def transform_filter_scored_labels(
+        self,
+        *,
+        lane: str,
+        score: str,
+        width: str,
+        pos: str,
+        padding: float | None = None,
+    ) -> Self:
+        """Add a filterScoredLabels transform."""
+        transform: dict[str, Any] = {
+            "type": "filterScoredLabels",
+            "lane": lane,
+            "score": score,
+            "width": width,
+            "pos": pos,
+        }
+        if padding is not None:
+            transform["padding"] = padding
+        return self._append_transform(transform)
 
     def transform_aggregate(
         self,
@@ -212,6 +338,37 @@ class TopLevelSpec:
             transform["fields"] = fields
         if ops is not None:
             transform["ops"] = ops
+        if as_ is not None:
+            transform["as"] = as_
+        return self._append_transform(transform)
+
+    def transform_pileup(
+        self,
+        *,
+        start: str,
+        end: str,
+        as_: str,
+        preference: str | None = None,
+        preferredOrder: list[str] | None = None,
+    ) -> Self:
+        """Add a pileup transform."""
+        transform: dict[str, Any] = {
+            "type": "pileup",
+            "start": start,
+            "end": end,
+            "as": as_,
+        }
+        if preference is not None:
+            transform["preference"] = preference
+        if preferredOrder is not None:
+            transform["preferredOrder"] = preferredOrder
+        return self._append_transform(transform)
+
+    def transform_project(
+        self, *, fields: list[str], as_: list[str] | None = None
+    ) -> Self:
+        """Add a project transform."""
+        transform: dict[str, Any] = {"type": "project", "fields": fields}
         if as_ is not None:
             transform["as"] = as_
         return self._append_transform(transform)
@@ -369,7 +526,7 @@ class Chart(TopLevelSpec, MarkMethodMixin, UnitSpec):
     def encode(
         self,
         *args: Channel,
-        **kwargs: Channel | str | dict[str, Any],
+        **kwargs: Channel | SchemaBase | str | dict[str, Any] | None,
     ) -> Chart:
         """Return a new chart with merged channel encodings."""
         for arg in args:
@@ -379,10 +536,8 @@ class Chart(TopLevelSpec, MarkMethodMixin, UnitSpec):
             kwargs[name] = arg
 
         current_encoding = self._kwds.get("encoding", Undefined)
-        merged = {} if current_encoding is Undefined else dict(current_encoding)
         data = self._kwds.get("data", Undefined)
-        for name, value in kwargs.items():
-            merged[name] = _normalize_channel(name, value, data=data)
+        merged = _merge_encoding_definitions(current_encoding, kwargs, data=data)
         return self.copy(deep=False, encoding=merged)
 
     def to_dict(
@@ -465,29 +620,51 @@ class _CompositionSpec(TopLevelSpec):
     def _with_properties(self, properties: dict[str, Any]) -> Self:
         return self.copy(deep=False, **properties)
 
-    def resolve_axis(self, **kwargs: GenomeAxis | GenomeAxisKwds | None) -> Self:
+    def encode(
+        self,
+        *args: Channel,
+        **kwargs: Channel | SchemaBase | str | dict[str, Any] | None,
+    ) -> Self:
+        """Return a copy with merged top-level encodings for composed specs."""
+        for arg in args:
+            name = _infer_encoding_name(arg)
+            if name in kwargs:
+                raise TypeError(f"Encoding channel {name!r} was specified twice.")
+            kwargs[name] = arg
+
+        current_encoding = self._kwds.get("encoding", Undefined)
+        data = self._kwds.get("data", Undefined)
+        merged = _merge_encoding_definitions(current_encoding, kwargs, data=data)
+        return self.copy(deep=False, encoding=merged)
+
+    def resolve_axis(self, **kwargs: str | None) -> Self:
         """Return a copy with merged composition-level axis resolutions."""
-        return self._merge_resolution("axes", kwargs)
+        return self._merge_resolution("axis", kwargs)
 
-    def resolve_scale(self, **kwargs: Scale | ScaleKwds | None) -> Self:
+    def resolve_scale(self, **kwargs: str | None) -> Self:
         """Return a copy with merged composition-level scale resolutions."""
-        return self._merge_resolution("scales", kwargs)
+        return self._merge_resolution("scale", kwargs)
 
-    def resolve_legend(self, **kwargs: Legend | LegendKwds | None) -> Self:
+    def resolve_legend(self, **kwargs: str | None) -> Self:
         """Return a copy with merged composition-level legend resolutions."""
-        return self._merge_resolution("legends", kwargs)
+        return self._merge_resolution("legend", kwargs)
 
     def _merge_resolution(self, key: str, updates: dict[str, Any]) -> Self:
-        current = self._kwds.get(key, Undefined)
+        current = self._kwds.get("resolve", Undefined)
         merged: dict[str, Any] = {} if current is Undefined else dict(current)
+        current_values = merged.get(key, Undefined)
+        merged_values: dict[str, Any] = (
+            {} if current_values is Undefined else dict(current_values)
+        )
         for name, value in updates.items():
             if isinstance(value, SchemaBase):
-                merged[name] = value.to_dict(validate=False)
+                merged_values[name] = value.to_dict(validate=False)
             elif is_mapping(value):
-                merged[name] = dict(value)
+                merged_values[name] = dict(value)
             else:
-                merged[name] = value
-        return self.copy(deep=False, **{key: merged})
+                merged_values[name] = value
+        merged[key] = merged_values
+        return self.copy(deep=False, resolve=merged)
 
 
 class LayerChart(_CompositionSpec, LayerSpec):

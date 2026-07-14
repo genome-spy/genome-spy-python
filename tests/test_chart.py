@@ -10,11 +10,15 @@ import pytest
 from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
 from genome_spy.schema import (
     ConcatSpec,
+    DynamicOpacity,
+    ExprRef,
     GenomeAxis,
     HConcatSpec,
     LayerSpec,
     Legend,
     SCHEMA_VERSION,
+    Step,
+    Title,
     Scale,
     UnitSpec,
     VConcatSpec,
@@ -72,6 +76,64 @@ def test_generated_channel_nested_setters_accept_schema_wrappers() -> None:
     }
 
 
+def test_public_api_exposes_additional_ergonomic_builders() -> None:
+    assert gs.expr("datum.x * 2").to_dict() == {"expr": "datum.x * 2"}
+    assert gs.title("Example", orient="left").to_dict() == {
+        "text": "Example",
+        "orient": "left",
+    }
+    assert gs.step(18).to_dict() == {"step": 18}
+    assert gs.dynamic_opacity(
+        unitsPerPixel=[100000, 40000], values=[0, 1]
+    ).to_dict() == {
+        "unitsPerPixel": [100000, 40000],
+        "values": [0, 1],
+    }
+    assert gs.data_format(type="bed").to_dict() == {"type": "bed"}
+    assert gs.parse(chrom="string", start="integer").to_dict() == {
+        "chrom": "string",
+        "start": "integer",
+    }
+    assert gs.param("threshold", value=5).to_dict() == {"name": "threshold", "value": 5}
+
+    assert isinstance(gs.expr("datum.x"), ExprRef)
+    assert isinstance(gs.title("Example"), Title)
+    assert isinstance(gs.step(10), Step)
+    assert isinstance(
+        gs.dynamic_opacity(unitsPerPixel=[100000, 40000], values=[0, 1]),
+        DynamicOpacity,
+    )
+
+
+def test_expression_helper_works_in_channel_definitions() -> None:
+    chart = (
+        gs.Chart([{"x": 1, "label": "A", "strand": "+"}])
+        .mark_point()
+        .encode(
+            x="x:Q",
+            dx=gs.Dx(gs.expr("datum.x * 2"), type="quantitative").scale(None),
+            shape=gs.Shape("strand:N")
+            .scale(domain=["-", "+"], range=["triangle-left", "triangle-right"])
+            .legend(None),
+        )
+    )
+
+    assert chart.to_dict()["encoding"]["dx"] == {
+        "expr": "datum.x * 2",
+        "type": "quantitative",
+        "scale": None,
+    }
+    assert chart.to_dict()["encoding"]["shape"] == {
+        "field": "strand",
+        "type": "nominal",
+        "scale": {
+            "domain": ["-", "+"],
+            "range": ["triangle-left", "triangle-right"],
+        },
+        "legend": None,
+    }
+
+
 def test_generated_channel_nested_setters_allow_null_override() -> None:
     channel = gs.X("position:Q").axis(None)
 
@@ -79,6 +141,22 @@ def test_generated_channel_nested_setters_allow_null_override() -> None:
         "field": "position",
         "type": "quantitative",
         "axis": None,
+    }
+
+
+def test_locus_channel_supports_fluent_axis_and_scale_configuration() -> None:
+    channel = (
+        gs.Locus("chrom", "pos")
+        .axis(title="Genomic position", grid=False)
+        .scale(assembly="hg38")
+    )
+
+    assert channel.to_dict() == {
+        "chrom": "chrom",
+        "pos": "pos",
+        "type": "locus",
+        "axis": {"title": "Genomic position", "grid": False},
+        "scale": {"assembly": "hg38"},
     }
 
 
@@ -164,6 +242,265 @@ def test_altair_style_penguins_snippet_serializes() -> None:
         "field": "Species",
         "type": "nominal",
     }
+
+
+def test_chart_properties_support_genomic_top_level_config() -> None:
+    chart = (
+        gs.Chart([{"chrom": "chr1", "start": 1, "end": 10, "value": 3}])
+        .mark_rect()
+        .encode(
+            x=gs.Locus("chrom", "start"),
+            x2=gs.Locus("chrom", "end"),
+            y="value:Q",
+        )
+        .properties(
+            assembly="hg38",
+            viewportHeight="container",
+            view={"stroke": "lightgray"},
+            params=[{"name": "threshold", "value": 5}],
+        )
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["assembly"] == "hg38"
+    assert spec["viewportHeight"] == "container"
+    assert spec["view"] == {"stroke": "lightgray"}
+    assert spec["params"] == [{"name": "threshold", "value": 5}]
+
+
+def test_composition_properties_support_root_level_genomic_config() -> None:
+    chart = (
+        gs.vconcat(gs.Chart([{"x": 1}]).mark_point().encode(x="x:Q"), spacing=10)
+        .properties(
+            assembly="hg38",
+            scales={
+                "x": {
+                    "domain": [
+                        {"chrom": "chr1", "pos": 1},
+                        {"chrom": "chr1", "pos": 10},
+                    ]
+                }
+            },
+        )
+        .resolve_scale(y="independent")
+        .resolve_axis(y="independent")
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["assembly"] == "hg38"
+    assert spec["spacing"] == 10
+    assert spec["scales"] == {
+        "x": {
+            "domain": [
+                {"chrom": "chr1", "pos": 1},
+                {"chrom": "chr1", "pos": 10},
+            ]
+        }
+    }
+    assert spec["resolve"] == {
+        "scale": {"y": "independent"},
+        "axis": {"y": "independent"},
+    }
+
+
+def test_layer_chart_supports_top_level_encode() -> None:
+    layer_chart = (
+        gs.layer(gs.Chart().mark_rule(), gs.Chart().mark_point())
+        .encode(x=gs.Locus("chrom", "start"), y=gs.Y("_lane:O").axis(None))
+        .properties(data=[{"chrom": "chr1", "start": 1, "_lane": 0}])
+    )
+
+    assert layer_chart.to_dict()["encoding"] == {
+        "x": {"chrom": "chrom", "pos": "start", "type": "locus"},
+        "y": {
+            "field": "_lane",
+            "type": "ordinal",
+            "axis": None,
+            "scale": {"reverse": True},
+        },
+    }
+
+
+def test_encode_supports_null_secondary_channels() -> None:
+    chart = gs.Chart([{"x": 1}]).mark_rule().encode(x="x:Q", x2=None)
+
+    assert chart.to_dict()["encoding"]["x2"] is None
+
+
+def test_chart_accepts_schema_data_wrapper() -> None:
+    chart = (
+        gs.Chart(
+            gs.Data(
+                url="https://example.test/features.tsv",
+                format={"type": "tsv"},
+            )
+        )
+        .mark_rect()
+        .encode(x="x:Q", y="y:Q")
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["data"] == {
+        "url": "https://example.test/features.tsv",
+        "format": {"type": "tsv"},
+    }
+
+
+def test_chart_accepts_lazy_data_helper() -> None:
+    chart = (
+        gs.Chart(gs.lazy.bigwig("https://example.test/signal.bw", pixelsPerBin=1))
+        .mark_rect()
+        .encode(
+            x=gs.Locus("chrom", "start"),
+            x2=gs.Locus("chrom", "end"),
+            y="score:Q",
+        )
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["data"] == {
+        "lazy": {
+            "type": "bigwig",
+            "url": "https://example.test/signal.bw",
+            "pixelsPerBin": 1,
+        }
+    }
+
+
+def test_lazy_namespace_supports_generic_and_named_sources() -> None:
+    gff3 = gs.lazy.gff3(
+        "https://example.test/genes.gff3.gz",
+        windowSize=2_000_000,
+    )
+    custom = gs.lazy.source("indexedFasta", "https://example.test/reference.fa.gz")
+
+    assert gff3.to_dict(validate=False) == {
+        "lazy": {
+            "type": "gff3",
+            "url": "https://example.test/genes.gff3.gz",
+            "windowSize": 2_000_000,
+        }
+    }
+    assert custom.to_dict(validate=False) == {
+        "lazy": {
+            "type": "indexedFasta",
+            "url": "https://example.test/reference.fa.gz",
+        }
+    }
+
+
+def test_generic_transform_appends_raw_mappings() -> None:
+    chart = (
+        gs.Chart([{"x": 1, "label": "A"}])
+        .mark_point()
+        .transform(
+            {"type": "collect", "sort": {"field": ["x"]}},
+            {"type": "project", "fields": ["x", "label"]},
+        )
+        .encode(x="x:Q")
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["transform"] == [
+        {"type": "collect", "sort": {"field": ["x"]}},
+        {"type": "project", "fields": ["x", "label"]},
+    ]
+
+
+def test_generic_transform_rejects_unsupported_values() -> None:
+    with pytest.raises(TypeError, match="Unsupported transform value"):
+        gs.Chart([{"x": 1}]).mark_point().transform(42)  # type: ignore[arg-type]
+
+
+def test_generic_transform_chains_with_existing_helpers() -> None:
+    chart = (
+        gs.Chart([{"x": 1, "width": 2}])
+        .mark_rect()
+        .transform_formula(expr="datum.x + datum.width", as_="x2")
+        .transform({"type": "filter", "expr": "datum.x2 > 0"})
+        .encode(x="x:Q", x2="x2")
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["transform"] == [
+        {"type": "formula", "expr": "datum.x + datum.width", "as": "x2"},
+        {"type": "filter", "expr": "datum.x2 > 0"},
+    ]
+
+
+def test_genomic_transform_helpers_serialize() -> None:
+    chart = (
+        gs.Chart([{"chrom": "chr1", "start": 10, "end": 20, "label": "A"}])
+        .mark_rect()
+        .transform_linearize_genomic_coordinate(
+            chrom="chrom",
+            pos="start",
+            as_="_start",
+        )
+        .transform_collect(sort={"field": ["_start"]})
+        .transform_pileup(start="_start", end="end", as_="lane")
+        .transform_measure_text(field="label", as_="labelWidth", fontSize=11)
+        .transform_filter_scored_labels(
+            lane="lane",
+            score="end",
+            width="labelWidth",
+            pos="_start",
+            padding=4,
+        )
+        .encode(x="start:Q")
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["transform"] == [
+        {
+            "type": "linearizeGenomicCoordinate",
+            "chrom": "chrom",
+            "pos": "start",
+            "as": "_start",
+        },
+        {"type": "collect", "sort": {"field": ["_start"]}},
+        {"type": "pileup", "start": "_start", "end": "end", "as": "lane"},
+        {
+            "type": "measureText",
+            "field": "label",
+            "as": "labelWidth",
+            "fontSize": 11,
+        },
+        {
+            "type": "filterScoredLabels",
+            "lane": "lane",
+            "score": "end",
+            "width": "labelWidth",
+            "pos": "_start",
+            "padding": 4,
+        },
+    ]
+
+
+def test_project_and_flatten_helpers_serialize() -> None:
+    chart = (
+        gs.Chart([{"values": [1, 2], "meta": "x"}])
+        .mark_point()
+        .transform_project(fields=["values", "meta"], as_=["items", "meta"])
+        .transform_flatten(fields=["items"], as_=["item"], index="row")
+        .transform_flatten_compressed_exons(start="_start")
+        .encode(x="item:Q")
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["transform"] == [
+        {"type": "project", "fields": ["values", "meta"], "as": ["items", "meta"]},
+        {"type": "flatten", "fields": ["items"], "as": ["item"], "index": "row"},
+        {"type": "flattenCompressedExons", "start": "_start"},
+    ]
 
 
 def test_altair_style_tick_shorthand_serializes() -> None:
@@ -439,19 +776,18 @@ def test_composition_charts_expose_resolution_ergonomics() -> None:
 
     chart = (
         (one | two)
-        .resolve_scale(x=Scale(reverse=True), color={"scheme": "blues"})
-        .resolve_axis(x=GenomeAxis(title="Shared x"))
-        .resolve_legend(color=Legend(title="Species"))
+        .resolve_scale(x="independent", color="shared")
+        .resolve_axis(x="shared")
+        .resolve_legend(color="independent")
     )
 
     spec = chart.to_dict()
 
-    assert spec["scales"] == {
-        "x": {"reverse": True},
-        "color": {"scheme": "blues"},
+    assert spec["resolve"] == {
+        "scale": {"x": "independent", "color": "shared"},
+        "axis": {"x": "shared"},
+        "legend": {"color": "independent"},
     }
-    assert spec["axes"] == {"x": {"title": "Shared x"}}
-    assert spec["legends"] == {"color": {"title": "Species"}}
 
 
 def test_concat_operators_match_genomespy_core_keys() -> None:
