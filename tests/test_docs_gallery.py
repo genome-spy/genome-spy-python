@@ -26,6 +26,16 @@ def _load_gallery():
     return module
 
 
+def _load_gallery_extension():
+    path = REPO_ROOT / "docs" / "_ext" / "genomespy_gallery.py"
+    spec = importlib.util.spec_from_file_location("_gs_gallery_ext", path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
 def _example_paths() -> list[Path]:
     return [p for p in sorted(EXAMPLES_DIR.glob("*.py")) if not p.name.startswith("_")]
 
@@ -45,3 +55,157 @@ def test_example_builds_valid_spec(path: Path) -> None:
     assert (
         "$schema" in example.spec or "mark" in example.spec or "layer" in example.spec
     )
+
+
+def test_gallery_index_keeps_examples_in_visible_navigation() -> None:
+    gallery = _load_gallery()
+    extension = _load_gallery_extension()
+    examples = gallery.collect_examples()
+    markdown = extension._gallery_index_md(examples)
+    build_token = gallery.build_token(examples)
+
+    assert ":hidden:" not in markdown
+    assert ":caption: Volcano and MA plots" in markdown
+    assert "airway_ma_plot" in markdown
+    assert "airway_volcano_plot" in markdown
+    assert ":caption: Association plots" in markdown
+    assert ":caption: Genome browser tracks" in markdown
+    assert f"manhattan_plot.html?v={build_token}" in markdown
+    for example in examples:
+        assert f"\n{example.name}\n" in markdown
+
+
+def test_gallery_build_token_changes_with_example_content() -> None:
+    gallery = _load_gallery()
+    examples = gallery.collect_examples()
+    original = gallery.build_token(examples)
+    mutated = [
+        gallery.Example(
+            name=example.name,
+            title=example.title,
+            description=example.description,
+            category=example.category,
+            tags=example.tags,
+            order=example.order,
+            height=example.height,
+            max_width=example.max_width,
+            source=example.source + "\n# cache bust",
+            spec=example.spec,
+        )
+        if example.name == examples[0].name
+        else example
+        for example in examples
+    ]
+
+    assert gallery.build_token(mutated) != original
+
+
+def test_gallery_can_require_png_thumbnails(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "manhattan_plot.py")
+
+    monkeypatch.setenv("GENOME_SPY_DOCS_REQUIRE_PNG_THUMBS", "1")
+    monkeypatch.setattr(gallery, "THUMBS_DIR", tmp_path)
+
+    with pytest.raises(FileNotFoundError, match="Missing PNG thumbnail"):
+        gallery.thumb_filename(example)
+
+
+def test_gallery_generation_runs_during_sphinx_config_phase() -> None:
+    extension = _load_gallery_extension()
+    app = FakeSphinxApp()
+
+    extension.setup(app)
+    events = [args[0] for args in app.events]
+
+    assert "config-inited" in events
+    assert "builder-inited" not in events
+
+
+def test_gallery_detail_embed_uses_shadow_dom_and_stable_reveal() -> None:
+    gallery = _load_gallery()
+    extension = _load_gallery_extension()
+    example = gallery.collect_example(EXAMPLES_DIR / "airway_volcano_plot.py")
+    expected = gallery.build_token([example])
+    markdown = extension._detail_md(example, "https://example.test/bundle.js")
+
+    assert 'class="gs-doc-embed"' in markdown
+    assert "attachShadow({ mode: 'open' })" in markdown
+    assert "await embed(c, spec, { bare: true });" in markdown
+    assert f"airway_volcano_plot.json?v={expected}" in markdown
+    assert (
+        "#shell{position:relative;width:100%;height:100%;overflow:hidden}" in markdown
+    )
+    assert "Math.round(r.width)}x${Math.round(r.height)" in markdown
+    assert "stable >= 3" in markdown
+
+
+def test_gallery_example_can_cap_embed_width() -> None:
+    gallery = _load_gallery()
+    extension = _load_gallery_extension()
+    example = gallery.collect_example(EXAMPLES_DIR / "qq_plot.py")
+    markdown = extension._detail_md(example, "https://example.test/bundle.js")
+
+    assert 'class="gs-doc-embed" style="height:560px;max-width:840px"' in markdown
+
+
+def test_minigallery_links_include_cache_busting_query() -> None:
+    gallery = _load_gallery()
+    extension = _load_gallery_extension()
+    examples = gallery.collect_examples()
+    expected = gallery.build_token(examples)
+    directive = extension.GenomeSpyMiniGallery(
+        "genomespy-minigallery",
+        [],
+        {},
+        [],
+        0,
+        0,
+        "",
+        FakeState(examples),
+        FakeStateMachine(),
+    )
+
+    nodes = directive.run()
+
+    assert len(nodes) == 1
+    assert f"gallery/manhattan_plot.html?v={expected}" in nodes[0].astext()
+
+
+class FakeSphinxApp:
+    def __init__(self) -> None:
+        self.events: list[tuple[str, object]] = []
+        self.directives: list[tuple[str, object]] = []
+
+    def connect(self, name: str, callback: object) -> None:
+        self.events.append((name, callback))
+
+    def add_directive(self, name: str, directive: object) -> None:
+        self.directives.append((name, directive))
+
+
+class FakeState:
+    def __init__(self, examples: list[object]) -> None:
+        self.document = FakeDocument(examples)
+
+
+class FakeDocument:
+    def __init__(self, examples: list[object]) -> None:
+        self.settings = FakeSettings(examples)
+
+
+class FakeSettings:
+    def __init__(self, examples: list[object]) -> None:
+        self.env = FakeEnv(examples)
+
+
+class FakeEnv:
+    def __init__(self, examples: list[object]) -> None:
+        self.genomespy_examples = examples
+
+
+class FakeStateMachine:
+    def __init__(self) -> None:
+        self.reporter = object()

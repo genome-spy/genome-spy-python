@@ -3,8 +3,9 @@
 GenomeSpy renders to a WebGL/canvas surface, so there is no pure-Python way to
 rasterize a chart; a headless browser is the correct tool. For each gallery
 example this mounts the live chart with the pinned GenomeSpy bundle and
-screenshots it to a PNG thumbnail. The example charts set no width/height, so the
-chart fills the fixed-size capture box.
+screenshots it to a PNG thumbnail. Examples use different natural heights, so
+the renderer scales each chart to fit inside a fixed gallery card instead of
+cropping taller compositions.
 
 Network is required (the browser imports the ``@genome-spy/core`` CDN bundle), so
 this runs in CI rather than as part of every local build. When no PNG exists,
@@ -20,6 +21,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 _TOOLS = Path(__file__).resolve().parent
@@ -27,6 +29,27 @@ _TOOLS = Path(__file__).resolve().parent
 # Capture-box size; the sizeless charts fill it, giving a consistent card image.
 CARD_WIDTH = 720
 CARD_HEIGHT = 405
+CARD_PADDING = 12
+READY_TIMEOUT_MS = 45_000
+SETTLE_DELAY_MS = 6_000
+
+
+@dataclass(frozen=True, slots=True)
+class ThumbnailLayout:
+    """Geometry for one rendered thumbnail card."""
+
+    stage_width: int
+    min_stage_height: int
+
+
+def thumbnail_layout(example: object) -> ThumbnailLayout:
+    """Return the natural render size for an example before card scaling."""
+    max_width = getattr(example, "max_width", None)
+    height = getattr(example, "height", CARD_HEIGHT)
+    return ThumbnailLayout(
+        stage_width=int(max_width) if max_width is not None else CARD_WIDTH,
+        min_stage_height=int(height),
+    )
 
 
 def _load_gallery():
@@ -42,14 +65,35 @@ def _load_gallery():
 
 _PAGE_TEMPLATE = """<!doctype html>
 <html><head><meta charset="utf-8">
-<style>html,body{{margin:0;height:100%;background:#fff}}#c{{width:{width}px;height:{height}px}}</style>
-</head><body><div id="c"></div>
+<style>
+html,body{{margin:0;height:100%;background:#fff}}
+body{{font-family:Lato,system-ui,sans-serif}}
+#frame{{display:flex;align-items:center;justify-content:center;box-sizing:border-box;width:{card_width}px;height:{card_height}px;padding:{card_padding}px;overflow:hidden;background:#fff}}
+#fit{{flex:0 0 auto;width:{stage_width}px;transform-origin:center center}}
+#c{{width:{stage_width}px;min-height:{min_stage_height}px}}
+</style>
+</head><body><div id="frame"><div id="fit"><div id="c"></div></div></div>
 <script type="module">
 import {{ embed }} from "{bundle}";
 const spec = {spec};
+const frame = document.getElementById("frame");
+const fit = document.getElementById("fit");
+const container = document.getElementById("c");
+const cardPadding = {card_padding};
+
+function applyScale() {{
+  const scale = Math.min(
+    (frame.clientWidth - cardPadding * 2) / fit.offsetWidth,
+    (frame.clientHeight - cardPadding * 2) / fit.offsetHeight,
+    1
+  );
+  fit.style.transform = `scale(${{scale}})`;
+}}
+
 try {{
-  await embed(document.getElementById("c"), spec);
-  window.__gsReady = true;
+  await embed(container, spec, {{ bare: true }});
+  applyScale();
+  window.__gsMounted = true;
 }} catch (e) {{
   window.__gsError = String(e);
 }}
@@ -77,26 +121,60 @@ def main() -> int:
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(
-            viewport={"width": 1000, "height": 900}, device_scale_factor=2
+            viewport={"width": CARD_WIDTH, "height": CARD_HEIGHT},
+            device_scale_factor=2,
         )
         for example in examples:
+            layout = thumbnail_layout(example)
             html = _PAGE_TEMPLATE.format(
-                width=CARD_WIDTH,
-                height=CARD_HEIGHT,
+                card_width=CARD_WIDTH,
+                card_height=CARD_HEIGHT,
+                card_padding=CARD_PADDING,
+                stage_width=layout.stage_width,
+                min_stage_height=layout.min_stage_height,
                 bundle=bundle_url,
                 spec=json.dumps(example.spec),
             )
             page.set_content(html, wait_until="load")
             try:
-                page.wait_for_function("window.__gsReady === true", timeout=30_000)
+                page.wait_for_function(
+                    "window.__gsMounted === true || window.__gsError",
+                    timeout=READY_TIMEOUT_MS + 5_000,
+                )
             except Exception:  # noqa: BLE001 - report and skip a single example
                 err = page.evaluate("window.__gsError || 'timed out'")
                 print(f"[thumb] {example.name}: render failed ({err})", file=sys.stderr)
                 continue
-            page.wait_for_timeout(900)  # let async data and the first frame settle
-            page.locator("#c").screenshot(
-                path=str(gallery.THUMBS_DIR / f"{example.name}.png")
+            error = page.evaluate("window.__gsError || null")
+            if error is not None:
+                print(
+                    f"[thumb] {example.name}: render failed ({error})", file=sys.stderr
+                )
+                continue
+            page.locator("#c canvas").first.wait_for(timeout=READY_TIMEOUT_MS)
+            try:
+                page.wait_for_load_state("networkidle", timeout=READY_TIMEOUT_MS)
+            except Exception:
+                pass
+            page.wait_for_timeout(SETTLE_DELAY_MS)
+            page.evaluate(
+                f"""
+                () => {{
+                  const frame = document.getElementById("frame");
+                  const fit = document.getElementById("fit");
+                  const container = document.getElementById("c");
+                  const rect = container.getBoundingClientRect();
+                  fit.style.height = `${{Math.ceil(rect.height)}}px`;
+                  const scale = Math.min(
+                    (frame.clientWidth - {CARD_PADDING * 2}) / rect.width,
+                    (frame.clientHeight - {CARD_PADDING * 2}) / rect.height,
+                    1
+                  );
+                  fit.style.transform = `scale(${{scale}})`;
+                }}
+                """
             )
+            page.screenshot(path=str(gallery.THUMBS_DIR / f"{example.name}.png"))
             print(f"[thumb] {example.name}")
             rendered += 1
         browser.close()
