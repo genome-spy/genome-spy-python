@@ -8,7 +8,7 @@ On ``builder-inited`` it turns every ``docs/examples/<name>.py`` module into:
 * the gallery landing page grouped into category sections.
 
 It also registers the ``genomespy-minigallery`` directive, which renders the
-Altair-style image-tile showcase used on the site's landing page.
+image-tile showcase used on the site's landing page.
 
 Example modules are the single source of truth; authors never edit the
 generated pages. The generation core lives in ``tools/docs_gallery.py`` so the
@@ -219,7 +219,7 @@ def _generate_on_config(app: Any, _config: Any) -> None:
 
 
 class GenomeSpyMiniGallery(Directive):
-    """Render the Altair-style image-tile showcase for the landing page."""
+    """Render the image-tile showcase for the landing page."""
 
     has_content = False
 

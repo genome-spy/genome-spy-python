@@ -40,24 +40,27 @@ chart.to_dict()   # Python dict (validated against the GenomeSpy schema)
 chart.to_json()   # pretty-printed JSON string
 ```
 
-## Altair-style ergonomics
+## Authoring style
 
-The API mirrors Altair wherever GenomeSpy's grammar allows, so many examples
-port by changing only the import:
+The API keeps the authoring flow compact and composable for tabular charts as
+well as genomics-native views:
 
 ```python
-import genome_spy as alt
-from altair.datasets import data
+import genome_spy as gs
 
-source = data.penguins()
-
-alt.Chart(source).mark_circle().encode(
-    alt.X("Flipper Length (mm)").scale(zero=False),
-    alt.Y("Body Mass (g)").scale(zero=False),
-    color="Species",
+gs.Chart(
+    [
+        {"x": 1.0, "y": 4.2, "category": "A"},
+        {"x": 2.0, "y": 3.1, "category": "B"},
+        {"x": 3.0, "y": 5.0, "category": "A"},
+    ]
+).mark_circle().encode(
+    gs.X("x:Q").scale(zero=False),
+    gs.Y("y:Q").scale(zero=False),
+    color=gs.Color("category:N"),
 )
 ```
 
-GenomeSpy-specific helpers such as `alt.Locus("chrom", "pos")` give you
+GenomeSpy-specific helpers such as `gs.Locus("chrom", "pos")` give you
 locus-scaled genomic axes. See the [gallery](gallery/index.md) for genomics-native
 examples like the Manhattan plot.

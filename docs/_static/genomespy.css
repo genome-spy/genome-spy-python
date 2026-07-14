@@ -2,7 +2,7 @@
  *
  * Brands the pydata-sphinx-theme with the genomespy.app design language: Lato
  * body text, a Special Elite wordmark, brand blues (#3e8cb6 / #3797ce /
- * #7fbbdd), and an Altair-style image-tile showcase on the landing page. */
+ * #7fbbdd), and an image-tile showcase on the landing page. */
 
 @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Special+Elite&display=swap");
 
@@ -50,7 +50,7 @@ p.lead {
   font-size: 1.15rem;
 }
 
-/* ---------- Altair-style showcase band ---------- */
+/* ---------- Showcase band ---------- */
 #gs-showcase {
   margin: 1.5rem auto 2.5rem;
   position: relative;

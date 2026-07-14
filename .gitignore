@@ -235,11 +235,11 @@ docs/gallery/
 docs/_static/gallery/
 docs/_static/specs/
 
-# Keep Codex/Claude skill files but ignore other local state
-.claude/*
-!.claude/skills/
-!.claude/skills/**
+# Local assistant state
+.claude/
 .agents/
 .pre-commit-cache/
 .uv-cache/
 .cache/
+tools/.uv-cache/
+tools/__pycache__/

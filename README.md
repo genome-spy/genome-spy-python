@@ -1,14 +1,13 @@
 # genome-spy-python
 
 `genome-spy-python` is a Python wrapper for
-[GenomeSpy](https://github.com/genome-spy/genome-spy), analogous to how Altair
-wraps Vega-Lite.
+[GenomeSpy](https://github.com/genome-spy/genome-spy).
 
 The goal is to let Python users author GenomeSpy specifications with an
 idiomatic Python API, serialize them to valid GenomeSpy JSON, and render them
-in notebooks. The project starts with the reusable `@genome-spy/core`
-grammar and notebook embedding, then expands toward the richer cohort
-application concepts in `@genome-spy/app`.
+in notebooks. The public API aims to mirror Altair-style authoring where it
+fits GenomeSpy naturally, while still exposing genomics-native features such as
+locus-scaled axes and lazy genomic data sources.
 
 ## Notebook Usage
 
@@ -37,61 +36,36 @@ A runnable example notebook is available at
 `chart.widget()` is also available for explicit `anywidget` usage, but plain
 `chart` display is the most portable default across notebook frontends.
 
-## Altair-Style Examples
+## Example notebooks
 
-The public API aims to mirror Altair wherever GenomeSpy's grammar allows it.
-For now, example notebooks use Altair's datasets directly:
+Some notebooks use simple tabular data to show the core authoring model:
 
 ```python
-import genome_spy as alt
-from altair.datasets import data
-
-source = data.penguins()
+import genome_spy as gs
 
 chart = (
-    alt.Chart(source)
+    gs.Chart(
+        [
+            {"x": 1.0, "y": 4.2, "category": "A"},
+            {"x": 2.0, "y": 3.1, "category": "B"},
+            {"x": 3.0, "y": 5.0, "category": "A"},
+        ]
+    )
     .mark_circle()
     .encode(
-        alt.X("Flipper Length (mm)").scale(zero=False),
-        alt.Y("Body Mass (g)").scale(zero=False, padding=1),
-        alt.Size("Beak Depth (mm)").scale(zero=False),
-        color="Species",
+        gs.X("x:Q").scale(zero=False),
+        gs.Y("y:Q").scale(zero=False, padding=1),
+        color=gs.Color("category:N"),
     )
 )
 
 chart
 ```
 
-The goal is that many simple Altair examples should require only the first
-import line to change. GenomeSpy-specific genomic helpers such as
-`alt.Locus("chrom", "start")` remain available for locus-scaled genomic axes.
+GenomeSpy-specific genomic helpers such as
+`gs.Locus("chrom", "start")` remain available for locus-scaled genomic axes.
 
-Runnable Altair-style examples:
-
-- `notebooks/altair_penguins_style.ipynb`
-- `notebooks/altair_cars_tick.ipynb`
-
-The cars tick notebook mirrors this Altair example:
-
-```python
-import genome_spy as alt
-from altair.datasets import data
-
-source = data.cars()
-
-alt.Chart(source).mark_tick().encode(
-    x="Horsepower:Q",
-    y="Cylinders:O",
-)
-```
-
-GenomeSpy-native grammar examples:
-
-- `notebooks/altair_stacked_bar_plot.ipynb`
-
-The stacked-bar notebook uses Altair's barley dataset but follows GenomeSpy's
-own stacked-bar grammar: explicit `aggregate` and `stack` transforms generate
-the fields that are then encoded with `x`/`x2` or `y`/`y2`.
+Additional runnable notebooks live under `notebooks/`.
 
 ## Packaged Datasets
 
@@ -108,18 +82,10 @@ features = load_dataset("pik3ca_mutations", as_format="json")
 Tabular packaged datasets load as pandas DataFrames; JSON datasets load as
 plain Python objects.
 
-Architecture notes:
-
-- `plans/altair_schema_generation.md`: how Altair generates Python wrappers
-  from the Vega-Lite schema and how that maps to the GenomeSpy wrapper plan
-- `plans/genomespy_codegen_mapping.md`: how the local GenomeSpy codegen
-  scaffold matches and differs from Altair's machinery
-
 ## Schema Generation
 
 Generated schema wrappers are committed to git and shipped with the package,
-following Altair's workflow. Normal users installing `genome-spy-python` should
-not need npm.
+so normal users installing `genome-spy-python` do not need npm.
 
 Maintainers regenerate wrappers only when updating the pinned GenomeSpy core
 version:
@@ -130,14 +96,4 @@ uv run python tools/generate_schema_wrapper.py
 
 That command requires `npm` on `PATH`, fetches the version-pinned
 `@genome-spy/core` package temporarily, writes `src/genome_spy/schema/`, and
-then removes the temporary npm package. The local `tmp/genome-spy` checkout is
-reference-only and is not a codegen source of truth.
-
-Reference implementations and upstream context live in `tmp/`:
-
-- `tmp/altair`: the canonical Vega-Lite Python wrapper
-- `tmp/gos`: a Gosling Python wrapper inspired by Altair
-- `tmp/vega-lite`: upstream Vega-Lite specification and grammar
-- `tmp/gosling.js`: upstream Gosling JavaScript library
-- `tmp/genome-spy`: upstream GenomeSpy monorepo
-- `tmp/anywidget`: notebook widget infrastructure for rich rendering
+then updates the generated schema package in-place.

@@ -1,6 +1,6 @@
 # Composition
 
-Combine charts into layered and concatenated views. Operators mirror Altair.
+Combine charts into layered and concatenated views.
 
 ```python
 import genome_spy as gs
