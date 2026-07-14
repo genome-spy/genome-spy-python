@@ -16,7 +16,7 @@ import genome_spy as gs
 from genome_spy.schema import Scale
 
 META = {
-    "category": "Populations",
+    "category": "Population structure plots",
     "tags": ("stack", "rect", "layer"),
     "order": 10,
     "height": 340,

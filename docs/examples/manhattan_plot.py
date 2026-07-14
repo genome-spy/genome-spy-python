@@ -10,29 +10,27 @@ statistics, from the `manhattanly` R package via Plotly's Dash Bio datasets
 (MIT). See `docs/_static/data/README.md` for provenance.
 """
 
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.datasets import load_dataset
 from genome_spy.schema import GenomeAxis, Scale
 
 META = {
-    "category": "GWAS",
+    "category": "Association plots",
     "tags": ("locus", "layer", "real-data"),
     "order": 10,
     "height": 340,
 }
 
-DATA = Path(__file__).parent.parent / "_static" / "data" / "hapmap_gwas.csv"
 GENOME_WIDE_P = 5e-8
 SUGGESTIVE_P = 1e-5
 
 
 def hapmap_gwas() -> pd.DataFrame:
     """Load the HapMap GWAS table and derive the columns the plot encodes."""
-    data = pd.read_csv(DATA)
+    data = load_dataset("hapmap_gwas", as_format="dataframe")
     data = data[data["P"] > 0].copy()
     # GenomeSpy's assemblies use bare chromosome names (as in its ASCAT data);
     # HapMap encodes chromosome 23 as X.

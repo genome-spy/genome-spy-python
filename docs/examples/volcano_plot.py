@@ -10,29 +10,27 @@ statistics, from the `manhattanly` R package via Plotly's Dash Bio datasets
 (MIT). See `docs/_static/data/README.md` for provenance.
 """
 
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.datasets import load_dataset
 from genome_spy.schema import Scale
 
 META = {
-    "category": "GWAS",
+    "category": "Volcano and MA plots",
     "tags": ("layer", "thresholds", "real-data"),
     "order": 30,
     "height": 440,
 }
 
-DATA = Path(__file__).parent.parent / "_static" / "data" / "hapmap_gwas.csv"
 EFFECT_CUTOFF = 0.5
 P_CUTOFF = 1e-5
 
 
 def hapmap_effects() -> pd.DataFrame:
     """Load the HapMap table and classify variants by effect and significance."""
-    data = pd.read_csv(DATA)
+    data = load_dataset("hapmap_gwas", as_format="dataframe")
     data = data[data["P"] > 0].copy()
     data["neglog"] = -np.log10(data["P"])
     passes = (data["P"] < P_CUTOFF) & (data["EFFECTSIZE"].abs() >= EFFECT_CUTOFF)

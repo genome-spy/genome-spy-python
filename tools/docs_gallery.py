@@ -12,8 +12,11 @@ renders real PNG thumbnails. Keeping this core framework-agnostic lets both reus
 
 from __future__ import annotations
 
+import hashlib
 import html
 import importlib.util
+import json
+import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -29,28 +32,39 @@ SPECS_DIR = STATIC_DIR / "specs"
 
 # Category display order and one-line blurbs. Unknown categories sort last.
 CATEGORIES: dict[str, tuple[int, str]] = {
-    "GWAS": (10, "Genome-wide association scans: Manhattan, QQ, and locus zoom views."),
-    "RNA-seq": (
+    "Association plots": (
+        10,
+        "Genome-wide association views such as Manhattan and QQ plots.",
+    ),
+    "Volcano and MA plots": (
         20,
-        "Expression and differential-expression views such as volcano and MA plots.",
+        "Effect-size and differential-expression views such as volcano and MA plots.",
     ),
-    "Genome tracks": (
+    "Genome browser tracks": (
         30,
-        "Coverage, peak, and gene-annotation tracks sharing a genomic axis.",
+        "Stacked or shared-axis browser views with locus navigation, signal tracks, or read-level detail.",
     ),
-    "Copy number": (
-        35,
-        "Allele-specific copy-number profiles on a genome-wide axis, from real hosted data.",
-    ),
-    "Variants": (
-        25,
-        "Somatic alterations across a cohort and sequence features along a gene.",
-    ),
-    "Populations": (
+    "Reference annotation tracks": (
         40,
-        "Ancestry and population-structure views such as admixture bars.",
+        "Reference-derived tracks such as cytobands, sequence, gene models, and regulatory annotations.",
     ),
-    "Basics": (50, "Core grammar and Altair-style ergonomics on tabular data."),
+    "Lollipop and pathogenicity plots": (
+        50,
+        "Variant-position and clinical-classification views such as lollipop plots and pathogenicity tracks.",
+    ),
+    "Oncoprints and cohort summaries": (
+        60,
+        "Cohort-level alteration matrices and related summary views.",
+    ),
+    "Copy-number plots": (
+        70,
+        "Genome-wide copy-number and allele-specific signal views.",
+    ),
+    "Population structure plots": (
+        80,
+        "Population-composition views such as admixture bar plots.",
+    ),
+    "Basics": (90, "Core grammar and Altair-style ergonomics on tabular data."),
 }
 UNKNOWN_CATEGORY = (100, "")
 
@@ -66,6 +80,7 @@ class Example:
     tags: tuple[str, ...]
     order: int
     height: int
+    max_width: int | None
     source: str
     spec: dict
 
@@ -125,6 +140,9 @@ def collect_example(path: Path) -> Example:
         tags=tuple(meta.get("tags", ())),
         order=int(meta.get("order", 100)),
         height=int(meta.get("height", 400)),
+        max_width=(
+            int(meta["max_width"]) if meta.get("max_width") is not None else None
+        ),
         source=path.read_text(encoding="utf-8"),
         spec=chart.to_dict(),
     )
@@ -151,10 +169,32 @@ def grouped_by_category(examples: list[Example]) -> list[tuple[str, list[Example
     )
 
 
+def build_token(examples: list[Example]) -> str:
+    """Return a short content-derived token for cache-busting gallery links."""
+    digest = hashlib.sha256()
+    for example in examples:
+        digest.update(example.name.encode("utf-8"))
+        digest.update(example.title.encode("utf-8"))
+        digest.update(example.source.encode("utf-8"))
+        digest.update(json.dumps(example.spec, sort_keys=True).encode("utf-8"))
+    return digest.hexdigest()[:12]
+
+
+def require_png_thumbnails() -> bool:
+    """Return whether the current docs build must use real PNG thumbnails."""
+    return os.getenv("GENOME_SPY_DOCS_REQUIRE_PNG_THUMBS") == "1"
+
+
 def thumb_filename(example: Example) -> str:
     """Thumbnail file name, preferring a rendered PNG over the SVG fallback."""
-    if (THUMBS_DIR / f"{example.name}.png").exists():
-        return f"{example.name}.png"
+    png_name = f"{example.name}.png"
+    if (THUMBS_DIR / png_name).exists():
+        return png_name
+    if require_png_thumbnails():
+        raise FileNotFoundError(
+            f"Missing PNG thumbnail for docs example {example.name!r}. "
+            "Run tools/render_thumbnails.py before building release docs."
+        )
     return f"{example.name}.svg"
 
 

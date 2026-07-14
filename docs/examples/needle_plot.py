@@ -1,118 +1,175 @@
-"""Lollipop plot (PIK3CA).
+"""Lollipop plot (DNMT3A hotspot in TCGA LAML).
 
-Annotated sequence features along the PIK3CA protein drawn as a lollipop plot —
-a stem and head per feature, coloured by feature type — over a band showing the
-protein's functional domains. This is the standard "needle" layout for
-positional annotations along a gene or protein.
+A `maftools`-style lollipop plot of DNMT3A amino-acid changes across the TCGA
+LAML cohort. Mutation counts are aggregated per amino-acid position, coloured by
+the dominant mutation class at each site, and drawn above a simplified DNMT3A
+domain map. The R882 hotspot is labeled explicitly, mirroring the canonical
+`lollipopPlot(..., gene = "DNMT3A", showMutationRate = TRUE, labelPos = 882)`
+example.
 
-Data: real PIK3CA UniProt sequence features and domains from Plotly's Dash Bio
-datasets (MIT). See `docs/_static/data/README.md` for provenance.
+Data: curated from `maftools` TCGA LAML example files. See
+`docs/_static/data/README.md` for provenance.
 """
 
-import json
-from pathlib import Path
+from __future__ import annotations
 
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.schema import Scale
+from genome_spy.datasets import load_dataset
+from genome_spy.schema import Legend, Scale
 
 META = {
-    "category": "Variants",
+    "category": "Lollipop and pathogenicity plots",
     "tags": ("lollipop", "layer", "real-data"),
     "order": 10,
-    "height": 300,
+    "height": 360,
+    "max_width": 760,
 }
 
-DATA = Path(__file__).parent.parent / "_static" / "data" / "pik3ca_mutations.json"
-PROTEIN_LENGTH = 1069
-X_DOMAIN = [0, PROTEIN_LENGTH]
-Y_DOMAIN = [-0.5, 1.5]
-DOMAIN_TOP, DOMAIN_BOTTOM = -0.12, -0.4
+CLASS_ORDER = [
+    "Frame_Shift_Del",
+    "Nonsense_Mutation",
+    "Missense_Mutation",
+    "Splice_Site",
+]
+
+CLASS_COLORS = Scale(
+    domain=CLASS_ORDER,
+    range=["#5f9ed1", "#e15759", "#66b55f", "#f28e2b"],
+)
 
 
-def _midpoint(span: str) -> float:
-    parts = span.split("-")
-    if len(parts) == 2:
-        return (float(parts[0]) + float(parts[1])) / 2
-    return float(parts[0])
+def dnmt3a_lollipop_payload() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
+    """Load the curated DNMT3A lollipop payload."""
+    payload = load_dataset("dnmt3a_lollipop", as_format="json")
 
+    features = pd.DataFrame(payload["features"]).sort_values("position").copy()
+    domains = pd.DataFrame(payload["domains"]).copy()
+    backbone = pd.DataFrame([payload["backbone"]]).copy()
 
-def pik3ca_features() -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Load PIK3CA features (as lollipops) and functional domains (as a band)."""
-    raw = json.loads(DATA.read_text())
-    features = pd.DataFrame(
-        {
-            "position": [_midpoint(x) for x in raw["x"]],
-            "count": [int(y) for y in raw["y"]],
-            "feature": raw["mutationGroups"],
-        }
+    domains["y0"] = -5.3
+    domains["y1"] = -1.7
+    domains["mid"] = (domains["y0"] + domains["y1"]) / 2
+    domains["center"] = (domains["start"] + domains["end"]) / 2
+    backbone["y0"] = -5.0
+    backbone["y1"] = -2.2
+    backbone["mid"] = (backbone["y0"] + backbone["y1"]) / 2
+    features["base"] = float(domains["y1"].iloc[0])
+    features["label_y"] = features["count"] + 1.2
+    features["label_text"] = features["position"].map(
+        lambda pos: f"R{pos}" if pos == 882 else ""
     )
-    features["base"] = 0
-    domains = pd.DataFrame(
-        {
-            "name": [d["name"] for d in raw["domains"]],
-            "start": [float(d["coord"].split("-")[0]) for d in raw["domains"]],
-            "end": [float(d["coord"].split("-")[1]) for d in raw["domains"]],
-            "top": DOMAIN_TOP,
-            "bottom": DOMAIN_BOTTOM,
-            "mid": (DOMAIN_TOP + DOMAIN_BOTTOM) / 2,
-        }
-    )
-    return features, domains
+
+    return features, domains, backbone, payload
 
 
-features, domains = pik3ca_features()
+features, domains, backbone, payload = dnmt3a_lollipop_payload()
+protein_length = int(payload["protein_length"])
+max_count = int(features["count"].max())
+x_domain = [0, protein_length]
+y_domain = [-6.2, max_count + 4]
+
+mutation_legend = Legend(
+    title="Mutation class",
+    orient="bottom",
+    direction="horizontal",
+    columns=2,
+    symbolSize=72,
+)
 
 # --- Visualization -------------------------------------------------------------
 
+# The protein backbone and annotated domains form the baseline geometry for the
+# lollipop marks.
+backbone_band = (
+    gs.Chart(backbone)
+    .mark_rect(color="#a8b5b6", stroke="#111111", strokeWidth=1)
+    .encode(
+        x=gs.X("start:Q")
+        .scale(domain=x_domain, zoom=True)
+        .title("Amino-acid position"),
+        x2=gs.X2("end"),
+        y=gs.Y("y0:Q")
+        .scale(reverse=False, domain=y_domain)
+        .axis({"values": [1, max_count], "grid": False})
+        .title(None),
+        y2=gs.Y2("y1"),
+    )
+)
+
+domain_layers = []
+for domain in domains.to_dict(orient="records"):
+    domain_layers.append(
+        gs.Chart([domain])
+        .mark_rect(
+            color=domain["color"], cornerRadius=2, stroke="#111111", strokeWidth=1
+        )
+        .encode(
+            x=gs.X("start:Q").scale(domain=x_domain, zoom=True),
+            x2=gs.X2("end"),
+            y=gs.Y("y0:Q").scale(reverse=False, domain=y_domain),
+            y2=gs.Y2("y1"),
+        )
+    )
+
+domain_blocks = domain_layers[0]
+for layer in domain_layers[1:]:
+    domain_blocks = domain_blocks + layer
+
+domain_labels = (
+    gs.Chart(domains)
+    .mark_text(size=8, color="#111111")
+    .encode(
+        x=gs.X("center:Q").scale(domain=x_domain, zoom=True),
+        y=gs.Y("mid:Q").scale(reverse=False, domain=y_domain),
+        text=gs.Text("name:N"),
+    )
+)
+
+# Stems carry counts from the protein backbone to each hotspot; points encode
+# the dominant mutation class at that amino-acid position.
 stems = (
     gs.Chart(features)
-    .mark_rule(color="#c9d1d9", size=1)
+    .mark_rule(color="#c0c0c0", size=1)
     .encode(
-        x=gs.X("position:Q")
-        .scale(domain=X_DOMAIN, zoom=True)
-        .title("Amino-acid position"),
-        y=gs.Y("base:Q").scale(reverse=False, domain=Y_DOMAIN).title("Features"),
+        x=gs.X("position:Q").scale(domain=x_domain, zoom=True),
+        y=gs.Y("base:Q").scale(reverse=False, domain=y_domain),
         y2=gs.Y2("count"),
     )
 )
 
 heads = (
     gs.Chart(features)
-    .mark_point(size=45, filled=True, opacity=0.85)
+    .mark_point(size=88, filled=True, opacity=0.9)
     .encode(
-        x=gs.X("position:Q").scale(domain=X_DOMAIN, zoom=True),
-        y=gs.Y("count:Q").scale(reverse=False, domain=Y_DOMAIN),
-        color=gs.Color("feature:N")
-        .scale(Scale(scheme="tableau10"))
-        .legend(title="Feature type"),
+        x=gs.X("position:Q").scale(domain=x_domain, zoom=True),
+        y=gs.Y("count:Q").scale(reverse=False, domain=y_domain),
+        color=gs.Color("class:N").scale(CLASS_COLORS).legend(mutation_legend),
     )
 )
 
-domain_blocks = (
-    gs.Chart(domains)
-    .mark_rect(cornerRadius=3, color="#5b8fd6")
+# The canonical R882 hotspot gets an explicit text label, echoing maftools.
+hotspot_labels = (
+    gs.Chart(features[features["is_hotspot"]].copy())
+    .mark_text(dy=-12, size=11, color="#111111")
     .encode(
-        x=gs.X("start:Q").scale(domain=X_DOMAIN, zoom=True),
-        x2=gs.X2("end"),
-        y=gs.Y("bottom:Q").scale(reverse=False, domain=Y_DOMAIN),
-        y2=gs.Y2("top"),
+        x=gs.X("position:Q").scale(domain=x_domain, zoom=True),
+        y=gs.Y("label_y:Q").scale(reverse=False, domain=y_domain),
+        text=gs.Text("label_text:N"),
     )
 )
 
-domain_labels = (
-    gs.Chart(domains)
-    .mark_text(color="white", size=9)
-    .encode(
-        x=gs.X("start:Q").scale(domain=X_DOMAIN, zoom=True),
-        x2=gs.X2("end"),
-        y=gs.Y("mid:Q").scale(reverse=False, domain=Y_DOMAIN),
-        text=gs.Text("name:N"),
-    )
-)
-
-chart = (domain_blocks + domain_labels + stems + heads).properties(
-    title="PIK3CA sequence features and domains",
-    description="A lollipop plot of PIK3CA sequence features over its functional domains.",
+# Compose the protein model and mutation marks into a single lollipop view.
+chart = (
+    backbone_band + domain_blocks + domain_labels + stems + heads + hotspot_labels
+).properties(
+    title=(
+        f"{payload['gene']} : [Somatic Mutation Rate: {payload['mutation_rate']:.2f}%]"
+    ),
+    description=(
+        "A DNMT3A lollipop plot derived from the maftools TCGA LAML example, "
+        "with per-position mutation counts, protein domains, and the labeled "
+        "R882 hotspot."
+    ),
 )

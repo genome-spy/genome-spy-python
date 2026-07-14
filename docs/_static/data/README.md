@@ -33,6 +33,40 @@ source and license.
 - **License:** MIT (`plotly/datasets`, © Plotly Technologies Inc.). TCGA data is
   open-access.
 
+## `tcga_laml_oncoprint.json`
+
+- **What it is:** a curated TCGA LAML oncoplot payload modeled after
+  `maftools::oncoplot(maf = laml, top = 10)`, with all 193 samples, the top 10
+  recurrently altered genes, stacked per-sample mutation-burden segments, a
+  collapsed mutation matrix, percentage labels, and right-side per-gene sample
+  counts. Used by the flagship oncoprint example.
+- **Source:** derived from `maftools` extdata files
+  `tcga_laml.maf.gz` and `tcga_laml_annot.tsv`, distributed in the
+  [`maftools`](https://github.com/PoisonAlien/maftools) package and used by its
+  oncoplot examples.
+- **Derivation:** silent/non-coding calls were excluded; the top 10 genes were
+  ordered by number of altered samples to match the canonical LAML oncoplot
+  ordering; samples were ordered by the presence pattern across those genes to
+  cluster co-occurring mutations; sample-gene pairs with multiple hits were
+  collapsed into a `Multi_Hit` display class for the matrix.
+- **License:** MIT (`maftools`, © Anand Mayakonda). TCGA data is open-access.
+
+## `dnmt3a_lollipop.json`
+
+- **What it is:** a curated DNMT3A lollipop payload derived from the TCGA LAML
+  MAF used in `maftools::lollipopPlot()`, with amino-acid positions, per-site
+  mutation counts, dominant mutation classes, the R882 hotspot label, and a
+  small set of DNMT3A domain annotations for the gallery example.
+- **Source:** derived from `maftools` extdata file `tcga_laml.maf.gz`,
+  distributed in the [`maftools`](https://github.com/PoisonAlien/maftools)
+  package and used by its lollipop examples.
+- **Derivation:** amino-acid positions were parsed from the `Protein_Change`
+  column for DNMT3A calls; per-position counts were aggregated across samples;
+  the displayed mutation class per site is the most frequent class at that
+  position; the reported mutation rate is the fraction of LAML samples with a
+  parsed DNMT3A protein change in the bundled MAF.
+- **License:** MIT (`maftools`, © Anand Mayakonda). TCGA data is open-access.
+
 ## `pik3ca_mutations.json`
 
 - **What it is:** real UniProt sequence features and functional domains of the
@@ -49,7 +83,7 @@ source and license.
 - **What it is:** real bulk RNA-seq gene counts for the classic `airway`
   teaching dataset (airway smooth muscle cells, dexamethasone-treated vs.
   control, 4 cell lines) plus per-sample metadata (treatment, cell line,
-  GEO accession). Not yet used by a gallery example.
+  GEO accession). Used by the airway differential-expression gallery example.
 - **Origin:** Himes et al. 2014, GEO accession
   [GSE52778](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE52778);
   distributed as the Bioconductor

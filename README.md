@@ -93,6 +93,21 @@ The stacked-bar notebook uses Altair's barley dataset but follows GenomeSpy's
 own stacked-bar grammar: explicit `aggregate` and `stack` transforms generate
 the fields that are then encoded with `x`/`x2` or `y`/`y2`.
 
+## Packaged Datasets
+
+The library also ships a small set of real datasets used by the documentation
+gallery:
+
+```python
+from genome_spy.datasets import available_datasets, load_dataset
+
+gwas = load_dataset("hapmap_gwas", as_format="dataframe")
+features = load_dataset("pik3ca_mutations", as_format="json")
+```
+
+Tabular packaged datasets load as pandas DataFrames; JSON datasets load as
+plain Python objects.
+
 Architecture notes:
 
 - `plans/altair_schema_generation.md`: how Altair generates Python wrappers

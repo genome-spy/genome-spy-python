@@ -65,3 +65,8 @@
   Altair-style helper constructors, schema-backed lazy data builders, packaged
   example datasets, airway preprocessing helpers, and the corresponding chart
   and dataset regression coverage plus dependency/artifact updates.
+- Committed the remaining docs/examples refresh as `docs(examples)`: updated
+  the Sphinx/gallery configuration, docs styling and README examples, vendored
+  the curated LAML oncoprint payload for docs provenance, and expanded the
+  real-data example set with cleaner Altair-style authoring and plot-family
+  categorization.

@@ -53,10 +53,17 @@ html_title = "genome-spy-python"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_css_files = ["genomespy.css"]
+html_js_files = ["force-light-theme.js"]
 html_show_sourcelink = False
+html_meta = {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
+}
 
 html_theme_options = {
     "navbar_align": "left",
+    "navbar_end": ["navbar-icon-links"],
     "show_prev_next": False,
     "icon_links": [
         {
@@ -67,6 +74,7 @@ html_theme_options = {
     ],
     "logo": {"text": "GenomeSpy for Python"},
 }
+html_context = {"default_mode": "light"}
 
 # The landing page is a full-width showcase, so drop its sidebars.
 html_sidebars = {"index": []}
