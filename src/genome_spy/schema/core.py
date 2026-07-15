@@ -86,7 +86,12 @@ from genome_spy.schema._kwds import (
     ViewConfigKwds,
     ZoomParamsKwds,
 )
-from genome_spy.schemapi import SchemaBase, Undefined, UndefinedType
+from genome_spy.schemapi import (
+    SchemaBase,
+    Undefined,
+    UndefinedType,
+    with_property_setters,
+)
 
 
 def load_schema() -> dict[str, Any]:
@@ -117,6 +122,7 @@ class Root(GenomeSpySchema):
         super().__init__(**kwds)
 
 
+@with_property_setters
 class AggregateOp(GenomeSpySchema):
     """Generated wrapper for ``AggregateOp``."""
 
@@ -128,6 +134,7 @@ class AggregateOp(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class AggregateParams(GenomeSpySchema):
     """Generated wrapper for ``AggregateParams``."""
 
@@ -169,6 +176,7 @@ class AggregateParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class Align(GenomeSpySchema):
     """Generated wrapper for ``Align``."""
 
@@ -180,6 +188,7 @@ class Align(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class Axis(GenomeSpySchema):
     """Generated wrapper for ``Axis``."""
 
@@ -506,6 +515,7 @@ class Axis(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class AxisConfig(GenomeSpySchema):
     """Generated wrapper for ``AxisConfig``."""
 
@@ -972,6 +982,7 @@ class AxisConfig(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class AxisGenomeData(GenomeSpySchema):
     """Generated wrapper for ``AxisGenomeData``."""
 
@@ -996,6 +1007,7 @@ class AxisGenomeData(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class AxisOrient(GenomeSpySchema):
     """Generated wrapper for ``AxisOrient``."""
 
@@ -1007,6 +1019,7 @@ class AxisOrient(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class AxisPlacement(GenomeSpySchema):
     """Generated wrapper for ``AxisPlacement``."""
 
@@ -1018,6 +1031,7 @@ class AxisPlacement(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class AxisTicksData(GenomeSpySchema):
     """Generated wrapper for ``AxisTicksData``."""
 
@@ -1052,6 +1066,7 @@ class AxisTicksData(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class BamData(GenomeSpySchema):
     """Generated wrapper for ``BamData``."""
 
@@ -1134,6 +1149,7 @@ class BamData(GenomeSpySchema):
         return self._with_property("windowSize", value)
 
 
+@with_property_setters
 class Baseline(GenomeSpySchema):
     """Generated wrapper for ``Baseline``."""
 
@@ -1145,6 +1161,7 @@ class Baseline(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class BedDataFormat(GenomeSpySchema):
     """Generated wrapper for ``BedDataFormat``."""
 
@@ -1174,6 +1191,7 @@ class BedDataFormat(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class BedpeDataFormat(GenomeSpySchema):
     """Generated wrapper for ``BedpeDataFormat``."""
 
@@ -1208,6 +1226,7 @@ class BedpeDataFormat(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class BigBedData(GenomeSpySchema):
     """Generated wrapper for ``BigBedData``."""
 
@@ -1290,6 +1309,7 @@ class BigBedData(GenomeSpySchema):
         return self._with_property("windowSize", value, **kwargs)
 
 
+@with_property_setters
 class BigWigData(GenomeSpySchema):
     """Generated wrapper for ``BigWigData``."""
 
@@ -1372,6 +1392,7 @@ class BigWigData(GenomeSpySchema):
         return self._with_property("url", value)
 
 
+@with_property_setters
 class BindCheckbox(GenomeSpySchema):
     """Generated wrapper for ``BindCheckbox``."""
 
@@ -1408,6 +1429,7 @@ class BindCheckbox(GenomeSpySchema):
         return self._with_property("name", value)
 
 
+@with_property_setters
 class BindInput(GenomeSpySchema):
     """Generated wrapper for ``BindInput``."""
 
@@ -1459,6 +1481,7 @@ class BindInput(GenomeSpySchema):
         return self._with_property("placeholder", value)
 
 
+@with_property_setters
 class BindRadioSelect(GenomeSpySchema):
     """Generated wrapper for ``BindRadioSelect``."""
 
@@ -1510,6 +1533,7 @@ class BindRadioSelect(GenomeSpySchema):
         return self._with_property("options", value)
 
 
+@with_property_setters
 class BindRange(GenomeSpySchema):
     """Generated wrapper for ``BindRange``."""
 
@@ -1567,6 +1591,7 @@ class BindRange(GenomeSpySchema):
         return self._with_property("step", value)
 
 
+@with_property_setters
 class Binding(GenomeSpySchema):
     """Generated wrapper for ``Binding``."""
 
@@ -1648,6 +1673,7 @@ class Binding(GenomeSpySchema):
         return self._with_property("step", value)
 
 
+@with_property_setters
 class BrushConfig(GenomeSpySchema):
     """Generated wrapper for ``BrushConfig``."""
 
@@ -1777,6 +1803,7 @@ class BrushConfig(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class BuiltInThemeName(GenomeSpySchema):
     """Generated wrapper for ``BuiltInThemeName``."""
 
@@ -1788,6 +1815,7 @@ class BuiltInThemeName(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class ChannelWithScale(GenomeSpySchema):
     """Generated wrapper for ``ChannelWithScale``."""
 
@@ -1799,6 +1827,7 @@ class ChannelWithScale(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class ChromPosDef(GenomeSpySchema):
     """Generated wrapper for ``ChromPosDef``."""
 
@@ -1890,6 +1919,7 @@ class ChromPosDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ChromosomalLocus(GenomeSpySchema):
     """Generated wrapper for ``ChromosomalLocus``."""
 
@@ -1914,6 +1944,7 @@ class ChromosomalLocus(GenomeSpySchema):
         return self._with_property("pos", value)
 
 
+@with_property_setters
 class CollectParams(GenomeSpySchema):
     """Generated wrapper for ``CollectParams``."""
 
@@ -1953,6 +1984,7 @@ class CollectParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ColorDef(GenomeSpySchema):
     """Generated wrapper for ``ColorDef``."""
 
@@ -2075,6 +2107,7 @@ class ColorDef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class ColorSchemeConfig(GenomeSpySchema):
     """Generated wrapper for ``ColorSchemeConfig``."""
 
@@ -2104,6 +2137,7 @@ class ColorSchemeConfig(GenomeSpySchema):
         return self._with_property("name", value)
 
 
+@with_property_setters
 class CompareParams(GenomeSpySchema):
     """Generated wrapper for ``CompareParams``."""
 
@@ -2128,6 +2162,7 @@ class CompareParams(GenomeSpySchema):
         return self._with_property("order", value)
 
 
+@with_property_setters
 class ComplexDomain(GenomeSpySchema):
     """Generated wrapper for ``ComplexDomain``."""
 
@@ -2139,6 +2174,7 @@ class ComplexDomain(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class ConcatSpec(GenomeSpySchema):
     """Generated wrapper for ``ConcatSpec``."""
 
@@ -2478,6 +2514,7 @@ class ConcatSpec(GenomeSpySchema):
         return self._with_property("width", value, **kwargs)
 
 
+@with_property_setters
 class ConditionalMarkPropExprDefType(GenomeSpySchema):
     """Generated wrapper for ``Conditional<MarkPropExprDef<Type>>``."""
 
@@ -2562,6 +2599,7 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``Conditional<MarkPropExprDef<TypeForShape>>``."""
 
@@ -2646,6 +2684,7 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalMarkPropFieldDefType(GenomeSpySchema):
     """Generated wrapper for ``Conditional<MarkPropFieldDef<Type>>``."""
 
@@ -2741,6 +2780,7 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``Conditional<MarkPropFieldDef<TypeForShape>>``."""
 
@@ -2838,6 +2878,7 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalScaleDatumDef(GenomeSpySchema):
     """Generated wrapper for ``Conditional<ScaleDatumDef>``."""
 
@@ -2922,6 +2963,7 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalValueDefNumberExprRef(GenomeSpySchema):
     """Generated wrapper for ``Conditional<ValueDef<(number|ExprRef)>>``."""
 
@@ -2970,6 +3012,7 @@ class ConditionalValueDefNumberExprRef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
     """Generated wrapper for ``Conditional<ValueDef<(string|null|ExprRef)>>``."""
 
@@ -3018,6 +3061,7 @@ class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<MarkPropExprDef<Type>>``."""
 
@@ -3102,6 +3146,7 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<MarkPropExprDef<TypeForShape>>``."""
 
@@ -3198,6 +3243,7 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<MarkPropFieldDef<Type>>``."""
 
@@ -3293,6 +3339,7 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<MarkPropFieldDef<TypeForShape>>``."""
 
@@ -3404,6 +3451,7 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalParameterScaleDatumDef(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<ScaleDatumDef>``."""
 
@@ -3490,6 +3538,7 @@ class ConditionalParameterScaleDatumDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ConditionalParameterValueDefNumberExprRef(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<ValueDef<(number|ExprRef)>>``."""
 
@@ -3540,6 +3589,7 @@ class ConditionalParameterValueDefNumberExprRef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class ConditionalParameterValueDefStringNullExprRef(GenomeSpySchema):
     """Generated wrapper for ``ConditionalParameter<ValueDef<(string|null|ExprRef)>>``."""
 
@@ -3592,6 +3642,7 @@ class ConditionalParameterValueDefStringNullExprRef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class Contig(GenomeSpySchema):
     """Generated wrapper for ``Contig``."""
 
@@ -3616,6 +3667,7 @@ class Contig(GenomeSpySchema):
         return self._with_property("size", value)
 
 
+@with_property_setters
 class CoreRootSpec(GenomeSpySchema):
     """Generated wrapper for ``CoreRootSpec``."""
 
@@ -4147,6 +4199,7 @@ class CoreRootSpec(GenomeSpySchema):
         return self._with_property("width", value, **kwargs)
 
 
+@with_property_setters
 class CoverageParams(GenomeSpySchema):
     """Generated wrapper for ``CoverageParams``."""
 
@@ -4216,6 +4269,7 @@ class CoverageParams(GenomeSpySchema):
         return self._with_property("weight", value)
 
 
+@with_property_setters
 class CsvDataFormat(GenomeSpySchema):
     """Generated wrapper for ``CsvDataFormat``."""
 
@@ -4250,6 +4304,7 @@ class CsvDataFormat(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class Data(GenomeSpySchema):
     """Generated wrapper for ``Data``."""
 
@@ -4353,6 +4408,7 @@ class Data(GenomeSpySchema):
         return self._with_property("values", value, **kwargs)
 
 
+@with_property_setters
 class DataFormat(GenomeSpySchema):
     """Generated wrapper for ``DataFormat``."""
 
@@ -4403,6 +4459,7 @@ class DataFormat(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class DataSource(GenomeSpySchema):
     """Generated wrapper for ``DataSource``."""
 
@@ -4495,6 +4552,7 @@ class DataSource(GenomeSpySchema):
         return self._with_property("values", value, **kwargs)
 
 
+@with_property_setters
 class DomEventType(GenomeSpySchema):
     """Generated wrapper for ``DomEventType``."""
 
@@ -4506,6 +4564,7 @@ class DomEventType(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class DomainValue(GenomeSpySchema):
     """Generated wrapper for ``DomainValue``."""
 
@@ -4521,6 +4580,7 @@ class DomainValue(GenomeSpySchema):
         return self._with_property("expr", value)
 
 
+@with_property_setters
 class DomainValueArray(GenomeSpySchema):
     """Generated wrapper for ``DomainValueArray``."""
 
@@ -4532,6 +4592,7 @@ class DomainValueArray(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class DsvDataFormat(GenomeSpySchema):
     """Generated wrapper for ``DsvDataFormat``."""
 
@@ -4571,6 +4632,7 @@ class DsvDataFormat(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class DynamicCallbackData(GenomeSpySchema):
     """Generated wrapper for ``DynamicCallbackData``."""
 
@@ -4626,6 +4688,7 @@ class DynamicCallbackData(GenomeSpySchema):
         return self._with_property("name", value)
 
 
+@with_property_setters
 class DynamicOpacity(GenomeSpySchema):
     """Generated wrapper for ``DynamicOpacity``."""
 
@@ -4662,6 +4725,7 @@ class DynamicOpacity(GenomeSpySchema):
         return self._with_property("values", value)
 
 
+@with_property_setters
 class Encoding(GenomeSpySchema):
     """Generated wrapper for ``Encoding``."""
 
@@ -5006,6 +5070,7 @@ class Encoding(GenomeSpySchema):
         return self._with_property("y2", value, **kwargs)
 
 
+@with_property_setters
 class EventConfig(GenomeSpySchema):
     """Generated wrapper for ``EventConfig``."""
 
@@ -5030,6 +5095,7 @@ class EventConfig(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ExprDef(GenomeSpySchema):
     """Generated wrapper for ``ExprDef``."""
 
@@ -5071,6 +5137,7 @@ class ExprDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ExprFilterParams(GenomeSpySchema):
     """Generated wrapper for ``ExprFilterParams``."""
 
@@ -5100,6 +5167,7 @@ class ExprFilterParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ExprRef(GenomeSpySchema):
     """Generated wrapper for ``ExprRef``."""
 
@@ -5115,6 +5183,7 @@ class ExprRef(GenomeSpySchema):
         return self._with_property("expr", value)
 
 
+@with_property_setters
 class Field(GenomeSpySchema):
     """Generated wrapper for ``Field``."""
 
@@ -5126,6 +5195,7 @@ class Field(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class FieldDefWithoutScale(GenomeSpySchema):
     """Generated wrapper for ``FieldDefWithoutScale``."""
 
@@ -5155,6 +5225,7 @@ class FieldDefWithoutScale(GenomeSpySchema):
         return self._with_property("title", value)
 
 
+@with_property_setters
 class FieldName(GenomeSpySchema):
     """Generated wrapper for ``FieldName``."""
 
@@ -5166,6 +5237,7 @@ class FieldName(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema):
     """Generated wrapper for ``FieldOrDatumDefWithCondition<MarkPropFieldDef<Type>,(string|null)>``."""
 
@@ -5275,6 +5347,7 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
     """Generated wrapper for ``FieldOrDatumDefWithCondition<MarkPropFieldDef<Type>,number>``."""
 
@@ -5384,6 +5457,7 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
     GenomeSpySchema
 ):
@@ -5495,6 +5569,7 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FieldOrDatumDefWithConditionScaleDatumDefStringNull(GenomeSpySchema):
     """Generated wrapper for ``FieldOrDatumDefWithCondition<ScaleDatumDef,(string|null)>``."""
 
@@ -5593,6 +5668,7 @@ class FieldOrDatumDefWithConditionScaleDatumDefStringNull(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FieldOrDatumDefWithConditionScaleDatumDefNumber(GenomeSpySchema):
     """Generated wrapper for ``FieldOrDatumDefWithCondition<ScaleDatumDef,number>``."""
 
@@ -5691,6 +5767,7 @@ class FieldOrDatumDefWithConditionScaleDatumDefNumber(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FilterParams(GenomeSpySchema):
     """Generated wrapper for ``FilterParams``."""
 
@@ -5742,6 +5819,7 @@ class FilterParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FilterScoredLabelsParams(GenomeSpySchema):
     """Generated wrapper for ``FilterScoredLabelsParams``."""
 
@@ -5819,6 +5897,7 @@ class FilterScoredLabelsParams(GenomeSpySchema):
         return self._with_property("width", value)
 
 
+@with_property_setters
 class FlattenCompressedExonsParams(GenomeSpySchema):
     """Generated wrapper for ``FlattenCompressedExonsParams``."""
 
@@ -5857,6 +5936,7 @@ class FlattenCompressedExonsParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FlattenDelimitedParams(GenomeSpySchema):
     """Generated wrapper for ``FlattenDelimitedParams``."""
 
@@ -5893,6 +5973,7 @@ class FlattenDelimitedParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FlattenParams(GenomeSpySchema):
     """Generated wrapper for ``FlattenParams``."""
 
@@ -5927,6 +6008,7 @@ class FlattenParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FlattenSequenceParams(GenomeSpySchema):
     """Generated wrapper for ``FlattenSequenceParams``."""
 
@@ -5956,6 +6038,7 @@ class FlattenSequenceParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class FontStyle(GenomeSpySchema):
     """Generated wrapper for ``FontStyle``."""
 
@@ -5967,6 +6050,7 @@ class FontStyle(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class FontWeight(GenomeSpySchema):
     """Generated wrapper for ``FontWeight``."""
 
@@ -5978,6 +6062,7 @@ class FontWeight(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class FormulaParams(GenomeSpySchema):
     """Generated wrapper for ``FormulaParams``."""
 
@@ -6007,6 +6092,7 @@ class FormulaParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class Generator(GenomeSpySchema):
     """Generated wrapper for ``Generator``."""
 
@@ -6041,6 +6127,7 @@ class Generator(GenomeSpySchema):
         return self._with_property("sequence", value, **kwargs)
 
 
+@with_property_setters
 class GenomeAxis(GenomeSpySchema):
     """Generated wrapper for ``GenomeAxis``."""
 
@@ -6507,6 +6594,7 @@ class GenomeAxis(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class GenomeConfig(GenomeSpySchema):
     """Generated wrapper for ``GenomeConfig``."""
 
@@ -6536,6 +6624,7 @@ class GenomeConfig(GenomeSpySchema):
         return self._with_property("url", value)
 
 
+@with_property_setters
 class GenomeConfigBase(GenomeSpySchema):
     """Generated wrapper for ``GenomeConfigBase``."""
 
@@ -6551,6 +6640,7 @@ class GenomeConfigBase(GenomeSpySchema):
         return self._with_property("name", value)
 
 
+@with_property_setters
 class GenomeDefinition(GenomeSpySchema):
     """Generated wrapper for ``GenomeDefinition``."""
 
@@ -6577,6 +6667,7 @@ class GenomeDefinition(GenomeSpySchema):
         return self._with_property("url", value)
 
 
+@with_property_setters
 class GenomeSpyConfig(GenomeSpySchema):
     """Generated wrapper for ``GenomeSpyConfig``."""
 
@@ -6873,6 +6964,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         return self._with_property("view", value, **kwargs)
 
 
+@with_property_setters
 class Gff3Data(GenomeSpySchema):
     """Generated wrapper for ``Gff3Data``."""
 
@@ -6968,6 +7060,7 @@ class Gff3Data(GenomeSpySchema):
         return self._with_property("windowSize", value)
 
 
+@with_property_setters
 class HConcatSpec(GenomeSpySchema):
     """Generated wrapper for ``HConcatSpec``."""
 
@@ -7301,6 +7394,7 @@ class HConcatSpec(GenomeSpySchema):
         return self._with_property("width", value, **kwargs)
 
 
+@with_property_setters
 class HandledTooltip(GenomeSpySchema):
     """Generated wrapper for ``HandledTooltip``."""
 
@@ -7325,6 +7419,7 @@ class HandledTooltip(GenomeSpySchema):
         return self._with_property("params", value)
 
 
+@with_property_setters
 class IdentifierParams(GenomeSpySchema):
     """Generated wrapper for ``IdentifierParams``."""
 
@@ -7349,6 +7444,7 @@ class IdentifierParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ImportSpec(GenomeSpySchema):
     """Generated wrapper for ``ImportSpec``."""
 
@@ -7398,6 +7494,7 @@ class ImportSpec(GenomeSpySchema):
         return self._with_property("visible", value)
 
 
+@with_property_setters
 class IndexUrlSourceRef(GenomeSpySchema):
     """Generated wrapper for ``IndexUrlSourceRef``."""
 
@@ -7422,6 +7519,7 @@ class IndexUrlSourceRef(GenomeSpySchema):
         return self._with_property("template", value)
 
 
+@with_property_setters
 class IndexUrlTemplate(GenomeSpySchema):
     """Generated wrapper for ``IndexUrlTemplate``."""
 
@@ -7437,6 +7535,7 @@ class IndexUrlTemplate(GenomeSpySchema):
         return self._with_property("template", value)
 
 
+@with_property_setters
 class IndexedFastaData(GenomeSpySchema):
     """Generated wrapper for ``IndexedFastaData``."""
 
@@ -7521,6 +7620,7 @@ class IndexedFastaData(GenomeSpySchema):
         return self._with_property("windowSize", value)
 
 
+@with_property_setters
 class InlineData(GenomeSpySchema):
     """Generated wrapper for ``InlineData``."""
 
@@ -7578,6 +7678,7 @@ class InlineData(GenomeSpySchema):
         return self._with_property("values", value, **kwargs)
 
 
+@with_property_setters
 class InlineDataset(GenomeSpySchema):
     """Generated wrapper for ``InlineDataset``."""
 
@@ -7589,6 +7690,7 @@ class InlineDataset(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class InlineGenomeConfig(GenomeSpySchema):
     """Generated wrapper for ``InlineGenomeConfig``."""
 
@@ -7615,6 +7717,7 @@ class InlineGenomeConfig(GenomeSpySchema):
         return self._with_property("name", value)
 
 
+@with_property_setters
 class InlineGenomeDefinition(GenomeSpySchema):
     """Generated wrapper for ``InlineGenomeDefinition``."""
 
@@ -7636,6 +7739,7 @@ class InlineGenomeDefinition(GenomeSpySchema):
         return self._with_property("contigs", value)
 
 
+@with_property_setters
 class InlineLocusAssembly(GenomeSpySchema):
     """Generated wrapper for ``InlineLocusAssembly``."""
 
@@ -7662,6 +7766,7 @@ class InlineLocusAssembly(GenomeSpySchema):
         return self._with_property("url", value)
 
 
+@with_property_setters
 class InteractionEventType(GenomeSpySchema):
     """Generated wrapper for ``InteractionEventType``."""
 
@@ -7673,6 +7778,7 @@ class InteractionEventType(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class IntervalSelectionConfig(GenomeSpySchema):
     """Generated wrapper for ``IntervalSelectionConfig``."""
 
@@ -7757,6 +7863,7 @@ class IntervalSelectionConfig(GenomeSpySchema):
         return self._with_property("zoom", value)
 
 
+@with_property_setters
 class JsonDataFormat(GenomeSpySchema):
     """Generated wrapper for ``JsonDataFormat``."""
 
@@ -7791,6 +7898,7 @@ class JsonDataFormat(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class KeyDef(GenomeSpySchema):
     """Generated wrapper for ``KeyDef``."""
 
@@ -7820,6 +7928,7 @@ class KeyDef(GenomeSpySchema):
         return self._with_property("title", value)
 
 
+@with_property_setters
 class LayerSpec(GenomeSpySchema):
     """Generated wrapper for ``LayerSpec``."""
 
@@ -8142,6 +8251,7 @@ class LayerSpec(GenomeSpySchema):
         return self._with_property("width", value, **kwargs)
 
 
+@with_property_setters
 class LazyData(GenomeSpySchema):
     """Generated wrapper for ``LazyData``."""
 
@@ -8171,6 +8281,7 @@ class LazyData(GenomeSpySchema):
         return self._with_property("lazy", value, **kwargs)
 
 
+@with_property_setters
 class LazyDataParams(GenomeSpySchema):
     """Generated wrapper for ``LazyDataParams``."""
 
@@ -8335,6 +8446,7 @@ class LazyDataParams(GenomeSpySchema):
         return self._with_property("windowSize", value)
 
 
+@with_property_setters
 class Legend(GenomeSpySchema):
     """Generated wrapper for ``Legend``."""
 
@@ -8452,6 +8564,7 @@ class Legend(GenomeSpySchema):
         return self._with_property("values", value)
 
 
+@with_property_setters
 class LegendConfig(GenomeSpySchema):
     """Generated wrapper for ``LegendConfig``."""
 
@@ -8714,6 +8827,7 @@ class LegendConfig(GenomeSpySchema):
         return self._with_property("values", value)
 
 
+@with_property_setters
 class LegendDirection(GenomeSpySchema):
     """Generated wrapper for ``LegendDirection``."""
 
@@ -8725,6 +8839,7 @@ class LegendDirection(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class LegendOrient(GenomeSpySchema):
     """Generated wrapper for ``LegendOrient``."""
 
@@ -8736,6 +8851,7 @@ class LegendOrient(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class LegendTitleOrient(GenomeSpySchema):
     """Generated wrapper for ``LegendTitleOrient``."""
 
@@ -8747,6 +8863,7 @@ class LegendTitleOrient(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class LinearizeGenomicCoordinateParams(GenomeSpySchema):
     """Generated wrapper for ``LinearizeGenomicCoordinateParams``."""
 
@@ -8808,6 +8925,7 @@ class LinearizeGenomicCoordinateParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class LinkConfig(GenomeSpySchema):
     """Generated wrapper for ``LinkConfig``."""
 
@@ -9103,6 +9221,7 @@ class LinkConfig(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class LinkProps(GenomeSpySchema):
     """Generated wrapper for ``LinkProps``."""
 
@@ -9404,6 +9523,7 @@ class LinkProps(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class MarkConfig(GenomeSpySchema):
     """Generated wrapper for ``MarkConfig``."""
 
@@ -9539,6 +9659,7 @@ class MarkConfig(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``MarkPropDef<(string|null),TypeForShape>``."""
 
@@ -9667,6 +9788,7 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class MarkPropDefStringNull(GenomeSpySchema):
     """Generated wrapper for ``MarkPropDef<(string|null)>``."""
 
@@ -9793,6 +9915,7 @@ class MarkPropDefStringNull(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class MarkPropDefNumber(GenomeSpySchema):
     """Generated wrapper for ``MarkPropDef<number>``."""
 
@@ -9917,6 +10040,7 @@ class MarkPropDefNumber(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class MarkPropExprDef(GenomeSpySchema):
     """Generated wrapper for ``MarkPropExprDef``."""
 
@@ -9985,6 +10109,7 @@ class MarkPropExprDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class MarkProps(GenomeSpySchema):
     """Generated wrapper for ``MarkProps``."""
 
@@ -10837,6 +10962,7 @@ class MarkProps(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class MarkType(GenomeSpySchema):
     """Generated wrapper for ``MarkType``."""
 
@@ -10848,6 +10974,7 @@ class MarkType(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class MeasureTextParams(GenomeSpySchema):
     """Generated wrapper for ``MeasureTextParams``."""
 
@@ -10910,6 +11037,7 @@ class MeasureTextParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class MergeFacetsParams(GenomeSpySchema):
     """Generated wrapper for ``MergeFacetsParams``."""
 
@@ -10934,6 +11062,7 @@ class MergeFacetsParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class MultiUrlSourceRef(GenomeSpySchema):
     """Generated wrapper for ``MultiUrlSourceRef``."""
 
@@ -10999,6 +11128,7 @@ class MultiUrlSourceRef(GenomeSpySchema):
         return self._with_property("values", value, **kwargs)
 
 
+@with_property_setters
 class MultiscaleSpec(GenomeSpySchema):
     """Generated wrapper for ``MultiscaleSpec``."""
 
@@ -11335,6 +11465,7 @@ class MultiscaleSpec(GenomeSpySchema):
         return self._with_property("width", value, **kwargs)
 
 
+@with_property_setters
 class MultiscaleStops(GenomeSpySchema):
     """Generated wrapper for ``MultiscaleStops``."""
 
@@ -11375,6 +11506,7 @@ class MultiscaleStops(GenomeSpySchema):
         return self._with_property("values", value)
 
 
+@with_property_setters
 class MultiscaleStopsDef(GenomeSpySchema):
     """Generated wrapper for ``MultiscaleStopsDef``."""
 
@@ -11415,6 +11547,7 @@ class MultiscaleStopsDef(GenomeSpySchema):
         return self._with_property("values", value)
 
 
+@with_property_setters
 class NamedData(GenomeSpySchema):
     """Generated wrapper for ``NamedData``."""
 
@@ -11460,6 +11593,7 @@ class NamedData(GenomeSpySchema):
         return self._with_property("name", value)
 
 
+@with_property_setters
 class NamedGenomeConfig(GenomeSpySchema):
     """Generated wrapper for ``NamedGenomeConfig``."""
 
@@ -11486,6 +11620,7 @@ class NamedGenomeConfig(GenomeSpySchema):
         return self._with_property("url", value)
 
 
+@with_property_setters
 class NumericDomain(GenomeSpySchema):
     """Generated wrapper for ``NumericDomain``."""
 
@@ -11497,6 +11632,7 @@ class NumericDomain(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class NumericMarkPropDef(GenomeSpySchema):
     """Generated wrapper for ``NumericMarkPropDef``."""
 
@@ -11621,6 +11757,7 @@ class NumericMarkPropDef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class NumericStopDef(GenomeSpySchema):
     """Generated wrapper for ``NumericStopDef``."""
 
@@ -11636,6 +11773,7 @@ class NumericStopDef(GenomeSpySchema):
         return self._with_property("expr", value)
 
 
+@with_property_setters
 class NumericValueDef(GenomeSpySchema):
     """Generated wrapper for ``NumericValueDef``."""
 
@@ -11670,6 +11808,7 @@ class NumericValueDef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class OtherDataFormat(GenomeSpySchema):
     """Generated wrapper for ``OtherDataFormat``."""
 
@@ -11699,6 +11838,7 @@ class OtherDataFormat(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class PackLegendLabelsParams(GenomeSpySchema):
     """Generated wrapper for ``PackLegendLabelsParams``."""
 
@@ -11811,6 +11951,7 @@ class PackLegendLabelsParams(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class PaddingConfig(GenomeSpySchema):
     """Generated wrapper for ``PaddingConfig``."""
 
@@ -11845,6 +11986,7 @@ class PaddingConfig(GenomeSpySchema):
         return self._with_property("top", value)
 
 
+@with_property_setters
 class Paddings(GenomeSpySchema):
     """Generated wrapper for ``Paddings``."""
 
@@ -11879,6 +12021,7 @@ class Paddings(GenomeSpySchema):
         return self._with_property("top", value)
 
 
+@with_property_setters
 class Parameter(GenomeSpySchema):
     """Generated wrapper for ``Parameter``."""
 
@@ -11986,6 +12129,7 @@ class Parameter(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class Parse(GenomeSpySchema):
     """Generated wrapper for ``Parse``."""
 
@@ -11997,6 +12141,7 @@ class Parse(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class ParseValue(GenomeSpySchema):
     """Generated wrapper for ``ParseValue``."""
 
@@ -12008,6 +12153,7 @@ class ParseValue(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class PileupParams(GenomeSpySchema):
     """Generated wrapper for ``PileupParams``."""
 
@@ -12070,6 +12216,7 @@ class PileupParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class PointConfig(GenomeSpySchema):
     """Generated wrapper for ``PointConfig``."""
 
@@ -12394,6 +12541,7 @@ class PointConfig(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class PointProps(GenomeSpySchema):
     """Generated wrapper for ``PointProps``."""
 
@@ -12724,6 +12872,7 @@ class PointProps(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class PointSelectionConfig(GenomeSpySchema):
     """Generated wrapper for ``PointSelectionConfig``."""
 
@@ -12771,6 +12920,7 @@ class PointSelectionConfig(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class Position2Def(GenomeSpySchema):
     """Generated wrapper for ``Position2Def``."""
 
@@ -12891,6 +13041,7 @@ class Position2Def(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class PositionDatumDef(GenomeSpySchema):
     """Generated wrapper for ``PositionDatumDef``."""
 
@@ -12972,6 +13123,7 @@ class PositionDatumDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class PositionDef(GenomeSpySchema):
     """Generated wrapper for ``PositionDef``."""
 
@@ -13092,6 +13244,7 @@ class PositionDef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class PositionExprDef(GenomeSpySchema):
     """Generated wrapper for ``PositionExprDef``."""
 
@@ -13154,6 +13307,7 @@ class PositionExprDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class PositionFieldDef(GenomeSpySchema):
     """Generated wrapper for ``PositionFieldDef``."""
 
@@ -13233,6 +13387,7 @@ class PositionFieldDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class PositionValueDef(GenomeSpySchema):
     """Generated wrapper for ``PositionValueDef``."""
 
@@ -13267,6 +13422,7 @@ class PositionValueDef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class PositionalChannel(GenomeSpySchema):
     """Generated wrapper for ``PositionalChannel``."""
 
@@ -13278,6 +13434,7 @@ class PositionalChannel(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class PrimaryPositionalChannel(GenomeSpySchema):
     """Generated wrapper for ``PrimaryPositionalChannel``."""
 
@@ -13289,6 +13446,7 @@ class PrimaryPositionalChannel(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class ProjectParams(GenomeSpySchema):
     """Generated wrapper for ``ProjectParams``."""
 
@@ -13318,6 +13476,7 @@ class ProjectParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class RangeConfig(GenomeSpySchema):
     """Generated wrapper for ``RangeConfig``."""
 
@@ -13371,6 +13530,7 @@ class RangeConfig(GenomeSpySchema):
         return self._with_property("size", value)
 
 
+@with_property_setters
 class RectConfig(GenomeSpySchema):
     """Generated wrapper for ``RectConfig``."""
 
@@ -13767,6 +13927,7 @@ class RectConfig(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class RectProps(GenomeSpySchema):
     """Generated wrapper for ``RectProps``."""
 
@@ -14169,6 +14330,7 @@ class RectProps(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class RegexExtractParams(GenomeSpySchema):
     """Generated wrapper for ``RegexExtractParams``."""
 
@@ -14214,6 +14376,7 @@ class RegexExtractParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class RegexFoldParams(GenomeSpySchema):
     """Generated wrapper for ``RegexFoldParams``."""
 
@@ -14265,6 +14428,7 @@ class RegexFoldParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ResolutionBehavior(GenomeSpySchema):
     """Generated wrapper for ``ResolutionBehavior``."""
 
@@ -14276,6 +14440,7 @@ class ResolutionBehavior(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class RuleConfig(GenomeSpySchema):
     """Generated wrapper for ``RuleConfig``."""
 
@@ -14483,6 +14648,7 @@ class RuleConfig(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class RuleProps(GenomeSpySchema):
     """Generated wrapper for ``RuleProps``."""
 
@@ -14696,6 +14862,7 @@ class RuleProps(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class RulerChannelValue(GenomeSpySchema):
     """Generated wrapper for ``RulerChannelValue``."""
 
@@ -14720,6 +14887,7 @@ class RulerChannelValue(GenomeSpySchema):
         return self._with_property("pos", value)
 
 
+@with_property_setters
 class RulerClear(GenomeSpySchema):
     """Generated wrapper for ``RulerClear``."""
 
@@ -14731,6 +14899,7 @@ class RulerClear(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class RulerConfig(GenomeSpySchema):
     """Generated wrapper for ``RulerConfig``."""
 
@@ -14807,6 +14976,7 @@ class RulerConfig(GenomeSpySchema):
         return self._with_property("source", value)
 
 
+@with_property_setters
 class RulerDisplay(GenomeSpySchema):
     """Generated wrapper for ``RulerDisplay``."""
 
@@ -14818,6 +14988,7 @@ class RulerDisplay(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class RulerEventConfig(GenomeSpySchema):
     """Generated wrapper for ``RulerEventConfig``."""
 
@@ -14842,6 +15013,7 @@ class RulerEventConfig(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class RulerEventType(GenomeSpySchema):
     """Generated wrapper for ``RulerEventType``."""
 
@@ -14853,6 +15025,7 @@ class RulerEventType(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class RulerExtent(GenomeSpySchema):
     """Generated wrapper for ``RulerExtent``."""
 
@@ -14864,6 +15037,7 @@ class RulerExtent(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class RulerInitMapping(GenomeSpySchema):
     """Generated wrapper for ``RulerInitMapping``."""
 
@@ -14900,6 +15074,7 @@ class RulerInitMapping(GenomeSpySchema):
         return self._with_property("y", value)
 
 
+@with_property_setters
 class RulerMarkConfig(GenomeSpySchema):
     """Generated wrapper for ``RulerMarkConfig``."""
 
@@ -15012,6 +15187,7 @@ class RulerMarkConfig(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class RulerParameter(GenomeSpySchema):
     """Generated wrapper for ``RulerParameter``."""
 
@@ -15073,6 +15249,7 @@ class RulerParameter(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class RulerSnap(GenomeSpySchema):
     """Generated wrapper for ``RulerSnap``."""
 
@@ -15084,6 +15261,7 @@ class RulerSnap(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class RulerSource(GenomeSpySchema):
     """Generated wrapper for ``RulerSource``."""
 
@@ -15095,6 +15273,7 @@ class RulerSource(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class SampleParams(GenomeSpySchema):
     """Generated wrapper for ``SampleParams``."""
 
@@ -15124,6 +15303,7 @@ class SampleParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class Scalar(GenomeSpySchema):
     """Generated wrapper for ``Scalar``."""
 
@@ -15135,6 +15315,7 @@ class Scalar(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class ScalarDomain(GenomeSpySchema):
     """Generated wrapper for ``ScalarDomain``."""
 
@@ -15146,6 +15327,7 @@ class ScalarDomain(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class Scale(GenomeSpySchema):
     """Generated wrapper for ``Scale``."""
 
@@ -15357,6 +15539,7 @@ class Scale(GenomeSpySchema):
         return self._with_property("zoom", value, **kwargs)
 
 
+@with_property_setters
 class ScaleConfig(GenomeSpySchema):
     """Generated wrapper for ``ScaleConfig``."""
 
@@ -15631,6 +15814,7 @@ class ScaleConfig(GenomeSpySchema):
         return self._with_property("zoom", value, **kwargs)
 
 
+@with_property_setters
 class ScaleInterpolate(GenomeSpySchema):
     """Generated wrapper for ``ScaleInterpolate``."""
 
@@ -15642,6 +15826,7 @@ class ScaleInterpolate(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class ScaleInterpolateParams(GenomeSpySchema):
     """Generated wrapper for ``ScaleInterpolateParams``."""
 
@@ -15668,6 +15853,7 @@ class ScaleInterpolateParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class ScaleType(GenomeSpySchema):
     """Generated wrapper for ``ScaleType``."""
 
@@ -15679,6 +15865,7 @@ class ScaleType(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class SchemeParams(GenomeSpySchema):
     """Generated wrapper for ``SchemeParams``."""
 
@@ -15708,6 +15895,7 @@ class SchemeParams(GenomeSpySchema):
         return self._with_property("name", value)
 
 
+@with_property_setters
 class SearchDef(GenomeSpySchema):
     """Generated wrapper for ``SearchDef``."""
 
@@ -15737,6 +15925,7 @@ class SearchDef(GenomeSpySchema):
         return self._with_property("title", value)
 
 
+@with_property_setters
 class SecondaryChromPosDef(GenomeSpySchema):
     """Generated wrapper for ``SecondaryChromPosDef``."""
 
@@ -15805,6 +15994,7 @@ class SecondaryChromPosDef(GenomeSpySchema):
         return self._with_property("title", value)
 
 
+@with_property_setters
 class SecondaryPositionalChannel(GenomeSpySchema):
     """Generated wrapper for ``SecondaryPositionalChannel``."""
 
@@ -15816,6 +16006,7 @@ class SecondaryPositionalChannel(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class SelectionDomainRef(GenomeSpySchema):
     """Generated wrapper for ``SelectionDomainRef``."""
 
@@ -15849,6 +16040,7 @@ class SelectionDomainRef(GenomeSpySchema):
         return self._with_property("param", value)
 
 
+@with_property_setters
 class SelectionExtent(GenomeSpySchema):
     """Generated wrapper for ``SelectionExtent``."""
 
@@ -15860,6 +16052,7 @@ class SelectionExtent(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class SelectionFilterParams(GenomeSpySchema):
     """Generated wrapper for ``SelectionFilterParams``."""
 
@@ -15901,6 +16094,7 @@ class SelectionFilterParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class SelectionInitIntervalMapping(GenomeSpySchema):
     """Generated wrapper for ``SelectionInitIntervalMapping``."""
 
@@ -15927,6 +16121,7 @@ class SelectionInitIntervalMapping(GenomeSpySchema):
         return self._with_property("y", value)
 
 
+@with_property_setters
 class SelectionParameter(GenomeSpySchema):
     """Generated wrapper for ``SelectionParameter``."""
 
@@ -15995,6 +16190,7 @@ class SelectionParameter(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class SelectionType(GenomeSpySchema):
     """Generated wrapper for ``SelectionType``."""
 
@@ -16006,6 +16202,7 @@ class SelectionType(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class SeparatorProps(GenomeSpySchema):
     """Generated wrapper for ``SeparatorProps``."""
 
@@ -16231,6 +16428,7 @@ class SeparatorProps(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class SequenceGenerator(GenomeSpySchema):
     """Generated wrapper for ``SequenceGenerator``."""
 
@@ -16265,6 +16463,7 @@ class SequenceGenerator(GenomeSpySchema):
         return self._with_property("sequence", value, **kwargs)
 
 
+@with_property_setters
 class SequenceParams(GenomeSpySchema):
     """Generated wrapper for ``SequenceParams``."""
 
@@ -16309,6 +16508,7 @@ class SequenceParams(GenomeSpySchema):
         return self._with_property("stop", value, **kwargs)
 
 
+@with_property_setters
 class ShapeDef(GenomeSpySchema):
     """Generated wrapper for ``ShapeDef``."""
 
@@ -16431,6 +16631,7 @@ class ShapeDef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class SingleUrlSourceRef(GenomeSpySchema):
     """Generated wrapper for ``SingleUrlSourceRef``."""
 
@@ -16496,6 +16697,7 @@ class SingleUrlSourceRef(GenomeSpySchema):
         return self._with_property("values", value, **kwargs)
 
 
+@with_property_setters
 class SizeDef(GenomeSpySchema):
     """Generated wrapper for ``SizeDef``."""
 
@@ -16530,6 +16732,7 @@ class SizeDef(GenomeSpySchema):
         return self._with_property("px", value)
 
 
+@with_property_setters
 class SortOrder(GenomeSpySchema):
     """Generated wrapper for ``SortOrder``."""
 
@@ -16541,6 +16744,7 @@ class SortOrder(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class StackParams(GenomeSpySchema):
     """Generated wrapper for ``StackParams``."""
 
@@ -16612,6 +16816,7 @@ class StackParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class Step(GenomeSpySchema):
     """Generated wrapper for ``Step``."""
 
@@ -16627,6 +16832,7 @@ class Step(GenomeSpySchema):
         return self._with_property("step", value)
 
 
+@with_property_setters
 class StringDatumDef(GenomeSpySchema):
     """Generated wrapper for ``StringDatumDef``."""
 
@@ -16695,6 +16901,7 @@ class StringDatumDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class StringFieldDef(GenomeSpySchema):
     """Generated wrapper for ``StringFieldDef``."""
 
@@ -16746,6 +16953,7 @@ class StringFieldDef(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class StyleConfig(GenomeSpySchema):
     """Generated wrapper for ``StyleConfig``."""
 
@@ -18236,6 +18444,7 @@ class StyleConfig(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class TabixTsvData(GenomeSpySchema):
     """Generated wrapper for ``TabixTsvData``."""
 
@@ -18348,6 +18557,7 @@ class TabixTsvData(GenomeSpySchema):
         return self._with_property("windowSize", value)
 
 
+@with_property_setters
 class TemplateImport(GenomeSpySchema):
     """Generated wrapper for ``TemplateImport``."""
 
@@ -18363,6 +18573,7 @@ class TemplateImport(GenomeSpySchema):
         return self._with_property("template", value)
 
 
+@with_property_setters
 class TextConfig(GenomeSpySchema):
     """Generated wrapper for ``TextConfig``."""
 
@@ -18715,6 +18926,7 @@ class TextConfig(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class TextDef(GenomeSpySchema):
     """Generated wrapper for ``TextDef``."""
 
@@ -18812,6 +19024,7 @@ class TextDef(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class TextProps(GenomeSpySchema):
     """Generated wrapper for ``TextProps``."""
 
@@ -19170,6 +19383,7 @@ class TextProps(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class TickConfig(GenomeSpySchema):
     """Generated wrapper for ``TickConfig``."""
 
@@ -19356,6 +19570,7 @@ class TickConfig(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class TickProps(GenomeSpySchema):
     """Generated wrapper for ``TickProps``."""
 
@@ -19548,6 +19763,7 @@ class TickProps(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class Title(GenomeSpySchema):
     """Generated wrapper for ``Title``."""
 
@@ -19748,6 +19964,7 @@ class Title(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class TitleAnchor(GenomeSpySchema):
     """Generated wrapper for ``TitleAnchor``."""
 
@@ -19759,6 +19976,7 @@ class TitleAnchor(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class TitleConfig(GenomeSpySchema):
     """Generated wrapper for ``TitleConfig``."""
 
@@ -19948,6 +20166,7 @@ class TitleConfig(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class TitleFrame(GenomeSpySchema):
     """Generated wrapper for ``TitleFrame``."""
 
@@ -19959,6 +20178,7 @@ class TitleFrame(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class TitleOrient(GenomeSpySchema):
     """Generated wrapper for ``TitleOrient``."""
 
@@ -19970,6 +20190,7 @@ class TitleOrient(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class Tooltip(GenomeSpySchema):
     """Generated wrapper for ``Tooltip``."""
 
@@ -19994,6 +20215,7 @@ class Tooltip(GenomeSpySchema):
         return self._with_property("params", value)
 
 
+@with_property_setters
 class TransformParams(GenomeSpySchema):
     """Generated wrapper for ``TransformParams``."""
 
@@ -20383,6 +20605,7 @@ class TransformParams(GenomeSpySchema):
         return self._with_property("yOffset", value)
 
 
+@with_property_setters
 class TruncateTextParams(GenomeSpySchema):
     """Generated wrapper for ``TruncateTextParams``."""
 
@@ -20452,6 +20675,7 @@ class TruncateTextParams(GenomeSpySchema):
         return self._with_property("type", value)
 
 
+@with_property_setters
 class Type(GenomeSpySchema):
     """Generated wrapper for ``Type``."""
 
@@ -20463,6 +20687,7 @@ class Type(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class TypeForShape(GenomeSpySchema):
     """Generated wrapper for ``TypeForShape``."""
 
@@ -20474,6 +20699,7 @@ class TypeForShape(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+@with_property_setters
 class UnitSpec(GenomeSpySchema):
     """Generated wrapper for ``UnitSpec``."""
 
@@ -20806,6 +21032,7 @@ class UnitSpec(GenomeSpySchema):
         return self._with_property("width", value, **kwargs)
 
 
+@with_property_setters
 class UrlData(GenomeSpySchema):
     """Generated wrapper for ``UrlData``."""
 
@@ -20865,6 +21092,7 @@ class UrlData(GenomeSpySchema):
         return self._with_property("url", value)
 
 
+@with_property_setters
 class UrlGenomeConfig(GenomeSpySchema):
     """Generated wrapper for ``UrlGenomeConfig``."""
 
@@ -20889,6 +21117,7 @@ class UrlGenomeConfig(GenomeSpySchema):
         return self._with_property("url", value)
 
 
+@with_property_setters
 class UrlGenomeDefinition(GenomeSpySchema):
     """Generated wrapper for ``UrlGenomeDefinition``."""
 
@@ -20904,6 +21133,7 @@ class UrlGenomeDefinition(GenomeSpySchema):
         return self._with_property("url", value)
 
 
+@with_property_setters
 class UrlImport(GenomeSpySchema):
     """Generated wrapper for ``UrlImport``."""
 
@@ -20919,6 +21149,7 @@ class UrlImport(GenomeSpySchema):
         return self._with_property("url", value)
 
 
+@with_property_setters
 class UrlList(GenomeSpySchema):
     """Generated wrapper for ``UrlList``."""
 
@@ -20943,6 +21174,7 @@ class UrlList(GenomeSpySchema):
         return self._with_property("urlsFromFile", value)
 
 
+@with_property_setters
 class UrlSourceRef(GenomeSpySchema):
     """Generated wrapper for ``UrlSourceRef``."""
 
@@ -21020,6 +21252,7 @@ class UrlSourceRef(GenomeSpySchema):
         return self._with_property("values", value, **kwargs)
 
 
+@with_property_setters
 class UrlTemplate(GenomeSpySchema):
     """Generated wrapper for ``UrlTemplate``."""
 
@@ -21079,6 +21312,7 @@ class UrlTemplate(GenomeSpySchema):
         return self._with_property("values", value, **kwargs)
 
 
+@with_property_setters
 class VConcatSpec(GenomeSpySchema):
     """Generated wrapper for ``VConcatSpec``."""
 
@@ -21412,6 +21646,7 @@ class VConcatSpec(GenomeSpySchema):
         return self._with_property("width", value, **kwargs)
 
 
+@with_property_setters
 class ValueDefNumber(GenomeSpySchema):
     """Generated wrapper for ``ValueDef<number>``."""
 
@@ -21446,6 +21681,7 @@ class ValueDefNumber(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class ValueDefString(GenomeSpySchema):
     """Generated wrapper for ``ValueDef<string>``."""
 
@@ -21480,6 +21716,7 @@ class ValueDefString(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class ValueDefWithConditionStringNullType(GenomeSpySchema):
     """Generated wrapper for ``ValueDefWithCondition<(string|null),Type>``."""
 
@@ -21537,6 +21774,7 @@ class ValueDefWithConditionStringNullType(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class ValueDefWithConditionStringNullTypeForShape(GenomeSpySchema):
     """Generated wrapper for ``ValueDefWithCondition<(string|null),TypeForShape>``."""
 
@@ -21598,6 +21836,7 @@ class ValueDefWithConditionStringNullTypeForShape(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class ValueDefWithConditionNumberType(GenomeSpySchema):
     """Generated wrapper for ``ValueDefWithCondition<number,Type>``."""
 
@@ -21655,6 +21894,7 @@ class ValueDefWithConditionNumberType(GenomeSpySchema):
         return self._with_property("value", value, **kwargs)
 
 
+@with_property_setters
 class VariableParameter(GenomeSpySchema):
     """Generated wrapper for ``VariableParameter``."""
 
@@ -21730,6 +21970,7 @@ class VariableParameter(GenomeSpySchema):
         return self._with_property("value", value)
 
 
+@with_property_setters
 class VcfData(GenomeSpySchema):
     """Generated wrapper for ``VcfData``."""
 
@@ -21825,6 +22066,7 @@ class VcfData(GenomeSpySchema):
         return self._with_property("windowSize", value)
 
 
+@with_property_setters
 class ViewBackground(GenomeSpySchema):
     """Generated wrapper for ``ViewBackground``."""
 
@@ -21943,6 +22185,7 @@ class ViewBackground(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class ViewConfig(GenomeSpySchema):
     """Generated wrapper for ``ViewConfig``."""
 
@@ -22095,6 +22338,7 @@ class ViewConfig(GenomeSpySchema):
         return self._with_property("zindex", value)
 
 
+@with_property_setters
 class ViewOpacityDef(GenomeSpySchema):
     """Generated wrapper for ``ViewOpacityDef``."""
 
@@ -22138,6 +22382,7 @@ class ViewOpacityDef(GenomeSpySchema):
         return self._with_property("values", value)
 
 
+@with_property_setters
 class ViewSpec(GenomeSpySchema):
     """Generated wrapper for ``ViewSpec``."""
 
@@ -22622,6 +22867,7 @@ class ViewSpec(GenomeSpySchema):
         return self._with_property("width", value, **kwargs)
 
 
+@with_property_setters
 class ZoomParams(GenomeSpySchema):
     """Generated wrapper for ``ZoomParams``."""
 

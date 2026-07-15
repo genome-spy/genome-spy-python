@@ -86,6 +86,22 @@ def test_generated_wrappers_expose_fluent_with_methods() -> None:
     }
 
 
+def test_generated_wrappers_expose_altair_style_property_setters() -> None:
+    legend = Legend().title("Species legend").padding(8)
+    scale = Scale().zero(False).scheme(name="blues")
+    axis = GenomeAxis().title("Position axis").grid(True)
+
+    assert legend.to_dict(validate=False) == {"title": "Species legend", "padding": 8}
+    assert scale.to_dict(validate=False) == {
+        "zero": False,
+        "scheme": {"name": "blues"},
+    }
+    assert axis.to_dict(validate=False) == {
+        "title": "Position axis",
+        "grid": True,
+    }
+
+
 def test_generated_wrappers_with_methods_merge_nested_helper_kwargs() -> None:
     color = ColorDef(field="species", type="nominal").with_legend(title="Species")
     position = PositionDef(field="x", type="quantitative").with_scale(
@@ -175,7 +191,7 @@ def test_generated_channels_match_encoding_schema() -> None:
 
 
 def test_generated_channels_expose_schema_derived_nested_setters() -> None:
-    assert hasattr(generated_channels.X("field:Q"), "axis")
-    assert hasattr(generated_channels.X("field:Q"), "scale")
-    assert not hasattr(generated_channels.X("field:Q"), "legend")
+    assert "axis" in generated_channels.X.__dict__
+    assert "scale" in generated_channels.X.__dict__
+    assert "legend" not in generated_channels.X.__dict__
     assert hasattr(generated_channels.Color("field:N"), "legend")

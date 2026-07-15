@@ -530,7 +530,9 @@ class SchemaWrapperGenerator:
             return ()
         return tuple(sorted(name for name in properties if isinstance(name, str)))
 
-    def channel_nested_setters(self, encoding_name: str) -> tuple[tuple[str, str], ...]:
+    def channel_nested_setters(
+        self, encoding_name: str
+    ) -> tuple[tuple[str, str, str], ...]:
         """Return nested setter properties available for an encoding channel."""
         encoding_schema = self._definitions_map.get("Encoding", {})
         if not isinstance(encoding_schema, dict):
@@ -542,15 +544,49 @@ class SchemaWrapperGenerator:
         if not isinstance(channel_schema, dict):
             return ()
         resolved_properties = self._analyzer.resolve_properties(channel_schema)
-        setters: list[tuple[str, str]] = []
-        for property_name in ("axis", "scale", "legend"):
-            nested_schema = resolved_properties.get(property_name)
+        available = {
+            _class_name(definition.name): definition.schema
+            for definition in self.definitions()
+        }
+        setters: list[tuple[str, str, str]] = []
+        for property_name in sorted(resolved_properties):
+            nested_schema = resolved_properties[property_name]
             if not isinstance(nested_schema, dict):
                 continue
-            ref_name = _first_ref_name(nested_schema)
+            ref_name = _nested_setter_ref_name(nested_schema)
             if ref_name is None:
                 continue
-            setters.append((property_name, _class_name(ref_name)))
+            class_name = _class_name(ref_name)
+            definition_schema = available.get(class_name)
+            if definition_schema is None or not _looks_like_object_schema(
+                definition_schema
+            ):
+                continue
+            setters.append(
+                (
+                    property_name,
+                    class_name,
+                    self._analyzer.raw_mapping_annotation(class_name),
+                )
+            )
+        return tuple(setters)
+
+    def channel_simple_setters(self, encoding_name: str) -> tuple[str, ...]:
+        """Return fluent scalar/custom setters available for an encoding channel."""
+        encoding_schema = self._definitions_map.get("Encoding", {})
+        if not isinstance(encoding_schema, dict):
+            return ()
+        properties = encoding_schema.get("properties", {})
+        if not isinstance(properties, dict):
+            return ()
+        channel_schema = properties.get(encoding_name)
+        if not isinstance(channel_schema, dict):
+            return ()
+        resolved_properties = self._analyzer.resolve_properties(channel_schema)
+        setters: list[str] = []
+        for property_name in ("title", "sort"):
+            if property_name in resolved_properties:
+                setters.append(property_name)
         return tuple(setters)
 
     def generate_core_module(self) -> GeneratedModule:
@@ -616,7 +652,10 @@ class SchemaWrapperGenerator:
                 if used_kwds_types
                 else ""
             ),
-            "from genome_spy.schemapi import SchemaBase, Undefined, UndefinedType",
+            (
+                "from genome_spy.schemapi import "
+                "SchemaBase, Undefined, UndefinedType, with_property_setters"
+            ),
             "",
             "def load_schema() -> dict[str, Any]:",
             '    """Load the packaged GenomeSpy JSON Schema."""',
@@ -877,34 +916,150 @@ class SchemaWrapperGenerator:
         return _anonymous_property_kwds_sources(property_names)
 
     def generate_mark_mixins_module(self) -> GeneratedModule:
-        """Generate chart mark methods from the upstream mark enum."""
-        methods = [_mark_method_source(mark_type) for mark_type in self.mark_types()]
+        """Generate chart mark and config methods for the handwritten API."""
+        mark_methods = [
+            _mark_method_source(
+                mark_type,
+                signature_class_name=self.mark_signature_class(mark_type),
+            )
+            for mark_type in self.mark_types()
+        ]
+        needs_core_import = any(
+            self.mark_signature_class(mark_type) is not None
+            for mark_type in self.mark_types()
+        )
+        config_method_specs = self.config_method_specs()
+        config_methods = [
+            _config_method_source(
+                property_name,
+                annotation=annotation,
+                nested_schema_class_name=nested_schema_class_name,
+                raw_mapping_annotation=raw_mapping_annotation,
+            )
+            for (
+                property_name,
+                annotation,
+                nested_schema_class_name,
+                raw_mapping_annotation,
+            ) in config_method_specs
+        ]
+        config_helper_kwds_names = {
+            kwds_name
+            for _, annotation, _, _ in config_method_specs
+            for kwds_name in _annotation_kwds_names(annotation)
+        }
         source = "\n".join(
             [
                 GENERATED_HEADER,
                 "from __future__ import annotations",
                 "from typing import Any, Self",
                 "",
+                "from genome_spy.schemapi import Undefined, use_signature",
+                (
+                    "from genome_spy.schema import core"
+                    if needs_core_import or config_method_specs
+                    else ""
+                ),
+                (
+                    "from genome_spy.schema._kwds import "
+                    + ", ".join(
+                        sorted(config_helper_kwds_names | {"GenomeSpyConfigKwds"})
+                    )
+                    if config_helper_kwds_names or config_method_specs
+                    else ""
+                ),
                 "class MarkMethodMixin:",
                 '    """Grammar-derived mark methods for the handwritten chart API."""',
                 "",
-                *(methods or ["    pass"]),
+                *(mark_methods or ["    pass"]),
+                *(
+                    [
+                        "",
+                        "class ConfigMethodMixin:",
+                        '    """Schema-derived config methods for the handwritten chart API."""',
+                        "",
+                        _configure_method_source(),
+                        *(config_methods or ["    pass"]),
+                    ]
+                    if config_method_specs
+                    else []
+                ),
                 "",
-                '__all__ = ["MarkMethodMixin"]',
+                (
+                    '__all__ = ["ConfigMethodMixin", "MarkMethodMixin"]'
+                    if config_method_specs
+                    else '__all__ = ["MarkMethodMixin"]'
+                ),
                 "",
             ]
         )
-        return GeneratedModule(source=source, exports=("MarkMethodMixin",))
+        return GeneratedModule(
+            source=source,
+            exports=(
+                ("ConfigMethodMixin", "MarkMethodMixin")
+                if config_method_specs
+                else ("MarkMethodMixin",)
+            ),
+        )
+
+    def mark_signature_class(self, mark_type: str) -> str | None:
+        """Return the best generated schema class to use for a mark method signature."""
+        class_stem = _class_name(mark_type)
+        candidates = (
+            f"{class_stem}Props",
+            f"{class_stem}Config",
+            "MarkProps",
+            "MarkConfig",
+        )
+        available = {_class_name(definition.name) for definition in self.definitions()}
+        for candidate in candidates:
+            if candidate in available:
+                return candidate
+        return None
+
+    def config_method_specs(self) -> list[tuple[str, str, str | None, str]]:
+        """Return generated method specs for GenomeSpyConfig properties."""
+        try:
+            definition = next(
+                definition
+                for definition in self.definitions()
+                if definition.name == "GenomeSpyConfig"
+            )
+        except StopIteration:
+            return []
+
+        specs: list[tuple[str, str, str | None, str]] = []
+        for property_spec in self._analyzer.property_specs(definition):
+            raw_mapping_annotation = (
+                self._analyzer.raw_mapping_annotation(
+                    property_spec.nested_schema_class_name
+                )
+                if property_spec.nested_schema_class_name is not None
+                else "dict[str, Any]"
+            )
+            specs.append(
+                (
+                    property_spec.name,
+                    property_spec.annotation.annotation,
+                    property_spec.nested_schema_class_name,
+                    raw_mapping_annotation,
+                )
+            )
+        return specs
 
     def generate_channels_module(self) -> GeneratedModule:
         """Generate named channel wrappers from the upstream encoding schema."""
         exports: list[str] = []
         classes: list[str] = []
         kwds_type_names = set(self.kwds_type_names())
+        simple_setters_by_channel = {
+            encoding_name: self.channel_simple_setters(encoding_name)
+            for encoding_name in self.encoding_channels()
+        }
         helper_class_names = {
             class_name
             for encoding_name in self.encoding_channels()
-            for _, class_name in self.channel_nested_setters(encoding_name)
+            for _, class_name, _ in self.channel_nested_setters(encoding_name)
         }
         helper_kwds_names = {
             _kwds_type_name(class_name)
@@ -919,10 +1074,14 @@ class SchemaWrapperGenerator:
                     class_name,
                     encoding_name,
                     nested_setters=self.channel_nested_setters(encoding_name),
+                    simple_setters=simple_setters_by_channel[encoding_name],
                     analyzer=self._analyzer,
                 )
             )
         helper_imports = ", ".join(sorted(helper_class_names))
+        needs_compare_params = any(
+            "sort" in setters for setters in simple_setters_by_channel.values()
+        )
         source = "\n".join(
             [
                 GENERATED_HEADER,
@@ -931,14 +1090,25 @@ class SchemaWrapperGenerator:
                 "",
                 "from genome_spy.channels import Channel, _MISSING, channel",
                 (
-                    "from genome_spy.schema.core import " + helper_imports
-                    if helper_imports
+                    "from genome_spy.schema.core import "
+                    + ", ".join(
+                        sorted(
+                            helper_class_names
+                            | ({"CompareParams"} if needs_compare_params else set())
+                        )
+                    )
+                    if helper_imports or needs_compare_params
                     else ""
                 ),
                 (
                     "from genome_spy.schema._kwds import "
-                    + ", ".join(sorted(helper_kwds_names))
-                    if helper_kwds_names
+                    + ", ".join(
+                        sorted(
+                            helper_kwds_names
+                            | ({"CompareParamsKwds"} if needs_compare_params else set())
+                        )
+                    )
+                    if helper_kwds_names or needs_compare_params
                     else ""
                 ),
                 "",
@@ -983,6 +1153,46 @@ def _first_ref_name(schema: dict[str, Any]) -> str | None:
     return None
 
 
+def _nested_setter_ref_name(schema: dict[str, Any]) -> str | None:
+    """Return a nested-setter ref when the schema is object/null only."""
+    ref = _ref_name(schema)
+    if ref is not None:
+        return ref
+
+    refs: list[str] = []
+    saw_other_non_null = False
+    for key in ("anyOf", "oneOf"):
+        variants = schema.get(key)
+        if not isinstance(variants, list):
+            continue
+        for variant in variants:
+            if not isinstance(variant, dict):
+                saw_other_non_null = True
+                continue
+            ref = _ref_name(variant)
+            if ref is not None:
+                refs.append(ref)
+                continue
+            if variant.get("type") == "null":
+                continue
+            saw_other_non_null = True
+        break
+
+    if saw_other_non_null or len(set(refs)) != 1:
+        return None
+    return refs[0]
+
+
+def _looks_like_object_schema(schema: dict[str, Any]) -> bool:
+    """Return whether a referenced definition behaves like an object wrapper."""
+    if schema.get("type") == "object":
+        return True
+    for key in ("properties", "required", "additionalProperties"):
+        if key in schema:
+            return True
+    return False
+
+
 def _schema_class_source(
     class_name: str,
     definition: SchemaDefinition,
@@ -1018,6 +1228,7 @@ def _schema_class_source(
 
     return GeneratedSchemaClass(
         source=(
+            f"@with_property_setters\n"
             f"class {class_name}(GenomeSpySchema):\n"
             f'    """Generated wrapper for ``{definition.name}``."""\n\n'
             f'    _schema = _ROOT_SCHEMA.get("definitions", {{}}).get({definition.name!r}, {{}})\n\n'
@@ -1124,13 +1335,72 @@ def _is_literal_value(value: Any) -> bool:
     return isinstance(value, str | bool | int | float) or value is None
 
 
-def _mark_method_source(mark_type: str) -> str:
+def _mark_method_source(mark_type: str, *, signature_class_name: str | None) -> str:
     method_name = mark_type.replace("-", "_")
+    decorator = (
+        f"    @use_signature(core.{signature_class_name})\n"
+        if signature_class_name is not None
+        else ""
+    )
     return (
+        f"{decorator}"
         f"    def mark_{method_name}(self, **kwargs: Any) -> Self:\n"
         f'        """Set the chart mark to ``{mark_type}``."""\n'
         f"        return self._with_mark({mark_type!r}, **kwargs)  "
         "# type: ignore[attr-defined, no-any-return]"
+    )
+
+
+def _snake_name(name: str) -> str:
+    name = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
+    return name.lower()
+
+
+def _configure_method_source() -> str:
+    return (
+        "    @use_signature(core.GenomeSpyConfig)\n"
+        "    def configure(\n"
+        "        self,\n"
+        "        value: core.GenomeSpyConfig | GenomeSpyConfigKwds | None | object = Undefined,\n"
+        "        /,\n"
+        "        **kwargs: Any,\n"
+        "    ) -> Self:\n"
+        '        """Return a chart with merged top-level config."""\n'
+        "        return self._configure(value, **kwargs)  # type: ignore[attr-defined, no-any-return]\n"
+    )
+
+
+def _config_method_source(
+    property_name: str,
+    *,
+    annotation: str,
+    nested_schema_class_name: str | None,
+    raw_mapping_annotation: str,
+) -> str:
+    method_name = f"configure_{_snake_name(property_name)}"
+    if nested_schema_class_name is None:
+        return (
+            "\n"
+            f"    def {method_name}(\n"
+            f"        self,\n"
+            f"        value: {annotation},\n"
+            "    ) -> Self:\n"
+            f'        """Return a chart with ``{property_name}`` config updated."""\n'
+            f"        return self._configure_property({property_name!r}, value)  "
+            "# type: ignore[attr-defined, no-any-return]\n"
+        )
+    return (
+        "\n"
+        f"    @use_signature(core.{nested_schema_class_name})\n"
+        f"    def {method_name}(\n"
+        f"        self,\n"
+        f"        value: core.{nested_schema_class_name} | {raw_mapping_annotation} | None | object = Undefined,\n"
+        "        /,\n"
+        "        **kwargs: Any,\n"
+        "    ) -> Self:\n"
+        f'        """Return a chart with ``{property_name}`` config updated."""\n'
+        f"        return self._configure_nested({property_name!r}, value, **kwargs)  "
+        "# type: ignore[attr-defined, no-any-return]\n"
     )
 
 
@@ -1139,16 +1409,21 @@ def _channel_class_source(
     encoding_name: str,
     *,
     nested_setters: tuple[tuple[str, str], ...],
+    simple_setters: tuple[str, ...],
     analyzer: SchemaAnalyzer,
 ) -> str:
+    simple_methods = "".join(
+        _channel_simple_setter_source(class_name, property_name)
+        for property_name in simple_setters
+    )
     methods = "".join(
         _channel_nested_setter_source(
             class_name,
             property_name,
             schema_class_name,
-            analyzer.raw_mapping_annotation(schema_class_name),
+            raw_mapping_annotation,
         )
-        for property_name, schema_class_name in nested_setters
+        for property_name, schema_class_name, raw_mapping_annotation in nested_setters
     )
     return (
         f"class {class_name}(Channel):\n"
@@ -1158,8 +1433,37 @@ def _channel_class_source(
         "    ) -> None:\n"
         f"        wrapped = channel(value, encoding_name={encoding_name!r}, **kwargs)\n"
         f"        super().__init__(wrapped.definition, encoding_name={encoding_name!r})\n"
+        f"{simple_methods}"
         f"{methods}"
     )
+
+
+def _channel_simple_setter_source(channel_class_name: str, property_name: str) -> str:
+    if property_name == "title":
+        return (
+            "\n"
+            "    def title(\n"
+            "        self,\n"
+            "        value: str | None,\n"
+            "    ) -> "
+            f"{channel_class_name}:\n"
+            '        """Return a channel with a title."""\n'
+            f"        return super().title(value)\n"
+        )
+    if property_name == "sort":
+        return (
+            "\n"
+            "    def sort(\n"
+            "        self,\n"
+            "        value: CompareParams | CompareParamsKwds | str | list[str] | None | object = _MISSING,\n"
+            "        /,\n"
+            "        **kwargs: Any,\n"
+            "    ) -> "
+            f"{channel_class_name}:\n"
+            '        """Return a channel with a ``sort`` configuration."""\n'
+            f"        return super().sort(value, **kwargs)\n"
+        )
+    raise ValueError(f"Unsupported channel simple setter: {property_name}")
 
 
 def _channel_nested_setter_source(

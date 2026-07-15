@@ -9,7 +9,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
-from typing import Any, ClassVar, Self
+import keyword
+from typing import Any, Callable, ClassVar, Self, TypeVar
 
 from jsonschema import ValidationError
 from jsonschema.validators import validator_for
@@ -50,6 +51,8 @@ class UndefinedType:
 
 
 Undefined = UndefinedType()
+
+_F = TypeVar("_F", bound=Callable[..., Any])
 
 
 class SchemaBase:
@@ -123,17 +126,206 @@ class SchemaBase:
         validator = validator_class(rootschema).evolve(schema=cls._schema)
         validator.validate(instance)
 
+    @classmethod
+    def resolve_references(cls) -> dict[str, Any]:
+        """Return this class schema with referenced properties merged in."""
+        rootschema = cls._rootschema or cls._schema
+        return _resolve_schema_references(cls._schema, rootschema)
+
 
 def _todict(value: Any) -> Any:
+    return normalize_schema_value(value, validate=True)
+
+
+def normalize_schema_value(value: Any, *, validate: bool = False) -> Any:
+    """Recursively convert schema wrappers into plain Python values."""
     if isinstance(value, SchemaBase):
-        return value.to_dict()
+        return value.to_dict(validate=validate)
     if isinstance(value, list | tuple):
-        return [_todict(item) for item in value]
+        return [normalize_schema_value(item, validate=validate) for item in value]
     if isinstance(value, dict):
         return {
-            key: _todict(item) for key, item in value.items() if item is not Undefined
+            key: normalize_schema_value(item, validate=validate)
+            for key, item in value.items()
+            if item is not Undefined
         }
     return value
 
 
-__all__ = ["SchemaBase", "SchemaValidationError", "Undefined", "UndefinedType"]
+def normalize_mapping_value(
+    value: SchemaBase | dict[str, Any],
+    *,
+    key: str,
+    validate: bool = False,
+) -> dict[str, Any]:
+    """Convert a schema wrapper or mapping into a plain mapping."""
+    normalized = normalize_schema_value(value, validate=validate)
+    if not isinstance(normalized, dict):
+        raise TypeError(f"Unsupported nested {key!r} value: {type(value)!r}")
+    return normalized
+
+
+def merge_mapping_value(
+    current: Any,
+    key: str,
+    value: Any = Undefined,
+    /,
+    **kwargs: Any,
+) -> Any:
+    """Merge a nested schema object using builder-style semantics."""
+    if value is Undefined:
+        if current is Undefined or current is None:
+            return dict(kwargs)
+        if isinstance(current, SchemaBase | dict):
+            merged = normalize_mapping_value(current, key=key, validate=False)
+            merged.update(kwargs)
+            return merged
+        raise TypeError(f"Cannot merge {key!r} into non-mapping value.")
+
+    if value is None:
+        if kwargs:
+            raise TypeError(f"Cannot merge keyword properties into null {key!r}.")
+        return None
+
+    merged = normalize_mapping_value(value, key=key, validate=False)
+    if kwargs:
+        merged.update(kwargs)
+    return merged
+
+
+def _ref_name(schema: dict[str, Any]) -> str | None:
+    ref = schema.get("$ref")
+    if not isinstance(ref, str):
+        return None
+    return ref.split("/")[-1]
+
+
+def _resolve_schema_references(
+    schema: dict[str, Any],
+    rootschema: dict[str, Any],
+    *,
+    seen: frozenset[str] = frozenset(),
+) -> dict[str, Any]:
+    ref_name = _ref_name(schema)
+    if ref_name is not None:
+        definitions = rootschema.get("definitions", {})
+        if not isinstance(definitions, dict) or ref_name in seen:
+            return {}
+        target = definitions.get(ref_name)
+        if not isinstance(target, dict):
+            return {}
+        return _resolve_schema_references(
+            target,
+            rootschema,
+            seen=seen | {ref_name},
+        )
+
+    resolved = dict(schema)
+    properties: dict[str, Any] = {}
+    own_properties = schema.get("properties", {})
+    if isinstance(own_properties, dict):
+        properties.update(own_properties)
+    for key in ("anyOf", "oneOf", "allOf"):
+        variants = schema.get(key, [])
+        if not isinstance(variants, list):
+            continue
+        for variant in variants:
+            if not isinstance(variant, dict):
+                continue
+            variant_properties = _resolve_schema_references(
+                variant,
+                rootschema,
+                seen=seen,
+            ).get("properties", {})
+            if isinstance(variant_properties, dict):
+                properties.update(variant_properties)
+    if properties:
+        resolved["properties"] = properties
+    return resolved
+
+
+class _BoundPropertySetter:
+    """Bound Altair-style property setter for generated schema wrappers."""
+
+    def __init__(
+        self,
+        obj: SchemaBase,
+        prop: str,
+        schema: dict[str, Any],
+    ) -> None:
+        self._obj = obj
+        self._prop = prop
+        self.__doc__ = schema.get("description")
+
+    def __call__(self, *args: Any, **kwargs: Any) -> SchemaBase:
+        if len(args) > 1:
+            raise TypeError(
+                f"{type(self._obj).__name__}.{self._prop} accepts at most one positional value."
+            )
+        if args:
+            return self._obj._with_property(self._prop, args[0], **kwargs)
+        return self._obj._with_property(self._prop, Undefined, **kwargs)
+
+
+class _PropertySetter:
+    """Descriptor that exposes fluent property setters on schema wrappers."""
+
+    def __init__(self, prop: str, schema: dict[str, Any]) -> None:
+        self._prop = prop
+        self._schema = schema
+        self.__doc__ = schema.get("description")
+
+    def __get__(self, obj: SchemaBase | None, cls: type[SchemaBase]) -> Any:
+        if obj is None:
+            return self
+        return _BoundPropertySetter(obj, self._prop, self._schema)
+
+
+def with_property_setters(cls: type[SchemaBase]) -> type[SchemaBase]:
+    """Decorator to add Altair-style property setters to a schema class."""
+    schema = cls.resolve_references()
+    properties = schema.get("properties", {})
+    if not isinstance(properties, dict):
+        return cls
+    for prop, propschema in properties.items():
+        if (
+            not isinstance(prop, str)
+            or not prop.isidentifier()
+            or keyword.iskeyword(prop)
+            or not isinstance(propschema, dict)
+        ):
+            continue
+        setattr(cls, prop, _PropertySetter(prop, propschema))
+    return cls
+
+
+def _wrap_and_copy_doc(tp: Callable[..., Any], cb: Callable[..., Any]) -> None:
+    """Copy Altair-style wrapper metadata from ``tp`` onto ``cb``."""
+    cb.__wrapped__ = getattr(tp, "__init__", tp)  # type: ignore[attr-defined]
+
+    if doc_in := tp.__doc__:
+        line_1 = f"{cb.__doc__ or f'Refer to :class:`{tp.__name__}`'}\n"
+        cb.__doc__ = "".join((line_1, *doc_in.splitlines(keepends=True)[1:]))
+
+
+def use_signature(target: Callable[..., Any], /) -> Callable[[_F], _F]:
+    """Use the signature and doc of ``target`` for the decorated method."""
+
+    def decorator(func: _F) -> _F:
+        _wrap_and_copy_doc(target, func)
+        return func
+
+    return decorator
+
+
+__all__ = [
+    "merge_mapping_value",
+    "normalize_mapping_value",
+    "normalize_schema_value",
+    "SchemaBase",
+    "SchemaValidationError",
+    "Undefined",
+    "UndefinedType",
+    "use_signature",
+    "with_property_setters",
+]

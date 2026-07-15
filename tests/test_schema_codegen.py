@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import inspect
 import json
 from pathlib import Path
+
+import genome_spy as gs
+from genome_spy.schema.core import AxisConfig, RectProps
 
 from tools.generate_schema_wrapper import write_schema_package
 from tools.schemapi.codegen import SchemaWrapperGenerator
@@ -69,7 +73,9 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     assert "MARK_TYPES = ()" in module.source
     assert "from genome_spy.schema._typing import AlignDef_T" in module.source
     assert "from genome_spy.schema._kwds import AxisKwds" in module.source
+    assert "with_property_setters" in module.source
     assert "class MarkDef" in module.source
+    assert "@with_property_setters" in module.source
     assert "class=Undefined" not in module.source
     assert "type: str | UndefinedType = Undefined" in module.source
     assert "size: float | UndefinedType = Undefined" in module.source
@@ -95,6 +101,136 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     assert mixins_module.exports == ("MarkMethodMixin",)
     assert "class MarkMethodMixin" in mixins_module.source
     assert channels_module.exports == ()
+
+
+def test_generate_mark_mixins_module_emits_config_methods_when_schema_supports_them() -> (
+    None
+):
+    schema = {
+        "definitions": {
+            "AxisConfig": {
+                "type": "object",
+                "properties": {"title": {"type": "string"}},
+            },
+            "GenomeSpyConfig": {
+                "type": "object",
+                "properties": {"axis": {"$ref": "#/definitions/AxisConfig"}},
+            },
+            "MarkType": {"type": "string", "enum": ["rect"]},
+            "RectProps": {
+                "type": "object",
+                "properties": {"minWidth": {"type": "number"}},
+            },
+        }
+    }
+
+    mixins_module = SchemaWrapperGenerator(schema).generate_mark_mixins_module()
+
+    assert mixins_module.exports == ("ConfigMethodMixin", "MarkMethodMixin")
+    assert "class ConfigMethodMixin" in mixins_module.source
+    assert "def configure(" in mixins_module.source
+    assert "@use_signature(core.GenomeSpyConfig)" in mixins_module.source
+    assert "def configure_axis(" in mixins_module.source
+    assert "@use_signature(core.AxisConfig)" in mixins_module.source
+
+
+def test_generate_channels_module_emits_schema_driven_channel_setters() -> None:
+    schema = {
+        "definitions": {
+            "CompareParams": {
+                "type": "object",
+                "properties": {"field": {"type": "string"}},
+            },
+            "Encoding": {
+                "type": "object",
+                "properties": {
+                    "x": {
+                        "type": "object",
+                        "properties": {
+                            "sort": {"$ref": "#/definitions/CompareParams"},
+                            "title": {"type": ["string", "null"]},
+                        },
+                    }
+                },
+            },
+        }
+    }
+
+    channels_module = SchemaWrapperGenerator(schema).generate_channels_module()
+
+    assert channels_module.exports == ("X",)
+    assert "from genome_spy.schema.core import CompareParams" in channels_module.source
+    assert (
+        "from genome_spy.schema._kwds import CompareParamsKwds"
+        in channels_module.source
+    )
+    assert "def title(" in channels_module.source
+    assert "value: str | None" in channels_module.source
+    assert "return super().title(value)" in channels_module.source
+    assert "def sort(" in channels_module.source
+    assert "CompareParams | CompareParamsKwds | str | list[str] | None | object" in (
+        channels_module.source
+    )
+    assert "return super().sort(value, **kwargs)" in channels_module.source
+
+
+def test_generate_channels_module_discovers_nested_setters_from_schema() -> None:
+    schema = {
+        "definitions": {
+            "Axis": {
+                "type": "object",
+                "properties": {"title": {"type": "string"}},
+            },
+            "ExtraConfig": {
+                "type": "object",
+                "properties": {"padding": {"type": "number"}},
+            },
+            "ExprRef": {
+                "type": "object",
+                "properties": {"expr": {"type": "string"}},
+            },
+            "FieldName": {"type": "string"},
+            "Encoding": {
+                "type": "object",
+                "properties": {
+                    "x": {
+                        "type": "object",
+                        "properties": {
+                            "axis": {
+                                "anyOf": [
+                                    {"$ref": "#/definitions/Axis"},
+                                    {"type": "null"},
+                                ]
+                            },
+                            "extra": {
+                                "anyOf": [
+                                    {"$ref": "#/definitions/ExtraConfig"},
+                                    {"type": "null"},
+                                ]
+                            },
+                            "chrom": {"$ref": "#/definitions/FieldName"},
+                            "value": {
+                                "anyOf": [
+                                    {"$ref": "#/definitions/ExprRef"},
+                                    {"type": "number"},
+                                ]
+                            },
+                        },
+                    }
+                },
+            },
+        }
+    }
+
+    channels_module = SchemaWrapperGenerator(schema).generate_channels_module()
+
+    assert "def axis(" in channels_module.source
+    assert "def extra(" in channels_module.source
+    assert "value: ExtraConfig | dict[str, Any] | None | object = _MISSING" in (
+        channels_module.source
+    )
+    assert "def chrom(" not in channels_module.source
+    assert "def value(" not in channels_module.source
 
 
 def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
@@ -176,3 +312,49 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
         .startswith("export interface RootConfig")
     )
     assert (reference_dir / "VERSION").read_text(encoding="utf-8") == "9.8.7\n"
+
+
+def test_generated_mark_methods_expose_schema_backed_signatures() -> None:
+    rect_signature = inspect.signature(gs.Chart().mark_rect)
+    point_signature = inspect.signature(gs.Chart().mark_point)
+
+    assert "minWidth" in rect_signature.parameters
+    assert "tooltip" in rect_signature.parameters
+    assert "geometricZoomBound" in point_signature.parameters
+    assert "kwargs" not in rect_signature.parameters
+    assert gs.Chart.mark_rect.__wrapped__ is RectProps.__init__
+
+
+def test_generated_config_methods_expose_schema_backed_signatures() -> None:
+    configure_signature = inspect.signature(gs.Chart().configure)
+    axis_signature = inspect.signature(gs.Chart().configure_axis)
+
+    assert "axis" in configure_signature.parameters
+    assert "view" in configure_signature.parameters
+    assert "title" in axis_signature.parameters
+    assert "kwargs" not in axis_signature.parameters
+    assert gs.Chart.configure_axis.__wrapped__ is AxisConfig.__init__
+
+
+def test_generated_schema_classes_expose_altair_style_property_setters() -> None:
+    axis = gs.GenomeAxis().title("Position axis").grid(True)
+    scale = gs.Scale().zero(False).scheme(name="blues")
+
+    assert axis.to_dict(validate=False) == {
+        "title": "Position axis",
+        "grid": True,
+    }
+    assert scale.to_dict(validate=False) == {
+        "zero": False,
+        "scheme": {"name": "blues"},
+    }
+
+
+def test_generated_channel_title_methods_are_schema_backed() -> None:
+    assert "title" in gs.X.__dict__
+    assert "title" in gs.Color.__dict__
+
+    titled = gs.X("value:Q").title("Coverage")
+
+    assert isinstance(titled, gs.X)
+    assert titled.to_dict()["title"] == "Coverage"
