@@ -110,7 +110,6 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
     spec_token = core.build_token([example])
     spec_url = f"../_static/specs/{example.name}.json?v={spec_token}"
     download_url = f"../_static/specs/{example.name}.json"
-    tags = " ".join(f"`{t}`" for t in example.tags)
     # GenomeSpy's own docs use an inline custom element backed by shadow DOM
     # instead of an iframe. Follow that pattern here so the chart feels like a
     # native part of the page while still isolating embed styles from Sphinx.
@@ -167,13 +166,9 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         embed,
         "```",
         "",
-        "*Interactive: drag to pan, scroll or pinch to zoom.*",
-        "",
     ]
-    if tags:
-        parts += [f"**Tags:** {tags}", ""]
     parts += [
-        "## Source",
+        "## Code",
         "",
         "```python",
         example.source.rstrip(),

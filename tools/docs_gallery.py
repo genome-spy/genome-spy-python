@@ -115,7 +115,8 @@ def _docstring_parts(module: ModuleType, fallback: str) -> tuple[str, str]:
         return fallback, ""
     title, _, rest = doc.partition("\n")
     title = title.strip().rstrip(".") or fallback
-    return title, rest.strip()
+    summary = rest.strip().split("\n\n", 1)[0].strip()
+    return title, summary
 
 
 def collect_example(path: Path) -> Example:

@@ -3,10 +3,7 @@
 Per-individual ancestry proportions as a stacked bar plot. Each bar sums to one
 across the ancestral components, individuals are grouped by population, and thin
 white rules separate the groups. The stack positions are precomputed so the
-visualization is plain stacked ``rect`` marks with ``y``/``y2``.
-
-The data is synthetic (Dirichlet-sampled proportions); it illustrates the
-stacked-composition pattern rather than a specific study.
+visualization uses plain ``rect`` marks with ``y`` and ``y2``.
 """
 
 import numpy as np
@@ -63,9 +60,10 @@ separators = [PER_POP * i for i in range(1, len(POPULATIONS))]
 
 # --- Visualization -------------------------------------------------------------
 
-ancestry_colors = Scale(
-    domain=[f"K{i + 1}" for i in range(K)],
-    range=["#4e79a7", "#f28e2b", "#59a14f", "#e15759", "#b07aa1"],
+ancestry_colors = (
+    Scale()
+    .domain([f"K{i + 1}" for i in range(K)])
+    .range(["#4e79a7", "#f28e2b", "#59a14f", "#e15759", "#b07aa1"])
 )
 
 bars = (

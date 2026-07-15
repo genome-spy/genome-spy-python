@@ -1,13 +1,8 @@
 """QQ plot.
 
-Quantile-quantile plot of a HapMap association scan: observed −log10 p against
-the values expected under the null. Points hug the diagonal except for a tail of
-associated variants that lifts away from it. A dashed identity line marks the
-null expectation.
-
-Data: real HapMap coordinates and gene annotations with simulated association
-statistics, from the `manhattanly` R package via Plotly's Dash Bio datasets
-(MIT). See `docs/_static/data/README.md` for provenance.
+Observed and expected −log10 p-values on matched axes. A dashed identity line
+marks the null expectation, while departures in the upper tail reveal enriched
+signal.
 """
 
 import numpy as np
@@ -78,14 +73,14 @@ limit = float(max(data["expected"].max(), data["observed"].max())) * 1.02
 annotation_x = round(limit * 0.54, 2)
 delta_limit = float(max(abs(deviation["delta_mean"]).max(), 0.25)) * 1.1
 
-pattern_colors = Scale(
-    domain=["Null-like bulk", "Tail enrichment"],
-    range=["#7fbbdd", "#c53b2c"],
+pattern_colors = (
+    Scale().domain(["Null-like bulk", "Tail enrichment"]).range(["#7fbbdd", "#c53b2c"])
 )
 
-deviation_colors = Scale(
-    domain=["Observed > expected", "Observed < expected"],
-    range=["#c53b2c", "#7fbbdd"],
+deviation_colors = (
+    Scale()
+    .domain(["Observed > expected", "Observed < expected"])
+    .range(["#c53b2c", "#7fbbdd"])
 )
 
 # --- Visualization -------------------------------------------------------------

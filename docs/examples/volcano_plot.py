@@ -1,13 +1,8 @@
-"""Volcano plot (GWAS effect vs significance).
+"""Volcano plot.
 
-Effect size against −log10 p for a HapMap association scan. Variants are colored
-by whether they clear both an effect-size and a significance cutoff, and dashed
-rules mark those thresholds — the classic volcano used to spotlight candidate
-associations.
-
-Data: real HapMap coordinates and gene annotations with simulated association
-statistics, from the `manhattanly` R package via Plotly's Dash Bio datasets
-(MIT). See `docs/_static/data/README.md` for provenance.
+Effect size against −log10 p-value, with color highlighting points that clear
+both an effect-size and a significance cutoff. Dashed guide lines mark the
+thresholds.
 """
 
 import numpy as np

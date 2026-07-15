@@ -1,18 +1,8 @@
-"""Airway RNA-seq volcano plot.
+"""Volcano plot.
 
-A volcano view from the real Himes et al. airway RNA-seq dataset:
-dexamethasone-treated airway smooth muscle cells versus matched controls across
-four cell lines. The example uses pandas for wrangling, SciPy's paired t-test,
-and statsmodels' Benjamini-Hochberg correction to keep the analysis code short
-and library-backed. The plot itself uses raw p-values for visual emphasis while
-still computing adjusted p-values for reference; with only four matched pairs,
-an FDR-only coloring would collapse the example into nearly all grey points. It
-is still a compact visualization-oriented example, not a replacement for DESeq2
-or edgeR.
-
-Data: real bulk RNA-seq counts from the Bioconductor `airway` teaching dataset
-(GEO GSE52778), vendored as scaled counts plus sample metadata. See
-`docs/_static/data/README.md` for provenance.
+Log2 fold change against −log10 p-value, with color separating upregulated,
+downregulated, and background genes. Dashed guide lines mark the significance
+and fold-change cutoffs.
 """
 
 from __future__ import annotations
@@ -77,9 +67,10 @@ volcano_y_max = float(np.ceil(np.quantile(data["neglog10_pvalue"], 0.995) / 5) *
 volcano_y_domain = [0.0, volcano_y_max]
 data["neglog10_pvalue_plot"] = np.minimum(data["neglog10_pvalue"], volcano_y_max)
 
-direction_colors = Scale(
-    domain=["down in dex", "n.s.", "up in dex"],
-    range=["#3e8cb6", "#c9d1d9", "#c53b2c"],
+direction_colors = (
+    Scale()
+    .domain(["down in dex", "n.s.", "up in dex"])
+    .range(["#3e8cb6", "#c9d1d9", "#c53b2c"])
 )
 
 volcano_points = (

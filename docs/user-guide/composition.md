@@ -20,8 +20,16 @@ conflicting encoding-level channel config in the same resolution. Prefer
 setting resolution at one level. See `plans/architecture.md` for details.
 :::
 
-:::{admonition} Work in progress
-:class: note
-This guide page is a scaffold. Expand it with worked layer and concat
-examples pulled from `docs/examples/`.
-:::
+Layering is useful when multiple marks share the same coordinate system:
+
+```python
+import genome_spy as gs
+
+points = gs.Chart(data).mark_point().encode(x="x:Q", y="y:Q")
+labels = gs.Chart(data).mark_text(dy=-10).encode(x="x:Q", y="y:Q", text="label:N")
+
+chart = (points + labels).properties(width=360, height=220)
+```
+
+Concatenation is useful when you want stacked browser tracks or side-by-side
+views that keep their own marks and encodings but share some top-level config.

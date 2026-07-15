@@ -1,12 +1,7 @@
-"""Oncoplot (TCGA LAML).
+"""Oncoplot.
 
-A `maftools`-style oncoplot of recurrent TCGA acute myeloid leukaemia (LAML)
-alterations: stacked per-sample mutation burden bars on top, the top recurrently
-altered genes in the center, percentage labels beside each gene, and stacked
-per-gene sample counts on the right.
-
-Data: curated from `maftools` TCGA LAML example files. See
-`docs/_static/data/README.md` for provenance.
+A cohort-level alteration matrix with per-sample burden bars above, recurrently
+altered genes in the center, and per-gene summary bars at the side.
 """
 
 from __future__ import annotations
@@ -93,18 +88,21 @@ altered_samples = loaded["altered_samples"]
 percent_data = percent_data.copy()
 percent_data["x"] = 1
 
-class_colors = Scale(
-    domain=CLASS_ORDER,
-    range=[
-        "#d53e4f",
-        "#377eb8",
-        "#33a02c",
-        "#fff176",
-        "#6a3d9a",
-        "#ff1f1f",
-        "#ff9800",
-        "#111111",
-    ],
+class_colors = (
+    Scale()
+    .domain(CLASS_ORDER)
+    .range(
+        [
+            "#d53e4f",
+            "#377eb8",
+            "#33a02c",
+            "#fff176",
+            "#6a3d9a",
+            "#ff1f1f",
+            "#ff9800",
+            "#111111",
+        ]
+    )
 )
 
 matrix_width = 540
@@ -115,12 +113,13 @@ matrix_height = 352
 tmb_limit = int(sample_data["tmb_total"].max())
 count_limit = int(gene_data["altered_samples"].max())
 
-mutation_legend = Legend(
-    title="Mutation class",
-    orient="bottom",
-    direction="horizontal",
-    columns=4,
-    symbolSize=90,
+mutation_legend = (
+    Legend()
+    .title("Mutation class")
+    .orient("bottom")
+    .direction("horizontal")
+    .columns(4)
+    .symbolSize(90)
 )
 
 count_grid_data = gene_data[["gene"]].copy()

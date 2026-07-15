@@ -1,7 +1,7 @@
 """Indexed FASTA sequence track.
 
-A lazy indexed FASTA sequence track adapted from the GenomeSpy docs, showing
-base-level reference sequence over a small hg38 window.
+A base-resolution sequence view for a small genomic window. Each position is
+drawn as both a colored tile and a base label on the locus axis.
 """
 
 from __future__ import annotations
@@ -47,14 +47,14 @@ chart = (
             "docs, using a lazy indexed FASTA source."
         ),
         data=gs.lazy.indexed_fasta("https://data.genomespy.app/genomes/hg38/hg38.fa"),
-        scales={
-            "x": {
-                "domain": [
+        scales=gs.scales(
+            x=gs.Scale(
+                domain=[
                     {"chrom": "chr7", "pos": 20003500},
                     {"chrom": "chr7", "pos": 20003540},
                 ]
-            }
-        },
+            )
+        ),
     )
     .encode(
         x=gs.Locus("chrom", "pos"),

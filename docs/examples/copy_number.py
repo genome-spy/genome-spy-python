@@ -1,10 +1,8 @@
-"""Copy-number profile (real data).
+"""Copy-number profile.
 
-Allele-specific copy-number segments from ASCAT for a single tumour sample,
-loaded directly from GenomeSpy's hosted sample data — no local files, GenomeSpy
-fetches the TSV in the browser. Each segment spans its genomic interval, total
-copy number sets the height, and loss of heterozygosity (no minor allele) is
-highlighted. Pan and zoom to explore individual chromosomes.
+Allele-specific copy-number segments drawn across the genome on a locus axis.
+Segment height shows total copy number, while color highlights loss of
+heterozygosity.
 """
 
 import genome_spy as gs
@@ -23,16 +21,17 @@ SEGMENTS = {
     "format": {"type": "tsv"},
 }
 
-axis = GenomeAxis(
-    title="Genomic position",
-    chromGrid=True,
-    chromGridOpacity=0.12,
-    chromGridFillEven="#f4f6fb",
-    chromGridFillOdd="#ffffff",
-    chromLabels=True,
-    chromLabelFontSize=11,
-    chromTicks=True,
-    grid=False,
+axis = (
+    GenomeAxis()
+    .title("Genomic position")
+    .chromGrid(True)
+    .chromGridOpacity(0.12)
+    .chromGridFillEven("#f4f6fb")
+    .chromGridFillOdd("#ffffff")
+    .chromLabels(True)
+    .chromLabelFontSize(11)
+    .chromTicks(True)
+    .grid(False)
 )
 
 diploid_baseline = (
@@ -47,16 +46,16 @@ segments = (
     .transform_formula(expr="datum.nMinor == 0 ? 'LOH' : 'retained'", as_="zygosity")
     .mark_rect()
     .encode(
-        x=gs.Locus("chr", "startpos", scale={"assembly": "hg38"}, axis=axis),
+        x=gs.Locus("chr", "startpos").scale(assembly="hg38").axis(axis),
         x2=gs.Locus("chr", "endpos"),
         y=gs.Y("totalCN:Q").scale(reverse=False, zero=True).title("Total copy number"),
         color=gs.Color("zygosity:N")
-        .scale(Scale(domain=["retained", "LOH"], range=["#5b8fd6", "#c53b2c"]))
+        .scale(Scale().domain(["retained", "LOH"]).range(["#5b8fd6", "#c53b2c"]))
         .legend(title="Heterozygosity"),
     )
 )
 
 chart = (diploid_baseline + segments).properties(
     title="Allele-specific copy number (ASCAT, sample S96)",
-    description="Real tumour copy-number segments streamed from GenomeSpy's hosted sample data.",
+    description="A whole-genome copy-number profile with total copy number and LOH status.",
 )

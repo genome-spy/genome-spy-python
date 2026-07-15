@@ -1,7 +1,7 @@
 """BigBed cCRE track.
 
-A lazy BigBed annotation track adapted from the GenomeSpy docs, showing ENCODE
-candidate cis-regulatory elements over an hg38 locus.
+A regulatory-annotation track built from BigBed intervals. Candidate elements
+are drawn as locus spans and colored by their annotation class.
 """
 
 from __future__ import annotations
@@ -37,17 +37,17 @@ chart = (
         assembly="hg38",
         title="BigBed cCRE track",
         description=(
-            "An ENCODE candidate cis-regulatory element track adapted from the "
-            "GenomeSpy docs."
+            "A regulatory annotation track showing candidate cis-regulatory "
+            "elements over a focused locus."
         ),
-        view={"stroke": "lightgray"},
-        scales={
-            "x": {
-                "domain": [
+        scales=gs.scales(
+            x=gs.Scale(
+                domain=[
                     {"chrom": "chr7", "pos": 66600000},
                     {"chrom": "chr7", "pos": 66800000},
                 ]
-            }
-        },
+            )
+        ),
     )
+    .configure_view(stroke="lightgray")
 )

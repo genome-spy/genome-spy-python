@@ -1,10 +1,8 @@
 """Genome tracks with gene annotations.
 
-A real browser-style locus view on hg38: GC content from GenomeSpy's BigWig
-documentation example stacked above the scored RefSeq gene-annotation track
-used in the GenomeSpy docs. The lower track keeps the canonical exon packing,
-label scoring, and strand arrows so the annotations stay readable as the view
-zooms.
+A browser-style locus view with a quantitative signal track stacked above a
+gene-annotation track. The lower panel combines transcript bodies, exons,
+labels, and strand cues so the annotations stay readable while zooming.
 """
 
 from __future__ import annotations
@@ -41,8 +39,8 @@ gc_track = (
         name="gc-content",
         title=gs.title("GC content", orient="left"),
         height=96,
-        view={"stroke": "lightgray"},
     )
+    .configure_view(stroke="lightgray")
 )
 
 # The lower track mirrors GenomeSpy's scored RefSeq gene view: exon blocks,
@@ -172,7 +170,7 @@ refseq_track = (
         expr="datum._start + datum.length / 2",
         as_="_centroid",
     )
-    .transform_collect(sort={"field": ["_start"]})
+    .transform_collect(sort=gs.compare(["_start"]))
     .transform_pileup(
         start="_start",
         end="_end",
@@ -190,11 +188,10 @@ chart = (
         assembly="hg38",
         title="GC content with RefSeq gene annotations",
         description=(
-            "A real hg38 browser view combining GenomeSpy's lazy BigWig GC-content "
-            "track with the scored RefSeq gene-annotation track used in the "
-            "GenomeSpy documentation."
+            "A genome browser view combining a GC-content signal track with "
+            "stacked RefSeq gene annotations."
         ),
-        scales={"x": {"domain": DOMAIN}},
+        scales=gs.scales(x=gs.Scale(domain=DOMAIN)),
     )
     .resolve_scale(y="independent")
     .resolve_axis(y="independent")

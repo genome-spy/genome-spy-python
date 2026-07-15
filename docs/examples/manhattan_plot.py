@@ -1,13 +1,8 @@
-"""Manhattan plot (HapMap GWAS).
+"""Manhattan plot.
 
-A genome-wide association scan of HapMap SNPs. Variants sit on a locus-aware
-chromosome axis, alternating chromosome colors separate the blocks, dashed rules
-mark the genome-wide and suggestive significance thresholds, and the strongest
-hits are outlined. Pan and zoom to inspect individual peaks.
-
-Data: real HapMap coordinates and gene annotations with simulated association
-statistics, from the `manhattanly` R package via Plotly's Dash Bio datasets
-(MIT). See `docs/_static/data/README.md` for provenance.
+Genome-wide association hits on a locus-aware chromosome axis. Alternating
+chromosome colors separate the blocks, dashed rules mark significance
+thresholds, and the strongest peaks are outlined for emphasis.
 """
 
 import numpy as np
@@ -49,27 +44,28 @@ Y_DOMAIN = [0.0, float(np.ceil(data["neglog"].max()))]
 
 # --- Visualization -------------------------------------------------------------
 
-chrom_colors = Scale(range=["#5b8fd6", "#8f98a3"])
+chrom_colors = Scale().range(["#5b8fd6", "#8f98a3"])
 
-axis = GenomeAxis(
-    title="Genomic position",
-    chromGrid=True,
-    chromGridOpacity=0.14,
-    chromGridFillEven="#f4f6fb",
-    chromGridFillOdd="#ffffff",
-    chromLabels=True,
-    chromLabelFontSize=11,
-    chromTicks=True,
-    chromTickSize=10,
-    labelFontSize=10,
-    grid=False,
+axis = (
+    GenomeAxis()
+    .title("Genomic position")
+    .chromGrid(True)
+    .chromGridOpacity(0.14)
+    .chromGridFillEven("#f4f6fb")
+    .chromGridFillOdd("#ffffff")
+    .chromLabels(True)
+    .chromLabelFontSize(11)
+    .chromTicks(True)
+    .chromTickSize(10)
+    .labelFontSize(10)
+    .grid(False)
 )
 
 points = (
     gs.Chart(data)
     .mark_point(size=20, filled=True, opacity=0.82)
     .encode(
-        x=gs.Locus("chrom", "BP", scale={"assembly": "hg38"}, axis=axis),
+        x=gs.Locus("chrom", "BP").scale(assembly="hg38").axis(axis),
         y=gs.Y("neglog:Q").scale(reverse=False, domain=Y_DOMAIN).title("−log10 p"),
         color=gs.Color("chrom_group:N")
         .scale(chrom_colors)
@@ -97,7 +93,7 @@ highlight_points = (
     gs.Chart(top_hits)
     .mark_point(size=48, filled=True, stroke="black", strokeWidth=0.5)
     .encode(
-        x=gs.Locus("chrom", "BP", scale={"assembly": "hg38"}),
+        x=gs.Locus("chrom", "BP").scale(assembly="hg38"),
         y=gs.Y("neglog:Q").scale(reverse=False, domain=Y_DOMAIN).title("−log10 p"),
         color=gs.Color("chrom_group:N").scale(chrom_colors).legend(None),
     )

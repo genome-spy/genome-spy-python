@@ -1,14 +1,8 @@
-"""Lollipop plot (DNMT3A hotspot in TCGA LAML).
+"""Lollipop plot.
 
-A `maftools`-style lollipop plot of DNMT3A amino-acid changes across the TCGA
-LAML cohort. Mutation counts are aggregated per amino-acid position, coloured by
-the dominant mutation class at each site, and drawn above a simplified DNMT3A
-domain map. The R882 hotspot is labeled explicitly, mirroring the canonical
-`lollipopPlot(..., gene = "DNMT3A", showMutationRate = TRUE, labelPos = 882)`
-example.
-
-Data: curated from `maftools` TCGA LAML example files. See
-`docs/_static/data/README.md` for provenance.
+Mutation counts aggregated by amino-acid position and drawn above a protein
+domain map. Color encodes the dominant mutation class at each site, making
+hotspots easy to spot.
 """
 
 from __future__ import annotations
@@ -34,9 +28,8 @@ CLASS_ORDER = [
     "Splice_Site",
 ]
 
-CLASS_COLORS = Scale(
-    domain=CLASS_ORDER,
-    range=["#5f9ed1", "#e15759", "#66b55f", "#f28e2b"],
+CLASS_COLORS = (
+    Scale().domain(CLASS_ORDER).range(["#5f9ed1", "#e15759", "#66b55f", "#f28e2b"])
 )
 
 
@@ -70,12 +63,13 @@ max_count = int(features["count"].max())
 x_domain = [0, protein_length]
 y_domain = [-6.2, max_count + 4]
 
-mutation_legend = Legend(
-    title="Mutation class",
-    orient="bottom",
-    direction="horizontal",
-    columns=2,
-    symbolSize=72,
+mutation_legend = (
+    Legend()
+    .title("Mutation class")
+    .orient("bottom")
+    .direction("horizontal")
+    .columns(2)
+    .symbolSize(72)
 )
 
 # --- Visualization -------------------------------------------------------------

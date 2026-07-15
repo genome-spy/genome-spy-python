@@ -1,10 +1,7 @@
-"""Allele-specific signal (real data).
+"""Allele-specific signal.
 
-Raw ASCAT logR and B-allele frequency for tumour sample S96 across the whole
-genome, streamed directly from GenomeSpy's hosted data. logR tracks total
-coverage change while BAF reveals allelic imbalance; together they are the raw
-signal behind the copy-number segments. Around 10,000 SNPs render smoothly —
-pan and zoom into any locus.
+Stacked whole-genome tracks for logR and B-allele frequency. Together they show
+coverage change and allelic imbalance across the same locus-aware axis.
 """
 
 import pandas as pd
@@ -25,21 +22,19 @@ RAW = {
     "format": {"type": "tsv"},
 }
 
-axis = GenomeAxis(
-    title="Genomic position",
-    chromGrid=True,
-    chromGridOpacity=0.12,
-    chromGridFillEven="#f4f6fb",
-    chromGridFillOdd="#ffffff",
-    chromLabels=True,
-    chromTicks=True,
-    grid=False,
+axis = (
+    GenomeAxis()
+    .title("Genomic position")
+    .chromGrid(True)
+    .chromGridOpacity(0.12)
+    .chromGridFillEven("#f4f6fb")
+    .chromGridFillOdd("#ffffff")
+    .chromLabels(True)
+    .chromTicks(True)
+    .grid(False)
 )
 
-signal_colors = Scale(
-    domain=["logR", "B-allele freq."],
-    range=["#3e8cb6", "#2c6e6a"],
-)
+signal_colors = Scale().domain(["logR", "B-allele freq."]).range(["#3e8cb6", "#2c6e6a"])
 
 legend_data = pd.DataFrame(
     {"signal": ["logR", "B-allele freq."], "x": [0, 1], "y": [0, 0]}
@@ -72,7 +67,7 @@ log_r = (
     .transform_formula(expr="'logR'", as_="signal")
     .mark_point(size=8, filled=True, opacity=0.35)
     .encode(
-        x=gs.Locus("chr", "pos", scale={"assembly": "hg38"}),
+        x=gs.Locus("chr", "pos").scale(assembly="hg38"),
         y=gs.Y("logR:Q").scale(reverse=False, domain=[-1.5, 1.5]).title("logR"),
         color=gs.Color("signal:N").scale(signal_colors).legend(None),
     )
@@ -83,7 +78,7 @@ baf = (
     .transform_formula(expr="'B-allele freq.'", as_="signal")
     .mark_point(size=8, filled=True, opacity=0.35)
     .encode(
-        x=gs.Locus("chr", "pos", scale={"assembly": "hg38"}, axis=axis),
+        x=gs.Locus("chr", "pos").scale(assembly="hg38").axis(axis),
         y=gs.Y("baf:Q").scale(reverse=False, domain=[0, 1]).title("B-allele freq."),
         color=gs.Color("signal:N").scale(signal_colors).legend(None),
     )
@@ -94,6 +89,6 @@ chart = (
     .resolve_scale(x="independent")
     .properties(
         title="Allele-specific raw signal (ASCAT, sample S96)",
-        description="Real genome-wide logR and BAF streamed from GenomeSpy's hosted sample data.",
+        description="Stacked whole-genome logR and B-allele-frequency tracks on a shared locus axis.",
     )
 )

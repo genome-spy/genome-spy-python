@@ -1,8 +1,8 @@
 """Chromosome ideogram.
 
-An hg38 cytoband ideogram adapted from the GenomeSpy docs. Cytobands are drawn
-as colored intervals across the whole genome, with band labels and dashed
-chromosome separators for navigation.
+A whole-genome cytoband ideogram with band labels and chromosome separators.
+Intervals are colored by stain to show familiar light, dark, centromeric, and
+other structural band types.
 """
 
 from __future__ import annotations
@@ -93,11 +93,9 @@ chart = (
         name="ideogram-track",
         title=gs.title("Chromosome Ideogram", style="track-title"),
         description=(
-            "An ideogram track showing hg38 cytobands across the human genome, "
-            "adapted from the GenomeSpy docs."
+            "A whole-genome ideogram showing hg38 cytobands and chromosome boundaries."
         ),
         height=24,
-        view={"stroke": "black"},
         data=gs.Data(
             url="https://data.genomespy.app/genomes/hg38/cytoBand.txt.gz",
             format=gs.data_format(
@@ -105,11 +103,12 @@ chart = (
                 columns=["chrom", "chromStart", "chromEnd", "name", "gieStain"],
             ),
         ),
-        resolve={"scale": {"color": "independent"}},
     )
     .encode(
         x=gs.Locus("chrom", "chromStart"),
         x2=gs.Locus("chrom", "chromEnd"),
     )
     .transform_filter("!test(/_/, datum.chrom)")
+    .resolve_scale(color="independent")
+    .configure_view(stroke="black")
 )

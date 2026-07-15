@@ -1,8 +1,8 @@
 """Sashimi plot.
 
-A sashimi-style splice junction view adapted from the GenomeSpy docs. Coverage
-comes from a lazy BigWig track, while splice-junction arcs and read-count labels
-come from a BED file over the same locus.
+A splice-junction view with coverage in the background and arc links connecting
+junction endpoints. Labels on the arcs show junction support while the signal
+track keeps local expression context visible.
 """
 
 from __future__ import annotations
@@ -105,26 +105,30 @@ splice_junctions = (
 )
 
 # Overlay the coverage signal with splice-junction arcs on the same locus window.
-chart = gs.layer(coverage, splice_junctions).properties(
-    assembly="hg38",
-    title="Sashimi plot",
-    description=(
-        "A sashimi-style splice junction view adapted from the GenomeSpy "
-        "docs, using lazy BigWig coverage and splice-junction arcs."
-    ),
-    params=[
-        gs.param(
-            "minUniquelyMappedReads",
-            value=1,
-            bind={
-                "input": "range",
-                "min": 0,
-                "max": 200,
-                "step": 1,
-                "name": "Min uniquely mapped reads",
-            },
-        )
-    ],
-    resolve={"scale": {"y": "independent"}, "axis": {"y": "independent"}},
-    scales={"x": {"domain": DOMAIN}},
+chart = (
+    gs.layer(coverage, splice_junctions)
+    .properties(
+        assembly="hg38",
+        title="Sashimi plot",
+        description=(
+            "A sashimi-style splice junction view adapted from the GenomeSpy "
+            "docs, using lazy BigWig coverage and splice-junction arcs."
+        ),
+        params=[
+            gs.param(
+                "minUniquelyMappedReads",
+                value=1,
+                bind={
+                    "input": "range",
+                    "min": 0,
+                    "max": 200,
+                    "step": 1,
+                    "name": "Min uniquely mapped reads",
+                },
+            )
+        ],
+        scales=gs.scales(x=gs.Scale(domain=DOMAIN)),
+    )
+    .resolve_scale(y="independent")
+    .resolve_axis(y="independent")
 )

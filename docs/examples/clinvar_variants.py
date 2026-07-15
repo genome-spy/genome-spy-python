@@ -1,8 +1,7 @@
 """ClinVar variants track.
 
-A ClinVar small-variant classification view adapted from the GenomeSpy docs,
-using a lazy VCF source and categorical germline classifications over a focused
-hg38 locus.
+A categorical variant track with stems and points for germline classification.
+Colors encode pathogenicity classes across a focused genomic locus.
 """
 
 from __future__ import annotations
@@ -55,14 +54,14 @@ variants = (
             addChrPrefix=True,
             windowSize=1_000_000,
         ),
-        scales={
-            "x": {
-                "domain": [
+        scales=gs.scales(
+            x=gs.Scale(
+                domain=[
                     {"chrom": "chr18", "pos": 31524101},
                     {"chrom": "chr18", "pos": 31525003},
                 ]
-            }
-        },
+            )
+        ),
     )
     .encode(
         x=gs.Locus("CHROM", "POS", offset=1).axis(title="Genomic position", grid=False),
@@ -104,13 +103,14 @@ variants = (
     )
 )
 
-chart = gs.layer(baseline, variants).properties(
-    assembly="hg38",
-    name="clinvar",
-    title=gs.title("ClinVar Variants", style="overlay"),
-    description=(
-        "A ClinVar germline classification track adapted from the GenomeSpy docs."
-    ),
-    height=gs.step(13),
-    view={"fill": "#f8f8f8"},
+chart = (
+    gs.layer(baseline, variants)
+    .properties(
+        assembly="hg38",
+        name="clinvar",
+        title=gs.title("ClinVar Variants", style="overlay"),
+        description="A lollipop-style ClinVar track colored by germline classification.",
+        height=gs.step(13),
+    )
+    .configure_view(fill="#f8f8f8")
 )

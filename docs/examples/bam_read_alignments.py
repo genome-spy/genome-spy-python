@@ -1,7 +1,8 @@
 """BAM read alignments.
 
-A lazy BAM alignment example adapted from the GenomeSpy docs, combining a
-coverage track with piled-up read rectangles over a small hg18 locus.
+A coverage summary stacked above piled-up read rectangles from a BAM source.
+This is the core browser pattern for moving from a signal overview to
+read-level alignments in the same locus.
 """
 
 from __future__ import annotations
@@ -48,7 +49,7 @@ alignments = (
     .mark_rect()
     .transform_pileup(start="start", end="end", as_="_lane")
     .encode(
-        x=gs.Locus("chrom", "start", axis={}),
+        x=gs.Locus("chrom", "start").axis(),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("_lane", type="index").scale(
             domain=[0, 60], padding=0.3, reverse=True, zoom=False
@@ -61,18 +62,17 @@ alignments = (
 
 # A shared lazy BAM source drives both panels, giving the example the familiar
 # browser pattern of coverage above per-read alignments.
-chart = gs.vconcat(coverage, alignments, spacing=5).properties(
-    assembly="hg18",
-    title="BAM read alignments",
-    description=(
-        "A lazy BAM alignment example adapted from the GenomeSpy docs, with "
-        "coverage above piled-up reads."
-    ),
-    data=gs.lazy.bam(
-        "https://data.genomespy.app/sample-data/bamExample.bam",
-        windowSize=30000,
-    ),
-    scales={"x": {"domain": domain}},
-    resolve={"scale": {"x": "shared"}},
-    config={"view": {"stroke": "lightgray"}},
+chart = (
+    gs.vconcat(coverage, alignments, spacing=5)
+    .properties(
+        assembly="hg18",
+        title="BAM read alignments",
+        description="A BAM browser view with coverage above piled-up read alignments.",
+        data=gs.lazy.bam(
+            "https://data.genomespy.app/sample-data/bamExample.bam",
+            windowSize=30000,
+        ),
+        scales=gs.scales(x=gs.Scale(domain=domain)),
+    )
+    .configure_view(stroke="lightgray")
 )

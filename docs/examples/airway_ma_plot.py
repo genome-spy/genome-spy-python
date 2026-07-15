@@ -1,17 +1,8 @@
-"""Airway RNA-seq MA plot.
+"""MA plot.
 
-An MA view from the real Himes et al. airway RNA-seq dataset:
-dexamethasone-treated airway smooth muscle cells versus matched controls across
-four cell lines. The example uses pandas for wrangling, SciPy's paired t-test,
-and statsmodels' Benjamini-Hochberg correction to keep the analysis code short
-and library-backed. The plot colors points by raw p-value significance while
-still computing adjusted p-values for reference; with only four matched pairs,
-FDR-only coloring would make the MA plot visually flat. It is still a compact
-visualization-oriented example, not a replacement for DESeq2 or edgeR.
-
-Data: real bulk RNA-seq counts from the Bioconductor `airway` teaching dataset
-(GEO GSE52778), vendored as scaled counts plus sample metadata. See
-`docs/_static/data/README.md` for provenance.
+Mean expression against log2 fold change, with color highlighting genes that
+pass a simple significance cutoff. This is the classic expression-change view
+for spotting strong shifts across the dynamic range.
 """
 
 from __future__ import annotations
@@ -76,9 +67,10 @@ ma_x_domain = [
 ]
 ma_y_domain = [-log2fc_extent, log2fc_extent]
 
-direction_colors = Scale(
-    domain=["down in dex", "n.s.", "up in dex"],
-    range=["#3e8cb6", "#c9d1d9", "#c53b2c"],
+direction_colors = (
+    Scale()
+    .domain(["down in dex", "n.s.", "up in dex"])
+    .range(["#3e8cb6", "#c9d1d9", "#c53b2c"])
 )
 
 ma_points = (

@@ -64,6 +64,10 @@ chart
 
 GenomeSpy-specific genomic helpers such as
 `gs.Locus("chrom", "start")` remain available for locus-scaled genomic axes.
+For top-level chart config, prefer the generated fluent methods such as
+`chart.configure_view(...)` and `chart.configure_axis(...)`; helper constructors
+like `gs.config(...)` and `gs.view_config(...)` remain available when you want
+to build schema objects directly.
 
 Additional runnable notebooks live under `notebooks/`.
 

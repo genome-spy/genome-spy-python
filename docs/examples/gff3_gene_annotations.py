@@ -1,9 +1,8 @@
 """GFF3 gene annotations.
 
-A lazy GENCODE gene-annotation track on hg38, adapted from the GenomeSpy docs.
-The view loads a bgzip-compressed GFF3 source, projects transcript and exon
-features into a browser-style locus track, and uses layered marks for
-transcript bodies, exon structure, UTR labels, and transcript labels.
+A browser-style gene-annotation track built from a GFF3 source. Layered marks
+separate transcript bodies, exon structure, UTRs, and transcript labels within
+one shared locus view.
 """
 
 from __future__ import annotations
@@ -24,13 +23,17 @@ DOMAIN = [
 ]
 
 # A transparent but wide rule layer makes transcript tooltips easier to hit.
-transcript_tooltip_trap = gs.Chart(
-    mark={"type": "rule", "color": "#b0b0b0", "opacity": 0, "size": 7}
-).properties(name="gencode-tooltip-trap", title="GENCODE transcript")
+transcript_tooltip_trap = (
+    gs.Chart()
+    .mark_rule(color="#b0b0b0", opacity=0, size=7)
+    .properties(name="gencode-tooltip-trap", title="GENCODE transcript")
+)
 
-transcript_body = gs.Chart(
-    mark={"type": "rule", "color": "#b0b0b0", "tooltip": None}
-).properties(name="gencode-transcript-body")
+transcript_body = (
+    gs.Chart()
+    .mark_rule(color="#b0b0b0", tooltip=None)
+    .properties(name="gencode-transcript-body")
+)
 
 transcript_layer = gs.layer(transcript_tooltip_trap, transcript_body).properties(
     name="gencode-transcript"
@@ -140,22 +143,18 @@ chart = (
     .properties(
         title="GENCODE GFF3 gene annotations",
         description=(
-            "A lazy GFF3 gene-annotation track adapted from the GenomeSpy docs, "
-            "using GENCODE release 43 data on hg38."
+            "A packed gene-annotation track showing transcript bodies, exons, "
+            "UTRs, and labels within one locus view."
         ),
         assembly="hg38",
-        height={"step": 28},
+        height=gs.step(28),
         viewportHeight="container",
-        view={"stroke": "lightgray"},
         data=gs.lazy.gff3(
             "https://data.genomespy.app/sample-data/gencode.v43.annotation.sorted.gff3.gz",
             windowSize=2_000_000,
             debounceDomainChange=300,
         ),
-        transform=[
-            {"type": "flatten"},
-        ],
-        scales={"x": {"domain": DOMAIN}},
+        scales=gs.scales(x=gs.Scale(domain=DOMAIN)),
     )
     .encode(
         x=gs.Locus("seq_id", "start", offset=1),
@@ -164,6 +163,7 @@ chart = (
         .scale(zoom=False, reverse=True, domain=[0, 40], padding=0.5)
         .axis(None),
     )
+    .transform({"type": "flatten"})
     .transform_formula(expr="datum.attributes.gene_name", as_="gene_name")
     .transform_flatten(fields=["child_features"])
     .transform_flatten(fields=["child_features"], as_=["child_feature"])
@@ -201,6 +201,7 @@ chart = (
             "_child_features",
         ],
     )
-    .transform_collect(sort={"field": ["seq_id", "start", "transcript_id"]})
+    .transform_collect(sort=gs.compare(["seq_id", "start", "transcript_id"]))
     .transform_pileup(start="start", end="end", as_="_lane")
+    .configure_view(stroke="lightgray")
 )

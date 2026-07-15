@@ -7,6 +7,11 @@ html_theme.sidebar_secondary.remove: false
 The public API is intentionally small: chart construction, encoding channels,
 composition, and notebook rendering.
 
+Generated `configure(...)` and `configure_* (...)` methods on `Chart` and
+composition specs are the preferred way to author top-level config. Helper
+constructors such as `gs.config(...)` and `gs.view_config(...)` remain
+available as lightweight schema wrappers.
+
 ## Chart
 
 ```{eval-rst}
