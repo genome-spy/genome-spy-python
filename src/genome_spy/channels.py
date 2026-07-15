@@ -6,9 +6,17 @@ from dataclasses import dataclass, field
 from typing import Any, Self, cast
 
 from genome_spy._utils import is_mapping, parse_shorthand
-from genome_spy.schemapi import SchemaBase
+from genome_spy.schema._kwds import CompareParamsKwds
+from genome_spy.schema._typing import SortOrder_T
+from genome_spy.schema.core import CompareParams
+from genome_spy.schemapi import (
+    SchemaBase,
+    Undefined,
+    merge_mapping_value,
+    normalize_schema_value,
+)
 
-_MISSING = object()
+_MISSING = Undefined
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,6 +34,26 @@ class Channel:
         """Return a channel with a title."""
         definition = self.to_dict()
         definition["title"] = value
+        return self._replace_definition(definition)
+
+    def sort(
+        self,
+        value: CompareParams
+        | CompareParamsKwds
+        | str
+        | list[str]
+        | None
+        | object = _MISSING,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a channel with a ``sort`` configuration."""
+        definition = self.to_dict()
+        definition["sort"] = _merge_sort_value(
+            definition.get("sort", Undefined),
+            value,
+            **kwargs,
+        )
         return self._replace_definition(definition)
 
     def axis(
@@ -63,32 +91,12 @@ class Channel:
         **kwargs: Any,
     ) -> Self:
         definition = self.to_dict()
-        if value is _MISSING:
-            previous = definition.get(key)
-            if previous is None:
-                definition[key] = dict(kwargs)
-            elif is_mapping(previous):
-                definition[key] = {**previous, **kwargs}
-            else:
-                raise TypeError(f"Cannot merge {key!r} into non-mapping value.")
-            return self._replace_definition(definition)
-
-        if value is None:
-            if kwargs:
-                raise TypeError(f"Cannot merge keyword properties into null {key!r}.")
-            definition[key] = None
-            return self._replace_definition(definition)
-
-        if isinstance(value, SchemaBase):
-            nested = value.to_dict()
-        elif is_mapping(value):
-            nested = dict(cast(dict[str, Any], value))
-        else:
-            raise TypeError(f"Unsupported nested {key!r} value: {type(value)!r}")
-
-        if kwargs:
-            nested.update(kwargs)
-        definition[key] = nested
+        definition[key] = merge_mapping_value(
+            definition.get(key, Undefined),
+            key,
+            value,
+            **kwargs,
+        )
         return self._replace_definition(definition)
 
     def _replace_definition(self, definition: dict[str, Any]) -> Self:
@@ -109,11 +117,11 @@ def channel(
         definition = value.to_dict()
         encoding_name = encoding_name or value.encoding_name
     elif isinstance(value, SchemaBase):
-        definition = value.to_dict(validate=False)
+        definition = cast(dict[str, Any], normalize_schema_value(value, validate=False))
     elif isinstance(value, str):
         definition = parse_shorthand(value)
     elif is_mapping(value):
-        definition = dict(value)
+        definition = cast(dict[str, Any], normalize_schema_value(value, validate=False))
     else:
         raise TypeError(f"Unsupported channel value: {type(value)!r}")
 
@@ -132,6 +140,54 @@ def locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> Channel:
 def value(value: Any, /, **kwargs: Any) -> Channel:
     """Create a constant-value encoding channel."""
     return Channel({"value": value, **kwargs})
+
+
+def compare(
+    field: str | list[str] | None = None,
+    /,
+    *,
+    order: SortOrder_T | list[SortOrder_T] | None = None,
+    **kwargs: Any,
+) -> CompareParams:
+    """Create a sort/compare definition."""
+    payload = dict(kwargs)
+    if field is not None:
+        payload["field"] = field
+    if order is not None:
+        payload["order"] = order
+    return CompareParams(**payload)
+
+
+def _merge_sort_value(
+    current: Any,
+    value: CompareParams
+    | CompareParamsKwds
+    | str
+    | list[str]
+    | None
+    | object = _MISSING,
+    /,
+    **kwargs: Any,
+) -> Any:
+    if value is _MISSING or value is None or isinstance(value, CompareParams | dict):
+        try:
+            return merge_mapping_value(current, "sort", value, **kwargs)
+        except TypeError as error:
+            message = str(error)
+            if "null 'sort'" in message or "non-mapping value" in message:
+                raise
+            raise TypeError(
+                f"Unsupported nested 'sort' value: {type(value)!r}"
+            ) from error
+
+    if isinstance(value, str | list):
+        if kwargs:
+            raise TypeError(
+                "Cannot merge keyword properties into simple 'sort' values."
+            )
+        return normalize_schema_value(value, validate=False)
+
+    raise TypeError(f"Unsupported nested 'sort' value: {type(value)!r}")
 
 
 def Locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> Channel:

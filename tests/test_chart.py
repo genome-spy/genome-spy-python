@@ -8,10 +8,13 @@ import genome_spy as gs
 import pytest
 
 from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
+from genome_spy import api as public_api
 from genome_spy.schema import (
+    CompareParams,
     ConcatSpec,
     DynamicOpacity,
     ExprRef,
+    GenomeSpyConfig,
     GenomeAxis,
     HConcatSpec,
     LayerSpec,
@@ -22,6 +25,8 @@ from genome_spy.schema import (
     Scale,
     UnitSpec,
     VConcatSpec,
+    ViewBackground,
+    ViewConfig,
 )
 from genome_spy.schema.channels import X as GeneratedX
 from genome_spy.schemapi import SchemaValidationError
@@ -29,6 +34,11 @@ from genome_spy.schemapi import SchemaValidationError
 
 def test_package_exposes_version() -> None:
     assert gs.__version__ == "0.1.0"
+
+
+def test_public_api_exports_are_unique() -> None:
+    assert len(public_api.__all__) == len(set(public_api.__all__))
+    assert len(gs.__all__) == len(set(gs.__all__))
 
 
 def test_chart_directly_inherits_generated_unit_spec() -> None:
@@ -76,6 +86,24 @@ def test_generated_channel_nested_setters_accept_schema_wrappers() -> None:
     }
 
 
+def test_channel_sort_supports_fluent_compare_configuration() -> None:
+    channel = gs.Y("gene:N").sort(field="score", order="descending")
+
+    assert channel.to_dict() == {
+        "field": "gene",
+        "type": "nominal",
+        "sort": {"field": "score", "order": "descending"},
+    }
+
+
+def test_channel_sort_accepts_schema_wrapper_and_simple_values() -> None:
+    wrapped = gs.Y("gene:N").sort(CompareParams(field="score", order="ascending"))
+    simple = gs.Y("gene:N").sort(["TP53", "NPM1"])
+
+    assert wrapped.to_dict()["sort"] == {"field": "score", "order": "ascending"}
+    assert simple.to_dict()["sort"] == ["TP53", "NPM1"]
+
+
 def test_public_api_exposes_additional_ergonomic_builders() -> None:
     assert gs.expr("datum.x * 2").to_dict() == {"expr": "datum.x * 2"}
     assert gs.title("Example", orient="left").to_dict() == {
@@ -95,10 +123,24 @@ def test_public_api_exposes_additional_ergonomic_builders() -> None:
         "start": "integer",
     }
     assert gs.param("threshold", value=5).to_dict() == {"name": "threshold", "value": 5}
+    assert gs.compare("site", order="ascending").to_dict() == {
+        "field": "site",
+        "order": "ascending",
+    }
+    assert gs.scales(x=Scale(domain=[0, 10])) == {"x": {"domain": [0, 10]}}
+    assert gs.view(stroke="lightgray").to_dict() == {"stroke": "lightgray"}
+    assert gs.view_config(stroke="lightgray").to_dict() == {"stroke": "lightgray"}
+    assert gs.config(view=gs.view(stroke="lightgray")).to_dict() == {
+        "view": {"stroke": "lightgray"}
+    }
 
     assert isinstance(gs.expr("datum.x"), ExprRef)
+    assert isinstance(gs.compare("site"), CompareParams)
     assert isinstance(gs.title("Example"), Title)
     assert isinstance(gs.step(10), Step)
+    assert isinstance(gs.view(stroke="lightgray"), ViewBackground)
+    assert isinstance(gs.view_config(stroke="lightgray"), ViewConfig)
+    assert isinstance(gs.config(), GenomeSpyConfig)
     assert isinstance(
         gs.dynamic_opacity(unitsPerPixel=[100000, 40000], values=[0, 1]),
         DynamicOpacity,
@@ -255,18 +297,56 @@ def test_chart_properties_support_genomic_top_level_config() -> None:
         )
         .properties(
             assembly="hg38",
+            config=gs.config(view=gs.view_config(stroke="lightgray")),
             viewportHeight="container",
-            view={"stroke": "lightgray"},
-            params=[{"name": "threshold", "value": 5}],
+            view=gs.view(stroke="lightgray"),
+            params=[gs.param("threshold", value=5)],
         )
     )
 
     spec = chart.to_dict()
 
     assert spec["assembly"] == "hg38"
+    assert spec["config"] == {"view": {"stroke": "lightgray"}}
     assert spec["viewportHeight"] == "container"
     assert spec["view"] == {"stroke": "lightgray"}
     assert spec["params"] == [{"name": "threshold", "value": 5}]
+
+
+def test_generated_configure_methods_merge_top_level_config() -> None:
+    chart = (
+        gs.Chart([{"x": 1}])
+        .mark_point()
+        .encode(x="x:Q")
+        .configure(view=gs.view_config(stroke="lightgray"))
+        .configure_axis(title="Position", domain=False)
+        .configure_mark(opacity=0.5)
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["config"] == {
+        "view": {"stroke": "lightgray"},
+        "axis": {"title": "Position", "domain": False},
+        "mark": {"opacity": 0.5},
+    }
+
+
+def test_generated_configure_methods_match_helper_serialization() -> None:
+    helper_chart = (
+        gs.Chart([{"x": 1}])
+        .mark_point()
+        .encode(x="x:Q")
+        .properties(config=gs.config(view=gs.view_config(stroke="lightgray")))
+    )
+    generated_chart = (
+        gs.Chart([{"x": 1}])
+        .mark_point()
+        .encode(x="x:Q")
+        .configure_view(stroke="lightgray")
+    )
+
+    assert helper_chart.to_dict()["config"] == generated_chart.to_dict()["config"]
 
 
 def test_composition_properties_support_root_level_genomic_config() -> None:
@@ -274,14 +354,14 @@ def test_composition_properties_support_root_level_genomic_config() -> None:
         gs.vconcat(gs.Chart([{"x": 1}]).mark_point().encode(x="x:Q"), spacing=10)
         .properties(
             assembly="hg38",
-            scales={
-                "x": {
-                    "domain": [
+            scales=gs.scales(
+                x=Scale(
+                    domain=[
                         {"chrom": "chr1", "pos": 1},
                         {"chrom": "chr1", "pos": 10},
                     ]
-                }
-            },
+                )
+            ),
         )
         .resolve_scale(y="independent")
         .resolve_axis(y="independent")
@@ -302,6 +382,21 @@ def test_composition_properties_support_root_level_genomic_config() -> None:
     assert spec["resolve"] == {
         "scale": {"y": "independent"},
         "axis": {"y": "independent"},
+    }
+
+
+def test_generated_configure_methods_work_on_compositions() -> None:
+    chart = (
+        gs.vconcat(gs.Chart([{"x": 1}]).mark_point().encode(x="x:Q"))
+        .configure_axis_x(labelAngle=0)
+        .configure_title(anchor="start")
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["config"] == {
+        "axisX": {"labelAngle": 0},
+        "title": {"anchor": "start"},
     }
 
 
@@ -443,7 +538,7 @@ def test_genomic_transform_helpers_serialize() -> None:
             pos="start",
             as_="_start",
         )
-        .transform_collect(sort={"field": ["_start"]})
+        .transform_collect(sort=gs.compare(["_start"]))
         .transform_pileup(start="_start", end="end", as_="lane")
         .transform_measure_text(field="label", as_="labelWidth", fontSize=11)
         .transform_filter_scored_labels(
@@ -546,7 +641,7 @@ def test_genomespy_style_stacked_bar_transforms_serialize() -> None:
         .transform_stack(
             field="yieldSum",
             groupby=["variety"],
-            sort={"field": "site", "order": "ascending"},
+            sort=gs.compare("site", order="ascending"),
             as_=["yieldStart", "yieldEnd"],
         )
         .mark_rect()
@@ -599,7 +694,7 @@ def test_locus_interval_chart_serializes_secondary_locus_channel() -> None:
         )
         .mark_rect()
         .encode(
-            x=gs.Locus("chrom", "start", scale={"assembly": "hg38"}),
+            x=gs.Locus("chrom", "start").scale(assembly="hg38"),
             x2=gs.Locus("chrom", "end"),
             y=gs.Y("feature:N").scale(reverse=False),
             color="feature:N",

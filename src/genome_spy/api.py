@@ -1,6 +1,6 @@
 """Public API re-exports for the handwritten ergonomic layer."""
 
-from genome_spy.channels import Locus, locus, value
+from genome_spy.channels import Locus, compare, locus, value
 from genome_spy.chart import (
     Chart,
     ConcatChart,
@@ -15,13 +15,17 @@ from genome_spy.chart import (
 )
 from genome_spy.data import Data, lazy
 from genome_spy.helpers import (
+    config,
     data_format,
     dynamic_opacity,
     expr,
     param,
     parse,
+    scales,
     step,
     title,
+    view,
+    view_config,
 )
 from genome_spy.jupyter import JupyterChart
 from genome_spy.schema.channels import (
@@ -66,6 +70,7 @@ __all__ = [
     "Angle",
     "Chart",
     "Color",
+    "compare",
     "ConcatChart",
     "Data",
     "DataFormat",
@@ -106,6 +111,7 @@ __all__ = [
     "Y",
     "Y2",
     "concat",
+    "config",
     "data_format",
     "dynamic_opacity",
     "expr",
@@ -115,8 +121,11 @@ __all__ = [
     "locus",
     "param",
     "parse",
+    "scales",
     "step",
     "title",
     "value",
+    "view",
+    "view_config",
     "vconcat",
 ]

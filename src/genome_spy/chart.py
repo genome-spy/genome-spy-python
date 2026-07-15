@@ -13,6 +13,7 @@ from genome_spy.channels import Channel, channel
 from genome_spy.schema import (
     ConcatSpec,
     EncodingKwds,
+    GenomeSpyConfig,
     HConcatSpec,
     LayerSpec,
     MARK_TYPES,
@@ -21,8 +22,15 @@ from genome_spy.schema import (
     UnitSpec,
     VConcatSpec,
 )
-from genome_spy.schema.mixins import MarkMethodMixin
-from genome_spy.schemapi import SchemaBase, Undefined, UndefinedType
+from genome_spy.schema.mixins import ConfigMethodMixin, MarkMethodMixin
+from genome_spy.schemapi import (
+    SchemaBase,
+    Undefined,
+    UndefinedType,
+    merge_mapping_value,
+    normalize_mapping_value,
+    normalize_schema_value,
+)
 
 _CORE_DIST_URL = f"https://cdn.jsdelivr.net/npm/@genome-spy/core@{SCHEMA_VERSION}/dist"
 DEFAULT_SCHEMA_URL = f"{_CORE_DIST_URL}/schema.json"
@@ -73,13 +81,9 @@ def _normalize_data(data: Any) -> Any:
         return data.to_dict(validate=False)
     records = _records_from_data(data)
     if records is not None:
-        return {"values": _json_safe(records)}
-    if hasattr(data, "to_dicts"):
-        return {"values": _json_safe(data.to_dicts())}
-    if isinstance(data, list):
-        return {"values": data}
+        return _records_data(records)
     if is_mapping(data):
-        return dict(data)
+        return cast(dict[str, Any], normalize_schema_value(data, validate=False))
     raise TypeError(f"Unsupported data value: {type(data)!r}")
 
 
@@ -107,6 +111,11 @@ def _json_safe(value: Any) -> Any:
 def _records_from_data(data: Any) -> list[dict[str, Any]] | None:
     if isinstance(data, list):
         return data
+    if hasattr(data, "to_dicts"):
+        records = data.to_dicts()
+        if isinstance(records, list):
+            return records
+        return None
     if is_mapping(data):
         values = data.get("values")
         if isinstance(values, list):
@@ -122,6 +131,10 @@ def _records_from_data(data: Any) -> list[dict[str, Any]] | None:
     return None
 
 
+def _records_data(records: list[dict[str, Any]]) -> dict[str, Any]:
+    return {"values": _json_safe(records)}
+
+
 def _infer_field_type(field: str, data: Any) -> str | None:
     records = _records_from_data(data)
     if not records:
@@ -131,14 +144,20 @@ def _infer_field_type(field: str, data: Any) -> str | None:
         if not is_mapping(row) or field not in row:
             continue
         value = row[field]
-        if value is None:
-            continue
-        if isinstance(value, bool):
-            return "nominal"
-        if isinstance(value, int | float):
-            return "quantitative"
-        return "nominal"
+        inferred_type = _infer_value_type(value)
+        if inferred_type is not None:
+            return inferred_type
     return None
+
+
+def _infer_value_type(value: Any) -> str | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return "nominal"
+    if isinstance(value, int | float):
+        return "quantitative"
+    return "nominal"
 
 
 def _normalize_channel(
@@ -150,21 +169,35 @@ def _normalize_channel(
     if value is None:
         return None
     definition = channel(value).to_dict()
+    return _normalized_channel_definition(name, definition, data=data)
+
+
+def _normalized_channel_definition(
+    name: str,
+    definition: dict[str, Any],
+    *,
+    data: Any = None,
+) -> dict[str, Any]:
+    normalized = dict(definition)
     # Secondary positional channels (x2/y2) only carry field/value in GenomeSpy's
     # schema; a `type` is invalid there, so never infer or keep one for them.
     if name in {"x2", "y2"}:
-        definition.pop("type", None)
-    elif "type" not in definition and isinstance(definition.get("field"), str):
-        inferred_type = _infer_field_type(definition["field"], data)
+        normalized.pop("type", None)
+    elif "type" not in normalized and isinstance(normalized.get("field"), str):
+        inferred_type = _infer_field_type(normalized["field"], data)
         if inferred_type is not None:
-            definition["type"] = inferred_type
+            normalized["type"] = inferred_type
     if name == "y":
-        scale = definition.get("scale")
-        if scale is None:
-            definition["scale"] = dict(Y_SCALE_DEFAULTS)
-        elif is_mapping(scale) and "reverse" not in scale:
-            definition["scale"] = {**Y_SCALE_DEFAULTS, **scale}
-    return definition
+        normalized["scale"] = _normalized_y_scale(normalized.get("scale"))
+    return normalized
+
+
+def _normalized_y_scale(scale: Any) -> Any:
+    if scale is None:
+        return dict(Y_SCALE_DEFAULTS)
+    if is_mapping(scale) and "reverse" not in scale:
+        return {**Y_SCALE_DEFAULTS, **scale}
+    return scale
 
 
 def _infer_encoding_name(value: Channel | SchemaBase | str | dict[str, Any]) -> str:
@@ -189,19 +222,92 @@ def _merge_encoding_definitions(
 
 
 def _normalize_transform(transform: SchemaBase | dict[str, Any]) -> dict[str, Any]:
-    if isinstance(transform, SchemaBase):
-        return transform.to_dict(validate=False)
-    if not is_mapping(transform):
-        raise TypeError(f"Unsupported transform value: {type(transform)!r}")
-    return dict(transform)
+    try:
+        return normalize_mapping_value(transform, key="transform", validate=False)
+    except TypeError as error:
+        raise TypeError(f"Unsupported transform value: {type(transform)!r}") from error
+
+
+def _normalize_transform_kwarg(
+    value: SchemaBase | dict[str, Any],
+    *,
+    key: str,
+) -> dict[str, Any]:
+    return normalize_mapping_value(value, key=key, validate=False)
 
 
 class TopLevelSpec:
     """Shared behavior for top-level GenomeSpy specifications."""
 
+    def _merged_encoding(
+        self,
+        args: tuple[Channel, ...],
+        kwargs: dict[str, Channel | SchemaBase | str | dict[str, Any] | None],
+    ) -> dict[str, Any]:
+        """Return merged encoding definitions for fluent ``encode(...)`` calls."""
+        updates = dict(kwargs)
+        for arg in args:
+            name = _infer_encoding_name(arg)
+            if name in updates:
+                raise TypeError(f"Encoding channel {name!r} was specified twice.")
+            updates[name] = arg
+
+        current_encoding = self._kwds.get("encoding", Undefined)  # type: ignore[attr-defined]
+        data = self._kwds.get("data", Undefined)  # type: ignore[attr-defined]
+        return _merge_encoding_definitions(current_encoding, updates, data=data)
+
+    def _config_object(self) -> GenomeSpyConfig:
+        """Return the current top-level config as a schema wrapper."""
+        current = self._kwds.get("config", Undefined)  # type: ignore[attr-defined]
+        if current is Undefined:
+            return GenomeSpyConfig()
+        if current is None:
+            raise TypeError("Cannot configure nested properties into null 'config'.")
+        if isinstance(current, GenomeSpyConfig):
+            return current
+        return GenomeSpyConfig(
+            **normalize_mapping_value(current, key="config", validate=False)
+        )
+
+    def _configured_nested(
+        self,
+        name: str,
+        value: SchemaBase | dict[str, Any] | None | object = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> GenomeSpyConfig:
+        """Return a config object with one nested property updated."""
+        return self._config_object()._with_property(name, value, **kwargs)
+
+    def _configured_property(self, name: str, value: Any) -> GenomeSpyConfig:
+        """Return a config object with one scalar property updated."""
+        config = self._config_object()
+        return config._with_property(name, value)
+
+    def _configure_nested(
+        self,
+        name: str,
+        value: SchemaBase | dict[str, Any] | None | object = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a copy with one nested config family updated."""
+        return self.copy(
+            deep=False, config=self._configured_nested(name, value, **kwargs)
+        )  # type: ignore[attr-defined, no-any-return]
+
+    def _configure_property(self, name: str, value: Any) -> Self:
+        """Return a copy with one scalar config property updated."""
+        return self.copy(deep=False, config=self._configured_property(name, value))  # type: ignore[attr-defined, no-any-return]
+
     def properties(self, **kwargs: Any) -> Self:
         """Return a new spec with merged top-level properties."""
-        return self._with_properties(kwargs)
+        return self._with_properties(
+            {
+                key: normalize_schema_value(value, validate=False)
+                for key, value in kwargs.items()
+            }
+        )
 
     def transform(self, *transforms: SchemaBase | dict[str, Any]) -> Self:
         """Add one or more arbitrary GenomeSpy transforms.
@@ -233,11 +339,13 @@ class TopLevelSpec:
         """Add a filter transform using a GenomeSpy expression string."""
         return self._append_transform({"type": "filter", "expr": expression})
 
-    def transform_collect(self, *, sort: dict[str, Any] | None = None) -> Self:
+    def transform_collect(
+        self, *, sort: SchemaBase | dict[str, Any] | None = None
+    ) -> Self:
         """Add a collect transform."""
         transform: dict[str, Any] = {"type": "collect"}
         if sort is not None:
-            transform["sort"] = dict(sort)
+            transform["sort"] = _normalize_transform_kwarg(sort, key="sort")
         return self._append_transform(transform)
 
     def transform_flatten(
@@ -378,7 +486,7 @@ class TopLevelSpec:
         *,
         groupby: list[str],
         field: str | None = None,
-        sort: dict[str, Any] | None = None,
+        sort: SchemaBase | dict[str, Any] | None = None,
         offset: str | None = None,
         as_: list[str] | None = None,
     ) -> Self:
@@ -387,7 +495,7 @@ class TopLevelSpec:
         if field is not None:
             transform["field"] = field
         if sort is not None:
-            transform["sort"] = dict(sort)
+            transform["sort"] = _normalize_transform_kwarg(sort, key="sort")
         if offset is not None:
             transform["offset"] = offset
         if as_ is not None:
@@ -483,7 +591,7 @@ class TopLevelSpec:
         raise NotImplementedError
 
 
-class Chart(TopLevelSpec, MarkMethodMixin, UnitSpec):
+class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
     """An immutable-style builder backed by generated ``UnitSpec`` state."""
 
     def __init__(
@@ -529,15 +637,7 @@ class Chart(TopLevelSpec, MarkMethodMixin, UnitSpec):
         **kwargs: Channel | SchemaBase | str | dict[str, Any] | None,
     ) -> Chart:
         """Return a new chart with merged channel encodings."""
-        for arg in args:
-            name = _infer_encoding_name(arg)
-            if name in kwargs:
-                raise TypeError(f"Encoding channel {name!r} was specified twice.")
-            kwargs[name] = arg
-
-        current_encoding = self._kwds.get("encoding", Undefined)
-        data = self._kwds.get("data", Undefined)
-        merged = _merge_encoding_definitions(current_encoding, kwargs, data=data)
+        merged = self._merged_encoding(args, kwargs)
         return self.copy(deep=False, encoding=merged)
 
     def to_dict(
@@ -576,8 +676,19 @@ class Chart(TopLevelSpec, MarkMethodMixin, UnitSpec):
     def _with_properties(self, properties: dict[str, Any]) -> Self:
         return self.copy(deep=False, **properties)
 
+    def _configure(
+        self,
+        value: SchemaBase | dict[str, Any] | None | object = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        merged = merge_mapping_value(
+            self._kwds.get("config", Undefined), "config", value, **kwargs
+        )
+        return self.copy(deep=False, config=merged)
 
-class _CompositionSpec(TopLevelSpec):
+
+class _CompositionSpec(TopLevelSpec, ConfigMethodMixin):
     _schema_spec_cls: ClassVar[type]
     _children_key: ClassVar[str]
     _kwds: dict[str, Any]
@@ -620,21 +731,24 @@ class _CompositionSpec(TopLevelSpec):
     def _with_properties(self, properties: dict[str, Any]) -> Self:
         return self.copy(deep=False, **properties)
 
+    def _configure(
+        self,
+        value: SchemaBase | dict[str, Any] | None | object = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        merged = merge_mapping_value(
+            self._kwds.get("config", Undefined), "config", value, **kwargs
+        )
+        return self.copy(deep=False, config=merged)
+
     def encode(
         self,
         *args: Channel,
         **kwargs: Channel | SchemaBase | str | dict[str, Any] | None,
     ) -> Self:
         """Return a copy with merged top-level encodings for composed specs."""
-        for arg in args:
-            name = _infer_encoding_name(arg)
-            if name in kwargs:
-                raise TypeError(f"Encoding channel {name!r} was specified twice.")
-            kwargs[name] = arg
-
-        current_encoding = self._kwds.get("encoding", Undefined)
-        data = self._kwds.get("data", Undefined)
-        merged = _merge_encoding_definitions(current_encoding, kwargs, data=data)
+        merged = self._merged_encoding(args, kwargs)
         return self.copy(deep=False, encoding=merged)
 
     def resolve_axis(self, **kwargs: str | None) -> Self:

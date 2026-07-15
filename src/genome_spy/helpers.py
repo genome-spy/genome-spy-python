@@ -7,17 +7,22 @@ raw dictionaries.
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from typing import Any, Sequence, cast
 
+from genome_spy.schema._kwds import ScalesKwds
 from genome_spy.schema.core import (
     DataFormat,
     DynamicOpacity,
     ExprRef,
+    GenomeSpyConfig,
     Parameter,
     Parse,
     Step,
     Title,
+    ViewBackground,
+    ViewConfig,
 )
+from genome_spy.schemapi import normalize_schema_value
 
 
 def expr(expression: str) -> ExprRef:
@@ -69,3 +74,41 @@ def data_format(*, type: str | None = None, **kwargs: Any) -> DataFormat:
 def param(name: str, /, **kwargs: Any) -> Parameter:
     """Create a parameter definition."""
     return Parameter(name=name, **kwargs)
+
+
+def scales(**kwargs: Any) -> ScalesKwds:
+    """Create top-level shared scale configuration."""
+    payload = {
+        key: normalize_schema_value(value, validate=False)
+        for key, value in kwargs.items()
+    }
+    return cast(ScalesKwds, payload)
+
+
+def view(**kwargs: Any) -> ViewBackground:
+    """Create a view background configuration."""
+    return ViewBackground(**kwargs)
+
+
+def view_config(**kwargs: Any) -> ViewConfig:
+    """Create a top-level view config object.
+
+    Prefer ``chart.configure_view(...)`` when you are authoring chart config
+    through the fluent chart API.
+    """
+    return ViewConfig(**kwargs)
+
+
+def config(**kwargs: Any) -> GenomeSpyConfig:
+    """Create a top-level GenomeSpy config object.
+
+    Prefer generated ``configure(...)`` and ``configure_* (...)`` chart methods
+    for fluent authoring on chart objects.
+    """
+    payload: dict[str, Any] = {}
+    for key, value in kwargs.items():
+        if key == "view" and isinstance(value, ViewBackground):
+            payload[key] = ViewConfig(**value.to_dict(validate=False))
+        else:
+            payload[key] = normalize_schema_value(value, validate=False)
+    return GenomeSpyConfig(**payload)
