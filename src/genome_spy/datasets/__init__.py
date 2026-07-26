@@ -21,7 +21,9 @@ _DATASETS = {
     "dnmt3a_lollipop": "dnmt3a_lollipop.json",
     "hapmap_gwas": "hapmap_gwas.csv",
     "pik3ca_mutations": "pik3ca_mutations.json",
+    "tcga_brca_rainfall": "tcga_brca_rainfall.json",
     "tcga_laml_oncoprint": "tcga_laml_oncoprint.json",
+    "tcga_luad_oncoprint": "tcga_luad_oncoprint.json",
     "tcga_oncoprint": "tcga_oncoprint.json",
 }
 
