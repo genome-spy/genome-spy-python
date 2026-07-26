@@ -27,7 +27,7 @@ DOMAIN = [
 coverage = (
     gs.Chart(
         gs.lazy.bigwig(
-            "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/splice_junctions//splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.bigWig",
+            "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/splice_junctions/splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.bigWig",
             pixelsPerBin=1,
         )
     )
@@ -83,18 +83,6 @@ splice_junctions = (
             url="https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/splice_junctions/splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.SJ.out.bed",
             format=gs.data_format(type="bed"),
         ),
-    )
-    .encode(
-        x=gs.Locus("chrom", "chromStart", band=0),
-        x2=gs.Locus("chrom", "chromEnd", band=0),
-        y=gs.Y("span:Q")
-        .scale(
-            type="sqrt",
-            domain=gs.expr("[0, span(domain('x')) * height / width * 5]"),
-            reverse=False,
-        )
-        .axis(None),
-        size=gs.Size("score:Q").scale(type="sqrt", range=[0.1, 2.0]),
     )
     .transform_filter("datum.score >= minUniquelyMappedReads")
     .transform_formula(expr="datum.chromEnd - datum.chromStart", as_="span")

@@ -57,6 +57,88 @@ def test_example_builds_valid_spec(path: Path) -> None:
     )
 
 
+def test_luad_oncoprint_uses_sample_intervals_and_categorical_genes() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "luad_oncoprint.py")
+
+    center_column = example.spec["hconcat"][0]
+    matrix_layers = center_column["vconcat"][4]["layer"]
+
+    assert center_column["resolve"]["scale"]["x"] == "shared"
+    assert center_column["resolve"]["scale"]["y"] == "independent"
+    assert center_column["resolve"]["axis"]["y"] == "independent"
+    assert example.spec["resolve"]["scale"] == {
+        "x": "independent",
+        "y": "independent",
+    }
+    for layer in matrix_layers:
+        assert layer["encoding"]["y"]["field"] == "gene"
+        assert layer["encoding"]["y"]["type"] == "nominal"
+        assert "axis" not in layer["encoding"]["y"]
+    assert matrix_layers[1]["encoding"]["color"]["legend"] is None
+    assert center_column["vconcat"][0]["encoding"]["x"]["scale"]["domain"] == [
+        0,
+        343,
+    ]
+    assert center_column["vconcat"][0]["encoding"]["y"]["title"] == "TMB"
+    assert center_column["vconcat"][1]["encoding"]["y"]["title"] == (
+        "Mutation spectrum"
+    )
+    assert center_column["vconcat"][2]["encoding"]["y"]["title"] == "MSI"
+    for layer in matrix_layers[:3]:
+        assert layer["encoding"]["x"]["field"] == "x0"
+        assert layer["encoding"]["x2"]["field"] == "x1"
+        assert "y2" not in layer["encoding"]
+    assert all(panel["data"]["values"] for panel in center_column["vconcat"][5:])
+    assert len(center_column["vconcat"]) == 8
+
+
+def test_gallery_data_preview_is_rendered_for_opt_in_example() -> None:
+    gallery = _load_gallery()
+    extension = _load_gallery_extension()
+    example = gallery.collect_example(EXAMPLES_DIR / "luad_oncoprint.py")
+
+    assert [preview.title for preview in example.previews] == [
+        "Samples",
+        "Mutation matrix",
+    ]
+    markdown = extension._detail_md(example, "https://example.test/bundle.js")
+
+    assert "## Data preview" in markdown
+    assert '<figure class="gs-data-preview"><figcaption>Samples' in markdown
+    assert "<th>sample</th>" in markdown
+    assert "<th>class</th>" in markdown
+    assert "<table><thead>" in markdown
+
+
+def test_sashimi_plot_uses_direct_data_urls() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "sashimi_plot.py")
+
+    bigwig_url = example.spec["layer"][0]["data"]["lazy"]["url"]
+    bed_url = example.spec["layer"][1]["data"]["url"]
+
+    assert "//splice_junction" not in bigwig_url
+    assert bigwig_url.endswith(".bigWig")
+    assert bed_url.endswith(".SJ.out.bed")
+    assert "encoding" not in example.spec["layer"][1]
+
+
+def test_manhattan_plot_uses_canonical_hg18_points() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "manhattan_plot.py")
+
+    assert example.spec["assembly"] == "hg18"
+    assert "genomes" not in example.spec
+    assert "vconcat" not in example.spec
+    assert example.spec["height"] == 360
+    point_data = example.spec["layer"][2]["data"]["values"]
+    assert {row["chrom"] for row in point_data} <= {
+        *(f"chr{number}" for number in range(1, 23)),
+        "chrX",
+    }
+
+
 def test_gallery_index_keeps_examples_in_visible_navigation() -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
@@ -71,6 +153,10 @@ def test_gallery_index_keeps_examples_in_visible_navigation() -> None:
     assert ":caption: Association plots" in markdown
     assert ":caption: Genome browser tracks" in markdown
     assert f"manhattan_plot.html?v={build_token}" in markdown
+    assert "Each card opens the live chart and the Python code that produced it." in (
+        markdown
+    )
+    assert 'class="gs-card__tags"' not in markdown
     for example in examples:
         assert f"\n{example.name}\n" in markdown
 
@@ -133,10 +219,15 @@ def test_gallery_detail_embed_uses_shadow_dom_and_stable_reveal() -> None:
 
     assert 'class="gs-doc-embed"' in markdown
     assert "attachShadow({ mode: 'open' })" in markdown
+    assert "import { embed } from 'https://example.test/bundle.js';" in markdown
     assert "await embed(c, spec, { bare: true });" in markdown
     assert f"airway_volcano_plot.json?v={expected}" in markdown
     assert (
         "#shell{position:relative;width:100%;height:100%;overflow:hidden}" in markdown
+    )
+    assert (
+        "#c{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .2s ease}"
+        in markdown
     )
     assert "Math.round(r.width)}x${Math.round(r.height)" in markdown
     assert "stable >= 3" in markdown

@@ -163,7 +163,7 @@ chart = (
         .scale(zoom=False, reverse=True, domain=[0, 40], padding=0.5)
         .axis(None),
     )
-    .transform({"type": "flatten"})
+    .transform_flatten()
     .transform_formula(expr="datum.attributes.gene_name", as_="gene_name")
     .transform_flatten(fields=["child_features"])
     .transform_flatten(fields=["child_features"], as_=["child_feature"])

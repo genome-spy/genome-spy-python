@@ -17,5 +17,4 @@ regenerated together, and the documentation is rebuilt on the next release.
 
 - [GenomeSpy](https://github.com/genome-spy/genome-spy) — the underlying grammar
   and rendering engine.
-- Gallery datasets are synthetic and deterministic unless otherwise noted; see
-  each example's source for how its data is generated.
+- Example pages show the exact Python source used to build each visualization.

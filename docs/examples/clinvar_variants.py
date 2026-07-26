@@ -9,7 +9,7 @@ from __future__ import annotations
 import genome_spy as gs
 
 META = {
-    "category": "Lollipop and pathogenicity plots",
+    "category": "Mutation position plots",
     "tags": ("vcf", "clinvar", "lazy", "variants", "layer", "real-data"),
     "order": 24,
     "height": 260,
@@ -29,7 +29,7 @@ classification_domain = [
 baseline = (
     gs.Chart([{}])
     .mark_rule(color="lightgray")
-    .encode(y=gs.Y({"datum": "Uncertain significance"}, type="ordinal"))
+    .encode(y=gs.Y(gs.datum("Uncertain significance"), type="ordinal"))
     .properties(name="baseline")
 )
 
@@ -38,7 +38,7 @@ baseline = (
 sticks = (
     gs.Chart()
     .mark_rule(tooltip=False)
-    .encode(y2=gs.Y2({"datum": "Uncertain significance"}))
+    .encode(y2=gs.Y2(gs.datum("Uncertain significance")))
     .properties(name="sticks")
 )
 
@@ -86,13 +86,10 @@ variants = (
         expr="replace(datum.INFO['CLNSIG'], /_/g, ' ')",
         as_="Germline classification",
     )
-    .transform(
-        {
-            "type": "regexExtract",
-            "field": "Germline classification",
-            "regex": "^([^/]+)",
-            "as": "Germline classification",
-        }
+    .transform_regex_extract(
+        field="Germline classification",
+        regex="^([^/]+)",
+        as_="Germline classification",
     )
     .transform_formula(
         expr="replace(datum['Germline classification'], /^Conflicting.*/g, 'Conflicting')",

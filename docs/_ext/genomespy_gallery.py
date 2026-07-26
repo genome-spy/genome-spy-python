@@ -42,16 +42,12 @@ def _card_html(
 ) -> str:
     thumb = f"{thumb_prefix}/{core.thumb_filename(example)}"
     href = f"{link_prefix}{example.name}.html?v={build_token}"
-    tags = "".join(
-        f'<span class="gs-tag">{html.escape(t)}</span>' for t in example.tags
-    )
     return (
         f'<a class="gs-card" href="{href}">'
         f'<span class="gs-card__shot" style="background-image:url({thumb})" '
         f'role="img" aria-label="{html.escape(example.title)}"></span>'
         f'<span class="gs-card__body"><span class="gs-card__title">'
-        f"{html.escape(example.title)}</span>"
-        f'<span class="gs-card__tags">{tags}</span></span></a>'
+        f"{html.escape(example.title)}</span></span></a>"
     )
 
 
@@ -64,8 +60,7 @@ def _gallery_index_md(examples: list[core.Example]) -> str:
         "",
         "# Example gallery",
         "",
-        "Each example is a real, interactive GenomeSpy visualization. Click a card "
-        "to open the live chart and its Python source.",
+        "Each card opens the live chart and the Python code that produced it.",
         "",
     ]
     for category, items in core.grouped_by_category(examples):
@@ -104,6 +99,26 @@ def _gallery_index_md(examples: list[core.Example]) -> str:
         blocks.append("```")
         blocks.append("")
     return "\n".join(blocks)
+
+
+def _preview_html(example: core.Example) -> str:
+    sections = []
+    for preview in example.previews:
+        header = "".join(
+            f"<th>{html.escape(column)}</th>" for column in preview.columns
+        )
+        rows = "".join(
+            "<tr>"
+            + "".join(f"<td>{html.escape(value)}</td>" for value in row)
+            + "</tr>"
+            for row in preview.rows
+        )
+        sections.append(
+            f'<figure class="gs-data-preview"><figcaption>{html.escape(preview.title)}'
+            f'</figcaption><div class="gs-data-preview__scroll"><table><thead><tr>{header}'
+            f"</tr></thead><tbody>{rows}</tbody></table></div></figure>"
+        )
+    return '<div class="gs-data-previews">' + "".join(sections) + "</div>"
 
 
 def _detail_md(example: core.Example, bundle_url: str) -> str:
@@ -167,6 +182,15 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         "```",
         "",
     ]
+    if example.previews:
+        parts += [
+            "## Data preview",
+            "",
+            "```{raw} html",
+            _preview_html(example),
+            "```",
+            "",
+        ]
     parts += [
         "## Code",
         "",

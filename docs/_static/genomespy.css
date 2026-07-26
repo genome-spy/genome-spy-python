@@ -88,6 +88,48 @@ p.lead {
   transform: translateY(-2px);
 }
 
+/* ---------- Optional example data previews ---------- */
+.gs-data-previews {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0 2rem;
+  min-width: 0;
+}
+.gs-data-preview {
+  margin: 0;
+  max-width: 100%;
+  min-width: 0;
+}
+.gs-data-preview figcaption {
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+.gs-data-preview__scroll {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+}
+.gs-data-preview table {
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin: 0;
+  max-width: none;
+  min-width: 100%;
+  white-space: nowrap;
+  width: max-content;
+}
+.gs-data-preview th,
+.gs-data-preview td {
+  border: 1px solid var(--pst-color-border);
+  padding: 0.3rem 0.5rem;
+  text-align: left;
+}
+.gs-data-preview th {
+  background: rgba(62, 140, 182, 0.1);
+}
+
 /* ---------- Gallery grid of static image cards ---------- */
 .gs-gallery {
   display: grid;

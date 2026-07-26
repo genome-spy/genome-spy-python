@@ -26,15 +26,7 @@ domain = [
 coverage = (
     gs.Chart()
     .mark_rect()
-    .transform(
-        {
-            "type": "coverage",
-            "start": "start",
-            "end": "end",
-            "as": "coverage",
-            "chrom": "chrom",
-        }
-    )
+    .transform_coverage(start="start", end="end", as_="coverage", chrom="chrom")
     .encode(
         x=gs.Locus("chrom", "start", axis=None),
         x2=gs.Locus("chrom", "end"),

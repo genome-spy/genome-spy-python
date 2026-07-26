@@ -5,42 +5,27 @@ chromosome colors separate the blocks, dashed rules mark significance
 thresholds, and the strongest peaks are outlined for emphasis.
 """
 
-import numpy as np
-import pandas as pd
-
 import genome_spy as gs
-from genome_spy.datasets import load_dataset
+from genome_spy.datasets._hapmap import hapmap_manhattan_data
 from genome_spy.schema import GenomeAxis, Scale
 
 META = {
     "category": "Association plots",
     "tags": ("locus", "layer", "real-data"),
     "order": 10,
-    "height": 340,
+    "height": 500,
+    "max_width": 980,
 }
 
 GENOME_WIDE_P = 5e-8
 SUGGESTIVE_P = 1e-5
 
 
-def hapmap_gwas() -> pd.DataFrame:
-    """Load the HapMap GWAS table and derive the columns the plot encodes."""
-    data = load_dataset("hapmap_gwas", as_format="dataframe")
-    data = data[data["P"] > 0].copy()
-    # GenomeSpy's assemblies use bare chromosome names (as in its ASCAT data);
-    # HapMap encodes chromosome 23 as X.
-    data["chrom"] = np.where(data["CHR"] == 23, "X", data["CHR"].astype(str))
-    data["neglog"] = -np.log10(data["P"])
-    data["chrom_group"] = np.where(data["CHR"] % 2 == 0, "even", "odd")
-    return data
-
-
-data = hapmap_gwas()
-top_hits = data.nsmallest(8, "P")
-
-# Explicit y-domain so the shared scale spans the points, not the tiny
-# threshold-rule datasets (which would otherwise clip the peaks).
-Y_DOMAIN = [0.0, float(np.ceil(data["neglog"].max()))]
+data, top_hits, domains = hapmap_manhattan_data(
+    genome_wide_p=GENOME_WIDE_P,
+    suggestive_p=SUGGESTIVE_P,
+)
+DATA_PREVIEW = {"GWAS points": data, "Top hits": top_hits}
 
 # --- Visualization -------------------------------------------------------------
 
@@ -65,8 +50,10 @@ points = (
     gs.Chart(data)
     .mark_point(size=20, filled=True, opacity=0.82)
     .encode(
-        x=gs.Locus("chrom", "BP").scale(assembly="hg38").axis(axis),
-        y=gs.Y("neglog:Q").scale(reverse=False, domain=Y_DOMAIN).title("−log10 p"),
+        x=gs.Locus("chrom", "BP").scale(assembly="hg18").axis(axis),
+        y=gs.Y("neglog:Q")
+        .scale(reverse=False, domain=domains["y_domain"])
+        .title("−log10 p"),
         color=gs.Color("chrom_group:N")
         .scale(chrom_colors)
         .legend(title="Chromosome group"),
@@ -74,18 +61,22 @@ points = (
 )
 
 genome_wide_rule = (
-    gs.Chart([{"threshold": -np.log10(GENOME_WIDE_P)}])
+    gs.Chart([{"threshold": domains["genome_wide_y"]}])
     .mark_rule(strokeDash=[6, 4], size=1.4, color="#c53b2c")
     .encode(
-        y=gs.Y("threshold:Q").scale(reverse=False, domain=Y_DOMAIN).title("−log10 p")
+        y=gs.Y("threshold:Q")
+        .scale(reverse=False, domain=domains["y_domain"])
+        .title("−log10 p")
     )
 )
 
 suggestive_rule = (
-    gs.Chart([{"threshold": -np.log10(SUGGESTIVE_P)}])
+    gs.Chart([{"threshold": domains["suggestive_y"]}])
     .mark_rule(strokeDash=[2, 4], size=1.2, color="#d48b31")
     .encode(
-        y=gs.Y("threshold:Q").scale(reverse=False, domain=Y_DOMAIN).title("−log10 p")
+        y=gs.Y("threshold:Q")
+        .scale(reverse=False, domain=domains["y_domain"])
+        .title("−log10 p")
     )
 )
 
@@ -93,13 +84,20 @@ highlight_points = (
     gs.Chart(top_hits)
     .mark_point(size=48, filled=True, stroke="black", strokeWidth=0.5)
     .encode(
-        x=gs.Locus("chrom", "BP").scale(assembly="hg38"),
-        y=gs.Y("neglog:Q").scale(reverse=False, domain=Y_DOMAIN).title("−log10 p"),
+        x=gs.Locus("chrom", "BP").scale(assembly="hg18"),
+        y=gs.Y("neglog:Q")
+        .scale(reverse=False, domain=domains["y_domain"])
+        .title("−log10 p"),
         color=gs.Color("chrom_group:N").scale(chrom_colors).legend(None),
     )
 )
 
-chart = (genome_wide_rule + suggestive_rule + points + highlight_points).properties(
+association_track = (
+    genome_wide_rule + suggestive_rule + points + highlight_points
+).properties(height=360)
+
+chart = association_track.properties(
+    assembly="hg18",
     title="HapMap genome-wide association scan",
-    description="A GenomeSpy-native Manhattan plot with a locus-aware chromosome axis and significance rules.",
+    description="A Manhattan plot with a locus-aware chromosome axis.",
 )

@@ -67,24 +67,16 @@ GenomeSpy-specific genomic helpers such as
 For top-level chart config, prefer the generated fluent methods such as
 `chart.configure_view(...)` and `chart.configure_axis(...)`; helper constructors
 like `gs.config(...)` and `gs.view_config(...)` remain available when you want
-to build schema objects directly.
+to build schema objects directly. Small mapping helpers such as `gs.scales(...)`
+and ergonomic builders such as `gs.param(...)` also remain useful where they
+keep the visualization code shorter and clearer.
 
 Additional runnable notebooks live under `notebooks/`.
 
 ## Packaged Datasets
 
-The library also ships a small set of real datasets used by the documentation
-gallery:
-
-```python
-from genome_spy.datasets import available_datasets, load_dataset
-
-gwas = load_dataset("hapmap_gwas", as_format="dataframe")
-features = load_dataset("pik3ca_mutations", as_format="json")
-```
-
-Tabular packaged datasets load as pandas DataFrames; JSON datasets load as
-plain Python objects.
+A small set of datasets used by the documentation examples is available through
+`genome_spy.datasets.load_dataset(...)`.
 
 ## Schema Generation
 

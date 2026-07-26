@@ -5,11 +5,8 @@ marks the null expectation, while departures in the upper tail reveal enriched
 signal.
 """
 
-import numpy as np
-import pandas as pd
-
 import genome_spy as gs
-from genome_spy.datasets import load_dataset
+from genome_spy.datasets._hapmap import hapmap_qq_data
 from genome_spy.schema import Scale
 
 META = {
@@ -21,57 +18,11 @@ META = {
 }
 
 
-def hapmap_qq() -> pd.DataFrame:
-    """Observed vs. expected −log10 p from the HapMap association p-values."""
-    pvals = np.sort(
-        load_dataset("hapmap_gwas", as_format="dataframe")
-        .query("P > 0")["P"]
-        .to_numpy()
-    )
-    ranks = np.arange(1, len(pvals) + 1)
-    data = pd.DataFrame(
-        {
-            "expected": -np.log10((ranks - 0.5) / len(pvals)),
-            "observed": -np.log10(pvals),
-        }
-    )
-    data["delta"] = data["observed"] - data["expected"]
-    data["pattern"] = np.where(
-        data["delta"] > 0.45, "Tail enrichment", "Null-like bulk"
-    )
-    return data
-
-
-def qq_deviation_bins(data: pd.DataFrame, *, bins: int = 45) -> pd.DataFrame:
-    """Summarize QQ deviations into x-bins for a compact lower panel."""
-    edges = np.linspace(0.0, float(data["expected"].max()), bins + 1)
-    binned = (
-        data.assign(
-            bin=pd.cut(
-                data["expected"],
-                bins=edges,
-                include_lowest=True,
-                duplicates="drop",
-            )
-        )
-        .groupby("bin", observed=True, as_index=False)
-        .agg(delta_mean=("delta", "mean"))
-    )
-    intervals = binned["bin"]
-    binned["x0"] = intervals.map(lambda interval: float(interval.left))
-    binned["x1"] = intervals.map(lambda interval: float(interval.right))
-    binned["zero"] = 0.0
-    binned["direction"] = np.where(
-        binned["delta_mean"] >= 0, "Observed > expected", "Observed < expected"
-    )
-    return binned[["x0", "x1", "zero", "delta_mean", "direction"]]
-
-
-data = hapmap_qq()
-deviation = qq_deviation_bins(data)
-limit = float(max(data["expected"].max(), data["observed"].max())) * 1.02
-annotation_x = round(limit * 0.54, 2)
-delta_limit = float(max(abs(deviation["delta_mean"]).max(), 0.25)) * 1.1
+data, deviation, domains = hapmap_qq_data()
+DATA_PREVIEW = {"QQ points": data, "Deviation": deviation}
+limit = domains["limit"]
+delta_limit = domains["delta_limit"]
+annotation_x = domains["annotation_x"]
 
 pattern_colors = (
     Scale().domain(["Null-like bulk", "Tail enrichment"]).range(["#7fbbdd", "#c53b2c"])
@@ -125,7 +76,7 @@ tail_label = (
         [
             {
                 "x": annotation_x,
-                "y": round(limit * 0.93, 2),
+                "y": domains["tail_y"],
                 "label": "Upward tail suggests associated variants",
             }
         ]

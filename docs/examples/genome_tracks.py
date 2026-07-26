@@ -78,7 +78,7 @@ transcripts = (
 
 labels = (
     gs.Chart()
-    .mark_text(size=11, yOffset=7, tooltip={"handler": "refseqgene"})
+    .mark_text(size=11, yOffset=7, tooltip=gs.HandledTooltip(handler="refseqgene"))
     .encode(x=gs.X("_centroid:L"), text=gs.Text("symbol:N"))
     .properties(name="labels")
 )

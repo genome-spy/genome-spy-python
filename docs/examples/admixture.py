@@ -56,6 +56,7 @@ def admixture_stacks(seed: int = 5) -> pd.DataFrame:
 
 
 data = admixture_stacks()
+DATA_PREVIEW = data
 separators = [PER_POP * i for i in range(1, len(POPULATIONS))]
 
 # --- Visualization -------------------------------------------------------------

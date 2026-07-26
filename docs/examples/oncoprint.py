@@ -8,10 +8,8 @@ from __future__ import annotations
 
 import math
 
-import pandas as pd
-
 import genome_spy as gs
-from genome_spy.datasets import load_dataset
+from genome_spy.datasets._oncoprint import laml_oncoplot_data
 from genome_spy.schema import Legend, Scale
 
 META = {
@@ -33,60 +31,11 @@ CLASS_ORDER = [
     "Multi_Hit",
 ]
 
-
-def curated_laml_oncoplot() -> dict[str, pd.DataFrame | int]:
-    """Load the curated TCGA LAML oncoplot payload."""
-    payload = load_dataset("tcga_laml_oncoprint", as_format="json")
-
-    samples = pd.DataFrame(payload["samples"]).sort_values("sample_order").copy()
-    genes = pd.DataFrame(payload["genes"]).sort_values("gene_order").copy()
-    matrix = pd.DataFrame(payload["matrix"]).copy()
-    grid = pd.DataFrame(payload["grid"]).copy()
-    sample_tmb = pd.DataFrame(payload["sample_tmb"]).copy()
-    gene_counts = pd.DataFrame(payload["gene_counts"]).copy()
-    percent_labels = pd.DataFrame(payload["percent_labels"]).copy()
-
-    sample_order = samples["sample"].tolist()
-    gene_order = genes["gene"].tolist()
-
-    for frame in [samples, matrix, grid, sample_tmb]:
-        frame["sample"] = pd.Categorical(
-            frame["sample"], categories=sample_order, ordered=True
-        )
-    for frame in [genes, matrix, grid, gene_counts, percent_labels]:
-        frame["gene"] = pd.Categorical(
-            frame["gene"], categories=gene_order, ordered=True
-        )
-
-    genes["zero"] = 0
-    percent_labels["x"] = 0
-
-    return {
-        "samples": samples,
-        "genes": genes,
-        "matrix": matrix,
-        "grid": grid,
-        "sample_tmb": sample_tmb,
-        "gene_counts": gene_counts,
-        "percent_labels": percent_labels,
-        "total_samples": int(payload["total_samples"]),
-        "altered_samples": int(payload["altered_samples"]),
-    }
-
-
-loaded = curated_laml_oncoplot()
-sample_data = loaded["samples"]
-gene_data = loaded["genes"]
-matrix_data = loaded["matrix"]
-grid_data = loaded["grid"]
-sample_tmb_data = loaded["sample_tmb"]
-gene_count_data = loaded["gene_counts"]
-percent_data = loaded["percent_labels"]
-total_samples = loaded["total_samples"]
-altered_samples = loaded["altered_samples"]
-
-percent_data = percent_data.copy()
-percent_data["x"] = 1
+data = laml_oncoplot_data()
+DATA_PREVIEW = {
+    "Samples": data.samples,
+    "Mutation matrix": data.matrix,
+}
 
 class_colors = (
     Scale()
@@ -110,8 +59,9 @@ percent_width = 52
 counts_width = 120
 tmb_height = 70
 matrix_height = 352
-tmb_limit = int(sample_data["tmb_total"].max())
-count_limit = int(gene_data["altered_samples"].max())
+tmb_limit = data.tmb_limit
+count_limit = data.count_limit
+sample_domain = data.sample_domain
 
 mutation_legend = (
     Legend()
@@ -122,17 +72,17 @@ mutation_legend = (
     .symbolSize(90)
 )
 
-count_grid_data = gene_data[["gene"]].copy()
-count_grid_data["x0"] = 0
-count_grid_data["x1"] = count_limit
-
 # --- Visualization -------------------------------------------------------------
 
 tmb = (
-    gs.Chart(sample_tmb_data)
+    gs.Chart(data.sample_tmb)
     .mark_rect()
     .encode(
-        x=gs.X("sample:N").axis(None).title(None),
+        x=gs.X("x0:Q")
+        .scale(domain=sample_domain, zero=True, zoom=True)
+        .axis(None)
+        .title(None),
+        x2=gs.X2("x1"),
         y=gs.Y("y0:Q").scale(reverse=False, domain=[0, tmb_limit]).title("TMB"),
         y2=gs.Y2("y1"),
         color=gs.Color("class:N").scale(class_colors).legend(None),
@@ -141,19 +91,27 @@ tmb = (
 )
 
 grid = (
-    gs.Chart(grid_data)
+    gs.Chart(data.grid)
     .mark_rect(color="#f1f3f5", stroke="white", strokeWidth=0.5)
     .encode(
-        x=gs.X("sample:N").axis(None).title(None),
+        x=gs.X("x0:Q")
+        .scale(domain=sample_domain, zero=True, zoom=True)
+        .axis(None)
+        .title(None),
+        x2=gs.X2("x1"),
         y=gs.Y("gene:N").scale(reverse=False, padding=0.08).title(None),
     )
 )
 
 matrix = (
-    gs.Chart(matrix_data)
+    gs.Chart(data.matrix)
     .mark_rect(stroke="white", strokeWidth=0.5)
     .encode(
-        x=gs.X("sample:N").axis(None).title(None),
+        x=gs.X("x0:Q")
+        .scale(domain=sample_domain, zero=True, zoom=True)
+        .axis(None)
+        .title(None),
+        x2=gs.X2("x1"),
         y=gs.Y("gene:N").scale(reverse=False, padding=0.08).title(None),
         color=gs.Color("class:N").scale(class_colors).legend(mutation_legend),
     )
@@ -162,7 +120,7 @@ matrix = (
 matrix_panel = (grid + matrix).properties(width=matrix_width, height=matrix_height)
 
 percent_panel = (
-    gs.Chart(percent_data)
+    gs.Chart(data.percent_labels)
     .mark_text(align="right", dx=-2, size=11)
     .encode(
         x=gs.X("x:Q").scale(domain=[0, 1]).axis(None).title(None),
@@ -196,7 +154,7 @@ count_title = (
 )
 
 count_bars = (
-    gs.Chart(gene_count_data)
+    gs.Chart(data.gene_counts)
     .mark_rect()
     .encode(
         x=gs.X("x0:Q")
@@ -210,7 +168,7 @@ count_bars = (
 )
 
 count_grid = (
-    gs.Chart(count_grid_data)
+    gs.Chart(data.count_grid)
     .mark_rect(color="#f1f3f5", stroke="white", strokeWidth=0.5)
     .encode(
         x=gs.X("x0:Q").scale(reverse=False, domain=[0, count_limit], zero=True),
@@ -220,23 +178,21 @@ count_grid = (
     .properties(width=counts_width, height=matrix_height)
 )
 
-top_row = gs.hconcat(tmb, percent_header, count_title, spacing=4).resolve_scale(
-    x="independent"
-)
 counts_panel = (count_grid + count_bars).properties(
     width=counts_width, height=matrix_height
 )
-middle_row = gs.hconcat(
-    matrix_panel, percent_panel, counts_panel, spacing=4
-).resolve_scale(x="independent")
+left_panel = gs.vconcat(tmb, matrix_panel, spacing=4).resolve_scale(x="shared")
+right_panel = gs.vconcat(percent_header, percent_panel, spacing=4).resolve_scale(
+    x="independent"
+)
+count_panel = gs.vconcat(count_title, counts_panel, spacing=4).resolve_scale(
+    x="independent"
+)
 
-summary = f"Altered in {altered_samples} ({altered_samples / total_samples:.2%}) of {total_samples} samples."
+summary = f"Altered in {data.altered_samples} ({data.altered_samples / data.total_samples:.2%}) of {data.total_samples} samples."
 
 chart = (
-    gs.vconcat(
-        top_row,
-        middle_row,
-    )
+    gs.hconcat(left_panel, right_panel, count_panel, spacing=4)
     .resolve_scale(x="independent")
     .properties(
         title=summary,

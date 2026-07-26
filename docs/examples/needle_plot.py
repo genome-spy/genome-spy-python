@@ -14,7 +14,7 @@ from genome_spy.datasets import load_dataset
 from genome_spy.schema import Legend, Scale
 
 META = {
-    "category": "Lollipop and pathogenicity plots",
+    "category": "Mutation position plots",
     "tags": ("lollipop", "layer", "real-data"),
     "order": 10,
     "height": 360,
@@ -58,6 +58,7 @@ def dnmt3a_lollipop_payload() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame,
 
 
 features, domains, backbone, payload = dnmt3a_lollipop_payload()
+DATA_PREVIEW = {"Mutation features": features, "Protein domains": domains}
 protein_length = int(payload["protein_length"])
 max_count = int(features["count"].max())
 x_domain = [0, protein_length]
@@ -86,7 +87,7 @@ backbone_band = (
         x2=gs.X2("end"),
         y=gs.Y("y0:Q")
         .scale(reverse=False, domain=y_domain)
-        .axis({"values": [1, max_count], "grid": False})
+        .axis(values=[1, max_count], grid=False)
         .title(None),
         y2=gs.Y2("y1"),
     )

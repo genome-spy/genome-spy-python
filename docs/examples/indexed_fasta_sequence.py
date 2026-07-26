@@ -73,8 +73,6 @@ chart = (
             ],
         ),
     )
-    .transform(
-        {"type": "flattenSequence", "field": "sequence", "as": ["rawPos", "base"]}
-    )
+    .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
     .transform_formula(expr="datum.rawPos + datum.start", as_="pos")
 )

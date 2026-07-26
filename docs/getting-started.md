@@ -62,10 +62,16 @@ gs.Chart(
 ```
 
 GenomeSpy-specific helpers such as `gs.Locus("chrom", "pos")` give you
-locus-scaled genomic axes. See the [gallery](gallery/index.md) for genomics-native
-examples like the Manhattan plot.
+locus-scaled genomic axes. See the [gallery](gallery/index.md) for fuller
+genomics examples.
 
 For chart configuration, prefer the generated fluent methods such as
 `chart.configure_view(...)` and `chart.configure_axis(...)`. Helper constructors
 like `gs.config(...)` and `gs.view_config(...)` still exist when you want to
-build schema objects directly.
+build schema objects directly. Small mapping or parameter helpers such as
+`gs.scales(...)` and `gs.param(...)` also remain available when they keep the
+spec clearer.
+
+For direct top-level spec properties, charts also support generated-style
+setters such as `chart.with_view(...)`, `chart.with_config(...)`, and
+`chart.with_scales(...)`.

@@ -76,23 +76,10 @@ body{{font-family:Lato,system-ui,sans-serif}}
 <script type="module">
 import {{ embed }} from "{bundle}";
 const spec = {spec};
-const frame = document.getElementById("frame");
-const fit = document.getElementById("fit");
 const container = document.getElementById("c");
-const cardPadding = {card_padding};
-
-function applyScale() {{
-  const scale = Math.min(
-    (frame.clientWidth - cardPadding * 2) / fit.offsetWidth,
-    (frame.clientHeight - cardPadding * 2) / fit.offsetHeight,
-    1
-  );
-  fit.style.transform = `scale(${{scale}})`;
-}}
 
 try {{
   await embed(container, spec, {{ bare: true }});
-  applyScale();
   window.__gsMounted = true;
 }} catch (e) {{
   window.__gsError = String(e);
@@ -163,6 +150,7 @@ def main() -> int:
                   const frame = document.getElementById("frame");
                   const fit = document.getElementById("fit");
                   const container = document.getElementById("c");
+                  fit.style.transform = "none";
                   const rect = container.getBoundingClientRect();
                   fit.style.height = `${{Math.ceil(rect.height)}}px`;
                   const scale = Math.min(

@@ -18,8 +18,18 @@ Constraints:
   later add app-specific concepts.
 - Notebook rendering is a first-class requirement; prefer `anywidget` for that
   integration.
+- Documentation gallery embeds must use the direct static GenomeSpy bundle
+  import followed by `embed(c, spec, { bare: true })`. Keep the chart container
+  direct and avoid transform/resize wrappers around the embedded canvas; this
+  is the known-working path for all gallery plots, including sashimi.
 - Keep reference material in `material/` and external code in `tmp/`.
 - Prefer pure Python logic in the core; isolate I/O and integration edges.
+- Keep documentation examples focused on the GenomeSpy visualization API, not
+  statistical analysis or general-purpose data wrangling. Prepare derived
+  example datasets, including p-values, adjusted p-values, transformed values,
+  classifications, and plotting domains, in `src/genome_spy/datasets/` or in
+  curated packaged data files. Examples should load the prepared table and
+  demonstrate encodings, marks, transforms, and composition directly.
 - Use upstream projects for design guidance:
   `tmp/altair`, `tmp/gos`, `tmp/vega-lite`, `tmp/gosling.js`,
   `tmp/genome-spy`, and `tmp/anywidget`.

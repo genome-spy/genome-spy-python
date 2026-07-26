@@ -1,15 +1,11 @@
 """Volcano plot.
 
 Effect size against −log10 p-value, with color highlighting points that clear
-both an effect-size and a significance cutoff. Dashed guide lines mark the
-thresholds.
+both an effect-size and a significance cutoff.
 """
 
-import numpy as np
-import pandas as pd
-
 import genome_spy as gs
-from genome_spy.datasets import load_dataset
+from genome_spy.datasets._hapmap import hapmap_volcano_data
 from genome_spy.schema import Scale
 
 META = {
@@ -19,31 +15,12 @@ META = {
     "height": 440,
 }
 
-EFFECT_CUTOFF = 0.5
-P_CUTOFF = 1e-5
-
-
-def hapmap_effects() -> pd.DataFrame:
-    """Load the HapMap table and classify variants by effect and significance."""
-    data = load_dataset("hapmap_gwas", as_format="dataframe")
-    data = data[data["P"] > 0].copy()
-    data["neglog"] = -np.log10(data["P"])
-    passes = (data["P"] < P_CUTOFF) & (data["EFFECTSIZE"].abs() >= EFFECT_CUTOFF)
-    data["association"] = np.where(
-        passes & (data["EFFECTSIZE"] > 0),
-        "risk",
-        np.where(passes & (data["EFFECTSIZE"] < 0), "protective", "n.s."),
-    )
-    return data
-
-
-data = hapmap_effects()
-
-# Explicit, shared domains from the data. Without them the shared scale collapses
-# onto the tiny cutoff-line datasets and clips every point to the axis edges.
-x_extent = float(np.ceil(data["EFFECTSIZE"].abs().max() * 10) / 10)
-X_DOMAIN = [-x_extent, x_extent]
-Y_DOMAIN = [0.0, float(np.ceil(data["neglog"].max()))]
+data, domains = hapmap_volcano_data()
+DATA_PREVIEW = data
+X_DOMAIN = domains["x_domain"]
+Y_DOMAIN = domains["y_domain"]
+EFFECT_CUTOFF = domains["effect_cutoff"]
+NEGLOG_P_CUTOFF = domains["neglog_pvalue_cutoff"]
 
 # --- Visualization -------------------------------------------------------------
 
@@ -75,7 +52,7 @@ effect_cutoffs = (
 )
 
 significance_cutoff = (
-    gs.Chart([{"y": -np.log10(P_CUTOFF)}])
+    gs.Chart([{"y": NEGLOG_P_CUTOFF}])
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         y=gs.Y("y:Q").scale(reverse=False, domain=Y_DOMAIN, zoom=True).title("−log10 p")
