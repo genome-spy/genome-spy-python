@@ -134,9 +134,63 @@ def test_generate_mark_mixins_module_emits_config_methods_when_schema_supports_t
     assert "@use_signature(core.AxisConfig)" in mixins_module.source
 
 
+def test_generate_kwds_module_emits_helper_relevant_kwds_targets() -> None:
+    schema = {
+        "definitions": {
+            "Parse": {
+                "type": "object",
+                "properties": {"chrom": {"type": "string"}},
+            },
+            "DataFormat": {
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "type": {"type": "string"},
+                            "parse": {"$ref": "#/definitions/Parse"},
+                        },
+                    },
+                    {"type": "null"},
+                ],
+            },
+            "DynamicOpacity": {
+                "type": "object",
+                "properties": {
+                    "channel": {"type": "string"},
+                    "values": {"type": "array", "items": {"type": "number"}},
+                },
+            },
+            "Parameter": {
+                "anyOf": [
+                    {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "expr": {"type": "string"},
+                        },
+                    },
+                    {"type": "string"},
+                ],
+            },
+        }
+    }
+
+    kwds_module = SchemaWrapperGenerator(schema).generate_kwds_module()
+
+    assert "class ParseKwds(TypedDict, total=False):" in kwds_module.source
+    assert "class DataFormatKwds(TypedDict, total=False):" in kwds_module.source
+    assert "class DynamicOpacityKwds(TypedDict, total=False):" in kwds_module.source
+    assert "class ParameterKwds(TypedDict, total=False):" in kwds_module.source
+    assert "parse: Parse | ParseKwds" in kwds_module.source
+    assert "values: Sequence[float]" in kwds_module.source
+    assert "name: str" in kwds_module.source
+
+
 def test_generate_channels_module_emits_schema_driven_channel_setters() -> None:
     schema = {
         "definitions": {
+            "FieldName": {"type": "string"},
+            "Type": {"enum": ["quantitative", "nominal"], "type": "string"},
             "CompareParams": {
                 "type": "object",
                 "properties": {"field": {"type": "string"}},
@@ -147,8 +201,10 @@ def test_generate_channels_module_emits_schema_driven_channel_setters() -> None:
                     "x": {
                         "type": "object",
                         "properties": {
+                            "field": {"$ref": "#/definitions/FieldName"},
                             "sort": {"$ref": "#/definitions/CompareParams"},
                             "title": {"type": ["string", "null"]},
+                            "type": {"$ref": "#/definitions/Type"},
                         },
                     }
                 },
@@ -159,6 +215,10 @@ def test_generate_channels_module_emits_schema_driven_channel_setters() -> None:
     channels_module = SchemaWrapperGenerator(schema).generate_channels_module()
 
     assert channels_module.exports == ("X",)
+    assert "value: Channel | SchemaBase | str | dict[str, Any]" in (
+        channels_module.source
+    )
+    assert "from genome_spy.schemapi import SchemaBase" in channels_module.source
     assert "from genome_spy.schema.core import CompareParams" in channels_module.source
     assert (
         "from genome_spy.schema._kwds import CompareParamsKwds"
@@ -166,7 +226,11 @@ def test_generate_channels_module_emits_schema_driven_channel_setters() -> None:
     )
     assert "def title(" in channels_module.source
     assert "value: str | None" in channels_module.source
-    assert "return super().title(value)" in channels_module.source
+    assert "return self._with_property('title', value)" in channels_module.source
+    assert "def field(" in channels_module.source
+    assert "value: str" in channels_module.source
+    assert "def type(" in channels_module.source
+    assert "value: Type_T" in channels_module.source
     assert "def sort(" in channels_module.source
     assert "CompareParams | CompareParamsKwds | str | list[str] | None | object" in (
         channels_module.source
@@ -229,8 +293,9 @@ def test_generate_channels_module_discovers_nested_setters_from_schema() -> None
     assert "value: ExtraConfig | dict[str, Any] | None | object = _MISSING" in (
         channels_module.source
     )
-    assert "def chrom(" not in channels_module.source
-    assert "def value(" not in channels_module.source
+    assert "def chrom(" in channels_module.source
+    assert "value: FieldName_T" in channels_module.source
+    assert "def value(" in channels_module.source
 
 
 def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:

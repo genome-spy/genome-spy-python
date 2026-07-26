@@ -28,6 +28,7 @@ from genome_spy.schema._typing import (
     Scalar_T,
     ScaleInterpolate_T,
     ScaleType_T,
+    SelectionType_T,
     SortOrder_T,
     TitleAnchor_T,
     TitleFrame_T,
@@ -37,6 +38,10 @@ from genome_spy.schema._typing import (
 if TYPE_CHECKING:
     from genome_spy.schema.core import (
         AxisConfig,
+        BindCheckbox,
+        BindInput,
+        BindRadioSelect,
+        BindRange,
         ChromPosDef,
         ChromosomalLocus,
         ExprDef,
@@ -50,12 +55,15 @@ if TYPE_CHECKING:
         GenomeAxis,
         HandledTooltip,
         InlineGenomeDefinition,
+        IntervalSelectionConfig,
         Legend,
         LegendConfig,
         LinkConfig,
         MarkConfig,
         MarkPropExprDef,
+        Parse,
         PointConfig,
+        PointSelectionConfig,
         Position2Def,
         PositionDatumDef,
         PositionExprDef,
@@ -63,7 +71,9 @@ if TYPE_CHECKING:
         RangeConfig,
         RectConfig,
         RuleConfig,
+        RulerConfig,
         RulerEventConfig,
+        RulerInitMapping,
         RulerMarkConfig,
         Scale,
         ScaleConfig,
@@ -270,6 +280,24 @@ class CompareParamsKwds(TypedDict, total=False):
 
     field: Sequence[Field_T] | Field_T
     order: Sequence[SortOrder_T] | SortOrder_T
+
+
+class DataFormatKwds(TypedDict, total=False):
+    """TypedDict helper for raw ``DataFormat`` mappings."""
+
+    columns: Sequence[str]
+    delimiter: str
+    parse: Parse | ParseKwds | None
+    property: str
+    type: str
+
+
+class DynamicOpacityKwds(TypedDict, total=False):
+    """TypedDict helper for raw ``DynamicOpacity`` mappings."""
+
+    channel: PrimaryPositionalChannel_T | Literal["auto"]
+    unitsPerPixel: Sequence[float | ExprRef | dict[str, Any]]
+    values: Sequence[float]
 
 
 class EncodingKwds(TypedDict, total=False):
@@ -631,6 +659,40 @@ class PaddingsKwds(TypedDict, total=False):
     left: float
     right: float
     top: float
+
+
+class ParameterKwds(TypedDict, total=False):
+    """TypedDict helper for raw ``Parameter`` mappings."""
+
+    bind: (
+        BindCheckbox
+        | BindCheckboxKwds
+        | BindRadioSelect
+        | BindRadioSelectKwds
+        | BindRange
+        | BindRangeKwds
+        | BindInput
+        | BindInputKwds
+    )
+    description: str
+    expr: str
+    name: str
+    persist: bool
+    push: Literal["outer"]
+    ruler: RulerConfig | RulerConfigKwds
+    select: (
+        SelectionType_T
+        | PointSelectionConfig
+        | dict[str, Any]
+        | IntervalSelectionConfig
+    )
+    value: RulerInitMapping | dict[str, Any]
+
+
+class ParseKwds(TypedDict, total=False):
+    """TypedDict helper for raw ``Parse`` mappings."""
+
+    pass
 
 
 class PointConfigKwds(TypedDict, total=False):
@@ -1251,6 +1313,8 @@ __all__ = [
     "BindRadioSelectKwds",
     "BindRangeKwds",
     "CompareParamsKwds",
+    "DataFormatKwds",
+    "DynamicOpacityKwds",
     "EncodingKwds",
     "EventConfigKwds",
     "GenomeAxisKwds",
@@ -1261,6 +1325,8 @@ __all__ = [
     "LinkConfigKwds",
     "MarkConfigKwds",
     "PaddingsKwds",
+    "ParameterKwds",
+    "ParseKwds",
     "PointConfigKwds",
     "RangeConfigKwds",
     "RectConfigKwds",

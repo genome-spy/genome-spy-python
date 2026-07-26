@@ -2,14 +2,19 @@
 
 from __future__ import annotations
 
-import math
-from datetime import date, datetime
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, ClassVar, Self, cast
+from typing import Any, ClassVar, Protocol, Self, Unpack, cast
 from uuid import uuid4
 
-from genome_spy._utils import JsonSpec, compact_json, is_mapping, pretty_json
-from genome_spy.channels import Channel, channel
+from genome_spy._utils import JsonSpec, compact_json, pretty_json
+from genome_spy._chart_authoring import (
+    merge_encoding_definitions,
+    normalize_data,
+    normalize_transform,
+    normalize_transform_kwarg,
+)
+from genome_spy.channels import Channel
 from genome_spy.schema import (
     ConcatSpec,
     EncodingKwds,
@@ -21,6 +26,15 @@ from genome_spy.schema import (
     SCHEMA_VERSION,
     UnitSpec,
     VConcatSpec,
+    ViewBackground,
+)
+from genome_spy.schema._kwds import (
+    AxisResolveKwds,
+    GenomeSpyConfigKwds,
+    LegendResolveKwds,
+    ScaleResolveKwds,
+    ScalesKwds,
+    ViewBackgroundKwds,
 )
 from genome_spy.schema.mixins import ConfigMethodMixin, MarkMethodMixin
 from genome_spy.schemapi import (
@@ -35,7 +49,11 @@ from genome_spy.schemapi import (
 _CORE_DIST_URL = f"https://cdn.jsdelivr.net/npm/@genome-spy/core@{SCHEMA_VERSION}/dist"
 DEFAULT_SCHEMA_URL = f"{_CORE_DIST_URL}/schema.json"
 DEFAULT_EMBED_URL = f"{_CORE_DIST_URL}/bundle/index.es.js"
-Y_SCALE_DEFAULTS = {"reverse": True}
+
+
+class _CopyableSpec(Protocol):
+    def copy(self, *, deep: bool = True, **kwargs: Any) -> Any: ...
+
 
 HTML_TEMPLATE = """
 <div id="{container_id}"></div>
@@ -74,132 +92,6 @@ HTML_TEMPLATE = """
 """.strip()
 
 
-def _normalize_data(data: Any) -> Any:
-    if data is None:
-        return None
-    if isinstance(data, SchemaBase):
-        return data.to_dict(validate=False)
-    records = _records_from_data(data)
-    if records is not None:
-        return _records_data(records)
-    if is_mapping(data):
-        return cast(dict[str, Any], normalize_schema_value(data, validate=False))
-    raise TypeError(f"Unsupported data value: {type(data)!r}")
-
-
-def _json_safe(value: Any) -> Any:
-    if value is None:
-        return None
-    if isinstance(value, float) and not math.isfinite(value):
-        return None
-    if isinstance(value, datetime | date):
-        return value.isoformat()
-    if not isinstance(value, str | bytes) and hasattr(value, "item"):
-        try:
-            item = value.item()
-        except (AttributeError, TypeError, ValueError):
-            item = value
-        if item is not value:
-            return _json_safe(item)
-    if isinstance(value, list):
-        return [_json_safe(item) for item in value]
-    if is_mapping(value):
-        return {key: _json_safe(item) for key, item in value.items()}
-    return value
-
-
-def _records_from_data(data: Any) -> list[dict[str, Any]] | None:
-    if isinstance(data, list):
-        return data
-    if hasattr(data, "to_dicts"):
-        records = data.to_dicts()
-        if isinstance(records, list):
-            return records
-        return None
-    if is_mapping(data):
-        values = data.get("values")
-        if isinstance(values, list):
-            return values
-        return None
-    if hasattr(data, "to_dict"):
-        try:
-            records = data.to_dict(orient="records")
-        except TypeError:
-            return None
-        if isinstance(records, list):
-            return records
-    return None
-
-
-def _records_data(records: list[dict[str, Any]]) -> dict[str, Any]:
-    return {"values": _json_safe(records)}
-
-
-def _infer_field_type(field: str, data: Any) -> str | None:
-    records = _records_from_data(data)
-    if not records:
-        return None
-
-    for row in records[:100]:
-        if not is_mapping(row) or field not in row:
-            continue
-        value = row[field]
-        inferred_type = _infer_value_type(value)
-        if inferred_type is not None:
-            return inferred_type
-    return None
-
-
-def _infer_value_type(value: Any) -> str | None:
-    if value is None:
-        return None
-    if isinstance(value, bool):
-        return "nominal"
-    if isinstance(value, int | float):
-        return "quantitative"
-    return "nominal"
-
-
-def _normalize_channel(
-    name: str,
-    value: Channel | SchemaBase | str | dict[str, Any] | None,
-    *,
-    data: Any = None,
-) -> dict[str, Any] | None:
-    if value is None:
-        return None
-    definition = channel(value).to_dict()
-    return _normalized_channel_definition(name, definition, data=data)
-
-
-def _normalized_channel_definition(
-    name: str,
-    definition: dict[str, Any],
-    *,
-    data: Any = None,
-) -> dict[str, Any]:
-    normalized = dict(definition)
-    # Secondary positional channels (x2/y2) only carry field/value in GenomeSpy's
-    # schema; a `type` is invalid there, so never infer or keep one for them.
-    if name in {"x2", "y2"}:
-        normalized.pop("type", None)
-    elif "type" not in normalized and isinstance(normalized.get("field"), str):
-        inferred_type = _infer_field_type(normalized["field"], data)
-        if inferred_type is not None:
-            normalized["type"] = inferred_type
-    if name == "y":
-        normalized["scale"] = _normalized_y_scale(normalized.get("scale"))
-    return normalized
-
-
-def _normalized_y_scale(scale: Any) -> Any:
-    if scale is None:
-        return dict(Y_SCALE_DEFAULTS)
-    if is_mapping(scale) and "reverse" not in scale:
-        return {**Y_SCALE_DEFAULTS, **scale}
-    return scale
-
-
 def _infer_encoding_name(value: Channel | SchemaBase | str | dict[str, Any]) -> str:
     if isinstance(value, Channel) and value.encoding_name is not None:
         return value.encoding_name
@@ -215,29 +107,56 @@ def _merge_encoding_definitions(
     *,
     data: Any,
 ) -> dict[str, Any]:
-    merged = {} if current_encoding is Undefined else dict(current_encoding)
-    for name, value in updates.items():
-        merged[name] = _normalize_channel(name, value, data=data)
-    return merged
-
-
-def _normalize_transform(transform: SchemaBase | dict[str, Any]) -> dict[str, Any]:
-    try:
-        return normalize_mapping_value(transform, key="transform", validate=False)
-    except TypeError as error:
-        raise TypeError(f"Unsupported transform value: {type(transform)!r}") from error
-
-
-def _normalize_transform_kwarg(
-    value: SchemaBase | dict[str, Any],
-    *,
-    key: str,
-) -> dict[str, Any]:
-    return normalize_mapping_value(value, key=key, validate=False)
+    return merge_encoding_definitions(current_encoding, updates, data=data)
 
 
 class TopLevelSpec:
     """Shared behavior for top-level GenomeSpy specifications."""
+
+    def with_config(
+        self,
+        value: GenomeSpyConfig | GenomeSpyConfigKwds | None | object = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a copy with merged top-level ``config``."""
+        merged = merge_mapping_value(
+            self._kwds.get("config", Undefined),  # type: ignore[attr-defined]
+            "config",
+            value,
+            **kwargs,
+        )
+        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, config=merged))
+
+    def with_view(
+        self,
+        value: ViewBackground | ViewBackgroundKwds | None | object = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a copy with merged top-level ``view``."""
+        merged = merge_mapping_value(
+            self._kwds.get("view", Undefined),  # type: ignore[attr-defined]
+            "view",
+            value,
+            **kwargs,
+        )
+        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, view=merged))
+
+    def with_scales(
+        self,
+        value: ScalesKwds | None | object = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a copy with merged top-level shared scales."""
+        merged = merge_mapping_value(
+            self._kwds.get("scales", Undefined),  # type: ignore[attr-defined]
+            "scales",
+            value,
+            **kwargs,
+        )
+        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, scales=merged))
 
     def _merged_encoding(
         self,
@@ -292,22 +211,113 @@ class TopLevelSpec:
         **kwargs: Any,
     ) -> Self:
         """Return a copy with one nested config family updated."""
-        return self.copy(
-            deep=False, config=self._configured_nested(name, value, **kwargs)
-        )  # type: ignore[attr-defined, no-any-return]
+        return cast(
+            Self,
+            cast(_CopyableSpec, self).copy(
+                deep=False, config=self._configured_nested(name, value, **kwargs)
+            ),
+        )
 
     def _configure_property(self, name: str, value: Any) -> Self:
         """Return a copy with one scalar config property updated."""
-        return self.copy(deep=False, config=self._configured_property(name, value))  # type: ignore[attr-defined, no-any-return]
+        return cast(
+            Self,
+            cast(_CopyableSpec, self).copy(
+                deep=False, config=self._configured_property(name, value)
+            ),
+        )
 
     def properties(self, **kwargs: Any) -> Self:
         """Return a new spec with merged top-level properties."""
-        return self._with_properties(
-            {
-                key: normalize_schema_value(value, validate=False)
-                for key, value in kwargs.items()
-            }
+        return self._with_properties(kwargs)
+
+    def _normalized_properties(self, properties: dict[str, Any]) -> dict[str, Any]:
+        """Return top-level properties normalized for schema-backed copying."""
+        return {
+            key: normalize_schema_value(value, validate=False)
+            for key, value in properties.items()
+        }
+
+    def _appended_transform(self, transform: dict[str, Any]) -> Self:
+        """Return a copy with one normalized transform appended."""
+        current = self._kwds.get("transform", Undefined)  # type: ignore[attr-defined]
+        merged = [] if current is Undefined else list(current)
+        merged.append(normalize_transform(transform))
+        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, transform=merged))
+
+    def _configured(
+        self,
+        value: SchemaBase | dict[str, Any] | None | object = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a copy with top-level config merged."""
+        merged = merge_mapping_value(
+            self._kwds.get("config", Undefined),  # type: ignore[attr-defined]
+            "config",
+            value,
+            **kwargs,
         )
+        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, config=merged))
+
+    def _with_properties(self, properties: dict[str, Any]) -> Self:
+        """Return a copy with normalized top-level properties applied."""
+        return cast(
+            Self,
+            cast(_CopyableSpec, self).copy(
+                deep=False,
+                **self._normalized_properties(properties),
+            ),
+        )
+
+    def _merged_resolution(
+        self, key: str, updates: Mapping[str, Any]
+    ) -> dict[str, Any]:
+        """Return a merged composition ``resolve`` mapping."""
+        current = self._kwds.get("resolve", Undefined)  # type: ignore[attr-defined]
+        merged: dict[str, Any] = {} if current is Undefined else dict(current)
+        current_values = merged.get(key, Undefined)
+        merged_values: dict[str, Any] = (
+            {} if current_values is Undefined else dict(current_values)
+        )
+        for name, value in updates.items():
+            merged_values[name] = normalize_schema_value(value, validate=False)
+        merged[key] = merged_values
+        return merged
+
+    def _with_resolution(self, key: str, updates: Mapping[str, Any]) -> Self:
+        """Return a copy with one composition resolution family merged."""
+        return cast(
+            Self,
+            cast(_CopyableSpec, self).copy(
+                deep=False,
+                resolve=self._merged_resolution(key, updates),
+            ),
+        )
+
+    def _serialized_top_level_values(self) -> dict[str, Any]:
+        """Return copied top-level state with authoring-edge values normalized."""
+        values = dict(self._kwds)  # type: ignore[attr-defined]
+        data = values.get("data", Undefined)
+        if data is not Undefined:
+            normalized_data = normalize_data(data)
+            if normalized_data is None:
+                values.pop("data")
+            else:
+                values["data"] = normalized_data
+        return values
+
+    def _validated_root_spec(
+        self,
+        spec: dict[str, Any],
+        *,
+        include_schema: bool,
+        validate: bool,
+    ) -> dict[str, Any]:
+        """Return a root-validated spec dictionary ready for serialization."""
+        if include_schema:
+            spec["$schema"] = self._schema_url  # type: ignore[attr-defined]
+        return Root(**spec).to_dict(validate=validate)
 
     def transform(self, *transforms: SchemaBase | dict[str, Any]) -> Self:
         """Add one or more arbitrary GenomeSpy transforms.
@@ -329,10 +339,9 @@ class TopLevelSpec:
         Example:
             >>> chart.transform({"type": "collect", "sort": {"field": ["x"]}})
         """
-
         result = self
         for transform in transforms:
-            result = result._append_transform(_normalize_transform(transform))
+            result = result._append_transform(normalize_transform(transform))
         return result
 
     def transform_filter(self, expression: str) -> Self:
@@ -345,18 +354,20 @@ class TopLevelSpec:
         """Add a collect transform."""
         transform: dict[str, Any] = {"type": "collect"}
         if sort is not None:
-            transform["sort"] = _normalize_transform_kwarg(sort, key="sort")
+            transform["sort"] = normalize_transform_kwarg(sort, key="sort")
         return self._append_transform(transform)
 
     def transform_flatten(
         self,
         *,
-        fields: list[str],
+        fields: list[str] | None = None,
         as_: list[str] | None = None,
         index: str | None = None,
     ) -> Self:
         """Add a flatten transform."""
-        transform: dict[str, Any] = {"type": "flatten", "fields": fields}
+        transform: dict[str, Any] = {"type": "flatten"}
+        if fields is not None:
+            transform["fields"] = fields
         if as_ is not None:
             transform["as"] = as_
         if index is not None:
@@ -369,9 +380,37 @@ class TopLevelSpec:
             {"type": "flattenCompressedExons", "start": start}
         )
 
+    def transform_flatten_delimited(
+        self,
+        *,
+        field: str | list[str],
+        separator: str | list[str],
+        as_: str | list[str] | None = None,
+    ) -> Self:
+        """Split delimited fields into aligned rows."""
+        transform: dict[str, Any] = {
+            "type": "flattenDelimited",
+            "field": field,
+            "separator": separator,
+        }
+        if as_ is not None:
+            transform["as"] = as_
+        return self._append_transform(transform)
+
     def transform_formula(self, *, expr: str, as_: str) -> Self:
         """Add a formula transform."""
         return self._append_transform({"type": "formula", "expr": expr, "as": as_})
+
+    def transform_regex_extract(self, *, field: str, regex: str, as_: str) -> Self:
+        """Add a regexExtract transform."""
+        return self._append_transform(
+            {
+                "type": "regexExtract",
+                "field": field,
+                "regex": regex,
+                "as": as_,
+            }
+        )
 
     def transform_linearize_genomic_coordinate(
         self, *, chrom: str, pos: str, as_: str
@@ -407,6 +446,21 @@ class TopLevelSpec:
             transform["fontWeight"] = fontWeight
         if font is not None:
             transform["font"] = font
+        return self._append_transform(transform)
+
+    def transform_flatten_sequence(
+        self,
+        *,
+        field: str,
+        as_: list[str] | None = None,
+    ) -> Self:
+        """Add a flattenSequence transform."""
+        transform: dict[str, Any] = {
+            "type": "flattenSequence",
+            "field": field,
+        }
+        if as_ is not None:
+            transform["as"] = as_
         return self._append_transform(transform)
 
     def transform_filter_scored_labels(
@@ -448,6 +502,25 @@ class TopLevelSpec:
             transform["ops"] = ops
         if as_ is not None:
             transform["as"] = as_
+        return self._append_transform(transform)
+
+    def transform_coverage(
+        self,
+        *,
+        start: str,
+        end: str,
+        as_: str,
+        chrom: str | None = None,
+    ) -> Self:
+        """Add a coverage transform."""
+        transform: dict[str, Any] = {
+            "type": "coverage",
+            "start": start,
+            "end": end,
+            "as": as_,
+        }
+        if chrom is not None:
+            transform["chrom"] = chrom
         return self._append_transform(transform)
 
     def transform_pileup(
@@ -495,7 +568,7 @@ class TopLevelSpec:
         if field is not None:
             transform["field"] = field
         if sort is not None:
-            transform["sort"] = _normalize_transform_kwarg(sort, key="sort")
+            transform["sort"] = normalize_transform_kwarg(sort, key="sort")
         if offset is not None:
             transform["offset"] = offset
         if as_ is not None:
@@ -587,9 +660,6 @@ class TopLevelSpec:
     def _append_transform(self, transform: dict[str, Any]) -> Self:
         raise NotImplementedError
 
-    def _with_properties(self, properties: dict[str, Any]) -> Self:
-        raise NotImplementedError
-
 
 class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
     """An immutable-style builder backed by generated ``UnitSpec`` state."""
@@ -623,10 +693,6 @@ class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
         copied._schema_url = self._schema_url
         return copied
 
-    def properties(self, **kwargs: Any) -> Self:
-        """Return a shallow copy with updated unit-spec properties."""
-        return self.copy(deep=False, **kwargs)
-
     def mark_circle(self, **kwargs: Any) -> Chart:
         """Set the mark to a point, whose default GenomeSpy shape is a circle."""
         return self._with_mark("point", **kwargs)
@@ -644,18 +710,13 @@ class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
         self, *, include_schema: bool = True, validate: bool = True
     ) -> dict[str, Any]:
         """Serialize and optionally validate the complete chart specification."""
-        values = dict(self._kwds)
-        data = values.get("data", Undefined)
-        if data is not Undefined:
-            normalized_data = _normalize_data(data)
-            if normalized_data is None:
-                values.pop("data")
-            else:
-                values["data"] = normalized_data
+        values = self._serialized_top_level_values()
         spec = UnitSpec(**values).to_dict(validate=False)
-        if include_schema:
-            spec["$schema"] = self._schema_url
-        return Root(**spec).to_dict(validate=validate)
+        return self._validated_root_spec(
+            spec,
+            include_schema=include_schema,
+            validate=validate,
+        )
 
     def _with_mark(self, mark_type: str, **kwargs: Any) -> Chart:
         if mark_type not in MARK_TYPES:
@@ -668,13 +729,7 @@ class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
         return self.copy(deep=False, mark=mark)
 
     def _append_transform(self, transform: dict[str, Any]) -> Self:
-        current = self._kwds.get("transform", Undefined)
-        merged = [] if current is Undefined else list(current)
-        merged.append(_normalize_transform(transform))
-        return self.copy(deep=False, transform=merged)
-
-    def _with_properties(self, properties: dict[str, Any]) -> Self:
-        return self.copy(deep=False, **properties)
+        return self._appended_transform(transform)
 
     def _configure(
         self,
@@ -682,10 +737,7 @@ class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
         /,
         **kwargs: Any,
     ) -> Self:
-        merged = merge_mapping_value(
-            self._kwds.get("config", Undefined), "config", value, **kwargs
-        )
-        return self.copy(deep=False, config=merged)
+        return self._configured(value, **kwargs)
 
 
 class _CompositionSpec(TopLevelSpec, ConfigMethodMixin):
@@ -703,33 +755,22 @@ class _CompositionSpec(TopLevelSpec, ConfigMethodMixin):
     def to_dict(
         self, *, include_schema: bool = True, validate: bool = True
     ) -> dict[str, Any]:
-        values = dict(self._kwds)
+        values = self._serialized_top_level_values()
         children = values.get(self._children_key, Undefined)
         if children is not Undefined:
             values[self._children_key] = [
                 child.to_dict(include_schema=False, validate=False)
                 for child in children
             ]
-        data = values.get("data", Undefined)
-        if data is not Undefined:
-            normalized_data = _normalize_data(data)
-            if normalized_data is None:
-                values.pop("data")
-            else:
-                values["data"] = normalized_data
         spec = self._schema_spec_cls(**values).to_dict(validate=False)
-        if include_schema:
-            spec["$schema"] = self._schema_url
-        return Root(**spec).to_dict(validate=validate)
+        return self._validated_root_spec(
+            spec,
+            include_schema=include_schema,
+            validate=validate,
+        )
 
     def _append_transform(self, transform: dict[str, Any]) -> Self:
-        current = self._kwds.get("transform", Undefined)
-        merged = [] if current is Undefined else list(current)
-        merged.append(_normalize_transform(transform))
-        return self.copy(deep=False, transform=merged)
-
-    def _with_properties(self, properties: dict[str, Any]) -> Self:
-        return self.copy(deep=False, **properties)
+        return self._appended_transform(transform)
 
     def _configure(
         self,
@@ -737,10 +778,7 @@ class _CompositionSpec(TopLevelSpec, ConfigMethodMixin):
         /,
         **kwargs: Any,
     ) -> Self:
-        merged = merge_mapping_value(
-            self._kwds.get("config", Undefined), "config", value, **kwargs
-        )
-        return self.copy(deep=False, config=merged)
+        return self._configured(value, **kwargs)
 
     def encode(
         self,
@@ -751,34 +789,17 @@ class _CompositionSpec(TopLevelSpec, ConfigMethodMixin):
         merged = self._merged_encoding(args, kwargs)
         return self.copy(deep=False, encoding=merged)
 
-    def resolve_axis(self, **kwargs: str | None) -> Self:
+    def resolve_axis(self, **kwargs: Unpack[AxisResolveKwds]) -> Self:
         """Return a copy with merged composition-level axis resolutions."""
-        return self._merge_resolution("axis", kwargs)
+        return self._with_resolution("axis", kwargs)
 
-    def resolve_scale(self, **kwargs: str | None) -> Self:
+    def resolve_scale(self, **kwargs: Unpack[ScaleResolveKwds]) -> Self:
         """Return a copy with merged composition-level scale resolutions."""
-        return self._merge_resolution("scale", kwargs)
+        return self._with_resolution("scale", kwargs)
 
-    def resolve_legend(self, **kwargs: str | None) -> Self:
+    def resolve_legend(self, **kwargs: Unpack[LegendResolveKwds]) -> Self:
         """Return a copy with merged composition-level legend resolutions."""
-        return self._merge_resolution("legend", kwargs)
-
-    def _merge_resolution(self, key: str, updates: dict[str, Any]) -> Self:
-        current = self._kwds.get("resolve", Undefined)
-        merged: dict[str, Any] = {} if current is Undefined else dict(current)
-        current_values = merged.get(key, Undefined)
-        merged_values: dict[str, Any] = (
-            {} if current_values is Undefined else dict(current_values)
-        )
-        for name, value in updates.items():
-            if isinstance(value, SchemaBase):
-                merged_values[name] = value.to_dict(validate=False)
-            elif is_mapping(value):
-                merged_values[name] = dict(value)
-            else:
-                merged_values[name] = value
-        merged[key] = merged_values
-        return self.copy(deep=False, resolve=merged)
+        return self._with_resolution("legend", kwargs)
 
 
 class LayerChart(_CompositionSpec, LayerSpec):

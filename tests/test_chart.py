@@ -14,6 +14,7 @@ from genome_spy.schema import (
     ConcatSpec,
     DynamicOpacity,
     ExprRef,
+    HandledTooltip,
     GenomeSpyConfig,
     GenomeAxis,
     HConcatSpec,
@@ -29,6 +30,7 @@ from genome_spy.schema import (
     ViewConfig,
 )
 from genome_spy.schema.channels import X as GeneratedX
+from genome_spy.channels import LocusChannel
 from genome_spy.schemapi import SchemaValidationError
 
 
@@ -62,6 +64,16 @@ def test_public_channel_wrapper_is_generated_and_fluent() -> None:
         "type": "quantitative",
         "scale": {"zero": False},
         "title": "Position",
+    }
+
+
+def test_generated_channel_simple_setters_are_schema_driven() -> None:
+    channel = gs.X("position:Q").field("position_bp").type("quantitative").band(0.5)
+
+    assert channel.to_dict() == {
+        "field": "position_bp",
+        "type": "quantitative",
+        "band": 0.5,
     }
 
 
@@ -117,6 +129,10 @@ def test_public_api_exposes_additional_ergonomic_builders() -> None:
         "unitsPerPixel": [100000, 40000],
         "values": [0, 1],
     }
+    assert gs.datum(0, type="quantitative").to_dict() == {
+        "datum": 0,
+        "type": "quantitative",
+    }
     assert gs.data_format(type="bed").to_dict() == {"type": "bed"}
     assert gs.parse(chrom="string", start="integer").to_dict() == {
         "chrom": "string",
@@ -141,6 +157,7 @@ def test_public_api_exposes_additional_ergonomic_builders() -> None:
     assert isinstance(gs.view(stroke="lightgray"), ViewBackground)
     assert isinstance(gs.view_config(stroke="lightgray"), ViewConfig)
     assert isinstance(gs.config(), GenomeSpyConfig)
+    assert isinstance(gs.HandledTooltip(handler="demo"), HandledTooltip)
     assert isinstance(
         gs.dynamic_opacity(unitsPerPixel=[100000, 40000], values=[0, 1]),
         DynamicOpacity,
@@ -176,6 +193,15 @@ def test_expression_helper_works_in_channel_definitions() -> None:
     }
 
 
+def test_generated_channel_constructor_accepts_schema_wrappers() -> None:
+    channel = gs.Dx(gs.expr("datum.x * 2"), type="quantitative")
+
+    assert channel.to_dict() == {
+        "expr": "datum.x * 2",
+        "type": "quantitative",
+    }
+
+
 def test_generated_channel_nested_setters_allow_null_override() -> None:
     channel = gs.X("position:Q").axis(None)
 
@@ -199,6 +225,18 @@ def test_locus_channel_supports_fluent_axis_and_scale_configuration() -> None:
         "type": "locus",
         "axis": {"title": "Genomic position", "grid": False},
         "scale": {"assembly": "hg38"},
+    }
+
+
+def test_locus_helper_returns_dedicated_channel_type() -> None:
+    channel = gs.Locus("chrom", "pos").chrom("chromosome").pos("position").band(0.5)
+
+    assert isinstance(channel, LocusChannel)
+    assert channel.to_dict() == {
+        "chrom": "chromosome",
+        "pos": "position",
+        "type": "locus",
+        "band": 0.5,
     }
 
 
@@ -347,6 +385,45 @@ def test_generated_configure_methods_match_helper_serialization() -> None:
     )
 
     assert helper_chart.to_dict()["config"] == generated_chart.to_dict()["config"]
+
+
+def test_top_level_with_view_merges_nested_properties_and_preserves_chart_type() -> (
+    None
+):
+    chart = (
+        gs.Chart([{"x": 1}])
+        .mark_point()
+        .encode(x="x:Q")
+        .with_view(stroke="lightgray")
+        .with_view(fill="#f8f8f8")
+    )
+
+    assert isinstance(chart, gs.Chart)
+    assert chart.to_dict()["view"] == {
+        "stroke": "lightgray",
+        "fill": "#f8f8f8",
+    }
+
+
+def test_top_level_with_config_and_with_scales_merge_across_calls() -> None:
+    chart = (
+        gs.Chart([{"x": 1}])
+        .mark_point()
+        .encode(x="x:Q")
+        .with_config(view={"stroke": "lightgray"})
+        .with_config(axis={"grid": False})
+        .with_scales(x={"zoom": True})
+        .with_scales(color={"scheme": "blues"})
+    )
+
+    assert chart.to_dict()["config"] == {
+        "view": {"stroke": "lightgray"},
+        "axis": {"grid": False},
+    }
+    assert chart.to_dict()["scales"] == {
+        "x": {"zoom": True},
+        "color": {"scheme": "blues"},
+    }
 
 
 def test_composition_properties_support_root_level_genomic_config() -> None:
@@ -595,6 +672,31 @@ def test_project_and_flatten_helpers_serialize() -> None:
         {"type": "project", "fields": ["values", "meta"], "as": ["items", "meta"]},
         {"type": "flatten", "fields": ["items"], "as": ["item"], "index": "row"},
         {"type": "flattenCompressedExons", "start": "_start"},
+    ]
+
+
+def test_additional_transform_helpers_cover_common_docs_patterns() -> None:
+    chart = (
+        gs.Chart([{"x": 1}])
+        .mark_point()
+        .transform_coverage(start="start", end="end", as_="coverage", chrom="chrom")
+        .transform_flatten()
+        .transform_flatten_sequence(field="sequence", as_=["raw_pos", "base"])
+        .transform_regex_extract(field="label", regex="^(A)", as_="prefix")
+        .encode(x="x:Q")
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "coverage",
+            "start": "start",
+            "end": "end",
+            "as": "coverage",
+            "chrom": "chrom",
+        },
+        {"type": "flatten"},
+        {"type": "flattenSequence", "field": "sequence", "as": ["raw_pos", "base"]},
+        {"type": "regexExtract", "field": "label", "regex": "^(A)", "as": "prefix"},
     ]
 
 
@@ -882,6 +984,17 @@ def test_composition_charts_expose_resolution_ergonomics() -> None:
         "scale": {"x": "independent", "color": "shared"},
         "axis": {"x": "shared"},
         "legend": {"color": "independent"},
+    }
+
+
+def test_composition_resolution_merges_across_repeated_calls() -> None:
+    one = gs.Chart(data=[{"x": 1}]).mark_point().encode(x="x:Q")
+    two = gs.Chart(data=[{"x": 2}]).mark_point().encode(x="x:Q")
+
+    chart = (one | two).resolve_scale(x="independent").resolve_scale(color="shared")
+
+    assert chart.to_dict()["resolve"] == {
+        "scale": {"x": "independent", "color": "shared"}
     }
 
 

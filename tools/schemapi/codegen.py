@@ -27,6 +27,8 @@ KWDS_TARGETS = frozenset(
         "BindRadioSelect",
         "BindRange",
         "CompareParams",
+        "DataFormat",
+        "DynamicOpacity",
         "Encoding",
         "EventConfig",
         "GenomeAxis",
@@ -38,6 +40,8 @@ KWDS_TARGETS = frozenset(
         "MarkConfig",
         "Paddings",
         "PointConfig",
+        "Parameter",
+        "Parse",
         "RangeConfig",
         "RectConfig",
         "Resolve",
@@ -550,6 +554,8 @@ class SchemaWrapperGenerator:
         }
         setters: list[tuple[str, str, str]] = []
         for property_name in sorted(resolved_properties):
+            if property_name == "sort":
+                continue
             nested_schema = resolved_properties[property_name]
             if not isinstance(nested_schema, dict):
                 continue
@@ -571,8 +577,8 @@ class SchemaWrapperGenerator:
             )
         return tuple(setters)
 
-    def channel_simple_setters(self, encoding_name: str) -> tuple[str, ...]:
-        """Return fluent scalar/custom setters available for an encoding channel."""
+    def channel_simple_setters(self, encoding_name: str) -> tuple[PropertySpec, ...]:
+        """Return non-merge channel setters derived directly from the schema."""
         encoding_schema = self._definitions_map.get("Encoding", {})
         if not isinstance(encoding_schema, dict):
             return ()
@@ -582,12 +588,17 @@ class SchemaWrapperGenerator:
         channel_schema = properties.get(encoding_name)
         if not isinstance(channel_schema, dict):
             return ()
-        resolved_properties = self._analyzer.resolve_properties(channel_schema)
-        setters: list[str] = []
-        for property_name in ("title", "sort"):
-            if property_name in resolved_properties:
-                setters.append(property_name)
-        return tuple(setters)
+        nested_property_names = {
+            property_name
+            for property_name, _, _ in self.channel_nested_setters(encoding_name)
+        }
+        definition = SchemaDefinition(encoding_name, channel_schema)
+        return tuple(
+            property_spec
+            for property_spec in self._analyzer.property_specs(definition)
+            if property_spec.name not in nested_property_names
+            or property_spec.name == "sort"
+        )
 
     def generate_core_module(self) -> GeneratedModule:
         """Generate a compact ``core.py``-style module."""
@@ -785,7 +796,7 @@ class SchemaWrapperGenerator:
             class_name = _class_name(definition.name)
             if class_name not in KWDS_TARGETS:
                 continue
-            if not self._base_analyzer.schema_looks_object_like(definition.schema):
+            if not self._supports_kwds_helper(definition):
                 continue
             names.append(_kwds_type_name(definition.name))
         names.extend(self._anonymous_kwds_sources())
@@ -807,7 +818,7 @@ class SchemaWrapperGenerator:
             class_name = _class_name(definition.name)
             if class_name not in KWDS_TARGETS:
                 continue
-            if not self._analyzer.schema_looks_object_like(definition.schema):
+            if not self._supports_kwds_helper(definition):
                 continue
             helper_name = _kwds_type_name(definition.name)
             property_specs = self._analyzer.property_specs(definition)
@@ -897,6 +908,12 @@ class SchemaWrapperGenerator:
                     *extra_helper_sources,
                 ]
             ),
+        )
+
+    def _supports_kwds_helper(self, definition: SchemaDefinition) -> bool:
+        """Return whether a definition can produce a useful TypedDict helper."""
+        return bool(self._base_analyzer.property_specs(definition)) or (
+            self._base_analyzer.schema_looks_object_like(definition.schema)
         )
 
     def _anonymous_kwds_sources(self) -> dict[str, str]:
@@ -1052,6 +1069,9 @@ class SchemaWrapperGenerator:
         exports: list[str] = []
         classes: list[str] = []
         kwds_type_names = set(self.kwds_type_names())
+        available_class_names = {
+            _class_name(definition.name) for definition in self.definitions()
+        }
         simple_setters_by_channel = {
             encoding_name: self.channel_simple_setters(encoding_name)
             for encoding_name in self.encoding_channels()
@@ -1061,11 +1081,43 @@ class SchemaWrapperGenerator:
             for encoding_name in self.encoding_channels()
             for _, class_name, _ in self.channel_nested_setters(encoding_name)
         }
+        simple_setter_specs = tuple(
+            property_spec
+            for encoding_name in self.encoding_channels()
+            for property_spec in simple_setters_by_channel[encoding_name]
+        )
         helper_kwds_names = {
             _kwds_type_name(class_name)
             for class_name in helper_class_names
             if _kwds_type_name(class_name) in kwds_type_names
         }
+        helper_kwds_names.update(
+            kwds_name
+            for property_spec in simple_setter_specs
+            for kwds_name in _annotation_kwds_names(property_spec.annotation.annotation)
+            if kwds_name in kwds_type_names
+        )
+        helper_alias_names = sorted(
+            {
+                alias_name
+                for property_spec in simple_setter_specs
+                for alias_name in _annotation_alias_names(
+                    property_spec.annotation.annotation
+                )
+            }
+        )
+        simple_setter_class_names = {
+            class_name
+            for property_spec in simple_setter_specs
+            for class_name in _annotation_class_names(
+                property_spec.annotation.annotation
+            )
+            if class_name in available_class_names
+        }
+        needs_sequence = any(
+            property_spec.annotation.needs_sequence
+            for property_spec in simple_setter_specs
+        )
         for encoding_name in self.encoding_channels():
             class_name = _class_name(encoding_name)
             exports.append(class_name)
@@ -1078,7 +1130,6 @@ class SchemaWrapperGenerator:
                     analyzer=self._analyzer,
                 )
             )
-        helper_imports = ", ".join(sorted(helper_class_names))
         needs_compare_params = any(
             "sort" in setters for setters in simple_setters_by_channel.values()
         )
@@ -1086,18 +1137,29 @@ class SchemaWrapperGenerator:
             [
                 GENERATED_HEADER,
                 "from __future__ import annotations",
+                ("from collections.abc import Sequence" if needs_sequence else ""),
                 "from typing import Any",
                 "",
                 "from genome_spy.channels import Channel, _MISSING, channel",
+                "from genome_spy.schemapi import SchemaBase",
+                (
+                    "from genome_spy.schema._typing import "
+                    + ", ".join(helper_alias_names)
+                    if helper_alias_names
+                    else ""
+                ),
                 (
                     "from genome_spy.schema.core import "
                     + ", ".join(
                         sorted(
                             helper_class_names
+                            | simple_setter_class_names
                             | ({"CompareParams"} if needs_compare_params else set())
                         )
                     )
-                    if helper_imports or needs_compare_params
+                    if helper_class_names
+                    or simple_setter_class_names
+                    or needs_compare_params
                     else ""
                 ),
                 (
@@ -1408,13 +1470,17 @@ def _channel_class_source(
     class_name: str,
     encoding_name: str,
     *,
-    nested_setters: tuple[tuple[str, str], ...],
-    simple_setters: tuple[str, ...],
+    nested_setters: tuple[tuple[str, str, str], ...],
+    simple_setters: tuple[PropertySpec, ...],
     analyzer: SchemaAnalyzer,
 ) -> str:
     simple_methods = "".join(
-        _channel_simple_setter_source(class_name, property_name)
-        for property_name in simple_setters
+        _channel_simple_setter_source(
+            class_name,
+            property_name=property_spec.name,
+            annotation=property_spec.annotation.annotation,
+        )
+        for property_spec in simple_setters
     )
     methods = "".join(
         _channel_nested_setter_source(
@@ -1429,7 +1495,7 @@ def _channel_class_source(
         f"class {class_name}(Channel):\n"
         f'    """Generated wrapper for the ``{encoding_name}`` encoding channel."""\n\n'
         "    def __init__(\n"
-        "        self, value: Channel | str | dict[str, Any], /, **kwargs: Any\n"
+        "        self, value: Channel | SchemaBase | str | dict[str, Any], /, **kwargs: Any\n"
         "    ) -> None:\n"
         f"        wrapped = channel(value, encoding_name={encoding_name!r}, **kwargs)\n"
         f"        super().__init__(wrapped.definition, encoding_name={encoding_name!r})\n"
@@ -1438,18 +1504,12 @@ def _channel_class_source(
     )
 
 
-def _channel_simple_setter_source(channel_class_name: str, property_name: str) -> str:
-    if property_name == "title":
-        return (
-            "\n"
-            "    def title(\n"
-            "        self,\n"
-            "        value: str | None,\n"
-            "    ) -> "
-            f"{channel_class_name}:\n"
-            '        """Return a channel with a title."""\n'
-            f"        return super().title(value)\n"
-        )
+def _channel_simple_setter_source(
+    channel_class_name: str,
+    *,
+    property_name: str,
+    annotation: str,
+) -> str:
     if property_name == "sort":
         return (
             "\n"
@@ -1463,7 +1523,15 @@ def _channel_simple_setter_source(channel_class_name: str, property_name: str) -
             '        """Return a channel with a ``sort`` configuration."""\n'
             f"        return super().sort(value, **kwargs)\n"
         )
-    raise ValueError(f"Unsupported channel simple setter: {property_name}")
+    return (
+        "\n"
+        f"    def {property_name}(\n"
+        "        self,\n"
+        f"        value: {annotation},\n"
+        f"    ) -> {channel_class_name}:\n"
+        f'        """Return a channel with ``{property_name}`` updated."""\n'
+        f"        return self._with_property({property_name!r}, value)\n"
+    )
 
 
 def _channel_nested_setter_source(

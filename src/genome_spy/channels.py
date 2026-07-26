@@ -6,9 +6,9 @@ from dataclasses import dataclass, field
 from typing import Any, Self, cast
 
 from genome_spy._utils import is_mapping, parse_shorthand
-from genome_spy.schema._kwds import CompareParamsKwds
+from genome_spy.schema._kwds import CompareParamsKwds, GenomeAxisKwds, ScaleKwds
 from genome_spy.schema._typing import SortOrder_T
-from genome_spy.schema.core import CompareParams
+from genome_spy.schema.core import CompareParams, GenomeAxis, Scale
 from genome_spy.schemapi import (
     SchemaBase,
     Undefined,
@@ -18,10 +18,26 @@ from genome_spy.schemapi import (
 
 _MISSING = Undefined
 
+__all__ = [
+    "Channel",
+    "LocusChannel",
+    "Locus",
+    "channel",
+    "compare",
+    "datum",
+    "locus",
+    "value",
+]
+
 
 @dataclass(frozen=True, slots=True)
 class Channel:
-    """A serializable GenomeSpy encoding channel definition."""
+    """A serializable GenomeSpy encoding channel definition.
+
+    This class is mostly a small runtime backend for generated channel wrappers
+    and the handwritten locus helper, not the main authoring surface users
+    should build on directly.
+    """
 
     definition: dict[str, Any] = field(default_factory=dict)
     encoding_name: str | None = None
@@ -29,12 +45,6 @@ class Channel:
     def to_dict(self) -> dict[str, Any]:
         """Return the JSON-serializable channel definition."""
         return dict(self.definition)
-
-    def title(self, value: str | None) -> Self:
-        """Return a channel with a title."""
-        definition = self.to_dict()
-        definition["title"] = value
-        return self._replace_definition(definition)
 
     def sort(
         self,
@@ -99,10 +109,63 @@ class Channel:
         )
         return self._replace_definition(definition)
 
+    def _with_property(self, key: str, value: Any) -> Self:
+        definition = self.to_dict()
+        definition[key] = normalize_schema_value(value, validate=False)
+        return self._replace_definition(definition)
+
     def _replace_definition(self, definition: dict[str, Any]) -> Self:
         if type(self) is Channel:
             return cast(Self, Channel(definition, self.encoding_name))
         return self.__class__(definition)
+
+
+@dataclass(frozen=True, slots=True)
+class LocusChannel(Channel):
+    """A handwritten locus channel with generated-style fluent setters.
+
+    GenomeSpy's genomic locus channels are intentionally kept as a small
+    handwritten ergonomic layer rather than forced into the ordinary generated
+    channel shape.
+    """
+
+    def axis(
+        self,
+        value: GenomeAxis | GenomeAxisKwds | None | object = _MISSING,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a locus channel with an ``axis`` configuration."""
+        return self._with_nested("axis", value, **kwargs)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = _MISSING,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a locus channel with a ``scale`` configuration."""
+        return self._with_nested("scale", value, **kwargs)
+
+    def title(self, value: str | None) -> Self:
+        """Return a locus channel with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def chrom(self, value: str) -> Self:
+        """Return a locus channel with ``chrom`` updated."""
+        return self._with_property("chrom", value)
+
+    def pos(self, value: str | None) -> Self:
+        """Return a locus channel with ``pos`` updated."""
+        return self._with_property("pos", value)
+
+    def offset(self, value: float) -> Self:
+        """Return a locus channel with ``offset`` updated."""
+        return self._with_property("offset", value)
+
+    def band(self, value: float) -> Self:
+        """Return a locus channel with ``band`` updated."""
+        return self._with_property("band", value)
 
 
 def channel(
@@ -112,7 +175,7 @@ def channel(
     encoding_name: str | None = None,
     **kwargs: Any,
 ) -> Channel:
-    """Create a channel definition from shorthand or a raw mapping."""
+    """Create a generic channel definition from shorthand or a raw mapping."""
     if isinstance(value, Channel):
         definition = value.to_dict()
         encoding_name = encoding_name or value.encoding_name
@@ -129,17 +192,22 @@ def channel(
     return Channel(definition, encoding_name=encoding_name)
 
 
-def locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> Channel:
+def locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> LocusChannel:
     """Create a GenomeSpy chromosomal locus channel definition."""
     definition: dict[str, Any] = {"chrom": chrom, "type": "locus", **kwargs}
     if pos is not None:
         definition["pos"] = pos
-    return Channel(definition)
+    return LocusChannel(definition)
 
 
 def value(value: Any, /, **kwargs: Any) -> Channel:
     """Create a constant-value encoding channel."""
     return Channel({"value": value, **kwargs})
+
+
+def datum(value: Any, /, **kwargs: Any) -> Channel:
+    """Create a constant-datum encoding channel."""
+    return Channel({"datum": value, **kwargs})
 
 
 def compare(
@@ -190,5 +258,6 @@ def _merge_sort_value(
     raise TypeError(f"Unsupported nested 'sort' value: {type(value)!r}")
 
 
-def Locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> Channel:
+def Locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> LocusChannel:
+    """Create a GenomeSpy chromosomal locus channel definition."""
     return locus(chrom, pos, **kwargs)

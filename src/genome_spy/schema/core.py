@@ -52,6 +52,7 @@ from genome_spy.schema._kwds import (
     BindRadioSelectKwds,
     BindRangeKwds,
     CompareParamsKwds,
+    DynamicOpacityKwds,
     EncodingKwds,
     EventConfigKwds,
     GenomeAxisKwds,
@@ -63,6 +64,7 @@ from genome_spy.schema._kwds import (
     LinkConfigKwds,
     MarkConfigKwds,
     PaddingsKwds,
+    ParseKwds,
     PointConfigKwds,
     RangeConfigKwds,
     RectConfigKwds,
@@ -1169,7 +1171,7 @@ class BedDataFormat(GenomeSpySchema):
 
     def __init__(
         self,
-        parse: Parse | dict[str, Any] | None | UndefinedType = Undefined,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
         type: Literal["bed"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
@@ -1179,7 +1181,7 @@ class BedDataFormat(GenomeSpySchema):
 
     def with_parse(
         self,
-        value: Parse | dict[str, Any] | None | Any = Undefined,
+        value: Parse | ParseKwds | None | Any = Undefined,
         /,
         **kwargs: Any,
     ) -> BedDataFormat:
@@ -1200,7 +1202,7 @@ class BedpeDataFormat(GenomeSpySchema):
     def __init__(
         self,
         columns: Sequence[str] | UndefinedType = Undefined,
-        parse: Parse | dict[str, Any] | None | UndefinedType = Undefined,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
         type: Literal["bedpe"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
@@ -1214,7 +1216,7 @@ class BedpeDataFormat(GenomeSpySchema):
 
     def with_parse(
         self,
-        value: Parse | dict[str, Any] | None | Any = Undefined,
+        value: Parse | ParseKwds | None | Any = Undefined,
         /,
         **kwargs: Any,
     ) -> BedpeDataFormat:
@@ -3750,8 +3752,9 @@ class CoreRootSpec(GenomeSpySchema):
         name: str | UndefinedType = Undefined,
         opacity: float
         | DynamicOpacity
-        | dict[str, Any]
+        | DynamicOpacityKwds
         | ExprRef
+        | dict[str, Any]
         | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
@@ -4043,7 +4046,8 @@ class CoreRootSpec(GenomeSpySchema):
         return self._with_property("name", value)
 
     def with_opacity(
-        self, value: float | DynamicOpacity | dict[str, Any] | ExprRef
+        self,
+        value: float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any],
     ) -> CoreRootSpec:
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
@@ -4278,7 +4282,7 @@ class CsvDataFormat(GenomeSpySchema):
     def __init__(
         self,
         columns: Sequence[str] | UndefinedType = Undefined,
-        parse: Parse | dict[str, Any] | None | UndefinedType = Undefined,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
         type: Literal["csv", "tsv"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
@@ -4292,7 +4296,7 @@ class CsvDataFormat(GenomeSpySchema):
 
     def with_parse(
         self,
-        value: Parse | dict[str, Any] | None | Any = Undefined,
+        value: Parse | ParseKwds | None | Any = Undefined,
         /,
         **kwargs: Any,
     ) -> CsvDataFormat:
@@ -4418,7 +4422,7 @@ class DataFormat(GenomeSpySchema):
         self,
         columns: Sequence[str] | UndefinedType = Undefined,
         delimiter: str | UndefinedType = Undefined,
-        parse: Parse | dict[str, Any] | None | UndefinedType = Undefined,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
         property: str | UndefinedType = Undefined,
         type: str | UndefinedType = Undefined,
         **kwds: Any,
@@ -4443,7 +4447,7 @@ class DataFormat(GenomeSpySchema):
 
     def with_parse(
         self,
-        value: Parse | dict[str, Any] | None | Any = Undefined,
+        value: Parse | ParseKwds | None | Any = Undefined,
         /,
         **kwargs: Any,
     ) -> DataFormat:
@@ -4602,7 +4606,7 @@ class DsvDataFormat(GenomeSpySchema):
         self,
         columns: Sequence[str] | UndefinedType = Undefined,
         delimiter: str | UndefinedType = Undefined,
-        parse: Parse | dict[str, Any] | None | UndefinedType = Undefined,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
         type: Literal["dsv"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
@@ -4620,7 +4624,7 @@ class DsvDataFormat(GenomeSpySchema):
 
     def with_parse(
         self,
-        value: Parse | dict[str, Any] | None | Any = Undefined,
+        value: Parse | ParseKwds | None | Any = Undefined,
         /,
         **kwargs: Any,
     ) -> DsvDataFormat:
@@ -7871,7 +7875,7 @@ class JsonDataFormat(GenomeSpySchema):
 
     def __init__(
         self,
-        parse: Parse | dict[str, Any] | None | UndefinedType = Undefined,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
         property: str | UndefinedType = Undefined,
         type: Literal["json"] | UndefinedType = Undefined,
         **kwds: Any,
@@ -7882,7 +7886,7 @@ class JsonDataFormat(GenomeSpySchema):
 
     def with_parse(
         self,
-        value: Parse | dict[str, Any] | None | Any = Undefined,
+        value: Parse | ParseKwds | None | Any = Undefined,
         /,
         **kwargs: Any,
     ) -> JsonDataFormat:
@@ -7966,8 +7970,9 @@ class LayerSpec(GenomeSpySchema):
         name: str | UndefinedType = Undefined,
         opacity: float
         | DynamicOpacity
-        | dict[str, Any]
+        | DynamicOpacityKwds
         | ExprRef
+        | dict[str, Any]
         | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
@@ -8139,7 +8144,8 @@ class LayerSpec(GenomeSpySchema):
         return self._with_property("name", value)
 
     def with_opacity(
-        self, value: float | DynamicOpacity | dict[str, Any] | ExprRef
+        self,
+        value: float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any],
     ) -> LayerSpec:
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
@@ -8307,7 +8313,7 @@ class LazyDataParams(GenomeSpySchema):
         | dict[str, Any]
         | IndexUrlTemplate
         | UndefinedType = Undefined,
-        parse: Parse | dict[str, Any] | None | UndefinedType = Undefined,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
         pixelsPerBin: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         sizeMode: Literal["area", "strokeWidth"] | UndefinedType = Undefined,
         type: Literal["vcf"] | UndefinedType = Undefined,
@@ -8407,7 +8413,7 @@ class LazyDataParams(GenomeSpySchema):
 
     def with_parse(
         self,
-        value: Parse | dict[str, Any] | None | Any = Undefined,
+        value: Parse | ParseKwds | None | Any = Undefined,
         /,
         **kwargs: Any,
     ) -> LazyDataParams:
@@ -11166,8 +11172,9 @@ class MultiscaleSpec(GenomeSpySchema):
         name: str | UndefinedType = Undefined,
         opacity: float
         | DynamicOpacity
-        | dict[str, Any]
+        | DynamicOpacityKwds
         | ExprRef
+        | dict[str, Any]
         | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
@@ -11344,7 +11351,8 @@ class MultiscaleSpec(GenomeSpySchema):
         return self._with_property("name", value)
 
     def with_opacity(
-        self, value: float | DynamicOpacity | dict[str, Any] | ExprRef
+        self,
+        value: float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any],
     ) -> MultiscaleSpec:
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
@@ -11816,7 +11824,7 @@ class OtherDataFormat(GenomeSpySchema):
 
     def __init__(
         self,
-        parse: Parse | dict[str, Any] | None | UndefinedType = Undefined,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
         type: str | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
@@ -11826,7 +11834,7 @@ class OtherDataFormat(GenomeSpySchema):
 
     def with_parse(
         self,
-        value: Parse | dict[str, Any] | None | Any = Undefined,
+        value: Parse | ParseKwds | None | Any = Undefined,
         /,
         **kwargs: Any,
     ) -> OtherDataFormat:
@@ -18466,7 +18474,7 @@ class TabixTsvData(GenomeSpySchema):
         | dict[str, Any]
         | IndexUrlTemplate
         | UndefinedType = Undefined,
-        parse: Parse | dict[str, Any] | None | UndefinedType = Undefined,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
         type: Literal["tabix"] | UndefinedType = Undefined,
         url: str
         | Sequence[str]
@@ -18535,7 +18543,7 @@ class TabixTsvData(GenomeSpySchema):
 
     def with_parse(
         self,
-        value: Parse | dict[str, Any] | None | Any = Undefined,
+        value: Parse | ParseKwds | None | Any = Undefined,
         /,
         **kwargs: Any,
     ) -> TabixTsvData:
@@ -20742,8 +20750,9 @@ class UnitSpec(GenomeSpySchema):
         name: str | UndefinedType = Undefined,
         opacity: float
         | DynamicOpacity
-        | dict[str, Any]
+        | DynamicOpacityKwds
         | ExprRef
+        | dict[str, Any]
         | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
@@ -20920,7 +20929,8 @@ class UnitSpec(GenomeSpySchema):
         return self._with_property("name", value)
 
     def with_opacity(
-        self, value: float | DynamicOpacity | dict[str, Any] | ExprRef
+        self,
+        value: float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any],
     ) -> UnitSpec:
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
@@ -22456,8 +22466,9 @@ class ViewSpec(GenomeSpySchema):
         name: str | UndefinedType = Undefined,
         opacity: float
         | DynamicOpacity
-        | dict[str, Any]
+        | DynamicOpacityKwds
         | ExprRef
+        | dict[str, Any]
         | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
@@ -22717,7 +22728,8 @@ class ViewSpec(GenomeSpySchema):
         return self._with_property("name", value)
 
     def with_opacity(
-        self, value: float | DynamicOpacity | dict[str, Any] | ExprRef
+        self,
+        value: float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any],
     ) -> ViewSpec:
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
