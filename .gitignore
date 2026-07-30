@@ -232,7 +232,6 @@ CHANGELOG_STAGING.md
 # Documentation build output and generated gallery artifacts
 docs/_build/
 docs/gallery/
-docs/_static/gallery/
 docs/_static/specs/
 
 # Local assistant state

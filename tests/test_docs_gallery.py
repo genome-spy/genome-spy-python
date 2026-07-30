@@ -178,10 +178,17 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     }
 
 
-def test_gallery_index_keeps_examples_in_visible_navigation() -> None:
+def test_gallery_index_keeps_examples_in_visible_navigation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
     examples = gallery.collect_examples()
+    monkeypatch.setattr(
+        extension.core,
+        "thumb_filename",
+        lambda example: f"{example.name}.png",
+    )
     markdown = extension._gallery_index_md(examples)
     build_token = gallery.build_token(examples)
 
@@ -225,14 +232,11 @@ def test_gallery_build_token_changes_with_example_content() -> None:
     assert gallery.build_token(mutated) != original
 
 
-def test_gallery_can_require_png_thumbnails(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_gallery_requires_png_thumbnails(tmp_path: Path) -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "manhattan_plot.py")
 
-    monkeypatch.setenv("GENOME_SPY_DOCS_REQUIRE_PNG_THUMBS", "1")
-    monkeypatch.setattr(gallery, "THUMBS_DIR", tmp_path)
+    gallery.THUMBS_DIR = tmp_path
 
     with pytest.raises(FileNotFoundError, match="Missing PNG thumbnail"):
         gallery.thumb_filename(example)
@@ -275,17 +279,24 @@ def test_gallery_detail_embed_uses_shadow_dom_and_stable_reveal() -> None:
 def test_gallery_example_can_cap_embed_width() -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
-    example = gallery.collect_example(EXAMPLES_DIR / "qq_plot.py")
+    example = gallery.collect_example(EXAMPLES_DIR / "manhattan_plot.py")
     markdown = extension._detail_md(example, "https://example.test/bundle.js")
 
-    assert 'class="gs-doc-embed" style="height:560px;max-width:840px"' in markdown
+    assert 'class="gs-doc-embed" style="height:500px;max-width:980px"' in markdown
 
 
-def test_minigallery_links_include_cache_busting_query() -> None:
+def test_minigallery_links_include_cache_busting_query(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
     examples = gallery.collect_examples()
     expected = gallery.build_token(examples)
+    monkeypatch.setattr(
+        extension.core,
+        "thumb_filename",
+        lambda example: f"{example.name}.png",
+    )
     directive = extension.GenomeSpyMiniGallery(
         "genomespy-minigallery",
         [],

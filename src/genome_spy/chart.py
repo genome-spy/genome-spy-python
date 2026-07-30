@@ -562,6 +562,7 @@ class TopLevelSpec:
         sort: SchemaBase | dict[str, Any] | None = None,
         offset: str | None = None,
         as_: list[str] | None = None,
+        baseField: str | None = None,
     ) -> Self:
         """Add a GenomeSpy stack transform."""
         transform: dict[str, Any] = {"type": "stack", "groupby": groupby}
@@ -573,6 +574,8 @@ class TopLevelSpec:
             transform["offset"] = offset
         if as_ is not None:
             transform["as"] = as_
+        if baseField is not None:
+            transform["baseField"] = baseField
         return self._append_transform(transform)
 
     def to_dict(
