@@ -37,6 +37,7 @@ from genome_spy.schema._typing import (
 
 if TYPE_CHECKING:
     from genome_spy.schema.core import (
+        ArrowConfig,
         AxisConfig,
         BindCheckbox,
         BindInput,
@@ -44,6 +45,7 @@ if TYPE_CHECKING:
         BindRange,
         ChromPosDef,
         ChromosomalLocus,
+        DirectionDef,
         ExprDef,
         ExprRef,
         FieldDefWithoutScale,
@@ -58,6 +60,7 @@ if TYPE_CHECKING:
         IntervalSelectionConfig,
         Legend,
         LegendConfig,
+        LerpTransition,
         LinkConfig,
         MarkConfig,
         MarkPropExprDef,
@@ -315,6 +318,7 @@ class EncodingKwds(TypedDict, total=False):
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
         | ValueDefWithConditionStringNullType
     )
+    direction: DirectionDef | dict[str, Any]
     dx: (
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
@@ -391,6 +395,17 @@ class EncodingKwds(TypedDict, total=False):
         | ValueDefWithConditionNumberType
     )
     text: StringFieldDef | dict[str, Any] | StringDatumDef | ExprDef | ValueDefString
+    tooltip: (
+        StringFieldDef
+        | dict[str, Any]
+        | StringDatumDef
+        | ExprDef
+        | ValueDefString
+        | Sequence[
+            StringFieldDef | dict[str, Any] | StringDatumDef | ExprDef | ValueDefString
+        ]
+        | None
+    )
     uniqueId: FieldDefWithoutScale | dict[str, Any]
     x: dict[str, Any]
     x2: Position2Def | dict[str, Any] | None
@@ -494,6 +509,7 @@ class GenomeAxisKwds(TypedDict, total=False):
 class GenomeSpyConfigKwds(TypedDict, total=False):
     """TypedDict helper for raw ``GenomeSpyConfig`` mappings."""
 
+    arrow: ArrowConfig | dict[str, Any]
     axis: AxisConfig | AxisConfigKwds
     axisBottom: AxisConfig | AxisConfigKwds
     axisIndex: AxisConfig | AxisConfigKwds
@@ -686,6 +702,7 @@ class ParameterKwds(TypedDict, total=False):
         | dict[str, Any]
         | IntervalSelectionConfig
     )
+    transition: LerpTransition | dict[str, Any]
     value: RulerInitMapping | dict[str, Any]
 
 
@@ -1012,7 +1029,7 @@ class SizeDefKwds(TypedDict, total=False):
 class StepKwds(TypedDict, total=False):
     """TypedDict helper for raw ``Step`` mappings."""
 
-    step: float
+    step: float | ExprRef | dict[str, Any]
 
 
 class TextConfigKwds(TypedDict, total=False):
@@ -1151,7 +1168,7 @@ class ViewConfigKwds(TypedDict, total=False):
     shadowOffsetX: float | ExprRef | dict[str, Any]
     shadowOffsetY: float | ExprRef | dict[str, Any]
     shadowOpacity: float | ExprRef | dict[str, Any]
-    step: float
+    step: float | ExprRef | dict[str, Any]
     stroke: str
     strokeOpacity: float
     strokeWidth: float
@@ -1162,7 +1179,12 @@ class ViewConfigKwds(TypedDict, total=False):
 class ZoomParamsKwds(TypedDict, total=False):
     """TypedDict helper for raw ``ZoomParams`` mappings."""
 
-    extent: ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]]
+    extent: (
+        ScalarDomain_T
+        | Sequence[ChromosomalLocus | dict[str, Any]]
+        | Literal["data"]
+        | Literal["unbounded"]
+    )
 
 
 class AxesKwds(TypedDict, total=False):

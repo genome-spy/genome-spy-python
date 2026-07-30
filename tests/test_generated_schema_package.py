@@ -34,8 +34,8 @@ def test_generated_schema_package_loads_real_genomespy_schema() -> None:
     assert schema["$schema"] == "http://json-schema.org/draft-07/schema#"
     assert len(schema["definitions"]) >= 200
     assert "UnitSpec" in schema["definitions"]
-    assert MARK_TYPES == ("rect", "point", "rule", "tick", "text", "link")
-    assert SCHEMA_VERSION == "0.80.0"
+    assert MARK_TYPES == ("rect", "point", "rule", "tick", "text", "link", "arrow")
+    assert SCHEMA_VERSION == "0.81.0"
 
 
 def test_generated_schema_wrappers_serialize_keyword_properties() -> None:

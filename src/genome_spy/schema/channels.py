@@ -6,7 +6,13 @@ from typing import Any
 
 from genome_spy.channels import Channel, _MISSING, channel
 from genome_spy.schemapi import SchemaBase
-from genome_spy.schema._typing import ChannelWithScale_T, FieldName_T, Scalar_T, Type_T
+from genome_spy.schema._typing import (
+    ArrowDirection_T,
+    ChannelWithScale_T,
+    FieldName_T,
+    Scalar_T,
+    Type_T,
+)
 from genome_spy.schema.core import (
     ConditionalParameterMarkPropExprDefType,
     ConditionalParameterMarkPropExprDefTypeForShape,
@@ -239,6 +245,95 @@ class Color(Channel):
         /,
         **kwargs: Any,
     ) -> Color:
+        """Return a channel with a ``Scale`` scale."""
+        return self._with_nested("scale", value, **kwargs)
+
+
+class Direction(Channel):
+    """Generated wrapper for the ``direction`` encoding channel."""
+
+    def __init__(
+        self, value: Channel | SchemaBase | str | dict[str, Any], /, **kwargs: Any
+    ) -> None:
+        wrapped = channel(value, encoding_name="direction", **kwargs)
+        super().__init__(wrapped.definition, encoding_name="direction")
+
+    def band(
+        self,
+        value: float,
+    ) -> Direction:
+        """Return a channel with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def datum(
+        self,
+        value: Scalar_T | ExprRef | dict[str, Any],
+    ) -> Direction:
+        """Return a channel with ``datum`` updated."""
+        return self._with_property("datum", value)
+
+    def description(
+        self,
+        value: str,
+    ) -> Direction:
+        """Return a channel with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(
+        self,
+        value: bool,
+    ) -> Direction:
+        """Return a channel with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def field(
+        self,
+        value: str,
+    ) -> Direction:
+        """Return a channel with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def format(
+        self,
+        value: str,
+    ) -> Direction:
+        """Return a channel with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def resolutionChannel(
+        self,
+        value: ChannelWithScale_T,
+    ) -> Direction:
+        """Return a channel with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def title(
+        self,
+        value: str | None,
+    ) -> Direction:
+        """Return a channel with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(
+        self,
+        value: Type_T,
+    ) -> Direction:
+        """Return a channel with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def value(
+        self,
+        value: ArrowDirection_T | ExprRef | dict[str, Any],
+    ) -> Direction:
+        """Return a channel with ``value`` updated."""
+        return self._with_property("value", value)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = _MISSING,
+        /,
+        **kwargs: Any,
+    ) -> Direction:
         """Return a channel with a ``Scale`` scale."""
         return self._with_nested("scale", value, **kwargs)
 
@@ -1615,6 +1710,102 @@ class Text(Channel):
         return self._with_nested("scale", value, **kwargs)
 
 
+class Tooltip(Channel):
+    """Generated wrapper for the ``tooltip`` encoding channel."""
+
+    def __init__(
+        self, value: Channel | SchemaBase | str | dict[str, Any], /, **kwargs: Any
+    ) -> None:
+        wrapped = channel(value, encoding_name="tooltip", **kwargs)
+        super().__init__(wrapped.definition, encoding_name="tooltip")
+
+    def band(
+        self,
+        value: float,
+    ) -> Tooltip:
+        """Return a channel with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def datum(
+        self,
+        value: Scalar_T | ExprRef | dict[str, Any],
+    ) -> Tooltip:
+        """Return a channel with ``datum`` updated."""
+        return self._with_property("datum", value)
+
+    def description(
+        self,
+        value: str,
+    ) -> Tooltip:
+        """Return a channel with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(
+        self,
+        value: bool,
+    ) -> Tooltip:
+        """Return a channel with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> Tooltip:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def field(
+        self,
+        value: str,
+    ) -> Tooltip:
+        """Return a channel with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def format(
+        self,
+        value: str,
+    ) -> Tooltip:
+        """Return a channel with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def resolutionChannel(
+        self,
+        value: ChannelWithScale_T,
+    ) -> Tooltip:
+        """Return a channel with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def title(
+        self,
+        value: str | None,
+    ) -> Tooltip:
+        """Return a channel with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(
+        self,
+        value: Type_T,
+    ) -> Tooltip:
+        """Return a channel with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def value(
+        self,
+        value: str | ExprRef | dict[str, Any],
+    ) -> Tooltip:
+        """Return a channel with ``value`` updated."""
+        return self._with_property("value", value)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = _MISSING,
+        /,
+        **kwargs: Any,
+    ) -> Tooltip:
+        """Return a channel with a ``Scale`` scale."""
+        return self._with_nested("scale", value, **kwargs)
+
+
 class UniqueId(Channel):
     """Generated wrapper for the ``uniqueId`` encoding channel."""
 
@@ -2132,6 +2323,7 @@ class Y2(Channel):
 __all__ = [
     "Angle",
     "Color",
+    "Direction",
     "Dx",
     "Dy",
     "FacetIndex",
@@ -2148,6 +2340,7 @@ __all__ = [
     "StrokeOpacity",
     "StrokeWidth",
     "Text",
+    "Tooltip",
     "UniqueId",
     "X",
     "X2",

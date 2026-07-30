@@ -8,6 +8,7 @@ AggregateOp_T: TypeAlias = Literal[
     "count", "valid", "sum", "min", "max", "mean", "q1", "median", "q3", "variance"
 ]
 Align_T: TypeAlias = Literal["left", "center", "right"]
+ArrowDirection_T: TypeAlias = Literal["forward", "reverse"]
 AxisOrient_T: TypeAlias = Literal["top", "bottom", "left", "right"]
 AxisPlacement_T: TypeAlias = Literal["outside", "inside"]
 Baseline_T: TypeAlias = Literal["top", "middle", "bottom", "alphabetic", "baseline"]
@@ -50,7 +51,9 @@ LegendOrient_T: TypeAlias = Literal[
     "bottom-right",
 ]
 LegendTitleOrient_T: TypeAlias = Literal["top", "bottom", "left", "right"]
-MarkType_T: TypeAlias = Literal["rect", "point", "rule", "tick", "text", "link"]
+MarkType_T: TypeAlias = Literal[
+    "rect", "point", "rule", "tick", "text", "link", "arrow"
+]
 NumericDomain_T: TypeAlias = Sequence[float]
 ParseValue_T: TypeAlias = str | None
 PrimaryPositionalChannel_T: TypeAlias = Literal["x", "y"]
@@ -98,6 +101,7 @@ ChannelWithScale_T: TypeAlias = (
     | Literal["strokeWidth"]
     | Literal["size"]
     | Literal["shape"]
+    | Literal["direction"]
     | Literal["angle"]
     | Literal["dx"]
     | Literal["dy"]
@@ -110,10 +114,27 @@ TitleFrame_T: TypeAlias = Literal["bounds", "group"]
 TitleOrient_T: TypeAlias = Literal["none", "left", "right", "top", "bottom"]
 TypeForShape_T: TypeAlias = Literal["ordinal", "nominal"]
 Type_T: TypeAlias = Literal["quantitative", "ordinal", "nominal", "index", "locus"]
+WindowOnlyOp_T: TypeAlias = Literal[
+    "row_number",
+    "rank",
+    "dense_rank",
+    "percent_rank",
+    "cume_dist",
+    "ntile",
+    "lag",
+    "lead",
+    "first_value",
+    "last_value",
+    "nth_value",
+    "prev_value",
+    "next_value",
+]
+WindowOp_T: TypeAlias = WindowOnlyOp_T | AggregateOp_T
 
 __all__ = [
     "AggregateOp_T",
     "Align_T",
+    "ArrowDirection_T",
     "AxisOrient_T",
     "AxisPlacement_T",
     "Baseline_T",
@@ -153,4 +174,6 @@ __all__ = [
     "TitleOrient_T",
     "TypeForShape_T",
     "Type_T",
+    "WindowOnlyOp_T",
+    "WindowOp_T",
 ]

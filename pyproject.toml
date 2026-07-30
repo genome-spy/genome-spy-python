@@ -50,7 +50,7 @@ artifacts = [
 ]
 
 [tool.genome-spy]
-core-version = "0.80.0"
+core-version = "0.81.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -55,6 +55,11 @@ class MarkMethodMixin:
         """Set the chart mark to ``link``."""
         return self._with_mark("link", **kwargs)  # type: ignore[attr-defined, no-any-return]
 
+    @use_signature(core.ArrowProps)
+    def mark_arrow(self, **kwargs: Any) -> Self:
+        """Set the chart mark to ``arrow``."""
+        return self._with_mark("arrow", **kwargs)  # type: ignore[attr-defined, no-any-return]
+
 
 class ConfigMethodMixin:
     """Schema-derived config methods for the handwritten chart API."""
@@ -68,6 +73,16 @@ class ConfigMethodMixin:
     ) -> Self:
         """Return a chart with merged top-level config."""
         return self._configure(value, **kwargs)  # type: ignore[attr-defined, no-any-return]
+
+    @use_signature(core.ArrowConfig)
+    def configure_arrow(
+        self,
+        value: core.ArrowConfig | dict[str, Any] | None | object = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> Self:
+        """Return a chart with ``arrow`` config updated."""
+        return self._configure_nested("arrow", value, **kwargs)  # type: ignore[attr-defined, no-any-return]
 
     @use_signature(core.AxisConfig)
     def configure_axis(
