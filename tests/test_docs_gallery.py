@@ -61,6 +61,7 @@ def test_luad_oncoprint_uses_sample_intervals_and_categorical_genes() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "luad_oncoprint.py")
 
+    assert example.spec["viewportHeight"] == "container"
     center_column = example.spec["hconcat"][0]
     matrix_layers = center_column["vconcat"][4]["layer"]
 
@@ -122,6 +123,44 @@ def test_sashimi_plot_uses_direct_data_urls() -> None:
     assert bigwig_url.endswith(".bigWig")
     assert bed_url.endswith(".SJ.out.bed")
     assert "encoding" not in example.spec["layer"][1]
+
+
+def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "stacked_genome_browser.py")
+
+    assert example.spec["assembly"] == "hg38"
+    assert example.spec["scales"]["x"]["domain"] == [
+        {"chrom": "chr7", "pos": 55100000},
+        {"chrom": "chr7", "pos": 55120000},
+    ]
+    assert example.spec["resolve"] == {
+        "scale": {"y": "independent"},
+        "axis": {"y": "independent"},
+    }
+
+    tracks = example.spec["vconcat"]
+    assert [track["name"] for track in tracks] == [
+        "gc-content",
+        "phylop-100way",
+        "ccre",
+        "sequence",
+        "refseq-track",
+    ]
+    assert [track["data"]["lazy"]["type"] for track in tracks[:4]] == [
+        "bigwig",
+        "bigwig",
+        "bigbed",
+        "indexedFasta",
+    ]
+    assert tracks[3]["data"]["lazy"]["windowSize"] == 30_000
+    assert "y" not in tracks[2]["encoding"]
+    assert "y" not in tracks[3]["encoding"]
+    assert tracks[4]["data"]["url"].endswith("refSeqGenes-hg38-release232.tsv.gz")
+    assert tracks[4]["transform"][-1] == {
+        "type": "filter",
+        "expr": "datum._lane < 3",
+    }
 
 
 def test_manhattan_plot_uses_canonical_hg18_points() -> None:

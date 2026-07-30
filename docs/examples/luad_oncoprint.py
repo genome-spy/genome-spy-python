@@ -15,7 +15,7 @@ META = {
     "category": "Oncoprints and cohort summaries",
     "tags": ("oncoprint", "cohort", "heatmap", "real-data", "zoom"),
     "order": 35,
-    "height": 1160,
+    "height": 720,
     "max_width": 1680,
 }
 
@@ -403,6 +403,7 @@ chart = (
     .resolve_scale(x="independent", y="independent")
     .properties(
         title=data.title,
+        viewportHeight="container",
         description=(
             "A TCGA LUAD oncoprint adapted from the pyoncoprint notebook, with "
             "sample-level burden tracks above, the sorted alteration matrix in the "
