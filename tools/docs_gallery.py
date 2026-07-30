@@ -4,19 +4,18 @@ Each example under ``docs/examples/<name>.py`` is a runnable module that defines
 a ``chart`` object and, optionally, a ``META`` mapping. Importing the module and
 serializing ``chart`` is the single source of truth for the gallery.
 
-This module only collects examples and provides shared paths, category metadata,
-and the SVG fallback poster. The Sphinx extension (``docs/_ext/genomespy_gallery.py``)
-turns collected examples into gallery pages, and ``tools/render_thumbnails.py``
-renders real PNG thumbnails. Keeping this core framework-agnostic lets both reuse it.
+This module only collects examples and provides shared paths and category
+metadata. The Sphinx extension (``docs/_ext/genomespy_gallery.py``) turns
+collected examples into gallery pages, and ``tools/render_thumbnails.py``
+renders the checked-in PNG thumbnails. Keeping this core framework-agnostic
+lets both reuse it.
 """
 
 from __future__ import annotations
 
 import hashlib
-import html
 import importlib.util
 import json
-import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -59,10 +58,6 @@ CATEGORIES: dict[str, tuple[int, str]] = {
     "Copy-number plots": (
         70,
         "Genome-wide copy-number and allele-specific signal views.",
-    ),
-    "Population structure plots": (
-        80,
-        "Population-composition views such as admixture bar plots.",
     ),
     "Basics": (90, "Core chart types and grammar building blocks."),
 }
@@ -217,39 +212,12 @@ def build_token(examples: list[Example]) -> str:
     return digest.hexdigest()[:12]
 
 
-def require_png_thumbnails() -> bool:
-    """Return whether the current docs build must use real PNG thumbnails."""
-    return os.getenv("GENOME_SPY_DOCS_REQUIRE_PNG_THUMBS") == "1"
-
-
 def thumb_filename(example: Example) -> str:
-    """Thumbnail file name, preferring a rendered PNG over the SVG fallback."""
+    """Return the checked-in PNG thumbnail name for an example."""
     png_name = f"{example.name}.png"
-    if (THUMBS_DIR / png_name).exists():
-        return png_name
-    if require_png_thumbnails():
+    if not (THUMBS_DIR / png_name).exists():
         raise FileNotFoundError(
             f"Missing PNG thumbnail for docs example {example.name!r}. "
-            "Run tools/render_thumbnails.py before building release docs."
+            "Add the manually reviewed thumbnail before building the docs."
         )
-    return f"{example.name}.svg"
-
-
-def poster_svg(example: Example) -> str:
-    """Static SVG poster used when no PNG screenshot has been rendered."""
-    category = html.escape(example.category.upper())
-    seed = sum(ord(char) for char in example.name)
-    dots = "".join(
-        f'<circle cx="{60 + (i * 53) % 520}" cy="{300 - (seed * (i + 3)) % 150}" '
-        f'r="4" fill="#{"3e8cb6" if i % 2 else "7fbbdd"}" opacity="0.9"/>'
-        for i in range(46)
-    )
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="{html.escape(example.title)}">
-  <rect width="640" height="360" fill="#f4f8fb"/>
-  <line x1="48" y1="312" x2="600" y2="312" stroke="#d5dee6" stroke-width="1.5"/>
-  <line x1="48" y1="312" x2="48" y2="70" stroke="#d5dee6" stroke-width="1.5"/>
-  <g>{dots}</g>
-  <line x1="48" y1="150" x2="600" y2="150" stroke="#c53b2c" stroke-width="1.5" stroke-dasharray="6 4"/>
-  <text x="48" y="52" fill="#3e8cb6" font-family="Lato, system-ui, sans-serif" font-size="15" letter-spacing="2" font-weight="700">{category}</text>
-</svg>
-"""
+    return png_name

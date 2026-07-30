@@ -36,3 +36,27 @@ def test_thumbnail_layout_defaults_to_card_width() -> None:
 
     assert layout.stage_width == renderer.CARD_WIDTH
     assert layout.min_stage_height == 320
+
+
+def test_select_examples_defaults_to_all_examples() -> None:
+    renderer = _load_renderer()
+    examples = [
+        type("Example", (), {"name": "first"})(),
+        type("Example", (), {"name": "second"})(),
+    ]
+    gallery = type("Gallery", (), {"collect_examples": lambda self: examples})()
+
+    assert renderer._select_examples(gallery, []) == examples
+
+
+def test_select_examples_rejects_unknown_name() -> None:
+    renderer = _load_renderer()
+    example = type("Example", (), {"name": "first"})()
+    gallery = type("Gallery", (), {"collect_examples": lambda self: [example]})()
+
+    try:
+        renderer._select_examples(gallery, ["missing"])
+    except ValueError as error:
+        assert "Unknown example name(s): missing" in str(error)
+    else:
+        raise AssertionError("unknown example name should fail")

@@ -3,7 +3,7 @@
 On ``builder-inited`` it turns every ``docs/examples/<name>.py`` module into:
 
 * a spec JSON under ``_static/specs/`` that the browser hydrates,
-* an SVG poster under ``_static/gallery/`` when no PNG screenshot exists,
+* a checked-in PNG thumbnail under ``_static/gallery/``,
 * a per-example detail page with the live interactive chart and source, and
 * the gallery landing page grouped into category sections.
 
@@ -221,8 +221,6 @@ def _generate(app: Any) -> None:
             core.SPECS_DIR / f"{example.name}.json",
             json.dumps(example.spec, indent=2),
         )
-        if not (core.THUMBS_DIR / f"{example.name}.png").exists():
-            _write(core.THUMBS_DIR / f"{example.name}.svg", core.poster_svg(example))
         _write(
             core.GALLERY_PAGES_DIR / f"{example.name}.md",
             _detail_md(example, bundle_url),

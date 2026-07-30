@@ -60,23 +60,10 @@ python3 -m http.server 8000 --directory docs/_build/html
 
 Then open <http://localhost:8000/> in a browser. The live examples load the
 pinned GenomeSpy JavaScript bundle from the CDN, so an internet connection is
-needed when viewing interactive charts.
+needed when viewing interactive charts. Gallery cards require manually reviewed
+PNG thumbnails to exist before the build.
 
-### Render gallery thumbnails
-
-Gallery cards use real chart screenshots when thumbnails are rendered. This is
-optional for ordinary documentation builds because the gallery has an SVG
-fallback, but it is useful when reviewing visual changes:
-
-```bash
-uv run --with playwright playwright install chromium
-uv run --with playwright python tools/render_thumbnails.py
-```
-
-On Linux CI, the browser installation may also need system dependencies:
-`uv run --with playwright playwright install --with-deps chromium`.
-
-### Work on examples and schema wrappers
+### Work on examples
 
 Documentation examples live under `docs/examples/` and are the source of truth
 for the generated gallery. Add or update an example there, then rebuild the
@@ -87,8 +74,10 @@ uv run pytest tests/test_docs_gallery.py -q
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
-Generated schema wrappers are committed to the repository. If the pinned
-GenomeSpy core version changes, regenerate them with:
+### Regenerate schema wrappers
+
+Generated schema wrappers are committed to the repository. Maintainers should
+regenerate them when the pinned GenomeSpy core version changes:
 
 ```bash
 uv run python tools/generate_schema_wrapper.py

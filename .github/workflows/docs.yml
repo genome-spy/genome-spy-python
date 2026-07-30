@@ -28,17 +28,12 @@ jobs:
       # Example modules that back the gallery need the example runtime
       # (pandas/numpy) plus the docs toolchain.
       - run: uv sync --locked --group docs --group dev
-      # Render real chart screenshots for the gallery cards. Best-effort: if the
-      # headless render fails, docs_gallery falls back to SVG posters and the
-      # build still succeeds.
+      # Render real chart screenshots for the gallery cards.
       - name: Render gallery thumbnails
-        continue-on-error: true
         run: |
           uv run --with playwright playwright install --with-deps chromium
           uv run --with playwright python tools/render_thumbnails.py
       - run: uv run sphinx-build -b html -W --keep-going docs docs/_build/html
-        env:
-          GENOME_SPY_DOCS_REQUIRE_PNG_THUMBS: ${{ github.event_name != 'push' && '1' || '0' }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/_build/html

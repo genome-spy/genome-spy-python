@@ -7,17 +7,20 @@ screenshots it to a PNG thumbnail. Examples use different natural heights, so
 the renderer scales each chart to fit inside a fixed gallery card instead of
 cropping taller compositions.
 
-Network is required (the browser imports the ``@genome-spy/core`` CDN bundle), so
-this runs in CI rather than as part of every local build. When no PNG exists,
-``docs_gallery.py`` falls back to a generated SVG poster.
+Network is required (the browser imports the ``@genome-spy/core`` CDN bundle).
+The generated PNGs are visual review artifacts and should be checked in after
+they have been inspected.
 
 Usage:
     uv run --with playwright playwright install --with-deps chromium
     uv run --with playwright python tools/render_thumbnails.py
+    uv run --with playwright python tools/render_thumbnails.py manhattan_plot
+    uv run --with playwright python tools/render_thumbnails.py --overwrite
 """
 
 from __future__ import annotations
 
+import argparse
 import importlib.util
 import json
 import sys
@@ -63,6 +66,39 @@ def _load_gallery():
     return module
 
 
+def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Capture missing GenomeSpy documentation gallery thumbnails."
+    )
+    parser.add_argument(
+        "examples",
+        nargs="*",
+        metavar="EXAMPLE",
+        help="Example names to capture; defaults to every documentation example.",
+    )
+    parser.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Recapture thumbnails that already exist.",
+    )
+    return parser.parse_args(argv)
+
+
+def _select_examples(gallery: object, names: list[str]) -> list[object]:
+    examples = gallery.collect_examples()
+    if not names:
+        return examples
+
+    by_name = {example.name: example for example in examples}
+    missing = [name for name in names if name not in by_name]
+    if missing:
+        available = ", ".join(sorted(by_name))
+        raise ValueError(
+            f"Unknown example name(s): {', '.join(missing)}. Available examples: {available}"
+        )
+    return [by_name[name] for name in names]
+
+
 _PAGE_TEMPLATE = """<!doctype html>
 <html><head><meta charset="utf-8">
 <style>
@@ -88,6 +124,7 @@ try {{
 
 
 def main() -> int:
+    args = _parse_args()
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
@@ -101,8 +138,27 @@ def main() -> int:
 
     gallery = _load_gallery()
     bundle_url = gallery.default_bundle_url()
-    examples = gallery.collect_examples()
+    try:
+        examples = _select_examples(gallery, args.examples)
+    except ValueError as error:
+        print(error, file=sys.stderr)
+        return 2
     gallery.THUMBS_DIR.mkdir(parents=True, exist_ok=True)
+
+    explicit_selection = bool(args.examples)
+    pending = [
+        example
+        for example in examples
+        if args.overwrite
+        or explicit_selection
+        or not (gallery.THUMBS_DIR / f"{example.name}.png").exists()
+    ]
+    if not pending:
+        print(
+            "No thumbnails captured because all selected outputs already exist. "
+            "Use --overwrite to refresh them."
+        )
+        return 0
 
     rendered = 0
     with sync_playwright() as pw:
@@ -111,7 +167,7 @@ def main() -> int:
             viewport={"width": CARD_WIDTH, "height": CARD_HEIGHT},
             device_scale_factor=2,
         )
-        for example in examples:
+        for example in pending:
             layout = thumbnail_layout(example)
             html = _PAGE_TEMPLATE.format(
                 card_width=CARD_WIDTH,
@@ -167,8 +223,8 @@ def main() -> int:
             rendered += 1
         browser.close()
 
-    print(f"Rendered {rendered}/{len(examples)} thumbnail(s).")
-    return 0 if rendered else 1
+    print(f"Rendered {rendered}/{len(pending)} thumbnail(s).")
+    return 0 if rendered == len(pending) else 1
 
 
 if __name__ == "__main__":
