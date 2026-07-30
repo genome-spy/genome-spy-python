@@ -9,6 +9,94 @@ in notebooks. The public API aims to mirror Altair-style authoring where it
 fits GenomeSpy naturally, while still exposing genomics-native features such as
 locus-scaled axes and lazy genomic data sources.
 
+## Contributing
+
+### Set up the repository
+
+Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/), then
+clone the repository and install the development and documentation dependencies:
+
+```bash
+git clone https://github.com/genome-spy/genome-spy-python.git
+cd genome-spy-python
+uv sync --group dev --group docs
+```
+
+The project requires Python 3.11 or newer. The `uv sync` command installs the
+package in editable mode, so changes under `src/` are immediately available to
+tests, notebooks, and documentation examples.
+
+Run the basic verification suite from the repository root:
+
+```bash
+uv run pytest tests/ -x
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src/
+```
+
+To install the repository's pre-commit hooks and run them manually:
+
+```bash
+uv run pre-commit install
+uv run pre-commit run --all-files
+```
+
+### Build and preview the documentation
+
+Build the HTML documentation with:
+
+```bash
+uv run sphinx-build -b html -W --keep-going docs docs/_build/html
+```
+
+The Sphinx build imports the examples, validates their serialized GenomeSpy
+specifications, and generates the gallery pages and downloadable specs. Preview
+the result locally with:
+
+```bash
+python3 -m http.server 8000 --directory docs/_build/html
+```
+
+Then open <http://localhost:8000/> in a browser. The live examples load the
+pinned GenomeSpy JavaScript bundle from the CDN, so an internet connection is
+needed when viewing interactive charts.
+
+### Render gallery thumbnails
+
+Gallery cards use real chart screenshots when thumbnails are rendered. This is
+optional for ordinary documentation builds because the gallery has an SVG
+fallback, but it is useful when reviewing visual changes:
+
+```bash
+uv run --with playwright playwright install chromium
+uv run --with playwright python tools/render_thumbnails.py
+```
+
+On Linux CI, the browser installation may also need system dependencies:
+`uv run --with playwright playwright install --with-deps chromium`.
+
+### Work on examples and schema wrappers
+
+Documentation examples live under `docs/examples/` and are the source of truth
+for the generated gallery. Add or update an example there, then rebuild the
+documentation and run the gallery tests:
+
+```bash
+uv run pytest tests/test_docs_gallery.py -q
+uv run sphinx-build -b html -W --keep-going docs docs/_build/html
+```
+
+Generated schema wrappers are committed to the repository. If the pinned
+GenomeSpy core version changes, regenerate them with:
+
+```bash
+uv run python tools/generate_schema_wrapper.py
+```
+
+Schema regeneration requires `npm` on `PATH` and updates the generated schema
+package from the pinned `@genome-spy/core` release.
+
 ## Notebook Usage
 
 The current notebook path uses `anywidget` as a thin bridge to GenomeSpy's
