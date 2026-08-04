@@ -187,6 +187,8 @@ only and intentionally does not claim zero-copy rendering.
 The reactive replacement spike is available at
 `notebooks/genome_spy_arrow_reactive.py`; its control recomputes the Polars
 frame, replaces the binary payload, and reports a small JSON-size comparison.
+For repeatable payload measurements across representative table sizes, run
+`uv run python scripts/benchmark_arrow_transport.py`.
 
 ## Packaged Datasets
 
