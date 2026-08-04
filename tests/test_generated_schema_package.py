@@ -41,7 +41,7 @@ def test_generated_schema_package_loads_real_genomespy_schema() -> None:
     assert len(schema["definitions"]) >= 200
     assert "UnitSpec" in schema["definitions"]
     assert MARK_TYPES == ("rect", "point", "rule", "tick", "text", "link", "arrow")
-    assert SCHEMA_VERSION == "0.81.0"
+    assert SCHEMA_VERSION == "0.82.0"
 
 
 def test_generated_schema_wrappers_serialize_keyword_properties() -> None:

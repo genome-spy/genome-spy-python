@@ -64,6 +64,8 @@ if TYPE_CHECKING:
         LinkConfig,
         MarkConfig,
         MarkPropExprDef,
+        MarkPropExprDefType,
+        MarkPropExprDefTypeForShape,
         Parse,
         PointConfig,
         PointSelectionConfig,
@@ -310,12 +312,14 @@ class EncodingKwds(TypedDict, total=False):
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
     )
     color: (
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefType
         | ValueDefWithConditionStringNullType
     )
     direction: DirectionDef | dict[str, Any]
@@ -323,6 +327,7 @@ class EncodingKwds(TypedDict, total=False):
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | MarkPropExprDef
     )
@@ -330,6 +335,7 @@ class EncodingKwds(TypedDict, total=False):
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | MarkPropExprDef
     )
@@ -338,12 +344,14 @@ class EncodingKwds(TypedDict, total=False):
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefType
         | ValueDefWithConditionStringNullType
     )
     fillOpacity: (
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
     )
     key: (
@@ -355,6 +363,7 @@ class EncodingKwds(TypedDict, total=False):
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
     )
     sample: FieldDefWithoutScale | dict[str, Any]
@@ -368,30 +377,35 @@ class EncodingKwds(TypedDict, total=False):
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefTypeForShape
         | ValueDefWithConditionStringNullTypeForShape
     )
     size: (
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
     )
     stroke: (
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefType
         | ValueDefWithConditionStringNullType
     )
     strokeOpacity: (
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
     )
     strokeWidth: (
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
     )
     text: StringFieldDef | dict[str, Any] | StringDatumDef | ExprDef | ValueDefString
@@ -407,7 +421,7 @@ class EncodingKwds(TypedDict, total=False):
         | None
     )
     uniqueId: FieldDefWithoutScale | dict[str, Any]
-    x: dict[str, Any]
+    x: dict[str, Any] | None
     x2: Position2Def | dict[str, Any] | None
     y: (
         PositionFieldDef
@@ -416,6 +430,7 @@ class EncodingKwds(TypedDict, total=False):
         | PositionDatumDef
         | PositionExprDef
         | ValueDefNumber
+        | None
     )
     y2: Position2Def | dict[str, Any] | None
 

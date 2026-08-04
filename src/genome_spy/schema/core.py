@@ -2897,6 +2897,7 @@ class ColorDef(GenomeSpySchema):
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
         field: str | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
@@ -2913,6 +2914,7 @@ class ColorDef(GenomeSpySchema):
             datum=datum,
             description=description,
             domainInert=domainInert,
+            expr=expr,
             field=field,
             format=format,
             legend=legend,
@@ -2952,6 +2954,10 @@ class ColorDef(GenomeSpySchema):
     def with_domainInert(self, value: bool) -> ColorDef:
         """Return a copy with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def with_expr(self, value: str) -> ColorDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def with_field(self, value: str) -> ColorDef:
         """Return a copy with ``field`` updated."""
@@ -3115,6 +3121,7 @@ class ConcatSpec(GenomeSpySchema):
         | UndefinedType = Undefined,
         legends: LegendsKwds | UndefinedType = Undefined,
         name: str | UndefinedType = Undefined,
+        overhang: OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
             PlainValueParameter
@@ -3141,6 +3148,7 @@ class ConcatSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -3162,6 +3170,7 @@ class ConcatSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ]
@@ -3207,6 +3216,7 @@ class ConcatSpec(GenomeSpySchema):
             height=height,
             legends=legends,
             name=name,
+            overhang=overhang,
             padding=padding,
             params=params,
             resolve=resolve,
@@ -3321,6 +3331,15 @@ class ConcatSpec(GenomeSpySchema):
         """Return a copy with ``name`` updated."""
         return self._with_property("name", value)
 
+    def with_overhang(
+        self,
+        value: OverhangConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConcatSpec:
+        """Return a copy with a ``OverhangConfig`` overhang."""
+        return self._with_property("overhang", value, **kwargs)
+
     def with_padding(self, value: Paddings | PaddingsKwds | float) -> ConcatSpec:
         """Return a copy with ``padding`` updated."""
         return self._with_property("padding", value)
@@ -3382,6 +3401,7 @@ class ConcatSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -3403,6 +3423,7 @@ class ConcatSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ],
@@ -3457,6 +3478,7 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         domainInert: bool | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
@@ -3470,6 +3492,7 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
             domainInert=domainInert,
             empty=empty,
             expr=expr,
+            legend=legend,
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
@@ -3498,6 +3521,15 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
     def with_expr(self, value: str) -> ConditionalMarkPropExprDefType:
         """Return a copy with ``expr`` updated."""
         return self._with_property("expr", value)
+
+    def with_legend(
+        self,
+        value: Legend | LegendKwds | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropExprDefType:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
 
     def with_param(self, value: str) -> ConditionalMarkPropExprDefType:
         """Return a copy with ``param`` updated."""
@@ -3542,6 +3574,7 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         domainInert: bool | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
@@ -3555,6 +3588,7 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
             domainInert=domainInert,
             empty=empty,
             expr=expr,
+            legend=legend,
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
@@ -3583,6 +3617,15 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
     def with_expr(self, value: str) -> ConditionalMarkPropExprDefTypeForShape:
         """Return a copy with ``expr`` updated."""
         return self._with_property("expr", value)
+
+    def with_legend(
+        self,
+        value: Legend | LegendKwds | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
 
     def with_param(self, value: str) -> ConditionalMarkPropExprDefTypeForShape:
         """Return a copy with ``param`` updated."""
@@ -4004,6 +4047,7 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
         domainInert: bool | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
@@ -4017,6 +4061,7 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
             domainInert=domainInert,
             empty=empty,
             expr=expr,
+            legend=legend,
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
@@ -4045,6 +4090,15 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
     def with_expr(self, value: str) -> ConditionalParameterMarkPropExprDefType:
         """Return a copy with ``expr`` updated."""
         return self._with_property("expr", value)
+
+    def with_legend(
+        self,
+        value: Legend | LegendKwds | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
 
     def with_param(self, value: str) -> ConditionalParameterMarkPropExprDefType:
         """Return a copy with ``param`` updated."""
@@ -4089,6 +4143,7 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
         domainInert: bool | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
@@ -4102,6 +4157,7 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
             domainInert=domainInert,
             empty=empty,
             expr=expr,
+            legend=legend,
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
@@ -4138,6 +4194,15 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
     def with_expr(self, value: str) -> ConditionalParameterMarkPropExprDefTypeForShape:
         """Return a copy with ``expr`` updated."""
         return self._with_property("expr", value)
+
+    def with_legend(
+        self,
+        value: Legend | LegendKwds | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
 
     def with_param(self, value: str) -> ConditionalParameterMarkPropExprDefTypeForShape:
         """Return a copy with ``param`` updated."""
@@ -4611,6 +4676,7 @@ class CoordinateLookupInput(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -4632,6 +4698,7 @@ class CoordinateLookupInput(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ]
@@ -4660,6 +4727,7 @@ class CoordinateLookupInput(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -4681,6 +4749,7 @@ class CoordinateLookupInput(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ],
@@ -4855,6 +4924,7 @@ class CoreRootSpec(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        overhang: OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
             PlainValueParameter
@@ -4889,6 +4959,7 @@ class CoreRootSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -4910,6 +4981,7 @@ class CoreRootSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ]
@@ -4976,6 +5048,7 @@ class CoreRootSpec(GenomeSpySchema):
             multiscale=multiscale,
             name=name,
             opacity=opacity,
+            overhang=overhang,
             padding=padding,
             params=params,
             resolve=resolve,
@@ -5169,6 +5242,15 @@ class CoreRootSpec(GenomeSpySchema):
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
 
+    def with_overhang(
+        self,
+        value: OverhangConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoreRootSpec:
+        """Return a copy with a ``OverhangConfig`` overhang."""
+        return self._with_property("overhang", value, **kwargs)
+
     def with_padding(self, value: Paddings | PaddingsKwds | float) -> CoreRootSpec:
         """Return a copy with ``padding`` updated."""
         return self._with_property("padding", value)
@@ -5246,6 +5328,7 @@ class CoreRootSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -5267,6 +5350,7 @@ class CoreRootSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ],
@@ -5405,6 +5489,231 @@ class CoverageParams(GenomeSpySchema):
     def with_weight(self, value: Field_T) -> CoverageParams:
         """Return a copy with ``weight`` updated."""
         return self._with_property("weight", value)
+
+
+@with_property_setters
+class CrossData(GenomeSpySchema):
+    """Generated wrapper for ``CrossData``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("CrossData", {})
+
+    def __init__(
+        self,
+        description: str | UndefinedType = Undefined,
+        format: CsvDataFormat
+        | dict[str, Any]
+        | DsvDataFormat
+        | JsonDataFormat
+        | BedDataFormat
+        | BedpeDataFormat
+        | VcfDataFormat
+        | OtherDataFormat
+        | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        sequence: SequenceParams | dict[str, Any] | UndefinedType = Undefined,
+        url: str
+        | Sequence[str]
+        | ExprRef
+        | dict[str, Any]
+        | UrlList
+        | UrlTemplate
+        | UndefinedType = Undefined,
+        values: InlineDataset | dict[str, Any] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            format=format,
+            name=name,
+            sequence=sequence,
+            url=url,
+            values=values,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def with_description(self, value: str) -> CrossData:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_format(
+        self,
+        value: CsvDataFormat
+        | dict[str, Any]
+        | DsvDataFormat
+        | JsonDataFormat
+        | BedDataFormat
+        | BedpeDataFormat
+        | VcfDataFormat
+        | OtherDataFormat,
+    ) -> CrossData:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def with_name(self, value: str) -> CrossData:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def with_sequence(
+        self,
+        value: SequenceParams | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CrossData:
+        """Return a copy with a ``SequenceParams`` sequence."""
+        return self._with_property("sequence", value, **kwargs)
+
+    def with_url(
+        self,
+        value: str | Sequence[str] | ExprRef | dict[str, Any] | UrlList | UrlTemplate,
+    ) -> CrossData:
+        """Return a copy with ``url`` updated."""
+        return self._with_property("url", value)
+
+    def with_values(
+        self,
+        value: InlineDataset | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CrossData:
+        """Return a copy with a ``InlineDataset`` values."""
+        return self._with_property("values", value, **kwargs)
+
+
+@with_property_setters
+class CrossInput(GenomeSpySchema):
+    """Generated wrapper for ``CrossInput``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("CrossInput", {})
+
+    def __init__(
+        self,
+        data: UrlData
+        | dict[str, Any]
+        | InlineData
+        | NamedData
+        | SequenceGenerator
+        | UndefinedType = Undefined,
+        transform: Sequence[
+            AlignmentMismatchesParams
+            | dict[str, Any]
+            | AggregateParams
+            | CollectParams
+            | CoverageParams
+            | CoordinateLookupParams
+            | CrossParams
+            | FlattenDelimitedParams
+            | FormulaParams
+            | LookupParams
+            | ExprFilterParams
+            | SelectionFilterParams
+            | FilterScoredLabelsParams
+            | FlattenParams
+            | FlattenCompressedExonsParams
+            | FlattenCigarParams
+            | FlattenSequenceParams
+            | IdentifierParams
+            | LinearizeGenomicCoordinateParams
+            | MeasureTextParams
+            | TruncateTextParams
+            | PackLegendLabelsParams
+            | MergeFacetsParams
+            | PileupParams
+            | ProjectParams
+            | RegexExtractParams
+            | RegexFoldParams
+            | SampleParams
+            | SetIntersectionParams
+            | StackParams
+            | WindowParams
+        ]
+        | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(data=data, transform=transform)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def with_data(
+        self,
+        value: UrlData | dict[str, Any] | InlineData | NamedData | SequenceGenerator,
+    ) -> CrossInput:
+        """Return a copy with ``data`` updated."""
+        return self._with_property("data", value)
+
+    def with_transform(
+        self,
+        value: Sequence[
+            AlignmentMismatchesParams
+            | dict[str, Any]
+            | AggregateParams
+            | CollectParams
+            | CoverageParams
+            | CoordinateLookupParams
+            | CrossParams
+            | FlattenDelimitedParams
+            | FormulaParams
+            | LookupParams
+            | ExprFilterParams
+            | SelectionFilterParams
+            | FilterScoredLabelsParams
+            | FlattenParams
+            | FlattenCompressedExonsParams
+            | FlattenCigarParams
+            | FlattenSequenceParams
+            | IdentifierParams
+            | LinearizeGenomicCoordinateParams
+            | MeasureTextParams
+            | TruncateTextParams
+            | PackLegendLabelsParams
+            | MergeFacetsParams
+            | PileupParams
+            | ProjectParams
+            | RegexExtractParams
+            | RegexFoldParams
+            | SampleParams
+            | SetIntersectionParams
+            | StackParams
+            | WindowParams
+        ],
+    ) -> CrossInput:
+        """Return a copy with ``transform`` updated."""
+        return self._with_property("transform", value)
+
+
+@with_property_setters
+class CrossParams(GenomeSpySchema):
+    """Generated wrapper for ``CrossParams``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("CrossParams", {})
+
+    def __init__(
+        self,
+        description: str | UndefinedType = Undefined,
+        from_: CrossInput | dict[str, Any] | UndefinedType = Undefined,
+        type: Literal["cross"] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(description=description, type=type, **{"from": from_})
+        if kwds:
+            self._kwds.update(kwds)
+
+    def with_description(self, value: str) -> CrossParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_from(
+        self,
+        value: CrossInput | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CrossParams:
+        """Return a copy with a ``CrossInput`` from."""
+        return self._with_property("from", value, **kwargs)
+
+    def with_type(self, value: Literal["cross"]) -> CrossParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 @with_property_setters
@@ -5969,23 +6278,27 @@ class Encoding(GenomeSpySchema):
         angle: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
         color: FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefType
         | ValueDefWithConditionStringNullType
         | UndefinedType = Undefined,
         direction: DirectionDef | dict[str, Any] | UndefinedType = Undefined,
         dx: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | MarkPropExprDef
         | UndefinedType = Undefined,
         dy: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | MarkPropExprDef
         | UndefinedType = Undefined,
@@ -5993,11 +6306,13 @@ class Encoding(GenomeSpySchema):
         fill: FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefType
         | ValueDefWithConditionStringNullType
         | UndefinedType = Undefined,
         fillOpacity: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
         key: FieldDefWithoutScale
@@ -6007,6 +6322,7 @@ class Encoding(GenomeSpySchema):
         opacity: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
@@ -6018,26 +6334,31 @@ class Encoding(GenomeSpySchema):
         shape: FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefTypeForShape
         | ValueDefWithConditionStringNullTypeForShape
         | UndefinedType = Undefined,
         size: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
         stroke: FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefType
         | ValueDefWithConditionStringNullType
         | UndefinedType = Undefined,
         strokeOpacity: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
         strokeWidth: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
         text: StringFieldDef
@@ -6057,7 +6378,7 @@ class Encoding(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
-        x: dict[str, Any] | UndefinedType = Undefined,
+        x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
@@ -6065,6 +6386,7 @@ class Encoding(GenomeSpySchema):
         | PositionDatumDef
         | PositionExprDef
         | ValueDefNumber
+        | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
         **kwds: Any,
@@ -6104,6 +6426,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType,
     ) -> Encoding:
         """Return a copy with ``angle`` updated."""
@@ -6114,6 +6437,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefType
         | ValueDefWithConditionStringNullType,
     ) -> Encoding:
         """Return a copy with ``color`` updated."""
@@ -6133,6 +6457,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | MarkPropExprDef,
     ) -> Encoding:
@@ -6144,6 +6469,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | MarkPropExprDef,
     ) -> Encoding:
@@ -6164,6 +6490,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefType
         | ValueDefWithConditionStringNullType,
     ) -> Encoding:
         """Return a copy with ``fill`` updated."""
@@ -6174,6 +6501,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType,
     ) -> Encoding:
         """Return a copy with ``fillOpacity`` updated."""
@@ -6193,6 +6521,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType,
     ) -> Encoding:
         """Return a copy with ``opacity`` updated."""
@@ -6225,6 +6554,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefTypeForShape
         | ValueDefWithConditionStringNullTypeForShape,
     ) -> Encoding:
         """Return a copy with ``shape`` updated."""
@@ -6235,6 +6565,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType,
     ) -> Encoding:
         """Return a copy with ``size`` updated."""
@@ -6245,6 +6576,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefStringNull
+        | MarkPropExprDefType
         | ValueDefWithConditionStringNullType,
     ) -> Encoding:
         """Return a copy with ``stroke`` updated."""
@@ -6255,6 +6587,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType,
     ) -> Encoding:
         """Return a copy with ``strokeOpacity`` updated."""
@@ -6265,6 +6598,7 @@ class Encoding(GenomeSpySchema):
         value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
         | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
         | ValueDefWithConditionNumberType,
     ) -> Encoding:
         """Return a copy with ``strokeWidth`` updated."""
@@ -6305,7 +6639,7 @@ class Encoding(GenomeSpySchema):
         """Return a copy with a ``FieldDefWithoutScale`` uniqueId."""
         return self._with_property("uniqueId", value, **kwargs)
 
-    def with_x(self, value: dict[str, Any]) -> Encoding:
+    def with_x(self, value: dict[str, Any] | None) -> Encoding:
         """Return a copy with ``x`` updated."""
         return self._with_property("x", value)
 
@@ -6325,7 +6659,8 @@ class Encoding(GenomeSpySchema):
         | ChromPosDef
         | PositionDatumDef
         | PositionExprDef
-        | ValueDefNumber,
+        | ValueDefNumber
+        | None,
     ) -> Encoding:
         """Return a copy with ``y`` updated."""
         return self._with_property("y", value)
@@ -8563,6 +8898,7 @@ class HConcatSpec(GenomeSpySchema):
         | UndefinedType = Undefined,
         legends: LegendsKwds | UndefinedType = Undefined,
         name: str | UndefinedType = Undefined,
+        overhang: OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
             PlainValueParameter
@@ -8589,6 +8925,7 @@ class HConcatSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -8610,6 +8947,7 @@ class HConcatSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ]
@@ -8654,6 +8992,7 @@ class HConcatSpec(GenomeSpySchema):
             height=height,
             legends=legends,
             name=name,
+            overhang=overhang,
             padding=padding,
             params=params,
             resolve=resolve,
@@ -8764,6 +9103,15 @@ class HConcatSpec(GenomeSpySchema):
         """Return a copy with ``name`` updated."""
         return self._with_property("name", value)
 
+    def with_overhang(
+        self,
+        value: OverhangConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> HConcatSpec:
+        """Return a copy with a ``OverhangConfig`` overhang."""
+        return self._with_property("overhang", value, **kwargs)
+
     def with_padding(self, value: Paddings | PaddingsKwds | float) -> HConcatSpec:
         """Return a copy with ``padding`` updated."""
         return self._with_property("padding", value)
@@ -8825,6 +9173,7 @@ class HConcatSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -8846,6 +9195,7 @@ class HConcatSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ],
@@ -9500,6 +9850,7 @@ class LayerSpec(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        overhang: OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
             PlainValueParameter
@@ -9521,6 +9872,7 @@ class LayerSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -9542,6 +9894,7 @@ class LayerSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ]
@@ -9588,6 +9941,7 @@ class LayerSpec(GenomeSpySchema):
             legends=legends,
             name=name,
             opacity=opacity,
+            overhang=overhang,
             padding=padding,
             params=params,
             resolve=resolve,
@@ -9697,6 +10051,15 @@ class LayerSpec(GenomeSpySchema):
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
 
+    def with_overhang(
+        self,
+        value: OverhangConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> LayerSpec:
+        """Return a copy with a ``OverhangConfig`` overhang."""
+        return self._with_property("overhang", value, **kwargs)
+
     def with_padding(self, value: Paddings | PaddingsKwds | float) -> LayerSpec:
         """Return a copy with ``padding`` updated."""
         return self._with_property("padding", value)
@@ -9745,6 +10108,7 @@ class LayerSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -9766,6 +10130,7 @@ class LayerSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ],
@@ -11376,6 +11741,7 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
         field: str | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
@@ -11392,6 +11758,7 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
             datum=datum,
             description=description,
             domainInert=domainInert,
+            expr=expr,
             field=field,
             format=format,
             legend=legend,
@@ -11433,6 +11800,10 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
     def with_domainInert(self, value: bool) -> MarkPropDefStringNullTypeForShape:
         """Return a copy with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def with_expr(self, value: str) -> MarkPropDefStringNullTypeForShape:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def with_field(self, value: str) -> MarkPropDefStringNullTypeForShape:
         """Return a copy with ``field`` updated."""
@@ -11503,6 +11874,7 @@ class MarkPropDefStringNull(GenomeSpySchema):
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
         field: str | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
@@ -11519,6 +11891,7 @@ class MarkPropDefStringNull(GenomeSpySchema):
             datum=datum,
             description=description,
             domainInert=domainInert,
+            expr=expr,
             field=field,
             format=format,
             legend=legend,
@@ -11560,6 +11933,10 @@ class MarkPropDefStringNull(GenomeSpySchema):
     def with_domainInert(self, value: bool) -> MarkPropDefStringNull:
         """Return a copy with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def with_expr(self, value: str) -> MarkPropDefStringNull:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def with_field(self, value: str) -> MarkPropDefStringNull:
         """Return a copy with ``field`` updated."""
@@ -11630,6 +12007,7 @@ class MarkPropDefNumber(GenomeSpySchema):
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
         field: str | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
@@ -11646,6 +12024,7 @@ class MarkPropDefNumber(GenomeSpySchema):
             datum=datum,
             description=description,
             domainInert=domainInert,
+            expr=expr,
             field=field,
             format=format,
             legend=legend,
@@ -11687,6 +12066,10 @@ class MarkPropDefNumber(GenomeSpySchema):
     def with_domainInert(self, value: bool) -> MarkPropDefNumber:
         """Return a copy with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def with_expr(self, value: str) -> MarkPropDefNumber:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def with_field(self, value: str) -> MarkPropDefNumber:
         """Return a copy with ``field`` updated."""
@@ -11748,6 +12131,7 @@ class MarkPropExprDef(GenomeSpySchema):
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -11759,6 +12143,7 @@ class MarkPropExprDef(GenomeSpySchema):
             description=description,
             domainInert=domainInert,
             expr=expr,
+            legend=legend,
             resolutionChannel=resolutionChannel,
             scale=scale,
             title=title,
@@ -11783,6 +12168,15 @@ class MarkPropExprDef(GenomeSpySchema):
         """Return a copy with ``expr`` updated."""
         return self._with_property("expr", value)
 
+    def with_legend(
+        self,
+        value: Legend | LegendKwds | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropExprDef:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
     def with_resolutionChannel(self, value: ChannelWithScale_T) -> MarkPropExprDef:
         """Return a copy with ``resolutionChannel`` updated."""
         return self._with_property("resolutionChannel", value)
@@ -11801,6 +12195,170 @@ class MarkPropExprDef(GenomeSpySchema):
         return self._with_property("title", value)
 
     def with_type(self, value: Type_T) -> MarkPropExprDef:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+
+@with_property_setters
+class MarkPropExprDefType(GenomeSpySchema):
+    """Generated wrapper for ``MarkPropExprDef<Type>``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("MarkPropExprDef<Type>", {})
+
+    def __init__(
+        self,
+        band: float | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
+        scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        type: Type_T | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            description=description,
+            domainInert=domainInert,
+            expr=expr,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def with_band(self, value: float) -> MarkPropExprDefType:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(self, value: str) -> MarkPropExprDefType:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: bool) -> MarkPropExprDefType:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_expr(self, value: str) -> MarkPropExprDefType:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_legend(
+        self,
+        value: Legend | LegendKwds | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropExprDefType:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(self, value: ChannelWithScale_T) -> MarkPropExprDefType:
+        """Return a copy with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def with_scale(
+        self,
+        value: Scale | ScaleKwds | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropExprDefType:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: str | None) -> MarkPropExprDefType:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(self, value: Type_T) -> MarkPropExprDefType:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+
+@with_property_setters
+class MarkPropExprDefTypeForShape(GenomeSpySchema):
+    """Generated wrapper for ``MarkPropExprDef<TypeForShape>``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get(
+        "MarkPropExprDef<TypeForShape>", {}
+    )
+
+    def __init__(
+        self,
+        band: float | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
+        scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        type: Type_T | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            description=description,
+            domainInert=domainInert,
+            expr=expr,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def with_band(self, value: float) -> MarkPropExprDefTypeForShape:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def with_description(self, value: str) -> MarkPropExprDefTypeForShape:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_domainInert(self, value: bool) -> MarkPropExprDefTypeForShape:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def with_expr(self, value: str) -> MarkPropExprDefTypeForShape:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def with_legend(
+        self,
+        value: Legend | LegendKwds | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropExprDefTypeForShape:
+        """Return a copy with a ``Legend`` legend."""
+        return self._with_property("legend", value, **kwargs)
+
+    def with_resolutionChannel(
+        self, value: ChannelWithScale_T
+    ) -> MarkPropExprDefTypeForShape:
+        """Return a copy with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def with_scale(
+        self,
+        value: Scale | ScaleKwds | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MarkPropExprDefTypeForShape:
+        """Return a copy with a ``Scale`` scale."""
+        return self._with_property("scale", value, **kwargs)
+
+    def with_title(self, value: str | None) -> MarkPropExprDefTypeForShape:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def with_type(self, value: Type_T) -> MarkPropExprDefTypeForShape:
         """Return a copy with ``type`` updated."""
         return self._with_property("type", value)
 
@@ -13012,6 +13570,7 @@ class MultiscaleSpec(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        overhang: OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
             PlainValueParameter
@@ -13038,6 +13597,7 @@ class MultiscaleSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -13059,6 +13619,7 @@ class MultiscaleSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ]
@@ -13105,6 +13666,7 @@ class MultiscaleSpec(GenomeSpySchema):
             multiscale=multiscale,
             name=name,
             opacity=opacity,
+            overhang=overhang,
             padding=padding,
             params=params,
             resolve=resolve,
@@ -13215,6 +13777,15 @@ class MultiscaleSpec(GenomeSpySchema):
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
 
+    def with_overhang(
+        self,
+        value: OverhangConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> MultiscaleSpec:
+        """Return a copy with a ``OverhangConfig`` overhang."""
+        return self._with_property("overhang", value, **kwargs)
+
     def with_padding(self, value: Paddings | PaddingsKwds | float) -> MultiscaleSpec:
         """Return a copy with ``padding`` updated."""
         return self._with_property("padding", value)
@@ -13273,6 +13844,7 @@ class MultiscaleSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -13294,6 +13866,7 @@ class MultiscaleSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ],
@@ -13548,6 +14121,7 @@ class NumericMarkPropDef(GenomeSpySchema):
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
         field: str | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
@@ -13564,6 +14138,7 @@ class NumericMarkPropDef(GenomeSpySchema):
             datum=datum,
             description=description,
             domainInert=domainInert,
+            expr=expr,
             field=field,
             format=format,
             legend=legend,
@@ -13605,6 +14180,10 @@ class NumericMarkPropDef(GenomeSpySchema):
     def with_domainInert(self, value: bool) -> NumericMarkPropDef:
         """Return a copy with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def with_expr(self, value: str) -> NumericMarkPropDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def with_field(self, value: str) -> NumericMarkPropDef:
         """Return a copy with ``field`` updated."""
@@ -13733,6 +14312,41 @@ class OtherDataFormat(GenomeSpySchema):
     def with_type(self, value: str) -> OtherDataFormat:
         """Return a copy with ``type`` updated."""
         return self._with_property("type", value)
+
+
+@with_property_setters
+class OverhangConfig(GenomeSpySchema):
+    """Generated wrapper for ``OverhangConfig``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("OverhangConfig", {})
+
+    def __init__(
+        self,
+        bottom: bool | UndefinedType = Undefined,
+        left: bool | UndefinedType = Undefined,
+        right: bool | UndefinedType = Undefined,
+        top: bool | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(bottom=bottom, left=left, right=right, top=top)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def with_bottom(self, value: bool) -> OverhangConfig:
+        """Return a copy with ``bottom`` updated."""
+        return self._with_property("bottom", value)
+
+    def with_left(self, value: bool) -> OverhangConfig:
+        """Return a copy with ``left`` updated."""
+        return self._with_property("left", value)
+
+    def with_right(self, value: bool) -> OverhangConfig:
+        """Return a copy with ``right`` updated."""
+        return self._with_property("right", value)
+
+    def with_top(self, value: bool) -> OverhangConfig:
+        """Return a copy with ``top`` updated."""
+        return self._with_property("top", value)
 
 
 @with_property_setters
@@ -18536,6 +19150,52 @@ class SequenceParams(GenomeSpySchema):
 
 
 @with_property_setters
+class SetIntersectionParams(GenomeSpySchema):
+    """Generated wrapper for ``SetIntersectionParams``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("SetIntersectionParams", {})
+
+    def __init__(
+        self,
+        description: str | UndefinedType = Undefined,
+        element: Field_T | Sequence[Field_T] | UndefinedType = Undefined,
+        membership: Field_T | UndefinedType = Undefined,
+        set: Field_T | UndefinedType = Undefined,
+        type: Literal["setIntersection"] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            element=element,
+            membership=membership,
+            set=set,
+            type=type,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def with_description(self, value: str) -> SetIntersectionParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def with_element(self, value: Field_T | Sequence[Field_T]) -> SetIntersectionParams:
+        """Return a copy with ``element`` updated."""
+        return self._with_property("element", value)
+
+    def with_membership(self, value: Field_T) -> SetIntersectionParams:
+        """Return a copy with ``membership`` updated."""
+        return self._with_property("membership", value)
+
+    def with_set(self, value: Field_T) -> SetIntersectionParams:
+        """Return a copy with ``set`` updated."""
+        return self._with_property("set", value)
+
+    def with_type(self, value: Literal["setIntersection"]) -> SetIntersectionParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+
+@with_property_setters
 class ShapeDef(GenomeSpySchema):
     """Generated wrapper for ``ShapeDef``."""
 
@@ -18554,6 +19214,7 @@ class ShapeDef(GenomeSpySchema):
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
         field: str | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
@@ -18570,6 +19231,7 @@ class ShapeDef(GenomeSpySchema):
             datum=datum,
             description=description,
             domainInert=domainInert,
+            expr=expr,
             field=field,
             format=format,
             legend=legend,
@@ -18609,6 +19271,10 @@ class ShapeDef(GenomeSpySchema):
     def with_domainInert(self, value: bool) -> ShapeDef:
         """Return a copy with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def with_expr(self, value: str) -> ShapeDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def with_field(self, value: str) -> ShapeDef:
         """Return a copy with ``field`` updated."""
@@ -22522,6 +23188,7 @@ class TransformParams(GenomeSpySchema):
         default: Any | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         direction: Literal["vertical", "horizontal"] | UndefinedType = Undefined,
+        element: Field_T | Sequence[Field_T] | UndefinedType = Undefined,
         ellipsis: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         end: Field_T | UndefinedType = Undefined,
@@ -22551,6 +23218,7 @@ class TransformParams(GenomeSpySchema):
         lane: Field_T | UndefinedType = Undefined,
         limit: float | UndefinedType = Undefined,
         md: Field_T | UndefinedType = Undefined,
+        membership: Field_T | UndefinedType = Undefined,
         offset: Literal["zero", "center", "normalize", "information"]
         | UndefinedType = Undefined,
         ops: Sequence[WindowOp_T] | UndefinedType = Undefined,
@@ -22570,6 +23238,7 @@ class TransformParams(GenomeSpySchema):
         score: Field_T | UndefinedType = Undefined,
         separator: Sequence[str] | str | UndefinedType = Undefined,
         sequence: Field_T | UndefinedType = Undefined,
+        set: Field_T | UndefinedType = Undefined,
         size: float | UndefinedType = Undefined,
         skipInvalidInput: bool | UndefinedType = Undefined,
         skipRegex: str | UndefinedType = Undefined,
@@ -22607,6 +23276,7 @@ class TransformParams(GenomeSpySchema):
             default=default,
             description=description,
             direction=direction,
+            element=element,
             ellipsis=ellipsis,
             empty=empty,
             end=end,
@@ -22628,6 +23298,7 @@ class TransformParams(GenomeSpySchema):
             lane=lane,
             limit=limit,
             md=md,
+            membership=membership,
             offset=offset,
             ops=ops,
             padding=padding,
@@ -22643,6 +23314,7 @@ class TransformParams(GenomeSpySchema):
             score=score,
             separator=separator,
             sequence=sequence,
+            set=set,
             size=size,
             skipInvalidInput=skipInvalidInput,
             skipRegex=skipRegex,
@@ -22742,6 +23414,10 @@ class TransformParams(GenomeSpySchema):
         """Return a copy with ``direction`` updated."""
         return self._with_property("direction", value)
 
+    def with_element(self, value: Field_T | Sequence[Field_T]) -> TransformParams:
+        """Return a copy with ``element`` updated."""
+        return self._with_property("element", value)
+
     def with_ellipsis(self, value: str) -> TransformParams:
         """Return a copy with ``ellipsis`` updated."""
         return self._with_property("ellipsis", value)
@@ -22839,6 +23515,10 @@ class TransformParams(GenomeSpySchema):
         """Return a copy with ``md`` updated."""
         return self._with_property("md", value)
 
+    def with_membership(self, value: Field_T) -> TransformParams:
+        """Return a copy with ``membership`` updated."""
+        return self._with_property("membership", value)
+
     def with_offset(
         self, value: Literal["zero", "center", "normalize", "information"]
     ) -> TransformParams:
@@ -22902,6 +23582,10 @@ class TransformParams(GenomeSpySchema):
     def with_sequence(self, value: Field_T) -> TransformParams:
         """Return a copy with ``sequence`` updated."""
         return self._with_property("sequence", value)
+
+    def with_set(self, value: Field_T) -> TransformParams:
+        """Return a copy with ``set`` updated."""
+        return self._with_property("set", value)
 
     def with_size(self, value: float) -> TransformParams:
         """Return a copy with ``size`` updated."""
@@ -23252,6 +23936,7 @@ class UnitSpec(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        overhang: OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
             PlainValueParameter
@@ -23273,6 +23958,7 @@ class UnitSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -23294,6 +23980,7 @@ class UnitSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ]
@@ -23340,6 +24027,7 @@ class UnitSpec(GenomeSpySchema):
             mark=mark,
             name=name,
             opacity=opacity,
+            overhang=overhang,
             padding=padding,
             params=params,
             resolve=resolve,
@@ -23455,6 +24143,15 @@ class UnitSpec(GenomeSpySchema):
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
 
+    def with_overhang(
+        self,
+        value: OverhangConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> UnitSpec:
+        """Return a copy with a ``OverhangConfig`` overhang."""
+        return self._with_property("overhang", value, **kwargs)
+
     def with_padding(self, value: Paddings | PaddingsKwds | float) -> UnitSpec:
         """Return a copy with ``padding`` updated."""
         return self._with_property("padding", value)
@@ -23503,6 +24200,7 @@ class UnitSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -23524,6 +24222,7 @@ class UnitSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ],
@@ -23889,6 +24588,7 @@ class VConcatSpec(GenomeSpySchema):
         | UndefinedType = Undefined,
         legends: LegendsKwds | UndefinedType = Undefined,
         name: str | UndefinedType = Undefined,
+        overhang: OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
             PlainValueParameter
@@ -23915,6 +24615,7 @@ class VConcatSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -23936,6 +24637,7 @@ class VConcatSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ]
@@ -23990,6 +24692,7 @@ class VConcatSpec(GenomeSpySchema):
             height=height,
             legends=legends,
             name=name,
+            overhang=overhang,
             padding=padding,
             params=params,
             resolve=resolve,
@@ -24085,6 +24788,15 @@ class VConcatSpec(GenomeSpySchema):
         """Return a copy with ``name`` updated."""
         return self._with_property("name", value)
 
+    def with_overhang(
+        self,
+        value: OverhangConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> VConcatSpec:
+        """Return a copy with a ``OverhangConfig`` overhang."""
+        return self._with_property("overhang", value, **kwargs)
+
     def with_padding(self, value: Paddings | PaddingsKwds | float) -> VConcatSpec:
         """Return a copy with ``padding`` updated."""
         return self._with_property("padding", value)
@@ -24146,6 +24858,7 @@ class VConcatSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -24167,6 +24880,7 @@ class VConcatSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ],
@@ -25191,6 +25905,7 @@ class ViewSpec(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        overhang: OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
         padding: Paddings | PaddingsKwds | float | UndefinedType = Undefined,
         params: Sequence[
             PlainValueParameter
@@ -25222,6 +25937,7 @@ class ViewSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -25243,6 +25959,7 @@ class ViewSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ]
@@ -25305,6 +26022,7 @@ class ViewSpec(GenomeSpySchema):
             multiscale=multiscale,
             name=name,
             opacity=opacity,
+            overhang=overhang,
             padding=padding,
             params=params,
             resolve=resolve,
@@ -25478,6 +26196,15 @@ class ViewSpec(GenomeSpySchema):
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
 
+    def with_overhang(
+        self,
+        value: OverhangConfig | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ViewSpec:
+        """Return a copy with a ``OverhangConfig`` overhang."""
+        return self._with_property("overhang", value, **kwargs)
+
     def with_padding(self, value: Paddings | PaddingsKwds | float) -> ViewSpec:
         """Return a copy with ``padding`` updated."""
         return self._with_property("padding", value)
@@ -25549,6 +26276,7 @@ class ViewSpec(GenomeSpySchema):
             | CollectParams
             | CoverageParams
             | CoordinateLookupParams
+            | CrossParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -25570,6 +26298,7 @@ class ViewSpec(GenomeSpySchema):
             | RegexExtractParams
             | RegexFoldParams
             | SampleParams
+            | SetIntersectionParams
             | StackParams
             | WindowParams
         ],
@@ -25830,6 +26559,9 @@ __all__ = [
     "CoordinateLookupParams",
     "CoreRootSpec",
     "CoverageParams",
+    "CrossData",
+    "CrossInput",
+    "CrossParams",
     "CsvDataFormat",
     "Data",
     "DataFormat",
@@ -25908,6 +26640,8 @@ __all__ = [
     "MarkPropDefStringNull",
     "MarkPropDefNumber",
     "MarkPropExprDef",
+    "MarkPropExprDefType",
+    "MarkPropExprDefTypeForShape",
     "MarkProps",
     "MarkType",
     "MeasureTextParams",
@@ -25923,6 +26657,7 @@ __all__ = [
     "NumericStopDef",
     "NumericValueDef",
     "OtherDataFormat",
+    "OverhangConfig",
     "PackLegendLabelsParams",
     "PaddingConfig",
     "Paddings",
@@ -25985,6 +26720,7 @@ __all__ = [
     "SeparatorProps",
     "SequenceGenerator",
     "SequenceParams",
+    "SetIntersectionParams",
     "ShapeDef",
     "SingleUrlSourceRef",
     "SizeDef",

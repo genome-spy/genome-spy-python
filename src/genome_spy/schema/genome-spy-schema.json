@@ -3251,6 +3251,10 @@
           "description": "An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.",
           "type": "string"
         },
+        "overhang": {
+          "$ref": "#/definitions/OverhangConfig",
+          "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
+        },
         "padding": {
           "$ref": "#/definitions/PaddingConfig",
           "description": "Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge.\n\nExamples:\n- `padding: 10`\n- `padding: { top: 10, right: 20, bottom: 10, left: 20 }`\n\n**Default value:** `0`"
@@ -3732,6 +3736,17 @@
           "description": "An expression. Properties of the data can be accessed through the `datum` object.",
           "type": "string"
         },
+        "legend": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Legend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Legend properties for the encoding channel. If `null`, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config.\n\n__Default value:__ If undefined, configured legend defaults are applied."
+        },
         "param": {
           "description": "Filter using a parameter name.",
           "type": "string"
@@ -3793,6 +3808,17 @@
         "expr": {
           "description": "An expression. Properties of the data can be accessed through the `datum` object.",
           "type": "string"
+        },
+        "legend": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Legend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Legend properties for the encoding channel. If `null`, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config.\n\n__Default value:__ If undefined, configured legend defaults are applied."
         },
         "param": {
           "description": "Filter using a parameter name.",
@@ -5164,6 +5190,10 @@
               "$ref": "#/definitions/ViewOpacityDef",
               "description": "Opacity of the view and all its children.\n\nThis can be:\n\n- a fixed number between `0` and `1`\n- an expression reference (`ExprRef`)\n- a `DynamicOpacity` definition for zoom-dependent opacity\n\nDynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms.\n\nExample:\n\n```json \"opacity\": {   \"unitsPerPixel\": [100000, 40000],   \"values\": [0, 1] } ```\n\nIn this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel.\n\n__Default value:__ `1.0`"
             },
+            "overhang": {
+              "$ref": "#/definitions/OverhangConfig",
+              "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
+            },
             "padding": {
               "$ref": "#/definitions/PaddingConfig",
               "description": "Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge.\n\nExamples:\n- `padding: 10`\n- `padding: { top: 10, right: 20, bottom: 10, left: 20 }`\n\n**Default value:** `0`"
@@ -6527,6 +6557,10 @@
               "$ref": "#/definitions/ViewOpacityDef",
               "description": "Opacity of the view and all its children.\n\nThis can be:\n\n- a fixed number between `0` and `1`\n- an expression reference (`ExprRef`)\n- a `DynamicOpacity` definition for zoom-dependent opacity\n\nDynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms.\n\nExample:\n\n```json \"opacity\": {   \"unitsPerPixel\": [100000, 40000],   \"values\": [0, 1] } ```\n\nIn this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel.\n\n__Default value:__ `1.0`"
             },
+            "overhang": {
+              "$ref": "#/definitions/OverhangConfig",
+              "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
+            },
             "padding": {
               "$ref": "#/definitions/PaddingConfig",
               "description": "Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge.\n\nExamples:\n- `padding: 10`\n- `padding: { top: 10, right: 20, bottom: 10, left: 20 }`\n\n**Default value:** `0`"
@@ -7889,6 +7923,10 @@
               "$ref": "#/definitions/ViewOpacityDef",
               "description": "Opacity of the view and all its children.\n\nThis can be:\n\n- a fixed number between `0` and `1`\n- an expression reference (`ExprRef`)\n- a `DynamicOpacity` definition for zoom-dependent opacity\n\nDynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms.\n\nExample:\n\n```json \"opacity\": {   \"unitsPerPixel\": [100000, 40000],   \"values\": [0, 1] } ```\n\nIn this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel.\n\n__Default value:__ `1.0`"
             },
+            "overhang": {
+              "$ref": "#/definitions/OverhangConfig",
+              "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
+            },
             "padding": {
               "$ref": "#/definitions/PaddingConfig",
               "description": "Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge.\n\nExamples:\n- `padding: 10`\n- `padding: { top: 10, right: 20, bottom: 10, left: 20 }`\n\n**Default value:** `0`"
@@ -9232,6 +9270,10 @@
             "name": {
               "description": "An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.",
               "type": "string"
+            },
+            "overhang": {
+              "$ref": "#/definitions/OverhangConfig",
+              "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
             },
             "padding": {
               "$ref": "#/definitions/PaddingConfig",
@@ -10610,6 +10652,10 @@
               "description": "An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.",
               "type": "string"
             },
+            "overhang": {
+              "$ref": "#/definitions/OverhangConfig",
+              "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
+            },
             "padding": {
               "$ref": "#/definitions/PaddingConfig",
               "description": "Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge.\n\nExamples:\n- `padding: 10`\n- `padding: { top: 10, right: 20, bottom: 10, left: 20 }`\n\n**Default value:** `0`"
@@ -11978,6 +12024,10 @@
               "description": "An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.",
               "type": "string"
             },
+            "overhang": {
+              "$ref": "#/definitions/OverhangConfig",
+              "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
+            },
             "padding": {
               "$ref": "#/definitions/PaddingConfig",
               "description": "Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge.\n\nExamples:\n- `padding: 10`\n- `padding: { top: 10, right: 20, bottom: 10, left: 20 }`\n\n**Default value:** `0`"
@@ -12477,6 +12527,65 @@
       "required": [
         "end",
         "start",
+        "type"
+      ],
+      "type": "object"
+    },
+    "CrossData": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/UrlData"
+        },
+        {
+          "$ref": "#/definitions/InlineData"
+        },
+        {
+          "$ref": "#/definitions/NamedData"
+        },
+        {
+          "$ref": "#/definitions/Generator"
+        }
+      ]
+    },
+    "CrossInput": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/CrossData",
+          "description": "Finite eager data crossed with the primary input."
+        },
+        "transform": {
+          "description": "Unary transforms applied to the foreign data before crossing.",
+          "items": {
+            "$ref": "#/definitions/TransformParams"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "type": "object"
+    },
+    "CrossParams": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "description": "A description of the transform step. Can be used for documentation and agent context.",
+          "type": "string"
+        },
+        "from": {
+          "$ref": "#/definitions/CrossInput",
+          "description": "The finite eager foreign data and its optional preprocessing transforms."
+        },
+        "type": {
+          "const": "cross",
+          "description": "The type of the transform to be applied",
+          "type": "string"
+        }
+      },
+      "required": [
+        "from",
         "type"
       ],
       "type": "object"
@@ -13242,6 +13351,9 @@
                 "value"
               ],
               "type": "object"
+            },
+            {
+              "type": "null"
             }
           ],
           "description": "X coordinates of the marks.\n\nThe `value` of this channel can be a number between zero and one."
@@ -13258,7 +13370,14 @@
           "description": "X2 coordinates of the marks.\n\nThe `value` of this channel can be a number between zero and one."
         },
         "y": {
-          "$ref": "#/definitions/PositionDef",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PositionDef"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "description": "Y coordinates of the marks.\n\nThe `value` of this channel can be a number between zero and one."
         },
         "y2": {
@@ -15673,6 +15792,10 @@
           "description": "An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.",
           "type": "string"
         },
+        "overhang": {
+          "$ref": "#/definitions/OverhangConfig",
+          "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
+        },
         "padding": {
           "$ref": "#/definitions/PaddingConfig",
           "description": "Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge.\n\nExamples:\n- `padding: 10`\n- `padding: { top: 10, right: 20, bottom: 10, left: 20 }`\n\n**Default value:** `0`"
@@ -17408,6 +17531,10 @@
         "opacity": {
           "$ref": "#/definitions/ViewOpacityDef",
           "description": "Opacity of the view and all its children.\n\nThis can be:\n\n- a fixed number between `0` and `1`\n- an expression reference (`ExprRef`)\n- a `DynamicOpacity` definition for zoom-dependent opacity\n\nDynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms.\n\nExample:\n\n```json \"opacity\": {   \"unitsPerPixel\": [100000, 40000],   \"values\": [0, 1] } ```\n\nIn this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel.\n\n__Default value:__ `1.0`"
+        },
+        "overhang": {
+          "$ref": "#/definitions/OverhangConfig",
+          "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
         },
         "padding": {
           "$ref": "#/definitions/PaddingConfig",
@@ -19276,6 +19403,9 @@
           "$ref": "#/definitions/FieldOrDatumDefWithCondition%3CScaleDatumDef%2C(string%7Cnull)%3E"
         },
         {
+          "$ref": "#/definitions/MarkPropExprDef%3CTypeForShape%3E"
+        },
+        {
           "$ref": "#/definitions/ValueDefWithCondition%3C(string%7Cnull)%2CTypeForShape%3E"
         }
       ]
@@ -19289,6 +19419,9 @@
           "$ref": "#/definitions/FieldOrDatumDefWithCondition%3CScaleDatumDef%2C(string%7Cnull)%3E"
         },
         {
+          "$ref": "#/definitions/MarkPropExprDef%3CType%3E"
+        },
+        {
           "$ref": "#/definitions/ValueDefWithCondition%3C(string%7Cnull)%2CType%3E"
         }
       ]
@@ -19300,6 +19433,9 @@
         },
         {
           "$ref": "#/definitions/FieldOrDatumDefWithCondition%3CScaleDatumDef%2Cnumber%3E"
+        },
+        {
+          "$ref": "#/definitions/MarkPropExprDef%3CType%3E"
         },
         {
           "$ref": "#/definitions/ValueDefWithCondition%3Cnumber%2CType%3E"
@@ -19326,6 +19462,145 @@
         "expr": {
           "description": "An expression. Properties of the data can be accessed through the `datum` object.",
           "type": "string"
+        },
+        "legend": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Legend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Legend properties for the encoding channel. If `null`, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config.\n\n__Default value:__ If undefined, configured legend defaults are applied."
+        },
+        "resolutionChannel": {
+          "$ref": "#/definitions/ChannelWithScale",
+          "description": "An alternative channel for scale resolution.\n\nThis is mainly for internal use and allows using `color` channel to resolve `fill` and `stroke` channels under certain circumstances."
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Scale"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels.\n\nIf `null`, the scale will be [disabled and the data value will be directly encoded](https://vega.github.io/vega-lite/docs/scale.html#disable).\n\n__Default value:__ If undefined, default [scale properties](https://vega.github.io/vega-lite/docs/scale.html) are applied.\n\n__See also:__ [`scale`](https://vega.github.io/vega-lite/docs/scale.html) documentation."
+        },
+        "title": {
+          "description": "A title for the field. If `null`, the title will be removed.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "$ref": "#/definitions/Type"
+        }
+      },
+      "required": [
+        "expr",
+        "type"
+      ],
+      "type": "object"
+    },
+    "MarkPropExprDef<Type>": {
+      "additionalProperties": false,
+      "properties": {
+        "band": {
+          "description": "Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to `0`, and at the middle of the band if set to `0.5`.",
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "description": {
+          "description": "A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.",
+          "type": "string"
+        },
+        "domainInert": {
+          "description": "Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level `domainInert` when an entire subtree should be excluded.\n\n**Default value:** `false`",
+          "type": "boolean"
+        },
+        "expr": {
+          "description": "An expression. Properties of the data can be accessed through the `datum` object.",
+          "type": "string"
+        },
+        "legend": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Legend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Legend properties for the encoding channel. If `null`, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config.\n\n__Default value:__ If undefined, configured legend defaults are applied."
+        },
+        "resolutionChannel": {
+          "$ref": "#/definitions/ChannelWithScale",
+          "description": "An alternative channel for scale resolution.\n\nThis is mainly for internal use and allows using `color` channel to resolve `fill` and `stroke` channels under certain circumstances."
+        },
+        "scale": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Scale"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels.\n\nIf `null`, the scale will be [disabled and the data value will be directly encoded](https://vega.github.io/vega-lite/docs/scale.html#disable).\n\n__Default value:__ If undefined, default [scale properties](https://vega.github.io/vega-lite/docs/scale.html) are applied.\n\n__See also:__ [`scale`](https://vega.github.io/vega-lite/docs/scale.html) documentation."
+        },
+        "title": {
+          "description": "A title for the field. If `null`, the title will be removed.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "$ref": "#/definitions/Type"
+        }
+      },
+      "required": [
+        "expr",
+        "type"
+      ],
+      "type": "object"
+    },
+    "MarkPropExprDef<TypeForShape>": {
+      "additionalProperties": false,
+      "properties": {
+        "band": {
+          "description": "Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to `0`, and at the middle of the band if set to `0.5`.",
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
+        "description": {
+          "description": "A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.",
+          "type": "string"
+        },
+        "domainInert": {
+          "description": "Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level `domainInert` when an entire subtree should be excluded.\n\n**Default value:** `false`",
+          "type": "boolean"
+        },
+        "expr": {
+          "description": "An expression. Properties of the data can be accessed through the `datum` object.",
+          "type": "string"
+        },
+        "legend": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Legend"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Legend properties for the encoding channel. If `null`, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config.\n\n__Default value:__ If undefined, configured legend defaults are applied."
         },
         "resolutionChannel": {
           "$ref": "#/definitions/ChannelWithScale",
@@ -20389,6 +20664,10 @@
           "$ref": "#/definitions/ViewOpacityDef",
           "description": "Opacity of the view and all its children.\n\nThis can be:\n\n- a fixed number between `0` and `1`\n- an expression reference (`ExprRef`)\n- a `DynamicOpacity` definition for zoom-dependent opacity\n\nDynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms.\n\nExample:\n\n```json \"opacity\": {   \"unitsPerPixel\": [100000, 40000],   \"values\": [0, 1] } ```\n\nIn this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel.\n\n__Default value:__ `1.0`"
         },
+        "overhang": {
+          "$ref": "#/definitions/OverhangConfig",
+          "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
+        },
         "padding": {
           "$ref": "#/definitions/PaddingConfig",
           "description": "Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge.\n\nExamples:\n- `padding: 10`\n- `padding: { top: 10, right: 20, bottom: 10, left: 20 }`\n\n**Default value:** `0`"
@@ -20918,6 +21197,25 @@
       "required": [
         "type"
       ],
+      "type": "object"
+    },
+    "OverhangConfig": {
+      "additionalProperties": false,
+      "description": "Controls which edges reserve external overhang during layout.\n\nSet an edge to false to let overhanging elements overlap adjacent content. The elements remain visible, and explicit view padding is still reserved.",
+      "properties": {
+        "bottom": {
+          "type": "boolean"
+        },
+        "left": {
+          "type": "boolean"
+        },
+        "right": {
+          "type": "boolean"
+        },
+        "top": {
+          "type": "boolean"
+        }
+      },
       "type": "object"
     },
     "PackLegendLabelsParams": {
@@ -26041,6 +26339,49 @@
       ],
       "type": "object"
     },
+    "SetIntersectionParams": {
+      "additionalProperties": false,
+      "description": "Computes exact set-intersection profiles from element-to-set memberships. The transform emits one row for every observed profile and observed set.\n\nEach output row contains `profileKey` (a bit string in first-observed set order), `profileSize` (the number of distinct elements with the exact profile), `profileDegree` (the number of active sets), `set`, `setIndex` (the zero-based first-observed set index), and `member` (Boolean membership of the profile in the set).",
+      "properties": {
+        "description": {
+          "description": "A description of the transform step. Can be used for documentation and agent context.",
+          "type": "string"
+        },
+        "element": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Field"
+            },
+            {
+              "items": {
+                "$ref": "#/definitions/Field"
+              },
+              "type": "array"
+            }
+          ],
+          "description": "Field identifying an element. Multiple fields form a compound identifier."
+        },
+        "membership": {
+          "$ref": "#/definitions/Field",
+          "description": "Optional field containing a Boolean membership value. The values `0` and `1` are also accepted. When omitted, every input row denotes membership."
+        },
+        "set": {
+          "$ref": "#/definitions/Field",
+          "description": "Field identifying a set."
+        },
+        "type": {
+          "const": "setIntersection",
+          "description": "The type of the transform to be applied",
+          "type": "string"
+        }
+      },
+      "required": [
+        "element",
+        "set",
+        "type"
+      ],
+      "type": "object"
+    },
     "ShapeDef": {
       "$ref": "#/definitions/MarkPropDef%3C(string%7Cnull)%2CTypeForShape%3E"
     },
@@ -29651,6 +29992,9 @@
           "$ref": "#/definitions/CoordinateLookupParams"
         },
         {
+          "$ref": "#/definitions/CrossParams"
+        },
+        {
           "$ref": "#/definitions/FlattenDelimitedParams"
         },
         {
@@ -29709,6 +30053,9 @@
         },
         {
           "$ref": "#/definitions/SampleParams"
+        },
+        {
+          "$ref": "#/definitions/SetIntersectionParams"
         },
         {
           "$ref": "#/definitions/StackParams"
@@ -30752,6 +31099,10 @@
         "opacity": {
           "$ref": "#/definitions/ViewOpacityDef",
           "description": "Opacity of the view and all its children.\n\nThis can be:\n\n- a fixed number between `0` and `1`\n- an expression reference (`ExprRef`)\n- a `DynamicOpacity` definition for zoom-dependent opacity\n\nDynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms.\n\nExample:\n\n```json \"opacity\": {   \"unitsPerPixel\": [100000, 40000],   \"values\": [0, 1] } ```\n\nIn this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel.\n\n__Default value:__ `1.0`"
+        },
+        "overhang": {
+          "$ref": "#/definitions/OverhangConfig",
+          "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
         },
         "padding": {
           "$ref": "#/definitions/PaddingConfig",
@@ -32219,6 +32570,10 @@
         "name": {
           "description": "An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.",
           "type": "string"
+        },
+        "overhang": {
+          "$ref": "#/definitions/OverhangConfig",
+          "description": "Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible.\n\n**Default value:** all edges reserve overhang"
         },
         "padding": {
           "$ref": "#/definitions/PaddingConfig",

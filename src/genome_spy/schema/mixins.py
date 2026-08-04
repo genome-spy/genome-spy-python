@@ -487,6 +487,19 @@ class TransformMethodMixin:
             transform["values"] = values
         return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
 
+    def transform_cross(
+        self,
+        *,
+        from_: core.CrossInput | dict[str, Any],
+        description: str | UndefinedType = Undefined,
+    ) -> Self:
+        """Add a ``cross`` transform."""
+        transform: dict[str, Any] = {"type": "cross"}
+        transform["from"] = from_
+        if description is not Undefined:
+            transform["description"] = description
+        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+
     def transform_flatten_delimited(
         self,
         *,
@@ -947,6 +960,24 @@ class TransformMethodMixin:
             transform["description"] = description
         if size is not Undefined:
             transform["size"] = size
+        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+
+    def transform_set_intersection(
+        self,
+        *,
+        element: Field_T | Sequence[Field_T],
+        set: Field_T,
+        description: str | UndefinedType = Undefined,
+        membership: Field_T | UndefinedType = Undefined,
+    ) -> Self:
+        """Add a ``setIntersection`` transform."""
+        transform: dict[str, Any] = {"type": "setIntersection"}
+        transform["element"] = element
+        transform["set"] = set
+        if description is not Undefined:
+            transform["description"] = description
+        if membership is not Undefined:
+            transform["membership"] = membership
         return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_stack(

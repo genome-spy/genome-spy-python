@@ -61,6 +61,9 @@ from genome_spy.schema.core import (
     CoordinateLookupParams,
     CoreRootSpec,
     CoverageParams,
+    CrossData,
+    CrossInput,
+    CrossParams,
     CsvDataFormat,
     Data,
     DataFormat,
@@ -139,6 +142,8 @@ from genome_spy.schema.core import (
     MarkPropDefStringNull,
     MarkPropDefNumber,
     MarkPropExprDef,
+    MarkPropExprDefType,
+    MarkPropExprDefTypeForShape,
     MarkProps,
     MarkType,
     MeasureTextParams,
@@ -154,6 +159,7 @@ from genome_spy.schema.core import (
     NumericStopDef,
     NumericValueDef,
     OtherDataFormat,
+    OverhangConfig,
     PackLegendLabelsParams,
     PaddingConfig,
     Paddings,
@@ -216,6 +222,7 @@ from genome_spy.schema.core import (
     SeparatorProps,
     SequenceGenerator,
     SequenceParams,
+    SetIntersectionParams,
     ShapeDef,
     SingleUrlSourceRef,
     SizeDef,
@@ -370,7 +377,7 @@ from genome_spy.schema._kwds import (
     ResolveKwds,
 )
 
-SCHEMA_VERSION = "0.81.0"
+SCHEMA_VERSION = "0.82.0"
 
 __all__ = [
     "GenomeSpySchema",
@@ -433,6 +440,9 @@ __all__ = [
     "CoordinateLookupParams",
     "CoreRootSpec",
     "CoverageParams",
+    "CrossData",
+    "CrossInput",
+    "CrossParams",
     "CsvDataFormat",
     "Data",
     "DataFormat",
@@ -511,6 +521,8 @@ __all__ = [
     "MarkPropDefStringNull",
     "MarkPropDefNumber",
     "MarkPropExprDef",
+    "MarkPropExprDefType",
+    "MarkPropExprDefTypeForShape",
     "MarkProps",
     "MarkType",
     "MeasureTextParams",
@@ -526,6 +538,7 @@ __all__ = [
     "NumericStopDef",
     "NumericValueDef",
     "OtherDataFormat",
+    "OverhangConfig",
     "PackLegendLabelsParams",
     "PaddingConfig",
     "Paddings",
@@ -588,6 +601,7 @@ __all__ = [
     "SeparatorProps",
     "SequenceGenerator",
     "SequenceParams",
+    "SetIntersectionParams",
     "ShapeDef",
     "SingleUrlSourceRef",
     "SizeDef",

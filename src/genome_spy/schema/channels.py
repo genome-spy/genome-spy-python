@@ -78,6 +78,13 @@ class Angle(Channel):
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
 
+    def expr(
+        self,
+        value: str,
+    ) -> Angle:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
     def field(
         self,
         value: str,
@@ -187,6 +194,13 @@ class Color(Channel):
     ) -> Color:
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> Color:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def field(
         self,
@@ -652,6 +666,13 @@ class Fill(Channel):
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
 
+    def expr(
+        self,
+        value: str,
+    ) -> Fill:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
     def field(
         self,
         value: str,
@@ -761,6 +782,13 @@ class FillOpacity(Channel):
     ) -> FillOpacity:
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> FillOpacity:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def field(
         self,
@@ -902,6 +930,13 @@ class Opacity(Channel):
     ) -> Opacity:
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> Opacity:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def field(
         self,
@@ -1113,6 +1148,13 @@ class Shape(Channel):
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
 
+    def expr(
+        self,
+        value: str,
+    ) -> Shape:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
     def field(
         self,
         value: str,
@@ -1222,6 +1264,13 @@ class Size(Channel):
     ) -> Size:
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> Size:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def field(
         self,
@@ -1333,6 +1382,13 @@ class Stroke(Channel):
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
 
+    def expr(
+        self,
+        value: str,
+    ) -> Stroke:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
     def field(
         self,
         value: str,
@@ -1443,6 +1499,13 @@ class StrokeOpacity(Channel):
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
 
+    def expr(
+        self,
+        value: str,
+    ) -> StrokeOpacity:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
     def field(
         self,
         value: str,
@@ -1552,6 +1615,13 @@ class StrokeWidth(Channel):
     ) -> StrokeWidth:
         """Return a channel with ``domainInert`` updated."""
         return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> StrokeWidth:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
 
     def field(
         self,
