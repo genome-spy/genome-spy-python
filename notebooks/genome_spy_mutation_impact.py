@@ -115,8 +115,17 @@ def _(gs, mutation_input, pl, reference):
     def signal_track(data_url: dict[str, object], title: str, color: str) -> object:
         return (
             gs.Chart(data=data_url)
-            .mark_point(size=70, filled=True, color=color)
-            .encode(x="position:Q", y="value:Q")
+            .mark_point(
+                size=70,
+                filled=True,
+                color=color,
+                tooltip=gs.HandledTooltip(handler="default"),
+            )
+            .encode(
+                x="position:Q",
+                y="value:Q",
+                tooltip=[gs.Tooltip("position:Q"), gs.Tooltip("value:Q")],
+            )
             .properties(height=90, title=title)
         )
 
