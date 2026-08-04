@@ -47,6 +47,9 @@ async function renderChart({ model, el, signal }) {
   };
 
   const attachInteractions = () => {
+    if (!api) {
+      return;
+    }
     clearInteractions();
 
     for (const name of model.get("parameter_names") || []) {
@@ -66,6 +69,7 @@ async function renderChart({ model, el, signal }) {
     }
 
     if (model.get("enable_click_events")) {
+      const interactionApi = api;
       const onClick = (event) => {
         const datum = event?.datum;
         model.set(
@@ -75,8 +79,10 @@ async function renderChart({ model, el, signal }) {
         model.set("click_revision", (model.get("click_revision") || 0) + 1);
         model.save_changes();
       };
-      api.addEventListener("click", onClick);
-      parameterSubscriptions.push(() => api.removeEventListener("click", onClick));
+      interactionApi.addEventListener("click", onClick);
+      parameterSubscriptions.push(() =>
+        interactionApi.removeEventListener("click", onClick)
+      );
     }
   };
 
@@ -112,6 +118,7 @@ async function renderChart({ model, el, signal }) {
     }
     api = await embed(el, spec, options);
     model.set("error", "");
+    model.save_changes();
     attachInteractions();
   };
 
