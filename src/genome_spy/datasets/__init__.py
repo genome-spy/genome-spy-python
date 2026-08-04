@@ -20,6 +20,7 @@ _DATASETS = {
     "airway_scaledcounts": "airway_scaledcounts.csv",
     "dnmt3a_lollipop": "dnmt3a_lollipop.json",
     "hapmap_gwas": "hapmap_gwas.csv",
+    "mutation_impact_reference": "mutation_impact_reference.json",
     "pik3ca_mutations": "pik3ca_mutations.json",
     "tcga_brca_rainfall": "tcga_brca_rainfall.json",
     "tcga_laml_oncoprint": "tcga_laml_oncoprint.json",

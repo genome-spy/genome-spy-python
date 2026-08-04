@@ -12,26 +12,17 @@ def _():
     import genome_spy as gs
     import marimo as mo
     import polars as pl
+    from genome_spy.datasets import load_dataset
 
-    return gs, mo, pl
+    return gs, load_dataset, mo, pl
 
 
 @app.cell
-def _(pl):
-    reference_sequence = "ACGTTCGAGTACCGTATGCA"
-    positions = list(range(100, 100 + len(reference_sequence)))
-    reference = pl.DataFrame(
-        {
-            "position": positions,
-            "base": list(reference_sequence),
-            "value": [
-                round(0.25 + 0.05 * ((index * 3) % 11), 2)
-                for index in range(len(reference_sequence))
-            ],
-        }
-    )
+def _(load_dataset, pl):
+    reference_payload = load_dataset("mutation_impact_reference", as_format="json")
+    reference = pl.DataFrame(reference_payload["rows"])
 
-    return reference, reference_sequence
+    return reference, reference_payload
 
 
 @app.cell

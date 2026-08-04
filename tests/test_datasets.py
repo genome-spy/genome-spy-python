@@ -23,6 +23,7 @@ def test_available_datasets_are_stable() -> None:
         "airway_scaledcounts",
         "dnmt3a_lollipop",
         "hapmap_gwas",
+        "mutation_impact_reference",
         "pik3ca_mutations",
         "tcga_brca_rainfall",
         "tcga_laml_oncoprint",
@@ -44,6 +45,16 @@ def test_load_json_dataset() -> None:
     assert isinstance(data, dict)
     assert "domains" in data
     assert isinstance(data["domains"], list)
+
+
+def test_load_mutation_impact_reference_dataset() -> None:
+    data = load_dataset("mutation_impact_reference", as_format="json")
+
+    assert isinstance(data, dict)
+    assert data["assembly"] == "synthetic-v1"
+    assert data["chrom"] == "chrSynthetic"
+    assert len(data["rows"]) == 20
+    assert data["rows"][0] == {"position": 100, "base": "A", "value": 0.25}
 
 
 def test_load_dnmt3a_lollipop_dataset() -> None:

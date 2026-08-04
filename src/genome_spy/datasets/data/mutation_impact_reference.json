@@ -1,0 +1,27 @@
+{
+  "assembly": "synthetic-v1",
+  "chrom": "chrSynthetic",
+  "description": "Deterministic reference window for the Marimo mutation-impact prototype.",
+  "rows": [
+    {"position": 100, "base": "A", "value": 0.25},
+    {"position": 101, "base": "C", "value": 0.4},
+    {"position": 102, "base": "G", "value": 0.55},
+    {"position": 103, "base": "T", "value": 0.7},
+    {"position": 104, "base": "T", "value": 0.3},
+    {"position": 105, "base": "C", "value": 0.45},
+    {"position": 106, "base": "G", "value": 0.6},
+    {"position": 107, "base": "A", "value": 0.75},
+    {"position": 108, "base": "G", "value": 0.35},
+    {"position": 109, "base": "T", "value": 0.5},
+    {"position": 110, "base": "A", "value": 0.65},
+    {"position": 111, "base": "C", "value": 0.25},
+    {"position": 112, "base": "C", "value": 0.4},
+    {"position": 113, "base": "G", "value": 0.55},
+    {"position": 114, "base": "T", "value": 0.7},
+    {"position": 115, "base": "A", "value": 0.3},
+    {"position": 116, "base": "T", "value": 0.45},
+    {"position": 117, "base": "G", "value": 0.6},
+    {"position": 118, "base": "C", "value": 0.75},
+    {"position": 119, "base": "A", "value": 0.35}
+  ]
+}
