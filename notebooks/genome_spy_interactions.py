@@ -33,11 +33,13 @@ def _(gs):
 
 
 @app.cell
-def _(chart):
-    chart_widget = chart.widget(
-        parameter_names=("threshold",),
-        parameter_values={"threshold": 5},
-        enable_click_events=True,
+def _(chart, mo):
+    chart_widget = mo.ui.anywidget(
+        chart.widget(
+            parameter_names=("threshold",),
+            parameter_values={"threshold": 5},
+            enable_click_events=True,
+        )
     )
 
     return (chart_widget,)
