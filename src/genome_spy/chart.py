@@ -505,6 +505,7 @@ class TopLevelSpec(TransformMethodMixin):
         *,
         bundle_url: str = DEFAULT_EMBED_URL,
         embed_options: dict[str, Any] | None = None,
+        arrow_data: Mapping[str, bytes] | None = None,
         parameter_names: Sequence[str] = (),
         parameter_values: Mapping[str, Any] | None = None,
         enable_click_events: bool = False,
@@ -514,6 +515,8 @@ class TopLevelSpec(TransformMethodMixin):
         Args:
             bundle_url: GenomeSpy bundle URL used by the widget.
             embed_options: Options passed to GenomeSpy's ``embed`` function.
+            arrow_data: Binary Arrow IPC payloads keyed by ``arrow://`` data
+                source names in the authored specification.
             parameter_names: Named GenomeSpy parameters synchronized with the
                 widget's ``parameter_values`` trait.
             parameter_values: Initial values for the synchronized parameters.
@@ -529,6 +532,7 @@ class TopLevelSpec(TransformMethodMixin):
             self,
             bundle_url=bundle_url,
             embed_options=embed_options,
+            arrow_data=arrow_data,
             parameter_names=parameter_names,
             parameter_values=parameter_values,
             enable_click_events=enable_click_events,

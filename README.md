@@ -172,6 +172,18 @@ click data synchronized back to Python. The notebook intentionally uses a
 small inline table; the planned Polars/Arrow transport follows after this
 interaction contract is validated.
 
+The Arrow transport spike can be opened with:
+
+```bash
+uv run marimo edit notebooks/genome_spy_arrow.py
+```
+
+It serializes a small Polars table with `gs.to_arrow_ipc(...)` and sends the
+binary payload through the widget using an `arrow://signal` data-source token.
+The browser replaces that token with a temporary Blob URL and GenomeSpy 0.82
+loads it with its native Arrow IPC loader. The spike supports uncompressed IPC
+only and intentionally does not claim zero-copy rendering.
+
 ## Packaged Datasets
 
 A small set of datasets used by the documentation examples is available through

@@ -25,6 +25,29 @@ def test_jupyter_chart_accepts_raw_spec_dict() -> None:
     assert widget.spec == spec
 
 
+def test_widget_exposes_binary_arrow_payloads() -> None:
+    spec = {
+        "$schema": "https://cdn.jsdelivr.net/npm/@genome-spy/core@0.82.0/dist/schema.json",
+        "mark": "point",
+        "data": {
+            "url": "arrow://signals",
+            "format": {"type": "arrow"},
+        },
+        "encoding": {
+            "x": {"field": "position", "type": "quantitative"},
+            "y": {"field": "value", "type": "quantitative"},
+        },
+    }
+    payload = b"ARROW1-test"
+
+    widget = gs.JupyterChart(spec, arrow_data={"signals": payload})
+
+    assert widget.arrow_data == {"signals": payload}
+    assert "arrow_data" in widget._esm
+    assert "createObjectURL" in widget._esm
+    assert "revokeObjectURL" in widget._esm
+
+
 def test_widget_exposes_explicit_interaction_state() -> None:
     chart = (
         gs.Chart([{"x": 1, "y": 2}])

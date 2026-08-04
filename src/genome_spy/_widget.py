@@ -12,17 +12,15 @@ from genome_spy.chart import DEFAULT_EMBED_URL
 
 _ESM = """
 async function renderChart({ model, el, signal }) {
-  const moduleUrl = model.get("bundle_url");
-  const spec = model.get("spec");
-  const options = model.get("embed_options") || {};
 
-  if (!spec) {
+  if (!model.get("spec")) {
     el.textContent = "No GenomeSpy specification provided.";
     return;
   }
 
   let api = null;
   let parameterSubscriptions = [];
+  let arrowObjectUrls = [];
   let syncingParameterValues = false;
 
   const setError = (error) => {
@@ -44,6 +42,54 @@ async function renderChart({ model, el, signal }) {
       unsubscribe();
     }
     parameterSubscriptions = [];
+  };
+
+  const revokeArrowObjectUrls = () => {
+    for (const url of arrowObjectUrls) {
+      URL.revokeObjectURL(url);
+    }
+    arrowObjectUrls = [];
+  };
+
+  const createRenderSpec = () => {
+    const renderSpec = structuredClone(model.get("spec"));
+    const arrowData = model.get("arrow_data") || {};
+
+    const visit = (value) => {
+      if (!value || typeof value !== "object") {
+        return;
+      }
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          visit(item);
+        }
+        return;
+      }
+      if (typeof value.url === "string" && value.url.startsWith("arrow://")) {
+        const name = value.url.slice("arrow://".length);
+        const payload = arrowData[name];
+        if (!payload) {
+          throw new Error(`No Arrow IPC payload provided for ${name}.`);
+        }
+        if (value.format?.type && value.format.type !== "arrow") {
+          throw new Error(
+            `Arrow data source ${name} must use format.type "arrow".`
+          );
+        }
+        const url = URL.createObjectURL(
+          new Blob([payload], { type: "application/vnd.apache.arrow.file" })
+        );
+        arrowObjectUrls.push(url);
+        value.url = url;
+        value.format = { ...(value.format || {}), type: "arrow" };
+      }
+      for (const child of Object.values(value)) {
+        visit(child);
+      }
+    };
+
+    visit(renderSpec);
+    return renderSpec;
   };
 
   const attachInteractions = () => {
@@ -104,22 +150,33 @@ async function renderChart({ model, el, signal }) {
   };
 
   const renderSpec = async () => {
+    const moduleUrl = model.get("bundle_url");
+    const options = model.get("embed_options") || {};
+
     if (api && typeof api.finalize === "function") {
       api.finalize();
       api = null;
     }
 
+    revokeArrowObjectUrls();
     el.replaceChildren();
 
-    const module = await import(moduleUrl);
-    const embed = module.embed ?? module.default?.embed ?? module.default;
-    if (typeof embed !== "function") {
-      throw new Error("GenomeSpy embed export was not found.");
+    try {
+      const module = await import(moduleUrl);
+      const embed = module.embed ?? module.default?.embed ?? module.default;
+      if (typeof embed !== "function") {
+        throw new Error("GenomeSpy embed export was not found.");
+      }
+      api = await embed(el, createRenderSpec(), options);
+      model.set("error", "");
+      model.save_changes();
+      attachInteractions();
+    } catch (error) {
+      revokeArrowObjectUrls();
+      model.set("error", String(error));
+      model.save_changes();
+      throw error;
     }
-    api = await embed(el, spec, options);
-    model.set("error", "");
-    model.save_changes();
-    attachInteractions();
   };
 
   const onSpecChange = async () => {
@@ -129,6 +186,7 @@ async function renderChart({ model, el, signal }) {
   model.on("change:spec", onSpecChange);
   model.on("change:bundle_url", onSpecChange);
   model.on("change:embed_options", onSpecChange);
+  model.on("change:arrow_data", onSpecChange);
   model.on("change:parameter_values", onParameterValuesChange);
   model.on("change:parameter_names", attachInteractions);
   model.on("change:enable_click_events", attachInteractions);
@@ -137,6 +195,7 @@ async function renderChart({ model, el, signal }) {
     model.off("change:spec", onSpecChange);
     model.off("change:bundle_url", onSpecChange);
     model.off("change:embed_options", onSpecChange);
+    model.off("change:arrow_data", onSpecChange);
     model.off("change:parameter_values", onParameterValuesChange);
     model.off("change:parameter_names", attachInteractions);
     model.off("change:enable_click_events", attachInteractions);
@@ -145,6 +204,7 @@ async function renderChart({ model, el, signal }) {
       api.finalize();
       api = null;
     }
+    revokeArrowObjectUrls();
   });
 
   await renderSpec();
@@ -162,6 +222,7 @@ class JupyterChart(anywidget.AnyWidget):
     spec = traitlets.Dict().tag(sync=True)
     bundle_url = traitlets.Unicode(DEFAULT_EMBED_URL).tag(sync=True)
     embed_options = traitlets.Dict(default_value={}).tag(sync=True)
+    arrow_data = traitlets.Dict(default_value={}).tag(sync=True)
     parameter_names = traitlets.List(trait=traitlets.Unicode(), default_value=[]).tag(
         sync=True
     )
@@ -177,6 +238,7 @@ class JupyterChart(anywidget.AnyWidget):
         *,
         bundle_url: str = DEFAULT_EMBED_URL,
         embed_options: dict[str, Any] | None = None,
+        arrow_data: Mapping[str, bytes] | None = None,
         parameter_names: Sequence[str] = (),
         parameter_values: Mapping[str, Any] | None = None,
         enable_click_events: bool = False,
@@ -191,6 +253,7 @@ class JupyterChart(anywidget.AnyWidget):
             spec=spec,
             bundle_url=bundle_url,
             embed_options=embed_options or {},
+            arrow_data=dict(arrow_data or {}),
             parameter_names=list(parameter_names),
             parameter_values=dict(parameter_values or {}),
             enable_click_events=enable_click_events,

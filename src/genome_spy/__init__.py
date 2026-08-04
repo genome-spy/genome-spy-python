@@ -1,5 +1,6 @@
 """Public package interface for genome_spy."""
 
+from genome_spy.arrow import to_arrow_ipc
 from genome_spy.api import (
     Angle,
     Color,
@@ -115,6 +116,7 @@ __all__ = [
     "Text",
     "Tooltip",
     "TopLevelSpec",
+    "to_arrow_ipc",
     "Title",
     "UniqueId",
     "VConcatChart",

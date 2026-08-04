@@ -1,6 +1,7 @@
 """Public API re-exports for the handwritten ergonomic layer."""
 
 from genome_spy.channels import Locus, compare, datum, locus, value
+from genome_spy.arrow import to_arrow_ipc
 from genome_spy.chart import (
     Chart,
     ConcatChart,
@@ -115,6 +116,7 @@ __all__ = [
     "Text",
     "Tooltip",
     "TopLevelSpec",
+    "to_arrow_ipc",
     "Title",
     "UniqueId",
     "VConcatChart",
