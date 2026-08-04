@@ -505,14 +505,33 @@ class TopLevelSpec(TransformMethodMixin):
         *,
         bundle_url: str = DEFAULT_EMBED_URL,
         embed_options: dict[str, Any] | None = None,
+        parameter_names: Sequence[str] = (),
+        parameter_values: Mapping[str, Any] | None = None,
+        enable_click_events: bool = False,
     ) -> Any:
-        """Create a notebook widget for the spec."""
+        """Create a notebook widget for the spec.
+
+        Args:
+            bundle_url: GenomeSpy bundle URL used by the widget.
+            embed_options: Options passed to GenomeSpy's ``embed`` function.
+            parameter_names: Named GenomeSpy parameters synchronized with the
+                widget's ``parameter_values`` trait.
+            parameter_values: Initial values for the synchronized parameters.
+            enable_click_events: Whether clicked mark data is synchronized to
+                ``clicked_datum`` and ``click_revision``.
+
+        Returns:
+            An anywidget-backed :class:`JupyterChart`.
+        """
         from genome_spy.jupyter import JupyterChart
 
         return JupyterChart(
             self,
             bundle_url=bundle_url,
             embed_options=embed_options,
+            parameter_names=parameter_names,
+            parameter_values=parameter_values,
+            enable_click_events=enable_click_events,
         )
 
     def _repr_mimebundle_(

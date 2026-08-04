@@ -161,6 +161,17 @@ keep the visualization code shorter and clearer.
 
 Additional runnable notebooks live under `notebooks/`.
 
+The Marimo interaction spike can be opened with:
+
+```bash
+uv run marimo edit notebooks/genome_spy_interactions.py
+```
+
+It demonstrates a GenomeSpy parameter controlled by a Marimo slider and
+click data synchronized back to Python. The notebook intentionally uses a
+small inline table; the planned Polars/Arrow transport follows after this
+interaction contract is validated.
+
 ## Packaged Datasets
 
 A small set of datasets used by the documentation examples is available through
