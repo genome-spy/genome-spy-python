@@ -190,6 +190,11 @@ frame, replaces the binary payload, and reports a small JSON-size comparison.
 For repeatable payload measurements across representative table sizes, run
 `uv run python scripts/benchmark_arrow_transport.py`.
 
+The deterministic mutation-impact prototype is available at
+`notebooks/genome_spy_mutation_impact.py`. It adds a mutation control and
+rebuilds aligned reference, alternate, and delta tracks as three Arrow IPC
+payloads without model credentials or network data.
+
 ## Packaged Datasets
 
 A small set of datasets used by the documentation examples is available through
