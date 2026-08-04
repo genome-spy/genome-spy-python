@@ -70,7 +70,7 @@ def _(chart_widget, mo):
     else:
         message = f"Last clicked datum: {chart_widget.clicked_datum}"
 
-    return mo.md(message)
+    mo.vstack([chart_widget, mo.md(message)])
 
 
 if __name__ == "__main__":
