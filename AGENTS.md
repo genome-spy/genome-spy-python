@@ -30,6 +30,9 @@ Constraints:
   classifications, and plotting domains, in `src/genome_spy/datasets/` or in
   curated packaged data files. Examples should load the prepared table and
   demonstrate encodings, marks, transforms, and composition directly.
+- Prefer Altair-style composition operators in examples when they express the
+  intended structure clearly: `+` for layers, `&` for vertical concatenation,
+  and `|` for horizontal concatenation.
 - Use upstream projects for design guidance:
   `tmp/altair`, `tmp/gos`, `tmp/vega-lite`, `tmp/gosling.js`,
   `tmp/genome-spy`, and `tmp/anywidget`.

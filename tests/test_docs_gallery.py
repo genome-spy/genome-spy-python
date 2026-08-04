@@ -125,6 +125,98 @@ def test_sashimi_plot_uses_direct_data_urls() -> None:
     assert "encoding" not in example.spec["layer"][1]
 
 
+def test_dynseq_uses_fasta_coordinate_lookup_and_sequence_logos() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "dynseq_bqtl.py")
+
+    assert example.spec["data"]["lazy"]["type"] == "indexedFasta"
+    assert example.spec["vconcat"] == [
+        {
+            "params": {"allele": "ref"},
+            "import": {"template": "allele-track"},
+        },
+        {
+            "params": {"allele": "alt"},
+            "import": {"template": "allele-track"},
+        },
+    ]
+
+    template = example.spec["templates"]["allele-track"]
+    assert template["transform"][0]["type"] == "coordinateLookup"
+    assert template["transform"][0]["from"]["data"]["lazy"]["type"] == "bigwig"
+    assert template["transform"][0]["key"] == ["chrom", "pos"]
+    assert template["transform"][0]["values"] == ["score"]
+
+    logo = template["layer"][1]
+    assert logo["mark"]["type"] == "text"
+    assert logo["mark"]["logoLetters"] is True
+    assert logo["mark"]["fitToBand"] is True
+    assert logo["encoding"]["text"]["field"] == "base"
+    assert logo["encoding"]["y2"]["field"] == "score"
+    assert logo["encoding"]["tooltip"] == [
+        {"field": "base", "type": "nominal"},
+        {"field": "score", "type": "quantitative"},
+    ]
+
+
+def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "tcga_ov_gistic.py")
+
+    assert example.spec["assembly"] == "hg19"
+    assert len(example.spec["vconcat"]) == 2
+
+    score_track, lesion_track = example.spec["vconcat"]
+    assert [layer["name"] for layer in score_track["layer"]] == [
+        "zero-line",
+        "q-value-rects",
+        "q-value-thresholds",
+    ]
+    assert lesion_track["name"] == "gistic-all-lesions"
+    assert [transform["type"] for transform in lesion_track["transform"]] == [
+        "regexExtract",
+        "filter",
+        "regexFold",
+        "regexExtract",
+        "project",
+    ]
+    assert lesion_track["encoding"]["opacity"]["field"] == "Segment type"
+    assert lesion_track["encoding"]["size"]["field"] == "Segment type"
+
+
+def test_bam_example_uses_full_alignment_dataflow() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "bam_read_alignments.py")
+
+    assert example.spec["assembly"] == "hg38"
+    assert example.spec["data"]["lazy"]["type"] == "bam"
+    assert example.spec["data"]["lazy"]["windowSize"] == {"expr": "windowSize"}
+    assert [param["name"] for param in example.spec["params"]] == [
+        "minMapq",
+        "minBaseQuality",
+        "windowSize",
+    ]
+    assert [panel["name"] for panel in example.spec["vconcat"]] == [
+        "coverage",
+        "read-alignments",
+    ]
+    assert [layer["name"] for layer in example.spec["vconcat"][0]["layer"]] == [
+        "depth",
+        "mismatch-summary",
+        "insertion-summary",
+    ]
+    read_spec = example.spec["vconcat"][1]
+    assert read_spec["viewportHeight"] == "container"
+    assert read_spec["layer"][0]["layer"][0]["mark"]["type"] == "arrow"
+    assert [transform["type"] for transform in example.spec["transform"]] == [
+        "filter",
+        "formula",
+        "pileup",
+    ]
+    assert "flattenCigar" in str(example.spec)
+    assert "alignmentMismatches" in str(example.spec)
+
+
 def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "stacked_genome_browser.py")
@@ -135,9 +227,13 @@ def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
         {"chrom": "chr7", "pos": 55120000},
     ]
     assert example.spec["resolve"] == {
-        "scale": {"y": "independent"},
-        "axis": {"y": "independent"},
+        "scale": {"x": "shared", "y": "independent"},
+        "axis": {"x": "shared", "y": "independent"},
     }
+    assert example.spec["axes"] == {
+        "x": {"orient": "bottom", "title": "Genomic position"}
+    }
+    assert len(example.spec["vconcat"]) == 5
 
     tracks = example.spec["vconcat"]
     assert [track["name"] for track in tracks] == [

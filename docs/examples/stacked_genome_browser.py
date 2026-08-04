@@ -29,7 +29,7 @@ gc_track = (
         x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("score:Q")
-        .scale(domain=[0, 100], reverse=False)
+        .scale(domain=[0, 100])
         .axis(title="GC (%)", grid=True, gridDash=[2, 2]),
     )
     .properties(
@@ -50,7 +50,7 @@ conservation_track = (
         x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("score:Q")
-        .scale(domain=[-5, 5], reverse=False)
+        .scale(domain=[-5, 5])
         .axis(title="phyloP", grid=True, gridDash=[2, 2]),
     )
     .properties(
@@ -96,7 +96,7 @@ sequence_labels = (
 )
 
 sequence_track = (
-    gs.layer(sequence_rects, sequence_labels)
+    (sequence_rects + sequence_labels)
     .properties(
         name="sequence",
         title=gs.title("Reference sequence", orient="left"),
@@ -141,7 +141,7 @@ bodies = (
     gs.Chart()
     .mark_rule(minLength=0.5, size=1, tooltip=None)
     .encode(
-        x=gs.X("_start:L").axis(title="Genomic position"),
+        x=gs.X("_start:L"),
         x2=gs.X2("_end"),
         search=gs.Search("symbol"),
     )
@@ -149,7 +149,7 @@ bodies = (
 )
 
 transcripts = (
-    gs.layer(exons, bodies)
+    (exons + bodies)
     .properties(
         name="transcripts",
         opacity=gs.dynamic_opacity(unitsPerPixel=[100000, 40000], values=[0, 1]),
@@ -185,7 +185,7 @@ arrows = (
 )
 
 symbols = (
-    gs.layer(labels, arrows)
+    (labels + arrows)
     .properties(name="symbols")
     .transform_measure_text(field="symbol", as_="_textWidth", fontSize=11)
     .transform_filter_scored_labels(
@@ -198,7 +198,7 @@ symbols = (
 )
 
 refseq_track = (
-    gs.layer(transcripts, symbols)
+    (transcripts + symbols)
     .properties(
         name="refseq-track",
         title=gs.title("RefSeq genes", orient="left"),
@@ -247,14 +247,7 @@ refseq_track = (
 
 
 chart = (
-    gs.vconcat(
-        gc_track,
-        conservation_track,
-        ccre_track,
-        sequence_track,
-        refseq_track,
-        spacing=8,
-    )
+    (gc_track & conservation_track & ccre_track & sequence_track & refseq_track)
     .properties(
         assembly="hg38",
         title="Stacked hg38 genome browser tracks",
@@ -262,8 +255,10 @@ chart = (
             "Lazy signal, regulatory, sequence, and RefSeq tracks aligned to "
             "one zoomable genomic axis."
         ),
+        axes={"x": gs.GenomeAxis(orient="bottom", title="Genomic position")},
+        spacing=8,
         scales=gs.scales(x=gs.Scale(domain=DOMAIN)),
     )
-    .resolve_scale(y="independent")
-    .resolve_axis(y="independent")
+    .resolve_scale(x="shared", y="independent")
+    .resolve_axis(x="shared", y="independent")
 )
