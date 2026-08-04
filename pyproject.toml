@@ -44,6 +44,7 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/genome_spy"]
 artifacts = [
+    "src/genome_spy/schema/capabilities.json",
     "src/genome_spy/schema/genome-spy-schema.json",
     "src/genome_spy/datasets/data/*.csv",
     "src/genome_spy/datasets/data/*.json",

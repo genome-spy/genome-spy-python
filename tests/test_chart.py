@@ -18,8 +18,10 @@ from genome_spy.schema import (
     GenomeSpyConfig,
     GenomeAxis,
     HConcatSpec,
+    ImportSpec,
     LayerSpec,
     Legend,
+    MultiscaleSpec,
     SCHEMA_VERSION,
     Step,
     Title,
@@ -262,11 +264,7 @@ def test_chart_serializes_core_spec() -> None:
         "mark": {"type": "point", "size": 64},
         "encoding": {
             "x": {"field": "x", "type": "quantitative"},
-            "y": {
-                "field": "y",
-                "type": "quantitative",
-                "scale": {"reverse": True},
-            },
+            "y": {"field": "y", "type": "quantitative"},
             "color": {"value": "steelblue"},
             "text": {"field": "label", "type": "nominal"},
         },
@@ -310,7 +308,7 @@ def test_altair_style_penguins_snippet_serializes() -> None:
     }
     assert spec["encoding"]["y"] == {
         "field": "Body Mass (g)",
-        "scale": {"reverse": True, "zero": False, "padding": 1},
+        "scale": {"zero": False, "padding": 1},
         "type": "quantitative",
     }
     assert spec["encoding"]["size"] == {
@@ -490,7 +488,6 @@ def test_layer_chart_supports_top_level_encode() -> None:
             "field": "_lane",
             "type": "ordinal",
             "axis": None,
-            "scale": {"reverse": True},
         },
     }
 
@@ -499,6 +496,37 @@ def test_encode_supports_null_secondary_channels() -> None:
     chart = gs.Chart([{"x": 1}]).mark_rule().encode(x="x:Q", x2=None)
 
     assert chart.to_dict()["encoding"]["x2"] is None
+
+
+def test_encode_supports_multi_field_tooltips() -> None:
+    chart = (
+        gs.Chart([{"base": "A", "score": 1.0}])
+        .mark_text()
+        .encode(
+            text="base:N",
+            tooltip=[
+                gs.Tooltip("base:N"),
+                gs.Tooltip("score:Q"),
+            ],
+        )
+    )
+
+    assert chart.to_dict()["encoding"]["tooltip"] == [
+        {"field": "base", "type": "nominal"},
+        {"field": "score", "type": "quantitative"},
+    ]
+
+
+def test_templates_accept_chart_objects_without_nested_schema_urls() -> None:
+    template = gs.Chart(mark="point")
+    chart = gs.vconcat(gs.import_view(template="track")).properties(
+        templates={"track": template}
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["templates"] == {"track": {"mark": "point"}}
+    assert "$schema" not in spec["templates"]["track"]
 
 
 def test_chart_accepts_schema_data_wrapper() -> None:
@@ -722,7 +750,6 @@ def test_altair_style_tick_shorthand_serializes() -> None:
     assert spec["encoding"]["y"] == {
         "field": "Cylinders",
         "type": "ordinal",
-        "scale": {"reverse": True},
     }
 
 
@@ -814,14 +841,20 @@ def test_locus_interval_chart_serializes_secondary_locus_channel() -> None:
     assert spec["encoding"]["x2"] == {"chrom": "chrom", "pos": "end"}
 
 
-def test_y_scale_reverse_can_be_overridden() -> None:
+def test_y_scale_reverse_is_only_serialized_when_explicit() -> None:
+    default_chart = (
+        gs.Chart([{"x": 1, "y": 2}])
+        .mark_point()
+        .encode(x="x:Q", y=gs.Y("y:Q").scale(zero=False))
+    )
     chart = (
         gs.Chart([{"x": 1, "y": 2}])
         .mark_point()
-        .encode(x="x:Q", y=gs.Y("y:Q").scale(reverse=False))
+        .encode(x="x:Q", y=gs.Y("y:Q").scale(reverse=True))
     )
 
-    assert chart.to_dict()["encoding"]["y"]["scale"] == {"reverse": False}
+    assert default_chart.to_dict()["encoding"]["y"]["scale"] == {"zero": False}
+    assert chart.to_dict()["encoding"]["y"]["scale"] == {"reverse": True}
 
 
 def test_plain_mapping_data_is_preserved() -> None:
@@ -1014,6 +1047,128 @@ def test_grid_concat_helper_serializes_columns() -> None:
 
     assert spec["columns"] == 2
     assert len(spec["concat"]) == 2
+
+
+def test_multiscale_helper_serializes_generated_root_variant() -> None:
+    overview = gs.Chart(mark="rect")
+    detail = gs.Chart(mark="text")
+
+    chart = gs.multiscale(overview, detail, stops=[1])
+    spec = chart.to_dict()
+
+    assert isinstance(chart, MultiscaleSpec)
+    assert spec["stops"] == [1]
+    assert [child["mark"] for child in spec["multiscale"]] == ["rect", "text"]
+
+
+def test_imported_views_participate_in_composition() -> None:
+    reference = gs.import_view(template="allele-track", params={"allele": "ref"})
+    alternate = gs.import_view(template="allele-track", params={"allele": "alt"})
+
+    chart = gs.vconcat(
+        reference,
+        alternate,
+        templates={"allele-track": {"mark": "point"}},
+    )
+    spec = chart.to_dict()
+
+    assert isinstance(reference, ImportSpec)
+    assert spec["vconcat"] == [
+        {
+            "import": {"template": "allele-track"},
+            "params": {"allele": "ref"},
+        },
+        {
+            "import": {"template": "allele-track"},
+            "params": {"allele": "alt"},
+        },
+    ]
+
+
+def test_imported_views_support_altair_style_composition_operators() -> None:
+    left = gs.import_view(template="left")
+    right = gs.import_view(template="right")
+
+    assert (left + right).to_dict(validate=False)["layer"]
+    assert (left & right).to_dict(validate=False)["vconcat"]
+    assert (left | right).to_dict(validate=False)["hconcat"]
+
+
+def test_import_view_requires_exactly_one_source() -> None:
+    with pytest.raises(ValueError, match="exactly one"):
+        gs.import_view()
+    with pytest.raises(ValueError, match="exactly one"):
+        gs.import_view(url="track.json", template="track")
+
+    assert gs.import_view(url="track.json").to_dict() == {
+        "import": {"url": "track.json"}
+    }
+
+
+def test_from_dict_round_trips_nested_root_variants_without_mutating_input() -> None:
+    schema_url = "https://example.test/genome-spy-schema.json"
+    original = {
+        "$schema": schema_url,
+        "templates": {"track": {"mark": "point"}},
+        "vconcat": [
+            {"import": {"template": "track"}},
+            {
+                "stops": [1],
+                "multiscale": [
+                    {"mark": "rect"},
+                    {"mark": "text"},
+                ],
+            },
+        ],
+    }
+    expected = json.loads(json.dumps(original))
+
+    chart = gs.TopLevelSpec.from_dict(original)
+    spec = chart.to_dict()
+
+    assert isinstance(chart, gs.VConcatChart)
+    assert isinstance(chart._kwds["vconcat"][0], gs.ImportedView)
+    assert isinstance(chart._kwds["vconcat"][1], gs.MultiscaleChart)
+    assert spec == expected
+    assert original == expected
+
+
+def test_from_json_dispatches_unit_specs_and_rejects_non_objects() -> None:
+    chart = gs.Chart.from_json('{"mark": "point"}')
+
+    assert isinstance(chart, gs.Chart)
+    assert chart.to_dict(include_schema=False) == {"mark": "point"}
+
+    with pytest.raises(TypeError, match="decode to an object"):
+        gs.Chart.from_json("[]")
+
+
+@pytest.mark.parametrize(
+    ("spec", "expected_type"),
+    [
+        ({"mark": "point"}, gs.Chart),
+        ({"layer": [{"mark": "point"}]}, gs.LayerChart),
+        ({"stops": [1], "multiscale": [{"mark": "point"}]}, gs.MultiscaleChart),
+        ({"vconcat": [{"mark": "point"}]}, gs.VConcatChart),
+        ({"hconcat": [{"mark": "point"}]}, gs.HConcatChart),
+        ({"columns": 1, "concat": [{"mark": "point"}]}, gs.ConcatChart),
+    ],
+)
+def test_from_dict_dispatches_every_root_variant(
+    spec: dict[str, object], expected_type: type[gs.TopLevelSpec]
+) -> None:
+    chart = gs.TopLevelSpec.from_dict(spec)
+
+    assert isinstance(chart, expected_type)
+    assert chart.to_dict(include_schema=False) == spec
+
+
+def test_from_dict_rejects_standalone_imports() -> None:
+    with pytest.raises(ValueError, match="must be nested"):
+        gs.TopLevelSpec.from_dict(
+            {"import": {"template": "track"}},
+            validate=False,
+        )
 
 
 def test_chart_validates_complete_spec_by_default() -> None:

@@ -84,7 +84,8 @@ uv run python tools/generate_schema_wrapper.py
 ```
 
 Schema regeneration requires `npm` on `PATH` and updates the generated schema
-package from the pinned `@genome-spy/core` release.
+package from the pinned `@genome-spy/core` release. See
+[Schema Generation](#schema-generation) for local upstream audit modes.
 
 ## Notebook Usage
 
@@ -112,6 +113,16 @@ A runnable example notebook is available at
 
 `chart.widget()` is also available for explicit `anywidget` usage, but plain
 `chart` display is the most portable default across notebook frontends.
+
+Existing GenomeSpy specifications can be validated, wrapped, and rendered
+without rewriting them:
+
+```python
+chart = gs.TopLevelSpec.from_dict(spec)
+```
+
+The loader dispatches unit, layer, multiscale, and concatenated roots, including
+template or URL imports nested inside compositions.
 
 ## Example notebooks
 
@@ -169,4 +180,28 @@ uv run python tools/generate_schema_wrapper.py
 
 That command requires `npm` on `PATH`, fetches the version-pinned
 `@genome-spy/core` package temporarily, writes `src/genome_spy/schema/`, and
-then updates the generated schema package in-place.
+then updates the generated schema package in-place. It also writes a capability
+manifest used to verify that generated transforms and root specification
+variants remain covered.
+
+To audit a built local GenomeSpy core package without fetching npm, generate
+into a separate output directory:
+
+```bash
+uv run python tools/generate_schema_wrapper.py \
+  --package-dir <path-to-genome-spy>/packages/core \
+  --output-dir <audit-output>
+```
+
+An explicit schema file can be inspected in the same way:
+
+```bash
+uv run python tools/generate_schema_wrapper.py \
+  --schema-path <path-to-schema.json> \
+  --core-version <schema-version> \
+  --output-dir <audit-output> \
+  --spec-reference-dir ""
+```
+
+The default npm mode remains the release source of truth. Local modes are for
+checking unreleased upstream changes before updating the pinned core version.

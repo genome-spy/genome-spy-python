@@ -7,7 +7,7 @@ from pathlib import Path
 import genome_spy as gs
 from genome_spy.schema.core import AxisConfig, RectProps
 
-from tools.generate_schema_wrapper import write_schema_package
+from tools.generate_schema_wrapper import write_schema_files, write_schema_package
 from tools.schemapi.codegen import SchemaWrapperGenerator
 
 
@@ -76,7 +76,8 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     assert "with_property_setters" in module.source
     assert "class MarkDef" in module.source
     assert "@with_property_setters" in module.source
-    assert "class=Undefined" not in module.source
+    assert "class_: str | UndefinedType = Undefined" in module.source
+    assert "'class': class_" in module.source
     assert "type: str | UndefinedType = Undefined" in module.source
     assert "size: float | UndefinedType = Undefined" in module.source
     assert "flag: bool | UndefinedType = Undefined" in module.source
@@ -92,15 +93,91 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     assert "value: Axis | AxisKwds | None | Any = Undefined" in module.source
     assert "def with_align(self, value: AlignDef_T) -> MarkDef:" in module.source
     assert "def with_flag(self, value: bool) -> MarkDef:" in module.source
+    assert "def with_class(self, value: str) -> MarkDef:" in module.source
     assert "def with_values(self, value: Sequence[int]) -> MarkDef:" in module.source
     assert typing_module.exports == ("AlignDef_T",)
     assert "AlignDef_T: TypeAlias = Literal['left', 'right']" in typing_module.source
     assert kwds_module.exports == ("AxisKwds",)
     assert "class AxisKwds(TypedDict, total=False):" in kwds_module.source
     assert "title: str" in kwds_module.source
-    assert mixins_module.exports == ("MarkMethodMixin",)
+    assert mixins_module.exports == ("MarkMethodMixin", "TransformMethodMixin")
     assert "class MarkMethodMixin" in mixins_module.source
+    assert "class TransformMethodMixin" in mixins_module.source
     assert channels_module.exports == ()
+
+
+def test_generate_transform_methods_from_schema_union() -> None:
+    schema = {
+        "definitions": {
+            "LookupParams": {
+                "type": "object",
+                "required": ["type", "from", "key"],
+                "properties": {
+                    "type": {"const": "lookup", "type": "string"},
+                    "from": {"type": "object"},
+                    "key": {"type": "string"},
+                    "as": {"type": "array", "items": {"type": "string"}},
+                },
+            },
+            "TransformParams": {"anyOf": [{"$ref": "#/definitions/LookupParams"}]},
+        }
+    }
+
+    generator = SchemaWrapperGenerator(schema, schema_version="1.2.3")
+    specs = generator.transform_method_specs()
+    mixins_module = generator.generate_mark_mixins_module()
+    manifest = generator.capability_manifest()
+
+    assert len(specs) == 1
+    assert specs[0].method_name == "transform_lookup"
+    assert specs[0].required == frozenset({"from", "key"})
+    assert "def transform_lookup(" in mixins_module.source
+    assert "from_: dict[str, Any]," in mixins_module.source
+    assert "as_: Sequence[str] | UndefinedType = Undefined" in mixins_module.source
+    assert "transform['from'] = from_" in mixins_module.source
+    assert "transform['as'] = as_" in mixins_module.source
+    assert manifest["transforms"] == [
+        {
+            "schema": "LookupParams",
+            "type": "lookup",
+            "method": "transform_lookup",
+        }
+    ]
+
+
+def test_generated_filter_requires_a_predicate() -> None:
+    schema = {
+        "definitions": {
+            "ExprFilterParams": {
+                "type": "object",
+                "required": ["expr", "type"],
+                "properties": {
+                    "expr": {"type": "string"},
+                    "type": {"const": "filter", "type": "string"},
+                },
+            },
+            "SelectionFilterParams": {
+                "type": "object",
+                "required": ["param", "type"],
+                "properties": {
+                    "param": {"type": "string"},
+                    "type": {"const": "filter", "type": "string"},
+                },
+            },
+            "FilterParams": {
+                "anyOf": [
+                    {"$ref": "#/definitions/ExprFilterParams"},
+                    {"$ref": "#/definitions/SelectionFilterParams"},
+                ]
+            },
+            "TransformParams": {"anyOf": [{"$ref": "#/definitions/FilterParams"}]},
+        }
+    }
+
+    source = SchemaWrapperGenerator(schema).generate_mark_mixins_module().source
+
+    assert "if expr is Undefined and param is Undefined:" in source
+    assert 'raise TypeError("filter requires an expression or param")' in source
 
 
 def test_generate_mark_mixins_module_emits_config_methods_when_schema_supports_them() -> (
@@ -126,7 +203,11 @@ def test_generate_mark_mixins_module_emits_config_methods_when_schema_supports_t
 
     mixins_module = SchemaWrapperGenerator(schema).generate_mark_mixins_module()
 
-    assert mixins_module.exports == ("ConfigMethodMixin", "MarkMethodMixin")
+    assert mixins_module.exports == (
+        "ConfigMethodMixin",
+        "MarkMethodMixin",
+        "TransformMethodMixin",
+    )
     assert "class ConfigMethodMixin" in mixins_module.source
     assert "def configure(" in mixins_module.source
     assert "@use_signature(core.GenomeSpyConfig)" in mixins_module.source
@@ -359,6 +440,16 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
     assert "class UnitSpec" in (output_dir / "core.py").read_text(encoding="utf-8")
     assert (output_dir / "_typing.py").exists()
     assert (output_dir / "_kwds.py").exists()
+    assert json.loads(
+        (output_dir / "capabilities.json").read_text(encoding="utf-8")
+    ) == {
+        "schema_version": "9.8.7",
+        "definitions": ["Encoding", "MarkType", "UnitSpec"],
+        "marks": ["point", "rect"],
+        "encoding_channels": ["color", "x"],
+        "transforms": [],
+        "root_spec_variants": [],
+    }
     assert "MARK_TYPES = ('point', 'rect')" in (output_dir / "core.py").read_text(
         encoding="utf-8"
     )
@@ -377,6 +468,33 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
         .startswith("export interface RootConfig")
     )
     assert (reference_dir / "VERSION").read_text(encoding="utf-8") == "9.8.7\n"
+
+
+def test_write_schema_files_supports_explicit_schema_input(tmp_path: Path) -> None:
+    schema_path = tmp_path / "schema.json"
+    output_dir = tmp_path / "generated"
+    schema_path.write_text(
+        json.dumps(
+            {
+                "$schema": "http://json-schema.org/draft-07/schema#",
+                "definitions": {
+                    "MarkType": {"type": "string", "enum": ["point"]},
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    write_schema_files(schema_path, output_dir, version="dev-local")
+
+    capabilities = json.loads(
+        (output_dir / "capabilities.json").read_text(encoding="utf-8")
+    )
+    assert capabilities["schema_version"] == "dev-local"
+    assert capabilities["marks"] == ["point"]
+    assert "SCHEMA_VERSION = 'dev-local'" in (output_dir / "__init__.py").read_text(
+        encoding="utf-8"
+    )
 
 
 def test_generated_mark_methods_expose_schema_backed_signatures() -> None:

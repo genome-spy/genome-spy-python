@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+import json
+from collections.abc import Mapping, Sequence
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, ClassVar, Protocol, Self, Unpack, cast
 from uuid import uuid4
@@ -12,19 +14,25 @@ from genome_spy._chart_authoring import (
     merge_encoding_definitions,
     normalize_data,
     normalize_transform,
-    normalize_transform_kwarg,
 )
 from genome_spy.channels import Channel
 from genome_spy.schema import (
     ConcatSpec,
     EncodingKwds,
+    ExprRef,
+    FadedMultiscaleStops,
     GenomeSpyConfig,
     HConcatSpec,
+    ImportSpec,
     LayerSpec,
     MARK_TYPES,
+    MultiscaleSpec,
     Root,
     SCHEMA_VERSION,
+    TemplateImport,
+    TransitionedMultiscaleStops,
     UnitSpec,
+    UrlImport,
     VConcatSpec,
     ViewBackground,
 )
@@ -36,7 +44,11 @@ from genome_spy.schema._kwds import (
     ScalesKwds,
     ViewBackgroundKwds,
 )
-from genome_spy.schema.mixins import ConfigMethodMixin, MarkMethodMixin
+from genome_spy.schema.mixins import (
+    ConfigMethodMixin,
+    MarkMethodMixin,
+    TransformMethodMixin,
+)
 from genome_spy.schemapi import (
     SchemaBase,
     Undefined,
@@ -53,6 +65,12 @@ DEFAULT_EMBED_URL = f"{_CORE_DIST_URL}/bundle/index.es.js"
 
 class _CopyableSpec(Protocol):
     def copy(self, *, deep: bool = True, **kwargs: Any) -> Any: ...
+
+
+class _SerializableView(Protocol):
+    def to_dict(
+        self, *, include_schema: bool = True, validate: bool = True
+    ) -> dict[str, Any]: ...
 
 
 HTML_TEMPLATE = """
@@ -103,14 +121,22 @@ def _infer_encoding_name(value: Channel | SchemaBase | str | dict[str, Any]) -> 
 
 def _merge_encoding_definitions(
     current_encoding: Any,
-    updates: dict[str, Channel | SchemaBase | str | dict[str, Any] | None],
+    updates: dict[
+        str,
+        Channel
+        | SchemaBase
+        | str
+        | dict[str, Any]
+        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+        | None,
+    ],
     *,
     data: Any,
 ) -> dict[str, Any]:
     return merge_encoding_definitions(current_encoding, updates, data=data)
 
 
-class TopLevelSpec:
+class TopLevelSpec(TransformMethodMixin):
     """Shared behavior for top-level GenomeSpy specifications."""
 
     def with_config(
@@ -161,7 +187,15 @@ class TopLevelSpec:
     def _merged_encoding(
         self,
         args: tuple[Channel, ...],
-        kwargs: dict[str, Channel | SchemaBase | str | dict[str, Any] | None],
+        kwargs: dict[
+            str,
+            Channel
+            | SchemaBase
+            | str
+            | dict[str, Any]
+            | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+            | None,
+        ],
     ) -> dict[str, Any]:
         """Return merged encoding definitions for fluent ``encode(...)`` calls."""
         updates = dict(kwargs)
@@ -233,10 +267,20 @@ class TopLevelSpec:
 
     def _normalized_properties(self, properties: dict[str, Any]) -> dict[str, Any]:
         """Return top-level properties normalized for schema-backed copying."""
-        return {
-            key: normalize_schema_value(value, validate=False)
-            for key, value in properties.items()
-        }
+        normalized: dict[str, Any] = {}
+        for key, value in properties.items():
+            if key == "templates" and isinstance(value, Mapping):
+                normalized[key] = {
+                    name: (
+                        template.to_dict(include_schema=False, validate=False)
+                        if isinstance(template, TopLevelSpec)
+                        else normalize_schema_value(template, validate=False)
+                    )
+                    for name, template in value.items()
+                }
+            else:
+                normalized[key] = normalize_schema_value(value, validate=False)
+        return normalized
 
     def _appended_transform(self, transform: dict[str, Any]) -> Self:
         """Return a copy with one normalized transform appended."""
@@ -344,239 +388,68 @@ class TopLevelSpec:
             result = result._append_transform(normalize_transform(transform))
         return result
 
-    def transform_filter(self, expression: str) -> Self:
-        """Add a filter transform using a GenomeSpy expression string."""
-        return self._append_transform({"type": "filter", "expr": expression})
+    @classmethod
+    def from_dict(
+        cls, spec: Mapping[str, Any], *, validate: bool = True
+    ) -> TopLevelSpec:
+        """Construct a renderable chart from a GenomeSpy specification.
 
-    def transform_collect(
-        self, *, sort: SchemaBase | dict[str, Any] | None = None
-    ) -> Self:
-        """Add a collect transform."""
-        transform: dict[str, Any] = {"type": "collect"}
-        if sort is not None:
-            transform["sort"] = normalize_transform_kwarg(sort, key="sort")
-        return self._append_transform(transform)
+        Args:
+            spec: Complete GenomeSpy specification.
+            validate: Validate the input against the generated root schema.
 
-    def transform_flatten(
-        self,
-        *,
-        fields: list[str] | None = None,
-        as_: list[str] | None = None,
-        index: str | None = None,
-    ) -> Self:
-        """Add a flatten transform."""
-        transform: dict[str, Any] = {"type": "flatten"}
-        if fields is not None:
-            transform["fields"] = fields
-        if as_ is not None:
-            transform["as"] = as_
-        if index is not None:
-            transform["index"] = index
-        return self._append_transform(transform)
+        Returns:
+            A chart matching the specification's structural root variant.
 
-    def transform_flatten_compressed_exons(self, *, start: str) -> Self:
-        """Add a flattenCompressedExons transform."""
-        return self._append_transform(
-            {"type": "flattenCompressedExons", "start": start}
+        Raises:
+            SchemaValidationError: If validation fails.
+            TypeError: If the specification is not a mapping.
+            ValueError: If no supported root structure is present.
+
+        Example:
+            >>> chart = TopLevelSpec.from_dict({"mark": "point"})
+        """
+        if not isinstance(spec, Mapping):
+            raise TypeError(
+                f"GenomeSpy specification must be a mapping, got {type(spec)!r}"
+            )
+
+        values = deepcopy(dict(spec))
+        if validate:
+            Root(**values).to_dict()
+
+        schema_url = values.pop("$schema", DEFAULT_SCHEMA_URL)
+        if not isinstance(schema_url, str):
+            raise TypeError("The $schema property must be a string.")
+        return cast(
+            TopLevelSpec,
+            _view_from_dict(values, schema_url=schema_url, allow_import=False),
         )
 
-    def transform_flatten_delimited(
-        self,
-        *,
-        field: str | list[str],
-        separator: str | list[str],
-        as_: str | list[str] | None = None,
-    ) -> Self:
-        """Split delimited fields into aligned rows."""
-        transform: dict[str, Any] = {
-            "type": "flattenDelimited",
-            "field": field,
-            "separator": separator,
-        }
-        if as_ is not None:
-            transform["as"] = as_
-        return self._append_transform(transform)
+    @classmethod
+    def from_json(cls, json_string: str, *, validate: bool = True) -> TopLevelSpec:
+        """Construct a renderable chart from a JSON specification.
 
-    def transform_formula(self, *, expr: str, as_: str) -> Self:
-        """Add a formula transform."""
-        return self._append_transform({"type": "formula", "expr": expr, "as": as_})
+        Args:
+            json_string: JSON-encoded GenomeSpy specification.
+            validate: Validate the input against the generated root schema.
 
-    def transform_regex_extract(self, *, field: str, regex: str, as_: str) -> Self:
-        """Add a regexExtract transform."""
-        return self._append_transform(
-            {
-                "type": "regexExtract",
-                "field": field,
-                "regex": regex,
-                "as": as_,
-            }
-        )
+        Returns:
+            A chart matching the specification's structural root variant.
 
-    def transform_linearize_genomic_coordinate(
-        self, *, chrom: str, pos: str, as_: str
-    ) -> Self:
-        """Add a linearizeGenomicCoordinate transform."""
-        return self._append_transform(
-            {
-                "type": "linearizeGenomicCoordinate",
-                "chrom": chrom,
-                "pos": pos,
-                "as": as_,
-            }
-        )
+        Raises:
+            json.JSONDecodeError: If ``json_string`` is invalid JSON.
+            SchemaValidationError: If schema validation fails.
+            TypeError: If the decoded value is not a mapping.
+            ValueError: If no supported root structure is present.
 
-    def transform_measure_text(
-        self,
-        *,
-        field: str,
-        as_: str,
-        fontSize: float | None = None,
-        fontWeight: str | None = None,
-        font: str | None = None,
-    ) -> Self:
-        """Add a measureText transform."""
-        transform: dict[str, Any] = {
-            "type": "measureText",
-            "field": field,
-            "as": as_,
-        }
-        if fontSize is not None:
-            transform["fontSize"] = fontSize
-        if fontWeight is not None:
-            transform["fontWeight"] = fontWeight
-        if font is not None:
-            transform["font"] = font
-        return self._append_transform(transform)
-
-    def transform_flatten_sequence(
-        self,
-        *,
-        field: str,
-        as_: list[str] | None = None,
-    ) -> Self:
-        """Add a flattenSequence transform."""
-        transform: dict[str, Any] = {
-            "type": "flattenSequence",
-            "field": field,
-        }
-        if as_ is not None:
-            transform["as"] = as_
-        return self._append_transform(transform)
-
-    def transform_filter_scored_labels(
-        self,
-        *,
-        lane: str,
-        score: str,
-        width: str,
-        pos: str,
-        padding: float | None = None,
-    ) -> Self:
-        """Add a filterScoredLabels transform."""
-        transform: dict[str, Any] = {
-            "type": "filterScoredLabels",
-            "lane": lane,
-            "score": score,
-            "width": width,
-            "pos": pos,
-        }
-        if padding is not None:
-            transform["padding"] = padding
-        return self._append_transform(transform)
-
-    def transform_aggregate(
-        self,
-        *,
-        groupby: list[str] | None = None,
-        fields: list[str] | None = None,
-        ops: list[str] | None = None,
-        as_: list[str] | None = None,
-    ) -> Self:
-        """Add a GenomeSpy aggregate transform."""
-        transform: dict[str, Any] = {"type": "aggregate"}
-        if groupby is not None:
-            transform["groupby"] = groupby
-        if fields is not None:
-            transform["fields"] = fields
-        if ops is not None:
-            transform["ops"] = ops
-        if as_ is not None:
-            transform["as"] = as_
-        return self._append_transform(transform)
-
-    def transform_coverage(
-        self,
-        *,
-        start: str,
-        end: str,
-        as_: str,
-        chrom: str | None = None,
-    ) -> Self:
-        """Add a coverage transform."""
-        transform: dict[str, Any] = {
-            "type": "coverage",
-            "start": start,
-            "end": end,
-            "as": as_,
-        }
-        if chrom is not None:
-            transform["chrom"] = chrom
-        return self._append_transform(transform)
-
-    def transform_pileup(
-        self,
-        *,
-        start: str,
-        end: str,
-        as_: str,
-        preference: str | None = None,
-        preferredOrder: list[str] | None = None,
-    ) -> Self:
-        """Add a pileup transform."""
-        transform: dict[str, Any] = {
-            "type": "pileup",
-            "start": start,
-            "end": end,
-            "as": as_,
-        }
-        if preference is not None:
-            transform["preference"] = preference
-        if preferredOrder is not None:
-            transform["preferredOrder"] = preferredOrder
-        return self._append_transform(transform)
-
-    def transform_project(
-        self, *, fields: list[str], as_: list[str] | None = None
-    ) -> Self:
-        """Add a project transform."""
-        transform: dict[str, Any] = {"type": "project", "fields": fields}
-        if as_ is not None:
-            transform["as"] = as_
-        return self._append_transform(transform)
-
-    def transform_stack(
-        self,
-        *,
-        groupby: list[str],
-        field: str | None = None,
-        sort: SchemaBase | dict[str, Any] | None = None,
-        offset: str | None = None,
-        as_: list[str] | None = None,
-        baseField: str | None = None,
-    ) -> Self:
-        """Add a GenomeSpy stack transform."""
-        transform: dict[str, Any] = {"type": "stack", "groupby": groupby}
-        if field is not None:
-            transform["field"] = field
-        if sort is not None:
-            transform["sort"] = normalize_transform_kwarg(sort, key="sort")
-        if offset is not None:
-            transform["offset"] = offset
-        if as_ is not None:
-            transform["as"] = as_
-        if baseField is not None:
-            transform["baseField"] = baseField
-        return self._append_transform(transform)
+        Example:
+            >>> chart = TopLevelSpec.from_json('{"mark": "point"}')
+        """
+        decoded = json.loads(json_string)
+        if not isinstance(decoded, dict):
+            raise TypeError("GenomeSpy JSON specification must decode to an object.")
+        return cls.from_dict(decoded, validate=validate)
 
     def to_dict(
         self, *, include_schema: bool = True, validate: bool = True
@@ -651,13 +524,13 @@ class TopLevelSpec:
         del include, exclude
         return self.widget()._repr_mimebundle_()
 
-    def __add__(self, other: TopLevelSpec) -> LayerChart:
+    def __add__(self, other: _SerializableView) -> LayerChart:
         return layer(self, other)
 
-    def __or__(self, other: TopLevelSpec) -> HConcatChart:
+    def __or__(self, other: _SerializableView) -> HConcatChart:
         return hconcat(self, other)
 
-    def __and__(self, other: TopLevelSpec) -> VConcatChart:
+    def __and__(self, other: _SerializableView) -> VConcatChart:
         return vconcat(self, other)
 
     def _append_transform(self, transform: dict[str, Any]) -> Self:
@@ -703,7 +576,12 @@ class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
     def encode(
         self,
         *args: Channel,
-        **kwargs: Channel | SchemaBase | str | dict[str, Any] | None,
+        **kwargs: Channel
+        | SchemaBase
+        | str
+        | dict[str, Any]
+        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+        | None,
     ) -> Chart:
         """Return a new chart with merged channel encodings."""
         merged = self._merged_encoding(args, kwargs)
@@ -786,7 +664,12 @@ class _CompositionSpec(TopLevelSpec, ConfigMethodMixin):
     def encode(
         self,
         *args: Channel,
-        **kwargs: Channel | SchemaBase | str | dict[str, Any] | None,
+        **kwargs: Channel
+        | SchemaBase
+        | str
+        | dict[str, Any]
+        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+        | None,
     ) -> Self:
         """Return a copy with merged top-level encodings for composed specs."""
         merged = self._merged_encoding(args, kwargs)
@@ -813,7 +696,7 @@ class LayerChart(_CompositionSpec, LayerSpec):
 
     def __init__(
         self,
-        layer: list[TopLevelSpec] | UndefinedType = Undefined,
+        layer: list[_SerializableView] | UndefinedType = Undefined,
         *,
         schema_url: str = DEFAULT_SCHEMA_URL,
         **kwargs: Any,
@@ -821,7 +704,7 @@ class LayerChart(_CompositionSpec, LayerSpec):
         LayerSpec.__init__(self, layer=cast(Any, layer), **kwargs)
         self._schema_url = schema_url
 
-    def __add__(self, other: TopLevelSpec) -> LayerChart:
+    def __add__(self, other: _SerializableView) -> LayerChart:
         current = self._kwds.get("layer", Undefined)
         merged = [] if current is Undefined else list(current)
         merged.append(other)
@@ -836,7 +719,7 @@ class HConcatChart(_CompositionSpec, HConcatSpec):
 
     def __init__(
         self,
-        hconcat: list[TopLevelSpec] | UndefinedType = Undefined,
+        hconcat: list[_SerializableView] | UndefinedType = Undefined,
         *,
         schema_url: str = DEFAULT_SCHEMA_URL,
         **kwargs: Any,
@@ -844,7 +727,7 @@ class HConcatChart(_CompositionSpec, HConcatSpec):
         HConcatSpec.__init__(self, hconcat=cast(Any, hconcat), **kwargs)
         self._schema_url = schema_url
 
-    def __or__(self, other: TopLevelSpec) -> HConcatChart:
+    def __or__(self, other: _SerializableView) -> HConcatChart:
         current = self._kwds.get("hconcat", Undefined)
         merged = [] if current is Undefined else list(current)
         merged.append(other)
@@ -859,7 +742,7 @@ class VConcatChart(_CompositionSpec, VConcatSpec):
 
     def __init__(
         self,
-        vconcat: list[TopLevelSpec] | UndefinedType = Undefined,
+        vconcat: list[_SerializableView] | UndefinedType = Undefined,
         *,
         schema_url: str = DEFAULT_SCHEMA_URL,
         **kwargs: Any,
@@ -867,7 +750,7 @@ class VConcatChart(_CompositionSpec, VConcatSpec):
         VConcatSpec.__init__(self, vconcat=cast(Any, vconcat), **kwargs)
         self._schema_url = schema_url
 
-    def __and__(self, other: TopLevelSpec) -> VConcatChart:
+    def __and__(self, other: _SerializableView) -> VConcatChart:
         current = self._kwds.get("vconcat", Undefined)
         merged = [] if current is Undefined else list(current)
         merged.append(other)
@@ -882,7 +765,7 @@ class ConcatChart(_CompositionSpec, ConcatSpec):
 
     def __init__(
         self,
-        concat: list[TopLevelSpec] | UndefinedType = Undefined,
+        concat: list[_SerializableView] | UndefinedType = Undefined,
         columns: int | UndefinedType = Undefined,
         *,
         schema_url: str = DEFAULT_SCHEMA_URL,
@@ -897,21 +780,207 @@ class ConcatChart(_CompositionSpec, ConcatSpec):
         self._schema_url = schema_url
 
 
-def layer(*charts: TopLevelSpec, **kwargs: Any) -> LayerChart:
+class MultiscaleChart(_CompositionSpec, MultiscaleSpec):
+    """A semantic-zoom composition backed by generated schema state."""
+
+    _schema_spec_cls = MultiscaleSpec
+    _children_key = "multiscale"
+
+    def __init__(
+        self,
+        multiscale: list[_SerializableView] | UndefinedType = Undefined,
+        stops: Sequence[float | ExprRef | dict[str, Any]]
+        | FadedMultiscaleStops
+        | dict[str, Any]
+        | TransitionedMultiscaleStops
+        | UndefinedType = Undefined,
+        *,
+        schema_url: str = DEFAULT_SCHEMA_URL,
+        **kwargs: Any,
+    ) -> None:
+        MultiscaleSpec.__init__(
+            self,
+            multiscale=cast(Any, multiscale),
+            stops=stops,
+            **kwargs,
+        )
+        self._schema_url = schema_url
+
+
+class ImportedView(ImportSpec):
+    """A child-view import that can participate in chart composition."""
+
+    def __init__(
+        self,
+        import_: UrlImport
+        | dict[str, Any]
+        | TemplateImport
+        | UndefinedType = Undefined,
+        **kwargs: Any,
+    ) -> None:
+        ImportSpec.__init__(self, import_=cast(Any, import_), **kwargs)
+
+    def to_dict(
+        self, *, include_schema: bool = False, validate: bool = True
+    ) -> dict[str, Any]:
+        """Serialize the imported child view without a root schema URL.
+
+        Args:
+            include_schema: Accepted for composition compatibility; imports
+                never emit a root ``$schema`` property.
+            validate: Validate against the generated import schema.
+
+        Returns:
+            The JSON-compatible imported-view specification.
+
+        Raises:
+            SchemaValidationError: If validation fails.
+
+        Example:
+            >>> ImportedView(import_={"template": "track"}).to_dict()
+            {'import': {'template': 'track'}}
+        """
+        del include_schema
+        return ImportSpec(**self._kwds).to_dict(validate=validate)
+
+    def __add__(self, other: _SerializableView) -> LayerChart:
+        """Layer this imported view with another view."""
+        return LayerChart(layer=[self, other])
+
+    def __and__(self, other: _SerializableView) -> VConcatChart:
+        """Vertically concatenate this imported view with another view."""
+        return VConcatChart(vconcat=[self, other])
+
+    def __or__(self, other: _SerializableView) -> HConcatChart:
+        """Horizontally concatenate this imported view with another view."""
+        return HConcatChart(hconcat=[self, other])
+
+
+def _view_from_dict(
+    values: dict[str, Any],
+    *,
+    schema_url: str,
+    allow_import: bool,
+) -> TopLevelSpec | ImportedView:
+    if allow_import and "import" in values:
+        import_definition = values.pop("import")
+        return ImportedView(import_=import_definition, **values)
+
+    for structural_key in (
+        "mark",
+        "layer",
+        "multiscale",
+        "vconcat",
+        "hconcat",
+        "concat",
+    ):
+        if structural_key not in values:
+            continue
+        if structural_key == "mark":
+            return Chart(schema_url=schema_url, **values)
+
+        raw_children = values.pop(structural_key)
+        if not isinstance(raw_children, list):
+            raise TypeError(f"{structural_key} must be a list of view specifications.")
+        children: list[_SerializableView] = []
+        for child in raw_children:
+            if not isinstance(child, Mapping):
+                raise TypeError(
+                    f"{structural_key} children must be mappings, got {type(child)!r}"
+                )
+            children.append(
+                _view_from_dict(
+                    deepcopy(dict(child)),
+                    schema_url=schema_url,
+                    allow_import=True,
+                )
+            )
+        if structural_key == "layer":
+            return LayerChart(layer=children, schema_url=schema_url, **values)
+        if structural_key == "multiscale":
+            return MultiscaleChart(multiscale=children, schema_url=schema_url, **values)
+        if structural_key == "vconcat":
+            return VConcatChart(vconcat=children, schema_url=schema_url, **values)
+        if structural_key == "hconcat":
+            return HConcatChart(hconcat=children, schema_url=schema_url, **values)
+        return ConcatChart(concat=children, schema_url=schema_url, **values)
+
+    if "import" in values:
+        raise ValueError("An imported view must be nested inside a composition.")
+    raise ValueError("GenomeSpy specification has no supported structural root.")
+
+
+def layer(*charts: _SerializableView, **kwargs: Any) -> LayerChart:
     """Compose a layered chart from multiple child charts."""
     return LayerChart(layer=list(charts), **kwargs)
 
 
-def hconcat(*charts: TopLevelSpec, **kwargs: Any) -> HConcatChart:
+def hconcat(*charts: _SerializableView, **kwargs: Any) -> HConcatChart:
     """Compose a horizontally concatenated chart."""
     return HConcatChart(hconcat=list(charts), **kwargs)
 
 
-def vconcat(*charts: TopLevelSpec, **kwargs: Any) -> VConcatChart:
+def vconcat(*charts: _SerializableView, **kwargs: Any) -> VConcatChart:
     """Compose a vertically concatenated chart."""
     return VConcatChart(vconcat=list(charts), **kwargs)
 
 
-def concat(*charts: TopLevelSpec, columns: int, **kwargs: Any) -> ConcatChart:
+def concat(*charts: _SerializableView, columns: int, **kwargs: Any) -> ConcatChart:
     """Compose a grid concatenation."""
     return ConcatChart(concat=list(charts), columns=columns, **kwargs)
+
+
+def multiscale(
+    *charts: _SerializableView,
+    stops: Sequence[float | ExprRef | dict[str, Any]]
+    | FadedMultiscaleStops
+    | dict[str, Any]
+    | TransitionedMultiscaleStops,
+    **kwargs: Any,
+) -> MultiscaleChart:
+    """Compose semantic-zoom levels using a multiscale view.
+
+    Args:
+        *charts: Views ordered from overview to detail.
+        stops: Zoom thresholds controlling transitions between levels.
+        **kwargs: Additional multiscale view properties.
+
+    Returns:
+        A renderable multiscale chart.
+
+    Raises:
+        SchemaValidationError: If the resulting specification is invalid when
+            serialized.
+
+    Example:
+        >>> multiscale(Chart(mark="rect"), Chart(mark="text"), stops=[1])
+    """
+    return MultiscaleChart(multiscale=list(charts), stops=stops, **kwargs)
+
+
+def import_view(
+    *,
+    url: str | UndefinedType = Undefined,
+    template: str | UndefinedType = Undefined,
+    **kwargs: Any,
+) -> ImportedView:
+    """Create an imported child view from a URL or template.
+
+    Args:
+        url: URL of a GenomeSpy specification to import.
+        template: Name of a template in the current view hierarchy.
+        **kwargs: Import-site properties such as ``params`` or ``visible``.
+
+    Returns:
+        An imported view for use in a composition.
+
+    Raises:
+        ValueError: If neither or both import sources are supplied.
+
+    Example:
+        >>> view = import_view(template="allele-track", params={"allele": "ref"})
+    """
+    if (url is Undefined) == (template is Undefined):
+        raise ValueError("Specify exactly one of url or template.")
+    import_definition = {"url": url} if url is not Undefined else {"template": template}
+    return ImportedView(import_=import_definition, **kwargs)

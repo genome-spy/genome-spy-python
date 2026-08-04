@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from datetime import date, datetime
 from typing import Any, cast
 
@@ -14,8 +15,6 @@ from genome_spy.schemapi import (
     normalize_mapping_value,
     normalize_schema_value,
 )
-
-Y_SCALE_DEFAULTS = {"reverse": True}
 
 
 def normalize_data(data: Any) -> Any:
@@ -111,13 +110,20 @@ def infer_value_type(value: Any) -> str | None:
 
 def normalize_channel(
     name: str,
-    value: Channel | SchemaBase | str | dict[str, Any] | None,
+    value: Channel
+    | SchemaBase
+    | str
+    | dict[str, Any]
+    | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+    | None,
     *,
     data: Any = None,
-) -> dict[str, Any] | None:
+) -> dict[str, Any] | list[dict[str, Any]] | None:
     """Normalize one chart encoding channel definition."""
     if value is None:
         return None
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes):
+        return [channel(item, encoding_name=name).to_dict() for item in value]
     definition = channel(value).to_dict()
     return normalized_channel_definition(name, definition, data=data)
 
@@ -136,23 +142,20 @@ def normalized_channel_definition(
         inferred_type = infer_field_type(normalized["field"], data)
         if inferred_type is not None:
             normalized["type"] = inferred_type
-    if name == "y":
-        normalized["scale"] = normalized_y_scale(normalized.get("scale"))
     return normalized
-
-
-def normalized_y_scale(scale: Any) -> Any:
-    """Apply the default reversed y-scale unless explicitly overridden."""
-    if scale is None:
-        return dict(Y_SCALE_DEFAULTS)
-    if is_mapping(scale) and "reverse" not in scale:
-        return {**Y_SCALE_DEFAULTS, **scale}
-    return scale
 
 
 def merge_encoding_definitions(
     current_encoding: Any,
-    updates: dict[str, Channel | SchemaBase | str | dict[str, Any] | None],
+    updates: dict[
+        str,
+        Channel
+        | SchemaBase
+        | str
+        | dict[str, Any]
+        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+        | None,
+    ],
     *,
     data: Any,
 ) -> dict[str, Any]:

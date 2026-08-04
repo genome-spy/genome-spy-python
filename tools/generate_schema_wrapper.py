@@ -28,6 +28,7 @@ DEFAULT_OUTPUT_DIR = Path("src/genome_spy/schema")
 DEFAULT_SPEC_REFERENCE_DIR = Path(".cache/genome-spy-python/genomespy-core-spec")
 PACKAGE_NAME = "@genome-spy/core"
 SCHEMA_FILENAME = "genome-spy-schema.json"
+CAPABILITIES_FILENAME = "capabilities.json"
 
 
 def configured_core_version(pyproject_path: Path = Path("pyproject.toml")) -> str:
@@ -127,6 +128,19 @@ def write_schema_package(
         raise FileNotFoundError(f"GenomeSpy package has no schema: {schema_path}")
 
     version = package_version(package_dir)
+    write_schema_files(schema_path, output_dir, version=version)
+
+    if spec_reference_dir is not None:
+        copy_spec_references(package_dir, spec_reference_dir, version)
+
+
+def write_schema_files(
+    schema_path: Path,
+    output_dir: Path,
+    *,
+    version: str,
+) -> None:
+    """Write generated schema artifacts from an explicit JSON Schema file."""
     schema = load_schema(schema_path)
     generator = SchemaWrapperGenerator(schema, schema_version=version)
     core_module = generator.generate_core_module()
@@ -149,9 +163,10 @@ def write_schema_package(
     (output_dir / "__init__.py").write_text(init_module.source, encoding="utf-8")
     (output_dir / "mixins.py").write_text(mark_mixins_module.source, encoding="utf-8")
     (output_dir / "channels.py").write_text(channels_module.source, encoding="utf-8")
-
-    if spec_reference_dir is not None:
-        copy_spec_references(package_dir, spec_reference_dir, version)
+    (output_dir / CAPABILITIES_FILENAME).write_text(
+        json.dumps(generator.capability_manifest(), indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def main() -> None:
@@ -175,23 +190,55 @@ def main() -> None:
             "are copied. Use an empty string to skip copying references."
         ),
     )
+    source_group = parser.add_mutually_exclusive_group()
+    source_group.add_argument(
+        "--package-dir",
+        type=Path,
+        help=(
+            "Use an existing built @genome-spy/core package directory instead "
+            "of fetching the pinned npm release."
+        ),
+    )
+    source_group.add_argument(
+        "--schema-path",
+        type=Path,
+        help=(
+            "Generate directly from a schema.json file. The --core-version value "
+            "is recorded as the schema version."
+        ),
+    )
     args = parser.parse_args()
 
     spec_reference_dir = (
         Path(args.spec_reference_dir) if args.spec_reference_dir else None
     )
 
-    with tempfile.TemporaryDirectory(prefix="genome-spy-core-") as tmpdir:
-        package_dir = fetch_npm_package(args.core_version, Path(tmpdir))
+    if args.schema_path is not None:
+        write_schema_files(
+            args.schema_path,
+            args.output_dir,
+            version=args.core_version,
+        )
+        source = str(args.schema_path)
+    elif args.package_dir is not None:
         write_schema_package(
-            package_dir,
+            args.package_dir,
             args.output_dir,
             spec_reference_dir=spec_reference_dir,
         )
+        source = str(args.package_dir)
+    else:
+        with tempfile.TemporaryDirectory(prefix="genome-spy-core-") as tmpdir:
+            package_dir = fetch_npm_package(args.core_version, Path(tmpdir))
+            write_schema_package(
+                package_dir,
+                args.output_dir,
+                spec_reference_dir=spec_reference_dir,
+            )
+        source = f"{PACKAGE_NAME}@{args.core_version}"
 
     print(
-        f"Wrote generated GenomeSpy schema package from "
-        f"{PACKAGE_NAME}@{args.core_version} to {args.output_dir}."
+        f"Wrote generated GenomeSpy schema package from {source} to {args.output_dir}."
     )
 
 

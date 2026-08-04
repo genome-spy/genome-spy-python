@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any, cast
 
-from genome_spy.schema import Data, LazyDataParams
+from genome_spy.schema import Data, ExprRef, LazyDataParams, UrlTemplate
 
 __all__ = ["Data", "LazyNamespace", "lazy"]
+
+_LazyUrl = str | Sequence[str] | ExprRef | dict[str, Any] | UrlTemplate
 
 
 class LazyNamespace:
@@ -22,7 +25,7 @@ class LazyNamespace:
         >>> lazy.gff3("https://example.test/genes.gff3.gz", windowSize=2_000_000)
     """
 
-    def source(self, type: str, url: str, /, **kwargs: Any) -> Data:
+    def source(self, type: str, url: _LazyUrl, /, **kwargs: Any) -> Data:
         """Create a lazy data source of an arbitrary GenomeSpy type.
 
         Description:
@@ -47,7 +50,7 @@ class LazyNamespace:
 
         return Data(lazy=LazyDataParams(type=cast(Any, type), url=url, **kwargs))
 
-    def bam(self, url: str, /, **kwargs: Any) -> Data:
+    def bam(self, url: _LazyUrl, /, **kwargs: Any) -> Data:
         """Create a lazy BAM data source.
 
         Description:
@@ -69,7 +72,7 @@ class LazyNamespace:
 
         return self.source("bam", url, **kwargs)
 
-    def bigbed(self, url: str, /, **kwargs: Any) -> Data:
+    def bigbed(self, url: _LazyUrl, /, **kwargs: Any) -> Data:
         """Create a lazy BigBed data source.
 
         Description:
@@ -91,7 +94,7 @@ class LazyNamespace:
 
         return self.source("bigbed", url, **kwargs)
 
-    def bigwig(self, url: str, /, **kwargs: Any) -> Data:
+    def bigwig(self, url: _LazyUrl, /, **kwargs: Any) -> Data:
         """Create a lazy BigWig data source.
 
         Description:
@@ -114,7 +117,7 @@ class LazyNamespace:
 
         return self.source("bigwig", url, **kwargs)
 
-    def gff3(self, url: str, /, **kwargs: Any) -> Data:
+    def gff3(self, url: _LazyUrl, /, **kwargs: Any) -> Data:
         """Create a lazy GFF3 data source.
 
         Description:
@@ -137,7 +140,7 @@ class LazyNamespace:
 
         return self.source("gff3", url, **kwargs)
 
-    def indexed_fasta(self, url: str, /, **kwargs: Any) -> Data:
+    def indexed_fasta(self, url: _LazyUrl, /, **kwargs: Any) -> Data:
         """Create a lazy indexed FASTA data source.
 
         Description:
@@ -160,7 +163,7 @@ class LazyNamespace:
 
         return self.source("indexedFasta", url, **kwargs)
 
-    def vcf(self, url: str, /, **kwargs: Any) -> Data:
+    def vcf(self, url: _LazyUrl, /, **kwargs: Any) -> Data:
         """Create a lazy VCF data source.
 
         Description:

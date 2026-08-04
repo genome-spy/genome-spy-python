@@ -130,6 +130,26 @@ class PropertySpec:
     annotation: AnnotationSpec
     nested_schema_class_name: str | None = None
 
+    @property
+    def python_name(self) -> str:
+        """Return the Python-safe parameter spelling for this property."""
+        return _python_property_name(self.name)
+
+
+@dataclass(frozen=True, slots=True)
+class TransformMethodSpec:
+    """Schema-derived information for one transform convenience method."""
+
+    schema_name: str
+    transform_type: str
+    properties: tuple[PropertySpec, ...]
+    required: frozenset[str]
+
+    @property
+    def method_name(self) -> str:
+        """Return the Altair-style method name for this transform."""
+        return f"transform_{_snake_name(self.transform_type)}"
+
 
 @dataclass(frozen=True, slots=True)
 class SchemaAnalyzer:
@@ -173,7 +193,7 @@ class SchemaAnalyzer:
         property_names = [
             name
             for name in self.resolved_identifier_properties(definition.schema)
-            if name.isidentifier() and not keyword.iskeyword(name)
+            if name.isidentifier()
         ]
         return tuple(
             PropertySpec(
@@ -534,6 +554,106 @@ class SchemaWrapperGenerator:
             return ()
         return tuple(sorted(name for name in properties if isinstance(name, str)))
 
+    def transform_method_specs(self) -> tuple[TransformMethodSpec, ...]:
+        """Return method metadata for every member of ``TransformParams``."""
+        transform_union = self._definitions_map.get("TransformParams", {})
+        if not isinstance(transform_union, dict):
+            return ()
+
+        variants = transform_union.get("anyOf", transform_union.get("oneOf", []))
+        if not isinstance(variants, list):
+            return ()
+
+        specs: list[TransformMethodSpec] = []
+        for variant in variants:
+            if not isinstance(variant, dict):
+                continue
+            schema_name = _ref_name(variant)
+            definition_schema = self._definitions_map.get(schema_name or "")
+            if schema_name is None or not isinstance(definition_schema, dict):
+                continue
+
+            properties = self._analyzer.resolve_properties(definition_schema)
+            type_schema = properties.get("type", {})
+            transform_type = (
+                type_schema.get("const") if isinstance(type_schema, dict) else None
+            )
+            if not isinstance(transform_type, str):
+                continue
+
+            property_specs = tuple(
+                PropertySpec(
+                    name=name,
+                    annotation=self._analyzer._property_spec_annotation(
+                        name, property_schema
+                    ),
+                    nested_schema_class_name=None,
+                )
+                for name, property_schema in sorted(properties.items())
+                if name != "type"
+                and isinstance(name, str)
+                and isinstance(property_schema, dict)
+                and (name.isidentifier() or keyword.iskeyword(name))
+            )
+            required = frozenset(
+                name
+                for name in definition_schema.get("required", [])
+                if isinstance(name, str) and name != "type"
+            )
+            specs.append(
+                TransformMethodSpec(
+                    schema_name=schema_name,
+                    transform_type=transform_type,
+                    properties=property_specs,
+                    required=required,
+                )
+            )
+        return tuple(specs)
+
+    def capability_manifest(self) -> dict[str, Any]:
+        """Return deterministic generated-API coverage metadata."""
+        root_schema = self._definitions_map.get("CoreRootSpec", {})
+        root_variants: list[str] = []
+        if isinstance(root_schema, dict):
+            variants = root_schema.get("anyOf", root_schema.get("oneOf", []))
+            if isinstance(variants, list):
+                for variant in variants:
+                    if not isinstance(variant, dict):
+                        continue
+                    required = variant.get("required", [])
+                    if not isinstance(required, list):
+                        continue
+                    structural = [
+                        name
+                        for name in required
+                        if name
+                        in {
+                            "mark",
+                            "layer",
+                            "multiscale",
+                            "vconcat",
+                            "hconcat",
+                            "concat",
+                        }
+                    ]
+                    root_variants.extend(structural)
+
+        return {
+            "schema_version": self.schema_version,
+            "definitions": [definition.name for definition in self.definitions()],
+            "marks": list(self.mark_types()),
+            "encoding_channels": list(self.encoding_channels()),
+            "transforms": [
+                {
+                    "schema": spec.schema_name,
+                    "type": spec.transform_type,
+                    "method": spec.method_name,
+                }
+                for spec in self.transform_method_specs()
+            ],
+            "root_spec_variants": root_variants,
+        }
+
     def channel_nested_setters(
         self, encoding_name: str
     ) -> tuple[tuple[str, str, str], ...]:
@@ -596,8 +716,11 @@ class SchemaWrapperGenerator:
         return tuple(
             property_spec
             for property_spec in self._analyzer.property_specs(definition)
-            if property_spec.name not in nested_property_names
-            or property_spec.name == "sort"
+            if not keyword.iskeyword(property_spec.name)
+            and (
+                property_spec.name not in nested_property_names
+                or property_spec.name == "sort"
+            )
         )
 
     def generate_core_module(self) -> GeneratedModule:
@@ -933,7 +1056,7 @@ class SchemaWrapperGenerator:
         return _anonymous_property_kwds_sources(property_names)
 
     def generate_mark_mixins_module(self) -> GeneratedModule:
-        """Generate chart mark and config methods for the handwritten API."""
+        """Generate schema-driven mixins for the handwritten chart API."""
         mark_methods = [
             _mark_method_source(
                 mark_type,
@@ -965,24 +1088,74 @@ class SchemaWrapperGenerator:
             for _, annotation, _, _ in config_method_specs
             for kwds_name in _annotation_kwds_names(annotation)
         }
+        transform_method_specs = self.transform_method_specs()
+        transform_methods = [
+            _transform_method_source(spec) for spec in transform_method_specs
+        ]
+        transform_annotations = [
+            property_spec.annotation
+            for spec in transform_method_specs
+            for property_spec in spec.properties
+        ]
+        needs_literal = any(
+            annotation.needs_literal for annotation in transform_annotations
+        )
+        needs_sequence = any(
+            annotation.needs_sequence for annotation in transform_annotations
+        )
+        transform_alias_names = {
+            alias_name
+            for annotation in transform_annotations
+            for alias_name in _annotation_alias_names(annotation.annotation)
+        }
+        transform_kwds_names = {
+            kwds_name
+            for annotation in transform_annotations
+            for kwds_name in _annotation_kwds_names(annotation.annotation)
+        }
+        available_class_names = {
+            _class_name(definition.name) for definition in self.definitions()
+        }
+        transform_class_names = {
+            class_name
+            for annotation in transform_annotations
+            for class_name in _annotation_class_names(annotation.annotation)
+            if class_name in available_class_names
+        }
+        typing_imports = ["Any", "Self"]
+        if needs_literal:
+            typing_imports.append("Literal")
         source = "\n".join(
             [
                 GENERATED_HEADER,
                 "from __future__ import annotations",
-                "from typing import Any, Self",
+                ("from collections.abc import Sequence" if needs_sequence else ""),
+                "from typing import " + ", ".join(typing_imports),
                 "",
-                "from genome_spy.schemapi import Undefined, use_signature",
+                (
+                    "from genome_spy.schema._typing import "
+                    + ", ".join(sorted(transform_alias_names))
+                    if transform_alias_names
+                    else ""
+                ),
+                "from genome_spy.schemapi import Undefined, UndefinedType, use_signature",
                 (
                     "from genome_spy.schema import core"
-                    if needs_core_import or config_method_specs
+                    if needs_core_import or config_method_specs or transform_class_names
                     else ""
                 ),
                 (
                     "from genome_spy.schema._kwds import "
                     + ", ".join(
-                        sorted(config_helper_kwds_names | {"GenomeSpyConfigKwds"})
+                        sorted(
+                            config_helper_kwds_names
+                            | transform_kwds_names
+                            | {"GenomeSpyConfigKwds"}
+                        )
                     )
-                    if config_helper_kwds_names or config_method_specs
+                    if config_helper_kwds_names
+                    or transform_kwds_names
+                    or config_method_specs
                     else ""
                 ),
                 "class MarkMethodMixin:",
@@ -1002,10 +1175,15 @@ class SchemaWrapperGenerator:
                     else []
                 ),
                 "",
+                "class TransformMethodMixin:",
+                '    """Schema-derived transform methods for top-level specifications."""',
+                "",
+                *(transform_methods or ["    pass"]),
+                "",
                 (
-                    '__all__ = ["ConfigMethodMixin", "MarkMethodMixin"]'
+                    '__all__ = ["ConfigMethodMixin", "MarkMethodMixin", "TransformMethodMixin"]'
                     if config_method_specs
-                    else '__all__ = ["MarkMethodMixin"]'
+                    else '__all__ = ["MarkMethodMixin", "TransformMethodMixin"]'
                 ),
                 "",
             ]
@@ -1013,9 +1191,9 @@ class SchemaWrapperGenerator:
         return GeneratedModule(
             source=source,
             exports=(
-                ("ConfigMethodMixin", "MarkMethodMixin")
+                ("ConfigMethodMixin", "MarkMethodMixin", "TransformMethodMixin")
                 if config_method_specs
-                else ("MarkMethodMixin",)
+                else ("MarkMethodMixin", "TransformMethodMixin")
             ),
         )
 
@@ -1263,16 +1441,35 @@ def _schema_class_source(
 ) -> GeneratedSchemaClass:
     property_specs = analyzer.property_specs(definition)
     args = ", ".join(
-        f"{property_spec.name}: {property_spec.annotation.annotation} | UndefinedType = Undefined"
+        f"{property_spec.python_name}: {property_spec.annotation.annotation} | UndefinedType = Undefined"
         for property_spec in property_specs
     )
     if args:
         args = ", " + args
 
-    assignments = ", ".join(
-        f"{property_spec.name}={property_spec.name}" for property_spec in property_specs
+    regular_assignments = ", ".join(
+        f"{property_spec.name}={property_spec.python_name}"
+        for property_spec in property_specs
+        if not keyword.iskeyword(property_spec.name)
     )
-    body = f"super().__init__({assignments})" if assignments else "super().__init__()"
+    keyword_assignments = ", ".join(
+        f"{property_spec.name!r}: {property_spec.python_name}"
+        for property_spec in property_specs
+        if keyword.iskeyword(property_spec.name)
+    )
+    call_arguments = regular_assignments
+    if keyword_assignments:
+        keyword_mapping = f"**{{{keyword_assignments}}}"
+        call_arguments = (
+            f"{call_arguments}, {keyword_mapping}"
+            if call_arguments
+            else keyword_mapping
+        )
+    body = (
+        f"super().__init__({call_arguments})"
+        if call_arguments
+        else "super().__init__()"
+    )
     methods = "".join(
         _schema_property_method_source(
             class_name,
@@ -1416,6 +1613,110 @@ def _mark_method_source(mark_type: str, *, signature_class_name: str | None) -> 
 def _snake_name(name: str) -> str:
     name = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
     return name.lower()
+
+
+def _python_property_name(name: str) -> str:
+    """Return a Python-safe spelling for a schema property."""
+    return f"{name}_" if keyword.iskeyword(name) else name
+
+
+def _qualified_transform_annotation(annotation: str) -> str:
+    """Qualify generated schema classes used by transform annotations."""
+    excluded = {
+        "Any",
+        "Literal",
+        "None",
+        "Sequence",
+        "UndefinedType",
+    }
+
+    def qualify(match: re.Match[str]) -> str:
+        name = match.group(0)
+        if name in excluded or name.endswith(("_T", "Kwds")):
+            return name
+        return f"core.{name}"
+
+    return re.sub(r"\b[A-Z][A-Za-z0-9]*\b", qualify, annotation)
+
+
+def _transform_method_source(spec: TransformMethodSpec) -> str:
+    ordered_properties = sorted(
+        spec.properties,
+        key=lambda property_spec: (
+            property_spec.name not in spec.required,
+            property_spec.name,
+        ),
+    )
+    parameters: list[str] = []
+    assignments: list[str] = []
+    for property_spec in ordered_properties:
+        schema_name = property_spec.name
+        python_name = _python_property_name(schema_name)
+        annotation = _qualified_transform_annotation(
+            property_spec.annotation.annotation
+        )
+        if schema_name in spec.required:
+            parameters.append(f"        {python_name}: {annotation},")
+            assignments.append(f"        transform[{schema_name!r}] = {python_name}")
+        else:
+            parameters.append(
+                f"        {python_name}: {annotation} | UndefinedType = Undefined,"
+            )
+            assignments.extend(
+                [
+                    f"        if {python_name} is not Undefined:",
+                    f"            transform[{schema_name!r}] = {python_name}",
+                ]
+            )
+
+    if spec.transform_type == "filter":
+        signature = "\n".join(
+            [
+                f"    def {spec.method_name}(",
+                "        self,",
+                "        expression: str | UndefinedType = Undefined,",
+                "        *,",
+                *parameters,
+                "    ) -> Self:",
+            ]
+        )
+    elif parameters:
+        signature = "\n".join(
+            [
+                f"    def {spec.method_name}(",
+                "        self,",
+                "        *,",
+                *parameters,
+                "    ) -> Self:",
+            ]
+        )
+    else:
+        signature = f"    def {spec.method_name}(self) -> Self:"
+
+    compatibility_lines = (
+        [
+            "        if expression is not Undefined:",
+            "            if expr is not Undefined or param is not Undefined:",
+            '                raise TypeError("expression cannot be combined with expr or param")',
+            "            expr = expression",
+            "        if expr is Undefined and param is Undefined:",
+            '            raise TypeError("filter requires an expression or param")',
+        ]
+        if spec.transform_type == "filter"
+        else []
+    )
+    return "\n".join(
+        [
+            signature,
+            f'        """Add a ``{spec.transform_type}`` transform."""',
+            f"        transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
+            *compatibility_lines,
+            *assignments,
+            "        return self._append_transform(transform)  "
+            "# type: ignore[attr-defined, no-any-return]",
+            "",
+        ]
+    )
 
 
 def _configure_method_source() -> str:
@@ -1587,6 +1888,7 @@ def _typed_dict_source(name: str, property_specs: tuple[PropertySpec, ...]) -> s
     fields = "\n".join(
         f"    {property_spec.name}: {property_spec.annotation.annotation}"
         for property_spec in property_specs
+        if not keyword.iskeyword(property_spec.name)
     )
     if not fields:
         fields = "    pass"

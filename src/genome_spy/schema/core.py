@@ -146,6 +146,7 @@ class AggregateParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         fields: Sequence[Field_T] | UndefinedType = Undefined,
         groupby: Sequence[Field_T] | UndefinedType = Undefined,
@@ -154,10 +155,19 @@ class AggregateParams(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
-            description=description, fields=fields, groupby=groupby, ops=ops, type=type
+            description=description,
+            fields=fields,
+            groupby=groupby,
+            ops=ops,
+            type=type,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str]) -> AggregateParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> AggregateParams:
         """Return a copy with ``description`` updated."""
@@ -4687,10 +4697,12 @@ class CoordinateLookupParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str] | UndefinedType = Undefined,
         channel: PrimaryPositionalChannel_T | UndefinedType = Undefined,
         default: Any | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         fields: Field_T | Sequence[Field_T] | None | UndefinedType = Undefined,
+        from_: CoordinateLookupInput | dict[str, Any] | UndefinedType = Undefined,
         key: Field_T | Sequence[Field_T] | UndefinedType = Undefined,
         type: Literal["coordinateLookup"] | UndefinedType = Undefined,
         values: Sequence[Field_T] | None | UndefinedType = Undefined,
@@ -4704,9 +4716,14 @@ class CoordinateLookupParams(GenomeSpySchema):
             key=key,
             type=type,
             values=values,
+            **{"as": as_, "from": from_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str]) -> CoordinateLookupParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_channel(self, value: PrimaryPositionalChannel_T) -> CoordinateLookupParams:
         """Return a copy with ``channel`` updated."""
@@ -4725,6 +4742,15 @@ class CoordinateLookupParams(GenomeSpySchema):
     ) -> CoordinateLookupParams:
         """Return a copy with ``fields`` updated."""
         return self._with_property("fields", value)
+
+    def with_from(
+        self,
+        value: CoordinateLookupInput | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> CoordinateLookupParams:
+        """Return a copy with a ``CoordinateLookupInput`` from."""
+        return self._with_property("from", value, **kwargs)
 
     def with_key(self, value: Field_T | Sequence[Field_T]) -> CoordinateLookupParams:
         """Return a copy with ``key`` updated."""
@@ -5313,6 +5339,7 @@ class CoverageParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: str | UndefinedType = Undefined,
         asChrom: str | UndefinedType = Undefined,
         asEnd: str | UndefinedType = Undefined,
         asStart: str | UndefinedType = Undefined,
@@ -5334,9 +5361,14 @@ class CoverageParams(GenomeSpySchema):
             start=start,
             type=type,
             weight=weight,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: str) -> CoverageParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_asChrom(self, value: str) -> CoverageParams:
         """Return a copy with ``asChrom`` updated."""
@@ -7284,15 +7316,22 @@ class FlattenCompressedExonsParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         exons: Field_T | UndefinedType = Undefined,
         start: Field_T | UndefinedType = Undefined,
         type: Literal["flattenCompressedExons"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(description=description, exons=exons, start=start, type=type)
+        super().__init__(
+            description=description, exons=exons, start=start, type=type, **{"as": as_}
+        )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str]) -> FlattenCompressedExonsParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> FlattenCompressedExonsParams:
         """Return a copy with ``description`` updated."""
@@ -7321,6 +7360,7 @@ class FlattenDelimitedParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str] | str | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         field: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
         separator: Sequence[str] | str | UndefinedType = Undefined,
@@ -7328,10 +7368,18 @@ class FlattenDelimitedParams(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
-            description=description, field=field, separator=separator, type=type
+            description=description,
+            field=field,
+            separator=separator,
+            type=type,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str] | str) -> FlattenDelimitedParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> FlattenDelimitedParams:
         """Return a copy with ``description`` updated."""
@@ -7358,15 +7406,26 @@ class FlattenParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str] | str | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         fields: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
         index: str | UndefinedType = Undefined,
         type: Literal["flatten"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(description=description, fields=fields, index=index, type=type)
+        super().__init__(
+            description=description,
+            fields=fields,
+            index=index,
+            type=type,
+            **{"as": as_},
+        )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str] | str) -> FlattenParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> FlattenParams:
         """Return a copy with ``description`` updated."""
@@ -7393,14 +7452,19 @@ class FlattenSequenceParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         field: Field_T | UndefinedType = Undefined,
         type: Literal["flattenSequence"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(description=description, field=field, type=type)
+        super().__init__(description=description, field=field, type=type, **{"as": as_})
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str]) -> FlattenSequenceParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> FlattenSequenceParams:
         """Return a copy with ``description`` updated."""
@@ -7447,14 +7511,19 @@ class FormulaParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: str | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
         type: Literal["formula"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(description=description, expr=expr, type=type)
+        super().__init__(description=description, expr=expr, type=type, **{"as": as_})
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: str) -> FormulaParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> FormulaParams:
         """Return a copy with ``description`` updated."""
@@ -8849,13 +8918,18 @@ class IdentifierParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: str | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         type: Literal["identifier"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(description=description, type=type)
+        super().__init__(description=description, type=type, **{"as": as_})
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: str) -> IdentifierParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> IdentifierParams:
         """Return a copy with ``description`` updated."""
@@ -8875,6 +8949,10 @@ class ImportSpec(GenomeSpySchema):
     def __init__(
         self,
         config: GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
+        import_: UrlImport
+        | dict[str, Any]
+        | TemplateImport
+        | UndefinedType = Undefined,
         name: str | UndefinedType = Undefined,
         params: Sequence[
             PlainValueParameter
@@ -8889,7 +8967,13 @@ class ImportSpec(GenomeSpySchema):
         visible: bool | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(config=config, name=name, params=params, visible=visible)
+        super().__init__(
+            config=config,
+            name=name,
+            params=params,
+            visible=visible,
+            **{"import": import_},
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -8901,6 +8985,15 @@ class ImportSpec(GenomeSpySchema):
     ) -> ImportSpec:
         """Return a copy with a ``GenomeSpyConfig`` config."""
         return self._with_property("config", value, **kwargs)
+
+    def with_import(
+        self,
+        value: UrlImport | dict[str, Any] | None | Any = Undefined,
+        /,
+        **kwargs: Any,
+    ) -> ImportSpec:
+        """Return a copy with a ``UrlImport`` import."""
+        return self._with_property("import", value, **kwargs)
 
     def with_name(self, value: str) -> ImportSpec:
         """Return a copy with ``name`` updated."""
@@ -10373,6 +10466,7 @@ class LinearizeGenomicCoordinateParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: str | Sequence[str] | UndefinedType = Undefined,
         channel: Literal["x", "y"] | UndefinedType = Undefined,
         chrom: Field_T | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -10388,9 +10482,14 @@ class LinearizeGenomicCoordinateParams(GenomeSpySchema):
             offset=offset,
             pos=pos,
             type=type,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: str | Sequence[str]) -> LinearizeGenomicCoordinateParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_channel(
         self, value: Literal["x", "y"]
@@ -11031,9 +11130,18 @@ class LookupParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str] | UndefinedType = Undefined,
         default: Any | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         fields: Field_T | Sequence[Field_T] | None | UndefinedType = Undefined,
+        from_: UrlData
+        | dict[str, Any]
+        | InlineData
+        | NamedData
+        | DynamicCallbackData
+        | LazyData
+        | LookupSelfInput
+        | UndefinedType = Undefined,
         key: Field_T | Sequence[Field_T] | UndefinedType = Undefined,
         type: Literal["lookup"] | UndefinedType = Undefined,
         values: Sequence[Field_T] | None | UndefinedType = Undefined,
@@ -11046,9 +11154,14 @@ class LookupParams(GenomeSpySchema):
             key=key,
             type=type,
             values=values,
+            **{"as": as_, "from": from_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str]) -> LookupParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_default(self, value: Any) -> LookupParams:
         """Return a copy with ``default`` updated."""
@@ -11061,6 +11174,19 @@ class LookupParams(GenomeSpySchema):
     def with_fields(self, value: Field_T | Sequence[Field_T] | None) -> LookupParams:
         """Return a copy with ``fields`` updated."""
         return self._with_property("fields", value)
+
+    def with_from(
+        self,
+        value: UrlData
+        | dict[str, Any]
+        | InlineData
+        | NamedData
+        | DynamicCallbackData
+        | LazyData
+        | LookupSelfInput,
+    ) -> LookupParams:
+        """Return a copy with ``from`` updated."""
+        return self._with_property("from", value)
 
     def with_key(self, value: Field_T | Sequence[Field_T]) -> LookupParams:
         """Return a copy with ``key`` updated."""
@@ -12689,6 +12815,7 @@ class MeasureTextParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: str | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         field: Field_T | UndefinedType = Undefined,
         font: str | UndefinedType = Undefined,
@@ -12706,9 +12833,14 @@ class MeasureTextParams(GenomeSpySchema):
             fontStyle=fontStyle,
             fontWeight=fontWeight,
             type=type,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: str) -> MeasureTextParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> MeasureTextParams:
         """Return a copy with ``description`` updated."""
@@ -13962,6 +14094,7 @@ class PileupParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: str | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         end: Field_T | UndefinedType = Undefined,
         preference: Field_T | UndefinedType = Undefined,
@@ -13982,9 +14115,14 @@ class PileupParams(GenomeSpySchema):
             spacing=spacing,
             start=start,
             type=type,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: str) -> PileupParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> PileupParams:
         """Return a copy with ``description`` updated."""
@@ -15325,14 +15463,21 @@ class ProjectParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         fields: Sequence[Field_T] | UndefinedType = Undefined,
         type: Literal["project"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(description=description, fields=fields, type=type)
+        super().__init__(
+            description=description, fields=fields, type=type, **{"as": as_}
+        )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str]) -> ProjectParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> ProjectParams:
         """Return a copy with ``description`` updated."""
@@ -16209,6 +16354,7 @@ class RegexExtractParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: str | Sequence[str] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         field: Field_T | UndefinedType = Undefined,
         regex: str | UndefinedType = Undefined,
@@ -16222,9 +16368,14 @@ class RegexExtractParams(GenomeSpySchema):
             regex=regex,
             skipInvalidInput=skipInvalidInput,
             type=type,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: str | Sequence[str]) -> RegexExtractParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> RegexExtractParams:
         """Return a copy with ``description`` updated."""
@@ -18342,14 +18493,19 @@ class SequenceParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: FieldName_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         start: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         step: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         stop: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(start=start, step=step, stop=stop)
+        super().__init__(start=start, step=step, stop=stop, **{"as": as_})
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: FieldName_T | ExprRef | dict[str, Any]) -> SequenceParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_start(
         self,
@@ -18623,6 +18779,7 @@ class StackParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str] | UndefinedType = Undefined,
         baseField: Field_T | UndefinedType = Undefined,
         cardinality: float | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -18643,9 +18800,14 @@ class StackParams(GenomeSpySchema):
             offset=offset,
             sort=sort,
             type=type,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str]) -> StackParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_baseField(self, value: Field_T) -> StackParams:
         """Return a copy with ``baseField`` updated."""
@@ -22341,6 +22503,7 @@ class TransformParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str | None] | UndefinedType = Undefined,
         asChrom: str | UndefinedType = Undefined,
         asEnd: str | UndefinedType = Undefined,
         asKey: str | UndefinedType = Undefined,
@@ -22371,6 +22534,14 @@ class TransformParams(GenomeSpySchema):
         fontStyle: FontStyle_T | UndefinedType = Undefined,
         fontWeight: FontWeight_T | UndefinedType = Undefined,
         frame: Sequence[float | None] | UndefinedType = Undefined,
+        from_: UrlData
+        | dict[str, Any]
+        | InlineData
+        | NamedData
+        | DynamicCallbackData
+        | LazyData
+        | LookupSelfInput
+        | UndefinedType = Undefined,
         groupby: Sequence[Field_T] | UndefinedType = Undefined,
         ignorePeers: bool | UndefinedType = Undefined,
         index: str | UndefinedType = Undefined,
@@ -22488,9 +22659,14 @@ class TransformParams(GenomeSpySchema):
             xOffset=xOffset,
             yExtent=yExtent,
             yOffset=yOffset,
+            **{"as": as_, "from": from_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str | None]) -> TransformParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_asChrom(self, value: str) -> TransformParams:
         """Return a copy with ``asChrom`` updated."""
@@ -22613,6 +22789,19 @@ class TransformParams(GenomeSpySchema):
     def with_frame(self, value: Sequence[float | None]) -> TransformParams:
         """Return a copy with ``frame`` updated."""
         return self._with_property("frame", value)
+
+    def with_from(
+        self,
+        value: UrlData
+        | dict[str, Any]
+        | InlineData
+        | NamedData
+        | DynamicCallbackData
+        | LazyData
+        | LookupSelfInput,
+    ) -> TransformParams:
+        """Return a copy with ``from`` updated."""
+        return self._with_property("from", value)
 
     def with_groupby(self, value: Sequence[Field_T]) -> TransformParams:
         """Return a copy with ``groupby`` updated."""
@@ -22920,6 +23109,7 @@ class TruncateTextParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: str | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         ellipsis: str | UndefinedType = Undefined,
         field: Field_T | UndefinedType = Undefined,
@@ -22941,9 +23131,14 @@ class TruncateTextParams(GenomeSpySchema):
             fontWeight=fontWeight,
             limit=limit,
             type=type,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: str) -> TruncateTextParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> TruncateTextParams:
         """Return a copy with ``description`` updated."""
@@ -25471,6 +25666,7 @@ class WindowParams(GenomeSpySchema):
 
     def __init__(
         self,
+        as_: Sequence[str | None] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         fields: Sequence[Field_T | None] | UndefinedType = Undefined,
         frame: Sequence[float | None] | UndefinedType = Undefined,
@@ -25492,9 +25688,14 @@ class WindowParams(GenomeSpySchema):
             params=params,
             sort=sort,
             type=type,
+            **{"as": as_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def with_as(self, value: Sequence[str | None]) -> WindowParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
 
     def with_description(self, value: str) -> WindowParams:
         """Return a copy with ``description`` updated."""
