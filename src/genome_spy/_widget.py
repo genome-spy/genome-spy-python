@@ -20,7 +20,8 @@ async function renderChart({ model, el, signal }) {
 
   let api = null;
   let parameterSubscriptions = [];
-  let arrowObjectUrls = [];
+  let activeArrowObjectUrls = [];
+  let renderRevision = 0;
   let syncingParameterValues = false;
 
   const setError = (error) => {
@@ -44,16 +45,16 @@ async function renderChart({ model, el, signal }) {
     parameterSubscriptions = [];
   };
 
-  const revokeArrowObjectUrls = () => {
-    for (const url of arrowObjectUrls) {
+  const revokeArrowObjectUrls = (urls) => {
+    for (const url of urls) {
       URL.revokeObjectURL(url);
     }
-    arrowObjectUrls = [];
   };
 
   const createRenderSpec = () => {
     const renderSpec = structuredClone(model.get("spec"));
     const arrowData = model.get("arrow_data") || {};
+    const objectUrls = [];
 
     const visit = (value) => {
       if (!value || typeof value !== "object") {
@@ -79,7 +80,7 @@ async function renderChart({ model, el, signal }) {
         const url = URL.createObjectURL(
           new Blob([payload], { type: "application/vnd.apache.arrow.file" })
         );
-        arrowObjectUrls.push(url);
+        objectUrls.push(url);
         value.url = url;
         value.format = { ...(value.format || {}), type: "arrow" };
       }
@@ -88,8 +89,13 @@ async function renderChart({ model, el, signal }) {
       }
     };
 
-    visit(renderSpec);
-    return renderSpec;
+    try {
+      visit(renderSpec);
+      return { spec: renderSpec, objectUrls };
+    } catch (error) {
+      revokeArrowObjectUrls(objectUrls);
+      throw error;
+    }
   };
 
   const attachInteractions = () => {
@@ -150,6 +156,7 @@ async function renderChart({ model, el, signal }) {
   };
 
   const renderSpec = async () => {
+    const revision = ++renderRevision;
     const moduleUrl = model.get("bundle_url");
     const options = model.get("embed_options") || {};
 
@@ -158,29 +165,44 @@ async function renderChart({ model, el, signal }) {
       api = null;
     }
 
-    revokeArrowObjectUrls();
+    revokeArrowObjectUrls(activeArrowObjectUrls);
+    activeArrowObjectUrls = [];
     el.replaceChildren();
 
+    let renderResources = null;
     try {
       const module = await import(moduleUrl);
       const embed = module.embed ?? module.default?.embed ?? module.default;
       if (typeof embed !== "function") {
         throw new Error("GenomeSpy embed export was not found.");
       }
-      api = await embed(el, createRenderSpec(), options);
+      renderResources = createRenderSpec();
+      const nextApi = await embed(el, renderResources.spec, options);
+      if (revision !== renderRevision || signal.aborted) {
+        nextApi?.finalize?.();
+        revokeArrowObjectUrls(renderResources.objectUrls);
+        return;
+      }
+      api = nextApi;
+      activeArrowObjectUrls = renderResources.objectUrls;
       model.set("error", "");
       model.save_changes();
       attachInteractions();
     } catch (error) {
-      revokeArrowObjectUrls();
+      if (renderResources) {
+        revokeArrowObjectUrls(renderResources.objectUrls);
+      }
+      if (revision !== renderRevision || signal.aborted) {
+        return;
+      }
       model.set("error", String(error));
       model.save_changes();
       throw error;
     }
   };
 
-  const onSpecChange = async () => {
-    await renderSpec();
+  const onSpecChange = () => {
+    void renderSpec();
   };
 
   model.on("change:spec", onSpecChange);
@@ -192,6 +214,7 @@ async function renderChart({ model, el, signal }) {
   model.on("change:enable_click_events", attachInteractions);
 
   signal.addEventListener("abort", () => {
+    renderRevision += 1;
     model.off("change:spec", onSpecChange);
     model.off("change:bundle_url", onSpecChange);
     model.off("change:embed_options", onSpecChange);
@@ -204,7 +227,8 @@ async function renderChart({ model, el, signal }) {
       api.finalize();
       api = null;
     }
-    revokeArrowObjectUrls();
+    revokeArrowObjectUrls(activeArrowObjectUrls);
+    activeArrowObjectUrls = [];
   });
 
   await renderSpec();

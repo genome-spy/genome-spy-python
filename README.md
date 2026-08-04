@@ -184,6 +184,10 @@ The browser replaces that token with a temporary Blob URL and GenomeSpy 0.82
 loads it with its native Arrow IPC loader. The spike supports uncompressed IPC
 only and intentionally does not claim zero-copy rendering.
 
+The reactive replacement spike is available at
+`notebooks/genome_spy_arrow_reactive.py`; its control recomputes the Polars
+frame, replaces the binary payload, and reports a small JSON-size comparison.
+
 ## Packaged Datasets
 
 A small set of datasets used by the documentation examples is available through

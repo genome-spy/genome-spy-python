@@ -46,6 +46,9 @@ def test_widget_exposes_binary_arrow_payloads() -> None:
     assert "arrow_data" in widget._esm
     assert "createObjectURL" in widget._esm
     assert "revokeObjectURL" in widget._esm
+    assert "renderRevision" in widget._esm
+    assert "activeArrowObjectUrls" in widget._esm
+    assert "nextApi?.finalize?.()" in widget._esm
 
 
 def test_widget_exposes_explicit_interaction_state() -> None:
