@@ -22,6 +22,9 @@ def _(pl):
         {
             "position": [0, 1, 2, 3, 4, 5, 6, 7],
             "value": [0.2, 0.8, 1.4, 0.6, 1.1, 1.8, 1.2, 0.4],
+            "group": ["A", "A", "A", "A", "B", "B", "B", "B"],
+            "selected": [False, True, False, False, False, True, False, False],
+            "annotation": [None, "peak", None, None, None, "peak", None, None],
         }
     )
 
@@ -29,7 +32,7 @@ def _(pl):
 
 
 @app.cell
-def _(gs, signal):
+def _(gs, mo, signal):
     chart = (
         gs.Chart(
             data={
@@ -37,11 +40,27 @@ def _(gs, signal):
                 "format": {"type": "arrow"},
             }
         )
-        .mark_point(size=100)
-        .encode(x="position:Q", y="value:Q")
+        .mark_point(
+            size=100,
+            tooltip=gs.HandledTooltip(handler="default"),
+        )
+        .encode(
+            x="position:Q",
+            y="value:Q",
+            color="group:N",
+            tooltip=[
+                gs.Tooltip("position:Q"),
+                gs.Tooltip("value:Q"),
+                gs.Tooltip("group:N"),
+                gs.Tooltip("selected:N"),
+                gs.Tooltip("annotation:N"),
+            ],
+        )
     )
-    chart_widget = chart.widget(
-        arrow_data={"signal": gs.to_arrow_ipc(signal)},
+    chart_widget = mo.ui.anywidget(
+        chart.widget(
+            arrow_data={"signal": gs.to_arrow_ipc(signal)},
+        )
     )
 
     return (chart_widget,)
@@ -54,7 +73,11 @@ def _(chart_widget, mo):
     else:
         output = mo.vstack(
             [
-                mo.md("Polars serialized this table as uncompressed Arrow IPC."),
+                mo.md(
+                    "Polars serialized integer, floating-point, string, Boolean, "
+                    "and nullable columns as uncompressed Arrow IPC. Hover a point "
+                    "to inspect the decoded values."
+                ),
                 chart_widget,
             ]
         )
