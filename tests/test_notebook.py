@@ -25,6 +25,7 @@ def test_notebook_example_is_valid(notebook_path: Path) -> None:
     [
         Path("notebooks/genome_spy_interactions.py"),
         Path("notebooks/genome_spy_arrow.py"),
+        Path("notebooks/genome_spy_arrow_reactive.py"),
     ],
 )
 def test_marimo_notebook_emits_visible_output(notebook_path: Path) -> None:

@@ -32,7 +32,7 @@ def _(pl):
 
 
 @app.cell
-def _(gs):
+def _(gs, mo, signal):
     chart = (
         gs.Chart(
             data={
@@ -43,7 +43,11 @@ def _(gs):
         .mark_point(size=100)
         .encode(x="position:Q", y="value:Q")
     )
-    chart_widget = chart.widget()
+    chart_widget = mo.ui.anywidget(
+        chart.widget(
+            arrow_data={"signal": gs.to_arrow_ipc(signal)},
+        )
+    )
 
     return (chart_widget,)
 
@@ -89,8 +93,10 @@ def _(amplitude, chart_widget, mo, transport_summary):
             [
                 amplitude,
                 mo.md(
-                    "Move the control to replace the Arrow payload and "
-                    "re-embed the chart."
+                    "Move the control to recompute the Polars frame, replace "
+                    "the Arrow payload, and re-embed the chart. The latest "
+                    "update wins, but re-embedding currently resets GenomeSpy "
+                    "viewport and selection state."
                 ),
                 mo.md(transport_summary),
                 chart_widget,
