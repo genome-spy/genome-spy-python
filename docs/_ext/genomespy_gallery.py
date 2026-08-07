@@ -204,10 +204,56 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
     return "\n".join(parts)
 
 
+def _remove_stale_build_outputs(app: Any, stale_names: set[str]) -> None:
+    outdir_value = getattr(app, "outdir", None)
+    doctreedir_value = getattr(app, "doctreedir", None)
+    if outdir_value is None:
+        return
+
+    outdir = Path(outdir_value)
+    for name in stale_names:
+        candidates = [
+            outdir / "gallery" / f"{name}.html",
+            outdir / "gallery" / name / "index.html",
+            outdir / "_sources" / "gallery" / f"{name}.md.txt",
+            outdir / "_static" / "specs" / f"{name}.json",
+            outdir / "_static" / "gallery" / f"{name}.png",
+            outdir / "_static" / "gallery" / f"{name}.svg",
+        ]
+        if doctreedir_value is not None:
+            candidates.append(Path(doctreedir_value) / "gallery" / f"{name}.doctree")
+        for path in candidates:
+            if path.is_file():
+                path.unlink()
+        downloads = outdir / "_downloads"
+        if downloads.is_dir():
+            for path in downloads.glob(f"**/{name}.json"):
+                path.unlink()
+
+
 def _generate(app: Any) -> None:
-    examples = core.collect_examples()
-    bundle_url = core.default_bundle_url()
-    active_names = {example.name for example in examples}
+    active_names = {
+        path.stem
+        for path in core.EXAMPLES_DIR.glob("*.py")
+        if not path.name.startswith("_")
+    }
+    stale_names = {
+        path.stem
+        for path in core.GALLERY_PAGES_DIR.glob("*.md")
+        if path.stem != "index" and path.stem not in active_names
+    }
+    stale_names.update(
+        path.stem
+        for path in core.SPECS_DIR.glob("*.json")
+        if path.stem not in active_names
+    )
+    outdir_value = getattr(app, "outdir", None)
+    if outdir_value is not None:
+        stale_names.update(
+            path.stem
+            for path in (Path(outdir_value) / "gallery").glob("*.html")
+            if path.stem != "index" and path.stem not in active_names
+        )
 
     for path in core.GALLERY_PAGES_DIR.glob("*.md"):
         if path.stem != "index" and path.stem not in active_names:
@@ -215,6 +261,10 @@ def _generate(app: Any) -> None:
     for path in core.SPECS_DIR.glob("*.json"):
         if path.stem not in active_names:
             path.unlink()
+    _remove_stale_build_outputs(app, stale_names)
+
+    examples = core.collect_examples()
+    bundle_url = core.default_bundle_url()
 
     for example in examples:
         _write(

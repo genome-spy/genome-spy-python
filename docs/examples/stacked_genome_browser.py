@@ -198,7 +198,7 @@ symbols = (
 )
 
 refseq_track = (
-    (transcripts + symbols)
+    gs.layer(transcripts, symbols)
     .properties(
         name="refseq-track",
         title=gs.title("RefSeq genes", orient="left"),

@@ -154,8 +154,9 @@ p.lead {
 .gs-card__shot {
   display: block;
   height: 180px;
-  background-size: cover;
-  background-position: center top;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   background-color: #f4f8fb;
   transition: transform 0.35s ease;
 }

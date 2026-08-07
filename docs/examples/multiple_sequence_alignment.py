@@ -16,8 +16,8 @@ META = {
 }
 
 BASE_COLORS = Scale(
-    domain=["A", "C", "T", "G", "-"],
-    range=["#7bd56c", "#ff9b9b", "#86bbf1", "#ffc56c", "#f5f5f5"],
+    domain=["A", "C", "T", "G", "N", "-"],
+    range=["#4FBF45", "#4D96E8", "#E85F78", "#E8B322", "#BDBDBD", "#f5f5f5"],
 )
 
 logo = (
@@ -43,7 +43,7 @@ logo = (
         paddingY=0,
     )
     .encode(
-        x=gs.X("pos:O").scale(zoom=True).axis(None),
+        x=gs.X("pos:I").axis(None),
         y=gs.Y("_y0:Q").scale(domain=[0, 2], zoom=True).title("Information"),
         y2=gs.Y2("_y1:Q"),
         text=gs.Text("base:N"),
@@ -60,8 +60,9 @@ alignment = (
         .encode(color=gs.value("black"), text=gs.Text("sequence:N")),
     )
     .encode(
-        x=gs.X("pos:O").scale(zoom=True),
+        x=gs.X("pos:I"),
         y=gs.Y("identifier:N").scale(zoom=True).title(None),
+        color=gs.Color("sequence:N").scale(BASE_COLORS).legend(None),
     )
     .properties(height=gs.step(14), viewportHeight="container", title="Alignment")
 )
@@ -77,7 +78,7 @@ chart = (
         scales=gs.scales(x=gs.Scale(domain=[190, 230], zoom={"extent": "data"})),
         description="A multiple sequence alignment with a sequence-logo overview.",
     )
-    .transform_flatten()
+    .transform_flatten_sequence()
     .resolve_scale(x="shared")
     .resolve_axis(x="independent")
 )

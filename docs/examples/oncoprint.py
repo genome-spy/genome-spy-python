@@ -6,8 +6,6 @@ altered genes in the center, and per-gene summary bars at the side.
 
 from __future__ import annotations
 
-import math
-
 import genome_spy as gs
 from genome_spy.datasets._oncoprint import laml_oncoplot_data
 from genome_spy.schema import Legend, Scale
@@ -54,7 +52,7 @@ class_colors = (
     )
 )
 
-matrix_width = 540
+matrix_width = 400
 percent_width = 52
 counts_width = 120
 tmb_height = 70
@@ -180,7 +178,28 @@ count_grid = (
 counts_panel = (count_grid + count_bars).properties(
     width=counts_width, height=matrix_height
 )
-left_panel = gs.vconcat(tmb, matrix_panel, spacing=4).resolve_scale(x="shared")
+left_panel = (
+    gs.vconcat(tmb, matrix_panel, spacing=4)
+    .properties(
+        scales={
+            "x": {
+                "domain": sample_domain,
+                "paddingInner": 0,
+                "paddingOuter": 0,
+                "zoom": True,
+            }
+        },
+        params=[
+            gs.param(
+                "sampleRuler",
+                persist=False,
+                ruler={"encodings": ["x"], "mark": {"opacity": 0.3}},
+            )
+        ],
+    )
+    .resolve_scale(x="shared", y="independent")
+    .resolve_axis(y="independent")
+)
 right_panel = gs.vconcat(percent_header, percent_panel, spacing=4).resolve_scale(
     x="independent"
 )

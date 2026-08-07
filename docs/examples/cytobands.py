@@ -33,7 +33,8 @@ band_layer = (
     gs.Chart()
     .mark_rect()
     .encode(
-        color=gs.Color("gieStain:N").scale(
+        color=gs.Color("gieStain:N")
+        .scale(
             domain=stain_domain,
             range=[
                 "#f0f0f0",
@@ -46,6 +47,7 @@ band_layer = (
                 "#000000",
             ],
         )
+        .legend(None)
     )
     .properties(title="Cytoband")
 )
@@ -59,7 +61,8 @@ label_layer = (
         tooltip=None,
     )
     .encode(
-        color=gs.Color("gieStain:N").scale(
+        color=gs.Color("gieStain:N")
+        .scale(
             domain=stain_domain,
             range=[
                 "black",
@@ -71,7 +74,8 @@ label_layer = (
                 "white",
                 "white",
             ],
-        ),
+        )
+        .legend(None),
         text=gs.Text("name:N"),
     )
 )
