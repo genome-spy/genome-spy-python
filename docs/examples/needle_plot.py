@@ -7,10 +7,8 @@ hotspots easy to spot.
 
 from __future__ import annotations
 
-import pandas as pd
-
 import genome_spy as gs
-from genome_spy.datasets import load_dataset
+from genome_spy.datasets._mutation import dnmt3a_lollipop_data
 from genome_spy.schema import Legend, Scale
 
 META = {
@@ -33,33 +31,25 @@ CLASS_COLORS = (
 )
 
 
-def dnmt3a_lollipop_payload() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, dict]:
-    """Load the curated DNMT3A lollipop payload."""
-    payload = load_dataset("dnmt3a_lollipop", as_format="json")
+data = dnmt3a_lollipop_data()
+features = data["features"].copy()
+domains = data["domains"].copy()
+backbone = data["backbone"].copy()
 
-    features = pd.DataFrame(payload["features"]).sort_values("position").copy()
-    domains = pd.DataFrame(payload["domains"]).copy()
-    backbone = pd.DataFrame([payload["backbone"]]).copy()
-
-    domains["y0"] = -5.3
-    domains["y1"] = -1.7
-    domains["mid"] = (domains["y0"] + domains["y1"]) / 2
-    domains["center"] = (domains["start"] + domains["end"]) / 2
-    backbone["y0"] = -5.0
-    backbone["y1"] = -2.2
-    backbone["mid"] = (backbone["y0"] + backbone["y1"]) / 2
-    features["base"] = float(domains["y1"].iloc[0])
-    features["label_y"] = features["count"] + 1.2
-    features["label_text"] = features["position"].map(
-        lambda pos: f"R{pos}" if pos == 882 else ""
-    )
-
-    return features, domains, backbone, payload
-
-
-features, domains, backbone, payload = dnmt3a_lollipop_payload()
+domains["y0"] = -5.3
+domains["y1"] = -1.7
+domains["mid"] = (domains["y0"] + domains["y1"]) / 2
+domains["center"] = (domains["start"] + domains["end"]) / 2
+backbone["y0"] = -5.0
+backbone["y1"] = -2.2
+backbone["mid"] = (backbone["y0"] + backbone["y1"]) / 2
+features["base"] = float(domains["y1"].iloc[0])
+features["label_y"] = features["count"] + 1.2
+features["label_text"] = features["position"].map(
+    lambda pos: f"R{pos}" if pos == 882 else ""
+)
 DATA_PREVIEW = {"Mutation features": features, "Protein domains": domains}
-protein_length = int(payload["protein_length"])
+protein_length = data["protein_length"]
 max_count = int(features["count"].max())
 x_domain = [0, protein_length]
 y_domain = [-6.2, max_count + 4]
@@ -159,9 +149,7 @@ hotspot_labels = (
 chart = (
     backbone_band + domain_blocks + domain_labels + stems + heads + hotspot_labels
 ).properties(
-    title=(
-        f"{payload['gene']} : [Somatic Mutation Rate: {payload['mutation_rate']:.2f}%]"
-    ),
+    title=(f"{data['gene']} : [Somatic Mutation Rate: {data['mutation_rate']:.2f}%]"),
     description=(
         "A DNMT3A lollipop plot derived from the maftools TCGA LAML example, "
         "with per-position mutation counts, protein domains, and the labeled "

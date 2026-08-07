@@ -15,7 +15,7 @@ META = {
     "category": "Oncoprints and cohort summaries",
     "tags": ("oncoprint", "cohort", "heatmap", "real-data", "zoom"),
     "order": 35,
-    "height": 720,
+    "height": 920,
     "max_width": 1680,
 }
 
@@ -63,18 +63,18 @@ STAGE_COLORS = [
     "#6b7280",
 ]
 
-MATRIX_WIDTH = 1180
-SUMMARY_WIDTH = 220
+SAMPLE_TRACK_WIDTH = "container"
 PERCENT_WIDTH = 44
 COUNTS_WIDTH = 120
 TMB_HEIGHT = 54
-SPECTRUM_HEIGHT = 54
+SPECTRUM_HEIGHT = 28
 MSI_HEIGHT = 40
 STAGE_HEIGHT = 24
 MATRIX_HEIGHT = 430
 MRNA_HEIGHT = 64
 METHYLATION_HEIGHT = 64
 MICROBIOME_HEIGHT = 28
+SAMPLE_LABEL_HEIGHT = 80
 TRACK_TICK_FONT_SIZE = 9
 HEATMAP_LABEL_FONT_SIZE = 9
 
@@ -86,16 +86,15 @@ MICROBIOME_GROUP = "Microbiome Signatures (log RNA Seq CPM)"
 data = luad_oncoprint_data()
 
 DATA_PREVIEW = {
-    "Samples": data.samples,
-    "Mutation matrix": data.full_rect_events,
+    "Samples": data["samples"],
+    "Mutation matrix": data["events"],
 }
 
-sample_domain = data.sample_domain
-gene_order = data.gene_order
-burden_limit = data.burden_limit
-spectrum_limit = data.spectrum_limit
-count_limit = data.count_limit
-msi_limit = data.msi_limit
+sample_domain = data["sample_domain"]
+gene_order = data["gene_order"]
+burden_limit = data["burden_limit"]
+count_limit = data["count_limit"]
+msi_limit = data["msi_limit"]
 
 mutation_scale = Scale().domain(CLASS_ORDER).range(CLASS_COLORS)
 spectrum_scale = Scale().domain(SPECTRUM_ORDER).range(SPECTRUM_COLORS)
@@ -104,17 +103,7 @@ stage_scale = Scale().domain(STAGE_ORDER).range(STAGE_COLORS)
 
 def blank_panel(*, width: int, height: int) -> gs.Chart:
     """Invisible spacer panel used to align the right summary column."""
-    return (
-        gs.Chart([{"x0": 0, "x1": 1, "y0": 0, "y1": 1}])
-        .mark_rect(opacity=0)
-        .encode(
-            x=gs.X("x0:Q").scale(domain=[0, 1], zero=True).axis(None).title(None),
-            x2=gs.X2("x1"),
-            y=gs.Y("y0:Q").scale(reverse=False, domain=[0, 1], zero=True).axis(None),
-            y2=gs.Y2("y1"),
-        )
-        .properties(width=width, height=height)
-    )
+    return gs.Chart([{}]).mark_rect(opacity=0).properties(width=width, height=height)
 
 
 def heatmap_panel(
@@ -125,26 +114,22 @@ def heatmap_panel(
     colors: list[str],
 ) -> gs.Chart:
     """Render one grouped quantitative heatmap block."""
-    panel_data = data.heatmap_cells[data.heatmap_cells["group"] == group_name]
-    rows = data.heatmap_rows[data.heatmap_rows["group"] == group_name]
+    panel_data = data["heatmap_cells"][data["heatmap_cells"]["group"] == group_name]
+    rows = data["heatmap_rows"][data["heatmap_rows"]["group"] == group_name]
     track_order = rows.sort_values("track_order")["track"].tolist()
 
     return (
         gs.Chart(panel_data)
         .mark_rect(stroke="white", strokeWidth=0.35)
         .encode(
-            x=gs.X("x0:Q")
-            .scale(domain=data.sample_domain, zero=True, zoom=True)
-            .axis(None)
-            .title(None),
-            x2=gs.X2("x1"),
+            x=gs.X("sample_order:I").axis(None).title(None),
             y=gs.Y("track:N")
             .scale(domain=track_order, reverse=False, padding=0.02)
             .axis(title=None, labelFontSize=HEATMAP_LABEL_FONT_SIZE, labelLimit=74),
             color=gs.Color("value:Q").scale(domain=domain, range=colors).legend(None),
         )
         .properties(
-            width=MATRIX_WIDTH,
+            width=SAMPLE_TRACK_WIDTH,
             height=panel_height,
         )
     )
@@ -153,145 +138,160 @@ def heatmap_panel(
 # --- top sample-aligned tracks -------------------------------------------------
 
 burden_track = (
-    gs.Chart(data.sample_burden)
+    gs.Chart(data["sample_burden"])
+    .transform_stack(
+        field="count",
+        groupby=["sample_order"],
+        as_=["_y0", "_y1"],
+    )
     .mark_rect()
     .encode(
-        x=gs.X("x0:Q")
-        .scale(domain=sample_domain, zero=True, zoom=True)
-        .axis(None)
-        .title(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("y0:Q")
+        x=gs.X("sample_order:I").axis(None).title(None),
+        y=gs.Y("_y0:Q")
         .scale(reverse=False, domain=[0, burden_limit], zero=True)
         .axis(labelFontSize=TRACK_TICK_FONT_SIZE, labelPadding=2, tickCount=3)
-        .title("TMB"),
-        y2=gs.Y2("y1"),
+        .title(None),
+        y2=gs.Y2("_y1"),
         color=gs.Color("class:N").scale(mutation_scale).legend(None),
     )
-    .properties(width=MATRIX_WIDTH, height=TMB_HEIGHT)
+    .properties(
+        width=SAMPLE_TRACK_WIDTH,
+        height=TMB_HEIGHT,
+        title=gs.Title(text="TMB", style="track-title"),
+    )
 )
 
 mutation_spectrum_track = (
-    gs.Chart(data.mutation_spectrum)
+    gs.Chart(data["mutation_spectrum"])
+    .transform_stack(
+        field="count",
+        groupby=["sample_order"],
+        as_=["_y0", "_y1"],
+        offset="normalize",
+    )
     .mark_rect()
     .encode(
-        x=gs.X("x0:Q")
-        .scale(domain=sample_domain, zero=True, zoom=True)
-        .axis(None)
+        x=gs.X("sample_order:I").axis(None).title(None),
+        y=gs.Y("_y0:Q")
+        .scale(reverse=False, domain=[0, 1], zero=True)
+        .axis(domain=False, labels=False, ticks=False)
         .title(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("y0:Q")
-        .scale(reverse=False, domain=[0, spectrum_limit], zero=True)
-        .axis(labelFontSize=TRACK_TICK_FONT_SIZE, labelPadding=2, tickCount=3)
-        .title("Mutation spectrum"),
-        y2=gs.Y2("y1"),
+        y2=gs.Y2("_y1"),
         color=gs.Color("class:N").scale(spectrum_scale).legend(None),
     )
-    .properties(width=MATRIX_WIDTH, height=SPECTRUM_HEIGHT)
+    .properties(
+        width=SAMPLE_TRACK_WIDTH,
+        height=SPECTRUM_HEIGHT,
+        title=gs.Title(text="Mutation spectrum", style="track-title"),
+    )
 )
 
 msi_track = (
-    gs.Chart(data.msi)
+    gs.Chart(data["msi"])
     .mark_rect(color="#15803d")
     .encode(
-        x=gs.X("x0:Q")
-        .scale(domain=sample_domain, zero=True, zoom=True)
-        .axis(None)
-        .title(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("y0:Q")
+        x=gs.X("sample_order:I").axis(None).title(None),
+        y=gs.Y(gs.datum(0), type="quantitative")
         .scale(reverse=False, domain=[0, msi_limit], zero=True)
         .axis(labelFontSize=TRACK_TICK_FONT_SIZE, labelPadding=2, tickCount=3)
-        .title("MSI"),
+        .title(None),
         y2=gs.Y2("value"),
     )
-    .properties(width=MATRIX_WIDTH, height=MSI_HEIGHT)
+    .properties(
+        width=SAMPLE_TRACK_WIDTH,
+        height=MSI_HEIGHT,
+        title=gs.Title(text="MSI", style="track-title"),
+    )
 )
 
 stage_track = (
-    gs.Chart(data.stage)
+    gs.Chart(data["stage"])
     .mark_rect()
     .encode(
-        x=gs.X("x0:Q")
-        .scale(domain=sample_domain, zero=True, zoom=True)
-        .axis(None)
-        .title(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("y0:Q").scale(reverse=False, domain=[0, 1], zero=True).axis(None),
-        y2=gs.Y2("y1"),
+        x=gs.X("sample_order:I").axis(None).title(None),
+        y=gs.Y(gs.datum(0), type="quantitative")
+        .scale(reverse=False, domain=[0, 1], zero=True)
+        .axis(None),
+        y2=gs.Y2(gs.datum(1)),
         color=gs.Color("stage:N").scale(stage_scale).legend(None),
     )
-    .properties(width=MATRIX_WIDTH, height=STAGE_HEIGHT)
+    .properties(
+        width=SAMPLE_TRACK_WIDTH,
+        height=STAGE_HEIGHT,
+        title=gs.Title(text="AJCC Stage", style="track-title"),
+    )
 )
 
 # --- main matrix ---------------------------------------------------------------
+# Keep one event table in the data helper. Each layer selects the classes that
+# need its visual mark, so the same normalized events remain easy to inspect.
 
 matrix_grid = (
-    gs.Chart(data.grid)
+    gs.Chart(data["grid"])
     .mark_rect(color="#ebebeb", stroke="white", strokeWidth=0.35)
     .encode(
-        x=gs.X("x0:Q")
-        .scale(domain=sample_domain, zero=True, zoom=True)
-        .axis(None)
-        .title(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.03).title(None),
+        x=gs.X("sample_order:I").axis(None).title(None),
+        y=gs.Y("gene:N").title(None),
     )
 )
 
 full_rect_layer = (
-    gs.Chart(data.full_rect_events)
+    gs.Chart(data["events"])
+    .transform_filter(
+        "datum.class === 'Amplification' || datum.class === 'Deep Deletion'"
+    )
     .mark_rect()
     .encode(
-        x=gs.X("x0:Q").scale(domain=sample_domain, zero=True, zoom=True).axis(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.03),
+        x=gs.X("sample_order:I").axis(None),
+        y=gs.Y("gene:N"),
         color=gs.Color("class:N").scale(mutation_scale).legend(None),
     )
 )
 
-half_rect_layer = (
-    gs.Chart(data.half_rect_events)
+putative_rect_layer = (
+    gs.Chart(data["events"])
+    .transform_filter(
+        "datum.class !== 'Amplification' && datum.class !== 'Deep Deletion' "
+        "&& datum.class !== 'Structural Variant (putative driver)' "
+        "&& datum.class !== 'Structural Variant (putative passenger)'"
+    )
     .mark_rect()
     .encode(
-        x=gs.X("x0:Q").scale(domain=sample_domain, zero=True, zoom=True).axis(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.03),
-        color=gs.Color("class:N").scale(mutation_scale).legend(None),
-    )
-)
-
-triangle_layer = (
-    gs.Chart(data.triangle_events)
-    .mark_point(shape="triangle-right", size=105, filled=True, strokeWidth=0)
-    .encode(
-        x=gs.X("x:Q").scale(domain=sample_domain, zero=True, zoom=True).axis(None),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.03),
+        x=gs.X("sample_order:I").axis(None),
+        y=gs.Y("gene:N", band=0.5),
         color=gs.Color("class:N").scale(mutation_scale).legend(None),
     )
 )
 
 star_layer = (
-    gs.Chart(data.star_events)
+    gs.Chart(data["events"])
+    .transform_filter(
+        "datum.class === 'Structural Variant (putative driver)' || "
+        "datum.class === 'Structural Variant (putative passenger)'"
+    )
     .mark_point(shape="star", size=80, filled=True, strokeWidth=0)
     .encode(
-        x=gs.X("x:Q").scale(domain=sample_domain, zero=True, zoom=True).axis(None),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.03),
+        x=gs.X("sample_order:I").axis(None),
+        y=gs.Y("gene:N"),
         color=gs.Color("class:N").scale(mutation_scale).legend(None),
     )
 )
 
 matrix_panel = (
-    matrix_grid + full_rect_layer + half_rect_layer + triangle_layer + star_layer
-).properties(width=MATRIX_WIDTH, height=MATRIX_HEIGHT)
+    matrix_grid + full_rect_layer + putative_rect_layer + star_layer
+).properties(
+    width=SAMPLE_TRACK_WIDTH,
+    height=MATRIX_HEIGHT,
+    scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.03}},
+)
 
 percent_panel = (
-    gs.Chart(data.percent_labels)
-    .mark_text(align="right", dx=-3, size=10, color="#4b5563")
+    gs.Chart(data["genes"])
+    .mark_text(align="right", dx=-3, size=10, color="#4b5563", clip="never")
     .encode(
-        x=gs.X("x:Q").scale(domain=[0, 1]).axis(None).title(None),
+        x=gs.value(1),
         y=gs.Y("gene:N")
-        .scale(domain=gene_order, reverse=False, padding=0.03)
+        .scale(domain=gene_order, reverse=True, padding=0.03)
         .axis(None)
         .title(None),
         text=gs.Text("label:N"),
@@ -300,30 +300,27 @@ percent_panel = (
 )
 
 count_grid = (
-    gs.Chart(data.count_grid)
+    gs.Chart(data["genes"][["gene"]])
     .mark_rect(color="#ebebeb", stroke="white", strokeWidth=0.35)
     .encode(
-        x=gs.X("x0:Q")
-        .scale(domain=[0, count_limit], zero=True)
-        .title("Altered samples"),
-        x2=gs.X2("x1"),
         y=gs.Y("gene:N")
-        .scale(domain=gene_order, reverse=False, padding=0.03)
+        .scale(domain=gene_order, reverse=True, padding=0.03)
         .axis(None)
         .title(None),
     )
 )
 
 count_bars = (
-    gs.Chart(data.gene_counts)
+    gs.Chart(data["gene_counts"])
+    .transform_stack(field="count", groupby=["gene"], as_=["_x0", "_x1"])
     .mark_rect()
     .encode(
-        x=gs.X("x0:Q")
+        x=gs.X("_x0:Q")
         .scale(domain=[0, count_limit], zero=True)
         .title("Altered samples"),
-        x2=gs.X2("x1"),
+        x2=gs.X2("_x1"),
         y=gs.Y("gene:N")
-        .scale(domain=gene_order, reverse=False, padding=0.03)
+        .scale(domain=gene_order, reverse=True, padding=0.03)
         .axis(None)
         .title(None),
         color=gs.Color("class:N").scale(mutation_scale).legend(None),
@@ -363,9 +360,21 @@ microbiome_panel = heatmap_panel(
     colors=["#f6e3c4", "#c08457", "#7c3f00"],
 )
 
+sample_label_track = (
+    gs.Chart(data["samples"])
+    .mark_text(align="center", baseline="top", angle=90, size=9, paddingX=1)
+    .encode(
+        x=gs.X("sample_order:I", band=0).axis(None).title(None),
+        x2=gs.X2("sample_order", band=1),
+        y=gs.value(0.5),
+        text=gs.Text("sample:N"),
+    )
+    .properties(width=SAMPLE_TRACK_WIDTH, height=SAMPLE_LABEL_HEIGHT)
+)
+
 summary_width = PERCENT_WIDTH + COUNTS_WIDTH + 4
 
-center_column = (
+sample_tracks = (
     gs.vconcat(
         burden_track,
         mutation_spectrum_track,
@@ -377,9 +386,35 @@ center_column = (
         microbiome_panel,
         spacing=4,
     )
+    .properties(
+        params=[
+            gs.param(
+                "sampleRuler",
+                persist=False,
+                ruler={"encodings": ["x"], "mark": {"opacity": 0.3}},
+            )
+        ],
+    )
     .resolve_scale(x="shared", y="independent")
     .resolve_axis(y="independent")
-    .properties(width=MATRIX_WIDTH)
+    .properties(width=SAMPLE_TRACK_WIDTH)
+)
+
+center_column = (
+    gs.vconcat(sample_tracks, sample_label_track, spacing=4)
+    .properties(
+        scales={
+            "x": {
+                "domain": sample_domain,
+                "paddingInner": 0,
+                "paddingOuter": 0,
+                "zoom": True,
+            }
+        }
+    )
+    .resolve_scale(x="shared", y="independent")
+    .resolve_axis(y="independent")
+    .properties(width=SAMPLE_TRACK_WIDTH)
 )
 
 right_column = gs.vconcat(
@@ -391,6 +426,7 @@ right_column = gs.vconcat(
     blank_panel(width=summary_width, height=MRNA_HEIGHT),
     blank_panel(width=summary_width, height=METHYLATION_HEIGHT),
     blank_panel(width=summary_width, height=MICROBIOME_HEIGHT),
+    blank_panel(width=summary_width, height=SAMPLE_LABEL_HEIGHT),
     spacing=4,
 )
 
@@ -402,7 +438,8 @@ chart = (
     )
     .resolve_scale(x="independent", y="independent")
     .properties(
-        title=data.title,
+        title="TCGA Lung Adenocarcinoma (PanCancer Atlas), default sort method",
+        width="container",
         viewportHeight="container",
         description=(
             "A TCGA LUAD oncoprint adapted from the pyoncoprint notebook, with "

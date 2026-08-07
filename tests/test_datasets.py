@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
+from importlib.resources import files
+
 import pytest
 
 from genome_spy.datasets import DatasetNotFoundError, available_datasets, load_dataset
@@ -14,6 +17,7 @@ from genome_spy.datasets._hapmap import (
     hapmap_qq_data,
     hapmap_volcano_data,
 )
+from genome_spy.datasets._mutation import brca_rainfall_data, dnmt3a_lollipop_data
 from genome_spy.datasets._oncoprint import laml_oncoplot_data, luad_oncoprint_data
 
 
@@ -21,13 +25,13 @@ def test_available_datasets_are_stable() -> None:
     assert available_datasets() == (
         "airway_metadata",
         "airway_scaledcounts",
-        "dnmt3a_lollipop",
+        "brca_maf",
         "hapmap_gwas",
         "mutation_impact_reference",
         "pik3ca_mutations",
-        "tcga_brca_rainfall",
-        "tcga_laml_oncoprint",
-        "tcga_luad_oncoprint",
+        "pyoncoprint_tcga",
+        "tcga_laml_annotations",
+        "tcga_laml_maf",
         "tcga_oncoprint",
     )
 
@@ -57,23 +61,6 @@ def test_load_mutation_impact_reference_dataset() -> None:
     assert data["rows"][0] == {"position": 100, "base": "A", "value": 0.25}
 
 
-def test_load_dnmt3a_lollipop_dataset() -> None:
-    data = load_dataset("dnmt3a_lollipop", as_format="json")
-
-    assert isinstance(data, dict)
-    assert data["gene"] == "DNMT3A"
-    assert data["transcript"] == "NM_022552"
-    assert data["protein_length"] == 912
-    assert data["total_samples"] == 193
-    assert data["mutated_samples"] == 47
-    assert data["mutation_rate"] == 24.35
-    assert len(data["features"]) == 22
-    assert any(
-        feature["position"] == 882 and feature["count"] == 27
-        for feature in data["features"]
-    )
-
-
 def test_auto_format_loads_json_as_python_object() -> None:
     data = load_dataset("tcga_oncoprint")
 
@@ -82,61 +69,150 @@ def test_auto_format_loads_json_as_python_object() -> None:
     assert "gene" in data[0]
 
 
-def test_load_curated_laml_oncoprint_dataset() -> None:
-    data = load_dataset("tcga_laml_oncoprint", as_format="json")
+def test_load_upstream_mutation_tables() -> None:
+    luad = load_dataset("pyoncoprint_tcga", as_format="dataframe")
+    laml = load_dataset("tcga_laml_maf", as_format="dataframe")
+    annotations = load_dataset("tcga_laml_annotations", as_format="dataframe")
+    brca = load_dataset("brca_maf", as_format="dataframe")
 
-    assert isinstance(data, dict)
-    assert data["cohort"] == "TCGA LAML"
-    assert data["total_samples"] == 193
-    assert data["altered_samples"] == 141
-    assert len(data["genes"]) == 10
-    assert len(data["samples"]) == 193
-    assert len(data["matrix"]) == 247
-    assert {"sample", "gene", "class"} <= set(data["matrix"][0])
+    assert luad.shape == (145, 509)
+    assert laml.shape == (2207, 17)
+    assert annotations.shape == (200, 4)
+    assert brca.shape == (1913, 9)
+    assert luad.columns[:2].tolist() == ["track_name", "track_type"]
+    assert "Tumor_Sample_Barcode" in laml
 
 
-def test_load_curated_brca_rainfall_dataset() -> None:
-    data = load_dataset("tcga_brca_rainfall", as_format="json")
+def test_upstream_mutation_files_are_byte_exact() -> None:
+    data_dir = files("genome_spy.datasets").joinpath("data")
+    expected_hashes = {
+        "brca.maf.gz": "61d5355e960bd480bec4f245b8f096e2333408659ced0d196e42b0e38de3d724",
+        "oncoprint_dataset3.json": "e07aa6ae9cf4f5f3a9f331d9979855ccf33bc47ed1bb2f4b871939b47c2a09ef",
+        "pik3ca_mutations.json": "4f36df9ad960c1429827522bbd4fce0cb47520d14a5c642abe8a55969f177aec",
+        "tcga.tsv": "39a90fc1f50ebcd113c37fd03894fb41b17dca4d6014f7efcf0e3f234c957742",
+        "tcga_laml.maf.gz": "d102b071a052265b6f8ad7947bad1d58d3e3036fd17d6b274f7ea09a376cd6a0",
+        "tcga_laml_annot.tsv": "7033030d52868e9a0f35ffd78f45a9d7a126c2edef90cf9e74e4f5d78990a710",
+    }
 
-    assert isinstance(data, dict)
-    assert data["sample"] == "TCGA-A8-A08B"
-    assert data["reference_build"] == "hg38"
-    assert len(data["points"]) == 1890
-    assert len(data["change_points"]) == 7
+    for filename, expected_hash in expected_hashes.items():
+        digest = hashlib.sha256(data_dir.joinpath(filename).read_bytes()).hexdigest()
+        assert digest == expected_hash
+
+
+def test_mutation_helpers_return_chart_ready_data() -> None:
+    dnmt3a = dnmt3a_lollipop_data()
+    rainfall = brca_rainfall_data()
+
+    assert dnmt3a["total_samples"] == 193
+    assert dnmt3a["mutated_samples"] == 47
+    assert dnmt3a["mutation_rate"] == 24.35
+    assert len(dnmt3a["features"]) == 22
+    hotspot = dnmt3a["features"][dnmt3a["features"]["position"].eq(882)].iloc[0]
+    assert hotspot["count"] == 27
+    assert hotspot["is_hotspot"]
+
+    assert rainfall["sample"] == "TCGA-A8-A08B"
+    assert rainfall["reference_build"] == "hg38"
+    assert len(rainfall["points"]) == 1890
+    assert len(rainfall["change_points"]) == 7
+    assert rainfall["y_max"] == 7.56
     assert {"chrom", "pos", "gene", "distance", "log10_distance", "con_class"} <= set(
-        data["points"][0]
+        rainfall["points"]
     )
     assert {"chrom", "start", "end", "count", "mean_distance", "arrow_y"} <= set(
-        data["change_points"][0]
+        rainfall["change_points"]
     )
-
-
-def test_load_curated_luad_oncoprint_dataset() -> None:
-    data = load_dataset("tcga_luad_oncoprint", as_format="json")
-
-    assert isinstance(data, dict)
-    assert data["cohort"] == "TCGA LUAD"
-    assert data["sample_count"] == 507
-    assert data["gene_count"] == 26
-    assert len(data["samples"]) == 507
-    assert len(data["genes"]) == 26
-    assert len(data["sample_burden"]) > 0
-    assert len(data["mutation_spectrum"]) > 0
-    assert len(data["heatmap_cells"]) == 3549
-    assert {"sample", "sample_order"} <= set(data["samples"][0])
-    assert {"gene", "gene_order", "altered_samples"} <= set(data["genes"][0])
 
 
 def test_oncoprint_helpers_return_chart_ready_data() -> None:
     laml = laml_oncoplot_data()
     luad = luad_oncoprint_data()
+    assert set(laml) == {
+        "samples",
+        "genes",
+        "events",
+        "grid",
+        "sample_tmb",
+        "gene_counts",
+        "total_samples",
+        "altered_samples",
+        "tmb_limit",
+        "count_limit",
+        "sample_domain",
+    }
+    assert set(luad) == {
+        "samples",
+        "genes",
+        "events",
+        "grid",
+        "sample_burden",
+        "mutation_spectrum",
+        "msi",
+        "stage",
+        "gene_counts",
+        "heatmap_rows",
+        "heatmap_cells",
+        "sample_domain",
+        "gene_order",
+        "burden_limit",
+        "spectrum_limit",
+        "count_limit",
+        "msi_limit",
+    }
+    coordinate_columns = {"x", "x0", "x1", "y", "y0", "y1"}
+    laml_tables = (
+        laml["samples"],
+        laml["genes"],
+        laml["events"],
+        laml["grid"],
+        laml["sample_tmb"],
+        laml["gene_counts"],
+    )
+    luad_tables = (
+        luad["samples"],
+        luad["genes"],
+        luad["sample_burden"],
+        luad["mutation_spectrum"],
+        luad["msi"],
+        luad["stage"],
+        luad["grid"],
+        luad["events"],
+        luad["gene_counts"],
+        luad["heatmap_rows"],
+        luad["heatmap_cells"],
+    )
 
-    assert laml.sample_domain == [0, laml.total_samples]
-    assert laml.count_grid["x1"].eq(laml.count_limit).all()
-    assert laml.matrix["gene"].dtype.name == "category"
-    assert luad.sample_domain[1] == len(luad.samples["sample_order"].unique())
-    assert luad.count_grid["x1"].eq(luad.count_limit).all()
-    assert luad.grid["gene"].dtype.name == "category"
+    assert laml["sample_domain"] == [-0.5, laml["total_samples"] - 0.5]
+    assert laml["events"].shape == (247, 5)
+    assert laml["grid"].shape == (1930, 4)
+    assert all(coordinate_columns.isdisjoint(table.columns) for table in laml_tables)
+    assert "count" in laml["sample_tmb"]
+    assert "count" in laml["gene_counts"]
+    assert laml["events"]["gene"].dtype.name == "category"
+    assert luad["sample_domain"] == [
+        -0.5,
+        len(luad["samples"]["sample_order"].unique()) - 0.5,
+    ]
+    assert luad["events"].shape == (598, 5)
+    assert luad["heatmap_cells"].shape == (2401, 7)
+    assert all(coordinate_columns.isdisjoint(table.columns) for table in luad_tables)
+    assert "count" in luad["sample_burden"]
+    assert "count" in luad["mutation_spectrum"]
+    assert "count" in luad["gene_counts"]
+    assert "Missense Mutation (putative driver)" in set(luad["events"]["class"])
+    assert (
+        luad["sample_burden"].groupby("sample_order")["count"].sum().max()
+        == (luad["burden_limit"])
+    )
+    assert (
+        luad["mutation_spectrum"].groupby("sample_order")["count"].sum().max()
+        == (luad["spectrum_limit"])
+    )
+    assert (
+        luad["gene_counts"].groupby("gene", observed=True)["count"].sum().max()
+        == (luad["count_limit"])
+    )
+    assert luad["grid"]["gene"].dtype.name == "category"
 
 
 def test_airway_paired_logcounts_uses_packaged_data() -> None:

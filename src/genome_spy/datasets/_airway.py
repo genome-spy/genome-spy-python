@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import importlib.util
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -16,13 +15,28 @@ if TYPE_CHECKING:
 def airway_paired_logcounts(
     *, min_base_mean: float = 10.0
 ) -> tuple[pd.Series, pd.DataFrame, pd.DataFrame]:
-    """Load the airway dataset as paired treated/control log-count matrices."""
-    if importlib.util.find_spec("pandas") is None:
-        raise ImportError(
-            "The airway RNA-seq examples require pandas. Install the dev/docs "
-            "dependencies to build these examples."
-        )
+    """Load packaged airway counts as paired treated/control log-counts.
 
+    Description:
+        Reads the scaled-count table and sample metadata, filters genes by
+        mean count, transforms counts with ``log2(count + 1)``, and pivots the
+        eight samples into matching treated and control matrices by cell type.
+
+    Args:
+        min_base_mean: Minimum mean count required to retain a gene.
+
+    Returns:
+        The retained base means, treated log-count matrix, and control
+        log-count matrix. All three share the same gene index.
+
+    Raises:
+        ImportError: If pandas is not installed.
+
+    Example:
+        >>> base_mean, treated, control = airway_paired_logcounts()
+        >>> treated.shape == control.shape
+        True
+    """
     counts = load_dataset("airway_scaledcounts", as_format="dataframe").set_index(
         "ensgene"
     )
@@ -67,16 +81,30 @@ def airway_differential_expression(
 ) -> tuple[pd.DataFrame, dict[str, list[float]]]:
     """Build the chart-ready airway differential-expression table.
 
-    The returned table contains paired-test results, multiple-testing results,
-    transformed plotting fields, and the direction classification shared by
-    the airway MA and volcano examples.
-    """
-    if importlib.util.find_spec("pandas") is None:
-        raise ImportError(
-            "The airway RNA-seq examples require pandas. Install the dev/docs "
-            "dependencies to build these examples."
-        )
+    Description:
+        Uses the paired treated/control log-count matrices from
+        :func:`airway_paired_logcounts`, computes paired t-tests and Benjamini-
+        Hochberg adjusted p-values, then adds the transformed fields and
+        significance classification shared by the MA and volcano examples.
 
+    Args:
+        min_base_mean: Minimum mean count required before testing.
+        max_genes: Keep at most this many genes by base mean for plotting.
+        log2fc_cutoff: Absolute fold-change threshold for significance labels.
+        pvalue_cutoff: Raw p-value threshold for significance labels.
+        padj_alpha: FDR level passed to the multiple-testing correction.
+
+    Returns:
+        A chart-ready result table and plotting domains.
+
+    Raises:
+        ImportError: If pandas, SciPy, or statsmodels is not installed.
+
+    Example:
+        >>> data, domains = airway_differential_expression(max_genes=200)
+        >>> {"log2fc", "pvalue", "padj"} <= set(data)
+        True
+    """
     import pandas as pd
     from scipy.stats import ttest_rel
     from statsmodels.stats.multitest import fdrcorrection
@@ -114,14 +142,14 @@ def airway_differential_expression(
     log2fc_extent = float(np.ceil(data["log2fc"].abs().max() * 2) / 2)
     volcano_y_max = float(np.ceil(data["neglog10_pvalue"].quantile(0.995) / 5) * 5)
     data["neglog10_pvalue_plot"] = np.minimum(data["neglog10_pvalue"], volcano_y_max)
+    volcano_x_extent = float(np.ceil(data["log2fc"].abs().max() * 2) / 2)
     domains = {
         "ma_x": [
             float(np.floor(data["log10_base_mean"].min() * 2) / 2),
             float(np.ceil(data["log10_base_mean"].max() * 2) / 2),
         ],
         "ma_y": [-log2fc_extent, log2fc_extent],
-        "volcano_x": [-float(np.ceil(data["log2fc"].abs().max() * 2) / 2)]
-        + [float(np.ceil(data["log2fc"].abs().max() * 2) / 2)],
+        "volcano_x": [-volcano_x_extent, volcano_x_extent],
         "volcano_y": [0.0, volcano_y_max],
         "pvalue_cutoff": [-float(np.log10(pvalue_cutoff))],
     }

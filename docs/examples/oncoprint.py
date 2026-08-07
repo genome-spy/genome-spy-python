@@ -33,8 +33,8 @@ CLASS_ORDER = [
 
 data = laml_oncoplot_data()
 DATA_PREVIEW = {
-    "Samples": data.samples,
-    "Mutation matrix": data.matrix,
+    "Samples": data["samples"],
+    "Mutation matrix": data["events"],
 }
 
 class_colors = (
@@ -59,9 +59,10 @@ percent_width = 52
 counts_width = 120
 tmb_height = 70
 matrix_height = 352
-tmb_limit = data.tmb_limit
-count_limit = data.count_limit
-sample_domain = data.sample_domain
+tmb_limit = data["tmb_limit"]
+count_limit = data["count_limit"]
+sample_domain = data["sample_domain"]
+gene_order = data["genes"].sort_values("gene_order")["gene"].tolist()
 
 mutation_legend = (
     Legend()
@@ -75,105 +76,103 @@ mutation_legend = (
 # --- Visualization -------------------------------------------------------------
 
 tmb = (
-    gs.Chart(data.sample_tmb)
+    gs.Chart(data["sample_tmb"])
+    .transform_stack(
+        field="count",
+        groupby=["sample_order"],
+        as_=["_y0", "_y1"],
+    )
     .mark_rect()
     .encode(
-        x=gs.X("x0:Q")
-        .scale(domain=sample_domain, zero=True, zoom=True)
-        .axis(None)
-        .title(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("y0:Q").scale(reverse=False, domain=[0, tmb_limit]).title("TMB"),
-        y2=gs.Y2("y1"),
+        x=gs.X("sample_order:I").axis(None).title(None),
+        y=gs.Y("_y0:Q").scale(reverse=False, domain=[0, tmb_limit]).title("TMB"),
+        y2=gs.Y2("_y1"),
         color=gs.Color("class:N").scale(class_colors).legend(None),
     )
     .properties(width=matrix_width, height=tmb_height)
 )
 
 grid = (
-    gs.Chart(data.grid)
+    gs.Chart(data["grid"])
     .mark_rect(color="#f1f3f5", stroke="white", strokeWidth=0.5)
     .encode(
-        x=gs.X("x0:Q")
-        .scale(domain=sample_domain, zero=True, zoom=True)
-        .axis(None)
-        .title(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.08).title(None),
+        x=gs.X("sample_order:I").axis(None).title(None),
+        y=gs.Y("gene:N").title(None),
     )
 )
 
 matrix = (
-    gs.Chart(data.matrix)
+    gs.Chart(data["events"])
     .mark_rect(stroke="white", strokeWidth=0.5)
     .encode(
-        x=gs.X("x0:Q")
-        .scale(domain=sample_domain, zero=True, zoom=True)
-        .axis(None)
-        .title(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.08).title(None),
+        x=gs.X("sample_order:I").axis(None).title(None),
+        y=gs.Y("gene:N").title(None),
         color=gs.Color("class:N").scale(class_colors).legend(mutation_legend),
     )
 )
 
-matrix_panel = (grid + matrix).properties(width=matrix_width, height=matrix_height)
+matrix_panel = (grid + matrix).properties(
+    width=matrix_width,
+    height=matrix_height,
+    scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.08}},
+)
 
 percent_panel = (
-    gs.Chart(data.percent_labels)
+    gs.Chart(data["genes"])
     .mark_text(align="right", dx=-2, size=11)
     .encode(
-        x=gs.X("x:Q").scale(domain=[0, 1]).axis(None).title(None),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.08).axis(None).title(None),
+        x=gs.value(1),
+        y=gs.Y("gene:N")
+        .scale(domain=gene_order, reverse=True, padding=0.08)
+        .axis(None)
+        .title(None),
         text=gs.Text("label:N"),
     )
     .properties(width=percent_width, height=matrix_height)
 )
 
 percent_header = (
-    gs.Chart([{"x": 1, "label": ""}])
+    gs.Chart([{}])
     .mark_text(opacity=0)
-    .encode(
-        x=gs.X("x:Q").scale(domain=[0, 1]).axis(None).title(None),
-        text=gs.Text("label:N"),
-    )
     .properties(width=percent_width, height=tmb_height)
 )
 
 count_title = (
-    gs.Chart([{"x": math.floor(count_limit / 2), "label": "No. of samples"}])
+    gs.Chart([{"label": "No. of samples"}])
     .mark_text(size=11)
     .encode(
-        x=gs.X("x:Q")
-        .scale(reverse=False, domain=[0, count_limit])
-        .axis(None)
-        .title(None),
+        x=gs.value(0.5),
         text=gs.Text("label:N"),
     )
     .properties(width=counts_width, height=tmb_height)
 )
 
 count_bars = (
-    gs.Chart(data.gene_counts)
+    gs.Chart(data["gene_counts"])
+    .transform_stack(field="count", groupby=["gene"], as_=["_x0", "_x1"])
     .mark_rect()
     .encode(
-        x=gs.X("x0:Q")
+        x=gs.X("_x0:Q")
         .scale(reverse=False, domain=[0, count_limit], zero=True)
         .title(None),
-        x2=gs.X2("x1"),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.08).axis(None).title(None),
+        x2=gs.X2("_x1"),
+        y=gs.Y("gene:N")
+        .scale(domain=gene_order, reverse=True, padding=0.08)
+        .axis(None)
+        .title(None),
         color=gs.Color("class:N").scale(class_colors).legend(None),
     )
     .properties(width=counts_width, height=matrix_height)
 )
 
 count_grid = (
-    gs.Chart(data.count_grid)
+    gs.Chart(data["genes"][["gene"]])
     .mark_rect(color="#f1f3f5", stroke="white", strokeWidth=0.5)
     .encode(
-        x=gs.X("x0:Q").scale(reverse=False, domain=[0, count_limit], zero=True),
-        x2=gs.X2("x1"),
-        y=gs.Y("gene:N").scale(reverse=False, padding=0.08).axis(None).title(None),
+        y=gs.Y("gene:N")
+        .scale(domain=gene_order, reverse=True, padding=0.08)
+        .axis(None)
+        .title(None),
     )
     .properties(width=counts_width, height=matrix_height)
 )
@@ -189,7 +188,7 @@ count_panel = gs.vconcat(count_title, counts_panel, spacing=4).resolve_scale(
     x="independent"
 )
 
-summary = f"Altered in {data.altered_samples} ({data.altered_samples / data.total_samples:.2%}) of {data.total_samples} samples."
+summary = f"Altered in {data['altered_samples']} ({data['altered_samples'] / data['total_samples']:.2%}) of {data['total_samples']} samples."
 
 chart = (
     gs.hconcat(left_panel, right_panel, count_panel, spacing=4)

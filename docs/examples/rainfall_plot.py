@@ -7,10 +7,8 @@ kataegis-like clusters.
 
 from __future__ import annotations
 
-import pandas as pd
-
 import genome_spy as gs
-from genome_spy.datasets import load_dataset
+from genome_spy.datasets._mutation import brca_rainfall_data
 from genome_spy.schema import GenomeAxis, Legend, Scale
 
 META = {
@@ -25,19 +23,13 @@ CONVERSION_ORDER = ["C>T", "C>G", "C>A", "T>C", "T>A", "T>G"]
 CONVERSION_COLORS = ["#f64b3c", "#4f63c9", "#2891e8", "#f6b617", "#4caf50", "#f7931a"]
 
 
-def curated_rainfall_payload() -> tuple[pd.DataFrame, pd.DataFrame, dict]:
-    """Load the curated BRCA rainfall payload."""
-    payload = load_dataset("tcga_brca_rainfall", as_format="json")
-    points = pd.DataFrame(payload["points"]).copy()
-    change_points = pd.DataFrame(payload["change_points"]).copy()
-    return points, change_points, payload
-
-
-points, change_points, payload = curated_rainfall_payload()
+data = brca_rainfall_data()
+points = data["points"]
+change_points = data["change_points"]
 DATA_PREVIEW = {"Mutations": points, "Change points": change_points}
-y_domain = [0.0, float(payload["y_max"])]
-sample_name = str(payload["sample"])
-assembly = str(payload["reference_build"])
+y_domain = [0.0, data["y_max"]]
+sample_name = data["sample"]
+assembly = data["reference_build"]
 
 axis = (
     GenomeAxis()

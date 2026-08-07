@@ -15,7 +15,28 @@ if TYPE_CHECKING:
 def hapmap_manhattan_data(
     *, genome_wide_p: float = 5e-8, suggestive_p: float = 1e-5
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, float | list[float]]]:
-    """Build the chart-ready HapMap Manhattan-plot tables."""
+    """Build chart tables for the packaged HapMap Manhattan example.
+
+    Description:
+        Loads ``CHR``, ``BP``, ``P``, and annotation columns from the HapMap
+        GWAS table, removes invalid p-values, adds chromosome labels and
+        ``-log10(P)``, and selects the eight smallest p-values for labels.
+
+    Args:
+        genome_wide_p: P-value used for the genome-wide guide line.
+        suggestive_p: P-value used for the suggestive guide line.
+
+    Returns:
+        The transformed point table, top-hit table, and y-axis metadata.
+
+    Raises:
+        ImportError: If pandas is not installed.
+
+    Example:
+        >>> points, top_hits, domains = hapmap_manhattan_data()
+        >>> "neglog" in points
+        True
+    """
     data = load_dataset("hapmap_gwas", as_format="dataframe")
     data = data[data["P"] > 0].copy()
     data["chrom"] = np.where(
@@ -41,7 +62,27 @@ def hapmap_manhattan_data(
 def hapmap_volcano_data(
     *, effect_cutoff: float = 0.5, pvalue_cutoff: float = 1e-5
 ) -> tuple[pd.DataFrame, dict[str, float | list[float]]]:
-    """Build the chart-ready HapMap volcano-plot table and domains."""
+    """Build the chart-ready HapMap volcano table and domains.
+
+    Description:
+        Loads the HapMap association table, transforms p-values to ``-log10(P)``,
+        and classifies points by effect direction and the supplied thresholds.
+
+    Args:
+        effect_cutoff: Minimum absolute effect size for a labelled point.
+        pvalue_cutoff: Maximum p-value for a labelled point.
+
+    Returns:
+        The transformed point table and plotting domains.
+
+    Raises:
+        ImportError: If pandas is not installed.
+
+    Example:
+        >>> data, domains = hapmap_volcano_data()
+        >>> "association" in data
+        True
+    """
     data = load_dataset("hapmap_gwas", as_format="dataframe")
     data = data[data["P"] > 0].copy()
     data["neglog"] = -np.log10(data["P"])
@@ -63,7 +104,26 @@ def hapmap_volcano_data(
 def hapmap_qq_data(
     *, bins: int = 45
 ) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, float]]:
-    """Build the chart-ready HapMap QQ and deviation tables."""
+    """Build the chart-ready HapMap QQ and deviation tables.
+
+    Description:
+        Sorts valid HapMap p-values, pairs observed and expected quantiles, and
+        bins their deviation for the lower summary strip.
+
+    Args:
+        bins: Number of expected-quantile bins used for the deviation summary.
+
+    Returns:
+        The QQ table, binned deviation table, and plotting limits.
+
+    Raises:
+        ImportError: If pandas is not installed.
+
+    Example:
+        >>> qq, deviation, domains = hapmap_qq_data()
+        >>> {"expected", "observed"} <= set(qq)
+        True
+    """
     import pandas as pd
 
     pvals = np.sort(
