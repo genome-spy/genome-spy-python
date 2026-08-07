@@ -49,7 +49,9 @@ artifacts = [
     "src/genome_spy/schema/capabilities.json",
     "src/genome_spy/schema/genome-spy-schema.json",
     "src/genome_spy/datasets/data/*.csv",
+    "src/genome_spy/datasets/data/*.gz",
     "src/genome_spy/datasets/data/*.json",
+    "src/genome_spy/datasets/data/*.tsv",
 ]
 
 [tool.genome-spy]
