@@ -40,7 +40,7 @@ def _write(path: Path, content: str) -> None:
 def _card_html(
     example: core.Example, *, link_prefix: str, thumb_prefix: str, build_token: str
 ) -> str:
-    thumb = f"{thumb_prefix}/{core.thumb_filename(example)}"
+    thumb = f"{thumb_prefix}/{core.thumb_filename(example)}?v={build_token}"
     href = f"{link_prefix}{example.name}.html?v={build_token}"
     return (
         f'<a class="gs-card" href="{href}">'
@@ -296,10 +296,11 @@ class GenomeSpyMiniGallery(Directive):
         )
         if not examples:
             examples = core.collect_examples()
+        token = core.build_token(examples)
         tiles = "\n".join(
-            f'<a class="preview" href="gallery/{e.name}.html?v={core.build_token(examples)}" '
+            f'<a class="preview" href="gallery/{e.name}.html?v={token}" '
             f'title="{html.escape(e.title)}" '
-            f'style="background-image:url(_static/gallery/{core.thumb_filename(e)})"></a>'
+            f'style="background-image:url(_static/gallery/{core.thumb_filename(e)}?v={token})"></a>'
             for e in examples
         )
         markup = (

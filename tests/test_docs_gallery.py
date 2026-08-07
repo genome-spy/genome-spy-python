@@ -664,6 +664,7 @@ def test_gallery_index_keeps_examples_in_visible_navigation(
     assert ":caption: Association plots" in markdown
     assert ":caption: Genome browser tracks" in markdown
     assert f"manhattan_plot.html?v={build_token}" in markdown
+    assert f"manhattan_plot.png?v={build_token}" in markdown
     assert "Each card opens the live chart and the Python code that produced it." in (
         markdown
     )
@@ -818,6 +819,7 @@ def test_minigallery_links_include_cache_busting_query(
 
     assert len(nodes) == 1
     assert f"gallery/manhattan_plot.html?v={expected}" in nodes[0].astext()
+    assert f"_static/gallery/manhattan_plot.png?v={expected}" in nodes[0].astext()
 
 
 class FakeSphinxApp:

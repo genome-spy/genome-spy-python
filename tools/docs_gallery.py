@@ -213,6 +213,9 @@ def build_token(examples: list[Example]) -> str:
         digest.update(example.title.encode("utf-8"))
         digest.update(example.source.encode("utf-8"))
         digest.update(json.dumps(example.spec, sort_keys=True).encode("utf-8"))
+        thumbnail = THUMBS_DIR / f"{example.name}.png"
+        if thumbnail.exists():
+            digest.update(thumbnail.read_bytes())
     return digest.hexdigest()[:12]
 
 
