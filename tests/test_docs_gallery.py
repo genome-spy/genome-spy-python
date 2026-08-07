@@ -57,17 +57,38 @@ def test_example_builds_valid_spec(path: Path) -> None:
     )
 
 
-def test_luad_oncoprint_uses_sample_intervals_and_categorical_genes() -> None:
+def test_luad_oncoprint_uses_sample_index_scale_and_categorical_genes() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "luad_oncoprint.py")
 
     assert example.spec["viewportHeight"] == "container"
+    assert example.height == 920
     center_column = example.spec["hconcat"][0]
-    matrix_layers = center_column["vconcat"][4]["layer"]
+    sample_tracks = center_column["vconcat"][0]
+    matrix_panel = sample_tracks["vconcat"][4]
+    matrix_layers = matrix_panel["layer"]
+    assert matrix_panel["scales"]["y"]["domain"]
+    assert matrix_panel["scales"]["y"]["reverse"] is True
+    assert "params" not in matrix_panel
+    assert "params" not in center_column
+    assert sample_tracks["params"] == [
+        {
+            "name": "sampleRuler",
+            "persist": False,
+            "ruler": {"encodings": ["x"], "mark": {"opacity": 0.3}},
+        }
+    ]
+    assert example.spec["width"] == "container"
+    assert center_column["width"] == "container"
+    assert sample_tracks["width"] == "container"
+    assert all(panel["width"] == "container" for panel in sample_tracks["vconcat"])
 
     assert center_column["resolve"]["scale"]["x"] == "shared"
     assert center_column["resolve"]["scale"]["y"] == "independent"
     assert center_column["resolve"]["axis"]["y"] == "independent"
+    assert sample_tracks["resolve"]["scale"]["x"] == "shared"
+    assert sample_tracks["resolve"]["scale"]["y"] == "independent"
+    assert sample_tracks["resolve"]["axis"]["y"] == "independent"
     assert example.spec["resolve"]["scale"] == {
         "x": "independent",
         "y": "independent",
@@ -77,21 +98,161 @@ def test_luad_oncoprint_uses_sample_intervals_and_categorical_genes() -> None:
         assert layer["encoding"]["y"]["type"] == "nominal"
         assert "axis" not in layer["encoding"]["y"]
     assert matrix_layers[1]["encoding"]["color"]["legend"] is None
-    assert center_column["vconcat"][0]["encoding"]["x"]["scale"]["domain"] == [
-        0,
-        343,
+    assert center_column["scales"]["x"] == {
+        "domain": [-0.5, 342.5],
+        "paddingInner": 0,
+        "paddingOuter": 0,
+        "zoom": True,
+    }
+    assert sample_tracks["vconcat"][0]["encoding"]["y"]["title"] is None
+    spectrum = sample_tracks["vconcat"][1]
+    assert spectrum["encoding"]["y"]["title"] is None
+    assert spectrum["encoding"]["y"]["scale"]["domain"] == [0, 1]
+    assert sample_tracks["vconcat"][2]["encoding"]["y"]["title"] is None
+    assert [panel["title"] for panel in sample_tracks["vconcat"][:4]] == [
+        {"text": "TMB", "style": "track-title"},
+        {"text": "Mutation spectrum", "style": "track-title"},
+        {"text": "MSI", "style": "track-title"},
+        {"text": "AJCC Stage", "style": "track-title"},
     ]
-    assert center_column["vconcat"][0]["encoding"]["y"]["title"] == "TMB"
-    assert center_column["vconcat"][1]["encoding"]["y"]["title"] == (
-        "Mutation spectrum"
-    )
-    assert center_column["vconcat"][2]["encoding"]["y"]["title"] == "MSI"
-    for layer in matrix_layers[:3]:
-        assert layer["encoding"]["x"]["field"] == "x0"
-        assert layer["encoding"]["x2"]["field"] == "x1"
+    sample_layers = [
+        *sample_tracks["vconcat"][:4],
+        *matrix_layers,
+        *sample_tracks["vconcat"][5:],
+    ]
+    for layer in sample_layers:
+        assert layer["encoding"]["x"]["field"] == "sample_order"
+        assert layer["encoding"]["x"]["type"] == "index"
+        assert layer["encoding"]["x"]["axis"] is None
+        assert "x2" not in layer["encoding"]
+    sample_labels = center_column["vconcat"][1]
+    assert sample_labels["mark"]["type"] == "text"
+    assert sample_labels["mark"]["angle"] == 90
+    assert sample_labels["mark"]["align"] == "center"
+    assert sample_labels["mark"]["baseline"] == "top"
+    assert sample_labels["height"] == 80
+    assert sample_labels["encoding"]["x"] == {
+        "field": "sample_order",
+        "type": "index",
+        "band": 0,
+        "axis": None,
+        "title": None,
+    }
+    assert sample_labels["encoding"]["x2"] == {
+        "field": "sample_order",
+        "band": 1,
+    }
+    assert sample_labels["encoding"]["text"] == {
+        "field": "sample",
+        "type": "nominal",
+    }
+    for layer in [*matrix_layers[:2], *matrix_layers[3:]]:
         assert "y2" not in layer["encoding"]
-    assert all(panel["data"]["values"] for panel in center_column["vconcat"][5:])
-    assert len(center_column["vconcat"]) == 8
+    assert len(matrix_layers) == 4
+    assert matrix_layers[2]["mark"] == "rect"
+    assert matrix_layers[2]["encoding"]["y"]["band"] == 0.5
+    assert "y2" not in matrix_layers[2]["encoding"]
+    for panel in sample_tracks["vconcat"][:2]:
+        expected_transform = {
+            "type": "stack",
+            "groupby": ["sample_order"],
+            "as": ["_y0", "_y1"],
+            "field": "count",
+        }
+        if panel is spectrum:
+            expected_transform["offset"] = "normalize"
+        assert panel["transform"][0] == expected_transform
+    percent_panel = example.spec["hconcat"][1]["vconcat"][4]["hconcat"][0]
+    assert percent_panel["encoding"]["x"] == {"value": 1}
+    assert percent_panel["mark"]["clip"] == "never"
+    assert percent_panel["encoding"]["y"]["scale"]["reverse"] is True
+    count_layers = example.spec["hconcat"][1]["vconcat"][4]["hconcat"][1]["layer"]
+    assert all(
+        layer["encoding"]["y"]["scale"]["reverse"] is True for layer in count_layers
+    )
+    assert all(panel["data"]["values"] for panel in sample_tracks["vconcat"][5:])
+    assert len(sample_tracks["vconcat"]) == 8
+    assert len(center_column["vconcat"]) == 2
+
+
+def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "oncoprint.py")
+
+    assert example.height == 660
+    assert example.max_width == 760
+    left_column = example.spec["hconcat"][0]
+    assert all(panel["width"] == 400 for panel in left_column["vconcat"])
+    sample_layers = [left_column["vconcat"][0], *left_column["vconcat"][1]["layer"]]
+    assert left_column["vconcat"][1]["scales"]["y"]["domain"] == [
+        "FLT3",
+        "DNMT3A",
+        "NPM1",
+        "IDH2",
+        "IDH1",
+        "TET2",
+        "RUNX1",
+        "NRAS",
+        "TP53",
+        "CEBPA",
+    ]
+    assert left_column["vconcat"][1]["scales"]["y"]["reverse"] is True
+    assert "params" not in left_column["vconcat"][1]
+    assert left_column["params"] == [
+        {
+            "name": "sampleRuler",
+            "persist": False,
+            "ruler": {"encodings": ["x"], "mark": {"opacity": 0.3}},
+        }
+    ]
+
+    assert left_column["resolve"]["scale"]["x"] == "shared"
+    assert left_column["resolve"]["scale"]["y"] == "independent"
+    assert left_column["resolve"]["axis"]["y"] == "independent"
+    assert left_column["scales"]["x"] == {
+        "domain": [-0.5, 192.5],
+        "paddingInner": 0,
+        "paddingOuter": 0,
+        "zoom": True,
+    }
+    for layer in sample_layers:
+        assert layer["encoding"]["x"]["field"] == "sample_order"
+        assert layer["encoding"]["x"]["type"] == "index"
+        assert "x2" not in layer["encoding"]
+    assert left_column["vconcat"][0]["transform"][0] == {
+        "type": "stack",
+        "groupby": ["sample_order"],
+        "as": ["_y0", "_y1"],
+        "field": "count",
+    }
+    count_bars = example.spec["hconcat"][2]["vconcat"][1]["layer"][1]
+    assert count_bars["transform"][0] == {
+        "type": "stack",
+        "groupby": ["gene"],
+        "as": ["_x0", "_x1"],
+        "field": "count",
+    }
+    percent_panel = example.spec["hconcat"][1]["vconcat"][1]
+    assert percent_panel["encoding"]["x"] == {"value": 1}
+    assert percent_panel["encoding"]["y"]["scale"]["reverse"] is True
+    assert all(
+        layer["encoding"]["y"]["scale"]["reverse"] is True
+        for layer in example.spec["hconcat"][2]["vconcat"][1]["layer"]
+    )
+    assert [row["label"] for row in percent_panel["data"]["values"]] == [
+        "27%",
+        "25%",
+        "17%",
+        "10%",
+        "9%",
+        "9%",
+        "8%",
+        "8%",
+        "8%",
+        "7%",
+    ]
+    count_title = example.spec["hconcat"][2]["vconcat"][0]
+    assert count_title["encoding"]["x"] == {"value": 0.5}
 
 
 def test_gallery_data_preview_is_rendered_for_opt_in_example() -> None:
@@ -259,6 +420,214 @@ def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
     }
 
 
+def test_ascat_segmentation_has_three_aligned_tracks() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "ascat_copy_number.py").spec
+
+    assert spec["assembly"] == "hg18"
+    assert spec["resolve"]["axis"]["x"] == "shared"
+    assert [track["name"] for track in spec["vconcat"]] == [
+        "copyNumberTrack",
+        "logRTrack",
+        "bafTrack",
+    ]
+    assert spec["encoding"]["x"] == {
+        "chrom": "chr",
+        "pos": "startpos",
+        "type": "locus",
+        "scale": {"type": "locus"},
+    }
+    assert spec["encoding"]["x2"]["offset"] == 1
+
+
+def test_ascat_fitting_uses_cross_grid_and_linked_fit_parameters() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "ascat_fitting.py").spec
+
+    assert spec["assembly"] == "hg19"
+    assert [param["name"] for param in spec["params"]] == [
+        "minLength",
+        "selectedFit",
+        "sample",
+        "gamma",
+        "downweightBalanced",
+        "fitBothAlleles",
+    ]
+    sunrise = spec["vconcat"][0]
+    assert [transform["type"] for transform in sunrise["transform"][:2]] == [
+        "cross",
+        "cross",
+    ]
+    assert sunrise["params"][0]["push"] == "outer"
+    assert sunrise["params"][0]["ruler"]["encodings"] == ["x", "y"]
+    assert len(spec["datasets"]["ascat-solutions"]) == 9
+    assert [transform["type"] for transform in spec["transform"]][-1] == ("identifier")
+
+
+def test_six_frame_translation_uses_lookup_windows_and_strand_template() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "six_frame_translation.py").spec
+
+    assert spec["assembly"] == "hg38"
+    assert len(spec["datasets"]["geneticCode"]) == 64
+    translation = spec["vconcat"][1]
+    assert [transform["type"] for transform in translation["transform"]] == [
+        "formula",
+        "lookup",
+        "window",
+        "filter",
+        "formula",
+    ]
+    assert translation["transform"][2]["ops"] == ["lead"] * 4
+    assert [view["params"]["strand"] for view in translation["layer"]] == [
+        "forward",
+        "reverse",
+    ]
+    assert "amino-acid-translation" in translation["templates"]
+
+
+def test_hcc1954_uses_vcf_self_lookup_and_copy_number_track() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "hcc1954_sv_cnv.py").spec
+
+    assert spec["assembly"] == "hg38"
+    assert [track["name"] for track in spec["vconcat"]] == [
+        "sv-link-layers",
+        "copy-numbers",
+    ]
+    sv_track = spec["vconcat"][0]
+    assert sv_track["data"]["format"]["type"] == "vcf"
+    lookup = next(
+        transform
+        for transform in sv_track["transform"]
+        if transform["type"] == "lookup"
+    )
+    assert lookup["from"] == {"source": "input"}
+    assert lookup["as"] == ["mateChrom", "matePos", "mateOrder"]
+    assert sv_track["layer"][0]["transform"][0]["type"] == "regexFold"
+    assert spec["vconcat"][1]["encoding"]["color"]["field"] == ("relative_copy_ratio")
+
+
+def test_refseq_example_preserves_nested_semantic_zoom_layers() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "refseq_scored_genes.py").spec
+
+    assert [layer["name"] for layer in spec["layer"]] == [
+        "transcripts",
+        "symbols",
+    ]
+    assert spec["layer"][0]["opacity"]["unitsPerPixel"] == [100000, 40000]
+    assert [transform["type"] for transform in spec["layer"][1]["transform"]] == [
+        "measureText",
+        "filterScoredLabels",
+    ]
+    arrows = spec["layer"][1]["layer"][1]
+    assert arrows["encoding"]["dx"]["scale"] is None
+
+
+def test_composed_genome_browser_imports_four_release_pinned_tracks() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "composing_genome_browser.py").spec
+
+    assert spec["assembly"] == "hg38"
+    assert spec["scales"]["x"]["domain"] == [
+        {"chrom": "chr20", "pos": 10006452},
+        {"chrom": "chr20", "pos": 10006533},
+    ]
+    assert spec["axes"]["x"] == {"orient": "top", "title": None}
+    assert spec["resolve"]["axis"]["x"] == "shared"
+    urls = [view["import"]["url"] for view in spec["vconcat"]]
+    assert all("/d2e9bd71/" in url for url in urls)
+    assert [url.rsplit("/", 1)[-1] for url in urls] == [
+        "cytobands.json",
+        "indexed-fasta-six-frame-translation.json",
+        "bam-read-alignments.json",
+        "scored-refSeq-genes.json",
+    ]
+
+
+def test_upset_plot_derives_and_aligns_exact_set_intersections() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "upset_mutations.py")
+    spec = example.spec
+
+    assert example.category == "Set intersections"
+    assert [transform["type"] for transform in spec["transform"]] == [
+        "regexFold",
+        "setIntersection",
+        "filter",
+        "formula",
+        "window",
+        "collect",
+        "formula",
+        "window",
+        "window",
+    ]
+    assert spec["transform"][1] == {
+        "type": "setIntersection",
+        "element": "Identifier",
+        "set": "set",
+        "membership": "membership",
+    }
+    assert [view["name"] for view in spec["concat"]] == [
+        "empty-space",
+        "intersection-sizes",
+        "set-sizes",
+        "combination-matrix",
+    ]
+    assert spec["columns"] == 2
+    assert spec["scales"]["x"]["domain"] == [0.5, 20.5]
+    assert spec["scales"]["y"]["domain"] == [-0.5, 4.5]
+    assert spec["concat"][1]["scales"]["y"] == {
+        "zero": True,
+        "nice": True,
+        "padding": 0.12,
+        "domainMin": 0,
+    }
+
+
+def test_multiple_sequence_alignment_configures_shared_x_scale_once() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "multiple_sequence_alignment.py").spec
+
+    assert spec["scales"]["x"] == {
+        "domain": [190, 230],
+        "zoom": {"extent": "data"},
+    }
+    assert spec["transform"] == [{"type": "flattenSequence"}]
+    assert "scale" not in spec["vconcat"][0]["encoding"]["x"]
+    assert "scale" not in spec["vconcat"][1]["encoding"]["x"]
+    assert spec["vconcat"][0]["encoding"]["x"]["type"] == "index"
+    assert spec["vconcat"][1]["encoding"]["x"]["type"] == "index"
+    expected_base_color = {
+        "field": "sequence",
+        "type": "nominal",
+        "scale": {
+            "domain": ["A", "C", "T", "G", "N", "-"],
+            "range": [
+                "#4FBF45",
+                "#4D96E8",
+                "#E85F78",
+                "#E8B322",
+                "#BDBDBD",
+                "#f5f5f5",
+            ],
+        },
+        "legend": None,
+    }
+    assert spec["vconcat"][1]["encoding"]["color"] == expected_base_color
+    assert spec["vconcat"][1]["layer"][1]["encoding"]["color"] == {"value": "black"}
+
+
+def test_cytobands_suppresses_legends_to_preserve_the_ideogram() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "cytobands.py").spec
+
+    assert all(
+        layer["encoding"]["color"]["legend"] is None for layer in spec["layer"][:2]
+    )
+
+
 def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "manhattan_plot.py")
@@ -347,6 +716,46 @@ def test_gallery_generation_runs_during_sphinx_config_phase() -> None:
 
     assert "config-inited" in events
     assert "builder-inited" not in events
+
+
+def test_gallery_generation_removes_stale_build_outputs(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    extension = _load_gallery_extension()
+    pages = tmp_path / "gallery-pages"
+    specs = tmp_path / "specs"
+    outdir = tmp_path / "html"
+    doctreedir = tmp_path / "doctrees"
+    stale_paths = [
+        pages / "obsolete.md",
+        specs / "obsolete.json",
+        outdir / "gallery" / "obsolete.html",
+        outdir / "_sources" / "gallery" / "obsolete.md.txt",
+        outdir / "_static" / "specs" / "obsolete.json",
+        outdir / "_static" / "gallery" / "obsolete.png",
+        outdir / "_downloads" / "hash" / "obsolete.json",
+        doctreedir / "gallery" / "obsolete.doctree",
+    ]
+    for path in stale_paths:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("stale", encoding="utf-8")
+
+    monkeypatch.setattr(extension.core, "GALLERY_PAGES_DIR", pages)
+    monkeypatch.setattr(extension.core, "SPECS_DIR", specs)
+    monkeypatch.setattr(extension.core, "collect_examples", lambda: [])
+    app = type(
+        "App",
+        (),
+        {
+            "outdir": outdir,
+            "doctreedir": doctreedir,
+            "env": type("Env", (), {})(),
+        },
+    )()
+
+    extension._generate(app)
+
+    assert all(not path.exists() for path in stale_paths)
 
 
 def test_gallery_detail_embed_uses_shadow_dom_and_stable_reveal() -> None:

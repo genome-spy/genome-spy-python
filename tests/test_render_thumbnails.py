@@ -24,7 +24,7 @@ def test_thumbnail_layout_uses_example_dimensions() -> None:
 
     layout = renderer.thumbnail_layout(example)
 
-    assert layout.stage_width == 760
+    assert layout.stage_width == 1000
     assert layout.min_stage_height == 660
 
 
@@ -36,6 +36,33 @@ def test_thumbnail_layout_defaults_to_card_width() -> None:
 
     assert layout.stage_width == renderer.CARD_WIDTH
     assert layout.min_stage_height == 320
+
+
+def test_center_translation_centers_ink_bounds() -> None:
+    renderer = _load_renderer()
+    bounds = renderer.PaintBounds(left=40, top=80, right=1240, bottom=720)
+
+    assert renderer.center_translation(bounds) == (40, 2.5)
+
+
+def test_center_translation_keeps_ink_inside_padding() -> None:
+    renderer = _load_renderer()
+    bounds = renderer.PaintBounds(left=0, top=0, right=1400, bottom=786)
+
+    assert renderer.center_translation(bounds) == (8, 0)
+
+
+def test_thumbnail_spec_removes_transient_zoom_guidance_without_mutating_input() -> (
+    None
+):
+    renderer = _load_renderer()
+    spec = {"layer": [{"name": "zoom-message"}, {"name": "data"}]}
+
+    assert renderer.thumbnail_spec(spec) == {"layer": [{"name": "data"}]}
+    assert spec["layer"][0]["name"] == "zoom-message"
+
+    nested = {"layer": [{"layer": [{"name": "zoom-message"}, {"mark": "text"}]}]}
+    assert renderer.thumbnail_spec(nested) == {"layer": []}
 
 
 def test_select_examples_defaults_to_all_examples() -> None:

@@ -21,6 +21,8 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import base64
+import copy
 import importlib.util
 import json
 import sys
@@ -33,6 +35,9 @@ _TOOLS = Path(__file__).resolve().parent
 CARD_WIDTH = 720
 CARD_HEIGHT = 405
 CARD_PADDING = 12
+DEVICE_SCALE_FACTOR = 2
+INK_THRESHOLD = 248
+STAGE_WIDTH_BUFFER = 240
 READY_TIMEOUT_MS = 45_000
 SETTLE_DELAY_MS = 6_000
 
@@ -45,14 +50,92 @@ class ThumbnailLayout:
     min_stage_height: int
 
 
+@dataclass(frozen=True, slots=True)
+class PaintBounds:
+    """Bounding box of non-background pixels in a rendered screenshot."""
+
+    left: int
+    top: int
+    right: int
+    bottom: int
+
+
+def center_translation(
+    bounds: PaintBounds,
+    *,
+    device_scale_factor: float = DEVICE_SCALE_FACTOR,
+) -> tuple[float, float]:
+    """Return a padding-safe translation that centers rendered chart ink."""
+    left = bounds.left / device_scale_factor
+    top = bounds.top / device_scale_factor
+    right = bounds.right / device_scale_factor
+    bottom = bounds.bottom / device_scale_factor
+
+    desired_x = CARD_WIDTH / 2 - (left + right) / 2
+    desired_y = CARD_HEIGHT / 2 - (top + bottom) / 2
+    min_x = CARD_PADDING - left
+    max_x = CARD_WIDTH - CARD_PADDING - right
+    min_y = CARD_PADDING - top
+    max_y = CARD_HEIGHT - CARD_PADDING - bottom
+    dx = min(max(desired_x, min_x), max_x)
+    dy = min(max(desired_y, min_y), max_y)
+    return dx, dy
+
+
 def thumbnail_layout(example: object) -> ThumbnailLayout:
     """Return the natural render size for an example before card scaling."""
     max_width = getattr(example, "max_width", None)
     height = getattr(example, "height", CARD_HEIGHT)
+    stage_width = CARD_WIDTH
+    if max_width is not None:
+        stage_width = int(max_width)
+        if stage_width <= 1200:
+            stage_width += STAGE_WIDTH_BUFFER
     return ThumbnailLayout(
-        stage_width=int(max_width) if max_width is not None else CARD_WIDTH,
+        stage_width=stage_width,
         min_stage_height=int(height),
     )
+
+
+def thumbnail_spec(spec: dict[str, object]) -> dict[str, object]:
+    """Return a copy with transient zoom guidance removed from thumbnails."""
+    result = copy.deepcopy(spec)
+
+    drop = object()
+
+    def clean(value: object, *, root: bool = False) -> object:
+        if isinstance(value, dict):
+            if value.get("name") == "zoom-message":
+                return drop
+            layers = value.get("layer")
+            if (
+                not root
+                and isinstance(layers, list)
+                and any(
+                    isinstance(layer, dict) and layer.get("name") == "zoom-message"
+                    for layer in layers
+                )
+            ):
+                return drop
+            for key, child in list(value.items()):
+                cleaned = clean(child)
+                if cleaned is drop:
+                    value.pop(key)
+                else:
+                    value[key] = cleaned
+            return value
+        if isinstance(value, list):
+            cleaned_items = []
+            for child in value:
+                cleaned = clean(child)
+                if cleaned is not drop:
+                    cleaned_items.append(cleaned)
+            return cleaned_items
+        return value
+
+    cleaned = clean(result, root=True)
+    assert isinstance(cleaned, dict)
+    return cleaned
 
 
 def _load_gallery():
@@ -123,6 +206,42 @@ try {{
 </script></body></html>"""
 
 
+_FIND_PAINT_BOUNDS = """
+async ({ url, threshold }) => {
+  const image = new Image();
+  image.src = url;
+  await image.decode();
+  const canvas = document.createElement("canvas");
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  context.drawImage(image, 0, 0);
+  const pixels = context.getImageData(0, 0, image.width, image.height).data;
+  let left = image.width;
+  let top = image.height;
+  let right = -1;
+  let bottom = -1;
+  for (let y = 0; y < image.height; y++) {
+    for (let x = 0; x < image.width; x++) {
+      const offset = (y * image.width + x) * 4;
+      if (
+        pixels[offset + 3] > 0 &&
+        (pixels[offset] < threshold ||
+          pixels[offset + 1] < threshold ||
+          pixels[offset + 2] < threshold)
+      ) {
+        left = Math.min(left, x);
+        top = Math.min(top, y);
+        right = Math.max(right, x + 1);
+        bottom = Math.max(bottom, y + 1);
+      }
+    }
+  }
+  return right < 0 ? null : { left, top, right, bottom };
+}
+"""
+
+
 def main() -> int:
     args = _parse_args()
     try:
@@ -165,7 +284,7 @@ def main() -> int:
         browser = pw.chromium.launch()
         page = browser.new_page(
             viewport={"width": CARD_WIDTH, "height": CARD_HEIGHT},
-            device_scale_factor=2,
+            device_scale_factor=DEVICE_SCALE_FACTOR,
         )
         for example in pending:
             layout = thumbnail_layout(example)
@@ -176,7 +295,7 @@ def main() -> int:
                 stage_width=layout.stage_width,
                 min_stage_height=layout.min_stage_height,
                 bundle=bundle_url,
-                spec=json.dumps(example.spec),
+                spec=json.dumps(thumbnail_spec(example.spec)),
             )
             page.set_content(html, wait_until="load")
             try:
@@ -200,24 +319,81 @@ def main() -> int:
             except Exception:
                 pass
             page.wait_for_timeout(SETTLE_DELAY_MS)
+            runtime_error = page.locator("#c").inner_text().strip()
+            if runtime_error.startswith("Error:"):
+                print(
+                    f"[thumb] {example.name}: render failed ({runtime_error})",
+                    file=sys.stderr,
+                )
+                continue
             page.evaluate(
-                f"""
-                () => {{
+                """
+                () => {
                   const frame = document.getElementById("frame");
                   const fit = document.getElementById("fit");
                   const container = document.getElementById("c");
                   fit.style.transform = "none";
+                  const canvas = container.querySelector("canvas");
+                  const canvasRect = canvas.getBoundingClientRect();
+                  container.style.width = `${Math.ceil(canvasRect.width)}px`;
+                  container.style.minHeight = "0px";
+                  fit.style.width = `${Math.ceil(canvasRect.width)}px`;
                   const rect = container.getBoundingClientRect();
-                  fit.style.height = `${{Math.ceil(rect.height)}}px`;
+                  fit.style.height = `${Math.ceil(rect.height)}px`;
                   const scale = Math.min(
-                    (frame.clientWidth - {CARD_PADDING * 2}) / rect.width,
-                    (frame.clientHeight - {CARD_PADDING * 2}) / rect.height,
+                    (frame.clientWidth - 24) / rect.width,
+                    (frame.clientHeight - 24) / rect.height,
                     1
                   );
-                  fit.style.transform = `scale(${{scale}})`;
-                }}
+                  fit.dataset.scale = String(scale);
+                  fit.style.transform = `scale(${scale})`;
+                }
                 """
             )
+            preview = page.screenshot()
+            bounds_data = None
+            for _ in range(4):
+                bounds_data = page.evaluate(
+                    _FIND_PAINT_BOUNDS,
+                    {
+                        "url": (
+                            "data:image/png;base64,"
+                            + base64.b64encode(preview).decode("ascii")
+                        ),
+                        "threshold": INK_THRESHOLD,
+                    },
+                )
+                if bounds_data is None:
+                    break
+                edge = DEVICE_SCALE_FACTOR * CARD_PADDING
+                if (
+                    bounds_data["left"] > edge
+                    and bounds_data["top"] > edge
+                    and bounds_data["right"] < CARD_WIDTH * DEVICE_SCALE_FACTOR - edge
+                    and bounds_data["bottom"] < CARD_HEIGHT * DEVICE_SCALE_FACTOR - edge
+                ):
+                    break
+                scale = float(page.locator("#fit").get_attribute("data-scale") or 1)
+                scale *= 0.75
+                page.evaluate(
+                    "(scale) => { const fit = document.getElementById('fit'); "
+                    "fit.dataset.scale = String(scale); "
+                    "fit.style.transform = `scale(${scale})`; }",
+                    scale,
+                )
+                preview = page.screenshot()
+            if bounds_data is not None:
+                dx, dy = center_translation(PaintBounds(**bounds_data))
+                page.evaluate(
+                    """
+                    ([dx, dy]) => {
+                      const fit = document.getElementById("fit");
+                      fit.style.transform =
+                        `translate(${dx}px, ${dy}px) scale(${fit.dataset.scale})`;
+                    }
+                    """,
+                    [dx, dy],
+                )
             page.screenshot(path=str(gallery.THUMBS_DIR / f"{example.name}.png"))
             print(f"[thumb] {example.name}")
             rendered += 1

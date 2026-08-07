@@ -55,6 +55,10 @@ CATEGORIES: dict[str, tuple[int, str]] = {
         60,
         "Cohort-level alteration matrices and related summaries.",
     ),
+    "Set intersections": (
+        65,
+        "Set-membership combinations and intersection-size summaries.",
+    ),
     "Copy-number plots": (
         70,
         "Genome-wide copy-number and allele-specific signal views.",
