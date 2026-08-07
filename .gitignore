@@ -226,6 +226,7 @@ tmp/
 
 # Planning scratch files
 plans/
+notebooks/
 scratchbook.md
 CHANGELOG_STAGING.md
 
