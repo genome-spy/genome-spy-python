@@ -18,14 +18,14 @@ _DATA_DIR = files("genome_spy.datasets").joinpath("data")
 _DATASETS = {
     "airway_metadata": "airway_metadata.csv",
     "airway_scaledcounts": "airway_scaledcounts.csv",
-    "dnmt3a_lollipop": "dnmt3a_lollipop.json",
+    "brca_maf": "brca.maf.gz",
     "hapmap_gwas": "hapmap_gwas.csv",
     "mutation_impact_reference": "mutation_impact_reference.json",
     "pik3ca_mutations": "pik3ca_mutations.json",
-    "tcga_brca_rainfall": "tcga_brca_rainfall.json",
-    "tcga_laml_oncoprint": "tcga_laml_oncoprint.json",
-    "tcga_luad_oncoprint": "tcga_luad_oncoprint.json",
-    "tcga_oncoprint": "tcga_oncoprint.json",
+    "pyoncoprint_tcga": "tcga.tsv",
+    "tcga_laml_annotations": "tcga_laml_annot.tsv",
+    "tcga_laml_maf": "tcga_laml.maf.gz",
+    "tcga_oncoprint": "oncoprint_dataset3.json",
 }
 
 
@@ -80,11 +80,13 @@ def _load_dataframe(name: str) -> Any:
         ) from exc
 
     resource = _resource_for(name)
-    suffix = Path(str(resource)).suffix
-    if suffix == ".csv":
+    suffixes = Path(_DATASETS[name]).suffixes
+    if suffixes == [".csv"]:
         return pd.read_csv(resource)
-    if suffix == ".tsv":
+    if suffixes == [".tsv"]:
         return pd.read_csv(resource, sep="\t")
+    if suffixes[-2:] == [".maf", ".gz"]:
+        return pd.read_csv(resource, sep="\t", compression="gzip")
     raise ValueError(
         f"Dataset {name!r} is not tabular and cannot be read as a DataFrame."
     )
@@ -118,7 +120,8 @@ def load_dataset(
     Description:
         The loader understands the small set of real datasets vendored with the
         package for examples and tutorials. ``"auto"`` returns a pandas
-        ``DataFrame`` for CSV/TSV files and parsed Python objects for JSON files.
+        ``DataFrame`` for CSV, TSV, and compressed MAF files and parsed Python
+        objects for JSON files.
 
     Args:
         name: Dataset name from ``available_datasets()``.
@@ -138,9 +141,15 @@ def load_dataset(
     """
 
     resource = _resource_for(name)
-    suffix = Path(str(resource)).suffix
+    filename = _DATASETS[name]
+    suffix = Path(filename).suffix
+    suffixes = Path(filename).suffixes
 
     if as_format == "text":
+        if suffix == ".gz":
+            import gzip
+
+            return gzip.decompress(resource.read_bytes()).decode("utf-8")
         return resource.read_text(encoding="utf-8")
     if as_format == "json":
         if suffix != ".json":
@@ -150,6 +159,6 @@ def load_dataset(
         return _load_dataframe(name)
     if suffix == ".json":
         return json.loads(resource.read_text("utf-8"))
-    if suffix in {".csv", ".tsv"}:
+    if suffix in {".csv", ".tsv"} or suffixes[-2:] == [".maf", ".gz"]:
         return _load_dataframe(name)
     raise ValueError(f"Unsupported dataset format for {name!r}: {suffix}.")
