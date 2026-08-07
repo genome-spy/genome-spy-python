@@ -370,11 +370,11 @@ from genome_spy.schema._kwds import (
     ZoomParamsKwds,
     AxesKwds,
     LegendsKwds,
-    ScalesKwds,
     AxisResolveKwds,
     LegendResolveKwds,
     ScaleResolveKwds,
     ResolveKwds,
+    ScalesKwds,
 )
 
 SCHEMA_VERSION = "0.82.0"
@@ -745,10 +745,10 @@ __all__ = [
     "ZoomParamsKwds",
     "AxesKwds",
     "LegendsKwds",
-    "ScalesKwds",
     "AxisResolveKwds",
     "LegendResolveKwds",
     "ScaleResolveKwds",
     "ResolveKwds",
+    "ScalesKwds",
     "SCHEMA_VERSION",
 ]

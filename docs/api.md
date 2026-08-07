@@ -4,8 +4,8 @@ html_theme.sidebar_secondary.remove: false
 
 # API reference
 
-The public API is intentionally small: chart construction, encoding channels,
-composition, and notebook rendering.
+The public API covers chart construction, every schema-derived encoding
+channel, composition, schema helpers, and notebook rendering.
 
 Generated `configure(...)` and `configure_* (...)` methods on `Chart` and
 composition specs are the preferred way to author top-level config. Helper
@@ -33,30 +33,19 @@ they keep the visualization code shorter and easier to read.
 
 .. autoclass:: Chart
    :members:
+   :inherited-members:
    :undoc-members:
    :show-inheritance:
 ```
 
-## Encoding channels
+## Public exports
 
 ```{eval-rst}
-.. autoclass:: X
-.. autoclass:: Y
-.. autoclass:: Color
-.. autoclass:: Size
-.. autoclass:: Text
-.. autoclass:: Opacity
-.. autofunction:: Locus
-.. autofunction:: value
-```
-
-## Composition
-
-```{eval-rst}
-.. autofunction:: layer
-.. autofunction:: hconcat
-.. autofunction:: vconcat
-.. autofunction:: concat
+.. automodule:: genome_spy.api
+   :members:
+   :imported-members:
+   :exclude-members: Chart, JupyterChart
+   :member-order: bysource
 ```
 
 ## Notebook rendering

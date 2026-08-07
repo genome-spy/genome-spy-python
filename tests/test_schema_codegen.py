@@ -5,8 +5,6 @@ import json
 from pathlib import Path
 
 import genome_spy as gs
-from genome_spy.schema.core import AxisConfig, RectProps
-
 from tools.generate_schema_wrapper import write_schema_files, write_schema_package
 from tools.schemapi.codegen import SchemaWrapperGenerator
 
@@ -54,6 +52,9 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     kwds_module = generator.generate_kwds_module()
     mixins_module = generator.generate_mark_mixins_module()
     channels_module = generator.generate_channels_module()
+    composition_module = generator.generate_composition_module()
+    lazy_module = generator.generate_lazy_module()
+    ergonomics_module = generator.generate_ergonomics_module()
 
     assert [definition.name for definition in definitions] == [
         "Axis",
@@ -73,9 +74,9 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     assert "MARK_TYPES = ()" in module.source
     assert "from genome_spy.schema._typing import AlignDef_T" in module.source
     assert "from genome_spy.schema._kwds import AxisKwds" in module.source
-    assert "with_property_setters" in module.source
+    assert "with_property_setters" not in module.source
     assert "class MarkDef" in module.source
-    assert "@with_property_setters" in module.source
+    assert "@with_property_setters" not in module.source
     assert "class_: str | UndefinedType = Undefined" in module.source
     assert "'class': class_" in module.source
     assert "type: str | UndefinedType = Undefined" in module.source
@@ -89,21 +90,83 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
         "axisOrNull: Axis | AxisKwds | None | UndefinedType = Undefined"
         in module.source
     )
-    assert "def with_axis(" in module.source
-    assert "value: Axis | AxisKwds | None | Any = Undefined" in module.source
-    assert "def with_align(self, value: AlignDef_T) -> MarkDef:" in module.source
-    assert "def with_flag(self, value: bool) -> MarkDef:" in module.source
-    assert "def with_class(self, value: str) -> MarkDef:" in module.source
-    assert "def with_values(self, value: Sequence[int]) -> MarkDef:" in module.source
+    assert "def axis(" in module.source
+    assert "value: Axis | AxisKwds | None | object = Undefined" in module.source
+    assert "title: str | UndefinedType = Undefined" in module.source
+    assert "def align(self, value: AlignDef_T) -> MarkDef:" in module.source
+    assert "def flag(self, value: bool) -> MarkDef:" in module.source
+    assert "def class_(self, value: str) -> MarkDef:" in module.source
+    assert "def values(self, value: Sequence[int]) -> MarkDef:" in module.source
     assert typing_module.exports == ("AlignDef_T",)
     assert "AlignDef_T: TypeAlias = Literal['left', 'right']" in typing_module.source
     assert kwds_module.exports == ("AxisKwds",)
     assert "class AxisKwds(TypedDict, total=False):" in kwds_module.source
     assert "title: str" in kwds_module.source
-    assert mixins_module.exports == ("MarkMethodMixin", "TransformMethodMixin")
+    assert {"EncodingMethodMixin", "MarkMethodMixin", "TransformMethodMixin"} <= set(
+        mixins_module.exports
+    )
     assert "class MarkMethodMixin" in mixins_module.source
     assert "class TransformMethodMixin" in mixins_module.source
     assert channels_module.exports == ()
+    assert composition_module.exports == (
+        "layer",
+        "hconcat",
+        "vconcat",
+        "concat",
+        "multiscale",
+        "import_view",
+    )
+    assert "def vconcat(" in composition_module.source
+    assert "def import_view(" in composition_module.source
+    assert "**kwargs" not in composition_module.source
+    assert lazy_module.exports == ("LazyDataMethodMixin",)
+    assert ergonomics_module.exports == (
+        "DatumChannelMethodMixin",
+        "LocusChannelMethodMixin",
+        "ValueChannelMethodMixin",
+    )
+
+
+def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
+    schema = json.loads(
+        Path("src/genome_spy/schema/genome-spy-schema.json").read_text(encoding="utf-8")
+    )
+    ergonomics_module = SchemaWrapperGenerator(schema).generate_ergonomics_module()
+
+    assert {
+        "title",
+        "dynamic_opacity",
+        "data_format",
+        "param",
+        "view",
+        "view_config",
+        "config",
+    } <= set(ergonomics_module.exports)
+    assert "def title(\n    text:" in ergonomics_module.source
+    assert "def param(\n    name: str," in ergonomics_module.source
+    assert "def config(\n    *," in ergonomics_module.source
+    assert "if isinstance(defined.get('view'), core.ViewBackground):" in (
+        ergonomics_module.source
+    )
+    assert "def copy(\n        self," in (
+        SchemaWrapperGenerator(schema).generate_mark_mixins_module().source
+    )
+
+
+def test_generated_parameter_docs_are_separated_from_method_summaries() -> None:
+    schema = json.loads(
+        Path("src/genome_spy/schema/genome-spy-schema.json").read_text(encoding="utf-8")
+    )
+    generator = SchemaWrapperGenerator(schema)
+
+    assert (
+        '"""Return a chart with merged top-level config.\n\n        Args:'
+        in generator.generate_mark_mixins_module().source
+    )
+    assert (
+        '"""Return a vconcat composition of the given charts.\n\n    Args:'
+        in generator.generate_composition_module().source
+    )
 
 
 def test_generate_transform_methods_from_schema_union() -> None:
@@ -203,16 +266,22 @@ def test_generate_mark_mixins_module_emits_config_methods_when_schema_supports_t
 
     mixins_module = SchemaWrapperGenerator(schema).generate_mark_mixins_module()
 
-    assert mixins_module.exports == (
+    assert {
         "ConfigMethodMixin",
+        "EncodingMethodMixin",
         "MarkMethodMixin",
         "TransformMethodMixin",
-    )
+    } <= set(mixins_module.exports)
     assert "class ConfigMethodMixin" in mixins_module.source
+    assert "def mark_rect(" in mixins_module.source
+    assert "minWidth: float | UndefinedType = Undefined" in mixins_module.source
+    assert "@use_signature(core.RectProps)" not in mixins_module.source
     assert "def configure(" in mixins_module.source
-    assert "@use_signature(core.GenomeSpyConfig)" in mixins_module.source
+    assert "axis: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined" in (
+        mixins_module.source
+    )
     assert "def configure_axis(" in mixins_module.source
-    assert "@use_signature(core.AxisConfig)" in mixins_module.source
+    assert "title: str | UndefinedType = Undefined" in mixins_module.source
 
 
 def test_generate_kwds_module_emits_helper_relevant_kwds_targets() -> None:
@@ -282,9 +351,15 @@ def test_generate_channels_module_emits_schema_driven_channel_setters() -> None:
                     "x": {
                         "type": "object",
                         "properties": {
-                            "field": {"$ref": "#/definitions/FieldName"},
+                            "field": {
+                                "$ref": "#/definitions/FieldName",
+                                "description": "Data field to encode.",
+                            },
                             "sort": {"$ref": "#/definitions/CompareParams"},
-                            "title": {"type": ["string", "null"]},
+                            "title": {
+                                "type": ["string", "null"],
+                                "description": "Channel title.",
+                            },
                             "type": {"$ref": "#/definitions/Type"},
                         },
                     }
@@ -306,6 +381,11 @@ def test_generate_channels_module_emits_schema_driven_channel_setters() -> None:
         in channels_module.source
     )
     assert "def title(" in channels_module.source
+    assert (
+        '"""Create a ``x`` encoding channel.\n\n        Args:' in channels_module.source
+    )
+    assert "field (FieldName_T): Data field to encode." in channels_module.source
+    assert "title (str | None): Channel title." in channels_module.source
     assert "value: str | None" in channels_module.source
     assert "return self._with_property('title', value)" in channels_module.source
     assert "def field(" in channels_module.source
@@ -316,7 +396,8 @@ def test_generate_channels_module_emits_schema_driven_channel_setters() -> None:
     assert "CompareParams | CompareParamsKwds | str | list[str] | None | object" in (
         channels_module.source
     )
-    assert "return super().sort(value, **kwargs)" in channels_module.source
+    assert "field: str | UndefinedType = Undefined" in channels_module.source
+    assert "return self._with_sort(value, defined)" in channels_module.source
 
 
 def test_generate_channels_module_discovers_nested_setters_from_schema() -> None:
@@ -371,9 +452,10 @@ def test_generate_channels_module_discovers_nested_setters_from_schema() -> None
 
     assert "def axis(" in channels_module.source
     assert "def extra(" in channels_module.source
-    assert "value: ExtraConfig | dict[str, Any] | None | object = _MISSING" in (
+    assert "value: ExtraConfig | dict[str, Any] | None | object = Undefined" in (
         channels_module.source
     )
+    assert "padding: float | UndefinedType = Undefined" in channels_module.source
     assert "def chrom(" in channels_module.source
     assert "value: FieldName_T" in channels_module.source
     assert "def value(" in channels_module.source
@@ -440,6 +522,8 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
     assert "class UnitSpec" in (output_dir / "core.py").read_text(encoding="utf-8")
     assert (output_dir / "_typing.py").exists()
     assert (output_dir / "_kwds.py").exists()
+    assert (output_dir / "lazy.py").exists()
+    assert (output_dir / "ergonomics.py").exists()
     assert json.loads(
         (output_dir / "capabilities.json").read_text(encoding="utf-8")
     ) == {
@@ -448,6 +532,7 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
         "marks": ["point", "rect"],
         "encoding_channels": ["color", "x"],
         "transforms": [],
+        "lazy_data_sources": [],
         "root_spec_variants": [],
     }
     assert "MARK_TYPES = ('point', 'rect')" in (output_dir / "core.py").read_text(
@@ -497,15 +582,56 @@ def test_write_schema_files_supports_explicit_schema_input(tmp_path: Path) -> No
     )
 
 
+def test_generate_lazy_data_helpers_from_schema_union() -> None:
+    schema = {
+        "definitions": {
+            "LazyDataParams": {
+                "anyOf": [
+                    {"$ref": "#/definitions/SignalData"},
+                    {"$ref": "#/definitions/InternalData"},
+                ]
+            },
+            "SignalData": {
+                "type": "object",
+                "required": ["type", "url"],
+                "properties": {
+                    "type": {"const": "signal", "type": "string"},
+                    "url": {"type": "string"},
+                    "windowSize": {"type": "number"},
+                },
+            },
+            "InternalData": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {"type": {"const": "internal", "type": "string"}},
+            },
+        }
+    }
+
+    module = SchemaWrapperGenerator(schema).generate_lazy_module()
+
+    assert "def signal(" in module.source
+    assert "url: str" in module.source
+    assert "windowSize: float | UndefinedType = Undefined" in module.source
+    assert "type=cast(Any, 'signal'), url=url, **defined" in module.source
+    assert "def internal(" not in module.source
+    assert "**kwargs" not in module.source
+
+
 def test_generated_mark_methods_expose_schema_backed_signatures() -> None:
     rect_signature = inspect.signature(gs.Chart().mark_rect)
     point_signature = inspect.signature(gs.Chart().mark_point)
+    circle_signature = inspect.signature(gs.Chart().mark_circle)
 
     assert "minWidth" in rect_signature.parameters
     assert "tooltip" in rect_signature.parameters
     assert "geometricZoomBound" in point_signature.parameters
     assert "kwargs" not in rect_signature.parameters
-    assert gs.Chart.mark_rect.__wrapped__ is RectProps.__init__
+    assert "kwargs" not in circle_signature.parameters
+    assert "size" in circle_signature.parameters
+    assert "type" not in rect_signature.parameters
+    assert rect_signature.parameters["minWidth"].kind is inspect.Parameter.KEYWORD_ONLY
+    assert not hasattr(gs.Chart.mark_rect, "__wrapped__")
 
 
 def test_generated_config_methods_expose_schema_backed_signatures() -> None:
@@ -516,7 +642,8 @@ def test_generated_config_methods_expose_schema_backed_signatures() -> None:
     assert "view" in configure_signature.parameters
     assert "title" in axis_signature.parameters
     assert "kwargs" not in axis_signature.parameters
-    assert gs.Chart.configure_axis.__wrapped__ is AxisConfig.__init__
+    assert axis_signature.parameters["title"].kind is inspect.Parameter.KEYWORD_ONLY
+    assert not hasattr(gs.Chart.configure_axis, "__wrapped__")
 
 
 def test_generated_schema_classes_expose_altair_style_property_setters() -> None:

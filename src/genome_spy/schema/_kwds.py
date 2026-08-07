@@ -1203,14 +1203,14 @@ class ZoomParamsKwds(TypedDict, total=False):
 
 
 class AxesKwds(TypedDict, total=False):
-    """TypedDict helper for composed-view axis resolution mappings."""
+    """TypedDict helper for raw ``Axes`` mappings."""
 
     x: GenomeAxis | GenomeAxisKwds
     y: GenomeAxis | GenomeAxisKwds
 
 
 class LegendsKwds(TypedDict, total=False):
-    """TypedDict helper for composed-view legend resolution mappings."""
+    """TypedDict helper for raw ``Legends`` mappings."""
 
     angle: Legend | LegendKwds
     color: Legend | LegendKwds
@@ -1226,11 +1226,113 @@ class LegendsKwds(TypedDict, total=False):
     strokeWidth: Legend | LegendKwds
 
 
+class AxisResolveKwds(TypedDict, total=False):
+    """TypedDict helper for raw ``AxisResolve`` mappings."""
+
+    angle: ResolutionBehavior_T
+    color: ResolutionBehavior_T
+    default: ResolutionBehavior_T
+    direction: ResolutionBehavior_T
+    dx: ResolutionBehavior_T
+    dy: ResolutionBehavior_T
+    facetIndex: ResolutionBehavior_T
+    fill: ResolutionBehavior_T
+    fillOpacity: ResolutionBehavior_T
+    key: ResolutionBehavior_T
+    opacity: ResolutionBehavior_T
+    sample: ResolutionBehavior_T
+    search: ResolutionBehavior_T
+    semanticScore: ResolutionBehavior_T
+    shape: ResolutionBehavior_T
+    size: ResolutionBehavior_T
+    stroke: ResolutionBehavior_T
+    strokeOpacity: ResolutionBehavior_T
+    strokeWidth: ResolutionBehavior_T
+    text: ResolutionBehavior_T
+    tooltip: ResolutionBehavior_T
+    uniqueId: ResolutionBehavior_T
+    x: ResolutionBehavior_T
+    x2: ResolutionBehavior_T
+    y: ResolutionBehavior_T
+    y2: ResolutionBehavior_T
+
+
+class LegendResolveKwds(TypedDict, total=False):
+    """TypedDict helper for raw ``LegendResolve`` mappings."""
+
+    angle: ResolutionBehavior_T
+    color: ResolutionBehavior_T
+    default: ResolutionBehavior_T
+    direction: ResolutionBehavior_T
+    dx: ResolutionBehavior_T
+    dy: ResolutionBehavior_T
+    facetIndex: ResolutionBehavior_T
+    fill: ResolutionBehavior_T
+    fillOpacity: ResolutionBehavior_T
+    key: ResolutionBehavior_T
+    opacity: ResolutionBehavior_T
+    sample: ResolutionBehavior_T
+    search: ResolutionBehavior_T
+    semanticScore: ResolutionBehavior_T
+    shape: ResolutionBehavior_T
+    size: ResolutionBehavior_T
+    stroke: ResolutionBehavior_T
+    strokeOpacity: ResolutionBehavior_T
+    strokeWidth: ResolutionBehavior_T
+    text: ResolutionBehavior_T
+    tooltip: ResolutionBehavior_T
+    uniqueId: ResolutionBehavior_T
+    x: ResolutionBehavior_T
+    x2: ResolutionBehavior_T
+    y: ResolutionBehavior_T
+    y2: ResolutionBehavior_T
+
+
+class ScaleResolveKwds(TypedDict, total=False):
+    """TypedDict helper for raw ``ScaleResolve`` mappings."""
+
+    angle: ResolutionBehavior_T
+    color: ResolutionBehavior_T
+    default: ResolutionBehavior_T
+    direction: ResolutionBehavior_T
+    dx: ResolutionBehavior_T
+    dy: ResolutionBehavior_T
+    facetIndex: ResolutionBehavior_T
+    fill: ResolutionBehavior_T
+    fillOpacity: ResolutionBehavior_T
+    key: ResolutionBehavior_T
+    opacity: ResolutionBehavior_T
+    sample: ResolutionBehavior_T
+    search: ResolutionBehavior_T
+    semanticScore: ResolutionBehavior_T
+    shape: ResolutionBehavior_T
+    size: ResolutionBehavior_T
+    stroke: ResolutionBehavior_T
+    strokeOpacity: ResolutionBehavior_T
+    strokeWidth: ResolutionBehavior_T
+    text: ResolutionBehavior_T
+    tooltip: ResolutionBehavior_T
+    uniqueId: ResolutionBehavior_T
+    x: ResolutionBehavior_T
+    x2: ResolutionBehavior_T
+    y: ResolutionBehavior_T
+    y2: ResolutionBehavior_T
+
+
+class ResolveKwds(TypedDict, total=False):
+    """TypedDict helper for raw ``Resolve`` mappings."""
+
+    axis: AxisResolveKwds
+    legend: LegendResolveKwds
+    scale: ScaleResolveKwds
+
+
 class ScalesKwds(TypedDict, total=False):
-    """TypedDict helper for composed-view scale resolution mappings."""
+    """TypedDict helper for raw ``Scales`` mappings."""
 
     angle: Scale | ScaleKwds
     color: Scale | ScaleKwds
+    direction: Scale | ScaleKwds
     dx: Scale | ScaleKwds
     dy: Scale | ScaleKwds
     fill: Scale | ScaleKwds
@@ -1245,101 +1347,6 @@ class ScalesKwds(TypedDict, total=False):
     x2: Scale | ScaleKwds
     y: Scale | ScaleKwds
     y2: Scale | ScaleKwds
-
-
-class AxisResolveKwds(TypedDict, total=False):
-    """TypedDict helper for axis resolution behavior mappings."""
-
-    angle: ResolutionBehavior_T
-    color: ResolutionBehavior_T
-    default: ResolutionBehavior_T
-    dx: ResolutionBehavior_T
-    dy: ResolutionBehavior_T
-    facetIndex: ResolutionBehavior_T
-    fill: ResolutionBehavior_T
-    fillOpacity: ResolutionBehavior_T
-    key: ResolutionBehavior_T
-    opacity: ResolutionBehavior_T
-    sample: ResolutionBehavior_T
-    search: ResolutionBehavior_T
-    semanticScore: ResolutionBehavior_T
-    shape: ResolutionBehavior_T
-    size: ResolutionBehavior_T
-    stroke: ResolutionBehavior_T
-    strokeOpacity: ResolutionBehavior_T
-    strokeWidth: ResolutionBehavior_T
-    text: ResolutionBehavior_T
-    uniqueId: ResolutionBehavior_T
-    x: ResolutionBehavior_T
-    x2: ResolutionBehavior_T
-    y: ResolutionBehavior_T
-    y2: ResolutionBehavior_T
-
-
-class LegendResolveKwds(TypedDict, total=False):
-    """TypedDict helper for legend resolution behavior mappings."""
-
-    angle: ResolutionBehavior_T
-    color: ResolutionBehavior_T
-    default: ResolutionBehavior_T
-    dx: ResolutionBehavior_T
-    dy: ResolutionBehavior_T
-    facetIndex: ResolutionBehavior_T
-    fill: ResolutionBehavior_T
-    fillOpacity: ResolutionBehavior_T
-    key: ResolutionBehavior_T
-    opacity: ResolutionBehavior_T
-    sample: ResolutionBehavior_T
-    search: ResolutionBehavior_T
-    semanticScore: ResolutionBehavior_T
-    shape: ResolutionBehavior_T
-    size: ResolutionBehavior_T
-    stroke: ResolutionBehavior_T
-    strokeOpacity: ResolutionBehavior_T
-    strokeWidth: ResolutionBehavior_T
-    text: ResolutionBehavior_T
-    uniqueId: ResolutionBehavior_T
-    x: ResolutionBehavior_T
-    x2: ResolutionBehavior_T
-    y: ResolutionBehavior_T
-    y2: ResolutionBehavior_T
-
-
-class ScaleResolveKwds(TypedDict, total=False):
-    """TypedDict helper for scale resolution behavior mappings."""
-
-    angle: ResolutionBehavior_T
-    color: ResolutionBehavior_T
-    default: ResolutionBehavior_T
-    dx: ResolutionBehavior_T
-    dy: ResolutionBehavior_T
-    facetIndex: ResolutionBehavior_T
-    fill: ResolutionBehavior_T
-    fillOpacity: ResolutionBehavior_T
-    key: ResolutionBehavior_T
-    opacity: ResolutionBehavior_T
-    sample: ResolutionBehavior_T
-    search: ResolutionBehavior_T
-    semanticScore: ResolutionBehavior_T
-    shape: ResolutionBehavior_T
-    size: ResolutionBehavior_T
-    stroke: ResolutionBehavior_T
-    strokeOpacity: ResolutionBehavior_T
-    strokeWidth: ResolutionBehavior_T
-    text: ResolutionBehavior_T
-    uniqueId: ResolutionBehavior_T
-    x: ResolutionBehavior_T
-    x2: ResolutionBehavior_T
-    y: ResolutionBehavior_T
-    y2: ResolutionBehavior_T
-
-
-class ResolveKwds(TypedDict, total=False):
-    """TypedDict helper for composed-view resolution mappings."""
-
-    axis: AxisResolveKwds
-    legend: LegendResolveKwds
-    scale: ScaleResolveKwds
 
 
 __all__ = [
@@ -1386,9 +1393,9 @@ __all__ = [
     "ZoomParamsKwds",
     "AxesKwds",
     "LegendsKwds",
-    "ScalesKwds",
     "AxisResolveKwds",
     "LegendResolveKwds",
     "ScaleResolveKwds",
     "ResolveKwds",
+    "ScalesKwds",
 ]

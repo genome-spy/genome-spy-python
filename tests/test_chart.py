@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+import inspect
 from datetime import datetime
 
 import genome_spy as gs
@@ -31,6 +32,7 @@ from genome_spy.schema import (
     ViewBackground,
     ViewConfig,
 )
+from genome_spy.schema import ergonomics as generated_ergonomics
 from genome_spy.schema.channels import X as GeneratedX
 from genome_spy.channels import LocusChannel
 from genome_spy.schemapi import SchemaValidationError
@@ -109,6 +111,13 @@ def test_channel_sort_supports_fluent_compare_configuration() -> None:
         "sort": {"field": "score", "order": "descending"},
     }
 
+    signature = inspect.signature(gs.Y("gene:N").sort)
+    assert {"value", "field", "order"} == set(signature.parameters)
+    assert all(
+        parameter.kind is not inspect.Parameter.VAR_KEYWORD
+        for parameter in signature.parameters.values()
+    )
+
 
 def test_channel_sort_accepts_schema_wrapper_and_simple_values() -> None:
     wrapped = gs.Y("gene:N").sort(CompareParams(field="score", order="ascending"))
@@ -163,6 +172,95 @@ def test_public_api_exposes_additional_ergonomic_builders() -> None:
     assert isinstance(
         gs.dynamic_opacity(unitsPerPixel=[100000, 40000], values=[0, 1]),
         DynamicOpacity,
+    )
+
+
+def test_schema_object_helpers_have_generated_keyword_signatures() -> None:
+    helper_parameters = {
+        "title": {"text", "orient", "subtitle"},
+        "dynamic_opacity": {"channel", "unitsPerPixel", "values"},
+        "data_format": {"columns", "delimiter", "parse", "property", "type"},
+        "param": {"name", "bind", "select", "transition", "value"},
+        "view": {"fill", "stroke", "style"},
+        "view_config": {"continuousWidth", "discreteHeight", "stroke"},
+        "config": {"axis", "legend", "mark", "view"},
+    }
+
+    for helper_name, expected_parameters in helper_parameters.items():
+        helper = getattr(gs, helper_name)
+        signature = inspect.signature(helper)
+
+        assert expected_parameters <= set(signature.parameters)
+        assert all(
+            parameter.kind is not inspect.Parameter.VAR_KEYWORD
+            for parameter in signature.parameters.values()
+        )
+        assert helper is getattr(generated_ergonomics, helper_name)
+
+
+def test_top_level_copy_methods_have_generated_keyword_signatures() -> None:
+    chart = gs.Chart([{"x": 1}]).mark_point().copy(width=240, height=120)
+
+    assert chart.to_dict()["width"] == 240
+    assert chart.to_dict()["height"] == 120
+    for chart_class in (
+        gs.Chart,
+        gs.LayerChart,
+        gs.HConcatChart,
+        gs.VConcatChart,
+        gs.ConcatChart,
+        gs.MultiscaleChart,
+    ):
+        signature = inspect.signature(chart_class.copy)
+
+        assert {"deep", "config", "width"} <= set(signature.parameters)
+        assert all(
+            parameter.kind is not inspect.Parameter.VAR_KEYWORD
+            for parameter in signature.parameters.values()
+        )
+
+
+def test_top_level_constructors_and_properties_are_root_variant_specific() -> None:
+    structural_parameters = {
+        "mark",
+        "layer",
+        "hconcat",
+        "vconcat",
+        "concat",
+        "multiscale",
+    }
+    expected = {
+        gs.Chart: "mark",
+        gs.LayerChart: "layer",
+        gs.HConcatChart: "hconcat",
+        gs.VConcatChart: "vconcat",
+        gs.ConcatChart: "concat",
+        gs.MultiscaleChart: "multiscale",
+    }
+
+    for chart_class, structural_parameter in expected.items():
+        for callable_ in (chart_class, chart_class.properties):
+            signature = inspect.signature(callable_)
+            assert structural_parameter in signature.parameters
+            assert structural_parameters & set(signature.parameters) == {
+                structural_parameter
+            }
+            assert all(
+                parameter.kind is not inspect.Parameter.VAR_KEYWORD
+                for parameter in signature.parameters.values()
+            )
+
+    assert "columns" in inspect.signature(gs.ConcatChart).parameters
+    assert "columns" not in inspect.signature(gs.VConcatChart).parameters
+    assert "stops" in inspect.signature(gs.MultiscaleChart).parameters
+    assert "stops" not in inspect.signature(gs.Chart).parameters
+    imported_signature = inspect.signature(gs.ImportedView)
+    assert {"import_", "config", "name", "params", "visible"} == set(
+        imported_signature.parameters
+    )
+    assert all(
+        parameter.kind is not inspect.Parameter.VAR_KEYWORD
+        for parameter in imported_signature.parameters.values()
     )
 
 
@@ -240,6 +338,56 @@ def test_locus_helper_returns_dedicated_channel_type() -> None:
         "type": "locus",
         "band": 0.5,
     }
+
+
+def test_locus_and_compare_helpers_have_generated_keyword_signatures() -> None:
+    locus_signature = inspect.signature(gs.Locus)
+    compare_signature = inspect.signature(gs.compare)
+
+    assert {"axis", "band", "offset", "scale", "title"} <= set(
+        locus_signature.parameters
+    )
+    assert set(compare_signature.parameters) == {"field", "order"}
+    assert all(
+        parameter.kind is not inspect.Parameter.VAR_KEYWORD
+        for signature in (locus_signature, compare_signature)
+        for parameter in signature.parameters.values()
+    )
+
+
+def test_datum_and_value_helpers_have_generated_keyword_signatures() -> None:
+    datum_signature = inspect.signature(gs.datum)
+    value_signature = inspect.signature(gs.value)
+
+    assert {"axis", "condition", "scale", "type"} <= set(datum_signature.parameters)
+    assert {"buildIndex", "condition", "description", "title", "value"} == set(
+        value_signature.parameters
+    )
+    assert {"datum", "field", "axis", "scale", "type"}.isdisjoint(
+        value_signature.parameters
+    )
+    assert {"field", "value"}.isdisjoint(datum_signature.parameters)
+    assert all(
+        parameter.kind is not inspect.Parameter.VAR_KEYWORD
+        for signature in (datum_signature, value_signature)
+        for parameter in signature.parameters.values()
+    )
+
+
+def test_constant_channel_helpers_preserve_fluent_configuration() -> None:
+    channel = gs.datum(0, type="quantitative").scale(zero=True).axis(title="Score")
+
+    assert channel.to_dict() == {
+        "datum": 0,
+        "type": "quantitative",
+        "scale": {"zero": True},
+        "axis": {"title": "Score"},
+    }
+    assert channel.encoding_name is None
+    assert not hasattr(gs.value("steelblue"), "scale")
+
+    with pytest.raises(TypeError, match="Positional encodings must be channel objects"):
+        gs.Chart().encode(gs.datum(0))
 
 
 def test_chart_serializes_core_spec() -> None:
@@ -424,6 +572,28 @@ def test_top_level_with_config_and_with_scales_merge_across_calls() -> None:
     }
 
 
+def test_top_level_merge_methods_have_generated_keyword_signatures() -> None:
+    for method, expected in (
+        (gs.Chart.with_config, {"axis", "view"}),
+        (gs.Chart.with_view, {"fill", "stroke"}),
+        (gs.Chart.with_scales, {"color", "x"}),
+    ):
+        signature = inspect.signature(method)
+        assert expected <= set(signature.parameters)
+        assert all(
+            parameter.kind is not inspect.Parameter.VAR_KEYWORD
+            for parameter in signature.parameters.values()
+        )
+
+    assert "direction" in inspect.signature(gs.Chart.with_scales).parameters
+    for method in (
+        gs.VConcatChart.resolve_axis,
+        gs.VConcatChart.resolve_legend,
+        gs.VConcatChart.resolve_scale,
+    ):
+        assert {"direction", "tooltip"} <= set(inspect.signature(method).parameters)
+
+
 def test_composition_properties_support_root_level_genomic_config() -> None:
     chart = (
         gs.vconcat(gs.Chart([{"x": 1}]).mark_point().encode(x="x:Q"), spacing=10)
@@ -458,6 +628,42 @@ def test_composition_properties_support_root_level_genomic_config() -> None:
         "scale": {"y": "independent"},
         "axis": {"y": "independent"},
     }
+
+
+def test_public_composition_helpers_have_generated_keyword_signatures() -> None:
+    signature = inspect.signature(gs.vconcat)
+
+    assert "charts" in signature.parameters
+    assert "spacing" in signature.parameters
+    assert all(
+        parameter.kind is not inspect.Parameter.VAR_KEYWORD
+        for parameter in signature.parameters.values()
+    )
+    assert "columns" in inspect.signature(gs.concat).parameters
+    assert "stops" in inspect.signature(gs.multiscale).parameters
+    import_signature = inspect.signature(gs.import_view)
+    assert "params" in import_signature.parameters
+    assert all(
+        parameter.kind is not inspect.Parameter.VAR_KEYWORD
+        for parameter in import_signature.parameters.values()
+    )
+
+
+def test_generated_channels_have_explicit_constructor_and_nested_signatures() -> None:
+    constructor_signature = inspect.signature(gs.X)
+    scale_signature = inspect.signature(gs.X("value:Q").scale)
+
+    assert "field" in constructor_signature.parameters
+    assert "scale" in constructor_signature.parameters
+    assert "domain" in scale_signature.parameters
+    assert all(
+        parameter.kind is not inspect.Parameter.VAR_KEYWORD
+        for parameter in constructor_signature.parameters.values()
+    )
+    assert all(
+        parameter.kind is not inspect.Parameter.VAR_KEYWORD
+        for parameter in scale_signature.parameters.values()
+    )
 
 
 def test_generated_configure_methods_work_on_compositions() -> None:
@@ -591,6 +797,29 @@ def test_lazy_namespace_supports_generic_and_named_sources() -> None:
             "url": "https://example.test/reference.fa.gz",
         }
     }
+
+
+def test_lazy_data_helpers_have_generated_keyword_signatures() -> None:
+    bigwig_signature = inspect.signature(gs.lazy.bigwig)
+    gff3_signature = inspect.signature(gs.lazy.gff3)
+
+    assert "pixelsPerBin" in bigwig_signature.parameters
+    assert "addChrPrefix" in gff3_signature.parameters
+    assert "windowSize" in gff3_signature.parameters
+    assert hasattr(gs.lazy, "tabix")
+    assert {
+        "bam",
+        "bigbed",
+        "bigwig",
+        "gff3",
+        "indexed_fasta",
+        "tabix",
+        "vcf",
+    } <= set(dir(gs.lazy))
+    assert all(
+        parameter.kind is not inspect.Parameter.VAR_KEYWORD
+        for parameter in bigwig_signature.parameters.values()
+    )
 
 
 def test_generic_transform_appends_raw_mappings() -> None:

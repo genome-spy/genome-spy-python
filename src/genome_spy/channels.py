@@ -6,9 +6,18 @@ from dataclasses import dataclass, field
 from typing import Any, Self, cast
 
 from genome_spy._utils import is_mapping, parse_shorthand
-from genome_spy.schema._kwds import CompareParamsKwds, GenomeAxisKwds, ScaleKwds
-from genome_spy.schema._typing import SortOrder_T
-from genome_spy.schema.core import CompareParams, GenomeAxis, Scale
+from genome_spy.schema._kwds import CompareParamsKwds
+from genome_spy.schema.core import CompareParams
+from genome_spy.schema.ergonomics import (
+    DatumChannelMethodMixin,
+    Locus,
+    LocusChannelMethodMixin,
+    ValueChannelMethodMixin,
+    compare,
+    datum,
+    locus,
+    value,
+)
 from genome_spy.schemapi import (
     SchemaBase,
     Undefined,
@@ -46,52 +55,20 @@ class Channel:
         """Return the JSON-serializable channel definition."""
         return dict(self.definition)
 
-    def sort(
+    def _with_sort(
         self,
-        value: CompareParams
-        | CompareParamsKwds
-        | str
-        | list[str]
-        | None
-        | object = _MISSING,
+        value: CompareParams | CompareParamsKwds | str | list[str] | None | object,
         /,
-        **kwargs: Any,
+        properties: dict[str, Any],
     ) -> Self:
-        """Return a channel with a ``sort`` configuration."""
+        """Return a channel with a normalized ``sort`` configuration."""
         definition = self.to_dict()
         definition["sort"] = _merge_sort_value(
             definition.get("sort", Undefined),
             value,
-            **kwargs,
+            **properties,
         )
         return self._replace_definition(definition)
-
-    def axis(
-        self,
-        value: SchemaBase | dict[str, Any] | None | object = _MISSING,
-        /,
-        **kwargs: Any,
-    ) -> Self:
-        """Return a channel with an ``axis`` configuration."""
-        return self._with_nested("axis", value, **kwargs)
-
-    def scale(
-        self,
-        value: SchemaBase | dict[str, Any] | None | object = _MISSING,
-        /,
-        **kwargs: Any,
-    ) -> Self:
-        """Return a channel with a ``scale`` configuration."""
-        return self._with_nested("scale", value, **kwargs)
-
-    def legend(
-        self,
-        value: SchemaBase | dict[str, Any] | None | object = _MISSING,
-        /,
-        **kwargs: Any,
-    ) -> Self:
-        """Return a channel with a ``legend`` configuration."""
-        return self._with_nested("legend", value, **kwargs)
 
     def _with_nested(
         self,
@@ -121,31 +98,13 @@ class Channel:
 
 
 @dataclass(frozen=True, slots=True)
-class LocusChannel(Channel):
+class LocusChannel(LocusChannelMethodMixin, Channel):
     """A handwritten locus channel with generated-style fluent setters.
 
     GenomeSpy's genomic locus channels are intentionally kept as a small
     handwritten ergonomic layer rather than forced into the ordinary generated
     channel shape.
     """
-
-    def axis(
-        self,
-        value: GenomeAxis | GenomeAxisKwds | None | object = _MISSING,
-        /,
-        **kwargs: Any,
-    ) -> Self:
-        """Return a locus channel with an ``axis`` configuration."""
-        return self._with_nested("axis", value, **kwargs)
-
-    def scale(
-        self,
-        value: Scale | ScaleKwds | None | object = _MISSING,
-        /,
-        **kwargs: Any,
-    ) -> Self:
-        """Return a locus channel with a ``scale`` configuration."""
-        return self._with_nested("scale", value, **kwargs)
 
     def title(self, value: str | None) -> Self:
         """Return a locus channel with ``title`` updated."""
@@ -166,6 +125,16 @@ class LocusChannel(Channel):
     def band(self, value: float) -> Self:
         """Return a locus channel with ``band`` updated."""
         return self._with_property("band", value)
+
+
+@dataclass(frozen=True, slots=True)
+class DatumChannel(DatumChannelMethodMixin, Channel):
+    """A constant-datum channel with schema-derived fluent methods."""
+
+
+@dataclass(frozen=True, slots=True)
+class ValueChannel(ValueChannelMethodMixin, Channel):
+    """A constant-value channel with schema-derived fluent methods."""
 
 
 def channel(
@@ -190,40 +159,6 @@ def channel(
 
     definition.update(kwargs)
     return Channel(definition, encoding_name=encoding_name)
-
-
-def locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> LocusChannel:
-    """Create a GenomeSpy chromosomal locus channel definition."""
-    definition: dict[str, Any] = {"chrom": chrom, "type": "locus", **kwargs}
-    if pos is not None:
-        definition["pos"] = pos
-    return LocusChannel(definition)
-
-
-def value(value: Any, /, **kwargs: Any) -> Channel:
-    """Create a constant-value encoding channel."""
-    return Channel({"value": value, **kwargs})
-
-
-def datum(value: Any, /, **kwargs: Any) -> Channel:
-    """Create a constant-datum encoding channel."""
-    return Channel({"datum": value, **kwargs})
-
-
-def compare(
-    field: str | list[str] | None = None,
-    /,
-    *,
-    order: SortOrder_T | list[SortOrder_T] | None = None,
-    **kwargs: Any,
-) -> CompareParams:
-    """Create a sort/compare definition."""
-    payload = dict(kwargs)
-    if field is not None:
-        payload["field"] = field
-    if order is not None:
-        payload["order"] = order
-    return CompareParams(**payload)
 
 
 def _merge_sort_value(
@@ -256,8 +191,3 @@ def _merge_sort_value(
         return normalize_schema_value(value, validate=False)
 
     raise TypeError(f"Unsupported nested 'sort' value: {type(value)!r}")
-
-
-def Locus(chrom: str, pos: str | None = None, /, **kwargs: Any) -> LocusChannel:
-    """Create a GenomeSpy chromosomal locus channel definition."""
-    return locus(chrom, pos, **kwargs)

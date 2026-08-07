@@ -9,8 +9,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
-import keyword
-from typing import Any, Callable, ClassVar, Self, TypeVar
+from typing import Any, ClassVar, Self
 
 from jsonschema import ValidationError
 from jsonschema.validators import validator_for
@@ -49,10 +48,13 @@ class UndefinedType:
     def __repr__(self) -> str:
         return "Undefined"
 
+    def __deepcopy__(self, memo: dict[int, Any]) -> UndefinedType:
+        """Preserve sentinel identity when schema state is deeply copied."""
+        del memo
+        return self
+
 
 Undefined = UndefinedType()
-
-_F = TypeVar("_F", bound=Callable[..., Any])
 
 
 class SchemaBase:
@@ -244,80 +246,6 @@ def _resolve_schema_references(
     return resolved
 
 
-class _BoundPropertySetter:
-    """Bound Altair-style property setter for generated schema wrappers."""
-
-    def __init__(
-        self,
-        obj: SchemaBase,
-        prop: str,
-        schema: dict[str, Any],
-    ) -> None:
-        self._obj = obj
-        self._prop = prop
-        self.__doc__ = schema.get("description")
-
-    def __call__(self, *args: Any, **kwargs: Any) -> SchemaBase:
-        if len(args) > 1:
-            raise TypeError(
-                f"{type(self._obj).__name__}.{self._prop} accepts at most one positional value."
-            )
-        if args:
-            return self._obj._with_property(self._prop, args[0], **kwargs)
-        return self._obj._with_property(self._prop, Undefined, **kwargs)
-
-
-class _PropertySetter:
-    """Descriptor that exposes fluent property setters on schema wrappers."""
-
-    def __init__(self, prop: str, schema: dict[str, Any]) -> None:
-        self._prop = prop
-        self._schema = schema
-        self.__doc__ = schema.get("description")
-
-    def __get__(self, obj: SchemaBase | None, cls: type[SchemaBase]) -> Any:
-        if obj is None:
-            return self
-        return _BoundPropertySetter(obj, self._prop, self._schema)
-
-
-def with_property_setters(cls: type[SchemaBase]) -> type[SchemaBase]:
-    """Decorator to add Altair-style property setters to a schema class."""
-    schema = cls.resolve_references()
-    properties = schema.get("properties", {})
-    if not isinstance(properties, dict):
-        return cls
-    for prop, propschema in properties.items():
-        if (
-            not isinstance(prop, str)
-            or not prop.isidentifier()
-            or keyword.iskeyword(prop)
-            or not isinstance(propschema, dict)
-        ):
-            continue
-        setattr(cls, prop, _PropertySetter(prop, propschema))
-    return cls
-
-
-def _wrap_and_copy_doc(tp: Callable[..., Any], cb: Callable[..., Any]) -> None:
-    """Copy Altair-style wrapper metadata from ``tp`` onto ``cb``."""
-    cb.__wrapped__ = getattr(tp, "__init__", tp)  # type: ignore[attr-defined]
-
-    if doc_in := tp.__doc__:
-        line_1 = f"{cb.__doc__ or f'Refer to :class:`{tp.__name__}`'}\n"
-        cb.__doc__ = "".join((line_1, *doc_in.splitlines(keepends=True)[1:]))
-
-
-def use_signature(target: Callable[..., Any], /) -> Callable[[_F], _F]:
-    """Use the signature and doc of ``target`` for the decorated method."""
-
-    def decorator(func: _F) -> _F:
-        _wrap_and_copy_doc(target, func)
-        return func
-
-    return decorator
-
-
 __all__ = [
     "merge_mapping_value",
     "normalize_mapping_value",
@@ -326,6 +254,4 @@ __all__ = [
     "SchemaValidationError",
     "Undefined",
     "UndefinedType",
-    "use_signature",
-    "with_property_setters",
 ]

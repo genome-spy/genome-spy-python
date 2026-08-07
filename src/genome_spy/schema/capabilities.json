@@ -459,6 +459,36 @@
       "method": "transform_window"
     }
   ],
+  "lazy_data_sources": [
+    {
+      "type": "bam",
+      "method": "bam"
+    },
+    {
+      "type": "bigbed",
+      "method": "bigbed"
+    },
+    {
+      "type": "bigwig",
+      "method": "bigwig"
+    },
+    {
+      "type": "gff3",
+      "method": "gff3"
+    },
+    {
+      "type": "indexedFasta",
+      "method": "indexed_fasta"
+    },
+    {
+      "type": "tabix",
+      "method": "tabix"
+    },
+    {
+      "type": "vcf",
+      "method": "vcf"
+    }
+  ],
   "root_spec_variants": [
     "mark",
     "layer",

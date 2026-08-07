@@ -14,7 +14,7 @@ from __future__ import annotations
 import keyword
 import re
 from urllib.parse import unquote
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 _MISSING = object()
@@ -129,6 +129,7 @@ class PropertySpec:
     name: str
     annotation: AnnotationSpec
     nested_schema_class_name: str | None = None
+    description: str = ""
 
     @property
     def python_name(self) -> str:
@@ -149,6 +150,20 @@ class TransformMethodSpec:
     def method_name(self) -> str:
         """Return the Altair-style method name for this transform."""
         return f"transform_{_snake_name(self.transform_type)}"
+
+
+@dataclass(frozen=True, slots=True)
+class LazyDataMethodSpec:
+    """Schema-derived information for one named lazy data source helper."""
+
+    source_type: str
+    url_annotation: AnnotationSpec
+    properties: tuple[PropertySpec, ...]
+
+    @property
+    def method_name(self) -> str:
+        """Return the Python method name for this lazy source type."""
+        return _snake_name(self.source_type)
 
 
 @dataclass(frozen=True, slots=True)
@@ -187,22 +202,82 @@ class SchemaAnalyzer:
     def resolved_identifier_properties(self, schema: dict[str, Any]) -> tuple[str, ...]:
         return tuple(sorted(self.resolve_properties(schema)))
 
+    def property_variants(
+        self,
+        schema: dict[str, Any],
+        *,
+        seen: frozenset[str] = frozenset(),
+    ) -> tuple[dict[str, Any], ...]:
+        """Return property mappings without flattening alternative branches."""
+        ref_name = _ref_name(schema)
+        if ref_name is not None:
+            target = self.definitions.get(ref_name)
+            if not isinstance(target, dict) or ref_name in seen:
+                return ()
+            variants = self.property_variants(target, seen=seen | {ref_name})
+        else:
+            variants = ({},)
+
+        local_properties = schema.get("properties", {})
+        if isinstance(local_properties, dict) and local_properties:
+            variants = tuple(
+                {**variant, **local_properties} for variant in variants
+            ) or (dict(local_properties),)
+
+        for key in ("allOf",):
+            components = schema.get(key, [])
+            if not isinstance(components, list):
+                continue
+            for component in components:
+                if not isinstance(component, dict):
+                    continue
+                component_variants = self.property_variants(component, seen=seen)
+                if component_variants:
+                    variants = tuple(
+                        {**variant, **component_variant}
+                        for variant in variants
+                        for component_variant in component_variants
+                    )
+
+        for key in ("anyOf", "oneOf"):
+            choices = schema.get(key, [])
+            if not isinstance(choices, list) or not choices:
+                continue
+            choice_variants = tuple(
+                choice_variant
+                for choice in choices
+                if isinstance(choice, dict)
+                for choice_variant in self.property_variants(choice, seen=seen)
+            )
+            if choice_variants:
+                variants = tuple(
+                    {**variant, **choice_variant}
+                    for variant in variants
+                    for choice_variant in choice_variants
+                )
+        return variants
+
     def property_specs(self, definition: SchemaDefinition) -> tuple[PropertySpec, ...]:
         resolved_properties = self.resolve_properties(definition.schema)
-        object_property_refs = self._resolved_object_property_refs(definition.schema)
-        property_names = [
-            name
-            for name in self.resolved_identifier_properties(definition.schema)
-            if name.isidentifier()
-        ]
+        return self.property_specs_from_properties(resolved_properties)
+
+    def property_specs_from_properties(
+        self, properties: dict[str, Any]
+    ) -> tuple[PropertySpec, ...]:
+        """Return property specs from one concrete object-property mapping."""
+        object_property_refs = self._resolved_object_property_refs(
+            {"properties": properties}
+        )
+        property_names = [name for name in sorted(properties) if name.isidentifier()]
         return tuple(
             PropertySpec(
                 name=name,
                 annotation=self._property_spec_annotation(
                     name,
-                    resolved_properties.get(name, {}),
+                    properties.get(name, {}),
                 ),
                 nested_schema_class_name=object_property_refs.get(name),
+                description=_property_description(properties.get(name, {})),
             )
             for name in property_names
         )
@@ -588,6 +663,7 @@ class SchemaWrapperGenerator:
                         name, property_schema
                     ),
                     nested_schema_class_name=None,
+                    description=_property_description(property_schema),
                 )
                 for name, property_schema in sorted(properties.items())
                 if name != "type"
@@ -609,6 +685,62 @@ class SchemaWrapperGenerator:
                 )
             )
         return tuple(specs)
+
+    def lazy_data_method_specs(self) -> tuple[LazyDataMethodSpec, ...]:
+        """Return URL-backed lazy data helpers declared by ``LazyDataParams``.
+
+        The union also includes internal sources, such as generated axis ticks.
+        A public helper is emitted only for a named union member that has both a
+        fixed ``type`` and a required ``url`` property.
+        """
+        lazy_data_schema = self._definitions_map.get("LazyDataParams", {})
+        if not isinstance(lazy_data_schema, dict):
+            return ()
+
+        variants = lazy_data_schema.get("anyOf", lazy_data_schema.get("oneOf", []))
+        if not isinstance(variants, list):
+            return ()
+
+        specs: list[LazyDataMethodSpec] = []
+        for variant in variants:
+            if not isinstance(variant, dict):
+                continue
+            definition_name = _ref_name(variant)
+            definition_schema = self._definitions_map.get(definition_name or "")
+            if definition_name is None or not isinstance(definition_schema, dict):
+                continue
+            properties = self._analyzer.resolve_properties(definition_schema)
+            type_schema = properties.get("type", {})
+            source_type = (
+                type_schema.get("const") if isinstance(type_schema, dict) else None
+            )
+            required = definition_schema.get("required", [])
+            if (
+                not isinstance(source_type, str)
+                or not _snake_name(source_type).isidentifier()
+                or keyword.iskeyword(_snake_name(source_type))
+                or "url" not in properties
+                or not isinstance(required, list)
+                or "url" not in required
+            ):
+                continue
+            all_property_specs = self._analyzer.property_specs(
+                SchemaDefinition(definition_name, definition_schema)
+            )
+            url_annotation = next(
+                property_spec.annotation
+                for property_spec in all_property_specs
+                if property_spec.name == "url"
+            )
+            property_specs = tuple(
+                property_spec
+                for property_spec in all_property_specs
+                if property_spec.name not in {"type", "url"}
+            )
+            specs.append(
+                LazyDataMethodSpec(source_type, url_annotation, property_specs)
+            )
+        return tuple(sorted(specs, key=lambda spec: spec.method_name))
 
     def capability_manifest(self) -> dict[str, Any]:
         """Return deterministic generated-API coverage metadata."""
@@ -650,6 +782,13 @@ class SchemaWrapperGenerator:
                     "method": spec.method_name,
                 }
                 for spec in self.transform_method_specs()
+            ],
+            "lazy_data_sources": [
+                {
+                    "type": spec.source_type,
+                    "method": spec.method_name,
+                }
+                for spec in self.lazy_data_method_specs()
             ],
             "root_spec_variants": root_variants,
         }
@@ -723,6 +862,21 @@ class SchemaWrapperGenerator:
             )
         )
 
+    def channel_property_specs(self, encoding_name: str) -> tuple[PropertySpec, ...]:
+        """Return all schema properties accepted by an encoding channel."""
+        encoding_schema = self._definitions_map.get("Encoding", {})
+        if not isinstance(encoding_schema, dict):
+            return ()
+        properties = encoding_schema.get("properties", {})
+        if not isinstance(properties, dict):
+            return ()
+        channel_schema = properties.get(encoding_name)
+        if not isinstance(channel_schema, dict):
+            return ()
+        return self._analyzer.property_specs(
+            SchemaDefinition(encoding_name, channel_schema)
+        )
+
     def generate_core_module(self) -> GeneratedModule:
         """Generate a compact ``core.py``-style module."""
         exports: list[str] = ["GenomeSpySchema", "MARK_TYPES", "Root", "load_schema"]
@@ -786,10 +940,7 @@ class SchemaWrapperGenerator:
                 if used_kwds_types
                 else ""
             ),
-            (
-                "from genome_spy.schemapi import "
-                "SchemaBase, Undefined, UndefinedType, with_property_setters"
-            ),
+            "from genome_spy.schemapi import SchemaBase, Undefined, UndefinedType",
             "",
             "def load_schema() -> dict[str, Any]:",
             '    """Load the packaged GenomeSpy JSON Schema."""',
@@ -922,7 +1073,7 @@ class SchemaWrapperGenerator:
             if not self._supports_kwds_helper(definition):
                 continue
             names.append(_kwds_type_name(definition.name))
-        names.extend(self._anonymous_kwds_sources())
+        names.extend(self._anonymous_kwds_specs())
         return tuple(names)
 
     def generate_kwds_module(self) -> GeneratedModule:
@@ -962,15 +1113,19 @@ class SchemaWrapperGenerator:
                     & available_class_names
                 )
 
-        extra_helper_sources = self._anonymous_kwds_sources()
-        if any(name.endswith("ResolveKwds") for name in extra_helper_sources):
-            used_aliases.update({"ResolutionBehavior_T"})
-        if any(name == "AxesKwds" for name in extra_helper_sources):
-            used_core_classes.update({"GenomeAxis"})
-        if any(name == "LegendsKwds" for name in extra_helper_sources):
-            used_core_classes.update({"Legend"})
-        if any(name == "ScalesKwds" for name in extra_helper_sources):
-            used_core_classes.update({"Scale"})
+        extra_helper_specs = self._anonymous_kwds_specs()
+        helper_specs.extend(extra_helper_specs.items())
+        for _, property_specs in extra_helper_specs.items():
+            for property_spec in property_specs:
+                annotation = property_spec.annotation
+                needs_any = needs_any or _annotation_mentions_any(annotation.annotation)
+                needs_literal = needs_literal or annotation.needs_literal
+                needs_sequence = needs_sequence or annotation.needs_sequence
+                used_aliases.update(_annotation_alias_names(annotation.annotation))
+                used_core_classes.update(
+                    set(_annotation_class_names(annotation.annotation))
+                    & available_class_names
+                )
 
         typing_imports = ["TYPE_CHECKING", "TypedDict"]
         if needs_any:
@@ -1012,25 +1167,13 @@ class SchemaWrapperGenerator:
                     _typed_dict_source(helper_name, property_specs)
                     for helper_name, property_specs in helper_specs
                 ],
-                *extra_helper_sources.values(),
-                "__all__ = "
-                + repr(
-                    [
-                        *(helper_name for helper_name, _ in helper_specs),
-                        *extra_helper_sources,
-                    ]
-                ),
+                "__all__ = " + repr([helper_name for helper_name, _ in helper_specs]),
                 "",
             ]
         )
         return GeneratedModule(
             source=source,
-            exports=tuple(
-                [
-                    *(helper_name for helper_name, _ in helper_specs),
-                    *extra_helper_sources,
-                ]
-            ),
+            exports=tuple(helper_name for helper_name, _ in helper_specs),
         )
 
     def _supports_kwds_helper(self, definition: SchemaDefinition) -> bool:
@@ -1039,35 +1182,145 @@ class SchemaWrapperGenerator:
             self._base_analyzer.schema_looks_object_like(definition.schema)
         )
 
-    def _anonymous_kwds_sources(self) -> dict[str, str]:
-        property_names: set[str] = set()
-        for definition in self.definitions():
-            resolved_properties = self._base_analyzer.resolve_properties(
-                definition.schema
+    def _anonymous_kwds_specs(self) -> dict[str, tuple[PropertySpec, ...]]:
+        """Return TypedDict specs for anonymous root mapping properties."""
+        specs: dict[str, tuple[PropertySpec, ...]] = {}
+        value_annotations = {
+            "axes": "GenomeAxis | GenomeAxisKwds",
+            "legends": "Legend | LegendKwds",
+            "scales": "Scale | ScaleKwds",
+        }
+        for property_name, helper_name in ANONYMOUS_PROPERTY_KWDS.items():
+            schema = self.root_property_schema(property_name)
+            properties = schema.get("properties", {})
+            if not isinstance(properties, dict) or not properties:
+                continue
+            if property_name == "resolve":
+                outer_specs: list[PropertySpec] = []
+                for name, nested_schema in sorted(properties.items()):
+                    if not isinstance(name, str) or not isinstance(nested_schema, dict):
+                        continue
+                    nested_properties = nested_schema.get("properties", {})
+                    if not isinstance(nested_properties, dict):
+                        continue
+                    nested_helper_name = f"{_class_name(name)}ResolveKwds"
+                    specs[nested_helper_name] = (
+                        self._base_analyzer.property_specs_from_properties(
+                            nested_properties
+                        )
+                    )
+                    outer_specs.append(
+                        PropertySpec(name, AnnotationSpec(nested_helper_name))
+                    )
+                specs[helper_name] = tuple(outer_specs)
+                continue
+
+            value_annotation = value_annotations[property_name]
+            specs[helper_name] = tuple(
+                PropertySpec(
+                    name=name,
+                    annotation=AnnotationSpec(value_annotation),
+                    description=_property_description(property_schema),
+                )
+                for name, property_schema in sorted(properties.items())
+                if isinstance(name, str) and isinstance(property_schema, dict)
             )
-            for property_name, helper_name in ANONYMOUS_PROPERTY_KWDS.items():
-                schema = resolved_properties.get(property_name)
-                if not isinstance(schema, dict):
-                    continue
-                if self._base_analyzer._looks_like_anonymous_kwds_target(
-                    property_name, schema
-                ):
-                    property_names.add(property_name)
-        return _anonymous_property_kwds_sources(property_names)
+        return specs
 
     def generate_mark_mixins_module(self) -> GeneratedModule:
         """Generate schema-driven mixins for the handwritten chart API."""
+        mark_property_specs = {
+            mark_type: self.mark_property_specs(mark_type)
+            for mark_type in self.mark_types()
+        }
         mark_methods = [
             _mark_method_source(
                 mark_type,
-                signature_class_name=self.mark_signature_class(mark_type),
+                property_specs=mark_property_specs[mark_type],
             )
             for mark_type in self.mark_types()
         ]
-        needs_core_import = any(
-            self.mark_signature_class(mark_type) is not None
-            for mark_type in self.mark_types()
-        )
+        if "point" in mark_property_specs:
+            mark_methods.append(
+                _mark_method_source(
+                    "point",
+                    method_name="circle",
+                    property_specs=mark_property_specs["point"],
+                )
+            )
+        mark_annotations = [
+            property_spec.annotation
+            for property_specs in mark_property_specs.values()
+            for property_spec in property_specs
+        ]
+        encoding_property_specs = self.schema_property_specs("Encoding")
+        encoding_method = _encoding_method_source(encoding_property_specs)
+        resolution_method_specs = self.resolution_method_specs()
+        resolution_methods = [
+            _resolution_method_source(name, property_specs)
+            for name, property_specs in resolution_method_specs.items()
+        ]
+        properties_specs = {
+            "UnitPropertiesMixin": (
+                self.top_level_property_specs("UnitSpec"),
+                ("data", "mark", "encoding"),
+            ),
+            "LayerPropertiesMixin": (
+                self.top_level_property_specs("LayerSpec"),
+                ("layer",),
+            ),
+            "HConcatPropertiesMixin": (
+                self.top_level_property_specs("HConcatSpec"),
+                ("hconcat",),
+            ),
+            "VConcatPropertiesMixin": (
+                self.top_level_property_specs("VConcatSpec"),
+                ("vconcat",),
+            ),
+            "ConcatPropertiesMixin": (
+                self.top_level_property_specs("ConcatSpec"),
+                ("concat", "columns"),
+            ),
+            "MultiscalePropertiesMixin": (
+                self.top_level_property_specs("MultiscaleSpec"),
+                ("multiscale", "stops"),
+            ),
+        }
+        imported_view_specs = self.schema_property_specs("ImportSpec")
+        property_mixins = [
+            _properties_mixin_source(
+                name,
+                property_specs,
+                positional_properties=positional_properties,
+            )
+            for name, (
+                property_specs,
+                positional_properties,
+            ) in properties_specs.items()
+        ]
+        unit_properties = {
+            property_spec.name: property_spec
+            for property_spec in properties_specs["UnitPropertiesMixin"][0]
+        }
+        top_level_merge_specs = [
+            (
+                unit_properties[name],
+                (
+                    self.schema_property_specs(
+                        unit_properties[name].nested_schema_class_name
+                    )
+                    if unit_properties[name].nested_schema_class_name is not None
+                    else self.shared_scale_property_specs()
+                ),
+            )
+            for name in ("config", "view", "scales")
+            if name in unit_properties
+        ]
+        top_level_merge_methods = [
+            _top_level_merge_method_source(property_spec, property_specs)
+            for property_spec, property_specs in top_level_merge_specs
+        ]
+        config_property_specs = self.schema_property_specs("GenomeSpyConfig")
         config_method_specs = self.config_method_specs()
         config_methods = [
             _config_method_source(
@@ -1075,18 +1328,32 @@ class SchemaWrapperGenerator:
                 annotation=annotation,
                 nested_schema_class_name=nested_schema_class_name,
                 raw_mapping_annotation=raw_mapping_annotation,
+                property_specs=property_specs,
             )
             for (
                 property_name,
                 annotation,
                 nested_schema_class_name,
                 raw_mapping_annotation,
+                property_specs,
             ) in config_method_specs
+        ]
+        config_annotations = [
+            property_spec.annotation for property_spec in config_property_specs
+        ] + [
+            property_spec.annotation
+            for *_, property_specs in config_method_specs
+            for property_spec in property_specs
+        ]
+        top_level_merge_annotations = [
+            property_spec.annotation
+            for _, property_specs in top_level_merge_specs
+            for property_spec in property_specs
         ]
         config_helper_kwds_names = {
             kwds_name
-            for _, annotation, _, _ in config_method_specs
-            for kwds_name in _annotation_kwds_names(annotation)
+            for annotation in config_annotations
+            for kwds_name in _annotation_kwds_names(annotation.annotation)
         }
         transform_method_specs = self.transform_method_specs()
         transform_methods = [
@@ -1097,20 +1364,35 @@ class SchemaWrapperGenerator:
             for spec in transform_method_specs
             for property_spec in spec.properties
         ]
+        all_method_annotations = [
+            *mark_annotations,
+            *config_annotations,
+            *top_level_merge_annotations,
+            *(property_spec.annotation for property_spec in encoding_property_specs),
+            *(property_spec.annotation for property_spec in imported_view_specs),
+            *(
+                property_spec.annotation
+                for specs, _ in properties_specs.values()
+                for property_spec in specs
+            ),
+            *transform_annotations,
+        ]
         needs_literal = any(
-            annotation.needs_literal for annotation in transform_annotations
+            annotation.needs_literal for annotation in all_method_annotations
         )
         needs_sequence = any(
-            annotation.needs_sequence for annotation in transform_annotations
+            annotation.needs_sequence for annotation in all_method_annotations
         )
         transform_alias_names = {
             alias_name
-            for annotation in transform_annotations
+            for annotation in all_method_annotations
             for alias_name in _annotation_alias_names(annotation.annotation)
         }
+        if resolution_method_specs:
+            transform_alias_names.add("ResolutionBehavior_T")
         transform_kwds_names = {
             kwds_name
-            for annotation in transform_annotations
+            for annotation in all_method_annotations
             for kwds_name in _annotation_kwds_names(annotation.annotation)
         }
         available_class_names = {
@@ -1118,7 +1400,7 @@ class SchemaWrapperGenerator:
         }
         transform_class_names = {
             class_name
-            for annotation in transform_annotations
+            for annotation in all_method_annotations
             for class_name in _annotation_class_names(annotation.annotation)
             if class_name in available_class_names
         }
@@ -1132,16 +1414,21 @@ class SchemaWrapperGenerator:
                 ("from collections.abc import Sequence" if needs_sequence else ""),
                 "from typing import " + ", ".join(typing_imports),
                 "",
+                "from typing import TYPE_CHECKING",
+                "",
+                "if TYPE_CHECKING:",
+                "    from genome_spy.channels import Channel",
+                "",
                 (
                     "from genome_spy.schema._typing import "
                     + ", ".join(sorted(transform_alias_names))
                     if transform_alias_names
                     else ""
                 ),
-                "from genome_spy.schemapi import Undefined, UndefinedType, use_signature",
+                "from genome_spy.schemapi import SchemaBase, Undefined, UndefinedType",
                 (
                     "from genome_spy.schema import core"
-                    if needs_core_import or config_method_specs or transform_class_names
+                    if config_method_specs or transform_class_names
                     else ""
                 ),
                 (
@@ -1162,13 +1449,32 @@ class SchemaWrapperGenerator:
                 '    """Grammar-derived mark methods for the handwritten chart API."""',
                 "",
                 *(mark_methods or ["    pass"]),
+                "",
+                "class EncodingMethodMixin:",
+                '    """Schema-derived encoding methods for renderable specifications."""',
+                "",
+                encoding_method,
+                "",
+                "class ResolutionMethodMixin:",
+                '    """Schema-derived composition resolution methods."""',
+                "",
+                *(resolution_methods if resolution_method_specs else ["    pass"]),
+                "",
+                "class TopLevelMergeMixin:",
+                '    """Schema-derived top-level property merge methods."""',
+                "",
+                *(top_level_merge_methods or ["    pass"]),
+                "",
+                _imported_view_constructor_mixin_source(imported_view_specs),
+                "",
+                *property_mixins,
                 *(
                     [
                         "",
                         "class ConfigMethodMixin:",
                         '    """Schema-derived config methods for the handwritten chart API."""',
                         "",
-                        _configure_method_source(),
+                        _configure_method_source(config_property_specs),
                         *(config_methods or ["    pass"]),
                     ]
                     if config_method_specs
@@ -1181,9 +1487,9 @@ class SchemaWrapperGenerator:
                 *(transform_methods or ["    pass"]),
                 "",
                 (
-                    '__all__ = ["ConfigMethodMixin", "MarkMethodMixin", "TransformMethodMixin"]'
+                    '__all__ = ["ConcatPropertiesMixin", "ConfigMethodMixin", "EncodingMethodMixin", "HConcatPropertiesMixin", "ImportedViewConstructorMixin", "LayerPropertiesMixin", "MarkMethodMixin", "MultiscalePropertiesMixin", "ResolutionMethodMixin", "TopLevelMergeMixin", "TransformMethodMixin", "UnitPropertiesMixin", "VConcatPropertiesMixin"]'
                     if config_method_specs
-                    else '__all__ = ["MarkMethodMixin", "TransformMethodMixin"]'
+                    else '__all__ = ["ConcatPropertiesMixin", "EncodingMethodMixin", "HConcatPropertiesMixin", "ImportedViewConstructorMixin", "LayerPropertiesMixin", "MarkMethodMixin", "MultiscalePropertiesMixin", "ResolutionMethodMixin", "TopLevelMergeMixin", "TransformMethodMixin", "UnitPropertiesMixin", "VConcatPropertiesMixin"]'
                 ),
                 "",
             ]
@@ -1191,9 +1497,36 @@ class SchemaWrapperGenerator:
         return GeneratedModule(
             source=source,
             exports=(
-                ("ConfigMethodMixin", "MarkMethodMixin", "TransformMethodMixin")
+                (
+                    "ConcatPropertiesMixin",
+                    "ConfigMethodMixin",
+                    "EncodingMethodMixin",
+                    "HConcatPropertiesMixin",
+                    "ImportedViewConstructorMixin",
+                    "LayerPropertiesMixin",
+                    "MarkMethodMixin",
+                    "MultiscalePropertiesMixin",
+                    "ResolutionMethodMixin",
+                    "TopLevelMergeMixin",
+                    "TransformMethodMixin",
+                    "UnitPropertiesMixin",
+                    "VConcatPropertiesMixin",
+                )
                 if config_method_specs
-                else ("MarkMethodMixin", "TransformMethodMixin")
+                else (
+                    "ConcatPropertiesMixin",
+                    "EncodingMethodMixin",
+                    "HConcatPropertiesMixin",
+                    "ImportedViewConstructorMixin",
+                    "LayerPropertiesMixin",
+                    "MarkMethodMixin",
+                    "MultiscalePropertiesMixin",
+                    "ResolutionMethodMixin",
+                    "TopLevelMergeMixin",
+                    "TransformMethodMixin",
+                    "UnitPropertiesMixin",
+                    "VConcatPropertiesMixin",
+                )
             ),
         )
 
@@ -1212,7 +1545,127 @@ class SchemaWrapperGenerator:
                 return candidate
         return None
 
-    def config_method_specs(self) -> list[tuple[str, str, str | None, str]]:
+    def mark_property_specs(self, mark_type: str) -> tuple[PropertySpec, ...]:
+        """Return the fixed mark's schema-derived keyword parameters."""
+        signature_class = self.mark_signature_class(mark_type)
+        if signature_class is None:
+            return ()
+        definition = next(
+            definition
+            for definition in self.definitions()
+            if _class_name(definition.name) == signature_class
+        )
+        return tuple(
+            property_spec
+            for property_spec in self._analyzer.property_specs(definition)
+            if property_spec.name != "type"
+        )
+
+    def schema_property_specs(self, class_name: str) -> tuple[PropertySpec, ...]:
+        """Return generated properties for a schema wrapper class name."""
+        definition = next(
+            (
+                definition
+                for definition in self.definitions()
+                if _class_name(definition.name) == class_name
+            ),
+            None,
+        )
+        if definition is None:
+            return ()
+        return self._analyzer.property_specs(definition)
+
+    def top_level_property_specs(self, class_name: str) -> tuple[PropertySpec, ...]:
+        """Return properties from the matching concrete root-spec variant."""
+        definition = next(
+            (
+                definition
+                for definition in self.definitions()
+                if _class_name(definition.name) == class_name
+            ),
+            None,
+        )
+        properties: dict[str, PropertySpec] = {}
+        root_schema = self._definitions_map.get("CoreRootSpec", {})
+        root_variants = (
+            root_schema.get("anyOf", []) if isinstance(root_schema, dict) else []
+        )
+        if definition is not None and isinstance(root_variants, list):
+            required = set(definition.required)
+            root_variant = next(
+                (
+                    variant
+                    for variant in root_variants
+                    if isinstance(variant, dict)
+                    and set(variant.get("required", [])) == required
+                ),
+                None,
+            )
+            if root_variant is not None:
+                properties.update(
+                    {
+                        property_spec.name: property_spec
+                        for property_spec in self._analyzer.property_specs(
+                            SchemaDefinition(
+                                f"CoreRootSpec[{class_name}]", root_variant
+                            )
+                        )
+                    }
+                )
+        properties.update(
+            {
+                property_spec.name: property_spec
+                for property_spec in self.schema_property_specs(class_name)
+            }
+        )
+        if "data" in properties:
+            properties["data"] = replace(
+                properties["data"], annotation=AnnotationSpec("Any")
+            )
+        return tuple(properties[name] for name in sorted(properties))
+
+    def root_property_schema(self, property_name: str) -> dict[str, Any]:
+        """Return a root property schema from the first concrete root variant."""
+        root_schema = self._definitions_map.get("CoreRootSpec", {})
+        variants = root_schema.get("anyOf", []) if isinstance(root_schema, dict) else []
+        if not isinstance(variants, list):
+            return {}
+        for variant in variants:
+            if not isinstance(variant, dict):
+                continue
+            properties = variant.get("properties", {})
+            if isinstance(properties, dict):
+                schema = properties.get(property_name)
+                if isinstance(schema, dict):
+                    return schema
+        return {}
+
+    def shared_scale_property_specs(self) -> tuple[PropertySpec, ...]:
+        """Return schema-derived shared-scale channel definitions."""
+        properties = self.root_property_schema("scales").get("properties", {})
+        if not isinstance(properties, dict):
+            return ()
+        return self._analyzer.property_specs_from_properties(properties)
+
+    def resolution_method_specs(self) -> dict[str, tuple[PropertySpec, ...]]:
+        """Return schema-derived resolution fields grouped by component."""
+        properties = self.root_property_schema("resolve").get("properties", {})
+        if not isinstance(properties, dict):
+            return {}
+        specs: dict[str, tuple[PropertySpec, ...]] = {}
+        for name, schema in sorted(properties.items()):
+            if not isinstance(name, str) or not isinstance(schema, dict):
+                continue
+            nested_properties = schema.get("properties", {})
+            if isinstance(nested_properties, dict):
+                specs[name] = self._analyzer.property_specs_from_properties(
+                    nested_properties
+                )
+        return specs
+
+    def config_method_specs(
+        self,
+    ) -> list[tuple[str, str, str | None, str, tuple[PropertySpec, ...]]]:
         """Return generated method specs for GenomeSpyConfig properties."""
         try:
             definition = next(
@@ -1223,7 +1676,7 @@ class SchemaWrapperGenerator:
         except StopIteration:
             return []
 
-        specs: list[tuple[str, str, str | None, str]] = []
+        specs: list[tuple[str, str, str | None, str, tuple[PropertySpec, ...]]] = []
         for property_spec in self._analyzer.property_specs(definition):
             raw_mapping_annotation = (
                 self._analyzer.raw_mapping_annotation(
@@ -1238,6 +1691,13 @@ class SchemaWrapperGenerator:
                     property_spec.annotation.annotation,
                     property_spec.nested_schema_class_name,
                     raw_mapping_annotation,
+                    (
+                        self.schema_property_specs(
+                            property_spec.nested_schema_class_name
+                        )
+                        if property_spec.nested_schema_class_name is not None
+                        else ()
+                    ),
                 )
             )
         return specs
@@ -1254,6 +1714,16 @@ class SchemaWrapperGenerator:
             encoding_name: self.channel_simple_setters(encoding_name)
             for encoding_name in self.encoding_channels()
         }
+        sort_property_specs = self.schema_property_specs("CompareParams")
+        nested_property_specs_by_channel = {
+            encoding_name: {
+                property_name: self.schema_property_specs(class_name)
+                for property_name, class_name, _ in self.channel_nested_setters(
+                    encoding_name
+                )
+            }
+            for encoding_name in self.encoding_channels()
+        }
         helper_class_names = {
             class_name
             for encoding_name in self.encoding_channels()
@@ -1264,6 +1734,17 @@ class SchemaWrapperGenerator:
             for encoding_name in self.encoding_channels()
             for property_spec in simple_setters_by_channel[encoding_name]
         )
+        nested_setter_specs = tuple(
+            property_spec
+            for property_specs in nested_property_specs_by_channel.values()
+            for specs in property_specs.values()
+            for property_spec in specs
+        )
+        channel_setter_specs = (
+            *simple_setter_specs,
+            *nested_setter_specs,
+            *sort_property_specs,
+        )
         helper_kwds_names = {
             _kwds_type_name(class_name)
             for class_name in helper_class_names
@@ -1271,14 +1752,14 @@ class SchemaWrapperGenerator:
         }
         helper_kwds_names.update(
             kwds_name
-            for property_spec in simple_setter_specs
+            for property_spec in channel_setter_specs
             for kwds_name in _annotation_kwds_names(property_spec.annotation.annotation)
             if kwds_name in kwds_type_names
         )
         helper_alias_names = sorted(
             {
                 alias_name
-                for property_spec in simple_setter_specs
+                for property_spec in channel_setter_specs
                 for alias_name in _annotation_alias_names(
                     property_spec.annotation.annotation
                 )
@@ -1294,7 +1775,11 @@ class SchemaWrapperGenerator:
         }
         needs_sequence = any(
             property_spec.annotation.needs_sequence
-            for property_spec in simple_setter_specs
+            for property_spec in channel_setter_specs
+        )
+        needs_literal = any(
+            property_spec.annotation.needs_literal
+            for property_spec in channel_setter_specs
         )
         for encoding_name in self.encoding_channels():
             class_name = _class_name(encoding_name)
@@ -1304,22 +1789,27 @@ class SchemaWrapperGenerator:
                     class_name,
                     encoding_name,
                     nested_setters=self.channel_nested_setters(encoding_name),
+                    nested_property_specs=nested_property_specs_by_channel[
+                        encoding_name
+                    ],
                     simple_setters=simple_setters_by_channel[encoding_name],
-                    analyzer=self._analyzer,
+                    constructor_property_specs=self.channel_property_specs(
+                        encoding_name
+                    ),
+                    sort_property_specs=sort_property_specs,
                 )
             )
-        needs_compare_params = any(
-            "sort" in setters for setters in simple_setters_by_channel.values()
-        )
+        needs_compare_params = bool(sort_property_specs)
         source = "\n".join(
             [
                 GENERATED_HEADER,
                 "from __future__ import annotations",
                 ("from collections.abc import Sequence" if needs_sequence else ""),
-                "from typing import Any",
+                "from typing import Any" + (", Literal" if needs_literal else ""),
                 "",
                 "from genome_spy.channels import Channel, _MISSING, channel",
-                "from genome_spy.schemapi import SchemaBase",
+                "from genome_spy.schemapi import SchemaBase, Undefined, UndefinedType",
+                "from genome_spy.schema import core",
                 (
                     "from genome_spy.schema._typing import "
                     + ", ".join(helper_alias_names)
@@ -1359,6 +1849,542 @@ class SchemaWrapperGenerator:
         )
         return GeneratedModule(source=source, exports=tuple(exports))
 
+    def generate_composition_module(self) -> GeneratedModule:
+        """Generate public composition helper functions from top-level specs."""
+        specs = (
+            ("layer", "LayerSpec", "layer", "LayerChart", ()),
+            ("hconcat", "HConcatSpec", "hconcat", "HConcatChart", ()),
+            ("vconcat", "VConcatSpec", "vconcat", "VConcatChart", ()),
+            ("concat", "ConcatSpec", "concat", "ConcatChart", ("columns",)),
+            (
+                "multiscale",
+                "MultiscaleSpec",
+                "multiscale",
+                "MultiscaleChart",
+                ("stops",),
+            ),
+        )
+        method_specs = [
+            (
+                name,
+                child_key,
+                return_class,
+                self._composition_property_specs(schema_class, child_key, required),
+                tuple(
+                    property_spec
+                    for property_spec in self.top_level_property_specs(schema_class)
+                    if property_spec.name in required
+                ),
+            )
+            for name, schema_class, child_key, return_class, required in specs
+        ]
+        import_property_specs = tuple(
+            property_spec
+            for property_spec in self.schema_property_specs("ImportSpec")
+            if property_spec.name != "import"
+        )
+        annotations = [
+            property_spec.annotation
+            for _, _, _, property_specs, required_specs in method_specs
+            for property_spec in (*property_specs, *required_specs)
+        ] + [property_spec.annotation for property_spec in import_property_specs]
+        aliases = sorted(
+            {
+                alias
+                for annotation in annotations
+                for alias in _annotation_alias_names(annotation.annotation)
+            }
+        )
+        kwds = sorted(
+            {
+                name
+                for annotation in annotations
+                for name in _annotation_kwds_names(annotation.annotation)
+            }
+        )
+        needs_literal = any(annotation.needs_literal for annotation in annotations)
+        needs_sequence = any(annotation.needs_sequence for annotation in annotations)
+        return GeneratedModule(
+            source="\n".join(
+                [
+                    GENERATED_HEADER,
+                    "from __future__ import annotations",
+                    ("from collections.abc import Sequence" if needs_sequence else ""),
+                    "from typing import Any, cast"
+                    + (", Literal" if needs_literal else ""),
+                    "",
+                    "from typing import TYPE_CHECKING",
+                    "",
+                    "if TYPE_CHECKING:",
+                    "    from genome_spy.chart import "
+                    + ", ".join(
+                        sorted(
+                            {
+                                *(
+                                    return_class
+                                    for _, _, return_class, _, _ in method_specs
+                                ),
+                                "ImportedView",
+                                "TopLevelSpec",
+                            }
+                        )
+                    ),
+                    "",
+                    (
+                        "from genome_spy.schema._typing import " + ", ".join(aliases)
+                        if aliases
+                        else ""
+                    ),
+                    (
+                        "from genome_spy.schema._kwds import " + ", ".join(kwds)
+                        if kwds
+                        else ""
+                    ),
+                    "from genome_spy.schemapi import Undefined, UndefinedType",
+                    "from genome_spy.schema import core",
+                    "",
+                    *(
+                        _composition_function_source(
+                            name,
+                            child_key=child_key,
+                            return_class=return_class,
+                            property_specs=property_specs,
+                            required_specs=required_specs,
+                        )
+                        for name, child_key, return_class, property_specs, required_specs in method_specs
+                    ),
+                    _import_view_function_source(import_property_specs),
+                    "",
+                    "__all__ = "
+                    + repr([*(name for name, *_ in method_specs), "import_view"]),
+                    "",
+                ]
+            ),
+            exports=tuple([*(name for name, *_ in method_specs), "import_view"]),
+        )
+
+    def generate_lazy_module(self) -> GeneratedModule:
+        """Generate named lazy data-source helpers from ``LazyDataParams``."""
+        method_specs = self.lazy_data_method_specs()
+        annotations = [
+            annotation
+            for spec in method_specs
+            for annotation in (
+                spec.url_annotation,
+                *(p.annotation for p in spec.properties),
+            )
+        ]
+        aliases = sorted(
+            {
+                alias
+                for annotation in annotations
+                for alias in _annotation_alias_names(annotation.annotation)
+            }
+        )
+        kwds = sorted(
+            {
+                name
+                for annotation in annotations
+                for name in _annotation_kwds_names(annotation.annotation)
+            }
+        )
+        needs_literal = any(annotation.needs_literal for annotation in annotations)
+        needs_sequence = any(annotation.needs_sequence for annotation in annotations)
+        source = "\n".join(
+            [
+                GENERATED_HEADER,
+                "from __future__ import annotations",
+                ("from collections.abc import Sequence" if needs_sequence else ""),
+                "from typing import Any, cast" + (", Literal" if needs_literal else ""),
+                "",
+                (
+                    "from genome_spy.schema._typing import " + ", ".join(aliases)
+                    if aliases
+                    else ""
+                ),
+                (
+                    "from genome_spy.schema._kwds import " + ", ".join(kwds)
+                    if kwds
+                    else ""
+                ),
+                "from genome_spy.schemapi import Undefined, UndefinedType",
+                "from genome_spy.schema import core",
+                "",
+                "class LazyDataMethodMixin:",
+                '    """Schema-derived named lazy data-source helpers."""',
+                "",
+                *(_lazy_data_method_source(spec) for spec in method_specs),
+                *(["    pass"] if not method_specs else []),
+                "",
+                "__all__ = ['LazyDataMethodMixin']",
+                "",
+            ]
+        )
+        return GeneratedModule(source=source, exports=("LazyDataMethodMixin",))
+
+    def generate_ergonomics_module(self) -> GeneratedModule:
+        """Generate small schema-backed public authoring helpers."""
+        locus_properties = self.schema_property_specs("ChromPosDef")
+        locus_property_specs = tuple(
+            property_spec
+            for property_spec in locus_properties
+            if property_spec.name not in {"chrom", "pos", "type"}
+        )
+        locus_annotations = [
+            property_spec.annotation for property_spec in locus_property_specs
+        ]
+        locus_nested_specs = {
+            "axis": self.schema_property_specs("GenomeAxis"),
+            "scale": self.schema_property_specs("Scale"),
+        }
+        channel_nested_specs = {
+            "axis": (
+                "core.GenomeAxis | GenomeAxisKwds | None | object",
+                self.schema_property_specs("GenomeAxis"),
+            ),
+            "scale": (
+                "core.Scale | ScaleKwds | None | object",
+                self.schema_property_specs("Scale"),
+            ),
+            "legend": (
+                "core.Legend | LegendKwds | None | object",
+                self.schema_property_specs("Legend"),
+            ),
+        }
+        compare_properties = self.schema_property_specs("CompareParams")
+        datum_properties = self.channel_helper_property_specs("datum")
+        value_properties = self.channel_helper_property_specs("value")
+        factory_helpers = (
+            ("title", "Title", "Create a chart title object.", "text", False),
+            (
+                "dynamic_opacity",
+                "DynamicOpacity",
+                "Create a zoom-dependent opacity definition.",
+                None,
+                False,
+            ),
+            (
+                "data_format",
+                "DataFormat",
+                "Create a data-format wrapper.",
+                None,
+                False,
+            ),
+            ("param", "Parameter", "Create a parameter definition.", "name", False),
+            (
+                "view",
+                "ViewBackground",
+                "Create a view background configuration.",
+                None,
+                False,
+            ),
+            (
+                "view_config",
+                "ViewConfig",
+                "Create a top-level view config object.",
+                None,
+                False,
+            ),
+            (
+                "config",
+                "GenomeSpyConfig",
+                "Create a top-level GenomeSpy config object.",
+                None,
+                True,
+            ),
+        )
+        factory_helper_specs = tuple(
+            (
+                helper_name,
+                class_name,
+                docstring,
+                positional_property,
+                normalize_view_background,
+                self.schema_property_specs(class_name),
+            )
+            for (
+                helper_name,
+                class_name,
+                docstring,
+                positional_property,
+                normalize_view_background,
+            ) in factory_helpers
+            if self.schema_property_specs(class_name)
+        )
+        has_locus = any(
+            property_spec.name == "chrom" for property_spec in locus_properties
+        )
+        has_compare = {property_spec.name for property_spec in compare_properties} >= {
+            "field",
+            "order",
+        }
+        has_datum = bool(datum_properties)
+        has_value = bool(value_properties)
+        helper_property_names = {
+            property_spec.name
+            for property_spec in (*datum_properties, *value_properties)
+        }
+        used_channel_nested_specs = {
+            name: nested
+            for name, nested in channel_nested_specs.items()
+            if name in helper_property_names
+        }
+        annotations = [
+            *locus_annotations,
+            *(p.annotation for specs in locus_nested_specs.values() for p in specs),
+            *(
+                AnnotationSpec(value_annotation)
+                for value_annotation, _ in used_channel_nested_specs.values()
+            ),
+            *(
+                p.annotation
+                for _, specs in used_channel_nested_specs.values()
+                for p in specs
+            ),
+            *(p.annotation for p in compare_properties),
+            *(p.annotation for p in datum_properties),
+            *(p.annotation for p in value_properties),
+            *(
+                p.annotation
+                for *_, property_specs in factory_helper_specs
+                for p in property_specs
+            ),
+        ]
+        aliases = sorted(
+            {"FieldName_T"}
+            | {
+                alias
+                for annotation in annotations
+                for alias in _annotation_alias_names(annotation.annotation)
+            }
+        )
+        kwds = sorted(
+            {
+                name
+                for annotation in annotations
+                for name in _annotation_kwds_names(annotation.annotation)
+            }
+        )
+        needs_literal = any(
+            "Literal[" in annotation.annotation for annotation in annotations
+        )
+        needs_sequence = any(annotation.needs_sequence for annotation in annotations)
+        return GeneratedModule(
+            source="\n".join(
+                [
+                    GENERATED_HEADER,
+                    "from __future__ import annotations",
+                    ("from collections.abc import Sequence" if needs_sequence else ""),
+                    "from typing import Any, Self"
+                    + (", Literal" if needs_literal else ""),
+                    "",
+                    "from typing import TYPE_CHECKING",
+                    "",
+                    "if TYPE_CHECKING:",
+                    "    from genome_spy.channels import DatumChannel, LocusChannel, ValueChannel",
+                    "",
+                    (
+                        "from genome_spy.schema._typing import " + ", ".join(aliases)
+                        if aliases
+                        else ""
+                    ),
+                    (
+                        "from genome_spy.schema._kwds import " + ", ".join(kwds)
+                        if kwds
+                        else ""
+                    ),
+                    "from genome_spy.schemapi import Undefined, UndefinedType",
+                    "from genome_spy.schema import core",
+                    "",
+                    _channel_helper_mixin_source(
+                        "DatumChannelMethodMixin",
+                        "datum",
+                        datum_properties,
+                        nested_specs=channel_nested_specs,
+                    ),
+                    _channel_helper_mixin_source(
+                        "ValueChannelMethodMixin",
+                        "value",
+                        value_properties,
+                        nested_specs=channel_nested_specs,
+                    ),
+                    "class LocusChannelMethodMixin:",
+                    '    """Schema-derived nested setters for locus channels."""',
+                    "",
+                    _nested_schema_method_source(
+                        method_name="axis",
+                        value_annotation="core.GenomeAxis | GenomeAxisKwds | None | object",
+                        property_specs=locus_nested_specs["axis"],
+                        docstring="Return a locus channel with an axis configuration.",
+                        call="self._with_nested('axis', value, **defined)",
+                    ),
+                    _nested_schema_method_source(
+                        method_name="scale",
+                        value_annotation="core.Scale | ScaleKwds | None | object",
+                        property_specs=locus_nested_specs["scale"],
+                        docstring="Return a locus channel with a scale configuration.",
+                        call="self._with_nested('scale', value, **defined)",
+                    ),
+                    *(
+                        [
+                            _locus_helper_source("locus", locus_property_specs),
+                            _locus_helper_source("Locus", locus_property_specs),
+                        ]
+                        if has_locus
+                        else []
+                    ),
+                    *(
+                        [_compare_helper_source(compare_properties)]
+                        if has_compare
+                        else []
+                    ),
+                    *(
+                        [
+                            _channel_helper_source(
+                                "datum", datum_properties, "DatumChannel"
+                            )
+                        ]
+                        if has_datum
+                        else []
+                    ),
+                    *(
+                        [
+                            _channel_helper_source(
+                                "value", value_properties, "ValueChannel"
+                            )
+                        ]
+                        if has_value
+                        else []
+                    ),
+                    *(
+                        _schema_factory_helper_source(
+                            helper_name,
+                            class_name,
+                            property_specs,
+                            docstring=docstring,
+                            positional_property=positional_property,
+                            normalize_view_background=normalize_view_background,
+                        )
+                        for (
+                            helper_name,
+                            class_name,
+                            docstring,
+                            positional_property,
+                            normalize_view_background,
+                            property_specs,
+                        ) in factory_helper_specs
+                    ),
+                    "",
+                    "__all__ = "
+                    + repr(
+                        [
+                            *(["Locus", "locus"] if has_locus else []),
+                            *(["compare"] if has_compare else []),
+                            *(["datum"] if has_datum else []),
+                            *(["value"] if has_value else []),
+                            *(helper_name for helper_name, *_ in factory_helper_specs),
+                            "DatumChannelMethodMixin",
+                            "LocusChannelMethodMixin",
+                            "ValueChannelMethodMixin",
+                        ]
+                    ),
+                    "",
+                ]
+            ),
+            exports=tuple(
+                [
+                    *(["Locus", "locus"] if has_locus else []),
+                    *(["compare"] if has_compare else []),
+                    *(["datum"] if has_datum else []),
+                    *(["value"] if has_value else []),
+                    *(helper_name for helper_name, *_ in factory_helper_specs),
+                    "DatumChannelMethodMixin",
+                    "LocusChannelMethodMixin",
+                    "ValueChannelMethodMixin",
+                ]
+            ),
+        )
+
+    def channel_helper_property_specs(
+        self, helper_name: str
+    ) -> tuple[PropertySpec, ...]:
+        """Return all schema properties for channels supporting one helper."""
+        encoding_schema = self._definitions_map.get("Encoding", {})
+        properties = (
+            encoding_schema.get("properties", {})
+            if isinstance(encoding_schema, dict)
+            else {}
+        )
+        if not isinstance(properties, dict):
+            return ()
+
+        specs_by_name: dict[str, list[PropertySpec]] = {}
+        for channel_name, channel_schema in properties.items():
+            if not isinstance(channel_name, str) or not isinstance(
+                channel_schema, dict
+            ):
+                continue
+            for property_variant in self._analyzer.property_variants(channel_schema):
+                if helper_name not in property_variant:
+                    continue
+                for property_spec in self._analyzer.property_specs_from_properties(
+                    property_variant
+                ):
+                    specs_by_name.setdefault(property_spec.name, []).append(
+                        property_spec
+                    )
+
+        specs: list[PropertySpec] = []
+        for name, values in sorted(specs_by_name.items()):
+            unique_annotations = tuple(
+                dict.fromkeys(value.annotation.annotation for value in values)
+            )
+            nested_class_names = {
+                value.nested_schema_class_name
+                for value in values
+                if value.nested_schema_class_name is not None
+            }
+            specs.append(
+                PropertySpec(
+                    name=name,
+                    annotation=AnnotationSpec(
+                        unique_annotations[0]
+                        if len(unique_annotations) == 1
+                        else "Any",
+                        needs_literal=any(
+                            value.annotation.needs_literal for value in values
+                        ),
+                        needs_sequence=any(
+                            value.annotation.needs_sequence for value in values
+                        ),
+                    ),
+                    nested_schema_class_name=(
+                        next(iter(nested_class_names))
+                        if len(nested_class_names) == 1
+                        else None
+                    ),
+                    description=next(
+                        (value.description for value in values if value.description),
+                        "",
+                    ),
+                )
+            )
+        return tuple(specs)
+
+    def _composition_property_specs(
+        self,
+        class_name: str,
+        child_key: str,
+        required: tuple[str, ...],
+    ) -> tuple[PropertySpec, ...]:
+        excluded = {"layer", "hconcat", "vconcat", "concat", "multiscale", child_key}
+        excluded.update(required)
+        return tuple(
+            property_spec
+            for property_spec in self.top_level_property_specs(class_name)
+            if property_spec.name not in excluded
+        )
+
 
 def _class_name(name: str) -> str:
     parts = re.split(r"[^0-9A-Za-z]+", name)
@@ -1391,6 +2417,49 @@ def _first_ref_name(schema: dict[str, Any]) -> str | None:
                 if ref is not None:
                     return ref
     return None
+
+
+def _property_description(schema: Any) -> str:
+    """Return a compact Sphinx-safe description from a property schema."""
+    if not isinstance(schema, dict):
+        return ""
+    description = schema.get("description")
+    if not isinstance(description, str):
+        return ""
+    normalized = " ".join(description.split())
+    # Keep Markdown link labels, but do not feed Markdown links to docutils.
+    normalized = re.sub(r"\[([^\]]+)]\([^)]*\)", r"\1", normalized)
+    # JSON Schema descriptions also use Markdown's underscore emphasis.
+    normalized = re.sub(r"(?<!\w)_([^_]+)_(?!\w)", r"\1", normalized)
+    # GenomeSpy descriptions use Markdown's single-backtick code notation;
+    # generated docstrings are parsed as reStructuredText by Sphinx.
+    return re.sub(r"(?<!`)`(?!`)", "``", normalized)
+
+
+def _method_docstring(
+    summary: str, property_specs: tuple[PropertySpec, ...], *, indent: int
+) -> str:
+    """Render a complete Google-style generated method docstring."""
+    prefix = " " * indent
+    lines = [f'{prefix}"""{summary}']
+    if property_specs:
+        lines.extend(["", f"{prefix}Args:"])
+        lines.extend(
+            f"{prefix}    {_docstring_parameter_name(property_spec.python_name)} "
+            f"({property_spec.annotation.annotation}): "
+            + (
+                property_spec.description
+                or f"Schema-defined ``{property_spec.name}`` property."
+            )
+            for property_spec in property_specs
+        )
+    lines.append(f'{prefix}"""')
+    return "\n".join(lines)
+
+
+def _docstring_parameter_name(name: str) -> str:
+    """Escape a Python keyword suffix for reStructuredText field parsing."""
+    return f"{name[:-1]}\\\\_" if name.endswith("_") else name
 
 
 def _nested_setter_ref_name(schema: dict[str, Any]) -> str | None:
@@ -1481,13 +2550,15 @@ def _schema_class_source(
                 if property_spec.nested_schema_class_name is not None
                 else "dict[str, Any]"
             ),
+            nested_property_specs=_nested_property_specs(
+                analyzer, property_spec.nested_schema_class_name
+            ),
         )
         for property_spec in property_specs
     )
 
     return GeneratedSchemaClass(
         source=(
-            f"@with_property_setters\n"
             f"class {class_name}(GenomeSpySchema):\n"
             f'    """Generated wrapper for ``{definition.name}``."""\n\n'
             f'    _schema = _ROOT_SCHEMA.get("definitions", {{}}).get({definition.name!r}, {{}})\n\n'
@@ -1594,19 +2665,671 @@ def _is_literal_value(value: Any) -> bool:
     return isinstance(value, str | bool | int | float) or value is None
 
 
-def _mark_method_source(mark_type: str, *, signature_class_name: str | None) -> str:
-    method_name = mark_type.replace("-", "_")
-    decorator = (
-        f"    @use_signature(core.{signature_class_name})\n"
-        if signature_class_name is not None
+def _mark_method_source(
+    mark_type: str,
+    *,
+    method_name: str | None = None,
+    property_specs: tuple[PropertySpec, ...],
+) -> str:
+    method_name = method_name or mark_type.replace("-", "_")
+    parameters = "\n".join(
+        f"        {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation)} "
+        "| UndefinedType = Undefined,"
+        for property_spec in property_specs
+    )
+    if parameters:
+        parameters = f",\n        *,\n{parameters}\n"
+    else:
+        parameters = ""
+    property_values = "\n".join(
+        f"            {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in property_specs
+    )
+    if property_values:
+        body = (
+            "        properties = {\n"
+            f"{property_values}\n"
+            "        }\n"
+            "        defined = {key: value for key, value in properties.items() "
+            "if value is not Undefined}\n"
+            f"        return self._with_mark({mark_type!r}, **defined)  "
+            "# type: ignore[attr-defined, no-any-return]"
+        )
+    else:
+        body = (
+            f"        return self._with_mark({mark_type!r})  "
+            "# type: ignore[attr-defined, no-any-return]"
+        )
+    return (
+        f"    def mark_{method_name}(self{parameters}) -> Self:\n"
+        + _method_docstring(
+            f"Set the chart mark to ``{mark_type}``.", property_specs, indent=8
+        )
+        + "\n"
+        f"{body}"
+    )
+
+
+def _lazy_data_method_source(spec: LazyDataMethodSpec) -> str:
+    """Render one concrete lazy data-source convenience method."""
+    parameters = "\n".join(
+        f"        {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation)} "
+        "| UndefinedType = Undefined,"
+        for property_spec in spec.properties
+    )
+    values = "\n".join(
+        f"            {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in spec.properties
+    )
+    return "\n".join(
+        [
+            f"    def {spec.method_name}(",
+            "        self,",
+            f"        url: {_qualified_transform_annotation(spec.url_annotation.annotation)},",
+            "        /,",
+            *(["        *,", parameters] if parameters else []),
+            "    ) -> core.Data:",
+            _method_docstring(
+                f"Create a lazy ``{spec.source_type}`` data source.",
+                spec.properties,
+                indent=8,
+            ),
+            "        properties = {",
+            values,
+            "        }",
+            "        defined: dict[str, Any] = {",
+            "            key: value for key, value in properties.items() if value is not Undefined",
+            "        }",
+            "        return core.Data(",
+            "            lazy=core.LazyDataParams(",
+            f"                type=cast(Any, {spec.source_type!r}), url=url, **defined",
+            "            )",
+            "        )",
+            "",
+        ]
+    )
+
+
+def _locus_helper_source(name: str, property_specs: tuple[PropertySpec, ...]) -> str:
+    """Render a schema-derived chromosomal locus helper."""
+    parameters = "\n".join(
+        f"    {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation)} "
+        "| UndefinedType = Undefined,"
+        for property_spec in property_specs
+    )
+    values = "\n".join(
+        f"        {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in property_specs
+    )
+    return "\n".join(
+        [
+            f"def {name}(",
+            "    chrom: FieldName_T,",
+            "    pos: FieldName_T | None = None,",
+            "    /,",
+            "    *,",
+            parameters,
+            ") -> LocusChannel:",
+            _method_docstring(
+                "Create a GenomeSpy chromosomal locus channel definition.",
+                property_specs,
+                indent=4,
+            ),
+            "    properties = {",
+            values,
+            "    }",
+            "    defined: dict[str, Any] = {",
+            "        key: value for key, value in properties.items() if value is not Undefined",
+            "    }",
+            "    definition: dict[str, Any] = {'chrom': chrom, 'type': 'locus', **defined}",
+            "    if pos is not None:",
+            "        definition['pos'] = pos",
+            "    from genome_spy.channels import LocusChannel",
+            "",
+            "    return LocusChannel(definition)",
+            "",
+        ]
+    )
+
+
+def _compare_helper_source(property_specs: tuple[PropertySpec, ...]) -> str:
+    """Render the schema-derived ``compare`` helper."""
+    properties = {property_spec.name: property_spec for property_spec in property_specs}
+    field = properties.get("field")
+    order = properties.get("order")
+    if field is None or order is None:
+        raise ValueError("CompareParams must define field and order properties.")
+    return "\n".join(
+        [
+            "def compare(",
+            f"    field: {_qualified_transform_annotation(field.annotation.annotation)} | None = None,",
+            "    *,",
+            f"    order: {_qualified_transform_annotation(order.annotation.annotation)} | None = None,",
+            ") -> core.CompareParams:",
+            _method_docstring(
+                "Create a sort/compare definition.", property_specs, indent=4
+            ),
+            "    properties = {'field': field, 'order': order}",
+            "    defined: dict[str, Any] = {",
+            "        key: value for key, value in properties.items() if value is not None",
+            "    }",
+            "    return core.CompareParams(**defined)",
+            "",
+        ]
+    )
+
+
+def _channel_helper_source(
+    helper_name: str,
+    property_specs: tuple[PropertySpec, ...],
+    channel_class_name: str,
+) -> str:
+    """Render a generic channel helper with schema-derived options."""
+    main_property = next(
+        property_spec
+        for property_spec in property_specs
+        if property_spec.name == helper_name
+    )
+    options = tuple(
+        property_spec
+        for property_spec in property_specs
+        if property_spec.name != helper_name
+    )
+    parameters = "\n".join(
+        f"    {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation)} "
+        "| UndefinedType = Undefined,"
+        for property_spec in options
+    )
+    values = "\n".join(
+        f"        {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in options
+    )
+    return "\n".join(
+        [
+            f"def {helper_name}(",
+            f"    {helper_name}: {_qualified_transform_annotation(main_property.annotation.annotation)},",
+            "    /,",
+            "    *,",
+            parameters,
+            f") -> {channel_class_name}:",
+            _method_docstring(
+                f"Create a constant-{helper_name} encoding channel.",
+                property_specs,
+                indent=4,
+            ),
+            "    properties = {",
+            f"        {helper_name!r}: {helper_name},",
+            values,
+            "    }",
+            "    defined = {key: value for key, value in properties.items() if value is not Undefined}",
+            f"    from genome_spy.channels import {channel_class_name}",
+            "",
+            f"    return {channel_class_name}(defined)",
+            "",
+        ]
+    )
+
+
+def _channel_helper_mixin_source(
+    class_name: str,
+    helper_name: str,
+    property_specs: tuple[PropertySpec, ...],
+    *,
+    nested_specs: dict[str, tuple[str, tuple[PropertySpec, ...]]],
+) -> str:
+    """Render fluent methods available on one constant-channel branch."""
+    methods: list[str] = []
+    for property_spec in property_specs:
+        if property_spec.name == helper_name:
+            continue
+        nested = nested_specs.get(property_spec.name)
+        if nested is not None:
+            value_annotation, nested_property_specs = nested
+            methods.append(
+                _nested_schema_method_source(
+                    method_name=property_spec.python_name,
+                    value_annotation=value_annotation,
+                    property_specs=nested_property_specs,
+                    docstring=(
+                        f"Return a channel with a {property_spec.name} configuration."
+                    ),
+                    call=(
+                        f"self._with_nested({property_spec.name!r}, value, **defined)"
+                    ),
+                )
+            )
+            continue
+        methods.append(
+            "\n".join(
+                [
+                    f"    def {property_spec.python_name}(",
+                    "        self,",
+                    "        value: "
+                    f"{_qualified_transform_annotation(property_spec.annotation.annotation)},",
+                    "    ) -> Self:",
+                    f'        """Return a channel with ``{property_spec.name}`` updated."""',
+                    f"        return self._with_property({property_spec.name!r}, value)  # type: ignore[attr-defined, no-any-return]",
+                ]
+            )
+        )
+    return "\n".join(
+        [
+            f"class {class_name}:",
+            f'    """Schema-derived methods for ``{helper_name}`` channels."""',
+            "",
+            *(methods or ["    pass"]),
+            "",
+        ]
+    )
+
+
+def _schema_factory_helper_source(
+    helper_name: str,
+    class_name: str,
+    property_specs: tuple[PropertySpec, ...],
+    *,
+    docstring: str,
+    positional_property: str | None,
+    normalize_view_background: bool,
+) -> str:
+    """Render a schema-object factory with explicit generated properties."""
+    positional_spec = next(
+        (
+            property_spec
+            for property_spec in property_specs
+            if property_spec.name == positional_property
+        ),
+        None,
+    )
+    options = tuple(
+        property_spec
+        for property_spec in property_specs
+        if property_spec is not positional_spec
+    )
+    parameters = "\n".join(
+        f"    {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation)} "
+        "| UndefinedType = Undefined,"
+        for property_spec in options
+    )
+    values = "\n".join(
+        f"        {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in options
+    )
+    positional_parameter = (
+        f"    {positional_spec.python_name}: "
+        f"{_qualified_transform_annotation(positional_spec.annotation.annotation)},"
+        if positional_spec is not None
         else ""
     )
-    return (
-        f"{decorator}"
-        f"    def mark_{method_name}(self, **kwargs: Any) -> Self:\n"
-        f'        """Set the chart mark to ``{mark_type}``."""\n'
-        f"        return self._with_mark({mark_type!r}, **kwargs)  "
-        "# type: ignore[attr-defined, no-any-return]"
+    positional_value = (
+        f"        {positional_spec.name!r}: {positional_spec.python_name},"
+        if positional_spec is not None
+        else ""
+    )
+    signature = [f"def {helper_name}("]
+    if positional_parameter:
+        signature.extend([positional_parameter, "    /,"])
+    signature.extend(["    *,", parameters, f") -> core.{class_name}:"])
+    normalization = (
+        [
+            "    if isinstance(defined.get('view'), core.ViewBackground):",
+            "        defined['view'] = core.ViewConfig(**defined['view'].to_dict(validate=False))",
+        ]
+        if normalize_view_background
+        else []
+    )
+    return "\n".join(
+        [
+            *signature,
+            _method_docstring(docstring, property_specs, indent=4),
+            "    properties = {",
+            *([positional_value] if positional_value else []),
+            *([values] if values else []),
+            "    }",
+            "    defined: dict[str, Any] = {",
+            "        key: value for key, value in properties.items() if value is not Undefined",
+            "    }",
+            *normalization,
+            f"    return core.{class_name}(**defined)",
+            "",
+            "",
+        ]
+    )
+
+
+def _encoding_method_source(property_specs: tuple[PropertySpec, ...]) -> str:
+    """Render the schema-derived fluent ``encode`` method."""
+    parameters = "\n".join(
+        f"        {property_spec.python_name}: "
+        "Channel | SchemaBase | str | dict[str, Any] | "
+        "Sequence[Channel | SchemaBase | str | dict[str, Any]] | None | "
+        "UndefinedType = Undefined,"
+        for property_spec in property_specs
+    )
+    property_values = "\n".join(
+        f"            {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in property_specs
+    )
+    return "\n".join(
+        [
+            "    def encode(",
+            "        self,",
+            "        *args: Channel,",
+            parameters,
+            "    ) -> Self:",
+            _method_docstring(
+                "Return a new specification with merged channel encodings.",
+                property_specs,
+                indent=8,
+            ),
+            "        properties = {",
+            property_values,
+            "        }",
+            "        defined = {",
+            "            key: value for key, value in properties.items() if value is not Undefined",
+            "        }",
+            "        return self._encode(args, defined)  # type: ignore[attr-defined, no-any-return]",
+        ]
+    )
+
+
+def _properties_mixin_source(
+    class_name: str,
+    property_specs: tuple[PropertySpec, ...],
+    *,
+    positional_properties: tuple[str, ...],
+) -> str:
+    """Render a concrete top-level property builder."""
+    specs_by_name = {spec.name: spec for spec in property_specs}
+    positional_specs = tuple(
+        specs_by_name[name] for name in positional_properties if name in specs_by_name
+    )
+    keyword_specs = tuple(
+        spec for spec in property_specs if spec.name not in positional_properties
+    )
+    positional_parameters = "\n".join(
+        f"        {spec.python_name}: {_qualified_transform_annotation(spec.annotation.annotation)} | UndefinedType = Undefined,"
+        for spec in positional_specs
+    )
+    keyword_parameters = "\n".join(
+        f"        {spec.python_name}: {_qualified_transform_annotation(spec.annotation.annotation)} | UndefinedType = Undefined,"
+        for spec in keyword_specs
+    )
+    parameters = "\n".join(
+        f"        {spec.python_name}: {_qualified_transform_annotation(spec.annotation.annotation)} | UndefinedType = Undefined,"
+        for spec in property_specs
+    )
+    values = "\n".join(
+        f"            {spec.name!r}: {spec.python_name}," for spec in property_specs
+    )
+    constructor_docs = (
+        *property_specs,
+        PropertySpec(
+            "schema_url",
+            AnnotationSpec("str | None"),
+            description="Root JSON Schema URL. Uses the packaged default when omitted.",
+        ),
+    )
+    return "\n".join(
+        [
+            f"class {class_name}:",
+            '    """Schema-derived top-level property builder."""',
+            "",
+            "    def __init__(",
+            "        self,",
+            positional_parameters,
+            "        *,",
+            keyword_parameters,
+            "        schema_url: str | None = None,",
+            "    ) -> None:",
+            _method_docstring(
+                "Initialize a schema-derived top-level specification.",
+                constructor_docs,
+                indent=8,
+            ),
+            "        properties = {",
+            values,
+            "        }",
+            "        defined = {key: value for key, value in properties.items() if value is not Undefined}",
+            "        self._initialize_spec(properties=defined, schema_url=schema_url)  # type: ignore[attr-defined]",
+            "",
+            "    def properties(",
+            "        self,",
+            "        *,",
+            parameters,
+            "    ) -> Self:",
+            _method_docstring(
+                "Return a new specification with updated top-level properties.",
+                property_specs,
+                indent=8,
+            ),
+            "        properties = {",
+            values,
+            "        }",
+            "        defined = {key: value for key, value in properties.items() if value is not Undefined}",
+            "        return self._with_properties(defined)  # type: ignore[attr-defined, no-any-return]",
+            "",
+            _copy_method_source(property_specs),
+        ]
+    )
+
+
+def _imported_view_constructor_mixin_source(
+    property_specs: tuple[PropertySpec, ...],
+) -> str:
+    """Render the exact constructor signature for imported child views."""
+    specs_by_name = {spec.name: spec for spec in property_specs}
+    import_spec = specs_by_name.get("import")
+    options = tuple(spec for spec in property_specs if spec is not import_spec)
+    positional_parameter = (
+        "        import_: "
+        f"{_qualified_transform_annotation(import_spec.annotation.annotation)} "
+        "| UndefinedType = Undefined,"
+        if import_spec is not None
+        else ""
+    )
+    parameters = "\n".join(
+        f"        {spec.python_name}: {_qualified_transform_annotation(spec.annotation.annotation)} | UndefinedType = Undefined,"
+        for spec in options
+    )
+    values = "\n".join(
+        f"            {spec.name!r}: {spec.python_name}," for spec in property_specs
+    )
+    return "\n".join(
+        [
+            "class ImportedViewConstructorMixin:",
+            '    """Schema-derived constructor for imported child views."""',
+            "",
+            "    def __init__(",
+            "        self,",
+            positional_parameter,
+            "        *,",
+            parameters,
+            "    ) -> None:",
+            _method_docstring(
+                "Initialize an imported child view.", property_specs, indent=8
+            ),
+            "        properties = {",
+            values,
+            "        }",
+            "        defined = {key: value for key, value in properties.items() if value is not Undefined}",
+            "        self._initialize_import(properties=defined)  # type: ignore[attr-defined]",
+        ]
+    )
+
+
+def _copy_method_source(property_specs: tuple[PropertySpec, ...]) -> str:
+    """Render an explicit top-level copy method for one spec family."""
+    parameters = "\n".join(
+        f"        {spec.python_name}: {_qualified_transform_annotation(spec.annotation.annotation)} | UndefinedType = Undefined,"
+        for spec in property_specs
+    )
+    values = "\n".join(
+        f"            {spec.name!r}: {spec.python_name}," for spec in property_specs
+    )
+    return "\n".join(
+        [
+            "    def copy(",
+            "        self,",
+            "        *,",
+            "        deep: bool = True,",
+            parameters,
+            "    ) -> Self:",
+            _method_docstring(
+                "Return a copy with updated top-level properties.",
+                property_specs,
+                indent=8,
+            ),
+            "        properties = {",
+            values,
+            "        }",
+            "        defined = {key: value for key, value in properties.items() if value is not Undefined}",
+            "        return self._copy_with_properties(deep=deep, properties=defined)  # type: ignore[attr-defined, no-any-return]",
+        ]
+    )
+
+
+def _top_level_merge_method_source(
+    property_spec: PropertySpec, property_specs: tuple[PropertySpec, ...]
+) -> str:
+    """Render a merging setter for one top-level mapping property."""
+    class_name = property_spec.nested_schema_class_name
+    value_annotation = (
+        f"core.{class_name} | {property_spec.annotation.annotation.removeprefix(f'{class_name} | ')} | None | object"
+        if class_name is not None
+        else f"{property_spec.annotation.annotation} | None | object"
+    )
+    return _nested_schema_method_source(
+        method_name=f"with_{property_spec.name}",
+        value_annotation=value_annotation,
+        property_specs=property_specs,
+        docstring=(f"Return a copy with merged top-level ``{property_spec.name}``."),
+        call=f"self._merge_top_level({property_spec.name!r}, value, defined)",
+    )
+
+
+def _composition_function_source(
+    name: str,
+    *,
+    child_key: str,
+    return_class: str,
+    property_specs: tuple[PropertySpec, ...],
+    required_specs: tuple[PropertySpec, ...],
+) -> str:
+    """Render a concrete public composition helper."""
+    required_parameters = "\n".join(
+        f"    {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation)},"
+        for property_spec in required_specs
+    )
+    optional_parameters = "\n".join(
+        f"    {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation)} "
+        "| UndefinedType = Undefined,"
+        for property_spec in property_specs
+    )
+    values = "\n".join(
+        f"        {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in (*required_specs, *property_specs)
+    )
+    return "\n".join(
+        [
+            f"def {name}(",
+            "    *charts: TopLevelSpec | ImportedView,",
+            required_parameters,
+            optional_parameters,
+            f") -> {return_class}:",
+            _method_docstring(
+                f"Return a {name} composition of the given charts.",
+                (*required_specs, *property_specs),
+                indent=4,
+            ),
+            "    properties = {",
+            values,
+            "    }",
+            "    defined: dict[str, Any] = {",
+            "        key: value for key, value in properties.items() if value is not Undefined",
+            "    }",
+            f"    from genome_spy.chart import {return_class}",
+            "",
+            f"    return {return_class}({child_key}=cast(Any, list(charts)), **defined)",
+            "",
+        ]
+    )
+
+
+def _import_view_function_source(property_specs: tuple[PropertySpec, ...]) -> str:
+    """Render the public imported-view helper."""
+    parameters = "\n".join(
+        f"    {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation)} "
+        "| UndefinedType = Undefined,"
+        for property_spec in property_specs
+    )
+    values = "\n".join(
+        f"        {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in property_specs
+    )
+    return "\n".join(
+        [
+            "def import_view(",
+            "    *,",
+            "    url: str | UndefinedType = Undefined,",
+            "    template: str | UndefinedType = Undefined,",
+            parameters,
+            ") -> ImportedView:",
+            '    """Create an imported child view from a URL or template."""',
+            "    if (url is Undefined) == (template is Undefined):",
+            '        raise ValueError("Specify exactly one of url or template.")',
+            "    properties = {",
+            values,
+            "    }",
+            "    defined: dict[str, Any] = {",
+            "        key: value for key, value in properties.items() if value is not Undefined",
+            "    }",
+            "    import_definition = {'url': url} if url is not Undefined else {'template': template}",
+            "    from genome_spy.chart import ImportedView",
+            "",
+            "    return ImportedView(import_=import_definition, **defined)",
+            "",
+        ]
+    )
+
+
+def _resolution_method_source(
+    channel: str, property_specs: tuple[PropertySpec, ...]
+) -> str:
+    """Render one composition resolution method."""
+    parameters = "\n".join(
+        f"        {property_spec.python_name}: "
+        f"{property_spec.annotation.annotation} | UndefinedType = Undefined,"
+        for property_spec in property_specs
+    )
+    values = "\n".join(
+        f"            {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in property_specs
+    )
+    return "\n".join(
+        [
+            f"    def resolve_{channel}(",
+            "        self,",
+            "        *,",
+            parameters,
+            "    ) -> Self:",
+            f'        """Return a copy with merged {channel} resolutions."""',
+            "        properties = {",
+            values,
+            "        }",
+            "        defined = {",
+            "            key: value for key, value in properties.items() if value is not Undefined",
+            "        }",
+            f"        return self._with_resolution({channel!r}, defined)  # type: ignore[attr-defined, no-any-return]",
+        ]
     )
 
 
@@ -1624,9 +3347,11 @@ def _qualified_transform_annotation(annotation: str) -> str:
     """Qualify generated schema classes used by transform annotations."""
     excluded = {
         "Any",
+        "False",
         "Literal",
         "None",
         "Sequence",
+        "True",
         "UndefinedType",
     }
 
@@ -1708,7 +3433,11 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
     return "\n".join(
         [
             signature,
-            f'        """Add a ``{spec.transform_type}`` transform."""',
+            _method_docstring(
+                f"Add a ``{spec.transform_type}`` transform.",
+                ordered_properties,
+                indent=8,
+            ),
             f"        transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
             *compatibility_lines,
             *assignments,
@@ -1719,17 +3448,14 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
     )
 
 
-def _configure_method_source() -> str:
-    return (
-        "    @use_signature(core.GenomeSpyConfig)\n"
-        "    def configure(\n"
-        "        self,\n"
-        "        value: core.GenomeSpyConfig | GenomeSpyConfigKwds | None | object = Undefined,\n"
-        "        /,\n"
-        "        **kwargs: Any,\n"
-        "    ) -> Self:\n"
-        '        """Return a chart with merged top-level config."""\n'
-        "        return self._configure(value, **kwargs)  # type: ignore[attr-defined, no-any-return]\n"
+def _configure_method_source(property_specs: tuple[PropertySpec, ...]) -> str:
+    """Return the explicit top-level config builder method."""
+    return _nested_schema_method_source(
+        method_name="configure",
+        value_annotation="core.GenomeSpyConfig | GenomeSpyConfigKwds | None | object",
+        property_specs=property_specs,
+        docstring="Return a chart with merged top-level config.",
+        call="self._configure(value, **defined)",
     )
 
 
@@ -1739,6 +3465,7 @@ def _config_method_source(
     annotation: str,
     nested_schema_class_name: str | None,
     raw_mapping_annotation: str,
+    property_specs: tuple[PropertySpec, ...],
 ) -> str:
     method_name = f"configure_{_snake_name(property_name)}"
     if nested_schema_class_name is None:
@@ -1752,18 +3479,76 @@ def _config_method_source(
             f"        return self._configure_property({property_name!r}, value)  "
             "# type: ignore[attr-defined, no-any-return]\n"
         )
+    return "\n" + _nested_schema_method_source(
+        method_name=method_name,
+        value_annotation=(
+            f"core.{nested_schema_class_name} | {raw_mapping_annotation} | None | object"
+        ),
+        property_specs=property_specs,
+        docstring=(f"Return a chart with ``{property_name}`` config updated."),
+        call=f"self._configure_nested({property_name!r}, value, **defined)",
+    )
+
+
+def _nested_schema_method_source(
+    *,
+    method_name: str,
+    value_annotation: str,
+    property_specs: tuple[PropertySpec, ...],
+    docstring: str,
+    call: str,
+    return_annotation: str = "Self",
+    suppress_override: bool = False,
+    suppress_return: bool = True,
+    qualify_annotations: bool = True,
+) -> str:
+    """Render a method accepting a mapping object or its explicit properties."""
+    parameters = "\n".join(
+        f"        {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation) if qualify_annotations else property_spec.annotation.annotation} "
+        "| UndefinedType = Undefined,"
+        for property_spec in property_specs
+    )
+    property_values = "\n".join(
+        f"            {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in property_specs
+    )
+    body = (
+        "        defined = {\n"
+        + property_values
+        + "\n        }\n"
+        + "        defined = {key: item for key, item in defined.items() "
+        + "if item is not Undefined}\n"
+    )
+    if parameters:
+        signature = (
+            f"    def {method_name}("
+            + ("  # type: ignore[override]\n" if suppress_override else "\n")
+            + "        self,\n"
+            + f"        value: {value_annotation} = Undefined,\n"
+            "        /,\n"
+            "        *,\n"
+            f"{parameters}\n"
+            f"    ) -> {return_annotation}:\n"
+        )
+    else:
+        signature = (
+            f"    def {method_name}("
+            + ("  # type: ignore[override]\n" if suppress_override else "\n")
+            + "        self,\n"
+            + f"        value: {value_annotation} = Undefined,\n"
+            "        /,\n"
+            f"    ) -> {return_annotation}:\n"
+        )
+        body = "        defined: dict[str, Any] = {}\n"
     return (
-        "\n"
-        f"    @use_signature(core.{nested_schema_class_name})\n"
-        f"    def {method_name}(\n"
-        f"        self,\n"
-        f"        value: core.{nested_schema_class_name} | {raw_mapping_annotation} | None | object = Undefined,\n"
-        "        /,\n"
-        "        **kwargs: Any,\n"
-        "    ) -> Self:\n"
-        f'        """Return a chart with ``{property_name}`` config updated."""\n'
-        f"        return self._configure_nested({property_name!r}, value, **kwargs)  "
-        "# type: ignore[attr-defined, no-any-return]\n"
+        signature
+        + _method_docstring(docstring, property_specs, indent=8)
+        + "\n"
+        + body
+        + f"        return {call}"
+        + ("  # type: ignore[attr-defined, no-any-return]" if suppress_return else "")
+        + "\n"
     )
 
 
@@ -1772,16 +3557,29 @@ def _channel_class_source(
     encoding_name: str,
     *,
     nested_setters: tuple[tuple[str, str, str], ...],
+    nested_property_specs: dict[str, tuple[PropertySpec, ...]],
     simple_setters: tuple[PropertySpec, ...],
-    analyzer: SchemaAnalyzer,
+    constructor_property_specs: tuple[PropertySpec, ...],
+    sort_property_specs: tuple[PropertySpec, ...],
 ) -> str:
     simple_methods = "".join(
         _channel_simple_setter_source(
             class_name,
             property_name=property_spec.name,
             annotation=property_spec.annotation.annotation,
+            sort_property_specs=sort_property_specs,
         )
         for property_spec in simple_setters
+        if property_spec.name != "sort"
+    ) + (
+        _channel_simple_setter_source(
+            class_name,
+            property_name="sort",
+            annotation="",
+            sort_property_specs=sort_property_specs,
+        )
+        if sort_property_specs
+        else ""
     )
     methods = "".join(
         _channel_nested_setter_source(
@@ -1789,16 +3587,64 @@ def _channel_class_source(
             property_name,
             schema_class_name,
             raw_mapping_annotation,
+            property_specs=nested_property_specs[property_name],
         )
         for property_name, schema_class_name, raw_mapping_annotation in nested_setters
+    )
+    nested_property_annotations = {
+        property_name: f"{schema_class_name} | {raw_mapping_annotation} | None"
+        for property_name, schema_class_name, raw_mapping_annotation in nested_setters
+    }
+    constructor_properties = [
+        (
+            property_spec.name,
+            property_spec.python_name,
+            property_spec.annotation.annotation,
+        )
+        for property_spec in simple_setters
+        if property_spec.name != "value"
+    ] + [
+        (property_name, property_name, annotation)
+        for property_name, annotation in nested_property_annotations.items()
+    ]
+    constructor_parameters = "\n".join(
+        f"        {python_name}: {annotation} | UndefinedType = _MISSING,"
+        for _, python_name, annotation in constructor_properties
+    )
+    constructor_values = "\n".join(
+        f"            {property_name!r}: {python_name},"
+        for property_name, python_name, _ in constructor_properties
+    )
+    constructor_property_names = {
+        "value",
+        *(name for name, _, _ in constructor_properties),
+    }
+    constructor_docs = tuple(
+        property_spec
+        for property_spec in constructor_property_specs
+        if property_spec.name in constructor_property_names
     )
     return (
         f"class {class_name}(Channel):\n"
         f'    """Generated wrapper for the ``{encoding_name}`` encoding channel."""\n\n'
         "    def __init__(\n"
-        "        self, value: Channel | SchemaBase | str | dict[str, Any], /, **kwargs: Any\n"
+        "        self,\n"
+        "        value: Channel | SchemaBase | str | dict[str, Any],\n"
+        "        /,\n"
+        "        *,\n"
+        f"{constructor_parameters}\n"
         "    ) -> None:\n"
-        f"        wrapped = channel(value, encoding_name={encoding_name!r}, **kwargs)\n"
+        + _method_docstring(
+            f"Create a ``{encoding_name}`` encoding channel.",
+            constructor_docs,
+            indent=8,
+        )
+        + "\n"
+        "        properties = {\n"
+        f"{constructor_values}\n"
+        "        }\n"
+        "        defined = {key: item for key, item in properties.items() if item is not _MISSING}\n"
+        f"        wrapped = channel(value, encoding_name={encoding_name!r}, **defined)\n"
         f"        super().__init__(wrapped.definition, encoding_name={encoding_name!r})\n"
         f"{simple_methods}"
         f"{methods}"
@@ -1810,19 +3656,34 @@ def _channel_simple_setter_source(
     *,
     property_name: str,
     annotation: str,
+    sort_property_specs: tuple[PropertySpec, ...],
 ) -> str:
     if property_name == "sort":
+        parameters = "\n".join(
+            f"        {property_spec.python_name}: "
+            f"{property_spec.annotation.annotation} | UndefinedType = Undefined,"
+            for property_spec in sort_property_specs
+        )
+        values = "\n".join(
+            f"            {property_spec.name!r}: {property_spec.python_name},"
+            for property_spec in sort_property_specs
+        )
         return (
             "\n"
             "    def sort(\n"
             "        self,\n"
             "        value: CompareParams | CompareParamsKwds | str | list[str] | None | object = _MISSING,\n"
             "        /,\n"
-            "        **kwargs: Any,\n"
+            "        *,\n"
+            f"{parameters}\n"
             "    ) -> "
             f"{channel_class_name}:\n"
             '        """Return a channel with a ``sort`` configuration."""\n'
-            f"        return super().sort(value, **kwargs)\n"
+            "        properties = {\n"
+            f"{values}\n"
+            "        }\n"
+            "        defined = {key: item for key, item in properties.items() if item is not Undefined}\n"
+            f"        return self._with_sort(value, defined)\n"
         )
     return (
         "\n"
@@ -1840,18 +3701,37 @@ def _channel_nested_setter_source(
     property_name: str,
     schema_class_name: str,
     raw_mapping_annotation: str,
+    *,
+    property_specs: tuple[PropertySpec, ...],
 ) -> str:
-    return (
-        "\n"
-        f"    def {property_name}(\n"
-        f"        self,\n"
-        f"        value: {schema_class_name} | {raw_mapping_annotation} | None | object = _MISSING,\n"
-        f"        /,\n"
-        f"        **kwargs: Any,\n"
-        f"    ) -> {channel_class_name}:\n"
-        f'        """Return a channel with a ``{schema_class_name}`` {property_name}."""\n'
-        f"        return self._with_nested({property_name!r}, value, **kwargs)\n"
+    return "\n" + _nested_schema_method_source(
+        method_name=property_name,
+        value_annotation=(
+            f"{schema_class_name} | {raw_mapping_annotation} | None | object"
+        ),
+        property_specs=property_specs,
+        docstring=(f"Return a channel with a ``{schema_class_name}`` {property_name}."),
+        call=f"self._with_nested({property_name!r}, value, **defined)",
+        return_annotation=channel_class_name,
+        suppress_override=False,
+        suppress_return=False,
     )
+
+
+def _nested_property_specs(
+    analyzer: SchemaAnalyzer, class_name: str | None
+) -> tuple[PropertySpec, ...]:
+    """Return schema properties for a generated nested wrapper class."""
+    if class_name is None:
+        return ()
+    for definition_name, definition_schema in analyzer.definitions.items():
+        if _class_name(definition_name) == class_name and isinstance(
+            definition_schema, dict
+        ):
+            return analyzer.property_specs(
+                SchemaDefinition(definition_name, definition_schema)
+            )
+    return ()
 
 
 def _schema_property_method_source(
@@ -1861,8 +3741,9 @@ def _schema_property_method_source(
     annotation: str,
     nested_schema_class_name: str | None,
     raw_mapping_annotation: str = "dict[str, Any]",
+    nested_property_specs: tuple[PropertySpec, ...] = (),
 ) -> str:
-    method_name = f"with_{property_name}"
+    method_name = _python_property_name(property_name)
     if nested_schema_class_name is None:
         value_annotation = annotation if annotation != "Any" else "Any"
         return (
@@ -1871,16 +3752,23 @@ def _schema_property_method_source(
             f'        """Return a copy with ``{property_name}`` updated."""\n'
             f"        return self._with_property({property_name!r}, value)\n"
         )
-    return (
-        "\n"
-        f"    def {method_name}(\n"
-        f"        self,\n"
-        f"        value: {nested_schema_class_name} | {raw_mapping_annotation} | None | Any = Undefined,\n"
-        f"        /,\n"
-        f"        **kwargs: Any,\n"
-        f"    ) -> {class_name}:\n"
-        f'        """Return a copy with a ``{nested_schema_class_name}`` {property_name}."""\n'
-        f"        return self._with_property({property_name!r}, value, **kwargs)\n"
+    return "\n" + _nested_schema_method_source(
+        method_name=method_name,
+        value_annotation=(
+            f"{nested_schema_class_name} | {raw_mapping_annotation} | None | object"
+        ),
+        property_specs=tuple(
+            property_spec
+            for property_spec in nested_property_specs
+            if property_spec.name != "value"
+        ),
+        docstring=(
+            f"Return a copy with a ``{nested_schema_class_name}`` {property_name}."
+        ),
+        call=f"self._with_property({property_name!r}, value, **defined)",
+        return_annotation=class_name,
+        suppress_return=False,
+        qualify_annotations=False,
     )
 
 
@@ -1897,162 +3785,6 @@ def _typed_dict_source(name: str, property_specs: tuple[PropertySpec, ...]) -> s
         f'    """TypedDict helper for raw ``{name.removesuffix("Kwds")}`` mappings."""\n'
         f"{fields}\n"
     )
-
-
-def _anonymous_property_kwds_sources(property_names: set[str]) -> dict[str, str]:
-    sources: dict[str, str] = {}
-    if "axes" in property_names:
-        sources["AxesKwds"] = "\n".join(
-            [
-                "class AxesKwds(TypedDict, total=False):",
-                '    """TypedDict helper for composed-view axis resolution mappings."""',
-                "    x: GenomeAxis | GenomeAxisKwds",
-                "    y: GenomeAxis | GenomeAxisKwds",
-            ]
-        )
-    if "legends" in property_names:
-        sources["LegendsKwds"] = "\n".join(
-            [
-                "class LegendsKwds(TypedDict, total=False):",
-                '    """TypedDict helper for composed-view legend resolution mappings."""',
-                "    angle: Legend | LegendKwds",
-                "    color: Legend | LegendKwds",
-                "    dx: Legend | LegendKwds",
-                "    dy: Legend | LegendKwds",
-                "    fill: Legend | LegendKwds",
-                "    fillOpacity: Legend | LegendKwds",
-                "    opacity: Legend | LegendKwds",
-                "    shape: Legend | LegendKwds",
-                "    size: Legend | LegendKwds",
-                "    stroke: Legend | LegendKwds",
-                "    strokeOpacity: Legend | LegendKwds",
-                "    strokeWidth: Legend | LegendKwds",
-            ]
-        )
-    if "scales" in property_names:
-        sources["ScalesKwds"] = "\n".join(
-            [
-                "class ScalesKwds(TypedDict, total=False):",
-                '    """TypedDict helper for composed-view scale resolution mappings."""',
-                "    angle: Scale | ScaleKwds",
-                "    color: Scale | ScaleKwds",
-                "    dx: Scale | ScaleKwds",
-                "    dy: Scale | ScaleKwds",
-                "    fill: Scale | ScaleKwds",
-                "    fillOpacity: Scale | ScaleKwds",
-                "    opacity: Scale | ScaleKwds",
-                "    shape: Scale | ScaleKwds",
-                "    size: Scale | ScaleKwds",
-                "    stroke: Scale | ScaleKwds",
-                "    strokeOpacity: Scale | ScaleKwds",
-                "    strokeWidth: Scale | ScaleKwds",
-                "    x: Scale | ScaleKwds",
-                "    x2: Scale | ScaleKwds",
-                "    y: Scale | ScaleKwds",
-                "    y2: Scale | ScaleKwds",
-            ]
-        )
-    if "resolve" in property_names:
-        sources["AxisResolveKwds"] = "\n".join(
-            [
-                "class AxisResolveKwds(TypedDict, total=False):",
-                '    """TypedDict helper for axis resolution behavior mappings."""',
-                "    angle: ResolutionBehavior_T",
-                "    color: ResolutionBehavior_T",
-                "    default: ResolutionBehavior_T",
-                "    dx: ResolutionBehavior_T",
-                "    dy: ResolutionBehavior_T",
-                "    facetIndex: ResolutionBehavior_T",
-                "    fill: ResolutionBehavior_T",
-                "    fillOpacity: ResolutionBehavior_T",
-                "    key: ResolutionBehavior_T",
-                "    opacity: ResolutionBehavior_T",
-                "    sample: ResolutionBehavior_T",
-                "    search: ResolutionBehavior_T",
-                "    semanticScore: ResolutionBehavior_T",
-                "    shape: ResolutionBehavior_T",
-                "    size: ResolutionBehavior_T",
-                "    stroke: ResolutionBehavior_T",
-                "    strokeOpacity: ResolutionBehavior_T",
-                "    strokeWidth: ResolutionBehavior_T",
-                "    text: ResolutionBehavior_T",
-                "    uniqueId: ResolutionBehavior_T",
-                "    x: ResolutionBehavior_T",
-                "    x2: ResolutionBehavior_T",
-                "    y: ResolutionBehavior_T",
-                "    y2: ResolutionBehavior_T",
-            ]
-        )
-        sources["LegendResolveKwds"] = "\n".join(
-            [
-                "class LegendResolveKwds(TypedDict, total=False):",
-                '    """TypedDict helper for legend resolution behavior mappings."""',
-                "    angle: ResolutionBehavior_T",
-                "    color: ResolutionBehavior_T",
-                "    default: ResolutionBehavior_T",
-                "    dx: ResolutionBehavior_T",
-                "    dy: ResolutionBehavior_T",
-                "    facetIndex: ResolutionBehavior_T",
-                "    fill: ResolutionBehavior_T",
-                "    fillOpacity: ResolutionBehavior_T",
-                "    key: ResolutionBehavior_T",
-                "    opacity: ResolutionBehavior_T",
-                "    sample: ResolutionBehavior_T",
-                "    search: ResolutionBehavior_T",
-                "    semanticScore: ResolutionBehavior_T",
-                "    shape: ResolutionBehavior_T",
-                "    size: ResolutionBehavior_T",
-                "    stroke: ResolutionBehavior_T",
-                "    strokeOpacity: ResolutionBehavior_T",
-                "    strokeWidth: ResolutionBehavior_T",
-                "    text: ResolutionBehavior_T",
-                "    uniqueId: ResolutionBehavior_T",
-                "    x: ResolutionBehavior_T",
-                "    x2: ResolutionBehavior_T",
-                "    y: ResolutionBehavior_T",
-                "    y2: ResolutionBehavior_T",
-            ]
-        )
-        sources["ScaleResolveKwds"] = "\n".join(
-            [
-                "class ScaleResolveKwds(TypedDict, total=False):",
-                '    """TypedDict helper for scale resolution behavior mappings."""',
-                "    angle: ResolutionBehavior_T",
-                "    color: ResolutionBehavior_T",
-                "    default: ResolutionBehavior_T",
-                "    dx: ResolutionBehavior_T",
-                "    dy: ResolutionBehavior_T",
-                "    facetIndex: ResolutionBehavior_T",
-                "    fill: ResolutionBehavior_T",
-                "    fillOpacity: ResolutionBehavior_T",
-                "    key: ResolutionBehavior_T",
-                "    opacity: ResolutionBehavior_T",
-                "    sample: ResolutionBehavior_T",
-                "    search: ResolutionBehavior_T",
-                "    semanticScore: ResolutionBehavior_T",
-                "    shape: ResolutionBehavior_T",
-                "    size: ResolutionBehavior_T",
-                "    stroke: ResolutionBehavior_T",
-                "    strokeOpacity: ResolutionBehavior_T",
-                "    strokeWidth: ResolutionBehavior_T",
-                "    text: ResolutionBehavior_T",
-                "    uniqueId: ResolutionBehavior_T",
-                "    x: ResolutionBehavior_T",
-                "    x2: ResolutionBehavior_T",
-                "    y: ResolutionBehavior_T",
-                "    y2: ResolutionBehavior_T",
-            ]
-        )
-        sources["ResolveKwds"] = "\n".join(
-            [
-                "class ResolveKwds(TypedDict, total=False):",
-                '    """TypedDict helper for composed-view resolution mappings."""',
-                "    axis: AxisResolveKwds",
-                "    legend: LegendResolveKwds",
-                "    scale: ScaleResolveKwds",
-            ]
-        )
-    return sources
 
 
 GENERATED_HEADER = (

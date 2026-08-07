@@ -11,12 +11,6 @@ from genome_spy.chart import (
     MultiscaleChart,
     TopLevelSpec,
     VConcatChart,
-    concat,
-    hconcat,
-    import_view,
-    layer,
-    multiscale,
-    vconcat,
 )
 from genome_spy.data import Data, lazy
 from genome_spy.helpers import (
@@ -72,6 +66,14 @@ from genome_spy.schema.core import (
     Scale,
     Step,
     Title,
+)
+from genome_spy.schema.composition import (
+    concat,
+    hconcat,
+    import_view,
+    layer,
+    multiscale,
+    vconcat,
 )
 
 __all__ = [

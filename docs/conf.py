@@ -40,7 +40,7 @@ myst_enable_extensions = [
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "examples"]
 
 autosummary_generate = True
-autodoc_typehints = "description"
+autodoc_typehints = "none"
 autodoc_member_order = "bysource"
 napoleon_google_docstring = True
 napoleon_numpy_docstring = False

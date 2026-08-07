@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import inspect
 import json
+import subprocess
+import sys
 from importlib.resources import files
 
 import genome_spy as gs
@@ -32,6 +34,37 @@ from genome_spy.schema import (
 from genome_spy.schema import channels as generated_channels
 from genome_spy.schema.mixins import TransformMethodMixin
 from genome_spy.schemapi import SchemaValidationError
+
+
+def test_package_declares_inline_typing_support() -> None:
+    assert files("genome_spy").joinpath("py.typed").is_file()
+
+
+def test_external_type_checker_sees_generated_public_signatures(tmp_path) -> None:
+    consumer = tmp_path / "consumer.py"
+    consumer.write_text(
+        "\n".join(
+            [
+                "import genome_spy as gs",
+                "chart = gs.Chart().mark_text(size=12).encode(x=gs.X('x:Q'))",
+                "gs.vconcat(chart, spacing=2)",
+                "gs.Chart().mark_text(size='large')",
+                "gs.Chart().properties(layer=[])",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    completed = subprocess.run(
+        [sys.executable, "-m", "mypy", "--no-error-summary", str(consumer)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 1
+    assert 'Argument "size"' in completed.stdout
+    assert 'Unexpected keyword argument "layer"' in completed.stdout
 
 
 def test_generated_schema_package_loads_real_genomespy_schema() -> None:
@@ -76,10 +109,10 @@ def test_generated_wrappers_resolve_constructor_properties_through_refs() -> Non
     assert "pos" in position_signature.parameters
 
 
-def test_generated_wrappers_expose_fluent_with_methods() -> None:
-    legend = Legend().with_title("Species legend").with_padding(8)
-    scale = Scale().with_zero(False).with_scheme(ColorSchemeConfig(name="blues"))
-    axis = GenomeAxis().with_title("Position axis").with_grid(True)
+def test_generated_wrappers_expose_fluent_property_methods() -> None:
+    legend = Legend().title("Species legend").padding(8)
+    scale = Scale().zero(False).scheme(ColorSchemeConfig(name="blues"))
+    axis = GenomeAxis().title("Position axis").grid(True)
 
     assert legend.to_dict(validate=False) == {"title": "Species legend", "padding": 8}
     assert scale.to_dict(validate=False) == {
@@ -132,9 +165,9 @@ def test_generated_wrappers_preserve_python_keyword_properties() -> None:
     }
 
 
-def test_generated_wrappers_with_methods_merge_nested_helper_kwargs() -> None:
-    color = ColorDef(field="species", type="nominal").with_legend(title="Species")
-    position = PositionDef(field="x", type="quantitative").with_scale(
+def test_generated_wrappers_nested_methods_merge_helper_kwargs() -> None:
+    color = ColorDef(field="species", type="nominal").legend(title="Species")
+    position = PositionDef(field="x", type="quantitative").scale(
         Scale(zero=False), padding=4
     )
 
@@ -155,10 +188,10 @@ def test_generated_wrappers_accept_composition_resolution_mappings() -> None:
     resolve: ResolveKwds = {"scale": {"color": "shared"}}
     spec = (
         UnitSpec(mark="point")
-        .with_axes(axes)
-        .with_legends({"color": {"title": "Species"}})
-        .with_resolve(resolve)
-        .with_scales({"color": {"scheme": "blues"}})
+        .axes(axes)
+        .legends({"color": {"title": "Species"}})
+        .resolve(resolve)
+        .scales({"color": {"scheme": "blues"}})
     )
 
     assert spec.to_dict(validate=False) == {

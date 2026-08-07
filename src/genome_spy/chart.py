@@ -6,7 +6,7 @@ import json
 from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, ClassVar, Protocol, Self, Unpack, cast
+from typing import Any, ClassVar, Protocol, Self, cast
 from uuid import uuid4
 
 from genome_spy._utils import JsonSpec, compact_json, pretty_json
@@ -18,9 +18,6 @@ from genome_spy._chart_authoring import (
 from genome_spy.channels import Channel
 from genome_spy.schema import (
     ConcatSpec,
-    EncodingKwds,
-    ExprRef,
-    FadedMultiscaleStops,
     GenomeSpyConfig,
     HConcatSpec,
     ImportSpec,
@@ -29,30 +26,35 @@ from genome_spy.schema import (
     MultiscaleSpec,
     Root,
     SCHEMA_VERSION,
-    TemplateImport,
-    TransitionedMultiscaleStops,
     UnitSpec,
-    UrlImport,
     VConcatSpec,
-    ViewBackground,
-)
-from genome_spy.schema._kwds import (
-    AxisResolveKwds,
-    GenomeSpyConfigKwds,
-    LegendResolveKwds,
-    ScaleResolveKwds,
-    ScalesKwds,
-    ViewBackgroundKwds,
 )
 from genome_spy.schema.mixins import (
+    ConcatPropertiesMixin,
     ConfigMethodMixin,
+    EncodingMethodMixin,
+    HConcatPropertiesMixin,
+    ImportedViewConstructorMixin,
+    LayerPropertiesMixin,
     MarkMethodMixin,
+    MultiscalePropertiesMixin,
+    ResolutionMethodMixin,
+    TopLevelMergeMixin,
     TransformMethodMixin,
+    UnitPropertiesMixin,
+    VConcatPropertiesMixin,
+)
+from genome_spy.schema.composition import (
+    concat as _concat,
+    hconcat as _hconcat,
+    layer as _layer,
+    multiscale as _multiscale,
+    import_view as _import_view,
+    vconcat as _vconcat,
 )
 from genome_spy.schemapi import (
     SchemaBase,
     Undefined,
-    UndefinedType,
     merge_mapping_value,
     normalize_mapping_value,
     normalize_schema_value,
@@ -64,7 +66,7 @@ DEFAULT_EMBED_URL = f"{_CORE_DIST_URL}/bundle/index.es.js"
 
 
 class _CopyableSpec(Protocol):
-    def copy(self, *, deep: bool = True, **kwargs: Any) -> Any: ...
+    def _copy(self, *, deep: bool = True, **kwargs: Any) -> Any: ...
 
 
 class _SerializableView(Protocol):
@@ -136,53 +138,30 @@ def _merge_encoding_definitions(
     return merge_encoding_definitions(current_encoding, updates, data=data)
 
 
-class TopLevelSpec(TransformMethodMixin):
+class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin):
     """Shared behavior for top-level GenomeSpy specifications."""
 
-    def with_config(
-        self,
-        value: GenomeSpyConfig | GenomeSpyConfigKwds | None | object = Undefined,
-        /,
-        **kwargs: Any,
-    ) -> Self:
-        """Return a copy with merged top-level ``config``."""
-        merged = merge_mapping_value(
-            self._kwds.get("config", Undefined),  # type: ignore[attr-defined]
-            "config",
-            value,
-            **kwargs,
-        )
-        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, config=merged))
+    _schema_spec_cls: ClassVar[type[SchemaBase]]
+    _schema_url: str
 
-    def with_view(
-        self,
-        value: ViewBackground | ViewBackgroundKwds | None | object = Undefined,
-        /,
-        **kwargs: Any,
-    ) -> Self:
-        """Return a copy with merged top-level ``view``."""
-        merged = merge_mapping_value(
-            self._kwds.get("view", Undefined),  # type: ignore[attr-defined]
-            "view",
-            value,
-            **kwargs,
-        )
-        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, view=merged))
+    def _initialize_spec(
+        self, *, properties: dict[str, Any], schema_url: str | None
+    ) -> None:
+        """Initialize generated schema state for a top-level specification."""
+        self._schema_spec_cls.__init__(cast(Any, self), **properties)
+        self._schema_url = DEFAULT_SCHEMA_URL if schema_url is None else schema_url
 
-    def with_scales(
-        self,
-        value: ScalesKwds | None | object = Undefined,
-        /,
-        **kwargs: Any,
+    def _merge_top_level(
+        self, name: str, value: Any, /, properties: Mapping[str, Any]
     ) -> Self:
-        """Return a copy with merged top-level shared scales."""
+        """Return a copy with one top-level mapping property merged."""
         merged = merge_mapping_value(
-            self._kwds.get("scales", Undefined),  # type: ignore[attr-defined]
-            "scales",
+            self._kwds.get(name, Undefined),  # type: ignore[attr-defined]
+            name,
             value,
-            **kwargs,
+            **properties,
         )
-        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, scales=merged))
+        return cast(Self, cast(_CopyableSpec, self)._copy(deep=False, **{name: merged}))
 
     def _merged_encoding(
         self,
@@ -208,6 +187,26 @@ class TopLevelSpec(TransformMethodMixin):
         current_encoding = self._kwds.get("encoding", Undefined)  # type: ignore[attr-defined]
         data = self._kwds.get("data", Undefined)  # type: ignore[attr-defined]
         return _merge_encoding_definitions(current_encoding, updates, data=data)
+
+    def _encode(
+        self,
+        args: tuple[Channel, ...],
+        properties: dict[
+            str,
+            Channel
+            | SchemaBase
+            | str
+            | dict[str, Any]
+            | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+            | None,
+        ],
+    ) -> Self:
+        """Return a copy with generated encoding arguments merged."""
+        merged = self._merged_encoding(args, properties)
+        return cast(
+            Self,
+            cast(_CopyableSpec, self)._copy(deep=False, encoding=merged),
+        )
 
     def _config_object(self) -> GenomeSpyConfig:
         """Return the current top-level config as a schema wrapper."""
@@ -247,7 +246,7 @@ class TopLevelSpec(TransformMethodMixin):
         """Return a copy with one nested config family updated."""
         return cast(
             Self,
-            cast(_CopyableSpec, self).copy(
+            cast(_CopyableSpec, self)._copy(
                 deep=False, config=self._configured_nested(name, value, **kwargs)
             ),
         )
@@ -256,12 +255,12 @@ class TopLevelSpec(TransformMethodMixin):
         """Return a copy with one scalar config property updated."""
         return cast(
             Self,
-            cast(_CopyableSpec, self).copy(
+            cast(_CopyableSpec, self)._copy(
                 deep=False, config=self._configured_property(name, value)
             ),
         )
 
-    def properties(self, **kwargs: Any) -> Self:
+    def _properties(self, **kwargs: Any) -> Self:
         """Return a new spec with merged top-level properties."""
         return self._with_properties(kwargs)
 
@@ -287,7 +286,7 @@ class TopLevelSpec(TransformMethodMixin):
         current = self._kwds.get("transform", Undefined)  # type: ignore[attr-defined]
         merged = [] if current is Undefined else list(current)
         merged.append(normalize_transform(transform))
-        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, transform=merged))
+        return cast(Self, cast(_CopyableSpec, self)._copy(deep=False, transform=merged))
 
     def _configured(
         self,
@@ -302,14 +301,24 @@ class TopLevelSpec(TransformMethodMixin):
             value,
             **kwargs,
         )
-        return cast(Self, cast(_CopyableSpec, self).copy(deep=False, config=merged))
+        return cast(Self, cast(_CopyableSpec, self)._copy(deep=False, config=merged))
 
     def _with_properties(self, properties: dict[str, Any]) -> Self:
         """Return a copy with normalized top-level properties applied."""
         return cast(
             Self,
-            cast(_CopyableSpec, self).copy(
+            cast(_CopyableSpec, self)._copy(
                 deep=False,
+                **self._normalized_properties(properties),
+            ),
+        )
+
+    def _copy_with_properties(self, *, deep: bool, properties: dict[str, Any]) -> Self:
+        """Return a copy with generated explicit top-level updates."""
+        return cast(
+            Self,
+            cast(_CopyableSpec, self)._copy(
+                deep=deep,
                 **self._normalized_properties(properties),
             ),
         )
@@ -333,7 +342,7 @@ class TopLevelSpec(TransformMethodMixin):
         """Return a copy with one composition resolution family merged."""
         return cast(
             Self,
-            cast(_CopyableSpec, self).copy(
+            cast(_CopyableSpec, self)._copy(
                 deep=False,
                 resolve=self._merged_resolution(key, updates),
             ),
@@ -360,7 +369,7 @@ class TopLevelSpec(TransformMethodMixin):
     ) -> dict[str, Any]:
         """Return a root-validated spec dictionary ready for serialization."""
         if include_schema:
-            spec["$schema"] = self._schema_url  # type: ignore[attr-defined]
+            spec["$schema"] = self._schema_url
         return Root(**spec).to_dict(validate=validate)
 
     def transform(self, *transforms: SchemaBase | dict[str, Any]) -> Self:
@@ -547,68 +556,31 @@ class TopLevelSpec(TransformMethodMixin):
         del include, exclude
         return self.widget()._repr_mimebundle_()
 
-    def __add__(self, other: _SerializableView) -> LayerChart:
+    def __add__(self, other: TopLevelSpec | ImportedView) -> LayerChart:
         return layer(self, other)
 
-    def __or__(self, other: _SerializableView) -> HConcatChart:
+    def __or__(self, other: TopLevelSpec | ImportedView) -> HConcatChart:
         return hconcat(self, other)
 
-    def __and__(self, other: _SerializableView) -> VConcatChart:
+    def __and__(self, other: TopLevelSpec | ImportedView) -> VConcatChart:
         return vconcat(self, other)
 
     def _append_transform(self, transform: dict[str, Any]) -> Self:
         raise NotImplementedError
 
 
-class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
+class Chart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy updates.
+    UnitPropertiesMixin, TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec
+):
     """An immutable-style builder backed by generated ``UnitSpec`` state."""
 
-    def __init__(
-        self,
-        data: Any = Undefined,
-        mark: str | dict[str, Any] | UndefinedType = Undefined,
-        encoding: EncodingKwds | UndefinedType = Undefined,
-        *,
-        properties_map: dict[str, Any] | None = None,
-        transform: list[dict[str, Any]] | UndefinedType = Undefined,
-        schema_url: str = DEFAULT_SCHEMA_URL,
-        **kwargs: Any,
-    ) -> None:
-        if properties_map:
-            kwargs = {**properties_map, **kwargs}
-        UnitSpec.__init__(
-            self,
-            data=data,
-            mark=cast(Any, mark),
-            encoding=cast(Any, encoding),
-            transform=transform,
-            **kwargs,
-        )
-        self._schema_url = schema_url
+    _schema_spec_cls = UnitSpec
 
-    def copy(self, *, deep: bool = True, **kwargs: Any) -> Self:
+    def _copy(self, *, deep: bool = True, **kwargs: Any) -> Self:
         """Return a schema-backed copy while preserving the schema URL."""
-        copied = super().copy(deep=deep, **kwargs)
+        copied = cast(Self, SchemaBase.copy(cast(Any, self), deep=deep, **kwargs))
         copied._schema_url = self._schema_url
         return copied
-
-    def mark_circle(self, **kwargs: Any) -> Chart:
-        """Set the mark to a point, whose default GenomeSpy shape is a circle."""
-        return self._with_mark("point", **kwargs)
-
-    def encode(
-        self,
-        *args: Channel,
-        **kwargs: Channel
-        | SchemaBase
-        | str
-        | dict[str, Any]
-        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
-        | None,
-    ) -> Chart:
-        """Return a new chart with merged channel encodings."""
-        merged = self._merged_encoding(args, kwargs)
-        return self.copy(deep=False, encoding=merged)
 
     def to_dict(
         self, *, include_schema: bool = True, validate: bool = True
@@ -630,7 +602,7 @@ class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
             mark = {"type": mark_type, **kwargs}
         else:
             mark = mark_type
-        return self.copy(deep=False, mark=mark)
+        return self._copy(deep=False, mark=mark)
 
     def _append_transform(self, transform: dict[str, Any]) -> Self:
         return self._appended_transform(transform)
@@ -644,13 +616,13 @@ class Chart(TopLevelSpec, ConfigMethodMixin, MarkMethodMixin, UnitSpec):
         return self._configured(value, **kwargs)
 
 
-class _CompositionSpec(TopLevelSpec, ConfigMethodMixin):
+class _CompositionSpec(TopLevelSpec, ConfigMethodMixin, ResolutionMethodMixin):
     _schema_spec_cls: ClassVar[type]
     _children_key: ClassVar[str]
     _kwds: dict[str, Any]
     _schema_url: str
 
-    def copy(self, *, deep: bool = True, **kwargs: Any) -> Self:
+    def _copy(self, *, deep: bool = True, **kwargs: Any) -> Self:
         """Return a schema-backed copy while preserving the schema URL."""
         copied = cast(Self, SchemaBase.copy(cast(Any, self), deep=deep, **kwargs))
         copied._schema_url = self._schema_url
@@ -684,164 +656,76 @@ class _CompositionSpec(TopLevelSpec, ConfigMethodMixin):
     ) -> Self:
         return self._configured(value, **kwargs)
 
-    def encode(
-        self,
-        *args: Channel,
-        **kwargs: Channel
-        | SchemaBase
-        | str
-        | dict[str, Any]
-        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
-        | None,
-    ) -> Self:
-        """Return a copy with merged top-level encodings for composed specs."""
-        merged = self._merged_encoding(args, kwargs)
-        return self.copy(deep=False, encoding=merged)
 
-    def resolve_axis(self, **kwargs: Unpack[AxisResolveKwds]) -> Self:
-        """Return a copy with merged composition-level axis resolutions."""
-        return self._with_resolution("axis", kwargs)
-
-    def resolve_scale(self, **kwargs: Unpack[ScaleResolveKwds]) -> Self:
-        """Return a copy with merged composition-level scale resolutions."""
-        return self._with_resolution("scale", kwargs)
-
-    def resolve_legend(self, **kwargs: Unpack[LegendResolveKwds]) -> Self:
-        """Return a copy with merged composition-level legend resolutions."""
-        return self._with_resolution("legend", kwargs)
-
-
-class LayerChart(_CompositionSpec, LayerSpec):
+class LayerChart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy updates.
+    LayerPropertiesMixin, _CompositionSpec, LayerSpec
+):
     """A layered GenomeSpy specification."""
 
     _schema_spec_cls = LayerSpec
     _children_key = "layer"
 
-    def __init__(
-        self,
-        layer: list[_SerializableView] | UndefinedType = Undefined,
-        *,
-        schema_url: str = DEFAULT_SCHEMA_URL,
-        **kwargs: Any,
-    ) -> None:
-        LayerSpec.__init__(self, layer=cast(Any, layer), **kwargs)
-        self._schema_url = schema_url
-
-    def __add__(self, other: _SerializableView) -> LayerChart:
+    def __add__(self, other: TopLevelSpec | ImportedView) -> LayerChart:
         current = self._kwds.get("layer", Undefined)
         merged = [] if current is Undefined else list(current)
         merged.append(other)
-        return self.copy(deep=False, layer=merged)
+        return self._copy(deep=False, layer=merged)
 
 
-class HConcatChart(_CompositionSpec, HConcatSpec):
+class HConcatChart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy updates.
+    HConcatPropertiesMixin, _CompositionSpec, HConcatSpec
+):
     """A horizontally concatenated GenomeSpy specification."""
 
     _schema_spec_cls = HConcatSpec
     _children_key = "hconcat"
 
-    def __init__(
-        self,
-        hconcat: list[_SerializableView] | UndefinedType = Undefined,
-        *,
-        schema_url: str = DEFAULT_SCHEMA_URL,
-        **kwargs: Any,
-    ) -> None:
-        HConcatSpec.__init__(self, hconcat=cast(Any, hconcat), **kwargs)
-        self._schema_url = schema_url
-
     def __or__(self, other: _SerializableView) -> HConcatChart:
         current = self._kwds.get("hconcat", Undefined)
         merged = [] if current is Undefined else list(current)
         merged.append(other)
-        return self.copy(deep=False, hconcat=merged)
+        return self._copy(deep=False, hconcat=merged)
 
 
-class VConcatChart(_CompositionSpec, VConcatSpec):
+class VConcatChart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy updates.
+    VConcatPropertiesMixin, _CompositionSpec, VConcatSpec
+):
     """A vertically concatenated GenomeSpy specification."""
 
     _schema_spec_cls = VConcatSpec
     _children_key = "vconcat"
 
-    def __init__(
-        self,
-        vconcat: list[_SerializableView] | UndefinedType = Undefined,
-        *,
-        schema_url: str = DEFAULT_SCHEMA_URL,
-        **kwargs: Any,
-    ) -> None:
-        VConcatSpec.__init__(self, vconcat=cast(Any, vconcat), **kwargs)
-        self._schema_url = schema_url
-
     def __and__(self, other: _SerializableView) -> VConcatChart:
         current = self._kwds.get("vconcat", Undefined)
         merged = [] if current is Undefined else list(current)
         merged.append(other)
-        return self.copy(deep=False, vconcat=merged)
+        return self._copy(deep=False, vconcat=merged)
 
 
-class ConcatChart(_CompositionSpec, ConcatSpec):
+class ConcatChart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy updates.
+    ConcatPropertiesMixin, _CompositionSpec, ConcatSpec
+):
     """A grid-concatenated GenomeSpy specification."""
 
     _schema_spec_cls = ConcatSpec
     _children_key = "concat"
 
-    def __init__(
-        self,
-        concat: list[_SerializableView] | UndefinedType = Undefined,
-        columns: int | UndefinedType = Undefined,
-        *,
-        schema_url: str = DEFAULT_SCHEMA_URL,
-        **kwargs: Any,
-    ) -> None:
-        ConcatSpec.__init__(
-            self,
-            concat=cast(Any, concat),
-            columns=columns,
-            **kwargs,
-        )
-        self._schema_url = schema_url
 
-
-class MultiscaleChart(_CompositionSpec, MultiscaleSpec):
+class MultiscaleChart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy updates.
+    MultiscalePropertiesMixin, _CompositionSpec, MultiscaleSpec
+):
     """A semantic-zoom composition backed by generated schema state."""
 
     _schema_spec_cls = MultiscaleSpec
     _children_key = "multiscale"
 
-    def __init__(
-        self,
-        multiscale: list[_SerializableView] | UndefinedType = Undefined,
-        stops: Sequence[float | ExprRef | dict[str, Any]]
-        | FadedMultiscaleStops
-        | dict[str, Any]
-        | TransitionedMultiscaleStops
-        | UndefinedType = Undefined,
-        *,
-        schema_url: str = DEFAULT_SCHEMA_URL,
-        **kwargs: Any,
-    ) -> None:
-        MultiscaleSpec.__init__(
-            self,
-            multiscale=cast(Any, multiscale),
-            stops=stops,
-            **kwargs,
-        )
-        self._schema_url = schema_url
 
-
-class ImportedView(ImportSpec):
+class ImportedView(ImportedViewConstructorMixin, ImportSpec):
     """A child-view import that can participate in chart composition."""
 
-    def __init__(
-        self,
-        import_: UrlImport
-        | dict[str, Any]
-        | TemplateImport
-        | UndefinedType = Undefined,
-        **kwargs: Any,
-    ) -> None:
-        ImportSpec.__init__(self, import_=cast(Any, import_), **kwargs)
+    def _initialize_import(self, *, properties: dict[str, Any]) -> None:
+        """Initialize generated schema state for an imported child view."""
+        ImportSpec.__init__(self, **properties)
 
     def to_dict(
         self, *, include_schema: bool = False, validate: bool = True
@@ -868,15 +752,15 @@ class ImportedView(ImportSpec):
 
     def __add__(self, other: _SerializableView) -> LayerChart:
         """Layer this imported view with another view."""
-        return LayerChart(layer=[self, other])
+        return LayerChart(layer=cast(Any, [self, other]))
 
-    def __and__(self, other: _SerializableView) -> VConcatChart:
+    def __and__(self, other: TopLevelSpec | ImportedView) -> VConcatChart:
         """Vertically concatenate this imported view with another view."""
-        return VConcatChart(vconcat=[self, other])
+        return VConcatChart(vconcat=cast(Any, [self, other]))
 
-    def __or__(self, other: _SerializableView) -> HConcatChart:
+    def __or__(self, other: TopLevelSpec | ImportedView) -> HConcatChart:
         """Horizontally concatenate this imported view with another view."""
-        return HConcatChart(hconcat=[self, other])
+        return HConcatChart(hconcat=cast(Any, [self, other]))
 
 
 def _view_from_dict(
@@ -905,7 +789,7 @@ def _view_from_dict(
         raw_children = values.pop(structural_key)
         if not isinstance(raw_children, list):
             raise TypeError(f"{structural_key} must be a list of view specifications.")
-        children: list[_SerializableView] = []
+        children: list[TopLevelSpec | ImportedView] = []
         for child in raw_children:
             if not isinstance(child, Mapping):
                 raise TypeError(
@@ -919,91 +803,31 @@ def _view_from_dict(
                 )
             )
         if structural_key == "layer":
-            return LayerChart(layer=children, schema_url=schema_url, **values)
+            return LayerChart(
+                layer=cast(Any, children), schema_url=schema_url, **values
+            )
         if structural_key == "multiscale":
-            return MultiscaleChart(multiscale=children, schema_url=schema_url, **values)
+            return MultiscaleChart(
+                multiscale=cast(Any, children), schema_url=schema_url, **values
+            )
         if structural_key == "vconcat":
-            return VConcatChart(vconcat=children, schema_url=schema_url, **values)
+            return VConcatChart(
+                vconcat=cast(Any, children), schema_url=schema_url, **values
+            )
         if structural_key == "hconcat":
-            return HConcatChart(hconcat=children, schema_url=schema_url, **values)
-        return ConcatChart(concat=children, schema_url=schema_url, **values)
+            return HConcatChart(
+                hconcat=cast(Any, children), schema_url=schema_url, **values
+            )
+        return ConcatChart(concat=cast(Any, children), schema_url=schema_url, **values)
 
     if "import" in values:
         raise ValueError("An imported view must be nested inside a composition.")
     raise ValueError("GenomeSpy specification has no supported structural root.")
 
 
-def layer(*charts: _SerializableView, **kwargs: Any) -> LayerChart:
-    """Compose a layered chart from multiple child charts."""
-    return LayerChart(layer=list(charts), **kwargs)
-
-
-def hconcat(*charts: _SerializableView, **kwargs: Any) -> HConcatChart:
-    """Compose a horizontally concatenated chart."""
-    return HConcatChart(hconcat=list(charts), **kwargs)
-
-
-def vconcat(*charts: _SerializableView, **kwargs: Any) -> VConcatChart:
-    """Compose a vertically concatenated chart."""
-    return VConcatChart(vconcat=list(charts), **kwargs)
-
-
-def concat(*charts: _SerializableView, columns: int, **kwargs: Any) -> ConcatChart:
-    """Compose a grid concatenation."""
-    return ConcatChart(concat=list(charts), columns=columns, **kwargs)
-
-
-def multiscale(
-    *charts: _SerializableView,
-    stops: Sequence[float | ExprRef | dict[str, Any]]
-    | FadedMultiscaleStops
-    | dict[str, Any]
-    | TransitionedMultiscaleStops,
-    **kwargs: Any,
-) -> MultiscaleChart:
-    """Compose semantic-zoom levels using a multiscale view.
-
-    Args:
-        *charts: Views ordered from overview to detail.
-        stops: Zoom thresholds controlling transitions between levels.
-        **kwargs: Additional multiscale view properties.
-
-    Returns:
-        A renderable multiscale chart.
-
-    Raises:
-        SchemaValidationError: If the resulting specification is invalid when
-            serialized.
-
-    Example:
-        >>> multiscale(Chart(mark="rect"), Chart(mark="text"), stops=[1])
-    """
-    return MultiscaleChart(multiscale=list(charts), stops=stops, **kwargs)
-
-
-def import_view(
-    *,
-    url: str | UndefinedType = Undefined,
-    template: str | UndefinedType = Undefined,
-    **kwargs: Any,
-) -> ImportedView:
-    """Create an imported child view from a URL or template.
-
-    Args:
-        url: URL of a GenomeSpy specification to import.
-        template: Name of a template in the current view hierarchy.
-        **kwargs: Import-site properties such as ``params`` or ``visible``.
-
-    Returns:
-        An imported view for use in a composition.
-
-    Raises:
-        ValueError: If neither or both import sources are supplied.
-
-    Example:
-        >>> view = import_view(template="allele-track", params={"allele": "ref"})
-    """
-    if (url is Undefined) == (template is Undefined):
-        raise ValueError("Specify exactly one of url or template.")
-    import_definition = {"url": url} if url is not Undefined else {"template": template}
-    return ImportedView(import_=import_definition, **kwargs)
+concat = _concat
+hconcat = _hconcat
+layer = _layer
+multiscale = _multiscale
+import_view = _import_view
+vconcat = _vconcat

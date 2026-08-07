@@ -13,6 +13,7 @@ import argparse
 import json
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import tomllib
@@ -153,6 +154,9 @@ def write_schema_files(
     )
     mark_mixins_module = generator.generate_mark_mixins_module()
     channels_module = generator.generate_channels_module()
+    composition_module = generator.generate_composition_module()
+    lazy_module = generator.generate_lazy_module()
+    ergonomics_module = generator.generate_ergonomics_module()
 
     output_dir.mkdir(parents=True, exist_ok=True)
     schema_text = schema_path.read_text(encoding="utf-8").rstrip() + "\n"
@@ -163,9 +167,27 @@ def write_schema_files(
     (output_dir / "__init__.py").write_text(init_module.source, encoding="utf-8")
     (output_dir / "mixins.py").write_text(mark_mixins_module.source, encoding="utf-8")
     (output_dir / "channels.py").write_text(channels_module.source, encoding="utf-8")
+    (output_dir / "composition.py").write_text(
+        composition_module.source, encoding="utf-8"
+    )
+    (output_dir / "lazy.py").write_text(lazy_module.source, encoding="utf-8")
+    (output_dir / "ergonomics.py").write_text(
+        ergonomics_module.source, encoding="utf-8"
+    )
     (output_dir / CAPABILITIES_FILENAME).write_text(
         json.dumps(generator.capability_manifest(), indent=2) + "\n",
         encoding="utf-8",
+    )
+
+
+def format_generated_modules(output_dir: Path) -> None:
+    """Format generated Python modules with the project's Ruff installation."""
+    modules = sorted(output_dir.glob("*.py"))
+    if not modules:
+        return
+    subprocess.run(
+        [sys.executable, "-m", "ruff", "format", *map(str, modules)],
+        check=True,
     )
 
 
@@ -236,6 +258,8 @@ def main() -> None:
                 spec_reference_dir=spec_reference_dir,
             )
         source = f"{PACKAGE_NAME}@{args.core_version}"
+
+    format_generated_modules(args.output_dir)
 
     print(
         f"Wrote generated GenomeSpy schema package from {source} to {args.output_dir}."
