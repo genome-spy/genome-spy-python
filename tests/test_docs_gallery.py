@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import importlib.util
 import sys
+from hashlib import sha256
 from pathlib import Path
+from urllib.parse import urljoin
 
 import pytest
 
@@ -75,7 +77,11 @@ def test_luad_oncoprint_uses_sample_index_scale_and_categorical_genes() -> None:
         {
             "name": "sampleRuler",
             "persist": False,
-            "ruler": {"encodings": ["x"], "mark": {"opacity": 0.3}},
+            "ruler": {
+                "encodings": ["x"],
+                "snap": False,
+                "mark": {"opacity": 0.3},
+            },
         }
     ]
     assert example.spec["width"] == "container"
@@ -202,7 +208,11 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
         {
             "name": "sampleRuler",
             "persist": False,
-            "ruler": {"encodings": ["x"], "mark": {"opacity": 0.3}},
+            "ruler": {
+                "encodings": ["x"],
+                "snap": False,
+                "mark": {"opacity": 0.3},
+            },
         }
     ]
 
@@ -343,6 +353,7 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
     ]
     assert lesion_track["encoding"]["opacity"]["field"] == "Segment type"
     assert lesion_track["encoding"]["size"]["field"] == "Segment type"
+    assert "https://data.genomespy.app" not in str(example.spec)
 
 
 def test_bam_example_uses_full_alignment_dataflow() -> None:
@@ -743,7 +754,7 @@ def test_gallery_generation_removes_stale_build_outputs(
 
     monkeypatch.setattr(extension.core, "GALLERY_PAGES_DIR", pages)
     monkeypatch.setattr(extension.core, "SPECS_DIR", specs)
-    monkeypatch.setattr(extension.core, "collect_examples", lambda: [])
+    monkeypatch.setattr(extension.core, "iter_prepared_examples", lambda: iter(()))
     app = type(
         "App",
         (),
@@ -759,6 +770,78 @@ def test_gallery_generation_removes_stale_build_outputs(
     assert all(not path.exists() for path in stale_paths)
 
 
+def test_gallery_arrow_assets_are_rewritten_deduplicated_and_cleaned(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    extension = _load_gallery_extension()
+    monkeypatch.setattr(extension.core, "ARROW_DIR", tmp_path / "arrow")
+    payload = b"ARROW1-test"
+    identifier = sha256(payload).hexdigest()
+
+    assert extension._write_arrow_assets({identifier: payload}) == {identifier}
+    (extension.core.ARROW_DIR / f"{identifier}.arrow").write_bytes(b"truncated")
+    assert extension._write_arrow_assets({identifier: payload}) == {identifier}
+    assert (extension.core.ARROW_DIR / f"{identifier}.arrow").read_bytes() == payload
+
+    rewritten = extension._rewrite_arrow_urls(
+        {"layer": [{"data": {"url": f"arrow://{identifier}"}}]}, {identifier}
+    )
+    assert rewritten["layer"][0]["data"]["url"] == (
+        f"../../../_static/generated/arrow/{identifier}.arrow"
+    )
+    assert urljoin(
+        "https://docs.example.test/gallery/oncoprint.html",
+        "_static/specs/" + rewritten["layer"][0]["data"]["url"],
+    ) == (f"https://docs.example.test/_static/generated/arrow/{identifier}.arrow")
+
+    stale = extension.core.ARROW_DIR / f"{'b' * 64}.arrow"
+    stale.write_bytes(b"stale")
+    extension._remove_stale_arrow_assets({identifier})
+
+    assert (extension.core.ARROW_DIR / f"{identifier}.arrow").exists()
+    assert not stale.exists()
+
+
+def test_gallery_generation_writes_prepared_arrow_assets(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    gallery = _load_gallery()
+    extension = _load_gallery_extension()
+    payload = b"ARROW1-test"
+    identifier = sha256(payload).hexdigest()
+    example = gallery.Example(
+        name="arrow_example",
+        title="Arrow example",
+        description="",
+        category="Basics",
+        tags=(),
+        order=1,
+        height=200,
+        max_width=None,
+        source="chart = None",
+        spec={
+            "mark": "point",
+            "data": {"url": f"arrow://{identifier}", "format": {"type": "arrow"}},
+        },
+    )
+
+    monkeypatch.setattr(extension.core, "GALLERY_PAGES_DIR", tmp_path / "gallery")
+    monkeypatch.setattr(extension.core, "SPECS_DIR", tmp_path / "specs")
+    monkeypatch.setattr(extension.core, "ARROW_DIR", tmp_path / "arrow")
+    monkeypatch.setattr(
+        extension.core,
+        "iter_prepared_examples",
+        lambda: iter([(example, {identifier: payload})]),
+    )
+    monkeypatch.setattr(extension.core, "thumb_filename", lambda _: "thumb.png")
+
+    extension._generate(type("App", (), {"env": type("Env", (), {})()})())
+
+    spec = (extension.core.SPECS_DIR / "arrow_example.json").read_text(encoding="utf-8")
+    assert f"../../../_static/generated/arrow/{identifier}.arrow" in spec
+    assert (extension.core.ARROW_DIR / f"{identifier}.arrow").read_bytes() == payload
+
+
 def test_gallery_detail_embed_uses_shadow_dom_and_stable_reveal() -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
@@ -771,6 +854,14 @@ def test_gallery_detail_embed_uses_shadow_dom_and_stable_reveal() -> None:
     assert "import { embed } from 'https://example.test/bundle.js';" in markdown
     assert "await embed(c, spec, { bare: true });" in markdown
     assert f"airway_volcano_plot.json?v={expected}" in markdown
+    assert "const spec = '../_static/specs/airway_volcano_plot.json" in markdown
+    assert "await fetch(" not in markdown
+    assert (
+        '<a href="../_static/specs/airway_volcano_plot.json">'
+        "View the generated render spec</a>" in markdown
+    )
+    assert "references assets hosted with these docs" in markdown
+    assert "Download the generated GenomeSpy spec" not in markdown
     assert (
         "#shell{position:relative;width:100%;height:100%;overflow:hidden}" in markdown
     )

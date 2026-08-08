@@ -269,7 +269,7 @@ star_layer = (
         "datum.class === 'Structural Variant (putative driver)' || "
         "datum.class === 'Structural Variant (putative passenger)'"
     )
-    .mark_point(shape="star", size=80, filled=True, strokeWidth=0)
+    .mark_point(shape="cross", size=80, filled=True, strokeWidth=0)
     .encode(
         x=gs.X("sample_order:I").axis(None),
         y=gs.Y("gene:N"),
@@ -391,7 +391,11 @@ sample_tracks = (
             gs.param(
                 "sampleRuler",
                 persist=False,
-                ruler={"encodings": ["x"], "mark": {"opacity": 0.3}},
+                ruler={
+                    "encodings": ["x"],
+                    "snap": False,
+                    "mark": {"opacity": 0.3},
+                },
             )
         ],
     )

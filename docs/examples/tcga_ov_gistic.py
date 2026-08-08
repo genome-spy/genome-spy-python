@@ -5,6 +5,7 @@ shown over a shared hg19 genomic axis.
 """
 
 import genome_spy as gs
+from genome_spy.datasets._gistic import tcga_ov_gistic_data
 
 META = {
     "category": "Copy-number plots",
@@ -19,6 +20,9 @@ event_colors = gs.Scale(
     range=["#e45756", "#4c78a8"],
 )
 
+data = tcga_ov_gistic_data()
+DATA_PREVIEW = {"GISTIC scores": data["scores"], "GISTIC lesions": data["lesions"]}
+
 zero_line = (
     gs.Chart([{"value": 0}])
     .mark_rule(color="black", opacity=0.3)
@@ -27,12 +31,7 @@ zero_line = (
 )
 
 q_values = (
-    gs.Chart(
-        gs.Data(
-            url=("https://data.genomespy.app/sample-data/TCGA-OV-GISTIC/scores.gistic"),
-            format={"type": "tsv"},
-        )
-    )
+    gs.Chart(data["scores"])
     .transform_formula(
         expr="datum['-log10(q-value)'] * (datum.Type == 'Del' ? -1 : 1)",
         as_="-log10(q-value)",
@@ -63,15 +62,7 @@ score_track = gs.layer(zero_line, q_values, thresholds).properties(
 )
 
 lesion_track = (
-    gs.Chart(
-        gs.Data(
-            url=(
-                "https://data.genomespy.app/sample-data/"
-                "TCGA-OV-GISTIC/all_lesions.conf_99.txt"
-            ),
-            format={"type": "tsv"},
-        )
-    )
+    gs.Chart(data["lesions"])
     .transform_regex_extract(
         field="Unique Name",
         regex=r"^(Amplification|Deletion) Peak[ ]+\d+$",
