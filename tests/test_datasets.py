@@ -17,6 +17,7 @@ from genome_spy.datasets._hapmap import (
     hapmap_qq_data,
     hapmap_volcano_data,
 )
+from genome_spy.datasets._gistic import tcga_ov_gistic_data
 from genome_spy.datasets._mutation import brca_rainfall_data, dnmt3a_lollipop_data
 from genome_spy.datasets._oncoprint import laml_oncoplot_data, luad_oncoprint_data
 
@@ -33,6 +34,8 @@ def test_available_datasets_are_stable() -> None:
         "tcga_laml_annotations",
         "tcga_laml_maf",
         "tcga_oncoprint",
+        "tcga_ov_gistic_lesions",
+        "tcga_ov_gistic_scores",
     )
 
 
@@ -83,6 +86,14 @@ def test_load_upstream_mutation_tables() -> None:
     assert "Tumor_Sample_Barcode" in laml
 
 
+def test_load_gistic_tables_for_the_displayed_genomic_interval() -> None:
+    data = tcga_ov_gistic_data()
+
+    assert data["scores"].shape == (9046, 8)
+    assert set(data["scores"]["Chromosome"]) == {18, 19, 20}
+    assert data["lesions"].shape == (22, 589)
+
+
 def test_upstream_mutation_files_are_byte_exact() -> None:
     data_dir = files("genome_spy.datasets").joinpath("data")
     expected_hashes = {
@@ -92,6 +103,8 @@ def test_upstream_mutation_files_are_byte_exact() -> None:
         "tcga.tsv": "39a90fc1f50ebcd113c37fd03894fb41b17dca4d6014f7efcf0e3f234c957742",
         "tcga_laml.maf.gz": "d102b071a052265b6f8ad7947bad1d58d3e3036fd17d6b274f7ea09a376cd6a0",
         "tcga_laml_annot.tsv": "7033030d52868e9a0f35ffd78f45a9d7a126c2edef90cf9e74e4f5d78990a710",
+        "tcga_ov_gistic_lesions.tsv.gz": "e301075b6742cb8fc4d4bc0b5c125bea5b6b8eee60b196a75d9baa7825cb46b7",
+        "tcga_ov_gistic_scores.tsv.gz": "2c61eb4a5f26afa9a026994cbf116796f663f74a320382ad20b50e6a9d6f30a0",
     }
 
     for filename, expected_hash in expected_hashes.items():

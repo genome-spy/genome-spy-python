@@ -193,7 +193,11 @@ left_panel = (
             gs.param(
                 "sampleRuler",
                 persist=False,
-                ruler={"encodings": ["x"], "mark": {"opacity": 0.3}},
+                ruler={
+                    "encodings": ["x"],
+                    "snap": False,
+                    "mark": {"opacity": 0.3},
+                },
             )
         ],
     )

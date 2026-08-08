@@ -6,6 +6,7 @@ import inspect
 from datetime import datetime
 
 import genome_spy as gs
+import polars as pl
 import pytest
 
 from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
@@ -1107,6 +1108,55 @@ def test_dataframe_like_datetime_values_are_json_safe() -> None:
 
     assert spec["data"]["values"] == [{"x": 1, "when": "1970-01-01T00:00:00"}]
     json.dumps(spec)
+
+
+def test_prepare_render_uses_arrow_without_changing_json_serialization() -> None:
+    frame = pl.DataFrame({"x": [1, 2], "label": ["A", "B"]})
+    chart = gs.Chart(frame).mark_point().encode(x="x:Q")
+
+    prepared = chart._prepare_render()
+
+    identifier = next(iter(prepared.buffers))
+    assert prepared.spec["data"] == {
+        "url": f"arrow://{identifier}",
+        "format": {"type": "arrow"},
+    }
+    assert prepared.buffers[identifier] == gs.to_arrow_ipc(frame)
+    assert chart.to_dict()["data"] == {
+        "values": [{"x": 1, "label": "A"}, {"x": 2, "label": "B"}]
+    }
+
+
+def test_prepare_render_encodes_a_shared_table_once_in_a_composition() -> None:
+    frame = pl.DataFrame({"x": [1, 2], "y": [3, 4]})
+    calls = 0
+
+    class CountingFrame:
+        __module__ = "polars"
+
+        schema = frame.schema
+
+        def write_ipc(self, *, file: object, compression: str) -> bytes:
+            nonlocal calls
+            calls += 1
+            assert file is None
+            assert compression == "uncompressed"
+            return frame.write_ipc(file=None, compression=compression)
+
+        def to_dicts(self) -> list[dict[str, object]]:
+            raise AssertionError("render preparation must not materialize records")
+
+    data = CountingFrame()
+    chart = gs.Chart(data).mark_point().encode(x="x", y="y") + gs.Chart(
+        data
+    ).mark_text().encode(x="x", text="y")
+
+    prepared = chart._prepare_render()
+
+    assert calls == 1
+    assert len(prepared.buffers) == 1
+    assert prepared.spec["layer"][0]["data"] == prepared.spec["layer"][1]["data"]
+    assert prepared.spec["layer"][0]["encoding"]["x"]["type"] == "quantitative"
 
 
 def test_chart_spec_and_string_repr_expose_json_spec() -> None:

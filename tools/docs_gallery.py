@@ -20,6 +20,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
+from typing import Iterator
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DOCS_DIR = REPO_ROOT / "docs"
@@ -28,6 +29,7 @@ STATIC_DIR = DOCS_DIR / "_static"
 GALLERY_PAGES_DIR = DOCS_DIR / "gallery"
 THUMBS_DIR = STATIC_DIR / "gallery"
 SPECS_DIR = STATIC_DIR / "specs"
+ARROW_DIR = STATIC_DIR / "generated" / "arrow"
 
 # Category display order and one-line blurbs. Unknown categories sort last.
 CATEGORIES: dict[str, tuple[int, str]] = {
@@ -153,17 +155,8 @@ def _data_previews(module: ModuleType) -> tuple[DataPreview, ...]:
     return tuple(previews)
 
 
-def collect_example(path: Path) -> Example:
-    """Import one example module and capture its chart spec and metadata."""
-    _ensure_src_on_path()
-    module = _load_module(path)
-    if not hasattr(module, "chart"):
-        raise AttributeError(f"{path.name} does not define a `chart` object")
-
-    chart = module.chart
-    if not hasattr(chart, "to_dict"):
-        raise TypeError(f"{path.name}'s `chart` is not serializable")
-
+def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
+    """Capture one already-imported example module with a supplied spec."""
     meta = getattr(module, "META", {}) or {}
     title, description = _docstring_parts(module, path.stem.replace("_", " ").title())
 
@@ -179,9 +172,43 @@ def collect_example(path: Path) -> Example:
             int(meta["max_width"]) if meta.get("max_width") is not None else None
         ),
         source=path.read_text(encoding="utf-8"),
-        spec=chart.to_dict(),
+        spec=spec,
         previews=_data_previews(module),
     )
+
+
+def _chart_from_example(path: Path) -> tuple[ModuleType, object]:
+    """Return one imported example module and its serializable chart."""
+    _ensure_src_on_path()
+    module = _load_module(path)
+    if not hasattr(module, "chart"):
+        raise AttributeError(f"{path.name} does not define a `chart` object")
+    chart = module.chart
+    if not hasattr(chart, "to_dict"):
+        raise TypeError(f"{path.name}'s `chart` is not serializable")
+    return module, chart
+
+
+def collect_example(path: Path) -> Example:
+    """Import one example module and capture its JSON-compatible spec."""
+    module, chart = _chart_from_example(path)
+    return _collect_example(path, module, chart.to_dict())  # type: ignore[attr-defined]
+
+
+def iter_prepared_examples() -> Iterator[tuple[Example, dict[str, bytes]]]:
+    """Prepare gallery examples one at a time for binary-capable renderers."""
+    for path in sorted(EXAMPLES_DIR.glob("*.py")):
+        if path.name.startswith("_"):
+            continue
+        module, chart = _chart_from_example(path)
+        if hasattr(chart, "_prepare_render"):
+            prepared = chart._prepare_render()  # type: ignore[attr-defined]
+            spec = prepared.spec
+            buffers = prepared.buffers
+        else:
+            spec = chart.to_dict()  # type: ignore[attr-defined]
+            buffers = {}
+        yield _collect_example(path, module, spec), buffers
 
 
 def collect_examples() -> list[Example]:

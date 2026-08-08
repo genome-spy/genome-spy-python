@@ -234,6 +234,7 @@ CHANGELOG_STAGING.md
 docs/_build/
 docs/gallery/
 docs/_static/specs/
+docs/_static/generated/arrow/
 
 # Local assistant state
 .claude/

@@ -25,6 +25,8 @@ _DATASETS = {
     "pyoncoprint_tcga": "tcga.tsv",
     "tcga_laml_annotations": "tcga_laml_annot.tsv",
     "tcga_laml_maf": "tcga_laml.maf.gz",
+    "tcga_ov_gistic_lesions": "tcga_ov_gistic_lesions.tsv.gz",
+    "tcga_ov_gistic_scores": "tcga_ov_gistic_scores.tsv.gz",
     "tcga_oncoprint": "oncoprint_dataset3.json",
 }
 
@@ -81,9 +83,9 @@ def _load_dataframe(name: str) -> Any:
 
     resource = _resource_for(name)
     suffixes = Path(_DATASETS[name]).suffixes
-    if suffixes == [".csv"]:
+    if suffixes in ([".csv"], [".csv", ".gz"]):
         return pd.read_csv(resource)
-    if suffixes == [".tsv"]:
+    if suffixes in ([".tsv"], [".tsv", ".gz"]):
         return pd.read_csv(resource, sep="\t")
     if suffixes[-2:] == [".maf", ".gz"]:
         return pd.read_csv(resource, sep="\t", compression="gzip")
@@ -159,6 +161,10 @@ def load_dataset(
         return _load_dataframe(name)
     if suffix == ".json":
         return json.loads(resource.read_text("utf-8"))
-    if suffix in {".csv", ".tsv"} or suffixes[-2:] == [".maf", ".gz"]:
+    if suffix in {".csv", ".tsv"} or suffixes[-2:] in (
+        [".csv", ".gz"],
+        [".tsv", ".gz"],
+        [".maf", ".gz"],
+    ):
         return _load_dataframe(name)
     raise ValueError(f"Unsupported dataset format for {name!r}: {suffix}.")

@@ -20,6 +20,9 @@ from __future__ import annotations
 import html
 import json
 import sys
+from copy import deepcopy
+from dataclasses import replace
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -35,6 +38,56 @@ import docs_gallery as core  # noqa: E402
 def _write(path: Path, content: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
+
+
+def _write_arrow_assets(buffers: dict[str, bytes]) -> set[str]:
+    """Write content-addressed Arrow assets and return their identifiers."""
+    identifiers = set(buffers)
+    for identifier, payload in buffers.items():
+        if sha256(payload).hexdigest() != identifier:
+            raise ValueError("Arrow asset identifier does not match its payload.")
+        path = core.ARROW_DIR / f"{identifier}.arrow"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(payload)
+    return identifiers
+
+
+def _rewrite_arrow_urls(spec: dict[str, Any], identifiers: set[str]) -> dict[str, Any]:
+    """Replace private Arrow tokens with paths that work from gallery pages."""
+    rewritten = deepcopy(spec)
+
+    def visit(value: Any) -> None:
+        if isinstance(value, list):
+            for item in value:
+                visit(item)
+            return
+        if not isinstance(value, dict):
+            return
+        url = value.get("url")
+        if isinstance(url, str) and url.startswith("arrow://"):
+            identifier = url.removeprefix("arrow://")
+            if identifier not in identifiers:
+                raise ValueError(
+                    f"Gallery spec references missing Arrow payload {identifier!r}."
+                )
+            # GenomeSpy derives ``_static/specs/`` from the URL passed to
+            # ``embed``. That base is resolved from ``gallery/<example>.html``,
+            # so the asset needs three parent segments to reach ``/_static``.
+            value["url"] = f"../../../_static/generated/arrow/{identifier}.arrow"
+        for child in value.values():
+            visit(child)
+
+    visit(rewritten)
+    return rewritten
+
+
+def _remove_stale_arrow_assets(referenced: set[str]) -> None:
+    """Delete only generated Arrow assets no longer referenced by examples."""
+    if not core.ARROW_DIR.is_dir():
+        return
+    for path in core.ARROW_DIR.glob("*.arrow"):
+        if path.stem not in referenced:
+            path.unlink()
 
 
 def _card_html(
@@ -152,7 +205,7 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         "<div id='shell'><div id='load'>Loading chart...</div><div id='c'></div></div>`;\n"
         "  const c = shadow.getElementById('c');\n"
         "  const load = shadow.getElementById('load');\n"
-        f"  const spec = await fetch('{spec_url}').then((r) => r.json());\n"
+        f"  const spec = '{spec_url}';\n"
         "  await embed(c, spec, { bare: true });\n"
         "  let last = '', stable = 0;\n"
         "  const reveal = () => { c.style.opacity = '1'; if (load) load.remove(); };\n"
@@ -198,7 +251,8 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         example.source.rstrip(),
         "```",
         "",
-        f"[Download the generated GenomeSpy spec]({download_url})",
+        f'<a href="{download_url}">View the generated render spec</a> '
+        "(references assets hosted with these docs)",
         "",
     ]
     return "\n".join(parts)
@@ -263,10 +317,17 @@ def _generate(app: Any) -> None:
             path.unlink()
     _remove_stale_build_outputs(app, stale_names)
 
-    examples = core.collect_examples()
+    examples: list[core.Example] = []
+    referenced_arrow_assets: set[str] = set()
     bundle_url = core.default_bundle_url()
 
-    for example in examples:
+    for example, buffers in core.iter_prepared_examples():
+        referenced_arrow_assets.update(_write_arrow_assets(buffers))
+        example = replace(
+            example,
+            spec=_rewrite_arrow_urls(example.spec, set(buffers)),
+        )
+        examples.append(example)
         _write(
             core.SPECS_DIR / f"{example.name}.json",
             json.dumps(example.spec, indent=2),
@@ -277,6 +338,7 @@ def _generate(app: Any) -> None:
         )
 
     _write(core.GALLERY_PAGES_DIR / "index.md", _gallery_index_md(examples))
+    _remove_stale_arrow_assets(referenced_arrow_assets)
     if hasattr(app, "env"):
         app.env.genomespy_examples = examples  # type: ignore[attr-defined]
 

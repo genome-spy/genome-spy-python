@@ -8,6 +8,7 @@ from datetime import date, datetime
 from typing import Any, cast
 
 from genome_spy._utils import is_mapping
+from genome_spy.arrow import _is_pandas_frame, _is_polars_frame, _is_pyarrow_table
 from genome_spy.channels import Channel, channel
 from genome_spy.schemapi import (
     SchemaBase,
@@ -57,6 +58,9 @@ def records_from_data(data: Any) -> list[dict[str, Any]] | None:
     """Extract record-like rows from common Python table inputs."""
     if isinstance(data, list):
         return data
+    if _is_pyarrow_table(data):
+        records = data.to_pylist()
+        return records if isinstance(records, list) else None
     if hasattr(data, "to_dicts"):
         records = data.to_dicts()
         if isinstance(records, list):
@@ -84,6 +88,12 @@ def records_data(records: list[dict[str, Any]]) -> dict[str, Any]:
 
 def infer_field_type(field: str, data: Any) -> str | None:
     """Infer a GenomeSpy encoding type from up to the first 100 records."""
+    table_type = infer_table_field_type(field, data)
+    if table_type is not None:
+        return table_type
+    if _is_polars_frame(data) or _is_pandas_frame(data) or _is_pyarrow_table(data):
+        return None
+
     records = records_from_data(data)
     if not records:
         return None
@@ -94,6 +104,42 @@ def infer_field_type(field: str, data: Any) -> str | None:
         inferred_type = infer_value_type(row[field])
         if inferred_type is not None:
             return inferred_type
+    return None
+
+
+def infer_table_field_type(field: str, data: Any) -> str | None:
+    """Infer a field type from supported table dtype metadata without rows."""
+    if _is_polars_frame(data):
+        dtype = getattr(data, "schema", {}).get(field)
+        if dtype is None:
+            return None
+        is_numeric = getattr(dtype, "is_numeric", None)
+        return "quantitative" if callable(is_numeric) and is_numeric() else "nominal"
+
+    if _is_pandas_frame(data):
+        dtypes = getattr(data, "dtypes", None)
+        if dtypes is None:
+            return None
+        try:
+            dtype = dtypes[field]
+        except (KeyError, TypeError):
+            return None
+        return "quantitative" if getattr(dtype, "kind", "") in "iufc" else "nominal"
+
+    if _is_pyarrow_table(data):
+        schema = getattr(data, "schema", None)
+        if schema is None:
+            return None
+        try:
+            arrow_type = schema.field(field).type
+        except (KeyError, TypeError, AttributeError):
+            return None
+        return (
+            "quantitative"
+            if str(arrow_type).startswith(("int", "uint", "float", "double", "decimal"))
+            else "nominal"
+        )
+
     return None
 
 
