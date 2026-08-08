@@ -159,41 +159,26 @@ to build schema objects directly. Small mapping helpers such as `gs.scales(...)`
 and ergonomic builders such as `gs.param(...)` also remain useful where they
 keep the visualization code shorter and clearer.
 
-Additional runnable notebooks live under `notebooks/`.
+## Dataframe rendering
 
-The Marimo interaction spike can be opened with:
-
-```bash
-uv run marimo edit notebooks/genome_spy_interactions.py
-```
-
-It demonstrates a GenomeSpy parameter controlled by a Marimo slider and
-click data synchronized back to Python. The notebook intentionally uses a
-small inline table; the planned Polars/Arrow transport follows after this
-interaction contract is validated.
-
-The Arrow transport spike can be opened with:
+When a chart is displayed in a notebook or generated for the documentation
+gallery, Polars dataframes are transferred automatically as uncompressed Arrow
+IPC. pandas dataframes and PyArrow tables use the same path when the optional
+Arrow support is installed:
 
 ```bash
-uv run marimo edit notebooks/genome_spy_arrow.py
+pip install "genome-spy-python[arrow]"
 ```
 
-It serializes a small Polars table with `gs.to_arrow_ipc(...)` and sends the
-binary payload through the widget using an `arrow://signal` data-source token.
-The browser replaces that token with a temporary Blob URL and GenomeSpy 0.82
-loads it with its native Arrow IPC loader. The spike supports uncompressed IPC
-only and intentionally does not claim zero-copy rendering.
+No manual `arrow://` data source or widget buffer map is needed. Ordinary
+Python record lists, and pandas installations without PyArrow, continue to use
+inline JSON. `chart.to_dict()`, `chart.to_json()`, and saved specs always
+remain JSON-compatible.
 
-The reactive replacement spike is available at
-`notebooks/genome_spy_arrow_reactive.py`; its control recomputes the Polars
-frame, replaces the binary payload, and reports a small JSON-size comparison.
-For repeatable payload measurements across representative table sizes, run
-`uv run python scripts/benchmark_arrow_transport.py`.
-
-The deterministic mutation-impact prototype is available at
-`notebooks/genome_spy_mutation_impact.py`. It adds a mutation control and
-rebuilds aligned reference, alternate, and delta tracks as three Arrow IPC
-payloads without model credentials or network data.
+GenomeSpy currently decodes IPC into JavaScript row objects, so this is binary
+columnar transport rather than zero-copy rendering. Use uncompressed IPC; dates
+and timestamps follow GenomeSpy's normal JavaScript conversion behavior, and
+integers beyond JavaScript's safe integer range can lose precision.
 
 ## Packaged Datasets
 

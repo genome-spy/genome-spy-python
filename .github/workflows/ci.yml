@@ -14,11 +14,17 @@ jobs:
         with:
           enable-cache: true
           python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - run: uv sync --locked --dev
       - run: uv run ruff format --check .
       - run: uv run ruff check .
       - run: uv run mypy src/
       - run: uv run pytest tests/ -x
+      - run: node --test tests/widget.test.mjs
+      - run: uv build --wheel
+      - run: unzip -Z1 dist/*.whl | rg --fixed-strings --line-regexp "genome_spy/static/widget.js"
 
   codegen:
     runs-on: ubuntu-latest

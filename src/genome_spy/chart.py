@@ -6,7 +6,7 @@ import json
 from collections.abc import Mapping, Sequence
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, ClassVar, Protocol, Self, cast
+from typing import TYPE_CHECKING, Any, Callable, ClassVar, Protocol, Self, cast
 from uuid import uuid4
 
 from genome_spy._utils import JsonSpec, compact_json, pretty_json
@@ -59,6 +59,9 @@ from genome_spy.schemapi import (
     normalize_mapping_value,
     normalize_schema_value,
 )
+
+if TYPE_CHECKING:
+    from genome_spy._render import _PreparedSpec
 
 _CORE_DIST_URL = f"https://cdn.jsdelivr.net/npm/@genome-spy/core@{SCHEMA_VERSION}/dist"
 DEFAULT_SCHEMA_URL = f"{_CORE_DIST_URL}/schema.json"
@@ -348,12 +351,14 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
             ),
         )
 
-    def _serialized_top_level_values(self) -> dict[str, Any]:
+    def _serialized_top_level_values(
+        self, *, normalize_chart_data: Callable[[Any], Any] = normalize_data
+    ) -> dict[str, Any]:
         """Return copied top-level state with authoring-edge values normalized."""
         values = dict(self._kwds)  # type: ignore[attr-defined]
         data = values.get("data", Undefined)
         if data is not Undefined:
-            normalized_data = normalize_data(data)
+            normalized_data = normalize_chart_data(data)
             if normalized_data is None:
                 values.pop("data")
             else:
@@ -466,6 +471,22 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         """Serialize the spec to a JSON-compatible dictionary."""
         raise NotImplementedError
 
+    def _to_dict(
+        self,
+        *,
+        include_schema: bool,
+        validate: bool,
+        normalize_chart_data: Callable[[Any], Any],
+    ) -> dict[str, Any]:
+        """Serialize with a caller-provided data-normalization policy."""
+        raise NotImplementedError
+
+    def _prepare_render(self) -> _PreparedSpec:
+        """Prepare this chart for a renderer that supports binary buffers."""
+        from genome_spy._render import prepare_render
+
+        return prepare_render(self)
+
     @property
     def spec(self) -> JsonSpec:
         """Return the rendered GenomeSpy specification with JSON display."""
@@ -514,7 +535,6 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         *,
         bundle_url: str = DEFAULT_EMBED_URL,
         embed_options: dict[str, Any] | None = None,
-        arrow_data: Mapping[str, bytes] | None = None,
         parameter_names: Sequence[str] = (),
         parameter_values: Mapping[str, Any] | None = None,
         enable_click_events: bool = False,
@@ -524,8 +544,6 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         Args:
             bundle_url: GenomeSpy bundle URL used by the widget.
             embed_options: Options passed to GenomeSpy's ``embed`` function.
-            arrow_data: Binary Arrow IPC payloads keyed by ``arrow://`` data
-                source names in the authored specification.
             parameter_names: Named GenomeSpy parameters synchronized with the
                 widget's ``parameter_values`` trait.
             parameter_values: Initial values for the synchronized parameters.
@@ -541,7 +559,6 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
             self,
             bundle_url=bundle_url,
             embed_options=embed_options,
-            arrow_data=arrow_data,
             parameter_names=parameter_names,
             parameter_values=parameter_values,
             enable_click_events=enable_click_events,
@@ -586,7 +603,23 @@ class Chart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy upd
         self, *, include_schema: bool = True, validate: bool = True
     ) -> dict[str, Any]:
         """Serialize and optionally validate the complete chart specification."""
-        values = self._serialized_top_level_values()
+        return self._to_dict(
+            include_schema=include_schema,
+            validate=validate,
+            normalize_chart_data=normalize_data,
+        )
+
+    def _to_dict(
+        self,
+        *,
+        include_schema: bool,
+        validate: bool,
+        normalize_chart_data: Callable[[Any], Any],
+    ) -> dict[str, Any]:
+        """Serialize this unit spec with a configurable data policy."""
+        values = self._serialized_top_level_values(
+            normalize_chart_data=normalize_chart_data
+        )
         spec = UnitSpec(**values).to_dict(validate=False)
         return self._validated_root_spec(
             spec,
@@ -631,11 +664,35 @@ class _CompositionSpec(TopLevelSpec, ConfigMethodMixin, ResolutionMethodMixin):
     def to_dict(
         self, *, include_schema: bool = True, validate: bool = True
     ) -> dict[str, Any]:
-        values = self._serialized_top_level_values()
+        return self._to_dict(
+            include_schema=include_schema,
+            validate=validate,
+            normalize_chart_data=normalize_data,
+        )
+
+    def _to_dict(
+        self,
+        *,
+        include_schema: bool,
+        validate: bool,
+        normalize_chart_data: Callable[[Any], Any],
+    ) -> dict[str, Any]:
+        """Serialize this composition with one shared data policy."""
+        values = self._serialized_top_level_values(
+            normalize_chart_data=normalize_chart_data
+        )
         children = values.get(self._children_key, Undefined)
         if children is not Undefined:
             values[self._children_key] = [
-                child.to_dict(include_schema=False, validate=False)
+                (
+                    child._to_dict(
+                        include_schema=False,
+                        validate=False,
+                        normalize_chart_data=normalize_chart_data,
+                    )
+                    if isinstance(child, TopLevelSpec)
+                    else child.to_dict(include_schema=False, validate=False)
+                )
                 for child in children
             ]
         spec = self._schema_spec_cls(**values).to_dict(validate=False)

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import genome_spy as gs
+import polars as pl
 
 
 def test_widget_uses_chart_spec() -> None:
@@ -25,29 +26,26 @@ def test_jupyter_chart_accepts_raw_spec_dict() -> None:
     assert widget.spec == spec
 
 
-def test_widget_exposes_binary_arrow_payloads() -> None:
-    spec = {
-        "$schema": "https://cdn.jsdelivr.net/npm/@genome-spy/core@0.82.0/dist/schema.json",
-        "mark": "point",
-        "data": {
-            "url": "arrow://signals",
-            "format": {"type": "arrow"},
-        },
-        "encoding": {
-            "x": {"field": "position", "type": "quantitative"},
-            "y": {"field": "value", "type": "quantitative"},
-        },
+def test_widget_automatically_exposes_binary_arrow_payloads() -> None:
+    chart = (
+        gs.Chart(pl.DataFrame({"position": [1, 2], "value": [3.0, 4.0]}))
+        .mark_point()
+        .encode(x="position:Q", y="value:Q")
+    )
+
+    widget = chart.widget()
+
+    identifier = next(iter(widget.arrow_data))
+    assert widget.spec["data"] == {
+        "url": f"arrow://{identifier}",
+        "format": {"type": "arrow"},
     }
-    payload = b"ARROW1-test"
-
-    widget = gs.JupyterChart(spec, arrow_data={"signals": payload})
-
-    assert widget.arrow_data == {"signals": payload}
+    assert widget.arrow_data[identifier][:6] == b"ARROW1"
     assert "arrow_data" in widget._esm
     assert "createObjectURL" in widget._esm
     assert "revokeObjectURL" in widget._esm
     assert "renderRevision" in widget._esm
-    assert "activeArrowObjectUrls" in widget._esm
+    assert "toUint8Array" in widget._esm
     assert "nextApi?.finalize?.()" in widget._esm
 
 
