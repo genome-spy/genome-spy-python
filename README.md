@@ -34,8 +34,107 @@ uv sync --extra arrow
 
 ## Examples
 
+<<<<<<< HEAD
 Build a simple scatter plot from Python records. In a notebook, evaluate the
 last line to display the interactive chart.
+=======
+```bash
+uv run pre-commit install
+uv run pre-commit run --all-files
+```
+
+### Build and preview the documentation
+
+Build the HTML documentation with:
+
+```bash
+uv run sphinx-build -b html -W --keep-going docs docs/_build/html
+```
+
+The Sphinx build imports the examples, validates their serialized GenomeSpy
+specifications, and generates the gallery pages and downloadable specs. Preview
+the result locally with:
+
+```bash
+python3 -m http.server 8000 --directory docs/_build/html
+```
+
+Then open <http://localhost:8000/> in a browser. The live examples load the
+pinned GenomeSpy JavaScript bundle from the CDN, so an internet connection is
+needed when viewing interactive charts. Gallery cards require manually reviewed
+PNG thumbnails to exist before the build.
+
+### Work on examples
+
+Documentation examples live under `docs/examples/` and are the source of truth
+for the generated gallery. Add or update an example there, then rebuild the
+documentation and run the gallery tests:
+
+```bash
+uv run pytest tests/test_docs_gallery.py -q
+uv run sphinx-build -b html -W --keep-going docs docs/_build/html
+```
+
+### Regenerate schema wrappers
+
+Generated schema wrappers are committed to the repository. Maintainers should
+regenerate them when the pinned GenomeSpy core version changes:
+
+```bash
+uv run python tools/generate_schema_wrapper.py
+```
+
+Schema regeneration requires `npm` on `PATH` and updates the generated schema
+package from the pinned `@genome-spy/core` release. See
+[Schema Generation](#schema-generation) for local upstream audit modes.
+
+## Notebook Usage
+
+The current notebook path uses `anywidget` as a thin bridge to GenomeSpy's
+JavaScript `embed(...)` API:
+
+```python
+import genome_spy as gs
+
+chart = (
+    gs.Chart(data=[{"x": 1, "y": 2, "category": "A"}])
+    .mark_point(size=90)
+    .encode(
+        x=gs.X("x:Q"),
+        y=gs.Y("y:Q"),
+        color=gs.Color("category:N"),
+    )
+)
+
+chart
+```
+
+A runnable example notebook is available at
+`notebooks/basic_point_chart.ipynb`.
+
+Run the reactive Marimo example with:
+
+```bash
+uv run marimo edit notebooks/genome_spy_arrow_reactive.py
+```
+
+`chart.widget()` is also available for explicit `anywidget` usage, but plain
+`chart` display is the most portable default across notebook frontends.
+
+Existing GenomeSpy specifications can be validated, wrapped, and rendered
+without rewriting them:
+
+```python
+chart = gs.TopLevelSpec.from_dict(spec)
+```
+
+The loader dispatches unit, layer, multiscale, and concatenated roots, including
+template or URL imports nested inside compositions.
+
+## Example notebooks
+
+Some notebooks use simple tabular data to show the core authoring model:
+>>>>>>> 9a945bd (docs: update README)
 
 ```python
 import genome_spy as gs
