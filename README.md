@@ -34,10 +34,6 @@ uv sync --extra arrow
 
 ## Examples
 
-<<<<<<< HEAD
-Build a simple scatter plot from Python records. In a notebook, evaluate the
-last line to display the interactive chart.
-=======
 ```bash
 uv run pre-commit install
 uv run pre-commit run --all-files
