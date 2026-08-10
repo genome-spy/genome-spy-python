@@ -155,10 +155,12 @@ class MarkMethodMixin:
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Set the chart mark to ``rect``.
 
@@ -194,10 +196,12 @@ class MarkMethodMixin:
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         properties = {
             "buildIndex": buildIndex,
@@ -231,9 +235,11 @@ class MarkMethodMixin:
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -298,9 +304,11 @@ class MarkMethodMixin:
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Set the chart mark to ``point``.
 
@@ -325,7 +333,7 @@ class MarkMethodMixin:
             sampleFacetPadding (float): Additional padding used by sample facets. **Default value:** ``0.1``
             semanticScore (float | ExprRef | dict[str, Any]): The semantic score used by semantic zooming in the point mark. This is primarily intended for internal use. **Default value:** ``0``
             semanticZoomFraction (float | ExprRef | dict[str, Any]): TODO **Default value:** ``0.02``
-            shape (str | ExprRef | dict[str, Any]): One of ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, ``"triangle-left"``, ``"tick-up"``, ``"tick-down"``, ``"tick-right"``, or ``"tick-left"`` **Default value:** ``"circle"``
+            shape (str | ExprRef | dict[str, Any]): One of ``"circle"``, ``"square"``, ``"cross"``, ``"x"``, ``"+"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, ``"triangle-left"``, ``"tick-up"``, ``"tick-down"``, ``"tick-right"``, or ``"tick-left"``. The ``"x"`` and ``"+"`` shapes are stroke-only and use ``strokeWidth`` for their line thickness. **Default value:** ``"circle"``
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
             stroke (str | ExprRef | dict[str, Any]): The stroke color
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
@@ -333,9 +341,11 @@ class MarkMethodMixin:
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         properties = {
             "angle": angle,
@@ -366,8 +376,10 @@ class MarkMethodMixin:
             "style": style,
             "tooltip": tooltip,
             "x": x,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -410,10 +422,12 @@ class MarkMethodMixin:
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Set the chart mark to ``rule``.
 
@@ -434,10 +448,12 @@ class MarkMethodMixin:
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         properties = {
             "buildIndex": buildIndex,
@@ -456,9 +472,11 @@ class MarkMethodMixin:
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -501,9 +519,11 @@ class MarkMethodMixin:
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Set the chart mark to ``tick``.
 
@@ -524,9 +544,11 @@ class MarkMethodMixin:
             thickness (float): The thickness of the tick mark in pixels. Equivalent to the ``size`` of the underlying rule mark. **Default value:** ``1``
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         properties = {
             "buildIndex": buildIndex,
@@ -545,8 +567,10 @@ class MarkMethodMixin:
             "thickness": thickness,
             "tooltip": tooltip,
             "x": x,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -604,10 +628,12 @@ class MarkMethodMixin:
         viewportEdgeFadeWidthTop: float | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Set the chart mark to ``text``.
 
@@ -648,10 +674,12 @@ class MarkMethodMixin:
             viewportEdgeFadeWidthTop (float): Schema-defined ``viewportEdgeFadeWidthTop`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         properties = {
             "align": align,
@@ -690,9 +718,11 @@ class MarkMethodMixin:
             "viewportEdgeFadeWidthTop": viewportEdgeFadeWidthTop,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -762,10 +792,12 @@ class MarkMethodMixin:
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Set the chart mark to ``link``.
 
@@ -792,10 +824,12 @@ class MarkMethodMixin:
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         properties = {
             "arcFadingDistance": arcFadingDistance,
@@ -820,9 +854,11 @@ class MarkMethodMixin:
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -902,10 +938,12 @@ class MarkMethodMixin:
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Set the chart mark to ``arrow``.
 
@@ -939,10 +977,12 @@ class MarkMethodMixin:
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         properties = {
             "buildIndex": buildIndex,
@@ -974,9 +1014,11 @@ class MarkMethodMixin:
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -1041,9 +1083,11 @@ class MarkMethodMixin:
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Set the chart mark to ``point``.
 
@@ -1068,7 +1112,7 @@ class MarkMethodMixin:
             sampleFacetPadding (float): Additional padding used by sample facets. **Default value:** ``0.1``
             semanticScore (float | ExprRef | dict[str, Any]): The semantic score used by semantic zooming in the point mark. This is primarily intended for internal use. **Default value:** ``0``
             semanticZoomFraction (float | ExprRef | dict[str, Any]): TODO **Default value:** ``0.02``
-            shape (str | ExprRef | dict[str, Any]): One of ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, ``"triangle-left"``, ``"tick-up"``, ``"tick-down"``, ``"tick-right"``, or ``"tick-left"`` **Default value:** ``"circle"``
+            shape (str | ExprRef | dict[str, Any]): One of ``"circle"``, ``"square"``, ``"cross"``, ``"x"``, ``"+"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, ``"triangle-left"``, ``"tick-up"``, ``"tick-down"``, ``"tick-right"``, or ``"tick-left"``. The ``"x"`` and ``"+"`` shapes are stroke-only and use ``strokeWidth`` for their line thickness. **Default value:** ``"circle"``
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
             stroke (str | ExprRef | dict[str, Any]): The stroke color
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
@@ -1076,9 +1120,11 @@ class MarkMethodMixin:
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         properties = {
             "angle": angle,
@@ -1109,8 +1155,10 @@ class MarkMethodMixin:
             "style": style,
             "tooltip": tooltip,
             "x": x,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -1286,6 +1334,13 @@ class EncodingMethodMixin:
         | Sequence[Channel | SchemaBase | str | dict[str, Any]]
         | None
         | UndefinedType = Undefined,
+        xOffset: Channel
+        | SchemaBase
+        | str
+        | dict[str, Any]
+        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+        | None
+        | UndefinedType = Undefined,
         y: Channel
         | SchemaBase
         | str
@@ -1300,6 +1355,13 @@ class EncodingMethodMixin:
         | Sequence[Channel | SchemaBase | str | dict[str, Any]]
         | None
         | UndefinedType = Undefined,
+        yOffset: Channel
+        | SchemaBase
+        | str
+        | dict[str, Any]
+        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+        | None
+        | UndefinedType = Undefined,
     ) -> Self:
         """Return a new specification with merged channel encodings.
 
@@ -1307,8 +1369,8 @@ class EncodingMethodMixin:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
-            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dx`` property.
-            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dy`` property.
+            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
+            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
@@ -1317,7 +1379,7 @@ class EncodingMethodMixin:
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
-            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - centered directional shape ``"triangle"``
+            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
             stroke (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Stroke color of the marks. Note: The ``stroke`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             strokeOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Stroke opacity of the marks.
@@ -1327,8 +1389,10 @@ class EncodingMethodMixin:
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         properties = {
             "angle": angle,
@@ -1354,8 +1418,10 @@ class EncodingMethodMixin:
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -1393,8 +1459,10 @@ class ResolutionMethodMixin:
         uniqueId: ResolutionBehavior_T | UndefinedType = Undefined,
         x: ResolutionBehavior_T | UndefinedType = Undefined,
         x2: ResolutionBehavior_T | UndefinedType = Undefined,
+        xOffset: ResolutionBehavior_T | UndefinedType = Undefined,
         y: ResolutionBehavior_T | UndefinedType = Undefined,
         y2: ResolutionBehavior_T | UndefinedType = Undefined,
+        yOffset: ResolutionBehavior_T | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with merged axis resolutions."""
         properties = {
@@ -1422,8 +1490,10 @@ class ResolutionMethodMixin:
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -1457,8 +1527,10 @@ class ResolutionMethodMixin:
         uniqueId: ResolutionBehavior_T | UndefinedType = Undefined,
         x: ResolutionBehavior_T | UndefinedType = Undefined,
         x2: ResolutionBehavior_T | UndefinedType = Undefined,
+        xOffset: ResolutionBehavior_T | UndefinedType = Undefined,
         y: ResolutionBehavior_T | UndefinedType = Undefined,
         y2: ResolutionBehavior_T | UndefinedType = Undefined,
+        yOffset: ResolutionBehavior_T | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with merged legend resolutions."""
         properties = {
@@ -1486,8 +1558,10 @@ class ResolutionMethodMixin:
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -1521,8 +1595,10 @@ class ResolutionMethodMixin:
         uniqueId: ResolutionBehavior_T | UndefinedType = Undefined,
         x: ResolutionBehavior_T | UndefinedType = Undefined,
         x2: ResolutionBehavior_T | UndefinedType = Undefined,
+        xOffset: ResolutionBehavior_T | UndefinedType = Undefined,
         y: ResolutionBehavior_T | UndefinedType = Undefined,
         y2: ResolutionBehavior_T | UndefinedType = Undefined,
+        yOffset: ResolutionBehavior_T | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with merged scale resolutions."""
         properties = {
@@ -1550,8 +1626,10 @@ class ResolutionMethodMixin:
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -1741,8 +1819,10 @@ class TopLevelMergeMixin:
         strokeWidth: core.Scale | ScaleKwds | UndefinedType = Undefined,
         x: core.Scale | ScaleKwds | UndefinedType = Undefined,
         x2: core.Scale | ScaleKwds | UndefinedType = Undefined,
+        xOffset: core.Scale | ScaleKwds | UndefinedType = Undefined,
         y: core.Scale | ScaleKwds | UndefinedType = Undefined,
         y2: core.Scale | ScaleKwds | UndefinedType = Undefined,
+        yOffset: core.Scale | ScaleKwds | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with merged top-level ``scales``.
 
@@ -1762,8 +1842,10 @@ class TopLevelMergeMixin:
             strokeWidth (Scale | ScaleKwds): Schema-defined ``strokeWidth`` property.
             x (Scale | ScaleKwds): Schema-defined ``x`` property.
             x2 (Scale | ScaleKwds): Schema-defined ``x2`` property.
+            xOffset (Scale | ScaleKwds): Schema-defined ``xOffset`` property.
             y (Scale | ScaleKwds): Schema-defined ``y`` property.
             y2 (Scale | ScaleKwds): Schema-defined ``y2`` property.
+            yOffset (Scale | ScaleKwds): Schema-defined ``yOffset`` property.
         """
         defined = {
             "angle": angle,
@@ -1781,8 +1863,10 @@ class TopLevelMergeMixin:
             "strokeWidth": strokeWidth,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._merge_top_level("scales", value, defined)  # type: ignore[attr-defined, no-any-return]
@@ -1910,6 +1994,7 @@ class UnitPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -1992,7 +2077,7 @@ class UnitPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -2112,6 +2197,7 @@ class UnitPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -2193,7 +2279,7 @@ class UnitPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -2313,6 +2399,7 @@ class UnitPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -2394,7 +2481,7 @@ class UnitPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -2515,6 +2602,7 @@ class LayerPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -2597,7 +2685,7 @@ class LayerPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -2715,6 +2803,7 @@ class LayerPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -2796,7 +2885,7 @@ class LayerPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -2914,6 +3003,7 @@ class LayerPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -2995,7 +3085,7 @@ class LayerPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -3118,6 +3208,7 @@ class HConcatPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -3200,7 +3291,7 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -3319,6 +3410,7 @@ class HConcatPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -3400,7 +3492,7 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -3519,6 +3611,7 @@ class HConcatPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -3600,7 +3693,7 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -3722,6 +3815,7 @@ class VConcatPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -3803,7 +3897,7 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``vconcat`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -3912,6 +4006,7 @@ class VConcatPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -4003,7 +4098,7 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``vconcat`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -4112,6 +4207,7 @@ class VConcatPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -4203,7 +4299,7 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``vconcat`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -4327,6 +4423,7 @@ class ConcatPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -4410,7 +4507,7 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -4531,6 +4628,7 @@ class ConcatPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -4613,7 +4711,7 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -4734,6 +4832,7 @@ class ConcatPropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -4816,7 +4915,7 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -4942,6 +5041,7 @@ class MultiscalePropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -5025,7 +5125,7 @@ class MultiscalePropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -5149,6 +5249,7 @@ class MultiscalePropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -5231,7 +5332,7 @@ class MultiscalePropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -5355,6 +5456,7 @@ class MultiscalePropertiesMixin:
             | core.CoverageParams
             | core.CoordinateLookupParams
             | core.CrossParams
+            | core.Displace1DParams
             | core.FlattenDelimitedParams
             | core.FormulaParams
             | core.LookupParams
@@ -5437,7 +5539,7 @@ class MultiscalePropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -5658,10 +5760,12 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Return a chart with ``arrow`` config updated.
 
@@ -5695,10 +5799,12 @@ class ConfigMethodMixin:
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -5730,9 +5836,11 @@ class ConfigMethodMixin:
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -5772,6 +5880,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -5850,6 +5959,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -5926,6 +6036,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -6009,6 +6120,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -6087,6 +6199,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6163,6 +6276,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -6246,6 +6360,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -6324,6 +6439,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6400,6 +6516,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -6483,6 +6600,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -6561,6 +6679,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6637,6 +6756,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -6720,6 +6840,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -6798,6 +6919,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6874,6 +6996,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -6957,6 +7080,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -7035,6 +7159,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7111,6 +7236,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -7194,6 +7320,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -7272,6 +7399,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7348,6 +7476,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -7431,6 +7560,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -7509,6 +7639,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7585,6 +7716,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -7668,6 +7800,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -7746,6 +7879,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7822,6 +7956,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -7905,6 +8040,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -7983,6 +8119,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -8059,6 +8196,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -8142,6 +8280,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -8220,6 +8359,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -8296,6 +8436,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -8379,6 +8520,7 @@ class ConfigMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -8457,6 +8599,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -8533,6 +8676,7 @@ class ConfigMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -8922,10 +9066,12 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Return a chart with ``link`` config updated.
 
@@ -8952,10 +9098,12 @@ class ConfigMethodMixin:
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "arcFadingDistance": arcFadingDistance,
@@ -8980,9 +9128,11 @@ class ConfigMethodMixin:
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -9014,9 +9164,11 @@ class ConfigMethodMixin:
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Return a chart with ``mark`` config updated.
 
@@ -9031,9 +9183,11 @@ class ConfigMethodMixin:
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -9046,8 +9200,10 @@ class ConfigMethodMixin:
             "style": style,
             "tooltip": tooltip,
             "x": x,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -9112,9 +9268,11 @@ class ConfigMethodMixin:
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Return a chart with ``point`` config updated.
 
@@ -9139,7 +9297,7 @@ class ConfigMethodMixin:
             sampleFacetPadding (float): Additional padding used by sample facets. **Default value:** ``0.1``
             semanticScore (float | ExprRef | dict[str, Any]): The semantic score used by semantic zooming in the point mark. This is primarily intended for internal use. **Default value:** ``0``
             semanticZoomFraction (float | ExprRef | dict[str, Any]): TODO **Default value:** ``0.02``
-            shape (str | ExprRef | dict[str, Any]): One of ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, ``"triangle-left"``, ``"tick-up"``, ``"tick-down"``, ``"tick-right"``, or ``"tick-left"`` **Default value:** ``"circle"``
+            shape (str | ExprRef | dict[str, Any]): One of ``"circle"``, ``"square"``, ``"cross"``, ``"x"``, ``"+"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, ``"triangle-left"``, ``"tick-up"``, ``"tick-down"``, ``"tick-right"``, or ``"tick-left"``. The ``"x"`` and ``"+"`` shapes are stroke-only and use ``strokeWidth`` for their line thickness. **Default value:** ``"circle"``
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
             stroke (str | ExprRef | dict[str, Any]): The stroke color
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
@@ -9147,9 +9305,11 @@ class ConfigMethodMixin:
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "angle": angle,
@@ -9180,8 +9340,10 @@ class ConfigMethodMixin:
             "style": style,
             "tooltip": tooltip,
             "x": x,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -9306,10 +9468,12 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Return a chart with ``rect`` config updated.
 
@@ -9345,10 +9509,12 @@ class ConfigMethodMixin:
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -9382,9 +9548,11 @@ class ConfigMethodMixin:
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -9427,10 +9595,12 @@ class ConfigMethodMixin:
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Return a chart with ``rule`` config updated.
 
@@ -9451,10 +9621,12 @@ class ConfigMethodMixin:
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -9473,9 +9645,11 @@ class ConfigMethodMixin:
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -9567,7 +9741,7 @@ class ConfigMethodMixin:
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             nominal (dict[str, Any]): Defaults for nominal scales.
             nominalColorScheme (str | SchemeParams | SchemeParamsKwds): Default color scheme for nominal color scales.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             ordinal (dict[str, Any]): Defaults for ordinal scales.
             ordinalColorScheme (str | SchemeParams | SchemeParamsKwds): Default color scheme for ordinal color scales.
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
@@ -9681,10 +9855,12 @@ class ConfigMethodMixin:
         viewportEdgeFadeWidthTop: float | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Return a chart with ``text`` config updated.
 
@@ -9725,10 +9901,12 @@ class ConfigMethodMixin:
             viewportEdgeFadeWidthTop (float): Schema-defined ``viewportEdgeFadeWidthTop`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "align": align,
@@ -9767,9 +9945,11 @@ class ConfigMethodMixin:
             "viewportEdgeFadeWidthTop": viewportEdgeFadeWidthTop,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -9812,9 +9992,11 @@ class ConfigMethodMixin:
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> Self:
         """Return a chart with ``tick`` config updated.
 
@@ -9835,9 +10017,11 @@ class ConfigMethodMixin:
             thickness (float): The thickness of the tick mark in pixels. Equivalent to the ``size`` of the underlying rule mark. **Default value:** ``1``
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -9856,8 +10040,10 @@ class ConfigMethodMixin:
             "thickness": thickness,
             "tooltip": tooltip,
             "x": x,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -10227,6 +10413,45 @@ class TransformMethodMixin:
         transform["from"] = from_
         if description is not Undefined:
             transform["description"] = description
+        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+
+    def transform_displace1d(
+        self,
+        *,
+        length: float | Field_T | core.ExprRef | dict[str, Any],
+        pos: Field_T,
+        as_: str | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        extent: Sequence[float]
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        positionFactor: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+    ) -> Self:
+        """Add a ``displace1d`` transform.
+
+        Args:
+            length (float | Field_T | ExprRef | dict[str, Any]): The full collision length, including any desired spacing, or a field containing that length. The value uses the same units as the scaled positions and output displacement. An expression provides a reactive scalar length shared by all rows.
+            pos (Field_T): The field containing the original position. Input rows must be ordered by ascending ``pos * positionFactor``.
+            as\\_ (str): The output field for signed displacement. __Default value:__ ``"displacement"``
+            description (str): A description of the transform step. Can be used for documentation and agent context.
+            extent (Sequence[float] | ExprRef | dict[str, Any]): Preferred outer bounds for the placed collision intervals, expressed in the original ``pos`` coordinate system. The bounds are multiplied by ``positionFactor`` together with the item positions. When all items cannot fit, they remain non-overlapping and extend beyond the bounds by the minimum necessary amount. An expression can update the bounds reactively.
+            positionFactor (float | ExprRef | dict[str, Any]): A multiplier applied to ``pos`` before placement. An expression can convert position units to logical pixels and react to zoom or layout changes. Use an ascending ``pos`` sort for a positive factor and a descending sort for a negative factor. Place a ``collect`` transform before this transform to buffer input for expression-driven updates. __Default value:__ ``1``
+        """
+        transform: dict[str, Any] = {"type": "displace1d"}
+        transform["length"] = length
+        transform["pos"] = pos
+        if as_ is not Undefined:
+            transform["as"] = as_
+        if description is not Undefined:
+            transform["description"] = description
+        if extent is not Undefined:
+            transform["extent"] = extent
+        if positionFactor is not Undefined:
+            transform["positionFactor"] = positionFactor
         return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_flatten_delimited(

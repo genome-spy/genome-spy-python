@@ -98,6 +98,7 @@ class DatumChannelMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -176,6 +177,7 @@ class DatumChannelMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -252,6 +254,7 @@ class DatumChannelMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -415,7 +418,7 @@ class DatumChannelMethodMixin:
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -542,6 +545,7 @@ class LocusChannelMethodMixin:
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -620,6 +624,7 @@ class LocusChannelMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -696,6 +701,7 @@ class LocusChannelMethodMixin:
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -810,7 +816,7 @@ class LocusChannelMethodMixin:
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.

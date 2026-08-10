@@ -55,6 +55,7 @@ MarkType_T: TypeAlias = Literal[
     "rect", "point", "rule", "tick", "text", "link", "arrow"
 ]
 NumericDomain_T: TypeAlias = Sequence[float]
+OffsetChannel_T: TypeAlias = Literal["xOffset", "yOffset"]
 ParseValue_T: TypeAlias = str | None
 PrimaryPositionalChannel_T: TypeAlias = Literal["x", "y"]
 ResolutionBehavior_T: TypeAlias = Literal["independent", "shared", "excluded", "forced"]
@@ -92,6 +93,7 @@ PositionalChannel_T: TypeAlias = (
 )
 ChannelWithScale_T: TypeAlias = (
     PositionalChannel_T
+    | OffsetChannel_T
     | Literal["color"]
     | Literal["fill"]
     | Literal["stroke"]
@@ -150,6 +152,7 @@ __all__ = [
     "LegendTitleOrient_T",
     "MarkType_T",
     "NumericDomain_T",
+    "OffsetChannel_T",
     "ParseValue_T",
     "PrimaryPositionalChannel_T",
     "ResolutionBehavior_T",

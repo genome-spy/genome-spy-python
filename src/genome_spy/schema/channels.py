@@ -366,7 +366,7 @@ class Angle(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -723,7 +723,7 @@ class Color(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -977,7 +977,7 @@ class Direction(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -1334,7 +1334,7 @@ class Dx(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -1691,7 +1691,7 @@ class Dy(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -2123,7 +2123,7 @@ class Fill(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -2480,7 +2480,7 @@ class FillOpacity(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -2912,7 +2912,7 @@ class Opacity(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -3504,7 +3504,7 @@ class Shape(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -3861,7 +3861,7 @@ class Size(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -4218,7 +4218,7 @@ class Stroke(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -4575,7 +4575,7 @@ class StrokeOpacity(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -4932,7 +4932,7 @@ class StrokeWidth(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -5196,7 +5196,7 @@ class Text(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -5460,7 +5460,7 @@ class Tooltip(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -5801,6 +5801,7 @@ class X(Channel):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -5879,6 +5880,7 @@ class X(Channel):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -5955,6 +5957,7 @@ class X(Channel):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -6069,7 +6072,7 @@ class X(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -6325,6 +6328,7 @@ class X2(Channel):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -6403,6 +6407,7 @@ class X2(Channel):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6479,6 +6484,7 @@ class X2(Channel):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -6593,7 +6599,364 @@ class X2(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
+            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
+            round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+        """
+        defined = {
+            "align": align,
+            "assembly": assembly,
+            "base": base,
+            "bins": bins,
+            "clamp": clamp,
+            "constant": constant,
+            "domain": domain,
+            "domainMax": domainMax,
+            "domainMid": domainMid,
+            "domainMin": domainMin,
+            "domainTransition": domainTransition,
+            "exponent": exponent,
+            "interpolate": interpolate,
+            "name": name,
+            "nice": nice,
+            "numberingOffset": numberingOffset,
+            "padding": padding,
+            "paddingInner": paddingInner,
+            "paddingOuter": paddingOuter,
+            "range": range,
+            "reverse": reverse,
+            "round": round,
+            "scheme": scheme,
+            "type": type,
+            "zero": zero,
+            "zoom": zoom,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_nested("scale", value, **defined)
+
+
+class XOffset(Channel):
+    """Generated wrapper for the ``xOffset`` encoding channel."""
+
+    def __init__(
+        self,
+        value: Channel | SchemaBase | str | dict[str, Any],
+        /,
+        *,
+        band: float | UndefinedType = _MISSING,
+        condition: ConditionalParameterMarkPropFieldDefType
+        | dict[str, Any]
+        | ConditionalParameterScaleDatumDef
+        | ConditionalParameterMarkPropExprDefType
+        | ConditionalParameterValueDefNumberExprRef
+        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | UndefinedType = _MISSING,
+        datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
+        description: str | UndefinedType = _MISSING,
+        domainInert: bool | UndefinedType = _MISSING,
+        expr: str | UndefinedType = _MISSING,
+        field: str | UndefinedType = _MISSING,
+        format: str | UndefinedType = _MISSING,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = _MISSING,
+        title: str | None | UndefinedType = _MISSING,
+        type: Type_T | UndefinedType = _MISSING,
+        legend: Legend | LegendKwds | None | UndefinedType = _MISSING,
+        scale: Scale | ScaleKwds | None | UndefinedType = _MISSING,
+    ) -> None:
+        """Create a ``xOffset`` encoding channel.
+
+        Args:
+            band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
+            description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
+            domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
+            expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
+            resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
+            scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
+            title (str | None): A title for the field. If ``null``, the title will be removed.
+            type (Type_T): Schema-defined ``type`` property.
+            value (float | ExprRef | dict[str, Any]): A constant value in visual domain (e.g., ``"red"`` / ``"#0099ff"``, values between ``0`` to ``1`` for opacity).
+        """
+        properties = {
+            "band": band,
+            "condition": condition,
+            "datum": datum,
+            "description": description,
+            "domainInert": domainInert,
+            "expr": expr,
+            "field": field,
+            "format": format,
+            "resolutionChannel": resolutionChannel,
+            "title": title,
+            "type": type,
+            "legend": legend,
+            "scale": scale,
+        }
+        defined = {
+            key: item for key, item in properties.items() if item is not _MISSING
+        }
+        wrapped = channel(value, encoding_name="xOffset", **defined)
+        super().__init__(wrapped.definition, encoding_name="xOffset")
+
+    def band(
+        self,
+        value: float,
+    ) -> XOffset:
+        """Return a channel with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def condition(
+        self,
+        value: ConditionalParameterMarkPropFieldDefType
+        | dict[str, Any]
+        | ConditionalParameterScaleDatumDef
+        | ConditionalParameterMarkPropExprDefType
+        | ConditionalParameterValueDefNumberExprRef
+        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+    ) -> XOffset:
+        """Return a channel with ``condition`` updated."""
+        return self._with_property("condition", value)
+
+    def datum(
+        self,
+        value: Scalar_T | ExprRef | dict[str, Any],
+    ) -> XOffset:
+        """Return a channel with ``datum`` updated."""
+        return self._with_property("datum", value)
+
+    def description(
+        self,
+        value: str,
+    ) -> XOffset:
+        """Return a channel with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(
+        self,
+        value: bool,
+    ) -> XOffset:
+        """Return a channel with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> XOffset:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def field(
+        self,
+        value: str,
+    ) -> XOffset:
+        """Return a channel with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def format(
+        self,
+        value: str,
+    ) -> XOffset:
+        """Return a channel with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def resolutionChannel(
+        self,
+        value: ChannelWithScale_T,
+    ) -> XOffset:
+        """Return a channel with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def title(
+        self,
+        value: str | None,
+    ) -> XOffset:
+        """Return a channel with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(
+        self,
+        value: Type_T,
+    ) -> XOffset:
+        """Return a channel with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def value(
+        self,
+        value: float | ExprRef | dict[str, Any],
+    ) -> XOffset:
+        """Return a channel with ``value`` updated."""
+        return self._with_property("value", value)
+
+    def sort(
+        self,
+        value: CompareParams
+        | CompareParamsKwds
+        | str
+        | list[str]
+        | None
+        | object = _MISSING,
+        /,
+        *,
+        field: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
+        order: Sequence[SortOrder_T] | SortOrder_T | UndefinedType = Undefined,
+    ) -> XOffset:
+        """Return a channel with a ``sort`` configuration."""
+        properties = {
+            "field": field,
+            "order": order,
+        }
+        defined = {
+            key: item for key, item in properties.items() if item is not Undefined
+        }
+        return self._with_sort(value, defined)
+
+    def legend(
+        self,
+        value: Legend | LegendKwds | None | object = Undefined,
+        /,
+        *,
+        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFillOpacity: float | UndefinedType = Undefined,
+        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStrokeOpacity: float | UndefinedType = Undefined,
+        backgroundStrokeWidth: float | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        direction: LegendDirection_T | UndefinedType = Undefined,
+        labelLimit: float | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: LegendOrient_T
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolSize: float | UndefinedType = Undefined,
+        symbolType: str | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
+        values: Sequence[str | float | bool] | UndefinedType = Undefined,
+    ) -> XOffset:
+        """Return a channel with a ``Legend`` legend.
+
+        Args:
+            backgroundFill (str): Fill color of the legend background.
+            backgroundFillOpacity (float): Opacity of the legend background fill.
+            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStrokeOpacity (float): Opacity of the legend background stroke.
+            backgroundStrokeWidth (float): Stroke width of the legend background border.
+            columns (float): The number of columns in which to arrange symbol legend entries.
+            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            labelLimit (float): Maximum label text width in pixels.
+            offset (float): External gap in pixels between the legend and the plot edge.
+            orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
+            padding (float): Internal padding in pixels around the legend content and background.
+            style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
+            symbolSize (float): Symbol size in pixels squared.
+            symbolType (str): Symbol shape.
+            title (str | None): Title text for the legend. If ``null``, the title is removed.
+            titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
+            values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
+        """
+        defined = {
+            "backgroundFill": backgroundFill,
+            "backgroundFillOpacity": backgroundFillOpacity,
+            "backgroundStroke": backgroundStroke,
+            "backgroundStrokeOpacity": backgroundStrokeOpacity,
+            "backgroundStrokeWidth": backgroundStrokeWidth,
+            "columns": columns,
+            "direction": direction,
+            "labelLimit": labelLimit,
+            "offset": offset,
+            "orient": orient,
+            "padding": padding,
+            "style": style,
+            "symbolSize": symbolSize,
+            "symbolType": symbolType,
+            "title": title,
+            "titleOrient": titleOrient,
+            "values": values,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_nested("legend", value, **defined)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = Undefined,
+        /,
+        *,
+        align: float | UndefinedType = Undefined,
+        assembly: str
+        | core.UrlGenomeDefinition
+        | dict[str, Any]
+        | core.InlineGenomeDefinition
+        | UndefinedType = Undefined,
+        base: float | UndefinedType = Undefined,
+        bins: Sequence[float] | UndefinedType = Undefined,
+        clamp: bool | UndefinedType = Undefined,
+        constant: float | UndefinedType = Undefined,
+        domain: ScalarDomain_T
+        | Sequence[core.ChromosomalLocus | dict[str, Any]]
+        | core.SelectionDomainRef
+        | dict[str, Any]
+        | core.ExprRef
+        | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
+        | UndefinedType = Undefined,
+        domainMax: float | UndefinedType = Undefined,
+        domainMid: float | UndefinedType = Undefined,
+        domainMin: float | UndefinedType = Undefined,
+        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        exponent: float | UndefinedType = Undefined,
+        interpolate: ScaleInterpolate_T
+        | core.ScaleInterpolateParams
+        | ScaleInterpolateParamsKwds
+        | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        nice: bool | float | dict[str, Any] | UndefinedType = Undefined,
+        numberingOffset: float | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        paddingInner: float | UndefinedType = Undefined,
+        paddingOuter: float | UndefinedType = Undefined,
+        range: Sequence[float | str | core.ExprRef | dict[str, Any]]
+        | str
+        | UndefinedType = Undefined,
+        reverse: bool | UndefinedType = Undefined,
+        round: bool | UndefinedType = Undefined,
+        scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
+        type: ScaleType_T | UndefinedType = Undefined,
+        zero: bool | UndefinedType = Undefined,
+        zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
+    ) -> XOffset:
+        """Return a channel with a ``Scale`` scale.
+
+        Args:
+            align (float): The alignment of the steps within the scale range. This value must lie in the range ``[0,1]``. A value of ``0.5`` indicates that the steps should be centered within the range. A value of ``0`` or ``1`` may be used to shift the bands to one side, say to position them adjacent to an axis. __Default value:__ ``0.5``
+            assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
+            base (float): The logarithm base of the ``log`` scale (default ``10``).
+            bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            exponent (float): The exponent of the ``pow`` scale.
+            interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
+            name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
+            nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -6849,6 +7212,7 @@ class Y(Channel):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -6927,6 +7291,7 @@ class Y(Channel):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7003,6 +7368,7 @@ class Y(Channel):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -7117,7 +7483,7 @@ class Y(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -7373,6 +7739,7 @@ class Y2(Channel):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -7451,6 +7818,7 @@ class Y2(Channel):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7527,6 +7895,7 @@ class Y2(Channel):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -7641,7 +8010,364 @@ class Y2(Channel):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
+            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
+            round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+        """
+        defined = {
+            "align": align,
+            "assembly": assembly,
+            "base": base,
+            "bins": bins,
+            "clamp": clamp,
+            "constant": constant,
+            "domain": domain,
+            "domainMax": domainMax,
+            "domainMid": domainMid,
+            "domainMin": domainMin,
+            "domainTransition": domainTransition,
+            "exponent": exponent,
+            "interpolate": interpolate,
+            "name": name,
+            "nice": nice,
+            "numberingOffset": numberingOffset,
+            "padding": padding,
+            "paddingInner": paddingInner,
+            "paddingOuter": paddingOuter,
+            "range": range,
+            "reverse": reverse,
+            "round": round,
+            "scheme": scheme,
+            "type": type,
+            "zero": zero,
+            "zoom": zoom,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_nested("scale", value, **defined)
+
+
+class YOffset(Channel):
+    """Generated wrapper for the ``yOffset`` encoding channel."""
+
+    def __init__(
+        self,
+        value: Channel | SchemaBase | str | dict[str, Any],
+        /,
+        *,
+        band: float | UndefinedType = _MISSING,
+        condition: ConditionalParameterMarkPropFieldDefType
+        | dict[str, Any]
+        | ConditionalParameterScaleDatumDef
+        | ConditionalParameterMarkPropExprDefType
+        | ConditionalParameterValueDefNumberExprRef
+        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | UndefinedType = _MISSING,
+        datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
+        description: str | UndefinedType = _MISSING,
+        domainInert: bool | UndefinedType = _MISSING,
+        expr: str | UndefinedType = _MISSING,
+        field: str | UndefinedType = _MISSING,
+        format: str | UndefinedType = _MISSING,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = _MISSING,
+        title: str | None | UndefinedType = _MISSING,
+        type: Type_T | UndefinedType = _MISSING,
+        legend: Legend | LegendKwds | None | UndefinedType = _MISSING,
+        scale: Scale | ScaleKwds | None | UndefinedType = _MISSING,
+    ) -> None:
+        """Create a ``yOffset`` encoding channel.
+
+        Args:
+            band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
+            description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
+            domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
+            expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
+            resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
+            scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
+            title (str | None): A title for the field. If ``null``, the title will be removed.
+            type (Type_T): Schema-defined ``type`` property.
+            value (float | ExprRef | dict[str, Any]): A constant value in visual domain (e.g., ``"red"`` / ``"#0099ff"``, values between ``0`` to ``1`` for opacity).
+        """
+        properties = {
+            "band": band,
+            "condition": condition,
+            "datum": datum,
+            "description": description,
+            "domainInert": domainInert,
+            "expr": expr,
+            "field": field,
+            "format": format,
+            "resolutionChannel": resolutionChannel,
+            "title": title,
+            "type": type,
+            "legend": legend,
+            "scale": scale,
+        }
+        defined = {
+            key: item for key, item in properties.items() if item is not _MISSING
+        }
+        wrapped = channel(value, encoding_name="yOffset", **defined)
+        super().__init__(wrapped.definition, encoding_name="yOffset")
+
+    def band(
+        self,
+        value: float,
+    ) -> YOffset:
+        """Return a channel with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def condition(
+        self,
+        value: ConditionalParameterMarkPropFieldDefType
+        | dict[str, Any]
+        | ConditionalParameterScaleDatumDef
+        | ConditionalParameterMarkPropExprDefType
+        | ConditionalParameterValueDefNumberExprRef
+        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+    ) -> YOffset:
+        """Return a channel with ``condition`` updated."""
+        return self._with_property("condition", value)
+
+    def datum(
+        self,
+        value: Scalar_T | ExprRef | dict[str, Any],
+    ) -> YOffset:
+        """Return a channel with ``datum`` updated."""
+        return self._with_property("datum", value)
+
+    def description(
+        self,
+        value: str,
+    ) -> YOffset:
+        """Return a channel with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(
+        self,
+        value: bool,
+    ) -> YOffset:
+        """Return a channel with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> YOffset:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def field(
+        self,
+        value: str,
+    ) -> YOffset:
+        """Return a channel with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def format(
+        self,
+        value: str,
+    ) -> YOffset:
+        """Return a channel with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def resolutionChannel(
+        self,
+        value: ChannelWithScale_T,
+    ) -> YOffset:
+        """Return a channel with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def title(
+        self,
+        value: str | None,
+    ) -> YOffset:
+        """Return a channel with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(
+        self,
+        value: Type_T,
+    ) -> YOffset:
+        """Return a channel with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def value(
+        self,
+        value: float | ExprRef | dict[str, Any],
+    ) -> YOffset:
+        """Return a channel with ``value`` updated."""
+        return self._with_property("value", value)
+
+    def sort(
+        self,
+        value: CompareParams
+        | CompareParamsKwds
+        | str
+        | list[str]
+        | None
+        | object = _MISSING,
+        /,
+        *,
+        field: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
+        order: Sequence[SortOrder_T] | SortOrder_T | UndefinedType = Undefined,
+    ) -> YOffset:
+        """Return a channel with a ``sort`` configuration."""
+        properties = {
+            "field": field,
+            "order": order,
+        }
+        defined = {
+            key: item for key, item in properties.items() if item is not Undefined
+        }
+        return self._with_sort(value, defined)
+
+    def legend(
+        self,
+        value: Legend | LegendKwds | None | object = Undefined,
+        /,
+        *,
+        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFillOpacity: float | UndefinedType = Undefined,
+        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStrokeOpacity: float | UndefinedType = Undefined,
+        backgroundStrokeWidth: float | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        direction: LegendDirection_T | UndefinedType = Undefined,
+        labelLimit: float | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: LegendOrient_T
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolSize: float | UndefinedType = Undefined,
+        symbolType: str | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
+        values: Sequence[str | float | bool] | UndefinedType = Undefined,
+    ) -> YOffset:
+        """Return a channel with a ``Legend`` legend.
+
+        Args:
+            backgroundFill (str): Fill color of the legend background.
+            backgroundFillOpacity (float): Opacity of the legend background fill.
+            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStrokeOpacity (float): Opacity of the legend background stroke.
+            backgroundStrokeWidth (float): Stroke width of the legend background border.
+            columns (float): The number of columns in which to arrange symbol legend entries.
+            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            labelLimit (float): Maximum label text width in pixels.
+            offset (float): External gap in pixels between the legend and the plot edge.
+            orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
+            padding (float): Internal padding in pixels around the legend content and background.
+            style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
+            symbolSize (float): Symbol size in pixels squared.
+            symbolType (str): Symbol shape.
+            title (str | None): Title text for the legend. If ``null``, the title is removed.
+            titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
+            values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
+        """
+        defined = {
+            "backgroundFill": backgroundFill,
+            "backgroundFillOpacity": backgroundFillOpacity,
+            "backgroundStroke": backgroundStroke,
+            "backgroundStrokeOpacity": backgroundStrokeOpacity,
+            "backgroundStrokeWidth": backgroundStrokeWidth,
+            "columns": columns,
+            "direction": direction,
+            "labelLimit": labelLimit,
+            "offset": offset,
+            "orient": orient,
+            "padding": padding,
+            "style": style,
+            "symbolSize": symbolSize,
+            "symbolType": symbolType,
+            "title": title,
+            "titleOrient": titleOrient,
+            "values": values,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_nested("legend", value, **defined)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = Undefined,
+        /,
+        *,
+        align: float | UndefinedType = Undefined,
+        assembly: str
+        | core.UrlGenomeDefinition
+        | dict[str, Any]
+        | core.InlineGenomeDefinition
+        | UndefinedType = Undefined,
+        base: float | UndefinedType = Undefined,
+        bins: Sequence[float] | UndefinedType = Undefined,
+        clamp: bool | UndefinedType = Undefined,
+        constant: float | UndefinedType = Undefined,
+        domain: ScalarDomain_T
+        | Sequence[core.ChromosomalLocus | dict[str, Any]]
+        | core.SelectionDomainRef
+        | dict[str, Any]
+        | core.ExprRef
+        | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
+        | UndefinedType = Undefined,
+        domainMax: float | UndefinedType = Undefined,
+        domainMid: float | UndefinedType = Undefined,
+        domainMin: float | UndefinedType = Undefined,
+        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        exponent: float | UndefinedType = Undefined,
+        interpolate: ScaleInterpolate_T
+        | core.ScaleInterpolateParams
+        | ScaleInterpolateParamsKwds
+        | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        nice: bool | float | dict[str, Any] | UndefinedType = Undefined,
+        numberingOffset: float | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        paddingInner: float | UndefinedType = Undefined,
+        paddingOuter: float | UndefinedType = Undefined,
+        range: Sequence[float | str | core.ExprRef | dict[str, Any]]
+        | str
+        | UndefinedType = Undefined,
+        reverse: bool | UndefinedType = Undefined,
+        round: bool | UndefinedType = Undefined,
+        scheme: str | core.SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
+        type: ScaleType_T | UndefinedType = Undefined,
+        zero: bool | UndefinedType = Undefined,
+        zoom: bool | core.ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
+    ) -> YOffset:
+        """Return a channel with a ``Scale`` scale.
+
+        Args:
+            align (float): The alignment of the steps within the scale range. This value must lie in the range ``[0,1]``. A value of ``0.5`` indicates that the steps should be centered within the range. A value of ``0`` or ``1`` may be used to shift the bands to one side, say to position them adjacent to an axis. __Default value:__ ``0.5``
+            assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
+            base (float): The logarithm base of the ``log`` scale (default ``10``).
+            bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            exponent (float): The exponent of the ``pow`` scale.
+            interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
+            name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
+            nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -7709,6 +8435,8 @@ __all__ = [
     "UniqueId",
     "X",
     "X2",
+    "XOffset",
     "Y",
     "Y2",
+    "YOffset",
 ]

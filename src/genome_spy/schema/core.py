@@ -324,10 +324,12 @@ class ArrowConfig(GenomeSpySchema):
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -360,9 +362,11 @@ class ArrowConfig(GenomeSpySchema):
             tooltip=tooltip,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -786,9 +790,41 @@ class ArrowConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> ArrowConfig:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ArrowConfig:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ArrowConfig:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -826,9 +862,41 @@ class ArrowConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> ArrowConfig:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ArrowConfig:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ArrowConfig:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class ArrowDirection(GenomeSpySchema):
@@ -910,10 +978,12 @@ class ArrowProps(GenomeSpySchema):
         type: Literal["arrow"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -947,9 +1017,11 @@ class ArrowProps(GenomeSpySchema):
             type=type,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -1377,9 +1449,41 @@ class ArrowProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> ArrowProps:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ArrowProps:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ArrowProps:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -1417,9 +1521,41 @@ class ArrowProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> ArrowProps:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ArrowProps:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ArrowProps:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class ArrowRelativeSize(GenomeSpySchema):
@@ -1488,6 +1624,7 @@ class Axis(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -1542,6 +1679,7 @@ class Axis(GenomeSpySchema):
             domainDash=domainDash,
             domainDashOffset=domainDashOffset,
             domainWidth=domainWidth,
+            extraValues=extraValues,
             format=format,
             grid=grid,
             gridCap=gridCap,
@@ -1614,6 +1752,10 @@ class Axis(GenomeSpySchema):
     def domainWidth(self, value: float) -> Axis:
         """Return a copy with ``domainWidth`` updated."""
         return self._with_property("domainWidth", value)
+
+    def extraValues(self, value: Sequence[float]) -> Axis:
+        """Return a copy with ``extraValues`` updated."""
+        return self._with_property("extraValues", value)
 
     def format(self, value: str) -> Axis:
         """Return a copy with ``format`` updated."""
@@ -1846,6 +1988,7 @@ class AxisConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -1923,6 +2066,7 @@ class AxisConfig(GenomeSpySchema):
             domainDash=domainDash,
             domainDashOffset=domainDashOffset,
             domainWidth=domainWidth,
+            extraValues=extraValues,
             format=format,
             grid=grid,
             gridCap=gridCap,
@@ -2087,6 +2231,10 @@ class AxisConfig(GenomeSpySchema):
     def domainWidth(self, value: float) -> AxisConfig:
         """Return a copy with ``domainWidth`` updated."""
         return self._with_property("domainWidth", value)
+
+    def extraValues(self, value: Sequence[float]) -> AxisConfig:
+        """Return a copy with ``extraValues`` updated."""
+        return self._with_property("extraValues", value)
 
     def format(self, value: str) -> AxisConfig:
         """Return a copy with ``format`` updated."""
@@ -2356,6 +2504,7 @@ class AxisTicksData(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -2411,6 +2560,7 @@ class AxisTicksData(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -2464,6 +2614,7 @@ class AxisTicksData(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -3479,6 +3630,7 @@ class ChromPosDef(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -3557,6 +3709,7 @@ class ChromPosDef(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -3633,6 +3786,7 @@ class ChromPosDef(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -3775,7 +3929,7 @@ class ChromPosDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -4125,7 +4279,7 @@ class ColorDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -4333,6 +4487,7 @@ class ConcatSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -4695,6 +4850,14 @@ class ConcatSpec(GenomeSpySchema):
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        xOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
         | ChromPosDef
@@ -4704,6 +4867,14 @@ class ConcatSpec(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        yOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
     ) -> ConcatSpec:
         """Return a copy with a ``Encoding`` encoding.
 
@@ -4711,8 +4882,8 @@ class ConcatSpec(GenomeSpySchema):
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
-            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dx`` property.
-            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dy`` property.
+            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
+            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
@@ -4721,7 +4892,7 @@ class ConcatSpec(GenomeSpySchema):
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
-            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - centered directional shape ``"triangle"``
+            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
             stroke (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Stroke color of the marks. Note: The ``stroke`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             strokeOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Stroke opacity of the marks.
@@ -4731,8 +4902,10 @@ class ConcatSpec(GenomeSpySchema):
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         defined = {
             "angle": angle,
@@ -4758,8 +4931,10 @@ class ConcatSpec(GenomeSpySchema):
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("encoding", value, **defined)
@@ -4891,10 +5066,12 @@ class ConcatSpec(GenomeSpySchema):
         type: Literal["rule"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         zindex: float | UndefinedType = Undefined,
     ) -> ConcatSpec:
         """Return a copy with a ``SeparatorProps`` separator.
@@ -4918,10 +5095,12 @@ class ConcatSpec(GenomeSpySchema):
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
             zindex (float): Z-order of the separator relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``
         """
         defined = {
@@ -4943,9 +5122,11 @@ class ConcatSpec(GenomeSpySchema):
             "type": type,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
             "zindex": zindex,
         }
@@ -5060,6 +5241,7 @@ class ConcatSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -5374,7 +5556,7 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -5625,7 +5807,7 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -5876,7 +6058,7 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -6127,7 +6309,7 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -6308,7 +6490,7 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -6673,7 +6855,7 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -6928,7 +7110,7 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -7181,7 +7363,7 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -7436,7 +7618,7 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -7625,7 +7807,7 @@ class ConditionalParameterScaleDatumDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -7831,6 +8013,7 @@ class CoordinateLookupInput(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -7894,6 +8077,7 @@ class CoordinateLookupInput(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -7991,6 +8175,7 @@ class CoordinateLookupParams(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -8022,7 +8207,7 @@ class CoordinateLookupParams(GenomeSpySchema):
 
         Args:
             data (LazyData | dict[str, Any]): The lazy side data source.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): Transforms applied to the side data before lookup.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): Transforms applied to the side data before lookup.
         """
         defined = {
             "data": data,
@@ -8169,6 +8354,7 @@ class CoreRootSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -8564,6 +8750,14 @@ class CoreRootSpec(GenomeSpySchema):
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        xOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
         | ChromPosDef
@@ -8573,6 +8767,14 @@ class CoreRootSpec(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        yOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
     ) -> CoreRootSpec:
         """Return a copy with a ``Encoding`` encoding.
 
@@ -8580,8 +8782,8 @@ class CoreRootSpec(GenomeSpySchema):
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
-            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dx`` property.
-            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dy`` property.
+            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
+            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
@@ -8590,7 +8792,7 @@ class CoreRootSpec(GenomeSpySchema):
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
-            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - centered directional shape ``"triangle"``
+            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
             stroke (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Stroke color of the marks. Note: The ``stroke`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             strokeOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Stroke opacity of the marks.
@@ -8600,8 +8802,10 @@ class CoreRootSpec(GenomeSpySchema):
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         defined = {
             "angle": angle,
@@ -8627,8 +8831,10 @@ class CoreRootSpec(GenomeSpySchema):
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("encoding", value, **defined)
@@ -8827,10 +9033,12 @@ class CoreRootSpec(GenomeSpySchema):
         type: Literal["rule"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         zindex: float | UndefinedType = Undefined,
     ) -> CoreRootSpec:
         """Return a copy with a ``SeparatorProps`` separator.
@@ -8854,10 +9062,12 @@ class CoreRootSpec(GenomeSpySchema):
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
             zindex (float): Z-order of the separator relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``
         """
         defined = {
@@ -8879,9 +9089,11 @@ class CoreRootSpec(GenomeSpySchema):
             "type": type,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
             "zindex": zindex,
         }
@@ -9012,6 +9224,7 @@ class CoreRootSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -9286,6 +9499,7 @@ class CrossData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat
         | UndefinedType = Undefined,
@@ -9324,6 +9538,7 @@ class CrossData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat,
     ) -> CrossData:
@@ -9399,6 +9614,7 @@ class CrossInput(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -9448,6 +9664,7 @@ class CrossInput(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -9517,6 +9734,7 @@ class CrossParams(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -9548,7 +9766,7 @@ class CrossParams(GenomeSpySchema):
 
         Args:
             data (UrlData | dict[str, Any] | InlineData | NamedData | SequenceGenerator): Finite eager data crossed with the primary input.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): Unary transforms applied to the foreign data before crossing.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): Unary transforms applied to the foreign data before crossing.
         """
         defined = {
             "data": data,
@@ -9611,6 +9829,7 @@ class Data(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat
         | UndefinedType = Undefined,
@@ -9656,6 +9875,7 @@ class Data(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat,
     ) -> Data:
@@ -9856,6 +10076,7 @@ class DataSource(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat
         | UndefinedType = Undefined,
@@ -9899,6 +10120,7 @@ class DataSource(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat,
     ) -> DataSource:
@@ -10136,7 +10358,7 @@ class DirectionDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -10190,6 +10412,93 @@ class DirectionDef(GenomeSpySchema):
     def value(self, value: ArrowDirection_T | ExprRef | dict[str, Any]) -> DirectionDef:
         """Return a copy with ``value`` updated."""
         return self._with_property("value", value)
+
+
+class Displace1DParams(GenomeSpySchema):
+    """Generated wrapper for ``Displace1DParams``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("Displace1DParams", {})
+
+    def __init__(
+        self,
+        as_: str | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        extent: Sequence[float] | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        length: float | Field_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        pos: Field_T | UndefinedType = Undefined,
+        positionFactor: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        type: Literal["displace1d"] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            extent=extent,
+            length=length,
+            pos=pos,
+            positionFactor=positionFactor,
+            type=type,
+            **{"as": as_},
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def as_(self, value: str) -> Displace1DParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
+
+    def description(self, value: str) -> Displace1DParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def extent(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> Displace1DParams:
+        """Return a copy with a ``ExprRef`` extent.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("extent", value, **defined)
+
+    def length(
+        self, value: float | Field_T | ExprRef | dict[str, Any]
+    ) -> Displace1DParams:
+        """Return a copy with ``length`` updated."""
+        return self._with_property("length", value)
+
+    def pos(self, value: Field_T) -> Displace1DParams:
+        """Return a copy with ``pos`` updated."""
+        return self._with_property("pos", value)
+
+    def positionFactor(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> Displace1DParams:
+        """Return a copy with a ``ExprRef`` positionFactor.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("positionFactor", value, **defined)
+
+    def type(self, value: Literal["displace1d"]) -> Displace1DParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class DomEventType(GenomeSpySchema):
@@ -10283,6 +10592,7 @@ class DynamicCallbackData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat
         | UndefinedType = Undefined,
@@ -10314,6 +10624,7 @@ class DynamicCallbackData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat,
     ) -> DynamicCallbackData:
@@ -10473,6 +10784,14 @@ class Encoding(GenomeSpySchema):
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        xOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
         | ChromPosDef
@@ -10482,6 +10801,14 @@ class Encoding(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        yOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -10508,8 +10835,10 @@ class Encoding(GenomeSpySchema):
             uniqueId=uniqueId,
             x=x,
             x2=x2,
+            xOffset=xOffset,
             y=y,
             y2=y2,
+            yOffset=yOffset,
         )
         if kwds:
             self._kwds.update(kwds)
@@ -10874,6 +11203,19 @@ class Encoding(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
+    def xOffset(
+        self,
+        value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None,
+    ) -> Encoding:
+        """Return a copy with ``xOffset`` updated."""
+        return self._with_property("xOffset", value)
+
     def y(
         self,
         value: PositionFieldDef
@@ -10943,6 +11285,19 @@ class Encoding(GenomeSpySchema):
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
+
+    def yOffset(
+        self,
+        value: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None,
+    ) -> Encoding:
+        """Return a copy with ``yOffset`` updated."""
+        return self._with_property("yOffset", value)
 
 
 class EventConfig(GenomeSpySchema):
@@ -11405,7 +11760,7 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -11670,7 +12025,7 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -11937,7 +12292,7 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -12132,7 +12487,7 @@ class FieldOrDatumDefWithConditionScaleDatumDefStringNull(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -12327,7 +12682,7 @@ class FieldOrDatumDefWithConditionScaleDatumDefNumber(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -12865,6 +13220,7 @@ class GenomeAxis(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -12942,6 +13298,7 @@ class GenomeAxis(GenomeSpySchema):
             domainDash=domainDash,
             domainDashOffset=domainDashOffset,
             domainWidth=domainWidth,
+            extraValues=extraValues,
             format=format,
             grid=grid,
             gridCap=gridCap,
@@ -13106,6 +13463,10 @@ class GenomeAxis(GenomeSpySchema):
     def domainWidth(self, value: float) -> GenomeAxis:
         """Return a copy with ``domainWidth`` updated."""
         return self._with_property("domainWidth", value)
+
+    def extraValues(self, value: Sequence[float]) -> GenomeAxis:
+        """Return a copy with ``extraValues`` updated."""
+        return self._with_property("extraValues", value)
 
     def format(self, value: str) -> GenomeAxis:
         """Return a copy with ``format`` updated."""
@@ -13503,10 +13864,12 @@ class GenomeSpyConfig(GenomeSpySchema):
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> GenomeSpyConfig:
         """Return a copy with a ``ArrowConfig`` arrow.
 
@@ -13540,10 +13903,12 @@ class GenomeSpyConfig(GenomeSpySchema):
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -13575,9 +13940,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -13617,6 +13984,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -13695,6 +14063,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -13771,6 +14140,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -13854,6 +14224,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -13932,6 +14303,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -14008,6 +14380,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -14091,6 +14464,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -14169,6 +14543,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -14245,6 +14620,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -14328,6 +14704,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -14406,6 +14783,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -14482,6 +14860,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -14565,6 +14944,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -14643,6 +15023,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -14719,6 +15100,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -14802,6 +15184,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -14880,6 +15263,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -14956,6 +15340,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -15039,6 +15424,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -15117,6 +15503,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -15193,6 +15580,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -15276,6 +15664,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -15354,6 +15743,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -15430,6 +15820,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -15513,6 +15904,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -15591,6 +15983,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -15667,6 +16060,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -15750,6 +16144,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -15828,6 +16223,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -15904,6 +16300,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -15987,6 +16384,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -16065,6 +16463,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -16141,6 +16540,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -16224,6 +16624,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -16302,6 +16703,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -16378,6 +16780,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -16752,10 +17155,12 @@ class GenomeSpyConfig(GenomeSpySchema):
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> GenomeSpyConfig:
         """Return a copy with a ``LinkConfig`` link.
 
@@ -16782,10 +17187,12 @@ class GenomeSpyConfig(GenomeSpySchema):
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "arcFadingDistance": arcFadingDistance,
@@ -16810,9 +17217,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -16844,9 +17253,11 @@ class GenomeSpyConfig(GenomeSpySchema):
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> GenomeSpyConfig:
         """Return a copy with a ``MarkConfig`` mark.
 
@@ -16861,9 +17272,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -16876,8 +17289,10 @@ class GenomeSpyConfig(GenomeSpySchema):
             "style": style,
             "tooltip": tooltip,
             "x": x,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -16933,9 +17348,11 @@ class GenomeSpyConfig(GenomeSpySchema):
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> GenomeSpyConfig:
         """Return a copy with a ``PointConfig`` point.
 
@@ -16960,7 +17377,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             sampleFacetPadding (float): Additional padding used by sample facets. **Default value:** ``0.1``
             semanticScore (float | ExprRef | dict[str, Any]): The semantic score used by semantic zooming in the point mark. This is primarily intended for internal use. **Default value:** ``0``
             semanticZoomFraction (float | ExprRef | dict[str, Any]): TODO **Default value:** ``0.02``
-            shape (str | ExprRef | dict[str, Any]): One of ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, ``"triangle-left"``, ``"tick-up"``, ``"tick-down"``, ``"tick-right"``, or ``"tick-left"`` **Default value:** ``"circle"``
+            shape (str | ExprRef | dict[str, Any]): One of ``"circle"``, ``"square"``, ``"cross"``, ``"x"``, ``"+"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, ``"triangle-left"``, ``"tick-up"``, ``"tick-down"``, ``"tick-right"``, or ``"tick-left"``. The ``"x"`` and ``"+"`` shapes are stroke-only and use ``strokeWidth`` for their line thickness. **Default value:** ``"circle"``
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
             stroke (str | ExprRef | dict[str, Any]): The stroke color
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
@@ -16968,9 +17385,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "angle": angle,
@@ -17001,8 +17420,10 @@ class GenomeSpyConfig(GenomeSpySchema):
             "style": style,
             "tooltip": tooltip,
             "x": x,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -17112,10 +17533,12 @@ class GenomeSpyConfig(GenomeSpySchema):
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> GenomeSpyConfig:
         """Return a copy with a ``RectConfig`` rect.
 
@@ -17151,10 +17574,12 @@ class GenomeSpyConfig(GenomeSpySchema):
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -17188,9 +17613,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -17233,10 +17660,12 @@ class GenomeSpyConfig(GenomeSpySchema):
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> GenomeSpyConfig:
         """Return a copy with a ``RuleConfig`` rule.
 
@@ -17257,10 +17686,12 @@ class GenomeSpyConfig(GenomeSpySchema):
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -17279,9 +17710,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             "tooltip": tooltip,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -17373,7 +17806,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             nominal (dict[str, Any]): Defaults for nominal scales.
             nominalColorScheme (str | SchemeParams | SchemeParamsKwds): Default color scheme for nominal color scales.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             ordinal (dict[str, Any]): Defaults for ordinal scales.
             ordinalColorScheme (str | SchemeParams | SchemeParamsKwds): Default color scheme for ordinal color scales.
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
@@ -17484,10 +17917,12 @@ class GenomeSpyConfig(GenomeSpySchema):
         viewportEdgeFadeWidthTop: float | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> GenomeSpyConfig:
         """Return a copy with a ``TextConfig`` text.
 
@@ -17528,10 +17963,12 @@ class GenomeSpyConfig(GenomeSpySchema):
             viewportEdgeFadeWidthTop (float): Schema-defined ``viewportEdgeFadeWidthTop`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "align": align,
@@ -17570,9 +18007,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             "viewportEdgeFadeWidthTop": viewportEdgeFadeWidthTop,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -17615,9 +18054,11 @@ class GenomeSpyConfig(GenomeSpySchema):
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> GenomeSpyConfig:
         """Return a copy with a ``TickConfig`` tick.
 
@@ -17638,9 +18079,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             thickness (float): The thickness of the tick mark in pixels. Equivalent to the ``size`` of the underlying rule mark. **Default value:** ``1``
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
         """
         defined = {
             "buildIndex": buildIndex,
@@ -17659,8 +18102,10 @@ class GenomeSpyConfig(GenomeSpySchema):
             "thickness": thickness,
             "tooltip": tooltip,
             "x": x,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -18006,6 +18451,7 @@ class HConcatSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -18347,6 +18793,14 @@ class HConcatSpec(GenomeSpySchema):
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        xOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
         | ChromPosDef
@@ -18356,6 +18810,14 @@ class HConcatSpec(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        yOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
     ) -> HConcatSpec:
         """Return a copy with a ``Encoding`` encoding.
 
@@ -18363,8 +18825,8 @@ class HConcatSpec(GenomeSpySchema):
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
-            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dx`` property.
-            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dy`` property.
+            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
+            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
@@ -18373,7 +18835,7 @@ class HConcatSpec(GenomeSpySchema):
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
-            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - centered directional shape ``"triangle"``
+            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
             stroke (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Stroke color of the marks. Note: The ``stroke`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             strokeOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Stroke opacity of the marks.
@@ -18383,8 +18845,10 @@ class HConcatSpec(GenomeSpySchema):
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         defined = {
             "angle": angle,
@@ -18410,8 +18874,10 @@ class HConcatSpec(GenomeSpySchema):
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("encoding", value, **defined)
@@ -18559,10 +19025,12 @@ class HConcatSpec(GenomeSpySchema):
         type: Literal["rule"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         zindex: float | UndefinedType = Undefined,
     ) -> HConcatSpec:
         """Return a copy with a ``SeparatorProps`` separator.
@@ -18586,10 +19054,12 @@ class HConcatSpec(GenomeSpySchema):
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
             zindex (float): Z-order of the separator relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``
         """
         defined = {
@@ -18611,9 +19081,11 @@ class HConcatSpec(GenomeSpySchema):
             "type": type,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
             "zindex": zindex,
         }
@@ -18728,6 +19200,7 @@ class HConcatSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -19225,6 +19698,7 @@ class InlineData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat
         | UndefinedType = Undefined,
@@ -19250,6 +19724,7 @@ class InlineData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat,
     ) -> InlineData:
@@ -19623,6 +20098,7 @@ class LayerSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -19965,6 +20441,14 @@ class LayerSpec(GenomeSpySchema):
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        xOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
         | ChromPosDef
@@ -19974,6 +20458,14 @@ class LayerSpec(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        yOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
     ) -> LayerSpec:
         """Return a copy with a ``Encoding`` encoding.
 
@@ -19981,8 +20473,8 @@ class LayerSpec(GenomeSpySchema):
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
-            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dx`` property.
-            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dy`` property.
+            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
+            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
@@ -19991,7 +20483,7 @@ class LayerSpec(GenomeSpySchema):
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
-            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - centered directional shape ``"triangle"``
+            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
             stroke (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Stroke color of the marks. Note: The ``stroke`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             strokeOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Stroke opacity of the marks.
@@ -20001,8 +20493,10 @@ class LayerSpec(GenomeSpySchema):
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         defined = {
             "angle": angle,
@@ -20028,8 +20522,10 @@ class LayerSpec(GenomeSpySchema):
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("encoding", value, **defined)
@@ -20242,6 +20738,7 @@ class LayerSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -20589,6 +21086,7 @@ class LazyDataParams(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -20644,6 +21142,7 @@ class LazyDataParams(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -20697,6 +21196,7 @@ class LazyDataParams(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -21432,10 +21932,12 @@ class LinkConfig(GenomeSpySchema):
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -21461,9 +21963,11 @@ class LinkConfig(GenomeSpySchema):
             tooltip=tooltip,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -21787,9 +22291,41 @@ class LinkConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> LinkConfig:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -21827,9 +22363,41 @@ class LinkConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> LinkConfig:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class LinkProps(GenomeSpySchema):
@@ -21890,10 +22458,12 @@ class LinkProps(GenomeSpySchema):
         type: Literal["link"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -21920,9 +22490,11 @@ class LinkProps(GenomeSpySchema):
             type=type,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -22250,9 +22822,41 @@ class LinkProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> LinkProps:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -22290,9 +22894,41 @@ class LinkProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> LinkProps:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class LookupParams(GenomeSpySchema):
@@ -22418,9 +23054,11 @@ class MarkConfig(GenomeSpySchema):
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -22434,8 +23072,10 @@ class MarkConfig(GenomeSpySchema):
             style=style,
             tooltip=tooltip,
             x=x,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -22543,9 +23183,41 @@ class MarkConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x", value, **defined)
 
-    def xOffset(self, value: float) -> MarkConfig:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> MarkConfig:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> MarkConfig:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -22565,9 +23237,41 @@ class MarkConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y", value, **defined)
 
-    def yOffset(self, value: float) -> MarkConfig:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> MarkConfig:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> MarkConfig:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
@@ -22799,7 +23503,7 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -23094,7 +23798,7 @@ class MarkPropDefStringNull(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -23387,7 +24091,7 @@ class MarkPropDefNumber(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -23640,7 +24344,7 @@ class MarkPropExprDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -23875,7 +24579,7 @@ class MarkPropExprDefType(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -24114,7 +24818,7 @@ class MarkPropExprDefTypeForShape(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -24342,10 +25046,12 @@ class MarkProps(GenomeSpySchema):
         viewportEdgeFadeWidthTop: float | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -24439,9 +25145,11 @@ class MarkProps(GenomeSpySchema):
             viewportEdgeFadeWidthTop=viewportEdgeFadeWidthTop,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -25695,9 +26403,41 @@ class MarkProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> MarkProps:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -25735,9 +26475,41 @@ class MarkProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> MarkProps:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class MarkType(GenomeSpySchema):
@@ -25998,6 +26770,7 @@ class MultiscaleSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -26341,6 +27114,14 @@ class MultiscaleSpec(GenomeSpySchema):
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        xOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
         | ChromPosDef
@@ -26350,6 +27131,14 @@ class MultiscaleSpec(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        yOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
     ) -> MultiscaleSpec:
         """Return a copy with a ``Encoding`` encoding.
 
@@ -26357,8 +27146,8 @@ class MultiscaleSpec(GenomeSpySchema):
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
-            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dx`` property.
-            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dy`` property.
+            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
+            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
@@ -26367,7 +27156,7 @@ class MultiscaleSpec(GenomeSpySchema):
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
-            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - centered directional shape ``"triangle"``
+            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
             stroke (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Stroke color of the marks. Note: The ``stroke`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             strokeOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Stroke opacity of the marks.
@@ -26377,8 +27166,10 @@ class MultiscaleSpec(GenomeSpySchema):
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         defined = {
             "angle": angle,
@@ -26404,8 +27195,10 @@ class MultiscaleSpec(GenomeSpySchema):
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("encoding", value, **defined)
@@ -26628,6 +27421,7 @@ class MultiscaleSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -26905,6 +27699,7 @@ class NamedData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat
         | UndefinedType = Undefined,
@@ -26927,6 +27722,7 @@ class NamedData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat,
     ) -> NamedData:
@@ -27196,7 +27992,7 @@ class NumericMarkPropDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -27312,6 +28108,310 @@ class NumericValueDef(GenomeSpySchema):
         *,
         expr: str | UndefinedType = Undefined,
     ) -> NumericValueDef:
+        """Return a copy with a ``ExprRef`` value.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("value", value, **defined)
+
+
+class OffsetChannel(GenomeSpySchema):
+    """Generated wrapper for ``OffsetChannel``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("OffsetChannel", {})
+
+    def __init__(self, **kwds: Any) -> None:
+        super().__init__()
+        if kwds:
+            self._kwds.update(kwds)
+
+
+class OffsetDef(GenomeSpySchema):
+    """Generated wrapper for ``OffsetDef``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("OffsetDef", {})
+
+    def __init__(
+        self,
+        band: float | UndefinedType = Undefined,
+        condition: ConditionalParameterMarkPropFieldDefType
+        | dict[str, Any]
+        | ConditionalParameterScaleDatumDef
+        | ConditionalParameterMarkPropExprDefType
+        | ConditionalParameterValueDefNumberExprRef
+        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | UndefinedType = Undefined,
+        datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
+        field: str | UndefinedType = Undefined,
+        format: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
+        scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        type: Type_T | UndefinedType = Undefined,
+        value: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            condition=condition,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            expr=expr,
+            field=field,
+            format=format,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            title=title,
+            type=type,
+            value=value,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def band(self, value: float) -> OffsetDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def condition(
+        self,
+        value: ConditionalParameterMarkPropFieldDefType
+        | dict[str, Any]
+        | ConditionalParameterScaleDatumDef
+        | ConditionalParameterMarkPropExprDefType
+        | ConditionalParameterValueDefNumberExprRef
+        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+    ) -> OffsetDef:
+        """Return a copy with ``condition`` updated."""
+        return self._with_property("condition", value)
+
+    def datum(self, value: Scalar_T | ExprRef | dict[str, Any]) -> OffsetDef:
+        """Return a copy with ``datum`` updated."""
+        return self._with_property("datum", value)
+
+    def description(self, value: str) -> OffsetDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(self, value: bool) -> OffsetDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def expr(self, value: str) -> OffsetDef:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def field(self, value: str) -> OffsetDef:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def format(self, value: str) -> OffsetDef:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def legend(
+        self,
+        value: Legend | LegendKwds | None | object = Undefined,
+        /,
+        *,
+        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFillOpacity: float | UndefinedType = Undefined,
+        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStrokeOpacity: float | UndefinedType = Undefined,
+        backgroundStrokeWidth: float | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        direction: LegendDirection_T | UndefinedType = Undefined,
+        labelLimit: float | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolSize: float | UndefinedType = Undefined,
+        symbolType: str | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
+        values: Sequence[str | float | bool] | UndefinedType = Undefined,
+    ) -> OffsetDef:
+        """Return a copy with a ``Legend`` legend.
+
+        Args:
+            backgroundFill (str): Fill color of the legend background.
+            backgroundFillOpacity (float): Opacity of the legend background fill.
+            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStrokeOpacity (float): Opacity of the legend background stroke.
+            backgroundStrokeWidth (float): Stroke width of the legend background border.
+            columns (float): The number of columns in which to arrange symbol legend entries.
+            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            labelLimit (float): Maximum label text width in pixels.
+            offset (float): External gap in pixels between the legend and the plot edge.
+            orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
+            padding (float): Internal padding in pixels around the legend content and background.
+            style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
+            symbolSize (float): Symbol size in pixels squared.
+            symbolType (str): Symbol shape.
+            title (str | None): Title text for the legend. If ``null``, the title is removed.
+            titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
+            values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
+        """
+        defined = {
+            "backgroundFill": backgroundFill,
+            "backgroundFillOpacity": backgroundFillOpacity,
+            "backgroundStroke": backgroundStroke,
+            "backgroundStrokeOpacity": backgroundStrokeOpacity,
+            "backgroundStrokeWidth": backgroundStrokeWidth,
+            "columns": columns,
+            "direction": direction,
+            "labelLimit": labelLimit,
+            "offset": offset,
+            "orient": orient,
+            "padding": padding,
+            "style": style,
+            "symbolSize": symbolSize,
+            "symbolType": symbolType,
+            "title": title,
+            "titleOrient": titleOrient,
+            "values": values,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("legend", value, **defined)
+
+    def resolutionChannel(self, value: ChannelWithScale_T) -> OffsetDef:
+        """Return a copy with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = Undefined,
+        /,
+        *,
+        align: float | UndefinedType = Undefined,
+        assembly: str
+        | UrlGenomeDefinition
+        | dict[str, Any]
+        | InlineGenomeDefinition
+        | UndefinedType = Undefined,
+        base: float | UndefinedType = Undefined,
+        bins: Sequence[float] | UndefinedType = Undefined,
+        clamp: bool | UndefinedType = Undefined,
+        constant: float | UndefinedType = Undefined,
+        domain: ScalarDomain_T
+        | Sequence[ChromosomalLocus | dict[str, Any]]
+        | SelectionDomainRef
+        | dict[str, Any]
+        | ExprRef
+        | Sequence[float | str | bool | ExprRef | dict[str, Any]]
+        | UndefinedType = Undefined,
+        domainMax: float | UndefinedType = Undefined,
+        domainMid: float | UndefinedType = Undefined,
+        domainMin: float | UndefinedType = Undefined,
+        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        exponent: float | UndefinedType = Undefined,
+        interpolate: ScaleInterpolate_T
+        | ScaleInterpolateParams
+        | ScaleInterpolateParamsKwds
+        | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        nice: bool | float | dict[str, Any] | UndefinedType = Undefined,
+        numberingOffset: float | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        paddingInner: float | UndefinedType = Undefined,
+        paddingOuter: float | UndefinedType = Undefined,
+        range: Sequence[float | str | ExprRef | dict[str, Any]]
+        | str
+        | UndefinedType = Undefined,
+        reverse: bool | UndefinedType = Undefined,
+        round: bool | UndefinedType = Undefined,
+        scheme: str | SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
+        type: ScaleType_T | UndefinedType = Undefined,
+        zero: bool | UndefinedType = Undefined,
+        zoom: bool | ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
+    ) -> OffsetDef:
+        """Return a copy with a ``Scale`` scale.
+
+        Args:
+            align (float): The alignment of the steps within the scale range. This value must lie in the range ``[0,1]``. A value of ``0.5`` indicates that the steps should be centered within the range. A value of ``0`` or ``1`` may be used to shift the bands to one side, say to position them adjacent to an axis. __Default value:__ ``0.5``
+            assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
+            base (float): The logarithm base of the ``log`` scale (default ``10``).
+            bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            exponent (float): The exponent of the ``pow`` scale.
+            interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
+            name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
+            nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
+            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
+            round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+        """
+        defined = {
+            "align": align,
+            "assembly": assembly,
+            "base": base,
+            "bins": bins,
+            "clamp": clamp,
+            "constant": constant,
+            "domain": domain,
+            "domainMax": domainMax,
+            "domainMid": domainMid,
+            "domainMin": domainMin,
+            "domainTransition": domainTransition,
+            "exponent": exponent,
+            "interpolate": interpolate,
+            "name": name,
+            "nice": nice,
+            "numberingOffset": numberingOffset,
+            "padding": padding,
+            "paddingInner": paddingInner,
+            "paddingOuter": paddingOuter,
+            "range": range,
+            "reverse": reverse,
+            "round": round,
+            "scheme": scheme,
+            "type": type,
+            "zero": zero,
+            "zoom": zoom,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("scale", value, **defined)
+
+    def title(self, value: str | None) -> OffsetDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(self, value: Type_T) -> OffsetDef:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def value(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> OffsetDef:
         """Return a copy with a ``ExprRef`` value.
 
         Args:
@@ -27983,9 +29083,11 @@ class PointConfig(GenomeSpySchema):
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -28017,8 +29119,10 @@ class PointConfig(GenomeSpySchema):
             style=style,
             tooltip=tooltip,
             x=x,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -28408,9 +29512,41 @@ class PointConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x", value, **defined)
 
-    def xOffset(self, value: float) -> PointConfig:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -28430,9 +29566,41 @@ class PointConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y", value, **defined)
 
-    def yOffset(self, value: float) -> PointConfig:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> PointConfig:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class PointProps(GenomeSpySchema):
@@ -28488,9 +29656,11 @@ class PointProps(GenomeSpySchema):
         | UndefinedType = Undefined,
         type: Literal["point"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -28523,8 +29693,10 @@ class PointProps(GenomeSpySchema):
             tooltip=tooltip,
             type=type,
             x=x,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -28918,9 +30090,41 @@ class PointProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x", value, **defined)
 
-    def xOffset(self, value: float) -> PointProps:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -28940,9 +30144,41 @@ class PointProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y", value, **defined)
 
-    def yOffset(self, value: float) -> PointProps:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> PointProps:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class PointSelectionConfig(GenomeSpySchema):
@@ -29070,6 +30306,7 @@ class Position2Def(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -29148,6 +30385,7 @@ class Position2Def(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -29224,6 +30462,7 @@ class Position2Def(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -29378,7 +30617,7 @@ class Position2Def(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -29514,6 +30753,7 @@ class PositionDatumDef(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -29592,6 +30832,7 @@ class PositionDatumDef(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -29668,6 +30909,7 @@ class PositionDatumDef(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -29802,7 +31044,7 @@ class PositionDatumDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -29932,6 +31174,7 @@ class PositionDef(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -30010,6 +31253,7 @@ class PositionDef(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -30086,6 +31330,7 @@ class PositionDef(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -30240,7 +31485,7 @@ class PositionDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -30372,6 +31617,7 @@ class PositionExprDef(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -30450,6 +31696,7 @@ class PositionExprDef(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -30526,6 +31773,7 @@ class PositionExprDef(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -30666,6 +31914,7 @@ class PositionFieldDef(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -30744,6 +31993,7 @@ class PositionFieldDef(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -30820,6 +32070,7 @@ class PositionFieldDef(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -30954,7 +32205,7 @@ class PositionFieldDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -31231,10 +32482,12 @@ class RectConfig(GenomeSpySchema):
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -31269,9 +32522,11 @@ class RectConfig(GenomeSpySchema):
             tooltip=tooltip,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -31743,9 +32998,41 @@ class RectConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> RectConfig:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -31783,9 +33070,41 @@ class RectConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> RectConfig:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RectConfig:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class RectProps(GenomeSpySchema):
@@ -31862,10 +33181,12 @@ class RectProps(GenomeSpySchema):
         type: Literal["rect"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -31901,9 +33222,11 @@ class RectProps(GenomeSpySchema):
             type=type,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -32379,9 +33702,41 @@ class RectProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> RectProps:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -32419,9 +33774,41 @@ class RectProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> RectProps:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RectProps:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class RegexExtractParams(GenomeSpySchema):
@@ -32576,10 +33963,12 @@ class RuleConfig(GenomeSpySchema):
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -32599,9 +33988,11 @@ class RuleConfig(GenomeSpySchema):
             tooltip=tooltip,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -32789,9 +34180,41 @@ class RuleConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> RuleConfig:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -32829,9 +34252,41 @@ class RuleConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> RuleConfig:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RuleConfig:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class RuleProps(GenomeSpySchema):
@@ -32874,10 +34329,12 @@ class RuleProps(GenomeSpySchema):
         type: Literal["rule"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -32898,9 +34355,11 @@ class RuleProps(GenomeSpySchema):
             type=type,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -33092,9 +34551,41 @@ class RuleProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> RuleProps:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -33132,9 +34623,41 @@ class RuleProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> RuleProps:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RuleProps:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class RulerChannelValue(GenomeSpySchema):
@@ -34437,6 +35960,7 @@ class SecondaryChromPosDef(GenomeSpySchema):
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
@@ -34515,6 +36039,7 @@ class SecondaryChromPosDef(GenomeSpySchema):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -34591,6 +36116,7 @@ class SecondaryChromPosDef(GenomeSpySchema):
             "domainDash": domainDash,
             "domainDashOffset": domainDashOffset,
             "domainWidth": domainWidth,
+            "extraValues": extraValues,
             "format": format,
             "grid": grid,
             "gridCap": gridCap,
@@ -34926,10 +36452,12 @@ class SeparatorProps(GenomeSpySchema):
         type: Literal["rule"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         zindex: float | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
@@ -34952,9 +36480,11 @@ class SeparatorProps(GenomeSpySchema):
             type=type,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
             zindex=zindex,
         )
@@ -35151,9 +36681,41 @@ class SeparatorProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> SeparatorProps:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -35191,9 +36753,41 @@ class SeparatorProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> SeparatorProps:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> SeparatorProps:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
     def zindex(self, value: float) -> SeparatorProps:
         """Return a copy with ``zindex`` updated."""
@@ -35596,7 +37190,7 @@ class ShapeDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -35881,12 +37475,17 @@ class Step(GenomeSpySchema):
 
     def __init__(
         self,
+        for_: Literal["position", "offset"] | UndefinedType = Undefined,
         step: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(step=step)
+        super().__init__(step=step, **{"for": for_})
         if kwds:
             self._kwds.update(kwds)
+
+    def for_(self, value: Literal["position", "offset"]) -> Step:
+        """Return a copy with ``for`` updated."""
+        return self._with_property("for", value)
 
     def step(
         self,
@@ -36022,7 +37621,7 @@ class StringDatumDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -36217,6 +37816,7 @@ class StyleConfig(GenomeSpySchema):
         domainWidth: float | UndefinedType = Undefined,
         dx: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         dy: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        extraValues: Sequence[float] | UndefinedType = Undefined,
         fill: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         fillGradientStrength: float
         | ExprRef
@@ -36413,10 +38013,12 @@ class StyleConfig(GenomeSpySchema):
         viewportEdgeFadeWidthTop: float | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         zindex: float | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
@@ -36478,6 +38080,7 @@ class StyleConfig(GenomeSpySchema):
             domainWidth=domainWidth,
             dx=dx,
             dy=dy,
+            extraValues=extraValues,
             fill=fill,
             fillGradientStrength=fillGradientStrength,
             fillOpacity=fillOpacity,
@@ -36612,9 +38215,11 @@ class StyleConfig(GenomeSpySchema):
             viewportEdgeFadeWidthTop=viewportEdgeFadeWidthTop,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
             zindex=zindex,
         )
@@ -36999,6 +38604,10 @@ class StyleConfig(GenomeSpySchema):
     def dy(self, value: float | ExprRef | dict[str, Any]) -> StyleConfig:
         """Return a copy with ``dy`` updated."""
         return self._with_property("dy", value)
+
+    def extraValues(self, value: Sequence[float]) -> StyleConfig:
+        """Return a copy with ``extraValues`` updated."""
+        return self._with_property("extraValues", value)
 
     def fill(
         self,
@@ -38280,9 +39889,41 @@ class StyleConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> StyleConfig:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -38320,9 +39961,41 @@ class StyleConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> StyleConfig:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
     def zindex(self, value: float) -> StyleConfig:
         """Return a copy with ``zindex`` updated."""
@@ -38528,10 +40201,12 @@ class TextConfig(GenomeSpySchema):
         viewportEdgeFadeWidthTop: float | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -38571,9 +40246,11 @@ class TextConfig(GenomeSpySchema):
             viewportEdgeFadeWidthTop=viewportEdgeFadeWidthTop,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -38925,9 +40602,41 @@ class TextConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> TextConfig:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -38965,9 +40674,41 @@ class TextConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> TextConfig:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TextConfig:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class TextDef(GenomeSpySchema):
@@ -39105,7 +40846,7 @@ class TextDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -39230,10 +40971,12 @@ class TextProps(GenomeSpySchema):
         viewportEdgeFadeWidthTop: float | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -39274,9 +41017,11 @@ class TextProps(GenomeSpySchema):
             viewportEdgeFadeWidthTop=viewportEdgeFadeWidthTop,
             x=x,
             x2=x2,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
             y2=y2,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -39632,9 +41377,41 @@ class TextProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x2", value, **defined)
 
-    def xOffset(self, value: float) -> TextProps:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -39672,9 +41449,41 @@ class TextProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y2", value, **defined)
 
-    def yOffset(self, value: float) -> TextProps:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TextProps:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class TickConfig(GenomeSpySchema):
@@ -39716,9 +41525,11 @@ class TickConfig(GenomeSpySchema):
         | Literal[False]
         | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -39738,8 +41549,10 @@ class TickConfig(GenomeSpySchema):
             thickness=thickness,
             tooltip=tooltip,
             x=x,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -39899,9 +41712,41 @@ class TickConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x", value, **defined)
 
-    def xOffset(self, value: float) -> TickConfig:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -39921,9 +41766,41 @@ class TickConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y", value, **defined)
 
-    def yOffset(self, value: float) -> TickConfig:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TickConfig:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class TickProps(GenomeSpySchema):
@@ -39966,9 +41843,11 @@ class TickProps(GenomeSpySchema):
         | UndefinedType = Undefined,
         type: Literal["tick"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
@@ -39989,8 +41868,10 @@ class TickProps(GenomeSpySchema):
             tooltip=tooltip,
             type=type,
             x=x,
+            x2Offset=x2Offset,
             xOffset=xOffset,
             y=y,
+            y2Offset=y2Offset,
             yOffset=yOffset,
         )
         if kwds:
@@ -40154,9 +42035,41 @@ class TickProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("x", value, **defined)
 
-    def xOffset(self, value: float) -> TickProps:
-        """Return a copy with ``xOffset`` updated."""
-        return self._with_property("xOffset", value)
+    def x2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` x2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("x2Offset", value, **defined)
+
+    def xOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` xOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("xOffset", value, **defined)
 
     def y(
         self,
@@ -40176,9 +42089,41 @@ class TickProps(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("y", value, **defined)
 
-    def yOffset(self, value: float) -> TickProps:
-        """Return a copy with ``yOffset`` updated."""
-        return self._with_property("yOffset", value)
+    def y2Offset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` y2Offset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("y2Offset", value, **defined)
+
+    def yOffset(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TickProps:
+        """Return a copy with a ``ExprRef`` yOffset.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("yOffset", value, **defined)
 
 
 class Title(GenomeSpySchema):
@@ -40879,7 +42824,7 @@ class TooltipDef(GenomeSpySchema):
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
-            numberingOffset (float): The numbering offset used when formatting tick labels on index and locus scales. __Default value:__ ``0``
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
             paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
@@ -40981,6 +42926,7 @@ class TransformParams(GenomeSpySchema):
         end: Field_T | UndefinedType = Undefined,
         exons: Field_T | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
+        extent: Sequence[float] | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         field: Field_T | UndefinedType = Undefined,
         fields: Sequence[Field_T | None] | UndefinedType = Undefined,
         font: str | UndefinedType = Undefined,
@@ -41003,6 +42949,7 @@ class TransformParams(GenomeSpySchema):
         labelOffset: float | UndefinedType = Undefined,
         labelWidth: Field_T | UndefinedType = Undefined,
         lane: Field_T | UndefinedType = Undefined,
+        length: float | Field_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         limit: float | UndefinedType = Undefined,
         md: Field_T | UndefinedType = Undefined,
         membership: Field_T | UndefinedType = Undefined,
@@ -41014,6 +42961,7 @@ class TransformParams(GenomeSpySchema):
         params: Sequence[float | None] | UndefinedType = Undefined,
         pos: Field_T | Sequence[Field_T] | UndefinedType = Undefined,
         pos2: Field_T | UndefinedType = Undefined,
+        positionFactor: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         preference: Field_T | UndefinedType = Undefined,
         preferredOrder: Sequence[str]
         | Sequence[float]
@@ -41069,6 +43017,7 @@ class TransformParams(GenomeSpySchema):
             end=end,
             exons=exons,
             expr=expr,
+            extent=extent,
             field=field,
             fields=fields,
             font=font,
@@ -41083,6 +43032,7 @@ class TransformParams(GenomeSpySchema):
             labelOffset=labelOffset,
             labelWidth=labelWidth,
             lane=lane,
+            length=length,
             limit=limit,
             md=md,
             membership=membership,
@@ -41093,6 +43043,7 @@ class TransformParams(GenomeSpySchema):
             params=params,
             pos=pos,
             pos2=pos2,
+            positionFactor=positionFactor,
             preference=preference,
             preferredOrder=preferredOrder,
             quality=quality,
@@ -41223,6 +43174,24 @@ class TransformParams(GenomeSpySchema):
         """Return a copy with ``expr`` updated."""
         return self._with_property("expr", value)
 
+    def extent(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TransformParams:
+        """Return a copy with a ``ExprRef`` extent.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("extent", value, **defined)
+
     def field(self, value: Field_T) -> TransformParams:
         """Return a copy with ``field`` updated."""
         return self._with_property("field", value)
@@ -41292,6 +43261,12 @@ class TransformParams(GenomeSpySchema):
         """Return a copy with ``lane`` updated."""
         return self._with_property("lane", value)
 
+    def length(
+        self, value: float | Field_T | ExprRef | dict[str, Any]
+    ) -> TransformParams:
+        """Return a copy with ``length`` updated."""
+        return self._with_property("length", value)
+
     def limit(self, value: float) -> TransformParams:
         """Return a copy with ``limit`` updated."""
         return self._with_property("limit", value)
@@ -41333,6 +43308,24 @@ class TransformParams(GenomeSpySchema):
     def pos2(self, value: Field_T) -> TransformParams:
         """Return a copy with ``pos2`` updated."""
         return self._with_property("pos2", value)
+
+    def positionFactor(
+        self,
+        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TransformParams:
+        """Return a copy with a ``ExprRef`` positionFactor.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("positionFactor", value, **defined)
 
     def preference(self, value: Field_T) -> TransformParams:
         """Return a copy with ``preference`` updated."""
@@ -41755,6 +43748,7 @@ class UnitSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -42097,6 +44091,14 @@ class UnitSpec(GenomeSpySchema):
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        xOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
         | ChromPosDef
@@ -42106,6 +44108,14 @@ class UnitSpec(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        yOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
     ) -> UnitSpec:
         """Return a copy with a ``Encoding`` encoding.
 
@@ -42113,8 +44123,8 @@ class UnitSpec(GenomeSpySchema):
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
-            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dx`` property.
-            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dy`` property.
+            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
+            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
@@ -42123,7 +44133,7 @@ class UnitSpec(GenomeSpySchema):
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
-            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - centered directional shape ``"triangle"``
+            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
             stroke (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Stroke color of the marks. Note: The ``stroke`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             strokeOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Stroke opacity of the marks.
@@ -42133,8 +44143,10 @@ class UnitSpec(GenomeSpySchema):
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         defined = {
             "angle": angle,
@@ -42160,8 +44172,10 @@ class UnitSpec(GenomeSpySchema):
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("encoding", value, **defined)
@@ -42380,6 +44394,7 @@ class UnitSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -42563,6 +44578,7 @@ class UrlData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat
         | UndefinedType = Undefined,
@@ -42592,6 +44608,7 @@ class UrlData(GenomeSpySchema):
         | JsonDataFormat
         | BedDataFormat
         | BedpeDataFormat
+        | WigDataFormat
         | VcfDataFormat
         | OtherDataFormat,
     ) -> UrlData:
@@ -42904,6 +44921,7 @@ class VConcatSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -43256,6 +45274,14 @@ class VConcatSpec(GenomeSpySchema):
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        xOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
         | ChromPosDef
@@ -43265,6 +45291,14 @@ class VConcatSpec(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        yOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
     ) -> VConcatSpec:
         """Return a copy with a ``Encoding`` encoding.
 
@@ -43272,8 +45306,8 @@ class VConcatSpec(GenomeSpySchema):
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
-            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dx`` property.
-            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dy`` property.
+            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
+            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
@@ -43282,7 +45316,7 @@ class VConcatSpec(GenomeSpySchema):
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
-            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - centered directional shape ``"triangle"``
+            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
             stroke (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Stroke color of the marks. Note: The ``stroke`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             strokeOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Stroke opacity of the marks.
@@ -43292,8 +45326,10 @@ class VConcatSpec(GenomeSpySchema):
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         defined = {
             "angle": angle,
@@ -43319,8 +45355,10 @@ class VConcatSpec(GenomeSpySchema):
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("encoding", value, **defined)
@@ -43452,10 +45490,12 @@ class VConcatSpec(GenomeSpySchema):
         type: Literal["rule"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         zindex: float | UndefinedType = Undefined,
     ) -> VConcatSpec:
         """Return a copy with a ``SeparatorProps`` separator.
@@ -43479,10 +45519,12 @@ class VConcatSpec(GenomeSpySchema):
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
             zindex (float): Z-order of the separator relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``
         """
         defined = {
@@ -43504,9 +45546,11 @@ class VConcatSpec(GenomeSpySchema):
             "type": type,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
             "zindex": zindex,
         }
@@ -43621,6 +45665,7 @@ class VConcatSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -44589,14 +46634,17 @@ class ViewConfig(GenomeSpySchema):
         value: Step | StepKwds | None | object = Undefined,
         /,
         *,
+        for_: Literal["position", "offset"] | UndefinedType = Undefined,
         step: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> ViewConfig:
         """Return a copy with a ``Step`` discreteHeight.
 
         Args:
+            for\\_ (Literal['position', 'offset']): Selects which discrete scale the step describes when a positional scale has a nested offset scale. ``"offset"`` sizes each subgroup step; ``"position"`` sizes each primary category step. __Default value:__ ``"offset"`` when a discrete nested offset scale is present, otherwise ``"position"``.
             step (float | ExprRef | dict[str, Any]): Step size in pixels.
         """
         defined = {
+            "for": for_,
             "step": step,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -44607,14 +46655,17 @@ class ViewConfig(GenomeSpySchema):
         value: Step | StepKwds | None | object = Undefined,
         /,
         *,
+        for_: Literal["position", "offset"] | UndefinedType = Undefined,
         step: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> ViewConfig:
         """Return a copy with a ``Step`` discreteWidth.
 
         Args:
+            for\\_ (Literal['position', 'offset']): Selects which discrete scale the step describes when a positional scale has a nested offset scale. ``"offset"`` sizes each subgroup step; ``"position"`` sizes each primary category step. __Default value:__ ``"offset"`` when a discrete nested offset scale is present, otherwise ``"position"``.
             step (float | ExprRef | dict[str, Any]): Step size in pixels.
         """
         defined = {
+            "for": for_,
             "step": step,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -44914,6 +46965,7 @@ class ViewSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -45296,6 +47348,14 @@ class ViewSpec(GenomeSpySchema):
         uniqueId: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         x: dict[str, Any] | None | UndefinedType = Undefined,
         x2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        xOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
         y: PositionFieldDef
         | dict[str, Any]
         | ChromPosDef
@@ -45305,6 +47365,14 @@ class ViewSpec(GenomeSpySchema):
         | None
         | UndefinedType = Undefined,
         y2: Position2Def | dict[str, Any] | None | UndefinedType = Undefined,
+        yOffset: FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+        | UndefinedType = Undefined,
     ) -> ViewSpec:
         """Return a copy with a ``Encoding`` encoding.
 
@@ -45312,8 +47380,8 @@ class ViewSpec(GenomeSpySchema):
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
-            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dx`` property.
-            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Schema-defined ``dy`` property.
+            dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
+            dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
@@ -45322,7 +47390,7 @@ class ViewSpec(GenomeSpySchema):
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
-            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - centered directional shape ``"triangle"``
+            shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
             stroke (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Stroke color of the marks. Note: The ``stroke`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             strokeOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Stroke opacity of the marks.
@@ -45332,8 +47400,10 @@ class ViewSpec(GenomeSpySchema):
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         defined = {
             "angle": angle,
@@ -45359,8 +47429,10 @@ class ViewSpec(GenomeSpySchema):
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("encoding", value, **defined)
@@ -45548,10 +47620,12 @@ class ViewSpec(GenomeSpySchema):
         type: Literal["rule"] | UndefinedType = Undefined,
         x: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        xOffset: float | UndefinedType = Undefined,
+        x2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        xOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         y2: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        yOffset: float | UndefinedType = Undefined,
+        y2Offset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        yOffset: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         zindex: float | UndefinedType = Undefined,
     ) -> ViewSpec:
         """Return a copy with a ``SeparatorProps`` separator.
@@ -45575,10 +47649,12 @@ class ViewSpec(GenomeSpySchema):
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
-            xOffset (float): Offsets of the ``x`` and ``x2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
+            xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
             y (float | ExprRef | dict[str, Any]): Position on the y axis.
             y2 (float | ExprRef | dict[str, Any]): The secondary position on the y axis.
-            yOffset (float): Offsets of the ``y`` and ``y2`` coordinates in pixels. The offset is applied after the viewport scaling and translation. **Default value:** ``0``
+            y2Offset (float | ExprRef | dict[str, Any]): Offset of the ``y2`` coordinate in logical pixels. When ``y2`` is implicit, it inherits ``yOffset`` unless this property is specified. **Default value:** inherited from ``yOffset`` for an implicit ``y2``, otherwise ``0``
+            yOffset (float | ExprRef | dict[str, Any]): Offset of the ``y`` coordinate in logical pixels. **Default value:** ``0``
             zindex (float): Z-order of the separator relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``
         """
         defined = {
@@ -45600,9 +47676,11 @@ class ViewSpec(GenomeSpySchema):
             "type": type,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
             "zindex": zindex,
         }
@@ -45727,6 +47805,7 @@ class ViewSpec(GenomeSpySchema):
             | CoverageParams
             | CoordinateLookupParams
             | CrossParams
+            | Displace1DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -45910,6 +47989,35 @@ class ViewSpec(GenomeSpySchema):
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("width", value, **defined)
+
+
+class WigDataFormat(GenomeSpySchema):
+    """Generated wrapper for ``WigDataFormat``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("WigDataFormat", {})
+
+    def __init__(
+        self,
+        parse: Parse | ParseKwds | None | UndefinedType = Undefined,
+        type: Literal["wig"] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(parse=parse, type=type)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def parse(
+        self,
+        value: Parse | ParseKwds | None | object = Undefined,
+        /,
+    ) -> WigDataFormat:
+        """Return a copy with a ``Parse`` parse."""
+        defined: dict[str, Any] = {}
+        return self._with_property("parse", value, **defined)
+
+    def type(self, value: Literal["wig"]) -> WigDataFormat:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
 
 
 class WindowOnlyOp(GenomeSpySchema):
@@ -46124,6 +48232,7 @@ __all__ = [
     "DataFormat",
     "DataSource",
     "DirectionDef",
+    "Displace1DParams",
     "DomEventType",
     "DomainValue",
     "DomainValueArray",
@@ -46213,6 +48322,8 @@ __all__ = [
     "NumericMarkPropDef",
     "NumericStopDef",
     "NumericValueDef",
+    "OffsetChannel",
+    "OffsetDef",
     "OtherDataFormat",
     "OverhangConfig",
     "PackLegendLabelsParams",
@@ -46330,6 +48441,7 @@ __all__ = [
     "ViewConfig",
     "ViewOpacityDef",
     "ViewSpec",
+    "WigDataFormat",
     "WindowOnlyOp",
     "WindowOp",
     "WindowParams",
