@@ -111,6 +111,7 @@ class AxisKwds(TypedDict, total=False):
     domainDash: Sequence[float]
     domainDashOffset: float
     domainWidth: float
+    extraValues: Sequence[float]
     format: str
     grid: bool
     gridCap: Literal["butt", "round", "square"]
@@ -190,6 +191,7 @@ class AxisConfigKwds(TypedDict, total=False):
     domainDash: Sequence[float]
     domainDashOffset: float
     domainWidth: float
+    extraValues: Sequence[float]
     format: str
     grid: bool
     gridCap: Literal["butt", "round", "square"]
@@ -423,6 +425,15 @@ class EncodingKwds(TypedDict, total=False):
     uniqueId: FieldDefWithoutScale | dict[str, Any]
     x: dict[str, Any] | None
     x2: Position2Def | dict[str, Any] | None
+    xOffset: (
+        FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+    )
     y: (
         PositionFieldDef
         | dict[str, Any]
@@ -433,6 +444,15 @@ class EncodingKwds(TypedDict, total=False):
         | None
     )
     y2: Position2Def | dict[str, Any] | None
+    yOffset: (
+        FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
+        | dict[str, Any]
+        | FieldOrDatumDefWithConditionScaleDatumDefNumber
+        | MarkPropExprDefType
+        | ValueDefWithConditionNumberType
+        | MarkPropExprDef
+        | None
+    )
 
 
 class EventConfigKwds(TypedDict, total=False):
@@ -474,6 +494,7 @@ class GenomeAxisKwds(TypedDict, total=False):
     domainDash: Sequence[float]
     domainDashOffset: float
     domainWidth: float
+    extraValues: Sequence[float]
     format: str
     grid: bool
     gridCap: Literal["butt", "round", "square"]
@@ -659,10 +680,12 @@ class LinkConfigKwds(TypedDict, total=False):
     tooltip: HandledTooltip | HandledTooltipKwds | None | Literal[False]
     x: float | ExprRef | dict[str, Any]
     x2: float | ExprRef | dict[str, Any]
-    xOffset: float
+    x2Offset: float | ExprRef | dict[str, Any]
+    xOffset: float | ExprRef | dict[str, Any]
     y: float | ExprRef | dict[str, Any]
     y2: float | ExprRef | dict[str, Any]
-    yOffset: float
+    y2Offset: float | ExprRef | dict[str, Any]
+    yOffset: float | ExprRef | dict[str, Any]
 
 
 class MarkConfigKwds(TypedDict, total=False):
@@ -678,9 +701,11 @@ class MarkConfigKwds(TypedDict, total=False):
     style: str | Sequence[str]
     tooltip: HandledTooltip | HandledTooltipKwds | None | Literal[False]
     x: float | ExprRef | dict[str, Any]
-    xOffset: float
+    x2Offset: float | ExprRef | dict[str, Any]
+    xOffset: float | ExprRef | dict[str, Any]
     y: float | ExprRef | dict[str, Any]
-    yOffset: float
+    y2Offset: float | ExprRef | dict[str, Any]
+    yOffset: float | ExprRef | dict[str, Any]
 
 
 class PaddingsKwds(TypedDict, total=False):
@@ -758,9 +783,11 @@ class PointConfigKwds(TypedDict, total=False):
     style: str | Sequence[str]
     tooltip: HandledTooltip | HandledTooltipKwds | None | Literal[False]
     x: float | ExprRef | dict[str, Any]
-    xOffset: float
+    x2Offset: float | ExprRef | dict[str, Any]
+    xOffset: float | ExprRef | dict[str, Any]
     y: float | ExprRef | dict[str, Any]
-    yOffset: float
+    y2Offset: float | ExprRef | dict[str, Any]
+    yOffset: float | ExprRef | dict[str, Any]
 
 
 class RangeConfigKwds(TypedDict, total=False):
@@ -821,10 +848,12 @@ class RectConfigKwds(TypedDict, total=False):
     tooltip: HandledTooltip | HandledTooltipKwds | None | Literal[False]
     x: float | ExprRef | dict[str, Any]
     x2: float | ExprRef | dict[str, Any]
-    xOffset: float
+    x2Offset: float | ExprRef | dict[str, Any]
+    xOffset: float | ExprRef | dict[str, Any]
     y: float | ExprRef | dict[str, Any]
     y2: float | ExprRef | dict[str, Any]
-    yOffset: float
+    y2Offset: float | ExprRef | dict[str, Any]
+    yOffset: float | ExprRef | dict[str, Any]
 
 
 class RuleConfigKwds(TypedDict, total=False):
@@ -852,10 +881,12 @@ class RuleConfigKwds(TypedDict, total=False):
     tooltip: HandledTooltip | HandledTooltipKwds | None | Literal[False]
     x: float | ExprRef | dict[str, Any]
     x2: float | ExprRef | dict[str, Any]
-    xOffset: float
+    x2Offset: float | ExprRef | dict[str, Any]
+    xOffset: float | ExprRef | dict[str, Any]
     y: float | ExprRef | dict[str, Any]
     y2: float | ExprRef | dict[str, Any]
-    yOffset: float
+    y2Offset: float | ExprRef | dict[str, Any]
+    yOffset: float | ExprRef | dict[str, Any]
 
 
 class RulerConfigKwds(TypedDict, total=False):
@@ -1025,10 +1056,12 @@ class SeparatorPropsKwds(TypedDict, total=False):
     type: Literal["rule"]
     x: float | ExprRef | dict[str, Any]
     x2: float | ExprRef | dict[str, Any]
-    xOffset: float
+    x2Offset: float | ExprRef | dict[str, Any]
+    xOffset: float | ExprRef | dict[str, Any]
     y: float | ExprRef | dict[str, Any]
     y2: float | ExprRef | dict[str, Any]
-    yOffset: float
+    y2Offset: float | ExprRef | dict[str, Any]
+    yOffset: float | ExprRef | dict[str, Any]
     zindex: float
 
 
@@ -1086,10 +1119,12 @@ class TextConfigKwds(TypedDict, total=False):
     viewportEdgeFadeWidthTop: float
     x: float | ExprRef | dict[str, Any]
     x2: float | ExprRef | dict[str, Any]
-    xOffset: float
+    x2Offset: float | ExprRef | dict[str, Any]
+    xOffset: float | ExprRef | dict[str, Any]
     y: float | ExprRef | dict[str, Any]
     y2: float | ExprRef | dict[str, Any]
-    yOffset: float
+    y2Offset: float | ExprRef | dict[str, Any]
+    yOffset: float | ExprRef | dict[str, Any]
 
 
 class TitleKwds(TypedDict, total=False):
@@ -1224,6 +1259,8 @@ class LegendsKwds(TypedDict, total=False):
     stroke: Legend | LegendKwds
     strokeOpacity: Legend | LegendKwds
     strokeWidth: Legend | LegendKwds
+    xOffset: Legend | LegendKwds
+    yOffset: Legend | LegendKwds
 
 
 class AxisResolveKwds(TypedDict, total=False):
@@ -1253,8 +1290,10 @@ class AxisResolveKwds(TypedDict, total=False):
     uniqueId: ResolutionBehavior_T
     x: ResolutionBehavior_T
     x2: ResolutionBehavior_T
+    xOffset: ResolutionBehavior_T
     y: ResolutionBehavior_T
     y2: ResolutionBehavior_T
+    yOffset: ResolutionBehavior_T
 
 
 class LegendResolveKwds(TypedDict, total=False):
@@ -1284,8 +1323,10 @@ class LegendResolveKwds(TypedDict, total=False):
     uniqueId: ResolutionBehavior_T
     x: ResolutionBehavior_T
     x2: ResolutionBehavior_T
+    xOffset: ResolutionBehavior_T
     y: ResolutionBehavior_T
     y2: ResolutionBehavior_T
+    yOffset: ResolutionBehavior_T
 
 
 class ScaleResolveKwds(TypedDict, total=False):
@@ -1315,8 +1356,10 @@ class ScaleResolveKwds(TypedDict, total=False):
     uniqueId: ResolutionBehavior_T
     x: ResolutionBehavior_T
     x2: ResolutionBehavior_T
+    xOffset: ResolutionBehavior_T
     y: ResolutionBehavior_T
     y2: ResolutionBehavior_T
+    yOffset: ResolutionBehavior_T
 
 
 class ResolveKwds(TypedDict, total=False):
@@ -1345,8 +1388,10 @@ class ScalesKwds(TypedDict, total=False):
     strokeWidth: Scale | ScaleKwds
     x: Scale | ScaleKwds
     x2: Scale | ScaleKwds
+    xOffset: Scale | ScaleKwds
     y: Scale | ScaleKwds
     y2: Scale | ScaleKwds
+    yOffset: Scale | ScaleKwds
 
 
 __all__ = [

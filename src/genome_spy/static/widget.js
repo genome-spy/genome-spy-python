@@ -1,78 +1,24 @@
-export function toUint8Array(payload) {
-  if (payload instanceof ArrayBuffer) {
-    return new Uint8Array(payload);
+export function datasetApi(api, descriptor) {
+  if (!descriptor.scoped) {
+    return api.datasets;
   }
-  if (ArrayBuffer.isView(payload)) {
-    return new Uint8Array(payload.buffer, payload.byteOffset, payload.byteLength);
+  if (!descriptor.owner) {
+    throw new Error(
+      `Dataset "${descriptor.name}" belongs to an unnamed nested view.`
+    );
   }
-  throw new TypeError("Arrow IPC payload must be an ArrayBuffer or typed-array view.");
+  const owner = api.views?.get({ scope: [], view: descriptor.owner });
+  if (!owner) {
+    throw new Error(
+      `Could not find the view that declares dataset "${descriptor.name}".`
+    );
+  }
+  return owner.datasets;
 }
 
-export function revokeObjectUrls(urls, revoke = URL.revokeObjectURL) {
-  for (const url of urls) {
-    revoke(url);
-  }
-}
-
-export function releaseInFlightResources(resources, revoke = URL.revokeObjectURL) {
-  for (const resource of resources) {
-    revokeObjectUrls(resource.objectUrls, revoke);
-  }
-  resources.clear();
-}
-
-export function createRenderSpec(
-  spec,
-  arrowData,
-  { createUrl = URL.createObjectURL, revokeUrl = URL.revokeObjectURL } = {}
-) {
-  const renderSpec = structuredClone(spec);
-  const objectUrls = [];
-  const urlsByName = new Map();
-
-  const visit = (value) => {
-    if (!value || typeof value !== "object") {
-      return;
-    }
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        visit(item);
-      }
-      return;
-    }
-    if (typeof value.url === "string" && value.url.startsWith("arrow://")) {
-      const name = value.url.slice("arrow://".length);
-      const payload = arrowData[name];
-      if (payload === undefined) {
-        throw new Error(`No Arrow IPC payload provided for ${name}.`);
-      }
-      if (value.format?.type && value.format.type !== "arrow") {
-        throw new Error(`Arrow data source ${name} must use format.type "arrow".`);
-      }
-      let url = urlsByName.get(name);
-      if (!url) {
-        url = createUrl(
-          new Blob([toUint8Array(payload)], {
-            type: "application/vnd.apache.arrow.file",
-          })
-        );
-        urlsByName.set(name, url);
-        objectUrls.push(url);
-      }
-      value.url = url;
-      value.format = { ...(value.format || {}), type: "arrow" };
-    }
-    for (const child of Object.values(value)) {
-      visit(child);
-    }
-  };
-
-  try {
-    visit(renderSpec);
-    return { spec: renderSpec, objectUrls };
-  } catch (error) {
-    revokeObjectUrls(objectUrls, revokeUrl);
-    throw error;
+export function setLoading(el, loading) {
+  if (el.style) {
+    el.style.visibility = loading ? "hidden" : "";
   }
 }
 
@@ -86,11 +32,18 @@ export async function renderChart({ model, el, signal }) {
   let parameterSubscriptions = [];
   let renderRevision = 0;
   let syncingParameterValues = false;
-  const inFlightResources = new Set();
+  const datasetListeners = [];
 
   const setError = (error) => {
     model.set("error", String(error));
     model.save_changes();
+  };
+
+  const clearError = () => {
+    if (model.get("error")) {
+      model.set("error", "");
+      model.save_changes();
+    }
   };
 
   const publishParameterValue = (name, value) => {
@@ -107,12 +60,6 @@ export async function renderChart({ model, el, signal }) {
       unsubscribe();
     }
     parameterSubscriptions = [];
-  };
-
-  const releaseResources = (resources) => {
-    if (inFlightResources.delete(resources)) {
-      revokeObjectUrls(resources.objectUrls);
-    }
   };
 
   const attachInteractions = () => {
@@ -169,46 +116,86 @@ export async function renderChart({ model, el, signal }) {
     }
   };
 
+  const applyDataset = async (descriptor) => {
+    const revision = model.get(descriptor.revision_trait) || 0;
+    const currentApi = api;
+    const currentRender = renderRevision;
+    if (!currentApi || revision === 0) {
+      return;
+    }
+
+    const payload = model.get(descriptor.payload_trait);
+    const format = model.get(descriptor.format_trait);
+    try {
+      const datasets = datasetApi(currentApi, descriptor);
+      if (format === "arrow") {
+        await datasets.load(descriptor.name, payload, { type: "arrow" });
+      } else if (format === "records") {
+        datasets.set(descriptor.name, payload);
+      } else {
+        throw new Error(`Unsupported dataset format: ${String(format)}`);
+      }
+      if (
+        signal.aborted ||
+        api !== currentApi ||
+        renderRevision !== currentRender ||
+        model.get(descriptor.revision_trait) !== revision
+      ) {
+        return;
+      }
+      clearError();
+    } catch (error) {
+      if (
+        !signal.aborted &&
+        api === currentApi &&
+        renderRevision === currentRender &&
+        model.get(descriptor.revision_trait) === revision
+      ) {
+        setError(error);
+      }
+    }
+  };
+
   const renderSpec = async () => {
     const revision = ++renderRevision;
     const moduleUrl = model.get("bundle_url");
     const options = model.get("embed_options") || {};
+    const datasets = model.get("dataset_manifest") || [];
+    const hasInitialData = datasets.some(
+      (descriptor) => (model.get(descriptor.revision_trait) || 0) > 0
+    );
 
     if (api?.finalize) {
       api.finalize();
       api = null;
     }
-    releaseInFlightResources(inFlightResources);
+    setLoading(el, hasInitialData);
     el.replaceChildren();
 
-    let resources = null;
     try {
       const module = await import(moduleUrl);
       const embed = module.embed ?? module.default?.embed ?? module.default;
       if (typeof embed !== "function") {
         throw new Error("GenomeSpy embed export was not found.");
       }
-      resources = createRenderSpec(model.get("spec"), model.get("arrow_data") || {});
-      inFlightResources.add(resources);
-      const nextApi = await embed(el, resources.spec, options);
+      const nextApi = await embed(el, model.get("spec"), options);
       if (revision !== renderRevision || signal.aborted) {
         nextApi?.finalize?.();
         return;
       }
       api = nextApi;
-      model.set("error", "");
-      model.save_changes();
       attachInteractions();
+      await Promise.all(datasets.map((descriptor) => applyDataset(descriptor)));
+      if (revision === renderRevision && !signal.aborted) {
+        setLoading(el, false);
+      }
     } catch (error) {
       if (revision !== renderRevision || signal.aborted) {
         return;
       }
+      setLoading(el, false);
       setError(error);
       throw error;
-    } finally {
-      if (resources) {
-        releaseResources(resources);
-      }
     }
   };
 
@@ -217,24 +204,31 @@ export async function renderChart({ model, el, signal }) {
   model.on("change:spec", onSpecChange);
   model.on("change:bundle_url", onSpecChange);
   model.on("change:embed_options", onSpecChange);
-  model.on("change:arrow_data", onSpecChange);
   model.on("change:parameter_values", onParameterValuesChange);
   model.on("change:parameter_names", attachInteractions);
   model.on("change:enable_click_events", attachInteractions);
+  for (const descriptor of model.get("dataset_manifest") || []) {
+    const listener = () => void applyDataset(descriptor);
+    const event = `change:${descriptor.revision_trait}`;
+    model.on(event, listener);
+    datasetListeners.push([event, listener]);
+  }
 
   signal.addEventListener("abort", () => {
     renderRevision += 1;
     model.off("change:spec", onSpecChange);
     model.off("change:bundle_url", onSpecChange);
     model.off("change:embed_options", onSpecChange);
-    model.off("change:arrow_data", onSpecChange);
     model.off("change:parameter_values", onParameterValuesChange);
     model.off("change:parameter_names", attachInteractions);
     model.off("change:enable_click_events", attachInteractions);
+    for (const [event, listener] of datasetListeners) {
+      model.off(event, listener);
+    }
     clearInteractions();
     api?.finalize?.();
     api = null;
-    releaseInFlightResources(inFlightResources);
+    setLoading(el, false);
   });
 
   await renderSpec();

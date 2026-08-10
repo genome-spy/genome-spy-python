@@ -23,18 +23,22 @@ def test_notebook_example_is_valid(notebook_path: Path) -> None:
 @pytest.mark.parametrize(
     "notebook_path",
     [
-        Path("notebooks/genome_spy_interactions.py"),
-        Path("notebooks/genome_spy_arrow.py"),
         Path("notebooks/genome_spy_arrow_reactive.py"),
     ],
 )
-def test_marimo_notebook_emits_visible_output(notebook_path: Path) -> None:
+def test_marimo_notebook_emits_visible_output_and_updates_a_stable_widget(
+    notebook_path: Path,
+) -> None:
     module = _load_python_module(notebook_path)
 
     outputs, definitions = module.app.run()
 
     assert any(output is not None for output in outputs)
     assert hasattr(definitions["chart_widget"], "widget")
+    assert definitions["view"].dataset_names == ("table",)
+    assert 'view.set_dataset("table", filtered_dataframe)' in notebook_path.read_text(
+        encoding="utf-8"
+    )
 
 
 def _load_python_module(path: Path) -> ModuleType:

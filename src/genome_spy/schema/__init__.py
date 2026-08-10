@@ -69,6 +69,7 @@ from genome_spy.schema.core import (
     DataFormat,
     DataSource,
     DirectionDef,
+    Displace1DParams,
     DomEventType,
     DomainValue,
     DomainValueArray,
@@ -158,6 +159,8 @@ from genome_spy.schema.core import (
     NumericMarkPropDef,
     NumericStopDef,
     NumericValueDef,
+    OffsetChannel,
+    OffsetDef,
     OtherDataFormat,
     OverhangConfig,
     PackLegendLabelsParams,
@@ -275,6 +278,7 @@ from genome_spy.schema.core import (
     ViewConfig,
     ViewOpacityDef,
     ViewSpec,
+    WigDataFormat,
     WindowOnlyOp,
     WindowOp,
     WindowParams,
@@ -299,6 +303,7 @@ from genome_spy.schema._typing import (
     LegendTitleOrient_T,
     MarkType_T,
     NumericDomain_T,
+    OffsetChannel_T,
     ParseValue_T,
     PrimaryPositionalChannel_T,
     ResolutionBehavior_T,
@@ -377,7 +382,7 @@ from genome_spy.schema._kwds import (
     ScalesKwds,
 )
 
-SCHEMA_VERSION = "0.82.0"
+SCHEMA_VERSION = "0.83.1"
 
 __all__ = [
     "GenomeSpySchema",
@@ -448,6 +453,7 @@ __all__ = [
     "DataFormat",
     "DataSource",
     "DirectionDef",
+    "Displace1DParams",
     "DomEventType",
     "DomainValue",
     "DomainValueArray",
@@ -537,6 +543,8 @@ __all__ = [
     "NumericMarkPropDef",
     "NumericStopDef",
     "NumericValueDef",
+    "OffsetChannel",
+    "OffsetDef",
     "OtherDataFormat",
     "OverhangConfig",
     "PackLegendLabelsParams",
@@ -654,6 +662,7 @@ __all__ = [
     "ViewConfig",
     "ViewOpacityDef",
     "ViewSpec",
+    "WigDataFormat",
     "WindowOnlyOp",
     "WindowOp",
     "WindowParams",
@@ -676,6 +685,7 @@ __all__ = [
     "LegendTitleOrient_T",
     "MarkType_T",
     "NumericDomain_T",
+    "OffsetChannel_T",
     "ParseValue_T",
     "PrimaryPositionalChannel_T",
     "ResolutionBehavior_T",

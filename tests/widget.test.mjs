@@ -6,13 +6,9 @@ const source = await readFile(
   new URL("../src/genome_spy/static/widget.js", import.meta.url),
   "utf8"
 );
-const {
-  createRenderSpec,
-  releaseInFlightResources,
-  renderChart,
-  revokeObjectUrls,
-  toUint8Array,
-} = await import(`data:text/javascript,${encodeURIComponent(source)}`);
+const { datasetApi, renderChart } = await import(
+  `data:text/javascript,${encodeURIComponent(source)}`
+);
 
 class MockModel {
   constructor(values) {
@@ -61,234 +57,331 @@ function deferred() {
 }
 
 async function waitFor(predicate) {
-  for (let attempt = 0; attempt < 20; attempt += 1) {
+  for (let attempt = 0; attempt < 30; attempt += 1) {
     if (predicate()) {
       return;
     }
     await new Promise((resolve) => setImmediate(resolve));
   }
-  assert.fail("Timed out waiting for widget render state.");
+  assert.fail("Timed out waiting for widget state.");
 }
 
-function renderFixture() {
-  const model = new MockModel({
-    spec: { data: { url: "arrow://table", format: { type: "arrow" } } },
-    arrow_data: { table: new Uint8Array([1, 2, 3]) },
+function descriptor(name, index, { owner = null, scoped = false } = {}) {
+  return {
+    name,
+    owner,
+    scoped,
+    payload_trait: `_dataset_${index}_payload`,
+    format_trait: `_dataset_${index}_format`,
+    revision_trait: `_dataset_${index}_revision`,
+  };
+}
+
+function fixture(datasets = []) {
+  const values = {
+    spec: { data: { name: "table" }, datasets: { table: [] } },
     bundle_url:
       "data:text/javascript,export const embed=(...args)=>globalThis.__widgetEmbed(...args)",
     embed_options: {},
+    dataset_manifest: datasets,
     parameter_names: [],
     parameter_values: {},
     enable_click_events: false,
-  });
+    error: "",
+  };
+  for (const entry of datasets) {
+    values[entry.payload_trait] = null;
+    values[entry.format_trait] = "arrow";
+    values[entry.revision_trait] = 0;
+  }
   return {
-    model,
+    model: new MockModel(values),
     el: {
       textContent: "",
-      replaceChildren() {},
+      style: {},
+      replaceCount: 0,
+      replaceChildren() {
+        this.replaceCount += 1;
+      },
     },
     controller: new AbortController(),
   };
 }
 
-async function withObjectUrlSpies(callback) {
-  const originalCreate = URL.createObjectURL;
-  const originalRevoke = URL.revokeObjectURL;
-  const created = [];
-  const revoked = [];
-  URL.createObjectURL = () => {
-    const url = `blob:test-${created.length + 1}`;
-    created.push(url);
-    return url;
+function apiFixture({ load, set } = {}) {
+  const loads = [];
+  const sets = [];
+  let finalized = 0;
+  let parameterSubscriptions = 0;
+  let clickListeners = 0;
+  let removedClickListeners = 0;
+  const api = {
+    datasets: {
+      load: async (...args) => {
+        loads.push(args);
+        return load?.(...args);
+      },
+      set: (...args) => {
+        sets.push(args);
+        return set?.(...args);
+      },
+    },
+    getParam() {
+      return {
+        getValue: () => 0,
+        setValue() {},
+        subscribe: () => {
+          parameterSubscriptions += 1;
+          return () => {};
+        },
+      };
+    },
+    addEventListener() {
+      clickListeners += 1;
+    },
+    removeEventListener() {
+      removedClickListeners += 1;
+    },
+    finalize() {
+      finalized += 1;
+    },
   };
-  URL.revokeObjectURL = (url) => revoked.push(url);
-  try {
-    await callback({ created, revoked });
-  } finally {
-    URL.createObjectURL = originalCreate;
-    URL.revokeObjectURL = originalRevoke;
-    delete globalThis.__widgetEmbed;
-  }
+  return {
+    api,
+    loads,
+    sets,
+    get finalized() {
+      return finalized;
+    },
+    get parameterSubscriptions() {
+      return parameterSubscriptions;
+    },
+    get clickListeners() {
+      return clickListeners;
+    },
+    get removedClickListeners() {
+      return removedClickListeners;
+    },
+  };
 }
 
-test("toUint8Array preserves a DataView slice", () => {
-  const payload = new DataView(Uint8Array.from([0, 1, 2, 3]).buffer, 1, 2);
+test("datasetApi uses the top-level dataset API by default", () => {
+  const api = { datasets: { load() {} } };
 
-  assert.deepEqual([...toUint8Array(payload)], [1, 2]);
+  assert.equal(datasetApi(api, descriptor("table", 0)), api.datasets);
 });
 
-test("createRenderSpec creates one Blob URL for repeated Arrow data", async () => {
-  const created = [];
-  const result = createRenderSpec(
-    {
-      layer: [
-        { data: { url: "arrow://signals" } },
-        { data: { url: "arrow://signals", format: { type: "arrow" } } },
-      ],
-    },
-    { signals: new DataView(Uint8Array.from([0, 7, 8, 0]).buffer, 1, 2) },
-    {
-      createUrl: (blob) => {
-        created.push(blob);
-        return "blob:signals";
-      },
-    }
+test("datasetApi addresses a scoped declaration through its owner", () => {
+  const ownerDatasets = { load() {} };
+  const api = {
+    views: { get: ({ scope, view }) => (scope.length === 0 && view === "child" ? { datasets: ownerDatasets } : undefined) },
+  };
+
+  assert.equal(
+    datasetApi(api, descriptor("table", 0, { owner: "child", scoped: true })),
+    ownerDatasets
   );
-
-  assert.equal(created.length, 1);
-  assert.deepEqual([...new Uint8Array(await created[0].arrayBuffer())], [7, 8]);
-  assert.equal(result.objectUrls.length, 1);
-  assert.equal(result.spec.layer[0].data.url, "blob:signals");
-  assert.equal(result.spec.layer[1].data.url, "blob:signals");
-  assert.equal(result.spec.layer[0].data.format.type, "arrow");
 });
 
-test("createRenderSpec revokes already-created URLs when rewriting fails", () => {
-  const revoked = [];
+test("initial Arrow data passes the original DataView directly to Core", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  const payload = new DataView(Uint8Array.from([0, 7, 8, 0]).buffer, 1, 2);
+  testFixture.model.set(entry.payload_trait, payload);
+  testFixture.model.set(entry.revision_trait, 1);
+  const rendered = apiFixture();
+  globalThis.__widgetEmbed = async () => rendered.api;
 
-  assert.throws(
-    () =>
-      createRenderSpec(
-        {
-          layer: [
-            { data: { url: "arrow://present" } },
-            { data: { url: "arrow://missing" } },
-          ],
-        },
-        { present: new Uint8Array([1]) },
-        {
-          createUrl: () => "blob:present",
-          revokeUrl: (url) => revoked.push(url),
-        }
-      ),
-    /No Arrow IPC payload provided for missing/
-  );
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
 
-  assert.deepEqual(revoked, ["blob:present"]);
+  assert.equal(rendered.loads.length, 1);
+  assert.deepEqual(rendered.loads[0], ["table", payload, { type: "arrow" }]);
+  assert.equal(rendered.finalized, 0);
+  assert.equal(testFixture.el.style.visibility, "");
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
 });
 
-test("revokeObjectUrls revokes each URL", () => {
-  const revoked = [];
+test("a dataset revision updates the current embed without structural rerender", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  const rendered = apiFixture();
+  let embeds = 0;
+  globalThis.__widgetEmbed = async () => {
+    embeds += 1;
+    return rendered.api;
+  };
 
-  revokeObjectUrls(["blob:a", "blob:b"], (url) => revoked.push(url));
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  const initialReplaceCount = testFixture.el.replaceCount;
+  testFixture.model.set(entry.payload_trait, new Uint8Array([1, 2]));
+  testFixture.model.set(entry.revision_trait, 1);
+  testFixture.model.emit(`change:${entry.revision_trait}`);
+  await waitFor(() => rendered.loads.length === 1);
 
-  assert.deepEqual(revoked, ["blob:a", "blob:b"]);
+  assert.equal(embeds, 1);
+  assert.equal(rendered.finalized, 0);
+  assert.equal(testFixture.el.replaceCount, initialReplaceCount);
+  assert.equal(testFixture.el.style.visibility, "");
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
 });
 
-test("releaseInFlightResources revokes stale render URLs", () => {
-  const revoked = [];
-  const resources = new Set([
-    { objectUrls: ["blob:old-a", "blob:old-b"] },
-    { objectUrls: ["blob:new"] },
+test("a dataset update retains parameter subscriptions and click listeners", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  testFixture.model.set("parameter_names", ["threshold"]);
+  testFixture.model.set("parameter_values", { threshold: 2 });
+  testFixture.model.set("enable_click_events", true);
+  const rendered = apiFixture();
+  globalThis.__widgetEmbed = async () => rendered.api;
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
+  testFixture.model.set(entry.revision_trait, 1);
+  testFixture.model.emit(`change:${entry.revision_trait}`);
+  await waitFor(() => rendered.loads.length === 1);
+
+  assert.equal(rendered.parameterSubscriptions, 1);
+  assert.equal(rendered.clickListeners, 1);
+  assert.equal(rendered.removedClickListeners, 0);
+  testFixture.controller.abort();
+  assert.equal(rendered.removedClickListeners, 1);
+  delete globalThis.__widgetEmbed;
+});
+
+test("one dataset update does not apply unchanged datasets", async () => {
+  const first = descriptor("first", 0);
+  const second = descriptor("second", 1);
+  const testFixture = fixture([first, second]);
+  const rendered = apiFixture();
+  globalThis.__widgetEmbed = async () => rendered.api;
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.model.set(first.payload_trait, new Uint8Array([1]));
+  testFixture.model.set(first.revision_trait, 1);
+  testFixture.model.emit(`change:${first.revision_trait}`);
+  await waitFor(() => rendered.loads.length === 1);
+
+  assert.equal(rendered.loads[0][0], "first");
+  assert.equal(testFixture.model.get(second.revision_trait), 0);
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
+});
+
+test("multiple rendered views apply pre-mount and future updates independently", async () => {
+  const entry = descriptor("table", 0);
+  const first = fixture([entry]);
+  const second = fixture([entry]);
+  const payload = new Uint8Array([1]);
+  for (const current of [first, second]) {
+    current.model.set(entry.payload_trait, payload);
+    current.model.set(entry.revision_trait, 1);
+  }
+  const firstApi = apiFixture();
+  const secondApi = apiFixture();
+  let calls = 0;
+  globalThis.__widgetEmbed = async () => [firstApi.api, secondApi.api][calls++];
+
+  await Promise.all([
+    renderChart({ ...first, signal: first.controller.signal }),
+    renderChart({ ...second, signal: second.controller.signal }),
   ]);
+  assert.equal(firstApi.loads.length, 1);
+  assert.equal(secondApi.loads.length, 1);
 
-  releaseInFlightResources(resources, (url) => revoked.push(url));
+  for (const current of [first, second]) {
+    current.model.set(entry.payload_trait, new Uint8Array([2]));
+    current.model.set(entry.revision_trait, 2);
+    current.model.emit(`change:${entry.revision_trait}`);
+  }
+  await waitFor(() => firstApi.loads.length === 2 && secondApi.loads.length === 2);
 
-  assert.deepEqual(revoked, ["blob:old-a", "blob:old-b", "blob:new"]);
-  assert.equal(resources.size, 0);
+  first.controller.abort();
+  second.controller.abort();
+  delete globalThis.__widgetEmbed;
 });
 
-test("renderChart revokes Arrow URLs after a successful embed", async () => {
-  await withObjectUrlSpies(async ({ created, revoked }) => {
-    const fixture = renderFixture();
-    globalThis.__widgetEmbed = async () => ({ finalize() {} });
+test("a current decode failure reports an error without finalizing the embed", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  const rendered = apiFixture({ load: async () => { throw new Error("decode failed"); } });
+  globalThis.__widgetEmbed = async () => rendered.api;
 
-    await renderChart({
-      model: fixture.model,
-      el: fixture.el,
-      signal: fixture.controller.signal,
-    });
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
+  testFixture.model.set(entry.revision_trait, 1);
+  testFixture.model.emit(`change:${entry.revision_trait}`);
+  await waitFor(() => /decode failed/.test(testFixture.model.get("error")));
 
-    assert.deepEqual(created, ["blob:test-1"]);
-    assert.deepEqual(revoked, created);
-    assert.equal(fixture.model.get("error"), "");
-    fixture.controller.abort();
-  });
+  assert.equal(rendered.finalized, 0);
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
 });
 
-test("renderChart reports embed failures and revokes Arrow URLs", async () => {
-  await withObjectUrlSpies(async ({ created, revoked }) => {
-    const fixture = renderFixture();
-    globalThis.__widgetEmbed = async () => {
-      throw new Error("embed failed");
-    };
-
-    await assert.rejects(
-      renderChart({
-        model: fixture.model,
-        el: fixture.el,
-        signal: fixture.controller.signal,
-      }),
-      /embed failed/
-    );
-
-    assert.deepEqual(revoked, created);
-    assert.match(fixture.model.get("error"), /embed failed/);
-    fixture.controller.abort();
+test("stale dataset failures do not overwrite a newer successful update", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  const first = deferred();
+  const second = deferred();
+  const rendered = apiFixture({
+    load: () => (rendered.loads.length === 1 ? first.promise : second.promise),
   });
+  globalThis.__widgetEmbed = async () => rendered.api;
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
+  testFixture.model.set(entry.revision_trait, 1);
+  testFixture.model.emit(`change:${entry.revision_trait}`);
+  await waitFor(() => rendered.loads.length === 1);
+  testFixture.model.set(entry.payload_trait, new Uint8Array([2]));
+  testFixture.model.set(entry.revision_trait, 2);
+  testFixture.model.emit(`change:${entry.revision_trait}`);
+  await waitFor(() => rendered.loads.length === 2);
+  second.resolve();
+  await waitFor(() => testFixture.model.get("error") === "");
+  first.reject(new Error("stale failure"));
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(testFixture.model.get("error"), "");
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
 });
 
-test("renderChart finalizes a stale render and keeps the latest one", async () => {
-  await withObjectUrlSpies(async ({ created, revoked }) => {
-    const fixture = renderFixture();
-    const renders = [deferred(), deferred()];
-    const finalized = [0, 0];
-    let calls = 0;
-    globalThis.__widgetEmbed = () => renders[calls++].promise;
+test("structural rerender finalizes the old embed and reapplies current data", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
+  testFixture.model.set(entry.revision_trait, 1);
+  const first = apiFixture();
+  const second = apiFixture();
+  let calls = 0;
+  globalThis.__widgetEmbed = async () => [first.api, second.api][calls++];
 
-    const initialRender = renderChart({
-      model: fixture.model,
-      el: fixture.el,
-      signal: fixture.controller.signal,
-    });
-    await waitFor(() => calls === 1);
-    fixture.model.emit("change:spec");
-    await waitFor(() => calls === 2);
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.model.emit("change:spec");
+  await waitFor(() => second.loads.length === 1);
 
-    renders[1].resolve({
-      finalize() {
-        finalized[1] += 1;
-      },
-    });
-    await waitFor(() => fixture.model.get("error") === "");
-    renders[0].resolve({
-      finalize() {
-        finalized[0] += 1;
-      },
-    });
-    await initialRender;
-
-    assert.equal(finalized[0], 1);
-    assert.equal(finalized[1], 0);
-    assert.deepEqual(revoked, created);
-
-    fixture.controller.abort();
-    assert.equal(finalized[1], 1);
-  });
+  assert.equal(first.finalized, 1);
+  assert.equal(second.loads.length, 1);
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
 });
 
-test("renderChart releases an in-flight render when disposed", async () => {
-  await withObjectUrlSpies(async ({ created, revoked }) => {
-    const fixture = renderFixture();
-    const pending = deferred();
-    let finalized = 0;
-    globalThis.__widgetEmbed = () => pending.promise;
+test("disposal removes dataset listeners and finalizes the current embed", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  const rendered = apiFixture();
+  globalThis.__widgetEmbed = async () => rendered.api;
 
-    const render = renderChart({
-      model: fixture.model,
-      el: fixture.el,
-      signal: fixture.controller.signal,
-    });
-    await waitFor(() => created.length === 1);
-    fixture.controller.abort();
-    assert.deepEqual(revoked, created);
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.controller.abort();
+  testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
+  testFixture.model.set(entry.revision_trait, 1);
+  testFixture.model.emit(`change:${entry.revision_trait}`);
+  await new Promise((resolve) => setImmediate(resolve));
 
-    pending.resolve({
-      finalize() {
-        finalized += 1;
-      },
-    });
-    await render;
-    assert.equal(finalized, 1);
-  });
+  assert.equal(rendered.finalized, 1);
+  assert.equal(rendered.loads.length, 0);
+  delete globalThis.__widgetEmbed;
 });

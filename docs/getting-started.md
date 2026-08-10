@@ -33,6 +33,26 @@ chart
 In a Jupyter notebook, displaying `chart` renders a live, interactive GenomeSpy
 view. `chart.widget()` returns an explicit `anywidget` instance if you need one.
 
+## Updating a live dataset
+
+For reactive notebooks, declare a named dataset, construct the widget once in a
+stable cell, and update that same widget from downstream cells. Supported
+dataframes and tables use Arrow IPC automatically:
+
+```python
+view = (
+    gs.Chart(data={"name": "table"}, datasets={"table": []})
+    .mark_point()
+    .encode(x="x:Q", y="y:Q")
+    .widget()
+)
+view.set_dataset("table", dataframe)
+```
+
+`set_dataset()` keeps the embedded GenomeSpy instance and its interaction state
+alive. When the widget has exactly one live dataset, `view.set_data(dataframe)`
+is a convenient equivalent.
+
 ## Serializing a spec
 
 ```python

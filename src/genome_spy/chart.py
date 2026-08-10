@@ -487,6 +487,12 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
 
         return prepare_render(self)
 
+    def _prepare_widget(self) -> Any:
+        """Prepare this chart for live named-dataset widget updates."""
+        from genome_spy._render import prepare_widget
+
+        return prepare_widget(self)
+
     @property
     def spec(self) -> JsonSpec:
         """Return the rendered GenomeSpy specification with JSON display."""

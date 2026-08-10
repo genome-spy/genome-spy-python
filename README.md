@@ -1,132 +1,41 @@
 # genome-spy-python
 
-`genome-spy-python` is a Python wrapper for
-[GenomeSpy](https://github.com/genome-spy/genome-spy).
+`genome-spy-python` is a Python interface for [GenomeSpy], a grammar for
+interactive and scalable genomic visualization. It lets Python users build
+GenomeSpy specifications with a declarative, fluent API, serialize them to
+JSON, and display them in Jupyter notebooks.
 
-The goal is to let Python users author GenomeSpy specifications with an
-idiomatic Python API, serialize them to valid GenomeSpy JSON, and render them
-in notebooks. The public API aims to mirror Altair-style authoring where it
-fits GenomeSpy naturally, while still exposing genomics-native features such as
-locus-scaled axes and lazy genomic data sources.
+[Altair] is the project's main source of inspiration. This codebase follows
+Altair's approach of combining schema-backed specification objects with a small
+handwritten Python API for marks, encodings, composition, and rendering. It
+adapts that model to GenomeSpy's genomics-native grammar: locus scales, genomic
+data sources, and coordinated genomic views.
 
-## Contributing
+The project is under active development. The current focus is the reusable
+GenomeSpy Core grammar and notebook rendering; GenomeSpy App-specific features
+will come later.
 
-### Set up the repository
+## Installation
 
-Install [`uv`](https://docs.astral.sh/uv/getting-started/installation/), then
-clone the repository and install the development and documentation dependencies:
+The package requires Python 3.11 or newer. Until a package release is
+published, install it from source with [uv]:
 
 ```bash
 git clone https://github.com/genome-spy/genome-spy-python.git
 cd genome-spy-python
-uv sync --group dev --group docs
+uv sync
 ```
 
-The project requires Python 3.11 or newer. The `uv sync` command installs the
-package in editable mode, so changes under `src/` are immediately available to
-tests, notebooks, and documentation examples.
-
-Run the basic verification suite from the repository root:
+For dataframe-backed charts using Arrow transport, install the optional extra:
 
 ```bash
-uv run pytest tests/ -x
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy src/
+uv sync --extra arrow
 ```
 
-To install the repository's pre-commit hooks and run them manually:
+## Examples
 
-```bash
-uv run pre-commit install
-uv run pre-commit run --all-files
-```
-
-### Build and preview the documentation
-
-Build the HTML documentation with:
-
-```bash
-uv run sphinx-build -b html -W --keep-going docs docs/_build/html
-```
-
-The Sphinx build imports the examples, validates their serialized GenomeSpy
-specifications, and generates the gallery pages and downloadable specs. Preview
-the result locally with:
-
-```bash
-python3 -m http.server 8000 --directory docs/_build/html
-```
-
-Then open <http://localhost:8000/> in a browser. The live examples load the
-pinned GenomeSpy JavaScript bundle from the CDN, so an internet connection is
-needed when viewing interactive charts. Gallery cards require manually reviewed
-PNG thumbnails to exist before the build.
-
-### Work on examples
-
-Documentation examples live under `docs/examples/` and are the source of truth
-for the generated gallery. Add or update an example there, then rebuild the
-documentation and run the gallery tests:
-
-```bash
-uv run pytest tests/test_docs_gallery.py -q
-uv run sphinx-build -b html -W --keep-going docs docs/_build/html
-```
-
-### Regenerate schema wrappers
-
-Generated schema wrappers are committed to the repository. Maintainers should
-regenerate them when the pinned GenomeSpy core version changes:
-
-```bash
-uv run python tools/generate_schema_wrapper.py
-```
-
-Schema regeneration requires `npm` on `PATH` and updates the generated schema
-package from the pinned `@genome-spy/core` release. See
-[Schema Generation](#schema-generation) for local upstream audit modes.
-
-## Notebook Usage
-
-The current notebook path uses `anywidget` as a thin bridge to GenomeSpy's
-JavaScript `embed(...)` API:
-
-```python
-import genome_spy as gs
-
-chart = (
-    gs.Chart(data=[{"x": 1, "y": 2, "category": "A"}])
-    .mark_point(size=90)
-    .encode(
-        x=gs.X("x:Q"),
-        y=gs.Y("y:Q"),
-        color=gs.Color("category:N"),
-    )
-)
-
-chart
-```
-
-A runnable example notebook is available at
-`notebooks/basic_point_chart.ipynb`.
-
-`chart.widget()` is also available for explicit `anywidget` usage, but plain
-`chart` display is the most portable default across notebook frontends.
-
-Existing GenomeSpy specifications can be validated, wrapped, and rendered
-without rewriting them:
-
-```python
-chart = gs.TopLevelSpec.from_dict(spec)
-```
-
-The loader dispatches unit, layer, multiscale, and concatenated roots, including
-template or URL imports nested inside compositions.
-
-## Example notebooks
-
-Some notebooks use simple tabular data to show the core authoring model:
+Build a simple scatter plot from Python records. In a notebook, evaluate the
+last line to display the interactive chart.
 
 ```python
 import genome_spy as gs
@@ -134,93 +43,126 @@ import genome_spy as gs
 chart = (
     gs.Chart(
         [
-            {"x": 1.0, "y": 4.2, "category": "A"},
-            {"x": 2.0, "y": 3.1, "category": "B"},
-            {"x": 3.0, "y": 5.0, "category": "A"},
+            {"x": 1, "y": 4, "group": "A"},
+            {"x": 2, "y": 3, "group": "B"},
+            {"x": 3, "y": 5, "group": "A"},
         ]
     )
-    .mark_circle()
+    .mark_point(size=80)
     .encode(
-        gs.X("x:Q").scale(zero=False),
-        gs.Y("y:Q").scale(zero=False, padding=1),
-        color=gs.Color("category:N"),
+        x="x:Q",
+        y="y:Q",
+        color="group:N",
     )
 )
 
 chart
 ```
 
-GenomeSpy-specific genomic helpers such as
-`gs.Locus("chrom", "start")` remain available for locus-scaled genomic axes.
-For top-level chart config, prefer the generated fluent methods such as
-`chart.configure_view(...)` and `chart.configure_axis(...)`; helper constructors
-like `gs.config(...)` and `gs.view_config(...)` remain available when you want
-to build schema objects directly. Small mapping helpers such as `gs.scales(...)`
-and ergonomic builders such as `gs.param(...)` also remain useful where they
-keep the visualization code shorter and clearer.
+GenomeSpy also has locus-scaled axes for genomic coordinates. This small
+example renders intervals along a region of chromosome 1:
 
-## Dataframe rendering
+```python
+import genome_spy as gs
 
-When a chart is displayed in a notebook or generated for the documentation
-gallery, Polars dataframes are transferred automatically as uncompressed Arrow
-IPC. pandas dataframes and PyArrow tables use the same path when the optional
-Arrow support is installed:
+intervals = [
+    {"chrom": "chr1", "start": 100, "end": 220, "name": "gene A"},
+    {"chrom": "chr1", "start": 280, "end": 420, "name": "gene B"},
+]
 
-```bash
-pip install "genome-spy-python[arrow]"
+chart = (
+    gs.Chart(intervals)
+    .mark_rect()
+    .encode(
+        x=gs.Locus("chrom", "start"),
+        x2="end:Q",
+        y="name:N",
+        color="name:N",
+    )
+)
+
+chart
 ```
 
-No manual `arrow://` data source or widget buffer map is needed. Ordinary
-Python record lists, and pandas installations without PyArrow, continue to use
-inline JSON. `chart.to_dict()`, `chart.to_json()`, and saved specs always
-remain JSON-compatible.
+Charts can be serialized to a portable GenomeSpy specification or standalone
+HTML:
 
-GenomeSpy currently decodes IPC into JavaScript row objects, so this is binary
-columnar transport rather than zero-copy rendering. Use uncompressed IPC; dates
-and timestamps follow GenomeSpy's normal JavaScript conversion behavior, and
-integers beyond JavaScript's safe integer range can lose precision.
+```python
+chart.to_json()
+chart.save("intervals.html")
+```
 
-## Packaged Datasets
+See the [documentation sources](docs/) for more examples and API reference
+material.
 
-A small set of datasets used by the documentation examples is available through
-`genome_spy.datasets.load_dataset(...)`.
+### Update data without recreating the chart
 
-## Schema Generation
+For reactive notebooks, create a widget with an explicitly named dataset and
+replace that dataset as inputs change. The browser keeps the existing
+GenomeSpy instance, so view state such as zoom is preserved.
 
-Generated schema wrappers are committed to git and shipped with the package,
-so normal users installing `genome-spy-python` do not need npm.
+```python
+chart = gs.Chart(data={"name": "table"}, datasets={"table": []})
+view = chart.widget()
 
-Maintainers regenerate wrappers only when updating the pinned GenomeSpy core
-version:
+view.set_dataset("table", updated_dataframe)
+```
+
+Install the Arrow extra when updating from Polars, pandas, or PyArrow tables:
+
+```bash
+uv sync --extra arrow
+```
+
+## Contributing
+
+Contributions are welcome. Set up the repository with its development and
+documentation dependencies, then run the checks before opening a pull request:
+
+```bash
+uv sync --group dev --group docs
+uv run pytest tests/ -x
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src/
+```
+
+The source lives in `src/genome_spy/`, tests are in `tests/`, and documentation
+examples are in `docs/examples/`. Generated schema wrappers are committed; only
+regenerate them when updating the pinned GenomeSpy Core version:
 
 ```bash
 uv run python tools/generate_schema_wrapper.py
 ```
 
-That command requires `npm` on `PATH`, fetches the version-pinned
-`@genome-spy/core` package temporarily, writes `src/genome_spy/schema/`, and
-then updates the generated schema package in-place. It also writes a capability
-manifest used to verify that generated transforms and root specification
-variants remain covered.
+### Build the documentation
 
-To audit a built local GenomeSpy core package without fetching npm, generate
-into a separate output directory:
+Build the documentation site from the repository root:
 
 ```bash
-uv run python tools/generate_schema_wrapper.py \
-  --package-dir <path-to-genome-spy>/packages/core \
-  --output-dir <audit-output>
+uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
-An explicit schema file can be inspected in the same way:
+Preview the result locally with:
 
 ```bash
-uv run python tools/generate_schema_wrapper.py \
-  --schema-path <path-to-schema.json> \
-  --core-version <schema-version> \
-  --output-dir <audit-output> \
-  --spec-reference-dir ""
+python3 -m http.server 8000 --directory docs/_build/html
 ```
 
-The default npm mode remains the release source of truth. Local modes are for
-checking unreleased upstream changes before updating the pinned core version.
+Then open <http://localhost:8000/>. Interactive examples load the GenomeSpy
+JavaScript bundle from a CDN, so viewing them requires an internet connection.
+
+For the project's design and current implementation direction, see the
+[`plans/`](plans/) directory.
+
+## References
+
+- [GenomeSpy] — the upstream visualization grammar and JavaScript renderer.
+- [Altair] — the primary design inspiration for this Python API.
+- [Gosling] — a related grammar and Python-wrapper design reference for
+  genomics visualization.
+
+[Altair]: https://altair-viz.github.io/
+[GenomeSpy]: https://genome-spy.org/
+[Gosling]: https://gosling-lang.org/
+[uv]: https://docs.astral.sh/uv/
