@@ -347,6 +347,13 @@ def _generate_on_config(app: Any, _config: Any) -> None:
     _generate(app)
 
 
+def _refresh_landing_page(_app: Any, env: Any, docnames: list[str]) -> None:
+    """Re-read the mini-gallery directive after the example inventory changes."""
+    env.genomespy_examples = core.collect_examples()
+    if "index" in env.found_docs and "index" not in docnames:
+        docnames.append("index")
+
+
 class GenomeSpyMiniGallery(Directive):
     """Render the image-tile showcase for the landing page."""
 
@@ -373,5 +380,6 @@ class GenomeSpyMiniGallery(Directive):
 
 def setup(app: Any) -> dict[str, Any]:
     app.connect("config-inited", _generate_on_config)
+    app.connect("env-before-read-docs", _refresh_landing_page)
     app.add_directive("genomespy-minigallery", GenomeSpyMiniGallery)
     return {"parallel_read_safe": False, "parallel_write_safe": True}

@@ -46,6 +46,30 @@ def test_gallery_has_examples() -> None:
     assert _example_paths(), "no gallery examples found under docs/examples/"
 
 
+def test_pik3ca_lollipop_uses_reactive_collision_displacement() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "pik3ca_tcga_brca_lollipop.py")
+
+    assert example.spec["datasets"]["mutations"][-1]["mutation"] == "G1049R"
+    mutation_view = example.spec["vconcat"][0]
+    assert mutation_view["transform"][1] == {
+        "type": "displace1d",
+        "pos": "position",
+        "length": 18,
+        "as": "xDisplacement",
+        "positionFactor": {"expr": "pixelsPerResidue"},
+        "extent": {
+            "expr": "[0.5, proteinLength + 0.5 - 25 / max(1, pixelsPerResidue)]"
+        },
+    }
+    assert mutation_view["encoding"]["xOffset"] == {
+        "field": "xDisplacement",
+        "type": "quantitative",
+        "scale": None,
+    }
+    assert mutation_view["vconcat"][2]["layer"][0]["mark"]["x2Offset"] == 0
+
+
 @pytest.mark.parametrize("path", _example_paths(), ids=lambda p: p.stem)
 def test_example_builds_valid_spec(path: Path) -> None:
     gallery = _load_gallery()
