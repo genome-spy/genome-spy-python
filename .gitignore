@@ -225,7 +225,6 @@ material/
 tmp/
 
 # Planning scratch files
-plans/
 scratchbook.md
 CHANGELOG_STAGING.md
 
@@ -236,10 +235,14 @@ docs/_static/specs/
 docs/_static/generated/arrow/
 
 # Local assistant state
-.claude/
-.agents/
+.agent-workflow
 .pre-commit-cache/
 .uv-cache/
 .cache/
 tools/.uv-cache/
 tools/__pycache__/
+
+# Local notebook/model utilities (not maintained project tooling)
+scripts/*alphagenome*.py
+scripts/fetch_*_reference.py
+scripts/_fetch_reference.py
