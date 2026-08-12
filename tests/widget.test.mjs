@@ -115,6 +115,7 @@ function apiFixture({ load, set } = {}) {
   let parameterSubscriptions = 0;
   let clickListeners = 0;
   let removedClickListeners = 0;
+  let clickHandler;
   const api = {
     datasets: {
       load: async (...args) => {
@@ -136,11 +137,17 @@ function apiFixture({ load, set } = {}) {
         },
       };
     },
-    addEventListener() {
-      clickListeners += 1;
+    addEventListener(type, listener) {
+      if (type === "click") {
+        clickListeners += 1;
+        clickHandler = listener;
+      }
     },
-    removeEventListener() {
-      removedClickListeners += 1;
+    removeEventListener(type, listener) {
+      if (type === "click" && listener === clickHandler) {
+        removedClickListeners += 1;
+        clickHandler = undefined;
+      }
     },
     finalize() {
       finalized += 1;
@@ -161,6 +168,9 @@ function apiFixture({ load, set } = {}) {
     },
     get removedClickListeners() {
       return removedClickListeners;
+    },
+    get clickHandler() {
+      return clickHandler;
     },
   };
 }
@@ -202,7 +212,7 @@ test("initial Arrow data passes the original DataView directly to Core", async (
   delete globalThis.__widgetEmbed;
 });
 
-test("a dataset revision updates the current embed without structural rerender", async () => {
+test("a dataset payload updates the current embed without structural rerender", async () => {
   const entry = descriptor("table", 0);
   const testFixture = fixture([entry]);
   const rendered = apiFixture();
@@ -216,13 +226,35 @@ test("a dataset revision updates the current embed without structural rerender",
   const initialReplaceCount = testFixture.el.replaceCount;
   testFixture.model.set(entry.payload_trait, new Uint8Array([1, 2]));
   testFixture.model.set(entry.revision_trait, 1);
-  testFixture.model.emit(`change:${entry.revision_trait}`);
+  testFixture.model.emit(`change:${entry.payload_trait}`);
   await waitFor(() => rendered.loads.length === 1);
 
   assert.equal(embeds, 1);
   assert.equal(rendered.finalized, 0);
   assert.equal(testFixture.el.replaceCount, initialReplaceCount);
   assert.equal(testFixture.el.style.visibility, "");
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
+});
+
+test("a payload arriving after its revision loads the new bytes", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  const rendered = apiFixture();
+  globalThis.__widgetEmbed = async () => rendered.api;
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.model.set(entry.revision_trait, 1);
+  testFixture.model.emit(`change:${entry.revision_trait}`);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(rendered.loads.length, 0);
+
+  const payload = new Uint8Array([1, 2]);
+  testFixture.model.set(entry.payload_trait, payload);
+  testFixture.model.emit(`change:${entry.payload_trait}`);
+  await waitFor(() => rendered.loads.length === 1);
+
+  assert.equal(rendered.loads[0][1], payload);
   testFixture.controller.abort();
   delete globalThis.__widgetEmbed;
 });
@@ -239,7 +271,7 @@ test("a dataset update retains parameter subscriptions and click listeners", asy
   await renderChart({ ...testFixture, signal: testFixture.controller.signal });
   testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
   testFixture.model.set(entry.revision_trait, 1);
-  testFixture.model.emit(`change:${entry.revision_trait}`);
+  testFixture.model.emit(`change:${entry.payload_trait}`);
   await waitFor(() => rendered.loads.length === 1);
 
   assert.equal(rendered.parameterSubscriptions, 1);
@@ -247,6 +279,29 @@ test("a dataset update retains parameter subscriptions and click listeners", asy
   assert.equal(rendered.removedClickListeners, 0);
   testFixture.controller.abort();
   assert.equal(rendered.removedClickListeners, 1);
+  delete globalThis.__widgetEmbed;
+});
+
+test("repeated clicks publish the datum and advance the revision", async () => {
+  const testFixture = fixture();
+  testFixture.model.set("enable_click_events", true);
+  const rendered = apiFixture();
+  globalThis.__widgetEmbed = async () => rendered.api;
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  const datum = {
+    interaction_kind: "sequence_base",
+    chrom: "chr1",
+    pos0: 47239295,
+    pos1: 47239296,
+    base: "C",
+  };
+  rendered.clickHandler({ datum });
+  rendered.clickHandler({ datum });
+
+  assert.deepEqual(testFixture.model.get("clicked_datum"), datum);
+  assert.equal(testFixture.model.get("click_revision"), 2);
+  testFixture.controller.abort();
   delete globalThis.__widgetEmbed;
 });
 
@@ -260,7 +315,7 @@ test("one dataset update does not apply unchanged datasets", async () => {
   await renderChart({ ...testFixture, signal: testFixture.controller.signal });
   testFixture.model.set(first.payload_trait, new Uint8Array([1]));
   testFixture.model.set(first.revision_trait, 1);
-  testFixture.model.emit(`change:${first.revision_trait}`);
+  testFixture.model.emit(`change:${first.payload_trait}`);
   await waitFor(() => rendered.loads.length === 1);
 
   assert.equal(rendered.loads[0][0], "first");
@@ -293,7 +348,7 @@ test("multiple rendered views apply pre-mount and future updates independently",
   for (const current of [first, second]) {
     current.model.set(entry.payload_trait, new Uint8Array([2]));
     current.model.set(entry.revision_trait, 2);
-    current.model.emit(`change:${entry.revision_trait}`);
+    current.model.emit(`change:${entry.payload_trait}`);
   }
   await waitFor(() => firstApi.loads.length === 2 && secondApi.loads.length === 2);
 
@@ -311,7 +366,7 @@ test("a current decode failure reports an error without finalizing the embed", a
   await renderChart({ ...testFixture, signal: testFixture.controller.signal });
   testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
   testFixture.model.set(entry.revision_trait, 1);
-  testFixture.model.emit(`change:${entry.revision_trait}`);
+  testFixture.model.emit(`change:${entry.payload_trait}`);
   await waitFor(() => /decode failed/.test(testFixture.model.get("error")));
 
   assert.equal(rendered.finalized, 0);
@@ -332,11 +387,11 @@ test("stale dataset failures do not overwrite a newer successful update", async 
   await renderChart({ ...testFixture, signal: testFixture.controller.signal });
   testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
   testFixture.model.set(entry.revision_trait, 1);
-  testFixture.model.emit(`change:${entry.revision_trait}`);
+  testFixture.model.emit(`change:${entry.payload_trait}`);
   await waitFor(() => rendered.loads.length === 1);
   testFixture.model.set(entry.payload_trait, new Uint8Array([2]));
   testFixture.model.set(entry.revision_trait, 2);
-  testFixture.model.emit(`change:${entry.revision_trait}`);
+  testFixture.model.emit(`change:${entry.payload_trait}`);
   await waitFor(() => rendered.loads.length === 2);
   second.resolve();
   await waitFor(() => testFixture.model.get("error") === "");
@@ -378,7 +433,7 @@ test("disposal removes dataset listeners and finalizes the current embed", async
   testFixture.controller.abort();
   testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
   testFixture.model.set(entry.revision_trait, 1);
-  testFixture.model.emit(`change:${entry.revision_trait}`);
+  testFixture.model.emit(`change:${entry.payload_trait}`);
   await new Promise((resolve) => setImmediate(resolve));
 
   assert.equal(rendered.finalized, 1);

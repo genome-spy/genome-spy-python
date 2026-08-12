@@ -209,7 +209,7 @@ export async function renderChart({ model, el, signal }) {
   model.on("change:enable_click_events", attachInteractions);
   for (const descriptor of model.get("dataset_manifest") || []) {
     const listener = () => void applyDataset(descriptor);
-    const event = `change:${descriptor.revision_trait}`;
+    const event = `change:${descriptor.payload_trait}`;
     model.on(event, listener);
     datasetListeners.push([event, listener]);
   }
