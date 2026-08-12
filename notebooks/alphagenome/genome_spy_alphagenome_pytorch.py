@@ -4,7 +4,8 @@ Launch with an ephemeral notebook-only model dependency (the project remains
 free of Torch and AlphaGenome dependencies):
 
     uv run --python 3.12 \
-      --with 'alphagenome-pytorch[hf]==0.3.1' \
+      --with 'alphagenome-pytorch==0.3.1' \
+      --with 'huggingface-hub==1.27.0' \
       marimo edit notebooks/alphagenome/genome_spy_alphagenome_pytorch.py
 """
 
@@ -31,6 +32,7 @@ def _():
         PRECISION_AUTO,
         PRECISION_FLOAT32,
         PRECISION_MIXED,
+        TAL1_DISPLAY_TRACKS,
         TAL1_TRACK_SELECTORS,
         ModelInterval,
         ModelVariant,
@@ -80,6 +82,7 @@ def _():
         PRECISION_AUTO,
         PRECISION_FLOAT32,
         PRECISION_MIXED,
+        TAL1_DISPLAY_TRACKS,
         TAL1_TRACK_SELECTORS,
         Interval,
         ModelInterval,
@@ -241,7 +244,14 @@ def _(get_selected_base, mo):
 
 @app.cell
 def _(
-    default_selection, editor_interval, empty_prediction_frame, gs, mo, sequence_rows
+    TAL1_DISPLAY_TRACKS,
+    default_selection,
+    editor_interval,
+    display_interval,
+    empty_prediction_frame,
+    gs,
+    mo,
+    sequence_rows,
 ):
     sequence = (
         gs.Chart(data={"name": "sequence"})
@@ -267,38 +277,90 @@ def _(
         .properties(height=55, title="hg38 sequence editor")
     )
 
-    def prediction_panel(track_name, title):
+    def signal_panel(track_name, title):
         return (
             gs.Chart(data={"name": "predictions"})
             .transform_filter(f"datum.track_name === '{track_name}'")
             .transform_regex_fold(
-                columnRegex=r"^(reference|alternate|delta)$",
+                columnRegex=r"^(reference|alternate)$",
                 asValue="value",
                 asKey="series",
             )
-            .mark_point(size=10, filled=True)
+            .mark_rule(size=2, strokeCap="round", opacity=0.9)
             .encode(
                 x=gs.X("start0:Q").title(None),
+                x2="end0:Q",
                 y=gs.Y("value:Q"),
                 color=gs.Color("series:N")
                 .scale(
-                    domain=["reference", "alternate", "delta"],
-                    range=["#2563eb", "#dc2626", "#7c3aed"],
+                    domain=["reference", "alternate"],
+                    range=["#2563eb", "#dc2626"],
                 )
                 .legend(None),
-                tooltip=["start0:Q", "series:N", "value:Q"],
+                tooltip=[
+                    "chrom:N",
+                    "start0:Q",
+                    "end0:Q",
+                    "output_type:N",
+                    "track_name:N",
+                    "biosample_name:N",
+                    "ontology_curie:N",
+                    "histone_mark:N",
+                    "series:N",
+                    "reference:Q",
+                    "alternate:Q",
+                    "delta:Q",
+                ],
             )
-            .properties(height=85, title=title)
+            .properties(height=64, title=title)
         )
 
-    chart = gs.vconcat(
-        sequence,
-        prediction_panel("CL:0001059 polyA plus RNA-seq", "CMP RNA-seq"),
-        prediction_panel("CL:0001059 DNase-seq", "CMP DNase"),
-        prediction_panel("CL:0001059 Histone ChIP-seq H3K27ac", "CMP H3K27ac"),
-        prediction_panel("CL:0001059 Histone ChIP-seq H3K4me1", "CMP H3K4me1"),
-        spacing=6,
+    def delta_panel(track_name):
+        return (
+            gs.Chart(data={"name": "predictions"})
+            .transform_filter(f"datum.track_name === '{track_name}'")
+            .mark_rule(color="#7c3aed", size=2, strokeCap="round")
+            .encode(
+                x=gs.X("start0:Q").title(None),
+                x2="end0:Q",
+                y=gs.Y("delta:Q").scale(zero=True).title("Δ alt − ref"),
+                tooltip=[
+                    "chrom:N",
+                    "start0:Q",
+                    "end0:Q",
+                    "output_type:N",
+                    "track_name:N",
+                    "biosample_name:N",
+                    "ontology_curie:N",
+                    "histone_mark:N",
+                    "reference:Q",
+                    "alternate:Q",
+                    "delta:Q",
+                ],
+            )
+            .properties(height=42)
+        )
+
+    prediction_tracks = gs.vconcat(
+        *(
+            panel
+            for track in TAL1_DISPLAY_TRACKS
+            for panel in (
+                signal_panel(track.track_name, track.panel_title),
+                delta_panel(track.track_name),
+            )
+        ),
+        spacing=2,
     ).properties(
+        scales=gs.scales(
+            x=gs.Scale(
+                domain=[display_interval.start, display_interval.end],
+                zoom=True,
+            )
+        )
+    )
+
+    chart = gs.vconcat(sequence, prediction_tracks, spacing=6).properties(
         datasets={"sequence": [], "predictions": []},
         params=[
             gs.param(

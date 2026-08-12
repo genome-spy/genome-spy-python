@@ -25,6 +25,12 @@ DEFAULT_RESOLUTION = 128
 PRECISION_AUTO = "auto"
 PRECISION_FLOAT32 = "full_float32"
 PRECISION_MIXED = "mixed_precision"
+_TAL1_HEAD_WIDTHS = {
+    "rna_seq": 768,
+    "dnase": 384,
+    "chip_histone": 1_152,
+}
+_TAL1_BIOSAMPLE_NAME = "common myeloid progenitor, CD34-positive"
 _loaded_model: Any | None = None
 _loaded_model_key: tuple[str, int, int, str, str] | None = None
 
@@ -75,6 +81,25 @@ class TrackSelector:
 
 
 @dataclass(frozen=True, slots=True)
+class DisplayTrack:
+    """One pinned model channel and its visualization label."""
+
+    track_index: int
+    track_name: str
+    panel_title: str
+    output_type: str
+    metadata: tuple[tuple[str, object], ...]
+
+    @property
+    def selector(self) -> TrackSelector:
+        """Return the exact metadata selector for this display track."""
+        return TrackSelector(
+            self.output_type,
+            (("track_name", self.track_name), *self.metadata),
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class TrackSnapshot:
     """Small CPU snapshot implementing the visualization adapter contract."""
 
@@ -93,24 +118,31 @@ class TrackSnapshotPair:
     selector: TrackSelector
 
 
-TAL1_TRACK_SELECTORS = (
-    TrackSelector(
+TAL1_DISPLAY_TRACKS = (
+    DisplayTrack(
+        561,
+        "CL:0001059 polyA plus RNA-seq",
+        "CMP RNA-seq",
         "rna_seq",
         (
             ("ontology_curie", "CL:0001059"),
-            ("track_name", "CL:0001059 polyA plus RNA-seq"),
             ("strand", "."),
         ),
     ),
-    TrackSelector(
+    DisplayTrack(
+        44,
+        "CL:0001059 DNase-seq",
+        "CMP DNase",
         "dnase",
         (
             ("ontology_curie", "CL:0001059"),
-            ("track_name", "CL:0001059 DNase-seq"),
             ("strand", "."),
         ),
     ),
-    TrackSelector(
+    DisplayTrack(
+        206,
+        "CL:0001059 Histone ChIP-seq H3K27ac",
+        "CMP H3K27ac",
         "chip_histone",
         (
             ("ontology_curie", "CL:0001059"),
@@ -118,7 +150,10 @@ TAL1_TRACK_SELECTORS = (
             ("strand", "."),
         ),
     ),
-    TrackSelector(
+    DisplayTrack(
+        209,
+        "CL:0001059 Histone ChIP-seq H3K4me1",
+        "CMP H3K4me1",
         "chip_histone",
         (
             ("ontology_curie", "CL:0001059"),
@@ -127,6 +162,7 @@ TAL1_TRACK_SELECTORS = (
         ),
     ),
 )
+TAL1_TRACK_SELECTORS = tuple(track.selector for track in TAL1_DISPLAY_TRACKS)
 
 
 def download_checkpoint(
@@ -238,7 +274,7 @@ def load_model(
 ) -> Any:
     """Load at most one local model, replacing the prior model before allocation."""
     global _loaded_model, _loaded_model_key
-    checkpoint_path = Path(checkpoint).expanduser().resolve()
+    checkpoint_path = Path(checkpoint).expanduser().absolute()
     if not checkpoint_path.is_file():
         raise AlphaGenomePyTorchError(
             f"AlphaGenome checkpoint does not exist: {checkpoint_path}"
@@ -284,6 +320,7 @@ def _load_fresh_model(checkpoint: Path, *, device: str, precision: str) -> Any:
     try:
         from alphagenome_pytorch import AlphaGenome
         from alphagenome_pytorch.config import DtypePolicy
+        from alphagenome_pytorch.named_outputs import TrackMetadataCatalog
     except ImportError as exc:
         raise AlphaGenomePyTorchError(
             "Local inference requires Python 3.12+ and `alphagenome-pytorch`."
@@ -299,10 +336,45 @@ def _load_fresh_model(checkpoint: Path, *, device: str, precision: str) -> Any:
         dtype_policy=policy,
         device="cpu",
     )
+    model.set_track_metadata_catalog(_tal1_metadata_catalog(TrackMetadataCatalog))
     if device != "cpu":
         model.to(device)
     model.eval()
     return model
+
+
+def _tal1_metadata_catalog(catalog_type: Any) -> Any:
+    """Build the strict metadata subset needed by the TAL1 display."""
+    rows: list[dict[str, Any]] = []
+    for output_type, width in _TAL1_HEAD_WIDTHS.items():
+        selected_by_index = {
+            track.track_index: track
+            for track in TAL1_DISPLAY_TRACKS
+            if track.output_type == output_type
+        }
+        for track_index in range(width):
+            display_track = selected_by_index.get(track_index)
+            if display_track is None:
+                rows.append(
+                    {
+                        "track_index": track_index,
+                        "track_name": "Padding",
+                        "output_type": output_type,
+                        "organism": 0,
+                    }
+                )
+                continue
+            row = {
+                "track_index": track_index,
+                "output_type": output_type,
+                "organism": 0,
+                "biosample_name": _TAL1_BIOSAMPLE_NAME,
+                "biosample_type": "primary_cell",
+            }
+            row.update(dict(display_track.metadata))
+            row["track_name"] = display_track.track_name
+            rows.append(row)
+    return catalog_type.from_rows(rows)
 
 
 def apply_snv(
@@ -352,30 +424,51 @@ def predict_variant_tracks(
         model_interval, display_interval, resolution
     )
     alternate_sequence = apply_snv(reference_sequence, model_interval, variant)
-    reference_tracks = _predict_sequence_tracks(
-        model,
-        reference_sequence,
-        selectors,
-        organism_index=organism_index,
-        resolution=resolution,
-        first_bin=first_bin,
-        last_bin=last_bin,
-        interval=cropped_interval,
-    )
-    alternate_tracks = _predict_sequence_tracks(
-        model,
-        alternate_sequence,
-        selectors,
-        organism_index=organism_index,
-        resolution=resolution,
-        first_bin=first_bin,
-        last_bin=last_bin,
-        interval=cropped_interval,
-    )
+    try:
+        reference_tracks = _predict_sequence_tracks(
+            model,
+            reference_sequence,
+            selectors,
+            organism_index=organism_index,
+            resolution=resolution,
+            first_bin=first_bin,
+            last_bin=last_bin,
+            interval=cropped_interval,
+        )
+        alternate_tracks = _predict_sequence_tracks(
+            model,
+            alternate_sequence,
+            selectors,
+            organism_index=organism_index,
+            resolution=resolution,
+            first_bin=first_bin,
+            last_bin=last_bin,
+            interval=cropped_interval,
+        )
+    except Exception as exc:
+        _recover_cuda_oom(exc)
+        raise
     return [
         TrackSnapshotPair(reference_tracks[index], alternate_tracks[index], selector)
         for index, selector in enumerate(selectors)
     ]
+
+
+def _recover_cuda_oom(exc: Exception) -> None:
+    """Release unused CUDA allocations and raise an actionable OOM error."""
+    try:
+        import torch
+    except ImportError:
+        return
+    if not isinstance(exc, torch.cuda.OutOfMemoryError):
+        return
+    exc.__traceback__ = None
+    gc.collect()
+    torch.cuda.empty_cache()
+    raise AlphaGenomePyTorchError(
+        "CUDA out of memory. Temporary accelerator allocations were released; "
+        "close other GPU or Marimo sessions, then retry."
+    ) from exc
 
 
 def _predict_sequence_tracks(

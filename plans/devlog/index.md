@@ -5,6 +5,12 @@ Read the active log first, then open only the archive relevant to the question.
 
 ## Archives
 
+### `2026-08-10.md`
+
+- Date range: 2026-08-10
+- Topics: Marimo genomics showcase planning, AlphaGenome request and adapter
+  contracts, sequence interaction, live widget datasets.
+
 ### `2026-08-04_to_2026-08-08.md`
 
 - Date range: 2026-08-04 to 2026-08-08

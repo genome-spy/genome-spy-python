@@ -31,6 +31,48 @@ def test_alphagenome_pytorch_notebook_opens_real_editor_without_loading_model(
     assert "accepts SNVs only" in source
 
 
+def test_alphagenome_pytorch_prediction_tracks_share_zoom_and_expose_context(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.syspath_prepend("notebooks/alphagenome")
+    module = _load_python_module(
+        Path("notebooks/alphagenome/genome_spy_alphagenome_pytorch.py")
+    )
+    _, definitions = module.app.run()
+
+    prediction_tracks = definitions["view"].spec["vconcat"][1]
+    panels = prediction_tracks["vconcat"]
+
+    assert prediction_tracks["scales"]["x"] == {
+        "domain": [
+            definitions["display_interval"].start,
+            definitions["display_interval"].end,
+        ],
+        "zoom": True,
+    }
+    assert len(panels) == 8
+    assert all(panel["mark"]["type"] == "rule" for panel in panels)
+    assert all(
+        panels[index]["encoding"]["y"]["field"] == "delta" for index in range(1, 8, 2)
+    )
+    assert all(
+        panels[index]["encoding"]["y"]["scale"] == {"zero": True}
+        for index in range(1, 8, 2)
+    )
+    assert {item["field"] for item in panels[0]["encoding"]["tooltip"]} >= {
+        "chrom",
+        "start0",
+        "end0",
+        "output_type",
+        "track_name",
+        "biosample_name",
+        "ontology_curie",
+        "reference",
+        "alternate",
+        "delta",
+    }
+
+
 def test_alphagenome_pytorch_prediction_state_avoids_redundant_dataset_updates(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

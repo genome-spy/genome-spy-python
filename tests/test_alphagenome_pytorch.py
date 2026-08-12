@@ -127,6 +127,88 @@ def test_tal1_selectors_are_exact_and_use_only_128bp_capable_heads(
         for selector in backend.TAL1_TRACK_SELECTORS
     )
     assert len({selector.signature for selector in backend.TAL1_TRACK_SELECTORS}) == 4
+    assert backend.TAL1_TRACK_SELECTORS == tuple(
+        track.selector for track in backend.TAL1_DISPLAY_TRACKS
+    )
+
+
+def test_tal1_metadata_catalog_preserves_upstream_track_indices(
+    backend: ModuleType,
+) -> None:
+    class FakeCatalog:
+        @classmethod
+        def from_rows(cls, rows: list[dict[str, object]]) -> list[dict[str, object]]:
+            return rows
+
+    rows = backend._tal1_metadata_catalog(FakeCatalog)
+
+    assert len(rows) == 768 + 384 + 1_152
+    selected = [row for row in rows if row["track_name"] != "Padding"]
+    assert [
+        (row["output_type"], row["track_index"], row["track_name"]) for row in selected
+    ] == [
+        ("rna_seq", 561, "CL:0001059 polyA plus RNA-seq"),
+        ("dnase", 44, "CL:0001059 DNase-seq"),
+        (
+            "chip_histone",
+            206,
+            "CL:0001059 Histone ChIP-seq H3K27ac",
+        ),
+        (
+            "chip_histone",
+            209,
+            "CL:0001059 Histone ChIP-seq H3K4me1",
+        ),
+    ]
+    assert all(row["ontology_curie"] == "CL:0001059" for row in selected)
+    assert all(
+        row["biosample_name"] == "common myeloid progenitor, CD34-positive"
+        for row in selected
+    )
+
+
+def test_prediction_oom_releases_cuda_cache_without_unloading_model(
+    backend: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeOutOfMemoryError(RuntimeError):
+        pass
+
+    events: list[str] = []
+    cuda = SimpleNamespace(
+        OutOfMemoryError=FakeOutOfMemoryError,
+        empty_cache=lambda: events.append("empty_cache"),
+    )
+    monkeypatch.setitem(sys.modules, "torch", SimpleNamespace(cuda=cuda))
+    monkeypatch.setattr(backend.gc, "collect", lambda: events.append("collect"))
+    model = object()
+    backend._loaded_model = model
+    calls = 0
+
+    def predict(*args: object, **kwargs: object) -> list[object]:
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise FakeOutOfMemoryError("out of memory")
+        return [object()]
+
+    monkeypatch.setattr(backend, "_predict_sequence_tracks", predict)
+
+    with pytest.raises(
+        backend.AlphaGenomePyTorchError,
+        match="Temporary accelerator allocations were released",
+    ):
+        backend.predict_variant_tracks(
+            model,
+            reference_sequence="ACGT",
+            model_interval=backend.ModelInterval("chr1", 100, 104),
+            display_interval=backend.ModelInterval("chr1", 100, 104),
+            variant=backend.ModelVariant("chr1", 102, "C", "T"),
+            selectors=(backend.TrackSelector("dnase", ()),),
+            resolution=1,
+        )
+
+    assert events == ["collect", "empty_cache"]
+    assert backend._loaded_model is model
 
 
 def test_precision_resolution_is_hardware_aware(
@@ -201,6 +283,33 @@ def test_model_replacement_unloads_before_allocating(
     assert events == ["unload", "load", "unload", "load"]
 
 
+def test_model_load_preserves_safetensors_symlink_suffix(
+    backend: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    target = tmp_path / "checkpoint-blob"
+    target.write_bytes(b"weights")
+    checkpoint = tmp_path / "model.safetensors"
+    checkpoint.symlink_to(target)
+    loaded = object()
+    seen_paths: list[Path] = []
+
+    def load_fresh(path: Path, *, device: str, precision: str) -> object:
+        seen_paths.append(path)
+        assert path.suffix == ".safetensors"
+        assert (device, precision) == ("cuda", "mixed_precision")
+        return loaded
+
+    monkeypatch.setattr(backend, "version", lambda _: backend.PACKAGE_VERSION)
+    monkeypatch.setattr(backend, "unload_model", lambda: None)
+    monkeypatch.setattr(backend, "_load_fresh_model", load_fresh)
+
+    assert (
+        backend.load_model(checkpoint, device="cuda", precision="mixed_precision")
+        is loaded
+    )
+    assert seen_paths == [checkpoint.absolute()]
+
+
 def test_fresh_model_loads_weights_on_cpu_before_device_transfer(
     backend: ModuleType, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -216,6 +325,9 @@ def test_fresh_model_loads_weights_on_cpu_before_device_transfer(
 
         def to(self, device: str) -> None:
             events.append(("move", device))
+
+        def set_track_metadata_catalog(self, catalog: object) -> None:
+            events.append(("metadata", catalog))
 
         def eval(self) -> None:
             events.append("eval")
@@ -233,9 +345,14 @@ def test_fresh_model_loads_weights_on_cpu_before_device_transfer(
     package.AlphaGenome = FakeModel
     config = ModuleType("alphagenome_pytorch.config")
     config.DtypePolicy = FakePolicy
+    named_outputs = ModuleType("alphagenome_pytorch.named_outputs")
+    named_outputs.TrackMetadataCatalog = SimpleNamespace(
+        from_rows=lambda rows: ("catalog", len(rows))
+    )
     monkeypatch.setitem(sys.modules, "alphagenome_pytorch", package)
     monkeypatch.setitem(sys.modules, "alphagenome_pytorch.config", config)
 
+    monkeypatch.setitem(sys.modules, "alphagenome_pytorch.named_outputs", named_outputs)
     backend._load_fresh_model(
         checkpoint,
         device="cuda",
@@ -244,6 +361,7 @@ def test_fresh_model_loads_weights_on_cpu_before_device_transfer(
 
     assert events == [
         ("load", checkpoint, "mixed", "cpu"),
+        ("metadata", ("catalog", 2_304)),
         ("move", "cuda"),
         "eval",
     ]
@@ -261,7 +379,8 @@ def test_model_dependency_is_scoped_to_the_marimo_launch_command(
     ).read_text(encoding="utf-8")
 
     assert "alphagenome-pytorch" not in dependency_text
-    assert f"alphagenome-pytorch[hf]=={backend.PACKAGE_VERSION}" in notebook
+    assert f"alphagenome-pytorch=={backend.PACKAGE_VERSION}" in notebook
+    assert "huggingface-hub==1.27.0" in notebook
 
 
 def test_checkpoint_identity_distinguishes_local_file_revisions(
