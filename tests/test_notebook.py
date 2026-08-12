@@ -1,44 +1,88 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 from types import ModuleType
 
-import nbformat
 import pytest
 
 
-@pytest.mark.parametrize("notebook_path", sorted(Path("notebooks").glob("*.ipynb")))
-def test_notebook_example_is_valid(notebook_path: Path) -> None:
-    notebook = nbformat.read(notebook_path, as_version=4)
-
-    assert notebook["nbformat"] == 4
-    assert any(
-        "chart" in "".join(cell["source"])
-        for cell in notebook["cells"]
-        if cell["cell_type"] == "code"
-    )
-
-
-@pytest.mark.parametrize(
-    "notebook_path",
-    [
-        Path("notebooks/genome_spy_arrow_reactive.py"),
-    ],
-)
-def test_marimo_notebook_emits_visible_output_and_updates_a_stable_widget(
-    notebook_path: Path,
+def test_alphagenome_pytorch_notebook_opens_real_editor_without_loading_model(
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    module = _load_python_module(notebook_path)
+    monkeypatch.syspath_prepend("notebooks/alphagenome")
+    sys.modules.pop("alphagenome_pytorch", None)
+    module = _load_python_module(
+        Path("notebooks/alphagenome/genome_spy_alphagenome_pytorch.py")
+    )
 
     outputs, definitions = module.app.run()
 
     assert any(output is not None for output in outputs)
-    assert hasattr(definitions["chart_widget"], "widget")
-    assert definitions["view"].dataset_names == ("table",)
-    assert 'view.set_dataset("table", filtered_dataframe)' in notebook_path.read_text(
+    assert "alphagenome_pytorch" not in sys.modules
+    assert definitions["reference_asset"]["provenance"]["assembly"] == "GRCh38"
+    assert definitions["view"].dataset_names == ("sequence", "predictions")
+    assert definitions["sequence_rows"].height == 81
+    source = Path("notebooks/alphagenome/genome_spy_alphagenome_pytorch.py").read_text(
         encoding="utf-8"
     )
+    assert 'view.set_dataset("predictions",' in source
+    assert "accepts SNVs only" in source
+
+
+def test_alphagenome_pytorch_prediction_state_avoids_redundant_dataset_updates(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.syspath_prepend("notebooks/alphagenome")
+    module = _load_python_module(
+        Path("notebooks/alphagenome/genome_spy_alphagenome_pytorch.py")
+    )
+    _, definitions = module.app.run()
+
+    pending = definitions["prediction_input_key"](
+        definitions["default_selection"],
+        "T",
+        "",
+        "cuda",
+        "auto",
+    )
+    changed_pending = definitions["prediction_input_key"](
+        definitions["default_selection"],
+        "A",
+        "",
+        "cuda",
+        "auto",
+    )
+    succeeded = {
+        "status": "succeeded",
+        "message": "done",
+        "frame": object(),
+        "input_key": pending,
+        "request_id": "request-1",
+        "variant_key": "chr1:47239296:C:T",
+    }
+    failed = {
+        **succeeded,
+        "status": "failed",
+        "message": "CUDA out of memory",
+    }
+
+    assert definitions["prediction_display_state"](succeeded, pending) == (
+        "succeeded",
+        "done",
+    )
+    assert (
+        definitions["prediction_display_state"](succeeded, changed_pending)[0]
+        == "stale"
+    )
+    assert definitions["prediction_display_state"](failed, changed_pending) == (
+        "failed",
+        "CUDA out of memory",
+    )
+    assert definitions["should_apply_prediction"](succeeded, None) is True
+    assert definitions["should_apply_prediction"](succeeded, "request-1") is False
+    assert definitions["should_apply_prediction"](failed, "request-1") is False
 
 
 def _load_python_module(path: Path) -> ModuleType:

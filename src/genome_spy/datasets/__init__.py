@@ -22,6 +22,7 @@ _DATASETS = {
     "hapmap_gwas": "hapmap_gwas.csv",
     "mutation_impact_reference": "mutation_impact_reference.json",
     "pik3ca_mutations": "pik3ca_mutations.json",
+    "tal1_alphagenome_reference": "tal1_alphagenome_reference.json.gz",
     "pyoncoprint_tcga": "tcga.tsv",
     "tcga_laml_annotations": "tcga_laml_annot.tsv",
     "tcga_laml_maf": "tcga_laml.maf.gz",
@@ -153,14 +154,16 @@ def load_dataset(
 
             return gzip.decompress(resource.read_bytes()).decode("utf-8")
         return resource.read_text(encoding="utf-8")
+    is_json = suffix == ".json" or suffixes[-2:] == [".json", ".gz"]
     if as_format == "json":
-        if suffix != ".json":
+        if not is_json:
             raise ValueError(f"Dataset {name!r} is stored as {suffix}, not JSON.")
-        return cast(dict[str, Any] | list[Any], json.loads(resource.read_text("utf-8")))
+        text = load_dataset(name, as_format="text")
+        return cast(dict[str, Any] | list[Any], json.loads(text))
     if as_format == "dataframe":
         return _load_dataframe(name)
-    if suffix == ".json":
-        return json.loads(resource.read_text("utf-8"))
+    if is_json:
+        return json.loads(load_dataset(name, as_format="text"))
     if suffix in {".csv", ".tsv"} or suffixes[-2:] in (
         [".csv", ".gz"],
         [".tsv", ".gz"],

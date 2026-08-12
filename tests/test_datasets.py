@@ -31,6 +31,7 @@ def test_available_datasets_are_stable() -> None:
         "mutation_impact_reference",
         "pik3ca_mutations",
         "pyoncoprint_tcga",
+        "tal1_alphagenome_reference",
         "tcga_laml_annotations",
         "tcga_laml_maf",
         "tcga_oncoprint",
@@ -62,6 +63,23 @@ def test_load_mutation_impact_reference_dataset() -> None:
     assert data["chrom"] == "chrSynthetic"
     assert len(data["rows"]) == 20
     assert data["rows"][0] == {"position": 100, "base": "A", "value": 0.25}
+
+
+def test_load_tal1_alphagenome_reference_dataset() -> None:
+    data = load_dataset("tal1_alphagenome_reference", as_format="json")
+
+    assert data["provenance"]["assembly"] == "GRCh38"
+    assert data["interval"] == {
+        "chrom": "chr1",
+        "start0": 47_173_759,
+        "end0": 47_304_831,
+    }
+    assert len(data["sequence"]) == 131_072
+    offset = data["positive_control_site"]["pos1"] - 1 - data["interval"]["start0"]
+    assert data["sequence"][offset] == "C"
+    assert (
+        hashlib.sha256(data["sequence"].encode()).hexdigest() == data["sequence_sha256"]
+    )
 
 
 def test_auto_format_loads_json_as_python_object() -> None:
@@ -100,6 +118,7 @@ def test_upstream_mutation_files_are_byte_exact() -> None:
         "brca.maf.gz": "61d5355e960bd480bec4f245b8f096e2333408659ced0d196e42b0e38de3d724",
         "oncoprint_dataset3.json": "e07aa6ae9cf4f5f3a9f331d9979855ccf33bc47ed1bb2f4b871939b47c2a09ef",
         "pik3ca_mutations.json": "4f36df9ad960c1429827522bbd4fce0cb47520d14a5c642abe8a55969f177aec",
+        "tal1_alphagenome_reference.json.gz": "10702eaaee63d2a4f600bf23ea4fac913db720aba56d33868b0f32590fc7b77e",
         "tcga.tsv": "39a90fc1f50ebcd113c37fd03894fb41b17dca4d6014f7efcf0e3f234c957742",
         "tcga_laml.maf.gz": "d102b071a052265b6f8ad7947bad1d58d3e3036fd17d6b274f7ea09a376cd6a0",
         "tcga_laml_annot.tsv": "7033030d52868e9a0f35ffd78f45a9d7a126c2edef90cf9e74e4f5d78990a710",
