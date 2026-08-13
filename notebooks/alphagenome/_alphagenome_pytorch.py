@@ -55,7 +55,7 @@ class ModelInterval:
 
 @dataclass(frozen=True, slots=True)
 class ModelVariant:
-    """A one-based single-nucleotide substitution."""
+    """A one-based single-nucleotide substitution in a designed sequence."""
 
     chromosome: str
     position: int
@@ -377,33 +377,47 @@ def _tal1_metadata_catalog(catalog_type: Any) -> Any:
     return catalog_type.from_rows(rows)
 
 
-def apply_snv(
+def apply_variants(
     reference_sequence: str,
     interval: ModelInterval,
-    variant: ModelVariant,
+    variants: Sequence[ModelVariant],
 ) -> str:
-    """Return an equal-length alternate sequence after strict REF validation."""
+    """Return a sequence carrying validated substitutions at distinct sites."""
     reference = reference_sequence.upper()
-    ref = variant.reference_bases.upper()
-    alt = variant.alternate_bases.upper()
-    if len(ref) != 1 or len(alt) != 1 or ref == alt:
-        raise AlphaGenomePyTorchError(
-            "The first local notebook backend supports one non-reference SNV."
-        )
-    if variant.chromosome != interval.chromosome:
-        raise AlphaGenomePyTorchError("Variant and model interval chromosomes differ.")
     if len(reference) != interval.width:
         raise AlphaGenomePyTorchError(
             "Reference sequence length must equal the model interval width."
         )
-    offset = variant.position - 1 - interval.start
-    if offset < 0 or offset >= len(reference):
-        raise AlphaGenomePyTorchError("Variant falls outside the model interval.")
-    if reference[offset] != ref:
-        raise AlphaGenomePyTorchError(
-            f"Reference mismatch: expected {ref!r}, found {reference[offset]!r}."
-        )
-    return reference[:offset] + alt + reference[offset + 1 :]
+    if not variants:
+        raise AlphaGenomePyTorchError("At least one substitution is required.")
+
+    alternate = list(reference)
+    occupied_offsets: set[int] = set()
+    for variant in variants:
+        ref = variant.reference_bases.upper()
+        alt = variant.alternate_bases.upper()
+        if len(ref) != 1 or len(alt) != 1 or ref == alt:
+            raise AlphaGenomePyTorchError(
+                "The local notebook backend supports non-reference SNVs only."
+            )
+        if variant.chromosome != interval.chromosome:
+            raise AlphaGenomePyTorchError(
+                "Variant and model interval chromosomes differ."
+            )
+        offset = variant.position - 1 - interval.start
+        if offset < 0 or offset >= len(reference):
+            raise AlphaGenomePyTorchError("Variant falls outside the model interval.")
+        if offset in occupied_offsets:
+            raise AlphaGenomePyTorchError(
+                "Designed variants must occupy distinct positions."
+            )
+        if reference[offset] != ref:
+            raise AlphaGenomePyTorchError(
+                f"Reference mismatch: expected {ref!r}, found {reference[offset]!r}."
+            )
+        occupied_offsets.add(offset)
+        alternate[offset] = alt
+    return "".join(alternate)
 
 
 def predict_variant_tracks(
@@ -412,7 +426,7 @@ def predict_variant_tracks(
     reference_sequence: str,
     model_interval: ModelInterval,
     display_interval: ModelInterval,
-    variant: ModelVariant,
+    variants: Sequence[ModelVariant],
     selectors: Sequence[TrackSelector] = TAL1_TRACK_SELECTORS,
     organism_index: int = 0,
     resolution: int = DEFAULT_RESOLUTION,
@@ -423,7 +437,7 @@ def predict_variant_tracks(
     first_bin, last_bin, cropped_interval = _crop_bounds(
         model_interval, display_interval, resolution
     )
-    alternate_sequence = apply_snv(reference_sequence, model_interval, variant)
+    alternate_sequence = apply_variants(reference_sequence, model_interval, variants)
     try:
         reference_tracks = _predict_sequence_tracks(
             model,

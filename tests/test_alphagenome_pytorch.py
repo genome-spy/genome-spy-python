@@ -60,17 +60,33 @@ class _Head:
         return {128: self.selected}
 
 
-def test_apply_snv_validates_reference_and_keeps_length(backend: ModuleType) -> None:
+def test_apply_variants_validates_reference_and_keeps_length(
+    backend: ModuleType,
+) -> None:
     interval = backend.ModelInterval("chr1", 100, 104)
-    variant = backend.ModelVariant("chr1", 102, "C", "T")
+    variants = (
+        backend.ModelVariant("chr1", 102, "C", "T"),
+        backend.ModelVariant("chr1", 104, "T", "A"),
+    )
 
-    assert backend.apply_snv("ACGT", interval, variant) == "ATGT"
+    assert backend.apply_variants("ACGT", interval, variants) == "ATGA"
 
     with pytest.raises(backend.AlphaGenomePyTorchError, match="mismatch"):
-        backend.apply_snv("ACGT", interval, backend.ModelVariant("chr1", 102, "G", "T"))
-    with pytest.raises(backend.AlphaGenomePyTorchError, match="supports one"):
-        backend.apply_snv(
-            "ACGT", interval, backend.ModelVariant("chr1", 102, "C", "CA")
+        backend.apply_variants(
+            "ACGT", interval, (backend.ModelVariant("chr1", 102, "G", "T"),)
+        )
+    with pytest.raises(backend.AlphaGenomePyTorchError, match="SNVs only"):
+        backend.apply_variants(
+            "ACGT", interval, (backend.ModelVariant("chr1", 102, "C", "CA"),)
+        )
+    with pytest.raises(backend.AlphaGenomePyTorchError, match="distinct"):
+        backend.apply_variants(
+            "ACGT",
+            interval,
+            (
+                backend.ModelVariant("chr1", 102, "C", "T"),
+                backend.ModelVariant("chr1", 102, "C", "A"),
+            ),
         )
 
 
@@ -202,7 +218,7 @@ def test_prediction_oom_releases_cuda_cache_without_unloading_model(
             reference_sequence="ACGT",
             model_interval=backend.ModelInterval("chr1", 100, 104),
             display_interval=backend.ModelInterval("chr1", 100, 104),
-            variant=backend.ModelVariant("chr1", 102, "C", "T"),
+            variants=(backend.ModelVariant("chr1", 102, "C", "T"),),
             selectors=(backend.TrackSelector("dnase", ()),),
             resolution=1,
         )
