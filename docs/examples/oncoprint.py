@@ -12,7 +12,7 @@ from genome_spy.schema import Legend, Scale
 
 META = {
     "category": "Oncoprints and cohort summaries",
-    "tags": ("rect", "cohort", "real-data", "hconcat", "vconcat"),
+    "tags": ("rect", "cohort", "real-data", "concat", "shared-scale"),
     "order": 25,
     "height": 660,
     "max_width": 760,
@@ -112,7 +112,25 @@ matrix = (
 matrix_panel = (grid + matrix).properties(
     width=matrix_width,
     height=matrix_height,
-    scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.08}},
+    scales={
+        "x": {
+            "domain": sample_domain,
+            "paddingInner": 0,
+            "paddingOuter": 0,
+            "zoom": True,
+        }
+    },
+    params=[
+        gs.param(
+            "sampleRuler",
+            persist=False,
+            ruler={
+                "encodings": ["x"],
+                "snap": False,
+                "mark": {"opacity": 0.3},
+            },
+        )
+    ],
 )
 
 percent_panel = (
@@ -120,10 +138,7 @@ percent_panel = (
     .mark_text(align="right", dx=-2, size=11)
     .encode(
         x=gs.value(1),
-        y=gs.Y("gene:N")
-        .scale(domain=gene_order, reverse=True, padding=0.08)
-        .axis(None)
-        .title(None),
+        y=gs.Y("gene:N").axis(None).title(None),
         text=gs.Text("label:N"),
     )
     .properties(width=percent_width, height=matrix_height)
@@ -154,10 +169,7 @@ count_bars = (
         .scale(reverse=False, domain=[0, count_limit], zero=True)
         .title(None),
         x2=gs.X2("_x1"),
-        y=gs.Y("gene:N")
-        .scale(domain=gene_order, reverse=True, padding=0.08)
-        .axis(None)
-        .title(None),
+        y=gs.Y("gene:N").axis(None).title(None),
         color=gs.Color("class:N").scale(class_colors).legend(None),
     )
     .properties(width=counts_width, height=matrix_height)
@@ -167,19 +179,32 @@ count_grid = (
     gs.Chart(data["genes"][["gene"]])
     .mark_rect(color="#f1f3f5", stroke="white", strokeWidth=0.5)
     .encode(
-        y=gs.Y("gene:N")
-        .scale(domain=gene_order, reverse=True, padding=0.08)
-        .axis(None)
-        .title(None),
+        y=gs.Y("gene:N").axis(None).title(None),
     )
     .properties(width=counts_width, height=matrix_height)
 )
 
-counts_panel = (count_grid + count_bars).properties(
-    width=counts_width, height=matrix_height
+counts_panel = (
+    (count_grid + count_bars)
+    .properties(width=counts_width, height=matrix_height)
+    .resolve_scale(x="excluded")
 )
-left_panel = (
-    gs.vconcat(tmb, matrix_panel, spacing=4)
+
+matrix_row = (
+    gs.concat(matrix_panel, percent_panel, counts_panel, columns=3, spacing=4)
+    .properties(scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.08}})
+    .resolve_scale(x="excluded", y="shared")
+)
+
+summary = f"Altered in {data['altered_samples']} ({data['altered_samples'] / data['total_samples']:.2%}) of {data['total_samples']} samples."
+
+chart = (
+    gs.concat(
+        gs.concat(tmb, percent_header, count_title, columns=3, spacing=4),
+        matrix_row,
+        columns=1,
+        spacing=4,
+    )
     .properties(
         scales={
             "x": {
@@ -189,33 +214,9 @@ left_panel = (
                 "zoom": True,
             }
         },
-        params=[
-            gs.param(
-                "sampleRuler",
-                persist=False,
-                ruler={
-                    "encodings": ["x"],
-                    "snap": False,
-                    "mark": {"opacity": 0.3},
-                },
-            )
-        ],
     )
     .resolve_scale(x="shared", y="independent")
     .resolve_axis(y="independent")
-)
-right_panel = gs.vconcat(percent_header, percent_panel, spacing=4).resolve_scale(
-    x="independent"
-)
-count_panel = gs.vconcat(count_title, counts_panel, spacing=4).resolve_scale(
-    x="independent"
-)
-
-summary = f"Altered in {data['altered_samples']} ({data['altered_samples'] / data['total_samples']:.2%}) of {data['total_samples']} samples."
-
-chart = (
-    gs.hconcat(left_panel, right_panel, count_panel, spacing=4)
-    .resolve_scale(x="independent")
     .properties(
         title=summary,
         description="A TCGA LAML oncoplot styled after the canonical maftools example with top mutation-burden bars, recurrently altered genes, percent labels, and right-side per-gene sample counts.",

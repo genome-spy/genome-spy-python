@@ -41,41 +41,29 @@ sv_links = (
     .encode(
         x=gs.Locus("chrom1", "breakpoint1", band=0),
         x2=gs.Locus("chrom2", "breakpoint2", band=0),
-        size=gs.Size(
-            {
-                "field": "SAMPLES.wakhan_haplotagged.VAF[0]",
-                "type": "quantitative",
-                "scale": {"range": [0.1, 2.5], "type": "pow"},
-                "legend": {"title": "Variant allele frequency", "orient": "top"},
-                "condition": [{"param": "svHover", "empty": False, "value": 3}],
-            }
+        size=(
+            gs.Size("SAMPLES.wakhan_haplotagged.VAF[0]:Q")
+            .scale(range=[0.1, 2.5], type="pow")
+            .legend(title="Variant allele frequency", orient="top")
+            .condition([gs.condition("svHover", 3, empty=False)])
         ),
-        opacity=gs.Opacity(
-            {
-                "condition": [{"param": "svHover", "empty": False, "value": 1}],
-                "value": 0.5,
-            }
+        opacity=gs.Opacity(gs.value(0.5)).condition(
+            [gs.condition("svHover", 1, empty=False)]
         ),
         tooltip=[
             gs.Tooltip(
-                {
-                    "expr": (
-                        "datum.INFO.SVTYPE[0] == 'BND' ? "
-                        "replace(datum.ID[0], /_[12]$/, '') : datum.ID[0]"
-                    ),
-                    "title": "SV ID",
-                }
-            ),
+                gs.expr(
+                    "datum.INFO.SVTYPE[0] == 'BND' ? "
+                    "replace(datum.ID[0], /_[12]$/, '') : datum.ID[0]"
+                )
+            ).title("SV ID"),
             gs.Tooltip("INFO.SVTYPE[0]").title("SV type"),
             gs.Tooltip(
-                {
-                    "expr": (
-                        "isValid(datum.INFO.DETAILED_TYPE) ? "
-                        "datum.INFO.DETAILED_TYPE[0] : null"
-                    ),
-                    "title": "Detailed type",
-                }
-            ),
+                gs.expr(
+                    "isValid(datum.INFO.DETAILED_TYPE) ? "
+                    "datum.INFO.DETAILED_TYPE[0] : null"
+                )
+            ).title("Detailed type"),
             gs.Tooltip("SAMPLES.wakhan_haplotagged.VAF[0]")
             .title("Variant allele frequency")
             .format(".3f"),
@@ -84,29 +72,19 @@ sv_links = (
             .format(".3f"),
             gs.Tooltip("SAMPLES.wakhan_haplotagged.GT[0]").title("Genotype"),
             gs.Tooltip(
-                {
-                    "expr": (
-                        "datum.SAMPLES.wakhan_haplotagged.DV[0] + ' variant, ' + "
-                        "datum.SAMPLES.wakhan_haplotagged.DR[0] + ' reference'"
-                    ),
-                    "title": "Read support",
-                }
-            ),
+                gs.expr(
+                    "datum.SAMPLES.wakhan_haplotagged.DV[0] + ' variant, ' + "
+                    "datum.SAMPLES.wakhan_haplotagged.DR[0] + ' reference'"
+                )
+            ).title("Read support"),
             gs.Tooltip(
-                {
-                    "expr": "isValid(datum.INFO.HP) ? datum.INFO.HP[0] : null",
-                    "title": "Haplotype",
-                }
-            ),
+                gs.expr("isValid(datum.INFO.HP) ? datum.INFO.HP[0] : null")
+            ).title("Haplotype"),
             gs.Tooltip(
-                {
-                    "expr": (
-                        "isValid(datum.INFO.PHASESETID) ? "
-                        "datum.INFO.PHASESETID[0] : null"
-                    ),
-                    "title": "Phase set",
-                }
-            ),
+                gs.expr(
+                    "isValid(datum.INFO.PHASESETID) ? datum.INFO.PHASESETID[0] : null"
+                )
+            ).title("Phase set"),
             gs.Tooltip("INFO.MAPQ[0]").title("Mapping quality"),
         ],
     )

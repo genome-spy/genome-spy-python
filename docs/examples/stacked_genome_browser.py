@@ -255,7 +255,7 @@ chart = (
             "Lazy signal, regulatory, sequence, and RefSeq tracks aligned to "
             "one zoomable genomic axis."
         ),
-        axes={"x": gs.GenomeAxis(orient="bottom", title="Genomic position")},
+        axes=gs.axes(x=gs.GenomeAxis(orient="bottom", title="Genomic position")),
         spacing=8,
         scales=gs.scales(x=gs.Scale(domain=DOMAIN)),
     )

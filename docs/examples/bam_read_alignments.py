@@ -16,16 +16,16 @@ META = {
 }
 
 read_tooltips = [
-    gs.Tooltip({"field": "name", "title": "Read"}),
-    gs.Tooltip({"field": "strand", "title": "Strand"}),
-    gs.Tooltip({"field": "isPaired", "title": "Paired"}),
-    gs.Tooltip({"field": "isProperPair", "title": "Proper pair"}),
-    gs.Tooltip({"field": "isDuplicate", "title": "Duplicate"}),
-    gs.Tooltip({"field": "isQcFail", "title": "QC fail"}),
-    gs.Tooltip({"field": "isSecondary", "title": "Secondary"}),
-    gs.Tooltip({"field": "isSupplementary", "title": "Supplementary"}),
-    gs.Tooltip({"field": "mapq", "title": "Mapping quality"}),
-    gs.Tooltip({"field": "cigar", "title": "CIGAR"}),
+    gs.Tooltip("name").title("Read"),
+    gs.Tooltip("strand").title("Strand"),
+    gs.Tooltip("isPaired").title("Paired"),
+    gs.Tooltip("isProperPair").title("Proper pair"),
+    gs.Tooltip("isDuplicate").title("Duplicate"),
+    gs.Tooltip("isQcFail").title("QC fail"),
+    gs.Tooltip("isSecondary").title("Secondary"),
+    gs.Tooltip("isSupplementary").title("Supplementary"),
+    gs.Tooltip("mapq").title("Mapping quality"),
+    gs.Tooltip("cigar").title("CIGAR"),
 ]
 
 base_colors = gs.Scale(
@@ -175,11 +175,8 @@ insertions = (
         x2=None,
         tooltip=[
             gs.Tooltip(
-                {
-                    "expr": "slice(datum._seq, datum.readStart, datum.readEnd)",
-                    "title": "Inserted sequence",
-                }
-            )
+                gs.expr("slice(datum._seq, datum.readStart, datum.readEnd)")
+            ).title("Inserted sequence")
         ],
     )
     .properties(name="insertions", title="Insertion")

@@ -28,7 +28,7 @@ chart = (
     .properties(
         height=gs.step(20),
         viewportHeight="container",
-        view={"stroke": "lightgray"},
         title="Scrollable viewport",
     )
+    .with_view(stroke="lightgray")
 )

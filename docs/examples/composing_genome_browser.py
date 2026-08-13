@@ -43,7 +43,7 @@ chart = (
                 ]
             )
         ),
-        axes={"x": {"orient": "top", "title": None}},
+        axes=gs.axes(x=gs.GenomeAxis(orient="top", title=None)),
     )
     .resolve_axis(x="shared")
     .configure_legend(disable=True)

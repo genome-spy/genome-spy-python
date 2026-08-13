@@ -204,7 +204,7 @@ matrix = (
         name="combination-matrix",
         width=gs.step(20),
         height=gs.step(20),
-        padding={"left": 45},
+        padding=gs.Paddings(left=45),
         params=[
             gs.param(
                 "setCursor",

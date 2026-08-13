@@ -77,6 +77,8 @@ MICROBIOME_HEIGHT = 28
 SAMPLE_LABEL_HEIGHT = 80
 TRACK_TICK_FONT_SIZE = 9
 HEATMAP_LABEL_FONT_SIZE = 9
+SUMMARY_WIDTH = PERCENT_WIDTH + COUNTS_WIDTH + 4
+TOP_TRACKS_HEIGHT = TMB_HEIGHT + SPECTRUM_HEIGHT + MSI_HEIGHT + STAGE_HEIGHT + 16
 
 MRNA_GROUP = "mRNA expression z-scores relative to diploid samples (RNA Seq V2 RSEM)"
 METHYLATION_GROUP = "Methylation (HM27 and HM450 merge)"
@@ -101,9 +103,13 @@ spectrum_scale = Scale().domain(SPECTRUM_ORDER).range(SPECTRUM_COLORS)
 stage_scale = Scale().domain(STAGE_ORDER).range(STAGE_COLORS)
 
 
-def blank_panel(*, width: int, height: int) -> gs.Chart:
-    """Invisible spacer panel used to align the right summary column."""
-    return gs.Chart([{}]).mark_rect(opacity=0).properties(width=width, height=height)
+def empty_panel(*, height: int) -> gs.Chart:
+    """Create a placeholder that aligns the summary column with the matrix."""
+    return (
+        gs.Chart([])
+        .mark_point()
+        .properties(name="summary-placeholder", width=SUMMARY_WIDTH, height=height)
+    )
 
 
 def heatmap_panel(
@@ -290,10 +296,7 @@ percent_panel = (
     .mark_text(align="right", dx=-3, size=10, color="#4b5563", clip="never")
     .encode(
         x=gs.value(1),
-        y=gs.Y("gene:N")
-        .scale(domain=gene_order, reverse=True, padding=0.03)
-        .axis(None)
-        .title(None),
+        y=gs.Y("gene:N").axis(None).title(None),
         text=gs.Text("label:N"),
     )
     .properties(width=PERCENT_WIDTH, height=MATRIX_HEIGHT)
@@ -303,10 +306,7 @@ count_grid = (
     gs.Chart(data["genes"][["gene"]])
     .mark_rect(color="#ebebeb", stroke="white", strokeWidth=0.35)
     .encode(
-        y=gs.Y("gene:N")
-        .scale(domain=gene_order, reverse=True, padding=0.03)
-        .axis(None)
-        .title(None),
+        y=gs.Y("gene:N").axis(None).title(None),
     )
 )
 
@@ -319,23 +319,22 @@ count_bars = (
         .scale(domain=[0, count_limit], zero=True)
         .title("Altered samples"),
         x2=gs.X2("_x1"),
-        y=gs.Y("gene:N")
-        .scale(domain=gene_order, reverse=True, padding=0.03)
-        .axis(None)
-        .title(None),
+        y=gs.Y("gene:N").axis(None).title(None),
         color=gs.Color("class:N").scale(mutation_scale).legend(None),
     )
 )
 
-gene_count_panel = (count_grid + count_bars).properties(
-    width=COUNTS_WIDTH, height=MATRIX_HEIGHT
+gene_count_panel = (
+    (count_grid + count_bars)
+    .properties(width=COUNTS_WIDTH, height=MATRIX_HEIGHT)
+    .resolve_scale(x="excluded")
 )
 
-matrix_summary_row = gs.hconcat(
-    percent_panel,
-    gene_count_panel,
-    spacing=4,
-).resolve_scale(y="shared", x="independent")
+matrix_summary = (
+    gs.concat(percent_panel, gene_count_panel, columns=2, spacing=4)
+    .properties(scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.03}})
+    .resolve_scale(x="excluded", y="shared")
+)
 
 # --- lower grouped heatmaps ----------------------------------------------------
 
@@ -372,8 +371,6 @@ sample_label_track = (
     .properties(width=SAMPLE_TRACK_WIDTH, height=SAMPLE_LABEL_HEIGHT)
 )
 
-summary_width = PERCENT_WIDTH + COUNTS_WIDTH + 4
-
 sample_tracks = (
     gs.vconcat(
         burden_track,
@@ -387,12 +384,21 @@ sample_tracks = (
         spacing=4,
     )
     .properties(
+        scales={
+            "x": {
+                "domain": sample_domain,
+                "paddingInner": 0,
+                "paddingOuter": 0,
+                "zoom": True,
+            }
+        },
         params=[
             gs.param(
                 "sampleRuler",
                 persist=False,
                 ruler={
                     "encodings": ["x"],
+                    "extent": "container",
                     "snap": False,
                     "mark": {"opacity": 0.3},
                 },
@@ -404,43 +410,21 @@ sample_tracks = (
     .properties(width=SAMPLE_TRACK_WIDTH)
 )
 
-center_column = (
-    gs.vconcat(sample_tracks, sample_label_track, spacing=4)
-    .properties(
-        scales={
-            "x": {
-                "domain": sample_domain,
-                "paddingInner": 0,
-                "paddingOuter": 0,
-                "zoom": True,
-            }
-        }
-    )
-    .resolve_scale(x="shared", y="independent")
-    .resolve_axis(y="independent")
-    .properties(width=SAMPLE_TRACK_WIDTH)
+center_column = gs.vconcat(sample_tracks, sample_label_track, spacing=4).resolve_scale(
+    x="shared", y="independent"
 )
 
-right_column = gs.vconcat(
-    blank_panel(width=summary_width, height=TMB_HEIGHT),
-    blank_panel(width=summary_width, height=SPECTRUM_HEIGHT),
-    blank_panel(width=summary_width, height=MSI_HEIGHT),
-    blank_panel(width=summary_width, height=STAGE_HEIGHT),
-    matrix_summary_row,
-    blank_panel(width=summary_width, height=MRNA_HEIGHT),
-    blank_panel(width=summary_width, height=METHYLATION_HEIGHT),
-    blank_panel(width=summary_width, height=MICROBIOME_HEIGHT),
-    blank_panel(width=summary_width, height=SAMPLE_LABEL_HEIGHT),
+summary_column = gs.concat(
+    empty_panel(height=TOP_TRACKS_HEIGHT),
+    matrix_summary,
+    columns=1,
     spacing=4,
 )
 
 chart = (
-    gs.hconcat(
-        center_column,
-        right_column,
-        spacing=4,
-    )
-    .resolve_scale(x="independent", y="independent")
+    gs.concat(center_column, summary_column, columns=2, spacing=4)
+    .resolve_scale(x="shared", y="independent")
+    .properties(width=SAMPLE_TRACK_WIDTH)
     .properties(
         title="TCGA Lung Adenocarcinoma (PanCancer Atlas), default sort method",
         width="container",

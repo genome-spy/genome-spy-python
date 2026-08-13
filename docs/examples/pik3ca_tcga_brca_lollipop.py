@@ -14,6 +14,12 @@ META = {
     "max_width": 980,
 }
 
+PROTEIN_LENGTH = 1068
+LABEL_HEIGHT = 65
+CONNECTOR_HEIGHT = 20
+PROTEIN_HEIGHT = 50
+DISPLACEMENT_LENGTH = 18
+
 MUTATIONS = [
     {
         "position": 81,
@@ -223,7 +229,7 @@ mutation_labels = (
         tooltip=None,
     )
     .encode(y=gs.value(0), text=gs.Text("mutation"))
-    .properties(name="mutation-labels", height=65)
+    .properties(name="mutation-labels", height=LABEL_HEIGHT)
 )
 stems = (
     gs.Chart()
@@ -275,14 +281,14 @@ connectors = (
 anchors = (
     gs.Chart()
     .mark_rule(size=gs.expr("lineWidth"), color="#707070", tooltip=None, y2Offset=20)
-    .encode(xOffset={"value": 0}, y=gs.value(0), y2=gs.value(0))
+    .encode(xOffset=gs.XOffset(gs.value(0)), y=gs.value(0), y2=gs.value(0))
     .properties(name="true-position-anchors")
 )
 mutation_view = (
     gs.vconcat(
         mutation_labels,
         mutation_marks,
-        gs.layer(connectors, anchors).properties(height=20),
+        gs.layer(connectors, anchors).properties(height=CONNECTOR_HEIGHT),
         spacing=0,
     )
     .properties(
@@ -290,8 +296,8 @@ mutation_view = (
         resolve={"scale": {"color": "shared"}, "legend": {"color": "shared"}},
     )
     .encode(
-        x=gs.X("position:I").scale(domainMin=1, nice=False).axis(None),
-        xOffset={"field": "xDisplacement", "type": "quantitative", "scale": None},
+        x=gs.X("position:I").axis(None),
+        xOffset=gs.XOffset("xDisplacement:Q").scale(None),
         y=gs.Y("sampleCount:Q")
         .scale(type="log", domainMin=1, nice=False, padding=0.08)
         .axis(title="Distinct tumor samples", grid=False),
@@ -299,7 +305,7 @@ mutation_view = (
     .transform_collect(sort=gs.compare("position", order="ascending"))
     .transform_displace1d(
         pos="position",
-        length=18,
+        length=DISPLACEMENT_LENGTH,
         as_="xDisplacement",
         positionFactor=gs.expr("pixelsPerResidue"),
         extent=gs.expr("[0.5, proteinLength + 0.5 - 25 / max(1, pixelsPerResidue)]"),
@@ -334,7 +340,7 @@ domain_blocks = (
             gs.Tooltip("description").title("Domain"),
             gs.Tooltip("start").title("Start"),
             gs.Tooltip("end").title("End"),
-            gs.Tooltip({"value": "UniProt P42336", "title": "Source"}),
+            gs.Tooltip(gs.value("UniProt P42336")).title("Source"),
         ],
     )
     .properties(name="domains")
@@ -348,7 +354,10 @@ domain_labels = (
 protein = (
     gs.layer(backbone, domain_blocks, domain_labels)
     .properties(
-        data=gs.Data(name="domains"), name="protein", height=50, padding={"top": -5}
+        data=gs.Data(name="domains"),
+        name="protein",
+        height=PROTEIN_HEIGHT,
+        padding=gs.Paddings(top=-5),
     )
     .encode(
         x=gs.X("start:I").axis(
@@ -365,8 +374,9 @@ chart = (
         padding=10,
         description="Recurrent protein-altering PIK3CA mutations in TCGA-BRCA. Heights and labels show distinct tumor sample counts.",
         datasets={"mutations": MUTATIONS, "domains": DOMAINS},
+        scales={"x": {"domainMin": 1, "nice": False}},
         params=[
-            gs.param("proteinLength", value=1068),
+            gs.param("proteinLength", value=PROTEIN_LENGTH),
             gs.param("lineWidth", value=1),
             gs.param(
                 "pixelsPerResidue", expr="width * (scale('x', 1) - scale('x', 0))"

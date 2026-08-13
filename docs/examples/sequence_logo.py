@@ -31,7 +31,7 @@ chart = (
         offset="information",
         as_=["_y0", "_y1"],
         baseField="base",
-        sort={"field": "count", "order": "ascending"},
+        sort=gs.compare("count", order="ascending"),
     )
     .mark_text(
         font="Source Sans Pro",

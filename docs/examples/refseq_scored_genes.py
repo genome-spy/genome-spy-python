@@ -34,10 +34,13 @@ bodies = (
     .properties(name="bodies", title="Gene annotations")
 )
 
-transcripts = (exons + bodies).properties(
-    name="transcripts",
-    opacity=gs.dynamic_opacity(unitsPerPixel=[100000, 40000], values=[0, 1]),
-    encoding={"color": {"value": "#909090"}},
+transcripts = (
+    (exons + bodies)
+    .encode(color=gs.value("#909090"))
+    .properties(
+        name="transcripts",
+        opacity=gs.dynamic_opacity(unitsPerPixel=[100000, 40000], values=[0, 1]),
+    )
 )
 
 labels = (
@@ -107,7 +110,7 @@ chart = (
                 )
             ),
         ),
-        axes={"x": {"title": None}},
+        axes=gs.axes(x=gs.GenomeAxis(title=None)),
     )
     .encode(
         y=gs.Y("_lane:O")

@@ -30,7 +30,7 @@ logo = (
         offset="information",
         as_=["_y0", "_y1"],
         baseField="base",
-        sort={"field": "count", "order": "ascending"},
+        sort=gs.compare("count", order="ascending"),
     )
     .mark_text(
         font="Source Sans Pro",
@@ -73,7 +73,7 @@ chart = (
         assembly="hg38",
         data=gs.Data(
             url="https://data.genomespy.app/sample-data/16SRNA_Deino_87seq.aln",
-            format={"type": "fasta"},
+            format=gs.data_format(type="fasta"),
         ),
         scales=gs.scales(x=gs.Scale(domain=[190, 230], zoom={"extent": "data"})),
         description="A multiple sequence alignment with a sequence-logo overview.",

@@ -51,6 +51,7 @@ def test_pik3ca_lollipop_uses_reactive_collision_displacement() -> None:
     example = gallery.collect_example(EXAMPLES_DIR / "pik3ca_tcga_brca_lollipop.py")
 
     assert example.spec["datasets"]["mutations"][-1]["mutation"] == "G1049R"
+    assert example.spec["scales"]["x"] == {"domainMin": 1, "nice": False}
     mutation_view = example.spec["vconcat"][0]
     assert mutation_view["transform"][1] == {
         "type": "displace1d",
@@ -67,7 +68,97 @@ def test_pik3ca_lollipop_uses_reactive_collision_displacement() -> None:
         "type": "quantitative",
         "scale": None,
     }
+    assert mutation_view["vconcat"][2]["layer"][1]["encoding"]["xOffset"] == {
+        "value": 0
+    }
     assert mutation_view["vconcat"][2]["layer"][0]["mark"]["x2Offset"] == 0
+
+
+def test_hcc_structural_variant_channels_use_typed_conditions() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "hcc1954_sv_cnv.py")
+
+    links = example.spec["vconcat"][0]["layer"][1]
+    assert links["encoding"]["size"]["condition"] == [
+        {"empty": False, "param": "svHover", "value": 3}
+    ]
+    assert links["encoding"]["opacity"] == {
+        "condition": [{"empty": False, "param": "svHover", "value": 1}],
+        "value": 0.5,
+    }
+    assert links["encoding"]["tooltip"][0] == {
+        "expr": (
+            "datum.INFO.SVTYPE[0] == 'BND' ? "
+            "replace(datum.ID[0], /_[12]$/, '') : datum.ID[0]"
+        ),
+        "title": "SV ID",
+    }
+
+
+def test_composed_examples_use_fluent_shared_encodings() -> None:
+    gallery = _load_gallery()
+    dynseq = gallery.collect_example(EXAMPLES_DIR / "dynseq_bqtl.py")
+    refseq = gallery.collect_example(EXAMPLES_DIR / "refseq_scored_genes.py")
+
+    baseline = dynseq.spec["templates"]["allele-track"]["layer"][0]
+    assert baseline["encoding"] == {
+        "color": {"value": "gray"},
+        "y": {"datum": 0, "type": "quantitative"},
+    }
+    transcripts = refseq.spec["layer"][0]
+    assert transcripts["encoding"] == {"color": {"value": "#909090"}}
+
+
+def test_sequence_examples_use_typed_sort_and_data_format_helpers() -> None:
+    gallery = _load_gallery()
+    alignment = gallery.collect_example(EXAMPLES_DIR / "multiple_sequence_alignment.py")
+    logo = gallery.collect_example(EXAMPLES_DIR / "sequence_logo.py")
+
+    assert alignment.spec["vconcat"][0]["transform"][2]["sort"] == {
+        "field": "count",
+        "order": "ascending",
+    }
+    assert alignment.spec["data"]["format"] == {"type": "fasta"}
+    assert logo.spec["transform"][0]["sort"] == {
+        "field": "count",
+        "order": "ascending",
+    }
+
+
+def test_examples_use_typed_axis_and_view_configuration() -> None:
+    gallery = _load_gallery()
+    composing = gallery.collect_example(EXAMPLES_DIR / "composing_genome_browser.py")
+    refseq = gallery.collect_example(EXAMPLES_DIR / "refseq_scored_genes.py")
+    stacked = gallery.collect_example(EXAMPLES_DIR / "stacked_genome_browser.py")
+    viewport = gallery.collect_example(EXAMPLES_DIR / "scrollable_viewport.py")
+
+    assert composing.spec["axes"] == {"x": {"orient": "top", "title": None}}
+    assert refseq.spec["axes"] == {"x": {"title": None}}
+    assert stacked.spec["axes"] == {
+        "x": {"orient": "bottom", "title": "Genomic position"}
+    }
+    assert viewport.spec["view"] == {"stroke": "lightgray"}
+
+
+def test_examples_use_typed_layout_definitions() -> None:
+    gallery = _load_gallery()
+    ascat = gallery.collect_example(EXAMPLES_DIR / "ascat_fitting.py")
+    lollipop = gallery.collect_example(EXAMPLES_DIR / "pik3ca_tcga_brca_lollipop.py")
+    upset = gallery.collect_example(EXAMPLES_DIR / "upset_mutations.py")
+
+    def values_for_key(spec: object, key: str) -> list[object]:
+        if isinstance(spec, list):
+            return [value for item in spec for value in values_for_key(item, key)]
+        if not isinstance(spec, dict):
+            return []
+        return [
+            *([spec[key]] if key in spec else []),
+            *(value for item in spec.values() for value in values_for_key(item, key)),
+        ]
+
+    assert {"grow": 2} in values_for_key(ascat.spec, "height")
+    assert {"top": -5} in values_for_key(lollipop.spec, "padding")
+    assert {"left": 45} in values_for_key(upset.spec, "padding")
 
 
 @pytest.mark.parametrize("path", _example_paths(), ids=lambda p: p.stem)
@@ -89,46 +180,48 @@ def test_luad_oncoprint_uses_sample_index_scale_and_categorical_genes() -> None:
 
     assert example.spec["viewportHeight"] == "container"
     assert example.height == 920
-    center_column = example.spec["hconcat"][0]
+    center_column, summary_column = example.spec["concat"]
     sample_tracks = center_column["vconcat"][0]
     matrix_panel = sample_tracks["vconcat"][4]
+    placeholder, matrix_summary = summary_column["concat"]
+    percent_panel, gene_count_panel = matrix_summary["concat"]
     matrix_layers = matrix_panel["layer"]
     assert matrix_panel["scales"]["y"]["domain"]
     assert matrix_panel["scales"]["y"]["reverse"] is True
-    assert "params" not in matrix_panel
-    assert "params" not in center_column
+    assert matrix_summary["resolve"]["scale"]["y"] == "shared"
     assert sample_tracks["params"] == [
         {
             "name": "sampleRuler",
             "persist": False,
             "ruler": {
                 "encodings": ["x"],
+                "extent": "container",
                 "snap": False,
                 "mark": {"opacity": 0.3},
             },
         }
     ]
     assert example.spec["width"] == "container"
-    assert center_column["width"] == "container"
     assert sample_tracks["width"] == "container"
-    assert all(panel["width"] == "container" for panel in sample_tracks["vconcat"])
+    assert all(
+        panel["width"] == "container"
+        for panel in [
+            *sample_tracks["vconcat"][:4],
+            matrix_panel,
+            *sample_tracks["vconcat"][5:],
+        ]
+    )
 
-    assert center_column["resolve"]["scale"]["x"] == "shared"
-    assert center_column["resolve"]["scale"]["y"] == "independent"
-    assert center_column["resolve"]["axis"]["y"] == "independent"
     assert sample_tracks["resolve"]["scale"]["x"] == "shared"
     assert sample_tracks["resolve"]["scale"]["y"] == "independent"
     assert sample_tracks["resolve"]["axis"]["y"] == "independent"
-    assert example.spec["resolve"]["scale"] == {
-        "x": "independent",
-        "y": "independent",
-    }
+    assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
     for layer in matrix_layers:
         assert layer["encoding"]["y"]["field"] == "gene"
         assert layer["encoding"]["y"]["type"] == "nominal"
         assert "axis" not in layer["encoding"]["y"]
     assert matrix_layers[1]["encoding"]["color"]["legend"] is None
-    assert center_column["scales"]["x"] == {
+    assert sample_tracks["scales"]["x"] == {
         "domain": [-0.5, 342.5],
         "paddingInner": 0,
         "paddingOuter": 0,
@@ -192,17 +285,16 @@ def test_luad_oncoprint_uses_sample_index_scale_and_categorical_genes() -> None:
         if panel is spectrum:
             expected_transform["offset"] = "normalize"
         assert panel["transform"][0] == expected_transform
-    percent_panel = example.spec["hconcat"][1]["vconcat"][4]["hconcat"][0]
     assert percent_panel["encoding"]["x"] == {"value": 1}
     assert percent_panel["mark"]["clip"] == "never"
-    assert percent_panel["encoding"]["y"]["scale"]["reverse"] is True
-    count_layers = example.spec["hconcat"][1]["vconcat"][4]["hconcat"][1]["layer"]
-    assert all(
-        layer["encoding"]["y"]["scale"]["reverse"] is True for layer in count_layers
-    )
+    assert "scale" not in percent_panel["encoding"]["y"]
+    count_layers = gene_count_panel["layer"]
+    assert all("scale" not in layer["encoding"]["y"] for layer in count_layers)
     assert all(panel["data"]["values"] for panel in sample_tracks["vconcat"][5:])
     assert len(sample_tracks["vconcat"]) == 8
-    assert len(center_column["vconcat"]) == 2
+    assert placeholder["name"] == "summary-placeholder"
+    assert placeholder["height"] == 162
+    assert "hconcat" not in example.spec
 
 
 def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
@@ -211,10 +303,10 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
 
     assert example.height == 660
     assert example.max_width == 760
-    left_column = example.spec["hconcat"][0]
-    assert all(panel["width"] == 400 for panel in left_column["vconcat"])
-    sample_layers = [left_column["vconcat"][0], *left_column["vconcat"][1]["layer"]]
-    assert left_column["vconcat"][1]["scales"]["y"]["domain"] == [
+    top_row, matrix_row = example.spec["concat"]
+    matrix_panel, percent_panel, counts_panel = matrix_row["concat"]
+    assert top_row["concat"][0]["width"] == matrix_panel["width"] == 400
+    assert matrix_row["scales"]["y"]["domain"] == [
         "FLT3",
         "DNMT3A",
         "NPM1",
@@ -226,9 +318,9 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
         "TP53",
         "CEBPA",
     ]
-    assert left_column["vconcat"][1]["scales"]["y"]["reverse"] is True
-    assert "params" not in left_column["vconcat"][1]
-    assert left_column["params"] == [
+    assert matrix_row["scales"]["y"]["reverse"] is True
+    assert matrix_row["resolve"]["scale"]["y"] == "shared"
+    assert matrix_panel["params"] == [
         {
             "name": "sampleRuler",
             "persist": False,
@@ -240,39 +332,33 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
         }
     ]
 
-    assert left_column["resolve"]["scale"]["x"] == "shared"
-    assert left_column["resolve"]["scale"]["y"] == "independent"
-    assert left_column["resolve"]["axis"]["y"] == "independent"
-    assert left_column["scales"]["x"] == {
+    assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
+    assert matrix_panel["scales"]["x"] == {
         "domain": [-0.5, 192.5],
         "paddingInner": 0,
         "paddingOuter": 0,
         "zoom": True,
     }
-    for layer in sample_layers:
+    for layer in [top_row["concat"][0], *matrix_panel["layer"]]:
         assert layer["encoding"]["x"]["field"] == "sample_order"
         assert layer["encoding"]["x"]["type"] == "index"
         assert "x2" not in layer["encoding"]
-    assert left_column["vconcat"][0]["transform"][0] == {
+    assert top_row["concat"][0]["transform"][0] == {
         "type": "stack",
         "groupby": ["sample_order"],
         "as": ["_y0", "_y1"],
         "field": "count",
     }
-    count_bars = example.spec["hconcat"][2]["vconcat"][1]["layer"][1]
+    count_bars = counts_panel["layer"][1]
     assert count_bars["transform"][0] == {
         "type": "stack",
         "groupby": ["gene"],
         "as": ["_x0", "_x1"],
         "field": "count",
     }
-    percent_panel = example.spec["hconcat"][1]["vconcat"][1]
     assert percent_panel["encoding"]["x"] == {"value": 1}
-    assert percent_panel["encoding"]["y"]["scale"]["reverse"] is True
-    assert all(
-        layer["encoding"]["y"]["scale"]["reverse"] is True
-        for layer in example.spec["hconcat"][2]["vconcat"][1]["layer"]
-    )
+    assert "scale" not in percent_panel["encoding"]["y"]
+    assert all("scale" not in layer["encoding"]["y"] for layer in counts_panel["layer"])
     assert [row["label"] for row in percent_panel["data"]["values"]] == [
         "27%",
         "25%",
@@ -285,7 +371,7 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
         "8%",
         "7%",
     ]
-    count_title = example.spec["hconcat"][2]["vconcat"][0]
+    count_title = top_row["concat"][2]
     assert count_title["encoding"]["x"] == {"value": 0.5}
 
 

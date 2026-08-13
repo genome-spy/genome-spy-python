@@ -18,12 +18,12 @@ allele_track = (
     gs.layer(
         gs.Chart(
             [{}],
-            encoding={
-                "y": {"datum": 0, "type": "quantitative"},
-                "color": {"value": "gray"},
-            },
         )
         .mark_rule()
+        .encode(
+            y=gs.datum(0, type="quantitative"),
+            color=gs.value("gray"),
+        )
         .properties(name="baseline"),
         gs.Chart()
         .mark_text(
@@ -42,7 +42,7 @@ allele_track = (
             .scale(zero=True, nice=False, reverse=False)
             .axis(title="Score"),
             y2=gs.Y2("score"),
-            text=gs.Text({"field": "base"}),
+            text=gs.Text("base"),
             color=gs.Color("base:N")
             .scale(
                 domain=["A", "C", "G", "T"],

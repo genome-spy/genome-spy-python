@@ -316,7 +316,7 @@ rounded_copy_number = (
         "Copy numbers rounded to integers + difference to raw values",
         style="overlay",
     ),
-    height={"grow": 2},
+    height=gs.SizeDef(grow=2),
 )
 selected_solution = (selected_fit & rounded_copy_number).resolve_axis(x="shared")
 
