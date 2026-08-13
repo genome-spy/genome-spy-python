@@ -4,9 +4,9 @@
 
 Maintain one polished Marimo notebook that demonstrates GenomeSpy as an
 interactive visualization layer for sequence-to-function modeling. The user
-selects a reference base, chooses an alternate allele, runs local
-`alphagenome-pytorch` inference explicitly, and compares reference, alternate,
-and delta regulatory tracks.
+chooses an alternate allele, zooms to base resolution, clicks a reference base,
+and immediately compares local `alphagenome-pytorch` reference, alternate, and
+delta regulatory tracks.
 
 The notebook lives at
 `notebooks/alphagenome/genome_spy_alphagenome_pytorch.py`. Non-model Marimo
@@ -15,16 +15,20 @@ in `notebooks/`.
 
 ## Product Contract
 
-- A sequence click selects a base but never mutates the sequence or starts
-  inference by itself.
-- The user chooses the alternate allele and presses **Predict variant**.
+- The sequence and prediction panels share one zoomable genomic x scale.
+- Wide views show sequence composition and representative gene models; base
+  letters replace the composition overview at detailed zoom levels.
+- A synchronized guide marks the selected base through the gene and prediction
+  panels so distal model effects cannot be mistaken for coordinate offsets.
+- The user chooses an alternate allele and clicking a sequence base starts one
+  prediction; the initial notebook render performs no model work.
 - Marimo owns mutation and request state; GenomeSpy parameters and click events
   carry only small interaction values.
 - Sequence and prediction tables move through stable named Arrow datasets.
 - Dataset changes update the existing GenomeSpy view without rebuilding the
   canvas or resetting zoom.
-- Changing an input marks the prior result stale rather than issuing hidden
-  work or discarding the last successful result.
+- Changing a non-sequence input marks the prior result stale without issuing
+  hidden work or discarding the last successful result.
 - The notebook accepts one SNV in the first implementation. Indels and
   haplotypes remain out of scope.
 
@@ -51,11 +55,12 @@ the local backend currently accepts SNVs.
 Show:
 
 1. a clickable reference-sequence track;
-2. aligned reference and alternate regulatory signal tracks;
-3. an alternate-minus-reference delta track;
-4. selected-site and model-interval context;
-5. explicit assay/ontology metadata and provenance;
-6. request status, stale state, timing, and actionable errors.
+2. representative RefSeq gene context for the displayed locus;
+3. aligned reference and alternate regulatory signal tracks;
+4. an alternate-minus-reference delta track;
+5. selected-site and model-interval context;
+6. explicit assay/ontology metadata and provenance;
+7. request status, stale state, timing, and actionable errors.
 
 Predictions are hypothesis-generating model output, not causal or clinical
 evidence.
@@ -91,7 +96,7 @@ Notebook/browser coverage:
 
 - notebook opens without importing or loading the model;
 - sequence clicks publish well-formed base data;
-- explicit submission is the only inference trigger;
+- a valid sequence click is the only inference trigger;
 - one successful request produces one live prediction-dataset update;
 - reference, alternate, and delta tracks render with useful tooltips;
 - zoom and the stable canvas survive prediction updates;
@@ -101,10 +106,10 @@ Notebook/browser coverage:
 
 ### M1 — Model-free interaction shell
 
-- Keep the packaged TAL1 reference, editor state machine, empty prediction
-  dataset, and explicit submission UI runnable without Torch.
-- Verify click routing, allele validation, stale state, and stable widget
-  updates.
+- Keep the packaged TAL1 reference, linked sequence track, click-submission
+  state machine, and empty prediction dataset runnable without Torch.
+- Verify click routing, allele validation, deduplicated submissions, stale
+  state, and stable widget updates.
 
 ### M2 — Local backend contract
 
@@ -123,8 +128,8 @@ Notebook/browser coverage:
 
 ### M4 — Showcase polish
 
-- Browser-verify the complete click, allele, predict, inspect, zoom, stale, and
-  recovery workflow.
+- Browser-verify the complete allele, zoom, click-to-predict, inspect, stale,
+  and recovery workflow.
 - Add concise notebook guidance and scientific limitations.
 - Consider additional SNV-compatible loci only after the TAL1 workflow is
   reliable; do not broaden the public library API solely for this notebook.

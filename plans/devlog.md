@@ -1,5 +1,59 @@
 # Dev Log
 
+## 2026-08-13 - Added locus context to the AlphaGenome view
+
+- Verified that the prediction coordinates are aligned rather than displaced:
+  the display starts at native AlphaGenome bin 384, and the default TAL1
+  control base begins a 128 bp output bin exactly. Distal peaks therefore
+  represent predicted activity or variant effects elsewhere in the locus.
+- Added a field-backed dashed guide for the selected base through every gene,
+  signal, and delta panel. The one-row guide dataset updates with the existing
+  GenomeSpy view and does not reset its shared zoom.
+- Added a semantic-zoom sequence treatment: a 128 bp GC-composition strip is
+  visible across the full 32 kb interval, while nucleotide blocks and letters
+  take over at detailed zoom levels.
+- Added representative NCBI RefSeq hg38 models for TAL1 (`NM_003189.5`) and the
+  partially visible neighboring STIL transcript (`NM_003035.2`) from UCSC's
+  2025-08-13 track release.
+- Validation: 29 focused Python tests, Ruff, and `git diff --check` passed.
+  Headless Chromium rendered one stable GenomeSpy canvas with the GC overview,
+  gene models, and aligned selected-site guides and no displayed runtime error.
+
+## 2026-08-13 - Simplified AlphaGenome interaction state
+
+- Kept the selected reference base, reconciled alternate allele, and processed
+  click revision in one Marimo state value. The alternate control now rebuilds
+  from that same state, so its displayed allele always matches the submitted
+  and inferred variant after a base click.
+- Removed separate click-submission, handled-click, and applied-request state.
+  Successful frames now update the named prediction dataset directly, and the
+  bounded session cache stores frames instead of redundant result wrappers.
+- Moved pure click and display-state helpers into
+  `_alphagenome_interaction.py` and shared the repeated prediction-tooltip
+  definition. The notebook remains responsible for its GenomeSpy composition
+  and visible reactive workflow.
+- Validation: 29 focused Python tests, Ruff formatting and linting, MyPy for
+  `src/`, and `git diff --check` passed. `marimo check` in the installed 0.23.16
+  environment hung inside its asynchronous linter without diagnostics; direct
+  `app.run()` coverage passed in the notebook tests.
+
+## 2026-08-13 - Linked sequence navigation to click-driven predictions
+
+- Expanded the packaged sequence dataset to the 32 kb display interval and put
+  the sequence plus all prediction panels under one shared zoomable x scale.
+  Sequence letters use the established semantic-zoom text treatment and the
+  selected base is highlighted through a parameter-driven filter.
+- Replaced 128 bp signal rules with zero-baseline bars. Dynseq letters were not
+  used because these assay outputs are binned signals rather than per-base
+  attribution scores.
+- Removed the run button. Each valid sequence click submits its selected base
+  and current alternate allele exactly once; repeat requests retain session
+  caching, while initial rendering remains model-free.
+- Validation: 29 focused Python tests, 13 frontend widget tests, Marimo check,
+  Ruff, MyPy, and `git diff --check` passed. Headless Chromium confirmed an
+  idle model-free render with one GenomeSpy canvas, no runtime errors, and no
+  lingering spinner.
+
 ## 2026-08-12 - Polished the TAL1 prediction tracks
 
 - Replaced point-only prediction panels with contiguous 128 bp rule segments
