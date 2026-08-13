@@ -24,10 +24,17 @@ def test_alphagenome_pytorch_notebook_opens_designer_without_loading_model(
         "predictions",
     )
     assert definitions["designer_rows"].height == definitions["display_interval"].width
+    assert (
+        definitions["display_interval"].start,
+        definitions["display_interval"].end,
+    ) == (47_212_000, 47_244_768)
     assert definitions["sequence_summary_rows"].height == 256
     assert definitions["gene_rows"].filter(
         definitions["gene_rows"]["feature"] == "transcript"
-    )["gene"].to_list() == ["TAL1", "STIL"]
+    )["gene"].to_list() == ["TAL1", "ENSG00000226252 (lncRNA)"]
+    assert definitions["gene_rows"].filter(
+        definitions["gene_rows"]["feature"] == "transcript"
+    )["biotype"].to_list() == ["protein_coding", "lncRNA"]
     source = Path("notebooks/alphagenome/genome_spy_alphagenome_pytorch.py").read_text(
         encoding="utf-8"
     )
@@ -44,17 +51,38 @@ def test_alphagenome_pytorch_tracks_share_zoom_and_expose_designer(
     definitions = _run_notebook(monkeypatch)
 
     spec = definitions["view"].spec
-    reference_sequence = spec["vconcat"][0]
-    designer_group = spec["vconcat"][1]
-    genes = spec["vconcat"][2]
-    prediction_tracks = spec["vconcat"][3]
+    detail_tracks = spec["vconcat"][0]
+    overview_tracks = spec["vconcat"][1]
+    reference_sequence = detail_tracks["vconcat"][0]
+    designer_group = detail_tracks["vconcat"][1]
+    genes = overview_tracks["vconcat"][0]
+    prediction_tracks = overview_tracks["vconcat"][1]
     assay_panels = prediction_tracks["vconcat"]
     panels = [panel for assay in assay_panels for panel in assay["vconcat"]]
 
-    assert spec["scales"]["x"] == {
+    assert spec["params"] == [{"name": "detailBrush"}]
+    assert spec["resolve"] == {"scale": {"x": "independent"}}
+    assert detail_tracks["resolve"] == {"scale": {"x": "shared"}}
+    assert detail_tracks["scales"]["x"] == {
+        "domain": {
+            "param": "detailBrush",
+            "initial": [
+                {"chrom": "chr1", "pos": definitions["tal1_pos0"] - 4},
+                {"chrom": "chr1", "pos": definitions["tal1_pos0"] + 4},
+            ],
+        },
+        "zoom": {
+            "extent": [
+                {"chrom": "chr1", "pos": definitions["display_interval"].start},
+                {"chrom": "chr1", "pos": definitions["display_interval"].end},
+            ]
+        },
+    }
+    assert overview_tracks["resolve"] == {"scale": {"x": "shared"}}
+    assert overview_tracks["scales"]["x"] == {
         "domain": [
-            {"chrom": "chr1", "pos": definitions["tal1_pos0"] - 4},
-            {"chrom": "chr1", "pos": definitions["tal1_pos0"] + 4},
+            {"chrom": "chr1", "pos": definitions["display_interval"].start},
+            {"chrom": "chr1", "pos": definitions["display_interval"].end},
         ],
         "zoom": {
             "extent": [
@@ -63,19 +91,47 @@ def test_alphagenome_pytorch_tracks_share_zoom_and_expose_designer(
             ]
         },
     }
+    assert overview_tracks["params"] == [
+        {
+            "name": "detailBrush",
+            "persist": False,
+            "push": "outer",
+            "select": {
+                "type": "interval",
+                "encodings": ["x"],
+                "extent": "container",
+                "mark": {
+                    "fill": "#2563eb",
+                    "fillOpacity": 0.04,
+                    "stroke": "#2563eb",
+                    "strokeOpacity": 0.45,
+                },
+            },
+        }
+    ]
     assert spec["assembly"] == "hg38"
-    assert spec["resolve"] == {"scale": {"x": "shared"}}
     assert reference_sequence["title"] == "hg38 reference sequence"
     assert reference_sequence["layer"][0]["data"] == {"name": "sequence_summary"}
     assert reference_sequence["layer"][0]["opacity"] == {
         "unitsPerPixel": [20, 5],
         "values": [1, 0],
     }
+    assert reference_sequence["layer"][0]["encoding"]["x"]["axis"] is None
     reference_bases = reference_sequence["layer"][1]
     assert reference_bases["data"] == {"name": "designer"}
     assert reference_bases["layer"][1]["encoding"]["text"]["field"] == "reference"
     assert designer_group["title"].startswith("Allele designer")
-    designer = designer_group["layer"][0]
+    assert designer_group["layer"][0]["data"] == {"name": "sequence_summary"}
+    assert designer_group["layer"][0]["opacity"] == {
+        "unitsPerPixel": [20, 5],
+        "values": [1, 0],
+    }
+    interactive_designer = designer_group["layer"][1]
+    assert interactive_designer["opacity"] == {
+        "unitsPerPixel": [20, 5],
+        "values": [0, 1],
+    }
+    designer = interactive_designer["layer"][0]
     assert designer["data"] == {"name": "designer"}
     assert designer["transform"] == [
         {"type": "flatten", "fields": ["alleles"], "as": ["allele"]}
@@ -84,11 +140,8 @@ def test_alphagenome_pytorch_tracks_share_zoom_and_expose_designer(
     assert designer["encoding"]["y"]["scale"]["domain"] == ["A", "C", "G", "T"]
     assert designer["layer"][1]["mark"]["type"] == "text"
     assert designer["layer"][1]["encoding"]["text"]["field"] == "allele"
-    assert designer_group["opacity"] == {
-        "unitsPerPixel": [20, 5],
-        "values": [0, 1],
-    }
-    reference_tiles = designer_group["layer"][1]
+    assert designer["encoding"]["x"]["axis"] == {"title": "Genomic position (hg38)"}
+    reference_tiles = interactive_designer["layer"][1]
     assert [layer["data"] for layer in reference_tiles["layer"]] == [
         {"name": "designer"},
         {"name": "designer"},
@@ -96,7 +149,7 @@ def test_alphagenome_pytorch_tracks_share_zoom_and_expose_designer(
     assert reference_tiles["layer"][0]["encoding"]["y"]["field"] == "reference"
     assert reference_tiles["layer"][1]["mark"]["type"] == "text"
     assert reference_tiles["layer"][1]["encoding"]["text"]["field"] == "reference"
-    edited_tiles = designer_group["layer"][2]
+    edited_tiles = interactive_designer["layer"][2]
     assert [layer["data"] for layer in edited_tiles["layer"]] == [
         {"name": "edits"},
         {"name": "edits"},
@@ -107,26 +160,147 @@ def test_alphagenome_pytorch_tracks_share_zoom_and_expose_designer(
     assert edited_tiles["layer"][1]["encoding"]["text"]["field"] == "reference"
     assert edited_tiles["layer"][2]["encoding"]["y"]["field"] == "alternate"
     assert edited_tiles["layer"][3]["encoding"]["text"]["field"] == "alternate"
-    assert "params" not in spec
-    assert genes["title"] == "NCBI RefSeq genes (hg38)"
+    base_color_scale = {
+        "domain": ["A", "C", "G", "T"],
+        "range": ["#4FBF45", "#4D96E8", "#E8B322", "#E85F78"],
+    }
+    assert reference_sequence["layer"][1]["encoding"]["color"]["scale"] == (
+        base_color_scale
+    )
+    assert reference_tiles["layer"][0]["encoding"]["color"]["scale"] == (
+        base_color_scale
+    )
+    assert edited_tiles["layer"][2]["encoding"]["color"]["scale"] == (base_color_scale)
+    assert genes["title"] == "TAL1 locus genes (RefSeq + Ensembl, hg38)"
+    assert "params" not in genes
     assert [layer["mark"]["type"] for layer in genes["layer"]] == [
         "rule",
         "rect",
         "text",
         "rule",
     ]
+    assert genes["layer"][0]["mark"] == {
+        "type": "rule",
+        "color": "#b0b0b0",
+        "size": 2,
+        "tooltip": None,
+    }
+    assert genes["layer"][1]["mark"] == {
+        "type": "rect",
+        "stroke": "#505050",
+        "strokeWidth": 1,
+        "minWidth": 1,
+        "fillOpacity": 0.8,
+        "tooltip": None,
+    }
+    assert genes["layer"][1]["encoding"]["fill"] == {
+        "field": "biotype",
+        "type": "nominal",
+        "scale": {
+            "domain": ["protein_coding", "lncRNA"],
+            "range": ["#ffbf79", "#83bcb6"],
+        },
+        "legend": None,
+    }
+    assert genes["layer"][2]["mark"] == {
+        "type": "text",
+        "color": "#505050",
+        "size": 10,
+        "yOffset": 12,
+        "tooltip": None,
+    }
+    assert "datum.transcript" in genes["layer"][2]["transform"][1]["expr"]
     assert len(assay_panels) == 4
     assert all(len(assay["vconcat"]) == 2 for assay in assay_panels)
     assert all(assay["resolve"]["axis"]["x"] == "shared" for assay in assay_panels)
     assert len(panels) == 8
-    assert all(panel["layer"][0]["mark"]["type"] == "rect" for panel in panels)
-    assert all(panel["layer"][0]["encoding"]["y2"] == {"datum": 0} for panel in panels)
+    signal_views = [panels[index]["layer"][0] for index in range(0, 8, 2)]
     assert all(
-        assay["vconcat"][0]["layer"][0]["encoding"]["x"]["axis"] is None
+        signal["stops"]
+        == {
+            "channel": "x",
+            "values": [10],
+            "transition": {"type": "lerp", "halfLife": 80},
+        }
+        for signal in signal_views
+    )
+    assert all(len(signal["multiscale"]) == 2 for signal in signal_views)
+    assert all(
+        signal["resolve"] == {"scale": {"color": "independent"}}
+        for signal in signal_views
+    )
+    assert all(
+        signal["multiscale"][0]["mark"]["type"] == "rect" for signal in signal_views
+    )
+    assert all(
+        signal["multiscale"][1]["layer"][1]["mark"]["type"] == "text"
+        for signal in signal_views
+    )
+    assert all(
+        signal["multiscale"][1]["layer"][1]["mark"]["logoLetters"] is True
+        for signal in signal_views
+    )
+    assert all(
+        signal["multiscale"][1]["layer"][1]["encoding"]["text"]["field"] == "base"
+        for signal in signal_views
+    )
+    assert all(
+        signal["multiscale"][1]["layer"][1]["encoding"]["y2"]["field"] == "logo_value"
+        for signal in signal_views
+    )
+    assert all(
+        signal["multiscale"][1]["layer"][1]["encoding"]["color"]["scale"]
+        == base_color_scale
+        for signal in signal_views
+    )
+    assert all("base-colored DynSeq" in panel["title"] for panel in panels[::2])
+    assert all(
+        signal["multiscale"][1]["layer"][1]["encoding"]["y"]["axis"]
+        == {"format": "~g", "title": None}
+        for signal in signal_views
+    )
+    assert all(
+        [
+            transform["type"]
+            for transform in signal["multiscale"][1]["layer"][1]["transform"]
+        ]
+        == [
+            "filter",
+            "regexFold",
+            "formula",
+            "flattenSequence",
+            "formula",
+            "formula",
+            "formula",
+        ]
+        for signal in signal_views
+    )
+    assert all(
+        signal["multiscale"][1]["layer"][0]["mark"]
+        == {
+            "type": "rule",
+            "color": "#475569",
+            "opacity": 0.7,
+            "size": 1,
+            "tooltip": None,
+        }
+        for signal in signal_views
+    )
+    assert all(
+        panels[index]["layer"][0]["mark"]["type"] == "rect" for index in range(1, 8, 2)
+    )
+    assert all(
+        panels[index]["layer"][0]["encoding"]["y2"] == {"datum": 0}
+        for index in range(1, 8, 2)
+    )
+    assert all(
+        assay["vconcat"][0]["layer"][0]["multiscale"][0]["encoding"]["x"]["axis"]
+        == {"title": "Genomic position (hg38)"}
         for assay in assay_panels
     )
     assert all(
-        assay["vconcat"][1]["layer"][0]["encoding"]["x"]["axis"] == {"title": None}
+        assay["vconcat"][1]["layer"][0]["encoding"]["x"]["axis"]
+        == {"title": "Genomic position (hg38)"}
         for assay in assay_panels
     )
     assert all(
@@ -137,7 +311,15 @@ def test_alphagenome_pytorch_tracks_share_zoom_and_expose_designer(
         panels[index]["layer"][0]["encoding"]["y"]["scale"] == {"zero": True}
         for index in range(1, 8, 2)
     )
-    assert {item["field"] for item in panels[0]["layer"][0]["encoding"]["tooltip"]} >= {
+    assert all(
+        panels[index]["layer"][0]["encoding"]["y"]["axis"]
+        == {"format": "~g", "title": None}
+        for index in range(1, 8, 2)
+    )
+    assert {
+        item["field"]
+        for item in signal_views[0]["multiscale"][1]["layer"][1]["encoding"]["tooltip"]
+    } >= {
         "chrom",
         "start0",
         "end0",
@@ -148,6 +330,9 @@ def test_alphagenome_pytorch_tracks_share_zoom_and_expose_designer(
         "reference",
         "alternate",
         "delta",
+        "series",
+        "base",
+        "value",
     }
 
 
@@ -208,6 +393,14 @@ def test_alphagenome_pytorch_allele_click_builds_multi_edit_submission(
         is False
     )
     assert definitions["should_run_submission"](None, prediction) is False
+    assert definitions["should_run_reference_prediction"](
+        None,
+        {"status": "idle", "frame": None, "click_revision": 0},
+    )
+    assert not definitions["should_run_reference_prediction"](
+        first,
+        {"status": "idle", "frame": None, "click_revision": 0},
+    )
 
 
 def test_alphagenome_pytorch_prediction_state_reports_stale_and_failed_inputs(

@@ -18,19 +18,25 @@ app = marimo.App()
 @app.cell
 def _():
     import importlib.metadata
+    import importlib.util
     import os
 
     import genome_spy as gs
     import marimo as mo
     import polars as pl
 
-    from _alphagenome_adapter import adapt_prediction_pairs, empty_prediction_frame
+    from _alphagenome_adapter import (
+        adapt_prediction_pairs,
+        add_sequence_chunks,
+        empty_prediction_frame,
+    )
     from _alphagenome_interaction import (
         BASES,
         allele_click_submission,
         prediction_display_state,
         prediction_input_key,
         should_run_submission,
+        should_run_reference_prediction,
     )
     from _alphagenome_pytorch import (
         DEFAULT_RESOLUTION,
@@ -41,6 +47,7 @@ def _():
         TAL1_TRACK_SELECTORS,
         ModelInterval,
         ModelVariant,
+        apply_variants,
         checkpoint_identity,
         download_checkpoint,
         load_model,
@@ -66,7 +73,9 @@ def _():
         TAL1_TRACK_SELECTORS,
         Variant,
         adapt_prediction_pairs,
+        add_sequence_chunks,
         allele_click_submission,
+        apply_variants,
         checkpoint_identity,
         download_checkpoint,
         empty_prediction_frame,
@@ -84,6 +93,7 @@ def _():
         resolve_precision,
         sequence_composition_rows,
         should_run_submission,
+        should_run_reference_prediction,
         update_prediction_cache,
     )
 
@@ -122,7 +132,7 @@ def _(
         model_start0,
         reference_asset["interval"]["end0"],
     )
-    display_interval = ModelInterval("chr1", tal1_pos0 - 16_384, tal1_pos0 + 16_384)
+    display_interval = ModelInterval("chr1", 47_212_000, 47_244_768)
     if model_interval.width != MODEL_INPUT_WIDTH:
         raise RuntimeError("Packaged TAL1 reference has an invalid model width.")
     reference_sequence = reference_asset["sequence"]
@@ -180,7 +190,7 @@ def _(mo):
     get_prediction, set_prediction = mo.state(
         {
             "status": "idle",
-            "message": "Zoom in and choose an alternate base to begin.",
+            "message": "Loading the reference sequence prediction.",
             "frame": None,
             "input_key": None,
             "click_revision": 0,
@@ -210,6 +220,7 @@ def _(
     sequence_summary_rows,
     tal1_pos0,
 ):
+    base_colors = ["#4FBF45", "#4D96E8", "#E8B322", "#E85F78"]
     base_grid = (
         gs.layer(
             gs.Chart().mark_rect(
@@ -231,7 +242,7 @@ def _(
             .encode(color=gs.value("#111827"), text=gs.Text("allele:N")),
         )
         .encode(
-            x=gs.Locus("chrom", "pos0", band=0).axis(title=None),
+            x=gs.Locus("chrom", "pos0", band=0).axis(title="Genomic position (hg38)"),
             x2=gs.Locus("chrom", "end0", band=0),
             y=gs.Y("allele:N").scale(domain=list(BASES)).axis(title=None),
             tooltip=["chrom:N", "pos1:Q", "reference:N", "allele:N"],
@@ -242,7 +253,7 @@ def _(
         .transform_flatten(fields=["alleles"], as_=["allele"])
     )
     reference_base = gs.Chart(data={"name": "designer"}).encode(
-        x=gs.Locus("chrom", "pos0", band=0).axis(title=None),
+        x=gs.Locus("chrom", "pos0", band=0).axis(title="Genomic position (hg38)"),
         x2=gs.Locus("chrom", "end0", band=0),
         y=gs.Y("reference:N").scale(domain=list(BASES)).axis(title=None),
         tooltip=["chrom:N", "pos1:Q", "reference:N"],
@@ -254,7 +265,7 @@ def _(
             color=gs.Color("reference:N")
             .scale(
                 domain=list(BASES),
-                range=["#4c78a8", "#f58518", "#54a24b", "#e45756"],
+                range=base_colors,
             )
             .legend(None)
         ),
@@ -272,7 +283,7 @@ def _(
         ),
     )
     edit_base = gs.Chart(data={"name": "edits"}).encode(
-        x=gs.Locus("chrom", "pos0", band=0).axis(title=None),
+        x=gs.Locus("chrom", "pos0", band=0).axis(title="Genomic position (hg38)"),
         x2=gs.Locus("chrom", "end0", band=0),
         tooltip=["chrom:N", "pos1:Q", "reference:N", "alternate:N"],
     )
@@ -303,7 +314,7 @@ def _(
             color=gs.Color("alternate:N")
             .scale(
                 domain=list(BASES),
-                range=["#4c78a8", "#f58518", "#54a24b", "#e45756"],
+                range=base_colors,
             )
             .legend(None),
         ),
@@ -321,23 +332,27 @@ def _(
             text=gs.Text("alternate:N"),
         ),
     )
-    sequence_designer = gs.layer(base_grid, reference_tiles, edited_tiles).properties(
-        height=104,
-        opacity=gs.dynamic_opacity(unitsPerPixel=[20, 5], values=[0, 1]),
-        title=(
-            "Allele designer: positions are columns; click an A/C/G/T tile "
-            "to build the alternate sequence"
-        ),
-    )
-
     sequence_overview = (
         gs.Chart(data={"name": "sequence_summary"})
         .mark_rect(minWidth=0.5)
         .encode(
-            x=gs.Locus("chrom", "start0", band=0).axis(title=None),
+            x=gs.Locus("chrom", "start0", band=0).axis(None),
             x2=gs.Locus("chrom", "end0", band=0),
             color=gs.Color("gc_fraction:Q")
             .scale(domain=[0.25, 0.75], range=["#f3f4f6", "#334155"])
+            .legend(None),
+            tooltip=["start0:Q", "end0:Q", "bin_size:Q", "gc_fraction:Q"],
+        )
+        .properties(opacity=gs.dynamic_opacity(unitsPerPixel=[20, 5], values=[1, 0]))
+    )
+    designer_overview = (
+        gs.Chart(data={"name": "sequence_summary"})
+        .mark_rect(minWidth=0.5)
+        .encode(
+            x=gs.Locus("chrom", "start0", band=0).axis(title="Genomic position (hg38)"),
+            x2=gs.Locus("chrom", "end0", band=0),
+            color=gs.Color("gc_fraction:Q")
+            .scale(domain=[0.25, 0.75], range=["#f8fafc", "#94a3b8"])
             .legend(None),
             tooltip=["start0:Q", "end0:Q", "bin_size:Q", "gc_fraction:Q"],
         )
@@ -359,12 +374,12 @@ def _(
             .encode(color=gs.value("#111827"), text=gs.Text("reference:N")),
         )
         .encode(
-            x=gs.Locus("chrom", "pos0", band=0).axis(title=None),
+            x=gs.Locus("chrom", "pos0", band=0).axis(None),
             x2=gs.Locus("chrom", "end0", band=0),
             color=gs.Color("reference:N")
             .scale(
                 domain=list(BASES),
-                range=["#4c78a8", "#f58518", "#54a24b", "#e45756"],
+                range=base_colors,
             )
             .legend(None),
             tooltip=["chrom:N", "pos1:Q", "reference:N"],
@@ -379,39 +394,65 @@ def _(
         .properties(height=34, title="hg38 reference sequence")
         .resolve_scale(color="independent")
     )
+    interactive_designer = gs.layer(
+        base_grid, reference_tiles, edited_tiles
+    ).properties(opacity=gs.dynamic_opacity(unitsPerPixel=[20, 5], values=[0, 1]))
+    sequence_designer = (
+        gs.layer(designer_overview, interactive_designer)
+        .properties(
+            height=104,
+            title=(
+                "Allele designer: positions are columns; click an A/C/G/T tile "
+                "to build the alternate sequence"
+            ),
+        )
+        .resolve_scale(color="independent")
+    )
 
     selected_site = (
         gs.Chart(data={"name": "selected_site"})
         .mark_rule(
             color="#111827", opacity=0.65, size=1, strokeDash=[4, 3], tooltip=None
         )
-        .encode(x=gs.Locus("chrom", "pos0", band=0).axis(None))
+        .encode(x=gs.Locus("chrom", "pos0", band=0))
     )
 
     gene_base = gs.Chart(data={"name": "genes"}).encode(
-        y=gs.Y("lane:O").axis(None),
-        color=gs.Color("gene:N")
-        .scale(domain=["TAL1", "STIL"], range=["#2563eb", "#64748b"])
-        .legend(None),
-        tooltip=["gene:N", "transcript:N", "strand:N", "source:N"],
+        y=gs.Y("lane:O").scale(padding=0.5, reverse=True).axis(None),
+        tooltip=["gene:N", "biotype:N", "transcript:N", "strand:N", "source:N"],
     )
     gene_models = gs.layer(
         gene_base.transform_filter("datum.feature === 'transcript'")
-        .mark_rule(size=2)
+        .mark_rule(color="#b0b0b0", size=2, tooltip=None)
         .encode(
             x=gs.Locus("chrom", "start0", band=0).axis(title=None),
             x2=gs.Locus("chrom", "end0", band=0),
         ),
         gene_base.transform_filter("datum.feature === 'exon'")
-        .mark_rect(minWidth=1)
+        .mark_rect(
+            stroke="#505050",
+            strokeWidth=1,
+            minWidth=1,
+            fillOpacity=0.8,
+            tooltip=None,
+        )
         .encode(
             x=gs.Locus("chrom", "start0", band=0).axis(title=None),
             x2=gs.Locus("chrom", "end0", band=0),
+            fill=gs.Fill("biotype:N")
+            .scale(
+                domain=["protein_coding", "lncRNA"],
+                range=["#ffbf79", "#83bcb6"],
+            )
+            .legend(None),
         ),
         gene_base.transform_filter("datum.feature === 'transcript'")
-        .mark_text(color="#111827", size=11, dy=-9, tooltip=None)
+        .mark_text(color="#505050", size=10, yOffset=12, tooltip=None)
         .transform_formula(
-            expr="(datum.strand === '-' ? '< ' : '') + datum.gene",
+            expr=(
+                "(datum.strand === '-' ? '< ' : '') + datum.gene + ' - ' "
+                "+ datum.transcript + (datum.strand === '+' ? ' >' : '')"
+            ),
             as_="label",
         )
         .encode(
@@ -419,7 +460,10 @@ def _(
             text=gs.Text("label:N"),
         ),
         selected_site,
-    ).properties(height=52, title="NCBI RefSeq genes (hg38)")
+    ).properties(
+        height=64,
+        title="TAL1 locus genes (RefSeq + Ensembl, hg38)",
+    )
 
     prediction_tooltip = [
         "chrom:N",
@@ -436,7 +480,7 @@ def _(
     ]
 
     def signal_panel(track_name, title):
-        signal = (
+        signal_bins = (
             gs.Chart(data={"name": "predictions"})
             .transform_filter(f"datum.track_name === '{track_name}'")
             .transform_regex_fold(
@@ -444,22 +488,81 @@ def _(
                 asValue="value",
                 asKey="series",
             )
-            .mark_rect(minWidth=0.5, opacity=0.55)
+        )
+        overview = signal_bins.mark_rect(minWidth=0.5, opacity=0.55).encode(
+            x=gs.Locus("chrom", "start0", band=0).axis(title="Genomic position (hg38)"),
+            x2=gs.Locus("chrom", "end0", band=0),
+            y=gs.Y("value:Q").axis(format="~g", title=None),
+            y2=gs.Y2(gs.datum(0)),
+            color=gs.Color("series:N")
+            .scale(
+                domain=["reference", "alternate"],
+                range=["#2563eb", "#dc2626"],
+            )
+            .legend(None),
+            tooltip=[*prediction_tooltip, "series:N", "value:Q"],
+        )
+        detail_logo = (
+            signal_bins.transform_formula(
+                expr=(
+                    "datum.series === 'reference' ? "
+                    "datum.reference_bases : datum.alternate_bases"
+                ),
+                as_="sequence",
+            )
+            .transform_flatten_sequence(field="sequence", as_=["base_offset", "base"])
+            .transform_formula(expr="upper(datum.base)", as_="base")
+            .transform_formula(expr="datum.start0 + datum.base_offset", as_="pos0")
+            .transform_formula(
+                expr="datum.series === 'reference' ? datum.value : -datum.value",
+                as_="logo_value",
+            )
+            .mark_text(
+                font="Source Sans Pro",
+                fontWeight=700,
+                size=90,
+                squeeze=True,
+                fitToBand=True,
+                paddingX=0,
+                paddingY=0,
+                logoLetters=True,
+            )
             .encode(
-                x=gs.Locus("chrom", "start0", band=0).axis(None),
-                x2=gs.Locus("chrom", "end0", band=0),
-                y=gs.Y("value:Q"),
-                y2=gs.Y2(gs.datum(0)),
-                color=gs.Color("series:N")
+                x=gs.Locus("chrom", "pos0").axis(title="Genomic position (hg38)"),
+                y=gs.datum(0, type="quantitative")
+                .scale(zero=True, nice=False)
+                .axis(format="~g", title=None),
+                y2=gs.Y2("logo_value:Q"),
+                text=gs.Text("base:N"),
+                color=gs.Color("base:N")
                 .scale(
-                    domain=["reference", "alternate"],
-                    range=["#2563eb", "#dc2626"],
+                    domain=list(BASES),
+                    range=base_colors,
                 )
                 .legend(None),
-                tooltip=[*prediction_tooltip, "series:N"],
+                tooltip=[*prediction_tooltip, "series:N", "base:N", "value:Q"],
             )
         )
-        return gs.layer(signal, selected_site).properties(height=64, title=title)
+        detail_baseline = signal_bins.mark_rule(
+            color="#475569", opacity=0.7, size=1, tooltip=None
+        ).encode(y=gs.datum(0, type="quantitative"))
+        detail = gs.layer(detail_baseline, detail_logo)
+        signal = gs.multiscale(
+            overview,
+            detail,
+            stops={
+                "channel": "x",
+                "values": [10],
+                "transition": {"type": "lerp", "halfLife": 80},
+            },
+        ).resolve_scale(color="independent")
+        return gs.layer(signal, selected_site).properties(
+            height=64,
+            title=(
+                f"{title} - ref above baseline, alt below; "
+                "base-colored DynSeq when deeply zoomed"
+            ),
+        )
 
     def delta_panel(track_name):
         delta = (
@@ -467,14 +570,19 @@ def _(
             .transform_filter(f"datum.track_name === '{track_name}'")
             .mark_rect(color="#7c3aed", minWidth=0.5, opacity=0.8)
             .encode(
-                x=gs.Locus("chrom", "start0", band=0).axis(title=None),
+                x=gs.Locus("chrom", "start0", band=0).axis(
+                    title="Genomic position (hg38)"
+                ),
                 x2=gs.Locus("chrom", "end0", band=0),
-                y=gs.Y("delta:Q").scale(zero=True).title("Δ alt − ref"),
+                y=gs.Y("delta:Q").scale(zero=True).axis(format="~g", title=None),
                 y2=gs.Y2(gs.datum(0)),
                 tooltip=prediction_tooltip,
             )
         )
-        return gs.layer(delta, selected_site).properties(height=42)
+        return gs.layer(delta, selected_site).properties(
+            height=42,
+            title="Delta model signal (alt - ref)",
+        )
 
     def assay_panel(track):
         return (
@@ -490,29 +598,73 @@ def _(
     prediction_tracks = gs.vconcat(
         *(assay_panel(track) for track in TAL1_DISPLAY_TRACKS), spacing=6
     )
-
-    chart = (
-        gs.vconcat(
-            reference_sequence_track,
-            sequence_designer,
-            gene_models,
-            prediction_tracks,
-            spacing=6,
-        )
+    detail_tracks = (
+        gs.vconcat(reference_sequence_track, sequence_designer, spacing=4)
         .properties(
-            datasets={
-                "designer": [],
-                "edits": [],
-                "sequence_summary": [],
-                "genes": [],
-                "selected_site": [],
-                "predictions": [],
-            },
+            scales=gs.scales(
+                x=gs.Scale(
+                    domain={
+                        "param": "detailBrush",
+                        "initial": [
+                            {
+                                "chrom": display_interval.chromosome,
+                                "pos": tal1_pos0 - 4,
+                            },
+                            {
+                                "chrom": display_interval.chromosome,
+                                "pos": tal1_pos0 + 4,
+                            },
+                        ],
+                    },
+                    zoom={
+                        "extent": [
+                            {
+                                "chrom": display_interval.chromosome,
+                                "pos": display_interval.start,
+                            },
+                            {
+                                "chrom": display_interval.chromosome,
+                                "pos": display_interval.end,
+                            },
+                        ]
+                    },
+                )
+            )
+        )
+        .resolve_scale(x="shared")
+    )
+    overview_tracks = (
+        gs.vconcat(gene_models, prediction_tracks, spacing=6)
+        .properties(
+            params=[
+                gs.param(
+                    "detailBrush",
+                    persist=False,
+                    push="outer",
+                    select={
+                        "type": "interval",
+                        "encodings": ["x"],
+                        "extent": "container",
+                        "mark": {
+                            "fill": "#2563eb",
+                            "fillOpacity": 0.04,
+                            "stroke": "#2563eb",
+                            "strokeOpacity": 0.45,
+                        },
+                    },
+                )
+            ],
             scales=gs.scales(
                 x=gs.Scale(
                     domain=[
-                        {"chrom": display_interval.chromosome, "pos": tal1_pos0 - 4},
-                        {"chrom": display_interval.chromosome, "pos": tal1_pos0 + 4},
+                        {
+                            "chrom": display_interval.chromosome,
+                            "pos": display_interval.start,
+                        },
+                        {
+                            "chrom": display_interval.chromosome,
+                            "pos": display_interval.end,
+                        },
                     ],
                     zoom={
                         "extent": [
@@ -528,11 +680,31 @@ def _(
                     },
                 )
             ),
+        )
+        .resolve_scale(x="shared")
+    )
+
+    chart = (
+        gs.vconcat(
+            detail_tracks,
+            overview_tracks,
+            spacing=10,
+        )
+        .properties(
+            datasets={
+                "designer": [],
+                "edits": [],
+                "sequence_summary": [],
+                "genes": [],
+                "selected_site": [],
+                "predictions": [],
+            },
+            params=[gs.param("detailBrush")],
             assembly="hg38",
             width=760,
             title="TAL1 local sequence-to-function perturbation explorer",
         )
-        .resolve_scale(x="shared")
+        .resolve_scale(x="independent")
     )
     view = chart.widget(enable_click_events=True)
     view.set_dataset("designer", designer_rows)
@@ -581,6 +753,8 @@ def _(
     TAL1_TRACK_SELECTORS,
     Variant,
     adapt_prediction_pairs,
+    add_sequence_chunks,
+    apply_variants,
     checkpoint_identity,
     checkpoint_path,
     device,
@@ -600,12 +774,17 @@ def _(
     set_prediction,
     set_prediction_cache,
     should_run_submission,
+    should_run_reference_prediction,
     submission,
     update_prediction_cache,
 ):
     _previous = get_prediction()
-    if should_run_submission(submission, _previous):
-        _variants = submission["variants"]
+    _is_reference_run = (
+        should_run_reference_prediction(submission, _previous)
+        and importlib.util.find_spec("alphagenome_pytorch") is not None
+    )
+    if _is_reference_run or should_run_submission(submission, _previous):
+        _variants = () if _is_reference_run else submission["variants"]
         _input_key = prediction_input_key(
             _variants,
             checkpoint_path,
@@ -623,6 +802,15 @@ def _(
             _package_version = importlib.metadata.version("alphagenome-pytorch")
             _request_variants = tuple(
                 Variant(
+                    variant["chrom"],
+                    variant["pos1"],
+                    variant["reference"],
+                    variant["alternate"],
+                )
+                for variant in _variants
+            )
+            _model_variants = tuple(
+                ModelVariant(
                     variant["chrom"],
                     variant["pos1"],
                     variant["reference"],
@@ -672,15 +860,7 @@ def _(
                     reference_sequence=reference_sequence,
                     model_interval=model_interval,
                     display_interval=display_interval,
-                    variants=tuple(
-                        ModelVariant(
-                            variant["chrom"],
-                            variant["pos1"],
-                            variant["reference"],
-                            variant["alternate"],
-                        )
-                        for variant in _variants
-                    ),
+                    variants=_model_variants,
                     resolution=DEFAULT_RESOLUTION,
                 )
                 _frame = adapt_prediction_pairs(
@@ -688,13 +868,23 @@ def _(
                     request_id=_request.request_id,
                     display_interval=_pairs[0].reference.interval,
                 )
+            _frame = add_sequence_chunks(
+                _frame,
+                reference_sequence=reference_sequence,
+                alternate_sequence=apply_variants(
+                    reference_sequence, model_interval, _model_variants
+                ),
+                sequence_start0=model_interval.start,
+            )
         except Exception as exc:
             set_prediction(
                 {
                     **_previous,
                     "status": "failed",
                     "message": f"Local prediction failed: {exc}",
-                    "click_revision": submission["click_revision"],
+                    "click_revision": (
+                        0 if _is_reference_run else submission["click_revision"]
+                    ),
                 }
             )
         else:
@@ -703,11 +893,17 @@ def _(
                 "message": (
                     "Loaded the matching prediction from this session."
                     if _was_cached
-                    else f"Predicted the {len(_variants)}-edit sequence locally."
+                    else (
+                        "Predicted the reference sequence locally."
+                        if _is_reference_run
+                        else f"Predicted the {len(_variants)}-edit sequence locally."
+                    )
                 ),
                 "frame": _frame,
                 "input_key": _input_key,
-                "click_revision": submission["click_revision"],
+                "click_revision": 0
+                if _is_reference_run
+                else submission["click_revision"],
             }
             if not _was_cached:
                 _updated_cache = update_prediction_cache(
@@ -761,7 +957,7 @@ def _(
     status, message = prediction_display_state(prediction, pending_input_key)
     _edit_summary = (
         ", ".join(
-            f"{variant['pos1']} {variant['reference']}→{variant['alternate']}"
+            f"{variant['pos1']} {variant['reference']}->{variant['alternate']}"
             for variant in _variants
         )
         or "reference sequence"
@@ -784,6 +980,11 @@ def _(
             ),
         ]
     )
+    return
+
+
+@app.cell
+def _():
     return
 
 
