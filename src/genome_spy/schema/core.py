@@ -7899,7 +7899,7 @@ class ConditionalParameterValueDefNumberExprRef(GenomeSpySchema):
 
     def value(
         self,
-        value: ExprRef | dict[str, Any] | None | object = Undefined,
+        value: float | ExprRef | dict[str, Any] | None | object = Undefined,
         /,
         *,
         expr: str | UndefinedType = Undefined,

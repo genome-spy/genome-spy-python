@@ -2545,11 +2545,6 @@ def _schema_class_source(
             property_spec.name,
             annotation=property_spec.annotation.annotation,
             nested_schema_class_name=property_spec.nested_schema_class_name,
-            raw_mapping_annotation=(
-                analyzer.raw_mapping_annotation(property_spec.nested_schema_class_name)
-                if property_spec.nested_schema_class_name is not None
-                else "dict[str, Any]"
-            ),
             nested_property_specs=_nested_property_specs(
                 analyzer, property_spec.nested_schema_class_name
             ),
@@ -3740,7 +3735,6 @@ def _schema_property_method_source(
     *,
     annotation: str,
     nested_schema_class_name: str | None,
-    raw_mapping_annotation: str = "dict[str, Any]",
     nested_property_specs: tuple[PropertySpec, ...] = (),
 ) -> str:
     method_name = _python_property_name(property_name)
@@ -3754,9 +3748,7 @@ def _schema_property_method_source(
         )
     return "\n" + _nested_schema_method_source(
         method_name=method_name,
-        value_annotation=(
-            f"{nested_schema_class_name} | {raw_mapping_annotation} | None | object"
-        ),
+        value_annotation=_nested_value_annotation(annotation),
         property_specs=tuple(
             property_spec
             for property_spec in nested_property_specs
@@ -3770,6 +3762,11 @@ def _schema_property_method_source(
         suppress_return=False,
         qualify_annotations=False,
     )
+
+
+def _nested_value_annotation(annotation: str) -> str:
+    """Add optional nested-setter sentinels without duplicating schema variants."""
+    return " | ".join(dict.fromkeys([*annotation.split(" | "), "None", "object"]))
 
 
 def _typed_dict_source(name: str, property_specs: tuple[PropertySpec, ...]) -> str:

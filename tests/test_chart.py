@@ -156,6 +156,30 @@ def test_public_api_exposes_additional_ergonomic_builders() -> None:
         "order": "ascending",
     }
     assert gs.scales(x=Scale(domain=[0, 10])) == {"x": {"domain": [0, 10]}}
+    assert gs.axes(x=GenomeAxis(orient="top")) == {"x": {"orient": "top"}}
+    assert gs.Paddings(top=-5).to_dict() == {"top": -5}
+    assert gs.SizeDef(grow=2).to_dict() == {"grow": 2}
+    assert gs.condition("hover", 1, empty=False).to_dict() == {
+        "empty": False,
+        "param": "hover",
+        "value": 1,
+    }
+    assert gs.condition("category", "selected").to_dict() == {
+        "empty": True,
+        "param": "category",
+        "value": "selected",
+    }
+    assert gs.condition("hover", gs.expr("datum.size")).value(3).to_dict() == {
+        "empty": True,
+        "param": "hover",
+        "value": 3,
+    }
+    assert gs.XOffset("displacement:Q").scale(None).to_dict() == {
+        "field": "displacement",
+        "type": "quantitative",
+        "scale": None,
+    }
+    assert gs.YOffset(gs.value(2)).to_dict() == {"value": 2}
     assert gs.view(stroke="lightgray").to_dict() == {"stroke": "lightgray"}
     assert gs.view_config(stroke="lightgray").to_dict() == {"stroke": "lightgray"}
     assert gs.config(view=gs.view(stroke="lightgray")).to_dict() == {

@@ -14,7 +14,9 @@ from genome_spy.chart import (
 )
 from genome_spy.data import Data, lazy
 from genome_spy.helpers import (
+    axes,
     config,
+    condition,
     data_format,
     dynamic_opacity,
     expr,
@@ -51,8 +53,10 @@ from genome_spy.schema.channels import (
     UniqueId,
     X,
     X2,
+    XOffset,
     Y,
     Y2,
+    YOffset,
 )
 from genome_spy.schema.core import (
     DataFormat,
@@ -62,8 +66,10 @@ from genome_spy.schema.core import (
     HandledTooltip,
     Legend,
     Parameter,
+    Paddings,
     Parse,
     Scale,
+    SizeDef,
     Step,
     Title,
 )
@@ -78,8 +84,10 @@ from genome_spy.schema.composition import (
 
 __all__ = [
     "Angle",
+    "axes",
     "Chart",
     "Color",
+    "condition",
     "Direction",
     "compare",
     "ConcatChart",
@@ -104,6 +112,7 @@ __all__ = [
     "MultiscaleChart",
     "Opacity",
     "Parameter",
+    "Paddings",
     "Parse",
     "Sample",
     "Scale",
@@ -111,6 +120,7 @@ __all__ = [
     "SemanticScore",
     "Shape",
     "Size",
+    "SizeDef",
     "Step",
     "Stroke",
     "StrokeOpacity",
@@ -124,8 +134,10 @@ __all__ = [
     "VConcatChart",
     "X",
     "X2",
+    "XOffset",
     "Y",
     "Y2",
+    "YOffset",
     "concat",
     "config",
     "data_format",

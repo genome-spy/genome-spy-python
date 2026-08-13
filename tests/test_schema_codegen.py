@@ -38,6 +38,12 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
                             {"type": "null"},
                         ]
                     },
+                    "axisOrNumber": {
+                        "anyOf": [
+                            {"$ref": "#/definitions/Axis"},
+                            {"type": "number"},
+                        ]
+                    },
                     "class": {"type": "string"},
                 },
                 "required": ["type"],
@@ -90,8 +96,13 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
         "axisOrNull: Axis | AxisKwds | None | UndefinedType = Undefined"
         in module.source
     )
+    assert (
+        "axisOrNumber: Axis | AxisKwds | float | UndefinedType = Undefined"
+        in module.source
+    )
     assert "def axis(" in module.source
     assert "value: Axis | AxisKwds | None | object = Undefined" in module.source
+    assert "value: Axis | AxisKwds | float | None | object = Undefined" in module.source
     assert "title: str | UndefinedType = Undefined" in module.source
     assert "def align(self, value: AlignDef_T) -> MarkDef:" in module.source
     assert "def flag(self, value: bool) -> MarkDef:" in module.source
