@@ -139,8 +139,6 @@ class PredictionRequest:
             raise AlphaGenomeRequestError(
                 "At least one ontology term, output type, and selector are required."
             )
-        if not self.variants:
-            raise AlphaGenomeRequestError("At least one variant is required.")
         ordered_variants = tuple(
             sorted(self.variants, key=lambda variant: (variant.start0, variant.key))
         )

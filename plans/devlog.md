@@ -1,5 +1,118 @@
 # Dev Log
 
+## 2026-08-13 - Warmed AlphaGenome with a reference prediction on startup
+
+- When the optional AlphaGenome package is installed, opening the notebook now
+  runs one reference-only prediction before interaction. The displayed
+  reference and alternate fields share that result, so model loading and the
+  initial signal tracks are ready before the first edit without a duplicate
+  inference.
+
+## 2026-08-13 - Colored compact TAL1 gene annotations by biotype
+
+- Reused the GFF3 annotation palette in the compact two-transcript track:
+  TAL1 protein-coding exons use warm CDS orange and lncRNA exons use teal.
+  Transcript backbones remain neutral, and tooltips now state the biotype.
+
+## 2026-08-13 - Unified AlphaGenome nucleotide colors
+
+- Defined one shared A/C/G/T palette for the reference sequence, designer
+  tiles, and DynSeq signal glyphs so every occurrence of a base has the same
+  color.
+- Set the signal semantic-zoom stop to 10 bases per pixel: the
+  blue/red overview bars remain visible until deeply zoomed, then the shared
+  base-colored DynSeq glyphs appear. DynSeq letter height always encodes the
+  corresponding separate reference or alternate model prediction; small SNV
+  effects may be visually subtle, so the explicit delta panel remains the
+  primary readout of change.
+- Resolved the overview `series` and detail `base` color scales independently
+  inside the multiscale signal view. This prevents blue/red overview-bar colors
+  from leaking into the DynSeq glyphs. Normalized DynSeq bases to uppercase and
+  replaced non-ASCII title and label characters with ASCII equivalents for
+  reliable font rendering.
+- Added a visible zero baseline to mirrored DynSeq tracks and changed their
+  semantic zoom to a short discrete transition. This removes the persistent
+  pale overview bars behind deeply zoomed logos while making reference-above
+  versus alternate-below height differences easier to compare.
+- Reduced the overview-to-detail brush fill and outline opacity so it provides
+  context without obscuring the signal tracks below it.
+
+## 2026-08-13 - Separated AlphaGenome detail and overview scale domains
+
+- Grouped the reference sequence and allele designer in a zoomable upper
+  concat. Grouped gene annotations and all signal tracks in an independently
+  zoomable lower concat, initially showing the full locus.
+- Added the hierarchical `detailBrush` interval parameter: its selection is
+  drawn across the complete lower overview concat, pushes to the root scope,
+  and drives the upper group’s zoomable x domain in both directions. This
+  keeps model signals visible over the complete locus while preserving
+  base-level sequence editing.
+- The lower zoomable scale uses the same 32 kb extent. Direct signal
+  inspection uses normal navigation; the linked brush uses GenomeSpy's
+  `Shift`+drag gesture because it selects a zoomable channel.
+
+## 2026-08-13 - Deferred Marimo widget zoom-state preservation
+
+- Documented the observed first-prediction zoom reset and the stable-widget
+  refactor required to fix it in
+  `plans/marimo_widget_zoom_state.md`. Deliberately deferred implementation to
+  keep the current visualization work focused.
+
+## 2026-08-13 - Cleaned AlphaGenome signal-axis tick labels
+
+- Applied D3's trimmed general-number format (`~g`) to signal and delta axes,
+  rendering the zero baseline as `0` rather than a distracting `0.00000`.
+
+## 2026-08-13 - Matched TAL1 gene models to the GFF3 annotation style
+
+- Restyled the two representative gene models after GenomeSpy's GFF3 example:
+  neutral gray transcript bodies, pale outlined exon boxes, packed lanes, and
+  directional transcript labels below each gene. Kept the intentionally
+  compact one-transcript-per-gene data rather than displaying every splice
+  isoform.
+
+## 2026-08-13 - Clarified DynSeq signal rendering
+
+- Restored the shared nucleotide palette for all sequence glyphs: A green,
+  C blue, G yellow, and T red.
+- Moved the signal and delta y-axis descriptions into horizontal panel titles.
+  The DynSeq view remains a mirrored display of model predictions (reference
+  upward, alternate downward); the lower bar track is the independently
+  computed `alternate - reference` prediction delta, not a sequence delta.
+
+## 2026-08-13 - Centered the TAL1 context on the full gene locus
+
+- Shifted the fixed 32 kb display interval to `chr1:47,212,000–47,244,768`
+  (hg38), retaining the editable TAL1 control site while including the full
+  TAL1 transcript instead of the unrelated STIL edge.
+- Replaced the partial STIL annotation with the overlapping opposite-strand
+  Ensembl lncRNA `ENSG00000226252` (`ENST00000422216.1`) and its two canonical
+  exons. The track title and tooltip provenance now make the RefSeq + Ensembl
+  source mix explicit.
+
+## 2026-08-13 - Replaced AlphaGenome signal bars with DynSeq logos
+
+- Replaced each reference/alternate assay bar pair with a mirrored DynSeq
+  letter track: reference signal extends upward and alternate signal downward,
+  while the existing alternate-minus-reference bars remain below.
+- Attached the corresponding reference and designed sequence chunk to every
+  128 bp prediction bin. GenomeSpy expands those compact strings into actual
+  A/C/G/T glyphs in the browser, preserving the assay magnitude without
+  presenting the signal as nucleotide-attribution scores.
+- Kept the signal and delta panels on their shared genomic x-axis and reused
+  the sequence-designer nucleotide colors.
+- Kept one genomic x-axis beneath the reference/designer pair and one beneath
+  each DynSeq/delta assay pair. The designer now also shows a muted GC overview
+  at wide zoom, rather than becoming blank while the reference overview remains
+  visible.
+- Added an MSA-style multiscale signal view: compact reference/alternate bars
+  appear at 12 or more base pairs per pixel, then GenomeSpy switches to the
+  base-resolution DynSeq logos when zooming in.
+- Validation: 264 repository tests, Ruff, MyPy, and `git diff --check` passed.
+  A synthetic-prediction Chromium smoke test rendered all four mirrored logo
+  tracks with their delta bars. `marimo check` again hung without diagnostics
+  and was stopped by its 90-second timeout.
+
 ## 2026-08-13 - Moved AlphaGenome editing into the visualization
 
 - Replaced the Marimo checkpoint, device, precision, and alternate-allele

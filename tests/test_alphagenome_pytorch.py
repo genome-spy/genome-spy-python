@@ -70,6 +70,7 @@ def test_apply_variants_validates_reference_and_keeps_length(
     )
 
     assert backend.apply_variants("ACGT", interval, variants) == "ATGA"
+    assert backend.apply_variants("ACGT", interval, ()) == "ACGT"
 
     with pytest.raises(backend.AlphaGenomePyTorchError, match="mismatch"):
         backend.apply_variants(
@@ -225,6 +226,32 @@ def test_prediction_oom_releases_cuda_cache_without_unloading_model(
 
     assert events == ["collect", "empty_cache"]
     assert backend._loaded_model is model
+
+
+def test_reference_prediction_reuses_one_model_output(
+    backend: ModuleType, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    snapshots = [object()]
+    calls: list[str] = []
+
+    def predict(*args: object, **kwargs: object) -> list[object]:
+        calls.append("predict")
+        return snapshots
+
+    monkeypatch.setattr(backend, "_predict_sequence_tracks", predict)
+    pairs = backend.predict_variant_tracks(
+        object(),
+        reference_sequence="ACGT",
+        model_interval=backend.ModelInterval("chr1", 100, 104),
+        display_interval=backend.ModelInterval("chr1", 100, 104),
+        variants=(),
+        selectors=(backend.TrackSelector("dnase", ()),),
+        resolution=1,
+    )
+
+    assert calls == ["predict"]
+    assert pairs[0].reference is snapshots[0]
+    assert pairs[0].alternate is snapshots[0]
 
 
 def test_precision_resolution_is_hardware_aware(

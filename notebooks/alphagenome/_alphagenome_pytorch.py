@@ -388,9 +388,6 @@ def apply_variants(
         raise AlphaGenomePyTorchError(
             "Reference sequence length must equal the model interval width."
         )
-    if not variants:
-        raise AlphaGenomePyTorchError("At least one substitution is required.")
-
     alternate = list(reference)
     occupied_offsets: set[int] = set()
     for variant in variants:
@@ -449,15 +446,19 @@ def predict_variant_tracks(
             last_bin=last_bin,
             interval=cropped_interval,
         )
-        alternate_tracks = _predict_sequence_tracks(
-            model,
-            alternate_sequence,
-            selectors,
-            organism_index=organism_index,
-            resolution=resolution,
-            first_bin=first_bin,
-            last_bin=last_bin,
-            interval=cropped_interval,
+        alternate_tracks = (
+            reference_tracks
+            if not variants
+            else _predict_sequence_tracks(
+                model,
+                alternate_sequence,
+                selectors,
+                organism_index=organism_index,
+                resolution=resolution,
+                first_bin=first_bin,
+                last_bin=last_bin,
+                interval=cropped_interval,
+            )
         )
     except Exception as exc:
         _recover_cuda_oom(exc)

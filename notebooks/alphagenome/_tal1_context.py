@@ -5,10 +5,13 @@ from __future__ import annotations
 from typing import Any
 
 _REFSEQ_SOURCE = "UCSC NCBI RefSeq, hg38 (data release 2025-08-13)"
+_ENSEMBL_SOURCE = "Ensembl GRCh38 release 116 (accessed 2026-08-13)"
 _TRANSCRIPTS = (
     {
         "gene": "TAL1",
+        "biotype": "protein_coding",
         "transcript": "NM_003189.5",
+        "source": _REFSEQ_SOURCE,
         "strand": "-",
         "start0": 47_216_289,
         "end0": 47_232_335,
@@ -22,36 +25,23 @@ _TRANSCRIPTS = (
         ),
     },
     {
-        "gene": "STIL",
-        "transcript": "NM_003035.2",
-        "strand": "-",
-        "start0": 47_250_138,
-        "end0": 47_314_147,
+        "gene": "ENSG00000226252 (lncRNA)",
+        "biotype": "lncRNA",
+        "transcript": "ENST00000422216.1",
+        "source": _ENSEMBL_SOURCE,
+        "strand": "+",
+        "start0": 47_225_797,
+        "end0": 47_230_750,
         "exons": (
-            (47_250_138, 47_251_922),
-            (47_260_288, 47_260_539),
-            (47_262_902, 47_263_113),
-            (47_269_634, 47_269_866),
-            (47_272_075, 47_272_241),
-            (47_280_240, 47_281_209),
-            (47_282_344, 47_282_459),
-            (47_287_550, 47_287_660),
-            (47_289_434, 47_289_585),
-            (47_293_457, 47_293_544),
-            (47_295_764, 47_295_848),
-            (47_299_904, 47_300_152),
-            (47_301_560, 47_301_748),
-            (47_302_233, 47_302_346),
-            (47_304_888, 47_304_996),
-            (47_310_275, 47_310_362),
-            (47_314_035, 47_314_147),
+            (47_225_797, 47_226_244),
+            (47_227_163, 47_230_750),
         ),
     },
 )
 
 
 def gene_annotation_rows(display_start: int, display_end: int) -> list[dict[str, Any]]:
-    """Return representative RefSeq transcript and exon rows for the display."""
+    """Return representative transcript and exon rows for the display."""
     rows: list[dict[str, Any]] = []
     for lane, transcript in enumerate(_TRANSCRIPTS):
         visible_start = max(display_start, transcript["start0"])
@@ -60,10 +50,11 @@ def gene_annotation_rows(display_start: int, display_end: int) -> list[dict[str,
             continue
         common = {
             "gene": transcript["gene"],
+            "biotype": transcript["biotype"],
             "transcript": transcript["transcript"],
             "strand": transcript["strand"],
             "lane": lane,
-            "source": _REFSEQ_SOURCE,
+            "source": transcript["source"],
         }
         rows.append(
             {

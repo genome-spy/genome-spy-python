@@ -23,8 +23,9 @@ in `notebooks/`.
 - A four-row A/C/G/T track acts as the allele designer. Each selected tile sets
   one position in the designed sequence; selecting the reference tile removes
   that edit.
-- Each changed design starts one prediction, while the initial notebook render
-  performs no model work.
+- Initializing the notebook runs one reference-sequence prediction to populate
+  and warm the signal tracks. Each changed design then starts one additional
+  reference-versus-designed prediction.
 - Marimo owns mutation and request state; GenomeSpy parameters and click events
   carry only small interaction values.
 - Sequence and prediction tables move through stable named Arrow datasets.
@@ -103,6 +104,11 @@ Notebook/browser coverage:
 - repeated clicks, errors, stale results, and cached results remain observable.
 
 ## Milestones
+
+## Deferred Follow-up
+
+- Preserve the GenomeSpy widget's pan/zoom state across Marimo reactive output
+  updates. See [marimo_widget_zoom_state.md](marimo_widget_zoom_state.md).
 
 ### M1 — Model-free interaction shell
 

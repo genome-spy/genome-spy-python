@@ -90,3 +90,15 @@ def should_run_submission(
         and bool(submission["variants"])
         and submission["click_revision"] != prediction["click_revision"]
     )
+
+
+def should_run_reference_prediction(
+    submission: Mapping[str, Any] | None, prediction: Mapping[str, Any]
+) -> bool:
+    """Return whether the initial reference prediction has not run yet."""
+    return (
+        submission is None
+        and prediction["status"] == "idle"
+        and prediction["frame"] is None
+        and prediction["click_revision"] == 0
+    )
