@@ -25,6 +25,13 @@ def _():
     import polars as pl
 
     from _alphagenome_adapter import adapt_prediction_pairs, empty_prediction_frame
+    from _alphagenome_interaction import (
+        alternate_options,
+        prediction_display_state,
+        prediction_input_key,
+        sequence_click_submission,
+        should_run_submission,
+    )
     from _alphagenome_pytorch import (
         DEFAULT_RESOLUTION,
         MODEL_INPUT_WIDTH,
@@ -44,59 +51,33 @@ def _():
         update_prediction_cache,
     )
     from _alphagenome_request import Interval, PredictionRequest, Variant
+    from _tal1_context import gene_annotation_rows, sequence_composition_rows
     from genome_spy.datasets import load_dataset
-
-    def prediction_input_key(
-        selection, alternate, checkpoint, device_name, precision_name
-    ):
-        return (
-            selection["chrom"],
-            selection["pos1"],
-            selection["base"],
-            alternate,
-            checkpoint.strip() or "pinned-checkpoint",
-            device_name,
-            precision_name,
-        )
-
-    def prediction_display_state(prediction, pending_input_key):
-        stale = (
-            prediction["status"] == "succeeded"
-            and prediction["frame"] is not None
-            and prediction["input_key"] != pending_input_key
-        )
-        if stale:
-            return "stale", "Inputs changed; the previous model result remains visible."
-        return prediction["status"], prediction["message"]
-
-    def should_apply_prediction(prediction, applied_request_id):
-        return (
-            prediction["frame"] is not None
-            and prediction["request_id"] != applied_request_id
-        )
 
     return (
         DEFAULT_RESOLUTION,
+        Interval,
         MODEL_INPUT_WIDTH,
+        ModelInterval,
+        ModelVariant,
         PACKAGE_VERSION,
         PRECISION_AUTO,
         PRECISION_FLOAT32,
         PRECISION_MIXED,
+        PredictionRequest,
         TAL1_DISPLAY_TRACKS,
         TAL1_TRACK_SELECTORS,
-        Interval,
-        ModelInterval,
-        ModelVariant,
-        PredictionRequest,
         Variant,
         adapt_prediction_pairs,
+        alternate_options,
         checkpoint_identity,
         download_checkpoint,
         empty_prediction_frame,
+        gene_annotation_rows,
         gs,
         importlib,
-        load_model,
         load_dataset,
+        load_model,
         mo,
         os,
         pl,
@@ -104,13 +85,22 @@ def _():
         prediction_display_state,
         prediction_input_key,
         resolve_precision,
-        should_apply_prediction,
+        sequence_click_submission,
+        sequence_composition_rows,
+        should_run_submission,
         update_prediction_cache,
     )
 
 
 @app.cell
-def _(PACKAGE_VERSION, PRECISION_AUTO, PRECISION_FLOAT32, PRECISION_MIXED, mo, os):
+def _(
+    PACKAGE_VERSION,
+    PRECISION_AUTO,
+    PRECISION_FLOAT32,
+    PRECISION_MIXED,
+    mo,
+    os,
+):
     checkpoint_path = mo.ui.text(
         value=os.environ.get("ALPHAGENOME_PYTORCH_CHECKPOINT", ""),
         label="Checkpoint (blank downloads the pinned Hugging Face file)",
@@ -129,8 +119,9 @@ def _(PACKAGE_VERSION, PRECISION_AUTO, PRECISION_FLOAT32, PRECISION_MIXED, mo, o
     setup = mo.md(
         "## Local AlphaGenome-PyTorch TAL1 explorer\n\n"
         "The checksummed hg38 TAL1 context is packaged with the example. "
-        "The 450M-parameter checkpoint is loaded only after **Predict "
-        "variant**; ordinary editing performs no model work. This first backend "
+        "Zoom into the sequence, choose an alternate allele, and click a base "
+        "to predict its effect. The 450M-parameter checkpoint is loaded on the "
+        "first base click and reused for later clicks. This first backend "
         "accepts SNVs only: the published TAL1 Jurkat insertion is scientific "
         "context, not an executable preset here. Current "
         "`alphagenome-pytorch` releases require "
@@ -144,8 +135,10 @@ def _(PACKAGE_VERSION, PRECISION_AUTO, PRECISION_FLOAT32, PRECISION_MIXED, mo, o
 def _(
     MODEL_INPUT_WIDTH,
     ModelInterval,
+    gene_annotation_rows,
     load_dataset,
     pl,
+    sequence_composition_rows,
 ):
     reference_asset = load_dataset("tal1_alphagenome_reference", as_format="json")
     tal1_pos1 = reference_asset["positive_control_site"]["pos1"]
@@ -157,29 +150,31 @@ def _(
         reference_asset["interval"]["end0"],
     )
     display_interval = ModelInterval("chr1", tal1_pos0 - 16_384, tal1_pos0 + 16_384)
-    editor_interval = ModelInterval("chr1", tal1_pos0 - 40, tal1_pos0 + 41)
     if model_interval.width != MODEL_INPUT_WIDTH:
         raise RuntimeError("Packaged TAL1 reference has an invalid model width.")
     reference_sequence = reference_asset["sequence"]
-    editor_offset = editor_interval.start - model_interval.start
-    editor_sequence = reference_sequence[
-        editor_offset : editor_offset + editor_interval.width
+    display_offset = display_interval.start - model_interval.start
+    display_sequence = reference_sequence[
+        display_offset : display_offset + display_interval.width
     ]
     sequence_rows = pl.DataFrame(
         {
-            "chrom": [editor_interval.chromosome] * editor_interval.width,
-            "pos0": list(range(editor_interval.start, editor_interval.end)),
-            "end0": list(range(editor_interval.start + 1, editor_interval.end + 1)),
-            "pos1": list(range(editor_interval.start + 1, editor_interval.end + 1)),
-            "base": list(editor_sequence),
-            "lane": ["Reference sequence"] * editor_interval.width,
-            "interaction_kind": ["sequence_base"] * editor_interval.width,
-            "selected_opacity": [
-                1.0 if pos0 == tal1_pos0 else 0.45
-                for pos0 in range(editor_interval.start, editor_interval.end)
-            ],
+            "chrom": [display_interval.chromosome] * display_interval.width,
+            "pos0": list(range(display_interval.start, display_interval.end)),
+            "end0": list(range(display_interval.start + 1, display_interval.end + 1)),
+            "pos1": list(range(display_interval.start + 1, display_interval.end + 1)),
+            "base": list(display_sequence),
+            "lane": ["Reference sequence"] * display_interval.width,
+            "interaction_kind": ["sequence_base"] * display_interval.width,
         }
     )
+    sequence_summary_rows = pl.DataFrame(
+        sequence_composition_rows(display_sequence, display_interval.start)
+    )
+    gene_rows = pl.DataFrame(
+        gene_annotation_rows(display_interval.start, display_interval.end)
+    )
+    selected_site_rows = pl.DataFrame({"pos0": [tal1_pos0]})
     default_selection = {
         "chrom": "chr1",
         "pos0": tal1_pos0,
@@ -191,81 +186,104 @@ def _(
     return (
         default_selection,
         display_interval,
-        editor_interval,
+        gene_rows,
         model_interval,
         reference_asset,
         reference_sequence,
+        selected_site_rows,
         sequence_rows,
+        sequence_summary_rows,
     )
 
 
 @app.cell
-def _(default_selection, mo):
-    get_selected_base, set_selected_base = mo.state(default_selection)
+def _(alternate_options, default_selection, mo):
+    initial_variant = {
+        "selection": default_selection,
+        "alternate": alternate_options(default_selection["base"])[0],
+        "click_revision": 0,
+    }
+    get_variant, set_variant = mo.state(initial_variant)
     get_prediction_cache, set_prediction_cache = mo.state({})
     get_prediction, set_prediction = mo.state(
         {
             "status": "idle",
-            "message": "Select a base and explicitly run the local model.",
+            "message": "Zoom into the sequence and click a base to predict.",
             "frame": None,
             "input_key": None,
-            "request_id": None,
-            "variant_key": None,
+            "click_revision": 0,
         }
     )
-    get_applied_request_id, set_applied_request_id = mo.state(None)
     return (
-        get_applied_request_id,
         get_prediction,
         get_prediction_cache,
-        get_selected_base,
-        set_applied_request_id,
+        get_variant,
         set_prediction,
         set_prediction_cache,
-        set_selected_base,
+        set_variant,
     )
 
 
 @app.cell
-def _(get_selected_base, mo):
-    selected_base = get_selected_base()
-    alternate_options = [
-        base for base in ("A", "C", "G", "T") if base != selected_base["base"]
-    ]
+def _(alternate_options, get_variant, mo):
+    variant = get_variant()
+    options = alternate_options(variant["selection"]["base"])
     alternate_base = mo.ui.radio(
-        options=alternate_options,
-        value=alternate_options[0],
+        options=options,
+        value=variant["alternate"],
         label="Alternate base",
         inline=True,
     )
-    predict = mo.ui.run_button(label="Predict variant", kind="success")
-    return alternate_base, predict, selected_base
+    return (alternate_base,)
 
 
 @app.cell
 def _(
     TAL1_DISPLAY_TRACKS,
     default_selection,
-    editor_interval,
     display_interval,
     empty_prediction_frame,
+    gene_rows,
     gs,
     mo,
+    selected_site_rows,
     sequence_rows,
+    sequence_summary_rows,
 ):
-    sequence = (
-        gs.Chart(data={"name": "sequence"})
-        .mark_rect(
-            stroke="white",
-            strokeWidth=0.5,
+    sequence_bases = (
+        gs.layer(
+            gs.Chart()
+            .mark_rect(minWidth=0.5)
+            .properties(
+                opacity=gs.dynamic_opacity(unitsPerPixel=[40, 8], values=[0, 1])
+            ),
+            gs.Chart()
+            .transform_filter("datum.pos0 === selectedBase")
+            .mark_rect(
+                fillOpacity=0,
+                minWidth=1,
+                stroke="#111827",
+                strokeWidth=2,
+            ),
+            gs.Chart()
+            .mark_text(
+                size=13,
+                fitToBand=True,
+                paddingX=1.5,
+                paddingY=1,
+                opacity=0.8,
+                flushX=False,
+                tooltip=None,
+            )
+            .encode(color=gs.value("black"), text=gs.Text("base:N"))
+            .properties(
+                opacity=gs.dynamic_opacity(unitsPerPixel=[100, 10], values=[0, 1])
+            ),
         )
         .encode(
-            x=gs.X("pos0:Q").scale(domain=gs.expr("editorDomain"), nice=False),
+            x=gs.X("pos0:Q").title(None),
             x2="end0:Q",
             y=gs.Y("lane:N").axis(None),
-            opacity=gs.Opacity("selected_opacity:Q").scale(
-                domain=[0.45, 1.0], range=[0.45, 1.0]
-            ),
             color=gs.Color("base:N")
             .scale(
                 domain=["A", "C", "G", "T"],
@@ -274,11 +292,81 @@ def _(
             .legend(None),
             tooltip=["chrom:N", "pos1:Q", "base:N"],
         )
-        .properties(height=55, title="hg38 sequence editor")
+        .properties(
+            data={"name": "sequence"},
+        )
     )
 
+    sequence_overview = (
+        gs.Chart(data={"name": "sequence_summary"})
+        .mark_rect(minWidth=0.5)
+        .encode(
+            x=gs.X("start0:Q").title(None),
+            x2="end0:Q",
+            color=gs.Color("gc_fraction:Q")
+            .scale(domain=[0.25, 0.75], range=["#f3f4f6", "#334155"])
+            .legend(None),
+            tooltip=["start0:Q", "end0:Q", "bin_size:Q", "gc_fraction:Q"],
+        )
+        .properties(opacity=gs.dynamic_opacity(unitsPerPixel=[40, 8], values=[1, 0]))
+    )
+    sequence = (
+        gs.layer(sequence_overview, sequence_bases)
+        .properties(
+            height=55,
+            title="hg38 sequence: 128 bp GC overview; zoom to reveal clickable bases",
+        )
+        .resolve_scale(color="independent")
+    )
+
+    selected_site = (
+        gs.Chart(data={"name": "selected_site"})
+        .mark_rule(
+            color="#111827", opacity=0.65, size=1, strokeDash=[4, 3], tooltip=None
+        )
+        .encode(x=gs.X("pos0:Q").title(None))
+    )
+
+    gene_base = gs.Chart(data={"name": "genes"}).encode(
+        y=gs.Y("lane:O").axis(None),
+        color=gs.Color("gene:N")
+        .scale(domain=["TAL1", "STIL"], range=["#2563eb", "#64748b"])
+        .legend(None),
+        tooltip=["gene:N", "transcript:N", "strand:N", "source:N"],
+    )
+    gene_models = gs.layer(
+        gene_base.transform_filter("datum.feature === 'transcript'")
+        .mark_rule(size=2)
+        .encode(x=gs.X("start0:Q").title(None), x2="end0:Q"),
+        gene_base.transform_filter("datum.feature === 'exon'")
+        .mark_rect(minWidth=1)
+        .encode(x=gs.X("start0:Q").title(None), x2="end0:Q"),
+        gene_base.transform_filter("datum.feature === 'transcript'")
+        .mark_text(color="#111827", size=11, dy=-9, tooltip=None)
+        .transform_formula(
+            expr="(datum.strand === '-' ? '< ' : '') + datum.gene",
+            as_="label",
+        )
+        .encode(x=gs.X("label_pos0:Q").title(None), text=gs.Text("label:N")),
+        selected_site,
+    ).properties(height=52, title="NCBI RefSeq genes (hg38)")
+
+    prediction_tooltip = [
+        "chrom:N",
+        "start0:Q",
+        "end0:Q",
+        "output_type:N",
+        "track_name:N",
+        "biosample_name:N",
+        "ontology_curie:N",
+        "histone_mark:N",
+        "reference:Q",
+        "alternate:Q",
+        "delta:Q",
+    ]
+
     def signal_panel(track_name, title):
-        return (
+        signal = (
             gs.Chart(data={"name": "predictions"})
             .transform_filter(f"datum.track_name === '{track_name}'")
             .transform_regex_fold(
@@ -286,60 +374,37 @@ def _(
                 asValue="value",
                 asKey="series",
             )
-            .mark_rule(size=2, strokeCap="round", opacity=0.9)
+            .mark_rect(minWidth=0.5, opacity=0.55)
             .encode(
                 x=gs.X("start0:Q").title(None),
                 x2="end0:Q",
                 y=gs.Y("value:Q"),
+                y2=gs.Y2(gs.datum(0)),
                 color=gs.Color("series:N")
                 .scale(
                     domain=["reference", "alternate"],
                     range=["#2563eb", "#dc2626"],
                 )
                 .legend(None),
-                tooltip=[
-                    "chrom:N",
-                    "start0:Q",
-                    "end0:Q",
-                    "output_type:N",
-                    "track_name:N",
-                    "biosample_name:N",
-                    "ontology_curie:N",
-                    "histone_mark:N",
-                    "series:N",
-                    "reference:Q",
-                    "alternate:Q",
-                    "delta:Q",
-                ],
+                tooltip=[*prediction_tooltip, "series:N"],
             )
-            .properties(height=64, title=title)
         )
+        return gs.layer(signal, selected_site).properties(height=64, title=title)
 
     def delta_panel(track_name):
-        return (
+        delta = (
             gs.Chart(data={"name": "predictions"})
             .transform_filter(f"datum.track_name === '{track_name}'")
-            .mark_rule(color="#7c3aed", size=2, strokeCap="round")
+            .mark_rect(color="#7c3aed", minWidth=0.5, opacity=0.8)
             .encode(
                 x=gs.X("start0:Q").title(None),
                 x2="end0:Q",
                 y=gs.Y("delta:Q").scale(zero=True).title("Δ alt − ref"),
-                tooltip=[
-                    "chrom:N",
-                    "start0:Q",
-                    "end0:Q",
-                    "output_type:N",
-                    "track_name:N",
-                    "biosample_name:N",
-                    "ontology_curie:N",
-                    "histone_mark:N",
-                    "reference:Q",
-                    "alternate:Q",
-                    "delta:Q",
-                ],
+                y2=gs.Y2(gs.datum(0)),
+                tooltip=prediction_tooltip,
             )
-            .properties(height=42)
         )
+        return gs.layer(delta, selected_site).properties(height=42)
 
     prediction_tracks = gs.vconcat(
         *(
@@ -351,74 +416,73 @@ def _(
             )
         ),
         spacing=2,
-    ).properties(
-        scales=gs.scales(
-            x=gs.Scale(
-                domain=[display_interval.start, display_interval.end],
-                zoom=True,
-            )
-        )
-    )
+    ).resolve_scale(y="independent")
 
-    chart = gs.vconcat(sequence, prediction_tracks, spacing=6).properties(
-        datasets={"sequence": [], "predictions": []},
-        params=[
-            gs.param(
-                "editorDomain", value=[editor_interval.start, editor_interval.end]
+    chart = (
+        gs.vconcat(sequence, gene_models, prediction_tracks, spacing=6)
+        .properties(
+            datasets={
+                "sequence": [],
+                "sequence_summary": [],
+                "genes": [],
+                "selected_site": [],
+                "predictions": [],
+            },
+            params=[
+                gs.param("selectedBase", value=default_selection["pos0"]),
+            ],
+            scales=gs.scales(
+                x=gs.Scale(
+                    domain=[display_interval.start, display_interval.end],
+                    zoom=True,
+                )
             ),
-            gs.param("selectedBase", value=default_selection["pos0"]),
-        ],
-        width=760,
-        title="TAL1 local sequence-to-function perturbation explorer",
+            width=760,
+            title="TAL1 local sequence-to-function perturbation explorer",
+        )
+        .resolve_scale(x="shared")
     )
     view = chart.widget(
-        parameter_names=("editorDomain", "selectedBase"),
+        parameter_names=("selectedBase",),
         parameter_values={
-            "editorDomain": [editor_interval.start, editor_interval.end],
             "selectedBase": default_selection["pos0"],
         },
         enable_click_events=True,
     )
     view.set_dataset("sequence", sequence_rows)
+    view.set_dataset("sequence_summary", sequence_summary_rows)
+    view.set_dataset("genes", gene_rows)
+    view.set_dataset("selected_site", selected_site_rows)
     view.set_dataset("predictions", empty_prediction_frame())
     chart_widget = mo.ui.anywidget(view)
     return chart_widget, view
 
 
 @app.cell
-def _(chart_widget, get_selected_base, set_selected_base):
+def _(
+    alternate_base,
+    chart_widget,
+    get_variant,
+    sequence_click_submission,
+    set_variant,
+):
     clicked = dict(chart_widget.value.get("clicked_datum", {}))
-    if (
-        clicked.get("interaction_kind") == "sequence_base"
-        and clicked.get("pos1") == clicked.get("pos0", -2) + 1
-        and clicked.get("base") in {"A", "C", "G", "T"}
-    ):
-        _selection = {
-            "chrom": clicked["chrom"],
-            "pos0": clicked["pos0"],
-            "pos1": clicked["pos1"],
-            "base": clicked["base"],
-        }
-        if _selection != get_selected_base():
-            set_selected_base(_selection)
-    return
+    click_revision = int(chart_widget.value.get("click_revision", 0))
+    submission = sequence_click_submission(
+        clicked, click_revision, alternate_base.value
+    )
+    if submission is not None and click_revision > get_variant()["click_revision"]:
+        set_variant(submission)
+    return (submission,)
 
 
 @app.cell
-def _(get_selected_base, pl, sequence_rows, view):
+def _(get_variant, view):
+    selected_pos0 = get_variant()["selection"]["pos0"]
     parameter_values = dict(view.parameter_values)
-    parameter_values["selectedBase"] = get_selected_base()["pos0"]
+    parameter_values["selectedBase"] = selected_pos0
     view.parameter_values = parameter_values
-    selected_pos0 = get_selected_base()["pos0"]
-    view.set_dataset(
-        "sequence",
-        sequence_rows.with_columns(
-            pl.when(pl.col("pos0") == selected_pos0)
-            .then(1.0)
-            .otherwise(0.45)
-            .alias("selected_opacity")
-        ),
-    )
+    view.set_dataset("selected_site", [{"pos0": selected_pos0}], format="records")
     return
 
 
@@ -431,7 +495,6 @@ def _(
     TAL1_TRACK_SELECTORS,
     Variant,
     adapt_prediction_pairs,
-    alternate_base,
     checkpoint_identity,
     checkpoint_path,
     device,
@@ -439,24 +502,25 @@ def _(
     download_checkpoint,
     get_prediction,
     get_prediction_cache,
-    get_selected_base,
     importlib,
     load_model,
     model_interval,
     precision,
-    predict,
-    prediction_input_key,
     predict_variant_tracks,
+    prediction_input_key,
     reference_asset,
     reference_sequence,
     resolve_precision,
     set_prediction,
     set_prediction_cache,
+    should_run_submission,
+    submission,
     update_prediction_cache,
 ):
-    if predict.value:
-        _selection = get_selected_base()
-        _alternate = alternate_base.value
+    _previous = get_prediction()
+    if should_run_submission(submission, _previous):
+        _selection = submission["selection"]
+        _alternate = submission["alternate"]
         _input_key = prediction_input_key(
             _selection,
             _alternate,
@@ -464,7 +528,6 @@ def _(
             device.value,
             precision.value,
         )
-        _previous = get_prediction()
         try:
             _resolved_precision = resolve_precision(device.value, precision.value)
             _pinned_checkpoint = not checkpoint_path.value.strip()
@@ -509,8 +572,9 @@ def _(
                     selector.signature for selector in TAL1_TRACK_SELECTORS
                 ),
             )
-            _cached = get_prediction_cache().get(_request.request_id)
-            if _cached is None:
+            _frame = get_prediction_cache().get(_request.request_id)
+            _was_cached = _frame is not None
+            if not _was_cached:
                 _model = load_model(
                     _checkpoint,
                     device=device.value,
@@ -534,14 +598,13 @@ def _(
                     request_id=_request.request_id,
                     display_interval=_pairs[0].reference.interval,
                 )
-            else:
-                _frame = _cached["frame"]
         except Exception as exc:
             set_prediction(
                 {
                     **_previous,
                     "status": "failed",
                     "message": f"Local prediction failed: {exc}",
+                    "click_revision": submission["click_revision"],
                 }
             )
         else:
@@ -549,19 +612,18 @@ def _(
                 "status": "succeeded",
                 "message": (
                     "Loaded the matching prediction from this session."
-                    if _cached is not None
+                    if _was_cached
                     else f"Predicted locally with alphagenome-pytorch "
                     f"{_package_version} on {device.value} "
                     f"({_resolved_precision})."
                 ),
                 "frame": _frame,
                 "input_key": _input_key,
-                "request_id": _request.request_id,
-                "variant_key": _variant.key,
+                "click_revision": submission["click_revision"],
             }
-            if _cached is None:
+            if not _was_cached:
                 _updated_cache = update_prediction_cache(
-                    get_prediction_cache(), _request.request_id, _result
+                    get_prediction_cache(), _request.request_id, _frame
                 )
                 set_prediction_cache(_updated_cache)
             set_prediction(_result)
@@ -569,18 +631,11 @@ def _(
 
 
 @app.cell
-def _(
-    get_applied_request_id,
-    get_prediction,
-    set_applied_request_id,
-    should_apply_prediction,
-    view,
-):
+def _(get_prediction, view):
     prediction = get_prediction()
-    if should_apply_prediction(prediction, get_applied_request_id()):
+    if prediction["status"] == "succeeded":
         view.set_dataset("predictions", prediction["frame"])
-        set_applied_request_id(prediction["request_id"])
-    return prediction
+    return (prediction,)
 
 
 @app.cell
@@ -589,16 +644,15 @@ def _(
     chart_widget,
     checkpoint_path,
     device,
-    get_selected_base,
+    get_variant,
     mo,
     precision,
-    predict,
     prediction,
     prediction_display_state,
     prediction_input_key,
     setup,
 ):
-    _selection = get_selected_base()
+    _selection = get_variant()["selection"]
     pending_variant_key = (
         f"{_selection['chrom']}:{_selection['pos1']}:"
         f"{_selection['base']}:{alternate_base.value}"
@@ -617,9 +671,13 @@ def _(
             mo.md(
                 f"Selected `{pending_variant_key}` on GRCh38. Inference uses a 131,072 bp "
                 "context; only aligned 128 bp bins in the 32 kb display window "
-                "cross the Arrow boundary."
+                "cross the Arrow boundary. Choose the alternate allele, then "
+                "click any visible sequence base to run or retrieve its prediction. "
+                "The dashed guide marks that exact base in every track. Signal bars "
+                "show predicted activity across the locus; the delta tracks show "
+                "where the edit changes that activity, including distal effects."
             ),
-            mo.hstack([alternate_base, device, precision, checkpoint_path, predict]),
+            mo.hstack([alternate_base, device, precision, checkpoint_path]),
             mo.md(f"**Status: {status}.** {message}"),
             chart_widget,
             mo.callout(
@@ -629,6 +687,11 @@ def _(
             ),
         ]
     )
+    return
+
+
+@app.cell
+def _():
     return
 
 
