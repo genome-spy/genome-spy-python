@@ -9,9 +9,12 @@
   runs one reference/alternate prediction pair regardless of edit count, while
   selecting the reference tile removes that position from the design.
 - Kept the full 32 kb pan/zoom extent but opened on an eight-base window around
-  the TAL1 control site. The editable grid covers 1,024 bp around that site,
+  the TAL1 control site. The editable grid now covers that complete interval,
   and GenomeSpy expands its four allele rows from one Arrow record per reference
-  position, avoiding both full-locus sampling and a fourfold transport payload.
+  position, avoiding a fourfold transport payload.
+- Split the reference sequence into the topmost track, using a GC overview at
+  wide scales and colored reference letters at base resolution. The allele
+  designer now follows it, ahead of genes and prediction tracks.
 - Switched every shared genomic x encoding from raw quantitative coordinates to
   GenomeSpy locus channels. This avoids float32 precision loss around chr1:47M
   and preserves one distinct clickable column per nucleotide.
