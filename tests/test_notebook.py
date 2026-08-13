@@ -23,7 +23,7 @@ def test_alphagenome_pytorch_notebook_opens_designer_without_loading_model(
         "selected_site",
         "predictions",
     )
-    assert definitions["designer_rows"].height == 1_024
+    assert definitions["designer_rows"].height == definitions["display_interval"].width
     assert definitions["sequence_summary_rows"].height == 256
     assert definitions["gene_rows"].filter(
         definitions["gene_rows"]["feature"] == "transcript"
@@ -44,9 +44,10 @@ def test_alphagenome_pytorch_tracks_share_zoom_and_expose_designer(
     definitions = _run_notebook(monkeypatch)
 
     spec = definitions["view"].spec
-    sequence = spec["vconcat"][0]
-    genes = spec["vconcat"][1]
-    prediction_tracks = spec["vconcat"][2]
+    reference_sequence = spec["vconcat"][0]
+    designer_group = spec["vconcat"][1]
+    genes = spec["vconcat"][2]
+    prediction_tracks = spec["vconcat"][3]
     assay_panels = prediction_tracks["vconcat"]
     panels = [panel for assay in assay_panels for panel in assay["vconcat"]]
 
@@ -64,12 +65,16 @@ def test_alphagenome_pytorch_tracks_share_zoom_and_expose_designer(
     }
     assert spec["assembly"] == "hg38"
     assert spec["resolve"] == {"scale": {"x": "shared"}}
-    assert sequence["layer"][0]["data"] == {"name": "sequence_summary"}
-    assert sequence["layer"][0]["opacity"] == {
+    assert reference_sequence["title"] == "hg38 reference sequence"
+    assert reference_sequence["layer"][0]["data"] == {"name": "sequence_summary"}
+    assert reference_sequence["layer"][0]["opacity"] == {
         "unitsPerPixel": [20, 5],
         "values": [1, 0],
     }
-    designer_group = sequence["layer"][1]
+    reference_bases = reference_sequence["layer"][1]
+    assert reference_bases["data"] == {"name": "designer"}
+    assert reference_bases["layer"][1]["encoding"]["text"]["field"] == "reference"
+    assert designer_group["title"].startswith("Allele designer")
     designer = designer_group["layer"][0]
     assert designer["data"] == {"name": "designer"}
     assert designer["transform"] == [

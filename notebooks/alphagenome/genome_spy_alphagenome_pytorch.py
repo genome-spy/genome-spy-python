@@ -130,19 +130,13 @@ def _(
     display_sequence = reference_sequence[
         display_offset : display_offset + display_interval.width
     ]
-    designer_start0 = tal1_pos0 - 512
-    designer_end0 = tal1_pos0 + 512
-    designer_offset = designer_start0 - model_interval.start
-    designer_sequence = reference_sequence[
-        designer_offset : designer_offset + (designer_end0 - designer_start0)
-    ]
     reference_rows = pl.DataFrame(
         {
-            "chrom": [display_interval.chromosome] * len(designer_sequence),
-            "pos0": list(range(designer_start0, designer_end0)),
-            "end0": list(range(designer_start0 + 1, designer_end0 + 1)),
-            "pos1": list(range(designer_start0 + 1, designer_end0 + 1)),
-            "reference": list(designer_sequence),
+            "chrom": [display_interval.chromosome] * display_interval.width,
+            "pos0": list(range(display_interval.start, display_interval.end)),
+            "end0": list(range(display_interval.start + 1, display_interval.end + 1)),
+            "pos1": list(range(display_interval.start + 1, display_interval.end + 1)),
+            "reference": list(display_sequence),
         }
     )
     designer_rows = reference_rows.with_columns(
@@ -328,7 +322,12 @@ def _(
         ),
     )
     sequence_designer = gs.layer(base_grid, reference_tiles, edited_tiles).properties(
-        opacity=gs.dynamic_opacity(unitsPerPixel=[20, 5], values=[0, 1])
+        height=104,
+        opacity=gs.dynamic_opacity(unitsPerPixel=[20, 5], values=[0, 1]),
+        title=(
+            "Allele designer: positions are columns; click an A/C/G/T tile "
+            "to build the alternate sequence"
+        ),
     )
 
     sequence_overview = (
@@ -344,15 +343,40 @@ def _(
         )
         .properties(opacity=gs.dynamic_opacity(unitsPerPixel=[20, 5], values=[1, 0]))
     )
-    sequence = (
-        gs.layer(sequence_overview, sequence_designer)
-        .properties(
-            height=104,
-            title=(
-                "Sequence designer: positions are columns; click an A/C/G/T tile "
-                "to build the alternate sequence"
-            ),
+    reference_sequence_bases = (
+        gs.layer(
+            gs.Chart().mark_rect(cullByVisibleRange=False),
+            gs.Chart()
+            .mark_text(
+                size=12,
+                fitToBand=True,
+                paddingX=2,
+                paddingY=2,
+                flushX=False,
+                tooltip=None,
+                cullByVisibleRange=False,
+            )
+            .encode(color=gs.value("#111827"), text=gs.Text("reference:N")),
         )
+        .encode(
+            x=gs.Locus("chrom", "pos0", band=0).axis(title=None),
+            x2=gs.Locus("chrom", "end0", band=0),
+            color=gs.Color("reference:N")
+            .scale(
+                domain=list(BASES),
+                range=["#4c78a8", "#f58518", "#54a24b", "#e45756"],
+            )
+            .legend(None),
+            tooltip=["chrom:N", "pos1:Q", "reference:N"],
+        )
+        .properties(
+            data={"name": "designer"},
+            opacity=gs.dynamic_opacity(unitsPerPixel=[20, 5], values=[0, 1]),
+        )
+    )
+    reference_sequence_track = (
+        gs.layer(sequence_overview, reference_sequence_bases)
+        .properties(height=34, title="hg38 reference sequence")
         .resolve_scale(color="independent")
     )
 
@@ -468,7 +492,13 @@ def _(
     )
 
     chart = (
-        gs.vconcat(sequence, gene_models, prediction_tracks, spacing=6)
+        gs.vconcat(
+            reference_sequence_track,
+            sequence_designer,
+            gene_models,
+            prediction_tracks,
+            spacing=6,
+        )
         .properties(
             datasets={
                 "designer": [],
