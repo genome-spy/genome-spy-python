@@ -121,6 +121,43 @@ def test_adapter_selects_metadata_independent_of_track_order(
     assert frame["biosample_name"].unique().to_list() == ["CD34-positive"]
 
 
+def test_adapter_attaches_sequence_chunks_for_dynseq_logos(
+    adapter: ModuleType,
+) -> None:
+    frame = pl.DataFrame(
+        {
+            "start0": [102, 104],
+            "end0": [104, 106],
+        }
+    )
+
+    enriched = adapter.add_sequence_chunks(
+        frame,
+        reference_sequence="ACGTACGT",
+        alternate_sequence="ACATACGT",
+        sequence_start0=100,
+    )
+
+    assert enriched.select("reference_bases", "alternate_bases").rows() == [
+        ("GT", "AT"),
+        ("AC", "AC"),
+    ]
+
+
+def test_adapter_rejects_sequence_chunks_outside_supplied_interval(
+    adapter: ModuleType,
+) -> None:
+    frame = pl.DataFrame({"start0": [99], "end0": [101]})
+
+    with pytest.raises(adapter.AlphaGenomeAdapterError, match="must fall within"):
+        adapter.add_sequence_chunks(
+            frame,
+            reference_sequence="ACGT",
+            alternate_sequence="ACAT",
+            sequence_start0=100,
+        )
+
+
 def test_adapter_rejects_misaligned_reference_and_alternate_tracks(
     adapter: ModuleType,
 ) -> None:

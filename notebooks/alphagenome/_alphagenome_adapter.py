@@ -69,10 +69,50 @@ _PREDICTION_SCHEMA = {
     "request_id": pl.String,
 }
 
+_SEQUENCE_COLUMNS = {
+    "reference_bases": pl.String,
+    "alternate_bases": pl.String,
+}
+
 
 def empty_prediction_frame() -> pl.DataFrame:
     """Return an empty dataframe with the live prediction schema."""
-    return pl.DataFrame(schema=_PREDICTION_SCHEMA)
+    return pl.DataFrame(schema={**_PREDICTION_SCHEMA, **_SEQUENCE_COLUMNS})
+
+
+def add_sequence_chunks(
+    frame: pl.DataFrame,
+    *,
+    reference_sequence: str,
+    alternate_sequence: str,
+    sequence_start0: int,
+) -> pl.DataFrame:
+    """Attach the reference and alternate bases covered by each signal bin."""
+    reference = reference_sequence.upper()
+    alternate = alternate_sequence.upper()
+    if len(reference) != len(alternate):
+        raise AlphaGenomeAdapterError(
+            "Reference and alternate sequences must have the same length."
+        )
+    sequence_end0 = sequence_start0 + len(reference)
+    chunks: list[tuple[str, str]] = []
+    for start0, end0 in frame.select("start0", "end0").iter_rows():
+        if start0 < sequence_start0 or end0 > sequence_end0:
+            raise AlphaGenomeAdapterError(
+                "Prediction bins must fall within the supplied sequences."
+            )
+        start_offset = start0 - sequence_start0
+        end_offset = end0 - sequence_start0
+        chunks.append(
+            (
+                reference[start_offset:end_offset],
+                alternate[start_offset:end_offset],
+            )
+        )
+    return frame.with_columns(
+        pl.Series("reference_bases", [chunk[0] for chunk in chunks], pl.String),
+        pl.Series("alternate_bases", [chunk[1] for chunk in chunks], pl.String),
+    )
 
 
 def adapt_prediction_pairs(
