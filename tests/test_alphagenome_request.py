@@ -54,6 +54,7 @@ def test_request_key_is_stable_when_selector_order_changes(
     request_helpers: ModuleType,
 ) -> None:
     variant = request_helpers.Variant("chr1", 1_000_001, "c", "t")
+    second_variant = request_helpers.Variant("chr1", 1_000_004, "A", "G")
     interval = request_helpers.centered_interval(variant)
     first = request_helpers.PredictionRequest(
         package_version="0.3.1",
@@ -65,7 +66,7 @@ def test_request_key_is_stable_when_selector_order_changes(
         resolution=128,
         interval=interval,
         display_interval=interval,
-        variant=variant,
+        variants=(variant, second_variant),
         ontology_terms=("CL:0001059", "UBERON:0000178"),
         output_types=("RNA_SEQ", "DNASE"),
         selectors=("rna", "dnase"),
@@ -80,7 +81,7 @@ def test_request_key_is_stable_when_selector_order_changes(
         resolution=128,
         interval=interval,
         display_interval=interval,
-        variant=variant,
+        variants=(second_variant, variant),
         ontology_terms=("UBERON:0000178", "CL:0001059"),
         output_types=("DNASE", "RNA_SEQ"),
         selectors=("dnase", "rna"),
@@ -88,6 +89,7 @@ def test_request_key_is_stable_when_selector_order_changes(
 
     assert interval == request_helpers.Interval("chr1", 934_464, 1_065_536)
     assert variant.key == "chr1:1000001:C:T"
+    assert first.variants == (variant, second_variant)
     assert first.request_id == second.request_id
 
     changed_reference = request_helpers.PredictionRequest(
@@ -100,7 +102,7 @@ def test_request_key_is_stable_when_selector_order_changes(
         resolution=first.resolution,
         interval=first.interval,
         display_interval=first.display_interval,
-        variant=first.variant,
+        variants=first.variants,
         ontology_terms=first.ontology_terms,
         output_types=first.output_types,
         selectors=first.selectors,
@@ -138,7 +140,7 @@ def test_request_rejects_variant_outside_model_interval(
             resolution=128,
             interval=request_helpers.Interval("chr1", 200, 400),
             display_interval=request_helpers.Interval("chr1", 200, 400),
-            variant=variant,
+            variants=(variant,),
             ontology_terms=("CL:0001059",),
             output_types=("RNA_SEQ",),
             selectors=("rna",),
@@ -158,7 +160,7 @@ def test_request_rejects_invalid_precision_and_display_interval(
         "reference_checksum": "reference-sha256",
         "resolution": 128,
         "interval": interval,
-        "variant": variant,
+        "variants": (variant,),
         "ontology_terms": ("CL:0001059",),
         "output_types": ("RNA_SEQ",),
         "selectors": ("rna",),
@@ -195,7 +197,7 @@ def test_request_rejects_unchanged_alleles_and_reference_span_overflow(
             resolution=128,
             interval=request_helpers.Interval("chr1", 100, 102),
             display_interval=request_helpers.Interval("chr1", 100, 102),
-            variant=request_helpers.Variant("chr1", 102, "AC", "T"),
+            variants=(request_helpers.Variant("chr1", 102, "AC", "T"),),
             ontology_terms=("CL:0001059",),
             output_types=("RNA_SEQ",),
             selectors=("rna",),

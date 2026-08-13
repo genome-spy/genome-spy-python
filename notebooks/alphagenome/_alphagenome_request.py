@@ -111,7 +111,7 @@ class PredictionRequest:
     resolution: int
     interval: Interval
     display_interval: Interval
-    variant: Variant
+    variants: tuple[Variant, ...]
     ontology_terms: tuple[str, ...]
     output_types: tuple[str, ...]
     selectors: tuple[str, ...]
@@ -139,19 +139,32 @@ class PredictionRequest:
             raise AlphaGenomeRequestError(
                 "At least one ontology term, output type, and selector are required."
             )
-        if self.interval.chrom != self.variant.chrom:
-            raise AlphaGenomeRequestError(
-                "Variant chromosome must match the input interval."
-            )
-        if not (
-            self.interval.start0
-            <= self.variant.start0
-            < self.variant.start0 + len(self.variant.ref)
-            <= self.interval.end0
+        if not self.variants:
+            raise AlphaGenomeRequestError("At least one variant is required.")
+        ordered_variants = tuple(
+            sorted(self.variants, key=lambda variant: (variant.start0, variant.key))
+        )
+        if len({variant.start0 for variant in ordered_variants}) != len(
+            ordered_variants
         ):
             raise AlphaGenomeRequestError(
-                "Variant position must fall inside the input interval."
+                "Designed variants must occupy distinct positions."
             )
+        for variant in ordered_variants:
+            if self.interval.chrom != variant.chrom:
+                raise AlphaGenomeRequestError(
+                    "Variant chromosomes must match the input interval."
+                )
+            if not (
+                self.interval.start0
+                <= variant.start0
+                < variant.start0 + len(variant.ref)
+                <= self.interval.end0
+            ):
+                raise AlphaGenomeRequestError(
+                    "Variant positions must fall inside the input interval."
+                )
+        object.__setattr__(self, "variants", ordered_variants)
         if (
             self.display_interval.chrom != self.interval.chrom
             or self.display_interval.start0 < self.interval.start0
@@ -181,7 +194,7 @@ class PredictionRequest:
             "reference_checksum": self.reference_checksum,
             "resolution": self.resolution,
             "selectors": sorted(set(self.selectors)),
-            "variant": self.variant.key,
+            "variants": [variant.key for variant in self.variants],
         }
         encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(encoded.encode()).hexdigest()

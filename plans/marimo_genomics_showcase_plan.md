@@ -4,8 +4,8 @@
 
 Maintain one polished Marimo notebook that demonstrates GenomeSpy as an
 interactive visualization layer for sequence-to-function modeling. The user
-chooses an alternate allele, zooms to base resolution, clicks a reference base,
-and immediately compares local `alphagenome-pytorch` reference, alternate, and
+selects one or more alternate alleles in a base-resolution sequence designer
+and immediately compares local `alphagenome-pytorch` reference, designed, and
 delta regulatory tracks.
 
 The notebook lives at
@@ -20,17 +20,18 @@ in `notebooks/`.
   letters replace the composition overview at detailed zoom levels.
 - A synchronized guide marks the selected base through the gene and prediction
   panels so distal model effects cannot be mistaken for coordinate offsets.
-- The user chooses an alternate allele and clicking a sequence base starts one
-  prediction; the initial notebook render performs no model work.
+- A four-row A/C/G/T track acts as the allele designer. Each selected tile sets
+  one position in the designed sequence; selecting the reference tile removes
+  that edit.
+- Each changed design starts one prediction, while the initial notebook render
+  performs no model work.
 - Marimo owns mutation and request state; GenomeSpy parameters and click events
   carry only small interaction values.
 - Sequence and prediction tables move through stable named Arrow datasets.
 - Dataset changes update the existing GenomeSpy view without rebuilding the
   canvas or resetting zoom.
-- Changing a non-sequence input marks the prior result stale without issuing
-  hidden work or discarding the last successful result.
-- The notebook accepts one SNV in the first implementation. Indels and
-  haplotypes remain out of scope.
+- The notebook supports multiple non-overlapping SNVs as one designed
+  haplotype. Indels remain out of scope.
 
 ## Model Boundary
 
@@ -47,14 +48,13 @@ in `notebooks/`.
 
 ## Biological Story
 
-Use the packaged GRCh38 TAL1 enhancer reference as the default single-variant
-workflow. The notebook must distinguish the documented Jurkat TAL1 insertion
-from executable SNV presets: the insertion is biological context only because
-the local backend currently accepts SNVs.
+Use the packaged GRCh38 TAL1 enhancer reference as the default sequence-design
+workflow. The documented Jurkat TAL1 insertion remains biological context only
+because the local backend accepts substitutions, not indels.
 
 Show:
 
-1. a clickable reference-sequence track;
+1. a categorical A/C/G/T sequence-design track;
 2. representative RefSeq gene context for the displayed locus;
 3. aligned reference and alternate regulatory signal tracks;
 4. an alternate-minus-reference delta track;
@@ -84,7 +84,7 @@ evidence.
 Pure helper coverage:
 
 - coordinate conversion and reference-allele validation;
-- canonical variant and request-key construction;
+- canonical multi-variant and request-key construction;
 - checkpoint identity and cache invalidation;
 - metadata selection independent of row order;
 - tensor crop boundaries and display downsampling;
@@ -96,7 +96,7 @@ Notebook/browser coverage:
 
 - notebook opens without importing or loading the model;
 - sequence clicks publish well-formed base data;
-- a valid sequence click is the only inference trigger;
+- a changed allele design is the only inference trigger;
 - one successful request produces one live prediction-dataset update;
 - reference, alternate, and delta tracks render with useful tooltips;
 - zoom and the stable canvas survive prediction updates;

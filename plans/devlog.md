@@ -1,5 +1,31 @@
 # Dev Log
 
+## 2026-08-13 - Moved AlphaGenome editing into the visualization
+
+- Replaced the Marimo checkpoint, device, precision, and alternate-allele
+  controls with pinned notebook defaults and a base-resolution A/C/G/T designer
+  inside the shared GenomeSpy view.
+- Selected tiles now define an ordered multi-SNV haplotype. Each changed design
+  runs one reference/alternate prediction pair regardless of edit count, while
+  selecting the reference tile removes that position from the design.
+- Kept the full 32 kb pan/zoom extent but opened on an eight-base window around
+  the TAL1 control site. The editable grid covers 1,024 bp around that site,
+  and GenomeSpy expands its four allele rows from one Arrow record per reference
+  position, avoiding both full-locus sampling and a fourfold transport payload.
+- Switched every shared genomic x encoding from raw quantitative coordinates to
+  GenomeSpy locus channels. This avoids float32 precision loss around chr1:47M
+  and preserves one distinct clickable column per nucleotide.
+- Put the nucleotide letter above every colored selected tile and restored an
+  edited position's old reference choice to a neutral letter-only cell. Grouped
+  each assay's signal and delta panels under one shared x-axis to remove repeated
+  coordinate labels.
+- Updated the request identity, backend sequence application, selected-site
+  guides, and focused tests for multiple substitutions.
+- Validation: 29 focused tests, Marimo check, Ruff, and `git diff --check`
+  passed. Headless Chromium rendered all eight base columns and confirmed two
+  independent allele clicks with separate aligned guides; the dependency-free
+  launch then stopped at the expected missing notebook-only Torch boundary.
+
 ## 2026-08-13 - Added locus context to the AlphaGenome view
 
 - Verified that the prediction coordinates are aligned rather than displaced:
