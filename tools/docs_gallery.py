@@ -86,6 +86,7 @@ class Example:
     name: str
     title: str
     description: str
+    prose: str
     category: str
     tags: tuple[str, ...]
     order: int
@@ -159,11 +160,16 @@ def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
     """Capture one already-imported example module with a supplied spec."""
     meta = getattr(module, "META", {}) or {}
     title, description = _docstring_parts(module, path.stem.replace("_", " ").title())
+    prose_path = path.with_suffix(".md")
+    prose = (
+        prose_path.read_text(encoding="utf-8").strip() if prose_path.exists() else ""
+    )
 
     return Example(
         name=path.stem,
         title=meta.get("title", title),
         description=meta.get("description", description),
+        prose=prose,
         category=meta.get("category", "Basics"),
         tags=tuple(meta.get("tags", ())),
         order=int(meta.get("order", 100)),
@@ -238,6 +244,7 @@ def build_token(examples: list[Example]) -> str:
     for example in examples:
         digest.update(example.name.encode("utf-8"))
         digest.update(example.title.encode("utf-8"))
+        digest.update(example.prose.encode("utf-8"))
         digest.update(example.source.encode("utf-8"))
         digest.update(json.dumps(example.spec, sort_keys=True).encode("utf-8"))
         thumbnail = THUMBS_DIR / f"{example.name}.png"

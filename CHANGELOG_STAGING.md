@@ -2,6 +2,8 @@
 
 ## 2026-08-18
 
+- Added self-contained interpretation, provenance, and implementation notes to
+  gallery examples adapted from the official GenomeSpy documentation.
 - Fixed documentation chart embeds to render immediately at embedder-owned
   dimensions, with responsive specs and tighter example containers.
 

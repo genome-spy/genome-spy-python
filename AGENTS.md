@@ -18,21 +18,8 @@ Constraints:
   later add app-specific concepts.
 - Notebook rendering is a first-class requirement; prefer `anywidget` for that
   integration.
-- Documentation gallery embeds must use the direct static GenomeSpy bundle
-  import followed by `embed(c, spec, { bare: true })`. Keep the chart container
-  direct and avoid transform/resize wrappers around the embedded canvas; this
-  is the known-working path for all gallery plots, including sashimi.
 - Keep reference material in `material/` and external code in `tmp/`.
 - Prefer pure Python logic in the core; isolate I/O and integration edges.
-- Keep documentation examples focused on the GenomeSpy visualization API, not
-  statistical analysis or general-purpose data wrangling. Prepare derived
-  example datasets, including p-values, adjusted p-values, transformed values,
-  classifications, and plotting domains, in `src/genome_spy/datasets/` or in
-  curated packaged data files. Examples should load the prepared table and
-  demonstrate encodings, marks, transforms, and composition directly.
-- Prefer Altair-style composition operators in examples when they express the
-  intended structure clearly: `+` for layers, `&` for vertical concatenation,
-  and `|` for horizontal concatenation.
 - Use upstream projects for design guidance:
   `tmp/altair`, `tmp/gos`, `tmp/vega-lite`, `tmp/gosling.js`,
   `tmp/genome-spy`, and `tmp/anywidget`.
@@ -130,3 +117,42 @@ Before handing work off:
 - Run `uv run mypy src/` when public Python code changes.
 - Update `plans/devlog.md` with meaningful decisions or completed work.
 - Call out anything you could not validate locally.
+
+## Documentation Gallery Policy
+
+- Keep documentation examples focused on the GenomeSpy visualization API, not
+  statistical analysis or general-purpose data wrangling. Prepare derived
+  example datasets, including p-values, adjusted p-values, transformed values,
+  classifications, and plotting domains, in `src/genome_spy/datasets/` or in
+  curated packaged data files. Examples should load the prepared table and
+  demonstrate encodings, marks, transforms, and composition directly.
+- Prefer Altair-style composition operators in examples when they express the
+  intended structure clearly: `+` for layers, `&` for vertical concatenation,
+  and `|` for horizontal concatenation.
+- Documentation gallery embeds must use the direct static GenomeSpy bundle
+  import followed by `embed(c, spec, { bare: true })`. Keep the chart container
+  direct and avoid transform or resize wrappers around the embedded canvas;
+  this is the known-working path for all gallery plots, including sashimi.
+- Keep adapted gallery pages self-contained. Link the corresponding official
+  GenomeSpy example as further reading, not as a substitute for local
+  explanation.
+- Put extended prose in an optional same-stem Markdown companion under
+  `docs/examples/`.
+- For the same data and processing, reuse the official GenomeSpy example's
+  concise provenance or disclaimer wording. Update it when the sample, region,
+  subset, preprocessing, or intended use differs.
+- Keep provenance as brief as possible. Include only details needed to identify
+  the data, disclose material processing, satisfy attribution or licensing, or
+  prevent misuse. Use a note-styled admonition titled `Data use and
+  provenance`; do not repeat it as a section heading.
+- Adapt `What to notice` and implementation prose to the chart actually
+  rendered. Verify every claim about data, encodings, transforms, interaction,
+  and composition against the checked-in Python source.
+- Explicitly distinguish processing performed in Python from GenomeSpy's
+  browser-side dataflow. State whether an example loads a prepared packaged
+  table, derives or filters data in Python, or sends data to GenomeSpy for
+  declarative transforms.
+- Do not describe packaged derived data as raw source data or imply that
+  `.transform_*()` methods execute in Python. The Python API authors and
+  serializes those transform definitions; GenomeSpy executes them while
+  rendering or interacting with the visualization in the browser.

@@ -810,6 +810,7 @@ def test_gallery_build_token_changes_with_example_content() -> None:
             name=example.name,
             title=example.title,
             description=example.description,
+            prose=example.prose,
             category=example.category,
             tags=example.tags,
             order=example.order,
@@ -930,6 +931,7 @@ def test_gallery_generation_writes_prepared_arrow_assets(
         name="arrow_example",
         title="Arrow example",
         description="",
+        prose="",
         category="Basics",
         tags=(),
         order=1,
@@ -982,6 +984,45 @@ def test_gallery_detail_embed_uses_direct_container_sizing() -> None:
     assert "attachShadow" not in markdown
     assert "setInterval" not in markdown
     assert "style.opacity" not in markdown
+
+
+def test_gallery_detail_includes_optional_companion_prose() -> None:
+    gallery = _load_gallery()
+    extension = _load_gallery_extension()
+    example = gallery.collect_example(EXAMPLES_DIR / "bam_read_alignments.py")
+    markdown = extension._detail_md(example, "https://example.test/bundle.js")
+
+    assert ":::{admonition} Data use and provenance" in markdown
+    assert "## Data use and provenance" not in markdown
+    assert "not for clinical" in markdown
+    assert "interpretation, diagnostic decisions" in markdown
+    assert "## What to notice" in markdown
+    assert "## Python implementation" in markdown
+    assert "official GenomeSpy example" in markdown
+    assert markdown.index(":::{admonition} Data use and provenance") < markdown.index(
+        "## Code"
+    )
+
+
+def test_gallery_build_token_changes_with_companion_prose() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "bam_read_alignments.py")
+    mutated = gallery.Example(
+        name=example.name,
+        title=example.title,
+        description=example.description,
+        prose=example.prose + "\nChanged prose.",
+        category=example.category,
+        tags=example.tags,
+        order=example.order,
+        height=example.height,
+        max_width=example.max_width,
+        source=example.source,
+        spec=example.spec,
+        previews=example.previews,
+    )
+
+    assert gallery.build_token([mutated]) != gallery.build_token([example])
 
 
 def test_gallery_example_can_cap_embed_width() -> None:

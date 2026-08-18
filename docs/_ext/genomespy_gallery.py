@@ -269,6 +269,8 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         "```",
         "",
     ]
+    if example.prose:
+        parts += [example.prose, ""]
     if example.previews:
         parts += [
             "## Data preview",

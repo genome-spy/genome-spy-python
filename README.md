@@ -145,8 +145,13 @@ build.
 ### Work on examples
 
 Documentation examples live under `docs/examples/` and are the source of truth
-for the generated gallery. Add or update an example there, then rebuild the
-documentation and run the gallery tests:
+for the generated gallery. An example may have an optional Markdown companion
+with the same stem, such as `bam_read_alignments.py` and
+`bam_read_alignments.md`. The companion is rendered between the live chart and
+its Python source and is the place for interpretation, data provenance,
+disclaimers, and links to the corresponding official GenomeSpy example. Add or
+update an example there, then rebuild the documentation and run the gallery
+tests:
 
 ```bash
 uv run pytest tests/test_docs_gallery.py -q
