@@ -71,7 +71,9 @@ The parent makes the intended resolutions explicit:
 
 An axis represents a scale, so sharing an x axis while keeping x scales
 independent would not make sense. Conversely, independent y scales are needed
-even when one track hides its y axis with `.axis(None)`.
+even when one track hides its y axis with `.axis(None)`. The GenomeSpy
+documentation covers these choices in
+[scale, axis, and legend resolution](https://genomespy.app/docs/grammar/composition/#scale-axis-and-legend-resolution).
 
 Place the shared `assembly`, x scale, and x axis at the closest parent that
 contains all linked tracks. Repeating the domain inside every child creates
@@ -107,7 +109,8 @@ only its visible viewport:
 `height` remains the content height, while `viewportHeight` limits the space
 occupied on screen and adds scrolling when necessary. Avoid replacing a
 lane-based content height with a small fixed height; that compresses marks
-instead of making them scrollable.
+instead of making them scrollable. See
+[scrollable viewports](https://genomespy.app/docs/grammar/composition/concat/#scrollable-viewports).
 
 ## Reveal detail with semantic zoom
 
@@ -131,6 +134,14 @@ user retains context while details appear.
 Use semantic zoom when labels, sequence bases, read mismatches, or other dense
 details become meaningful only at close range. Keep a simpler overview layer
 visible rather than making the entire track disappear.
+
+The GenomeSpy documentation describes this technique in
+[zoom-driven layer opacity](https://genomespy.app/docs/grammar/composition/layer/#zoom-driven-layer-opacity).
+Two related mechanisms are
+[`multiscale`](https://genomespy.app/docs/grammar/composition/multiscale/), which
+switches between whole detail levels, and
+[score-based semantic zoom](https://genomespy.app/docs/grammar/mark/point/#semantic-zoom)
+for thinning dense point marks.
 
 The [stacked genome browser gallery example](../gallery/stacked_genome_browser.md)
 extends this pattern with multiple BigWig signals, sequence, and transcript

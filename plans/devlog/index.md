@@ -5,17 +5,12 @@ Read the active log first, then open only the archive relevant to the question.
 
 ## Archives
 
-### `2026-08-13.md`
+### `2026-08-10_to_2026-08-13.md`
 
-- Date range: 2026-08-13
-- Topics: typed gallery authoring, oncoprint composition, shared scales and
-  rulers, layout definitions, and the reverted copy-number profile experiment.
-
-### `2026-08-10_to_2026-08-12.md`
-
-- Date range: 2026-08-10 to 2026-08-12
+- Date range: 2026-08-10 to 2026-08-13
 - Topics: live widget datasets, Marimo and AlphaGenome workflows, interactive
-  genomics examples, notebook cleanup, and gallery fixes.
+  genomics examples, notebook cleanup, gallery fixes, oncoprint composition and
+  shared scales, and typed conditional/layout/axis builders.
 
 ### `2026-08-04_to_2026-08-08.md`
 

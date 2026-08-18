@@ -12,6 +12,10 @@ has three central ingredients:
 - a **mark**: the shape used to represent a row, such as a point or rectangle;
 - **encodings**: rules that map data fields to visible properties.
 
+This library builds the same specifications that the
+[GenomeSpy visualization grammar](https://genomespy.app/docs/grammar/) defines,
+so its documentation applies to the charts you write here.
+
 ## Install
 
 Install the current version directly from its Git repository in a virtual
@@ -157,7 +161,8 @@ Setting `zoom=True` lets you zoom and pan along that scale.
 
 These example intervals use zero-based, half-open coordinates: the start is
 included and the end is excluded. This is the convention used by formats such
-as BED. Other formats may require a coordinate offset.
+as BED. Other formats may require a coordinate offset, as described in
+[genomic coordinates](https://genomespy.app/docs/grammar/genomic-coordinates/).
 
 ## Where to go next
 
@@ -167,3 +172,6 @@ as BED. Other formats may require a coordinate offset.
 - Browse complete applications in the [example gallery](gallery/index.md).
 - Use `chart.to_dict()` or `chart.to_json()` when you are ready to inspect the
   generated GenomeSpy specification.
+- Consult the [GenomeSpy documentation](https://genomespy.app/docs/grammar/) for
+  the complete grammar. This guide teaches a subset; every property it describes
+  is available here through the same names.

@@ -38,6 +38,12 @@ not Python syntax. Common operators include `&&` for “and”, `||` for “or�
 `!` for “not”. Keep predicates short; complicated validation and cleaning are
 usually clearer in Python.
 
+The GenomeSpy documentation describes the
+[expression language](https://genomespy.app/docs/grammar/expressions/) and the
+[constants and functions](https://genomespy.app/docs/grammar/expressions/#provided-constants-and-functions)
+available inside an expression, as well as the
+[filter transform](https://genomespy.app/docs/grammar/transform/filter/) itself.
+
 ## Derive a field with a formula
 
 A formula calculates a value and stores it in a new field. The `as_` argument
@@ -60,7 +66,9 @@ transforms can refer to the derived field by name.
 
 Formula transforms are useful for small visualization-specific calculations:
 converting units, constructing labels, calculating interval endpoints, or
-deriving a category used only by the chart.
+deriving a category used only by the chart. See the
+[formula transform](https://genomespy.app/docs/grammar/transform/formula/) in
+the GenomeSpy documentation.
 
 ## Summarize groups
 
@@ -82,7 +90,9 @@ that specify the input fields, aggregate operations, and output names:
 The six input rows become two output rows, one for `control` and one for
 `treated`. Available operations include `count`, `sum`, `min`, `max`, `mean`,
 `median`, quartiles, and variance. When no fields or operations are supplied,
-the aggregate produces a `count` for each group.
+the aggregate produces a `count` for each group. The
+[aggregate transform](https://genomespy.app/docs/grammar/transform/aggregate/)
+lists every supported operation.
 
 ## Transform order matters
 
@@ -118,4 +128,6 @@ and visualization easier to test.
 GenomeSpy also provides transforms for sorting and stacking, lookups, windows,
 genomic coordinates, sequence data, read alignments, and label placement.
 Those transforms are introduced by the focused examples that need them; their
-complete signatures are available in the [API reference](../api.md).
+complete signatures are available in the [API reference](../api.md), and the
+GenomeSpy documentation describes each one in its
+[transform reference](https://genomespy.app/docs/grammar/transform/).

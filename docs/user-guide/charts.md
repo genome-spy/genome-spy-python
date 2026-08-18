@@ -41,25 +41,27 @@ the data:
 Put a visual value directly in the mark method when every instance should look
 the same. Put it in `encode()` when the value should represent a field.
 `properties()` is for view-level settings such as `width`, `height`, `title`,
-and the accessibility-oriented `description`.
+and the accessibility-oriented `description`. The GenomeSpy documentation lists
+the properties shared by all marks in
+[marks](https://genomespy.app/docs/grammar/mark/#properties).
 
 ## Choose a mark for the visual task
 
 Different marks emphasize different aspects of the data:
 
-| Mark method | Useful for |
-| --- | --- |
-| `mark_point()` or `mark_circle()` | Individual observations and distributions |
-| `mark_rect()` | Bands, intervals, and heatmaps |
-| `mark_rule()` | Ranges, boundaries, and reference lines |
-| `mark_tick()` | Compact positions along one axis |
-| `mark_text()` | Labels or values shown as text |
-| `mark_link()` | Connections between two positions |
-| `mark_arrow()` | Directed connections or events |
+| Mark method | Useful for | GenomeSpy reference |
+| --- | --- | --- |
+| `mark_point()` or `mark_circle()` | Individual observations and distributions | [Point](https://genomespy.app/docs/grammar/mark/point/) |
+| `mark_rect()` | Bands, intervals, and heatmaps | [Rect](https://genomespy.app/docs/grammar/mark/rect/) |
+| `mark_rule()` | Ranges, boundaries, and reference lines | [Rule](https://genomespy.app/docs/grammar/mark/rule/) |
+| `mark_tick()` | Compact positions along one axis | [Tick](https://genomespy.app/docs/grammar/mark/tick/) |
+| `mark_text()` | Labels or values shown as text | [Text](https://genomespy.app/docs/grammar/mark/text/) |
+| `mark_link()` | Connections between two positions | [Link](https://genomespy.app/docs/grammar/mark/link/) |
+| `mark_arrow()` | Directed connections or events | [Arrow](https://genomespy.app/docs/grammar/mark/arrow/) |
 
 `mark_circle()` is a convenient point mark with a circular shape. Marks can
 often express related tasks, so choose the one that makes the intended reading
-most direct.
+most direct. Each reference page lists the properties that mark supports.
 
 ## Ranged marks use secondary positions
 
@@ -79,7 +81,9 @@ The secondary channels `x2` and `y2` supply that second endpoint:
 
 Here, each rule begins at `start` and ends at `end`. A rectangle can likewise
 use `x` with `x2`, `y` with `y2`, or both pairs to fill an area. A tick is a
-compact rule centered on a single encoded position.
+compact rule centered on a single encoded position. Which marks support a second
+endpoint is documented in
+[secondary channels](https://genomespy.app/docs/grammar/mark/#secondary-channels).
 
 ## Text is also a mark
 

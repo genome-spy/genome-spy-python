@@ -67,7 +67,8 @@ present in this small table.
 Set only the options that communicate intent. For example,
 `.scale(zero=False)` prevents an otherwise useful zero baseline from flattening
 variation in measurements far from zero, while leaving the other scale choices
-automatic.
+automatic. The GenomeSpy documentation lists the scale types and every scale
+option in [scale](https://genomespy.app/docs/grammar/scale/#properties).
 
 ## Axes explain positional scales
 
@@ -88,7 +89,9 @@ Common axis adjustments include:
 
 `tickCount` is a request rather than an exact count. GenomeSpy may choose a
 nearby set of round, readable values. A channel `.title(...)` supplies the
-default axis title; `.axis(title=...)` can override it when necessary.
+default axis title; `.axis(title=...)` can override it when necessary. See
+[ticks, labels, and grid lines](https://genomespy.app/docs/grammar/axis/#ticks-labels-and-grid-lines)
+for the remaining axis options.
 
 ## Legends explain visual scales
 
@@ -106,7 +109,8 @@ gs.Color("sample:N").legend(
 The title states what the categories mean, `orient` selects the side of the
 plot, and `direction` controls how entries are arranged within the legend.
 Continuous quantitative colors use a gradient legend; discrete categories use
-symbols.
+symbols. Symbol and gradient legends, placement, and styling are documented in
+[legend](https://genomespy.app/docs/grammar/legend/).
 
 ## Remove a guide with `None`
 
@@ -130,7 +134,9 @@ disables the scale itself and sends values directly to the visual channel; use
 that only when the data already contains suitable visual values.
 
 Removing a guide also removes its explanation. Keep at least one clear label or
-guide for every visual distinction the reader must interpret.
+guide for every visual distinction the reader must interpret. The GenomeSpy
+documentation covers the alternatives in
+[disabling legends](https://genomespy.app/docs/grammar/legend/#disabling-legends).
 
 ## Zoomable positional scales
 
@@ -144,7 +150,8 @@ gs.X("time:Q").scale(domain=[0.5, 3.5], zoom=True)
 The customized chart above uses a zoomable horizontal scale. Its axis updates
 with the domain, so the guide continues to describe the visible data. Zoom is
 especially useful for dense genomic and indexed views where the full domain
-cannot be inspected at once.
+cannot be inspected at once. Zoom extent and domain transitions are described in
+[zooming and panning](https://genomespy.app/docs/grammar/scale/#zooming-and-panning).
 
 In composed views, scales and guides may be shared or independent. Configure
 that relationship with scale, axis, and legend resolution at the composition

@@ -22,6 +22,24 @@
 - Validation: 74 gallery tests, repository-wide Ruff format/check, and the
   strict Sphinx HTML build passed.
 
+## 2026-08-18 - Linked the documentation to the upstream GenomeSpy docs
+
+- Added upstream links across Getting started, all user-guide pages, the landing
+  page, About, and the API reference, placed at the end of the section each one
+  deepens. The three widest coverage gaps (transforms, indexed genomic data, and
+  interaction) carry per-feature links; the lazy-source and mark tables link
+  every row.
+- At this stage, decided against metadata-rendered upstream links on gallery
+  pages and reverted a `META["upstream"]` prototype. The later same-stem
+  companion prose superseded that choice without editing the generated,
+  gitignored `docs/gallery/*.md` pages directly.
+- Validated with the full pytest suite (300 passed), repository-wide Ruff, MyPy,
+  `git diff --check`, the strict Sphinx build, and a curl sweep confirming every
+  upstream URL used in the prose returns 200 with its heading anchor present.
+- Follow-up: re-run that anchor sweep when the pinned `@genome-spy/core` version
+  is bumped; upstream headings can move between releases. Link inventory and
+  rationale are in `plans/upstream_doc_links.md`.
+
 ## 2026-08-18 - Made documentation embeds own chart dimensions
 
 - Removed the gallery loading label, delayed reveal, shadow DOM, and canvas-size

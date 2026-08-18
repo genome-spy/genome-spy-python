@@ -6,7 +6,9 @@ Scales, transforms, encodings, and expressions can read those names and update
 when their values change.
 
 Start with the interaction already built into a scale. Add a parameter only
-when the chart needs another named piece of state.
+when the chart needs another named piece of state. The GenomeSpy documentation
+describes the complete parameter model in
+[parameters](https://genomespy.app/docs/grammar/parameters/).
 
 ## Enable zoom and pan
 
@@ -64,6 +66,11 @@ slider changes. `gs.expr("pointSize")` then supplies the current result to the
 mark's size. Expressions use GenomeSpy's JavaScript-like expression language,
 not Python syntax.
 
+The GenomeSpy documentation covers the available input widgets in
+[input bindings](https://genomespy.app/docs/grammar/parameters/#using-input-bindings)
+and reactive parameters in
+[expressions](https://genomespy.app/docs/grammar/parameters/#expressions).
+
 Use unique, descriptive parameter names. Define a parameter at the closest
 common parent of every view that needs to read it.
 
@@ -88,7 +95,11 @@ in `selectedVariant`. An empty point selection matches every row by default, so
 all points begin fully visible.
 
 The stroke condition uses `empty=False`. It therefore applies only to actual
-selected rows and does not outline every point before the first click.
+selected rows and does not outline every point before the first click. The
+GenomeSpy documentation explains this behavior in
+[empty selections](https://genomespy.app/docs/grammar/conditional-encoding/#empty-selections)
+and the surrounding rules in
+[conditional encoding](https://genomespy.app/docs/grammar/conditional-encoding/).
 
 `key=gs.Key("id")` gives each row a stable identity. A key should be unique and
 remain unchanged when data updates. It prevents a selection from depending on
@@ -107,7 +118,12 @@ gs.param(
 Interval selections can filter rows or supply another scale's domain for an
 overview-and-detail layout. When an x scale is already zoomable, GenomeSpy uses
 Shift-drag to start the brush by default so brushing does not conflict with
-panning.
+panning. See
+[point](https://genomespy.app/docs/grammar/parameters/#point-selection) and
+[interval selections](https://genomespy.app/docs/grammar/parameters/#interval-selection)
+for their configuration options, and
+[domain from selection parameters](https://genomespy.app/docs/grammar/scale/#domain-from-selection-parameters)
+for the overview-and-detail pattern.
 
 ## Add one ruler across linked tracks
 
@@ -134,7 +150,9 @@ aligned vertical container instead of a separate guide inside each track.
 
 Pointer rulers follow mouse movement and clear on mouse leave by default. Set
 `source="viewport"` when the ruler should track the center of the visible domain
-instead.
+instead. The GenomeSpy documentation covers snapping, clearing, and guide
+styling in
+[ruler parameters](https://genomespy.app/docs/grammar/parameters/#ruler-parameters).
 
 ## Keep interaction state close to its consumers
 

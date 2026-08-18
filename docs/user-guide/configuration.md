@@ -13,7 +13,10 @@ appropriate level keeps a specification predictable:
 
 Explicit properties win over configured defaults. A configured point size, for
 example, applies only when the point mark or size encoding does not provide a
-more specific value.
+more specific value. The GenomeSpy documentation describes where a default
+applies in [config scopes](https://genomespy.app/docs/grammar/config/#config-scopes)
+and how competing defaults are settled in
+[resolution order](https://genomespy.app/docs/grammar/config/#resolution-order).
 
 ```{literalinclude} ../tutorials/configuration.py
 :language: python
@@ -77,7 +80,9 @@ chart.properties(
 `orient` chooses the side of the view and `anchor` positions the title along
 that side. Use `.configure_title(...)` when several titles in a composed chart
 should share typography. A view `description` is not normally drawn, but gives
-the chart an accessibility-oriented textual description.
+the chart an accessibility-oriented textual description. Reserved and overlay
+titles, subtitles, and styling are covered in
+[titles](https://genomespy.app/docs/grammar/title/).
 
 ## Fixed dimensions
 
@@ -110,7 +115,9 @@ of space for every scale value:
 The four categories and `gs.step(48)` produce a plot width based on four
 48-pixel steps. If another category is added, the plot grows automatically.
 Step sizing is useful for matrices, alignments, categorical rows, and compact
-genome-browser tracks.
+genome-browser tracks. See
+[step sizing](https://genomespy.app/docs/grammar/composition/concat/#step-sizing)
+in the GenomeSpy documentation.
 
 ## Container and flexible sizing
 
@@ -138,7 +145,11 @@ becoming too narrow. `gs.SizeDef` can combine:
 
 Use `viewportWidth` or `viewportHeight` when the content should retain its
 calculated size but appear inside a smaller scrollable viewport. This is often
-preferable to squeezing a long categorical or sequence view.
+preferable to squeezing a long categorical or sequence view. The GenomeSpy
+documentation covers both in
+[child sizing](https://genomespy.app/docs/grammar/composition/concat/#child-sizing)
+and
+[scrollable viewports](https://genomespy.app/docs/grammar/composition/concat/#scrollable-viewports).
 
 ## Padding and spacing
 
@@ -172,7 +183,9 @@ on the root specification:
 ```
 
 Available built-in themes include `genomespy`, `vegalite`, `quartz`, `dark`,
-`fivethirtyeight`, and `urbaninstitute`. The default is `genomespy`.
+`fivethirtyeight`, and `urbaninstitute`. The default is `genomespy`. The current
+list and a preview of each theme are in
+[built-in themes](https://genomespy.app/docs/grammar/config/#built-in-themes).
 
 Use a theme for the broad visual language, configuration for repeated defaults,
 and explicit properties for intentional exceptions. Local explicit properties
