@@ -42,6 +42,7 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
   standalone HTML.
 
 ```{toctree}
+:hidden:
 :maxdepth: 1
 :caption: Foundations
 
@@ -53,6 +54,7 @@ transforms
 ```
 
 ```{toctree}
+:hidden:
 :maxdepth: 1
 :caption: Building larger views
 
@@ -61,6 +63,7 @@ configuration
 ```
 
 ```{toctree}
+:hidden:
 :maxdepth: 1
 :caption: Genomics
 
@@ -70,6 +73,7 @@ genome-browser-layouts
 ```
 
 ```{toctree}
+:hidden:
 :maxdepth: 1
 :caption: Interaction and output
 
