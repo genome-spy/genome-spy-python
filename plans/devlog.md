@@ -1,5 +1,38 @@
 # Dev Log
 
+## 2026-08-18 - Split the API reference into one page per object
+
+- Replaced the single-page API reference with Altair's three-layer structure: a
+  generated index of `autosummary` tables, one page per public object, and no
+  `:members:` dump on the index. `api.html` went from 3.2 MB with 639 inlined
+  method blocks to 54 KB with six grouped tables and 76 generated pages.
+- Added `tools/generate_api_docs.py`, which derives the groups from the objects
+  themselves — `TopLevelSpec` subclasses, `schema.channels` classes,
+  `schema.core` classes, module-level functions — so the index cannot drift from
+  `genome_spy.__all__`. Stubs are written into the ignored `docs/generated/`.
+- Added `docs/_templates/autosummary/class.rst`: a methods/attributes summary
+  table inside the `autoclass` body, so the table renders above the full member
+  descriptions rather than replacing them. Our generated methods carry real
+  parameter docs, unlike Altair's "Refer to X" stubs, so table-only pages would
+  have dropped them.
+- `JupyterChart` uses a second template without `:inherited-members:`; the
+  inherited ipywidgets docstrings are invalid reStructuredText and broke the
+  strict build.
+- `:template:` names resolve against templates_path, not its `autosummary/`
+  subdirectory, and Sphinx falls back to its base template *silently* when the
+  name does not resolve — which produced an options-less stub that still built
+  cleanly under `-W`. Names now carry the `autosummary/` prefix and a test
+  asserts it.
+- `Locus` is grouped with the encoding channels, both because it constructs one
+  and because sharing a stub directory with `locus` collides on
+  case-insensitive filesystems.
+- Validated with the full suite (305 passed, five new API-reference tests),
+  Ruff, `git diff --check`, and the strict Sphinx build.
+- Follow-up: the `Chart` page is still 1.5 MB, and 872 KB of that is the
+  `configure_*` family, whose parameters duplicate the schema objects already
+  documented under "Schema objects". Splitting those onto per-method pages or
+  shortening their generated docstrings to point at the schema classes would
+  address the remaining bulk.
 ## 2026-08-18 - Switched the Sphinx documentation to Furo
 
 - Replaced `pydata-sphinx-theme` with Furo in the docs dependency group and
