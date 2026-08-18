@@ -18,7 +18,9 @@ thumbnail renderer can reuse it.
 from __future__ import annotations
 
 import html
+import importlib.util
 import json
+import re
 import sys
 from copy import deepcopy
 from dataclasses import replace
@@ -27,12 +29,18 @@ from pathlib import Path
 from typing import Any
 
 from docutils import nodes
-from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive, directives
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_REPO_ROOT / "tools"))
 
 import docs_gallery as core  # noqa: E402
+
+
+_TUTORIALS_DIR = _REPO_ROOT / "docs" / "tutorials"
+_TUTORIAL_TARGET = re.compile(
+    r"(?P<module>[A-Za-z_][A-Za-z0-9_]*):(?P<attribute>[A-Za-z_][A-Za-z0-9_]*)"
+)
 
 
 def _write(path: Path, content: str) -> None:
@@ -172,6 +180,61 @@ def _preview_html(example: core.Example) -> str:
             f"</tr></thead><tbody>{rows}</tbody></table></div></figure>"
         )
     return '<div class="gs-data-previews">' + "".join(sections) + "</div>"
+
+
+def _load_tutorial_chart(target: str) -> Any:
+    """Load one named chart from a docs-only tutorial module."""
+    match = _TUTORIAL_TARGET.fullmatch(target)
+    if match is None:
+        raise ValueError("Tutorial chart target must use the form 'module:chart_name'.")
+
+    module_name = match.group("module")
+    path = _TUTORIALS_DIR / f"{module_name}.py"
+    if not path.is_file():
+        raise ValueError(f"Tutorial module does not exist: {path}")
+
+    import_name = f"_genomespy_tutorial_{module_name}"
+    module_spec = importlib.util.spec_from_file_location(import_name, path)
+    if module_spec is None or module_spec.loader is None:
+        raise ValueError(f"Cannot import tutorial module: {path}")
+    module = importlib.util.module_from_spec(module_spec)
+    module_spec.loader.exec_module(module)
+
+    attribute = match.group("attribute")
+    try:
+        chart = getattr(module, attribute)
+    except AttributeError as exc:
+        raise ValueError(
+            f"Tutorial module {module_name!r} has no chart {attribute!r}."
+        ) from exc
+    if not callable(getattr(chart, "to_dict", None)):
+        raise ValueError(f"Tutorial target {target!r} is not a chart.")
+    return chart
+
+
+def _tutorial_embed_html(
+    target: str,
+    spec: dict[str, Any],
+    *,
+    bundle_url: str,
+    height: int,
+    title: str,
+    identity: str,
+) -> str:
+    """Return a direct, wrapper-free GenomeSpy embed for a prose page."""
+    token = sha256(f"{target}:{identity}".encode()).hexdigest()[:12]
+    container_id = f"gs-tutorial-{token}"
+    return (
+        f'<div id="{container_id}" class="gs-doc-embed" '
+        f'style="height:{height}px" role="img" '
+        f'aria-label="{html.escape(title)}"></div>\n'
+        '<script type="module">\n'
+        f"import {{ embed }} from {json.dumps(bundle_url)};\n"
+        f"const c = document.getElementById({json.dumps(container_id)});\n"
+        f"const spec = {json.dumps(spec, separators=(',', ':'))};\n"
+        "if (c) await embed(c, spec, { bare: true });\n"
+        "</script>"
+    )
 
 
 def _detail_md(example: core.Example, bundle_url: str) -> str:
@@ -378,8 +441,42 @@ class GenomeSpyMiniGallery(Directive):
         return [nodes.raw("", markup, format="html")]
 
 
+class GenomeSpyChart(Directive):
+    """Render a named chart from ``docs/tutorials`` in a prose page."""
+
+    required_arguments = 1
+    has_content = False
+    option_spec = {
+        "height": directives.nonnegative_int,
+        "title": directives.unchanged_required,
+    }
+
+    def run(self) -> list[nodes.Node]:
+        target = self.arguments[0]
+        try:
+            chart = _load_tutorial_chart(target)
+            spec = chart.to_dict()
+        except Exception as exc:
+            raise self.error(
+                f"Cannot render GenomeSpy chart {target!r}: {exc}"
+            ) from exc
+
+        env = self.state.document.settings.env
+        identity = f"{env.docname}:{self.lineno}"
+        markup = _tutorial_embed_html(
+            target,
+            spec,
+            bundle_url=core.default_bundle_url(),
+            height=self.options.get("height", 280),
+            title=self.options.get("title", target),
+            identity=identity,
+        )
+        return [nodes.raw("", markup, format="html")]
+
+
 def setup(app: Any) -> dict[str, Any]:
     app.connect("config-inited", _generate_on_config)
     app.connect("env-before-read-docs", _refresh_landing_page)
     app.add_directive("genomespy-minigallery", GenomeSpyMiniGallery)
+    app.add_directive("genomespy-chart", GenomeSpyChart)
     return {"parallel_read_safe": False, "parallel_write_safe": True}

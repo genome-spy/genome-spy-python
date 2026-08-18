@@ -1500,3 +1500,13 @@ def test_secondary_channels_never_carry_type() -> None:
     encoding = chart.to_dict()["encoding"]
     assert "type" not in encoding["x2"]
     assert "type" not in encoding["y2"]
+
+
+def test_key_channel_never_carries_type() -> None:
+    chart = (
+        gs.Chart([{"id": "a", "value": 1}])
+        .mark_point()
+        .encode(x="value:Q", key=gs.Key("id"))
+    )
+
+    assert chart.to_dict()["encoding"]["key"] == {"field": "id"}

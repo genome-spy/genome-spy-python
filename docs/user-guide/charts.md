@@ -1,33 +1,130 @@
 # Charts and marks
 
-A `Chart` pairs data with a mark and a set of encodings. Mark methods return a
-new chart, so construction reads as a fluent chain.
+A `Chart` combines data, one geometric shape called a **mark**, and encodings
+that control where and how those marks are drawn. A chart with one mark type is
+also called a *unit view*.
 
-```python
-import genome_spy as gs
+For most marks, GenomeSpy draws one mark for every data row. Six rows therefore
+produce six points in this example:
 
-gs.Chart(data).mark_point().encode(x="pos:Q", y="value:Q")
+```{literalinclude} ../tutorials/charts_and_marks.py
+:language: python
+:start-after: charts-marks-observations-start
+:end-before: charts-marks-observations-end
 ```
 
-Available mark methods are generated from the GenomeSpy `MarkType` grammar and
-include `mark_point`, `mark_rect`, `mark_rule`, `mark_text`, and more. Mark
-arguments (for example `size`, `filled`, `strokeDash`) map to GenomeSpy mark
-properties.
-
-Marks can be configured either inline on the mark method or later through the
-generated config surface:
-
-```python
-import genome_spy as gs
-
-chart = (
-    gs.Chart(data)
-    .mark_point(size=80, filled=True)
-    .encode(x="x:Q", y="y:Q")
-    .configure_mark(opacity=0.7)
-)
+```{literalinclude} ../tutorials/charts_and_marks.py
+:language: python
+:start-after: charts-marks-point-start
+:end-before: charts-marks-point-end
 ```
 
-Use `.properties(...)` for chart-level fields such as `width`, `height`,
-`title`, and `description`. Use `chart.to_dict()` when you want to inspect the
-final validated GenomeSpy specification.
+```{genomespy-chart} charts_and_marks:point_chart
+:height: 320
+:title: A point for each observation
+```
+
+The call to `mark_point()` chooses the geometry. The calls inside `encode()`
+connect data fields to visual channels such as position, color, and size.
+
+## Static properties and data-driven encodings
+
+The location of a property determines whether it is constant or varies with
+the data:
+
+| Level | Example above | Effect |
+| --- | --- | --- |
+| Mark | `filled=True`, `stroke="white"` | Applies to every point |
+| Encoding | `color="sample:N"`, `size="amount:Q"` | Reads a value from each row |
+| View | `height=220`, `title=...` | Describes the chart area as a whole |
+
+Put a visual value directly in the mark method when every instance should look
+the same. Put it in `encode()` when the value should represent a field.
+`properties()` is for view-level settings such as `width`, `height`, `title`,
+and the accessibility-oriented `description`.
+
+## Choose a mark for the visual task
+
+Different marks emphasize different aspects of the data:
+
+| Mark method | Useful for |
+| --- | --- |
+| `mark_point()` or `mark_circle()` | Individual observations and distributions |
+| `mark_rect()` | Bands, intervals, and heatmaps |
+| `mark_rule()` | Ranges, boundaries, and reference lines |
+| `mark_tick()` | Compact positions along one axis |
+| `mark_text()` | Labels or values shown as text |
+| `mark_link()` | Connections between two positions |
+| `mark_arrow()` | Directed connections or events |
+
+`mark_circle()` is a convenient point mark with a circular shape. Marks can
+often express related tasks, so choose the one that makes the intended reading
+most direct.
+
+## Ranged marks use secondary positions
+
+A point needs one position on each axis. An interval needs a start and an end.
+The secondary channels `x2` and `y2` supply that second endpoint:
+
+```{literalinclude} ../tutorials/charts_and_marks.py
+:language: python
+:start-after: charts-marks-ranges-start
+:end-before: charts-marks-ranges-end
+```
+
+```{genomespy-chart} charts_and_marks:interval_chart
+:height: 250
+:title: Rules spanning start and end positions
+```
+
+Here, each rule begins at `start` and ends at `end`. A rectangle can likewise
+use `x` with `x2`, `y` with `y2`, or both pairs to fill an area. A tick is a
+compact rule centered on a single encoded position.
+
+## Text is also a mark
+
+Text becomes data-driven through the `text` encoding. The mark's `size=13` is
+constant, while each rendered label comes from the `sample` field:
+
+```{literalinclude} ../tutorials/charts_and_marks.py
+:language: python
+:start-after: charts-marks-text-start
+:end-before: charts-marks-text-end
+```
+
+```{genomespy-chart} charts_and_marks:text_chart
+:height: 260
+:title: Field values rendered as text
+```
+
+Text marks work well for short labels. Dense labels can overlap, so points or
+rectangles are usually better for large datasets.
+
+## Links and arrows connect rows
+
+Links and arrows also use primary and secondary positions, but they connect
+the endpoints instead of showing a range along one axis:
+
+```{literalinclude} ../tutorials/charts_and_marks.py
+:language: python
+:start-after: charts-marks-relations-start
+:end-before: charts-marks-relations-end
+```
+
+```{genomespy-chart} charts_and_marks:link_chart
+:height: 280
+:title: Curved links between positions
+```
+
+```{genomespy-chart} charts_and_marks:arrow_chart
+:height: 280
+:title: Directed arrows between positions
+```
+
+Use a link when the relationship has no direction. Use an arrow when the
+source-to-target direction matters. Both examples reuse the same encoded base;
+only their marks and view properties differ.
+
+Mark methods return new chart objects, so a base can be reused safely as shown
+above. Repeated defaults across many charts can instead be set with GenomeSpy
+configuration, which is covered later in the user guide.

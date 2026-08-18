@@ -186,9 +186,8 @@ p.lead {
   color: var(--gs-brand);
 }
 
-/* ---------- Detail-page live embed ---------- */
-/* Match GenomeSpy's docs more closely: render the live chart inline, center it,
- * and let a shadow-root host isolate the inner embed styling from Sphinx. */
+/* ---------- Live documentation embeds ---------- */
+/* Render gallery and prose charts inline at the full available width. */
 .gs-doc-embed {
   display: block;
   width: 100%;

@@ -182,7 +182,7 @@ def normalized_channel_definition(
 ) -> dict[str, Any]:
     """Normalize one mapping-form channel definition."""
     normalized = dict(definition)
-    if name in {"x2", "y2"}:
+    if name in {"x2", "y2", "key"}:
         normalized.pop("type", None)
     elif "type" not in normalized and isinstance(normalized.get("field"), str):
         inferred_type = infer_field_type(normalized["field"], data)

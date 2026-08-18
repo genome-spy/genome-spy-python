@@ -1,97 +1,170 @@
 # Getting started
 
+Build a point chart from a Python table, then apply the same grammar to genomic
+intervals. The examples use plain Python records, so you do not need pandas or
+prior genomics knowledge.
+
+GenomeSpy uses a **declarative** visualization grammar: you describe what the
+chart should show, and GenomeSpy determines how to draw it. A chart description
+has three central ingredients:
+
+- **data**: the values you want to show;
+- a **mark**: the shape used to represent a row, such as a point or rectangle;
+- **encodings**: rules that map data fields to visible properties.
+
 ## Install
 
+`genome-spy-python` has not published its first package release yet. Until then,
+install the current version directly from its Git repository in a virtual
+environment:
+
 ```bash
-pip install genome-spy-python
-# or, in this repo:
-uv sync --dev
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install "genome-spy-python @ git+https://github.com/genome-spy/genome-spy-python.git"
+python -m pip install jupyterlab
+jupyter lab
 ```
 
-The package ships the generated schema wrappers, so normal installation needs no
-Node/npm. Notebook rendering pulls the pinned `@genome-spy/core` bundle from a
-CDN at display time.
+On Windows PowerShell, activate the environment with
+`.venv\Scripts\Activate.ps1`. Cloning the repository and running `uv sync` is
+needed only when developing the library itself.
 
-## Your first chart
+The examples work in JupyterLab, Jupyter Notebook, VS Code notebooks, and
+Marimo. Notebook rendering loads the pinned GenomeSpy JavaScript bundle from a
+CDN, so the browser needs network access when a chart first appears.
+
+Start a notebook and import the package:
 
 ```python
 import genome_spy as gs
-
-chart = (
-    gs.Chart(data=[{"x": 1, "y": 2, "category": "A"}])
-    .mark_point(size=90)
-    .encode(
-        x=gs.X("x:Q"),
-        y=gs.Y("y:Q"),
-        color=gs.Color("category:N"),
-    )
-)
-
-chart
 ```
 
-In a Jupyter notebook, displaying `chart` renders a live, interactive GenomeSpy
-view. `chart.widget()` returns an explicit `anywidget` instance if you need one.
+## Start with a small table
 
-## Updating a live dataset
+This table contains six **records**, represented by Python dictionaries. Each
+record is one row. The keys `day`, `value`, and `group` name the table's
+**fields**, or columns.
 
-For reactive notebooks, declare a named dataset, construct the widget once in a
-stable cell, and update that same widget from downstream cells. Supported
-dataframes and tables use Arrow IPC automatically:
-
-```python
-view = (
-    gs.Chart(data={"name": "table"}, datasets={"table": []})
-    .mark_point()
-    .encode(x="x:Q", y="y:Q")
-    .widget()
-)
-view.set_dataset("table", dataframe)
+```{literalinclude} tutorials/getting_started.py
+:language: python
+:start-after: getting-started-data-start
+:end-before: getting-started-data-end
 ```
 
-`set_dataset()` keeps the embedded GenomeSpy instance and its interaction state
-alive. When the widget has exactly one live dataset, `view.set_data(dataframe)`
-is a convenient equivalent.
+## Choose a mark
 
-## Serializing a spec
+A point mark asks GenomeSpy to draw one point for every record:
 
-```python
-chart.to_dict()   # Python dict (validated against the GenomeSpy schema)
-chart.to_json()   # pretty-printed JSON string
+```{literalinclude} tutorials/getting_started.py
+:language: python
+:start-after: getting-started-mark-start
+:end-before: getting-started-mark-end
 ```
 
-## Authoring style
+Without positional encodings, all six points overlap. An encoding assigns each
+point a position.
 
-The API keeps the authoring flow compact and composable for tabular charts as
-well as genomics-native views:
+## Map fields to visual channels
 
-```python
-import genome_spy as gs
+A **channel** is the visual property controlled by an encoding. The `x` channel
+controls horizontal position:
 
-gs.Chart(
-    [
-        {"x": 1.0, "y": 4.2, "category": "A"},
-        {"x": 2.0, "y": 3.1, "category": "B"},
-        {"x": 3.0, "y": 5.0, "category": "A"},
-    ]
-).mark_circle().encode(
-    gs.X("x:Q").scale(zero=False),
-    gs.Y("y:Q").scale(zero=False),
-    color=gs.Color("category:N"),
-)
+```{literalinclude} tutorials/getting_started.py
+:language: python
+:start-after: getting-started-x-start
+:end-before: getting-started-x-end
 ```
 
-GenomeSpy-specific helpers such as `gs.Locus("chrom", "pos")` give you
-locus-scaled genomic axes. See the [gallery](gallery/index.md) for fuller
-genomics examples.
+The text `"day:O"` contains a field name and a type code. A data type tells
+GenomeSpy how values should behave:
 
-For chart configuration, prefer the generated fluent methods such as
-`chart.configure_view(...)` and `chart.configure_axis(...)`. Helper constructors
-like `gs.config(...)` and `gs.view_config(...)` still exist when you want to
-build schema objects directly. Small mapping or parameter helpers such as
-`gs.scales(...)` and `gs.param(...)` also remain available when they keep the
-spec clearer.
+| Code | Type | Use it for |
+|---|---|---|
+| `Q` | quantitative | Numeric amounts that can be compared mathematically |
+| `N` | nominal | Unordered names or categories |
+| `O` | ordinal | Values with a meaningful order or sequence |
 
-For direct top-level spec properties, charts also support generated-style
-setters such as `chart.with_view(...)`, `chart.with_config(...)`, and
-`chart.with_scales(...)`.
+Day is ordinal because day 1 comes before day 2. The measured value is
+quantitative, while the groups are nominal categories:
+
+```{literalinclude} tutorials/getting_started.py
+:language: python
+:start-after: getting-started-encodings-start
+:end-before: getting-started-encodings-end
+```
+
+```{genomespy-chart} getting_started:encoded_points
+:height: 260
+:title: Point chart with day, value, and group encodings
+```
+
+The explicit `gs.Y("value", type="quantitative")` form means the same thing as
+`gs.Y("value:Q")`. The shorthand is convenient once the type codes are
+familiar.
+
+## Adjust scales and guides
+
+A **scale** converts data values into positions, colors, or sizes. An **axis**
+is the visible guide for a positional scale, while a **legend** explains a
+color, size, or shape scale.
+
+Guide titles label the mappings. Setting `zero=False` lets the vertical scale
+focus on the observed values instead of including zero:
+
+```{literalinclude} tutorials/getting_started.py
+:language: python
+:start-after: getting-started-guides-start
+:end-before: getting-started-guides-end
+```
+
+```{genomespy-chart} getting_started:measurement_chart
+:height: 260
+:title: Point chart with customized scale, axis title, and legend
+```
+
+## Make a genomic interval track
+
+GenomeSpy extends the same grammar with chromosome-aware positions. A
+**genomic interval** describes a span from a start position to an end position
+on a chromosome.
+
+The example uses three intervals on chromosome 17:
+
+```{literalinclude} tutorials/getting_started.py
+:language: python
+:start-after: getting-started-genomic-data-start
+:end-before: getting-started-genomic-data-end
+```
+
+Use a rectangle mark for each interval. The `x` encoding maps the start, and
+`x2` maps the other edge of the rectangle:
+
+```{literalinclude} tutorials/getting_started.py
+:language: python
+:start-after: getting-started-genomic-chart-start
+:end-before: getting-started-genomic-chart-end
+```
+
+```{genomespy-chart} getting_started:genomic_track
+:height: 190
+:title: Three intervals on chromosome 17 in the hg38 assembly
+```
+
+`gs.Locus("chrom", "start")` combines a chromosome field and a position field
+into a **locus**, meaning a place in the genome. The `hg38` **genome assembly**
+supplies the chromosome names, lengths, and order needed by the locus scale.
+Setting `zoom=True` lets you zoom and pan along that scale.
+
+These example intervals use zero-based, half-open coordinates: the start is
+included and the end is excluded. This is the convention used by formats such
+as BED. Other formats may require a coordinate offset.
+
+## Where to go next
+
+- Learn more about [encodings and channels](user-guide/encodings.md).
+- Read about [genomic axes and intervals](user-guide/genomic-axes.md).
+- Combine linked tracks with [composition](user-guide/composition.md).
+- Browse complete applications in the [example gallery](gallery/index.md).
+- Use `chart.to_dict()` or `chart.to_json()` when you are ready to inspect the
+  generated GenomeSpy specification.

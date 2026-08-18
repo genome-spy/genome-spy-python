@@ -1,39 +1,153 @@
 # Encodings and channels
 
-Channels map data fields to visual properties. Use the shorthand `field:type`
-form or the explicit channel classes.
+An **encoding** maps data to a visible property. The property being controlled
+is called a **channel**: `x` controls horizontal position, `color` controls
+color, and `size` controls mark size. The field supplies the values, while its
+data type tells GenomeSpy how those values should be interpreted.
 
-```python
-import genome_spy as gs
-
-gs.Chart(data).mark_point().encode(
-    x=gs.X("pos:Q"),
-    y=gs.Y("value:Q").scale(zero=False).title("Signal"),
-    color=gs.Color("group:N").legend(title="Group"),
-)
+```{literalinclude} ../tutorials/encoding_channels.py
+:language: python
+:start-after: encoding-channels-data-start
+:end-before: encoding-channels-data-end
 ```
 
-Type codes: `Q` quantitative, `N` nominal, `O` ordinal, `L` locus. Channel
-classes expose schema-derived fluent setters such as `.scale(...)`, `.axis(...)`,
-and `.legend(...)`.
+## Field and type shorthand
 
-Positional channels can also be passed positionally to `.encode(...)` when the
-channel object already knows its name:
+The compact string `"score:Q"` contains a field name (`score`) and a type code
+(`Q`) separated by a colon. The shorthand and explicit forms below produce the
+same encodings:
 
-```python
-import genome_spy as gs
-
-gs.Chart(data).mark_point().encode(
-    gs.X("pos:Q").scale(zero=False),
-    gs.Y("value:Q").scale(reverse=False),
-    color=gs.Color("group:N"),
-)
+```{literalinclude} ../tutorials/encoding_channels.py
+:language: python
+:start-after: encoding-channels-syntax-start
+:end-before: encoding-channels-syntax-end
 ```
 
-Use `gs.value(...)` for constant encodings, and use `None` to disable nested
-schema objects such as legends or axes:
+Use shorthand when a field and type are enough. Use a channel class such as
+`gs.X`, `gs.Color`, or `gs.Tooltip` when adding a title, scale, axis, legend, or
+another channel option. Setter methods can be chained:
 
 ```python
-gs.Color("group:N").legend(None)
-gs.X("pos:Q").axis(None)
+gs.X("score:Q").scale(zero=False).axis(grid=True).title("Score")
 ```
+
+## Data types describe meaning
+
+Choose a type from what a field means, not merely from how Python stores it:
+
+| Code | Type | Concrete example |
+| --- | --- | --- |
+| `Q` | quantitative | A measured score such as `3.4` |
+| `N` | nominal | An unordered sample label such as `A` or `B` |
+| `O` | ordinal | An ordered stage such as low, medium, or high |
+| `I` | index | A numbered sequence position with a regular slot |
+| `L` | locus | A chromosome-aware genomic position |
+
+A numeric identifier is usually nominal, not quantitative: sample `12` is not
+twice sample `6`. Likewise, an ordinal field describes order but does not claim
+that the distance from low to medium equals the distance from medium to high.
+The selected type affects the default scale and the guide GenomeSpy creates.
+
+## Visual channels
+
+Several encodings can describe different parts of the same row:
+
+```{literalinclude} ../tutorials/encoding_channels.py
+:language: python
+:start-after: encoding-channels-visual-start
+:end-before: encoding-channels-visual-end
+```
+
+```{genomespy-chart} encoding_channels:channel_chart
+:height: 310
+:title: Position, color, shape, size, opacity, and tooltip encodings
+```
+
+The most common channels have distinct jobs:
+
+| Channels | Purpose |
+| --- | --- |
+| `x`, `y` | Primary horizontal and vertical positions |
+| `x2`, `y2` | Secondary endpoints for ranges, rectangles, links, and arrows |
+| `color`, `opacity`, `size`, `shape` | Visible mark properties |
+| `text` | Content drawn by a text mark |
+| `tooltip` | Details shown when pointing at a mark |
+
+Position is generally the easiest visual channel to compare accurately. Color
+and shape are useful for categories; size and opacity can show quantities but
+are harder to compare precisely. A tooltip adds details without replacing a
+clear visible encoding.
+
+## Index positions
+
+The `I` type combines numbered positions with regular-width slots. It is useful
+for bases, amino acids, matrix columns, and other ordered integer locations:
+
+```{literalinclude} ../tutorials/encoding_channels.py
+:language: python
+:start-after: encoding-channels-index-start
+:end-before: encoding-channels-index-end
+```
+
+```{genomespy-chart} encoding_channels:index_chart
+:height: 170
+:title: Bases positioned with an index channel
+```
+
+Unlike an ordinal category, an index remains linear and can be zoomed. Each
+integer also has a band, allowing a rectangle to fill one indexed position.
+
+## Genomic loci
+
+The `L` type places positions on a chromosome-aware axis. `gs.Locus()` is the
+clearest form when chromosome and position are stored in separate fields:
+
+```{literalinclude} ../tutorials/encoding_channels.py
+:language: python
+:start-after: encoding-channels-locus-start
+:end-before: encoding-channels-locus-end
+```
+
+```{genomespy-chart} encoding_channels:locus_chart
+:height: 220
+:title: Genomic intervals encoded as loci
+```
+
+The chart's `assembly="hg38"` supplies chromosome names, lengths, and order.
+The genomic coordinates guide covers locus domains and coordinate conventions
+in detail.
+
+## Field, datum, value, and expression
+
+Most encodings read a field, but an encoding definition can obtain its value in
+four ways:
+
+```{literalinclude} ../tutorials/encoding_channels.py
+:language: python
+:start-after: encoding-channels-definitions-start
+:end-before: encoding-channels-definitions-end
+```
+
+```{genomespy-chart} encoding_channels:definition_chart
+:height: 200
+:title: Four kinds of encoding definition
+```
+
+| Definition | Meaning | Example above |
+| --- | --- | --- |
+| Field | Read a value from every row | `gs.X("score:Q")` |
+| Datum | Use a constant in the scale's data domain | `gs.datum(0, type="quantitative")` |
+| Value | Use a constant visual value without a scale | `gs.value("#4c78a8")` |
+| Expression | Calculate a value while the chart runs | `gs.expr("datum.amount * datum.confidence")` |
+
+A datum and a value are deliberately different. A quantitative datum of `0`
+is mapped through the channel's scale; a positional value of `0` means the
+start of the visual range and a value of `0.5` means its midpoint.
+
+Expressions that participate in a scale need an explicit type, as the size
+expression above demonstrates. GenomeSpy cannot infer whether an arbitrary
+expression returns a quantity, category, index, or locus.
+
+Scales translate data values into visual values. Axes and legends explain those
+translations to the reader. Their defaults and focused customization are the
+subject of the next guide.

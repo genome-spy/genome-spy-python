@@ -6,7 +6,7 @@ sd_hide_title: true
 ```{raw} html
 <div class="gs-hero">
   <h1 class="gs-hero__mark">GenomeSpy <span class="gs-py">for Python</span></h1>
-  <p class="gs-hero__tag">Declarative, GPU-accelerated genomics visualization — authored with an idiomatic Python API and interactive in notebooks and on the web.</p>
+  <p class="gs-hero__tag">Interactive genomic visualization in Python.</p>
 </div>
 ```
 
@@ -14,9 +14,9 @@ sd_hide_title: true
 ```
 
 ```{rst-class} lead
-**genome-spy-python** lets you build [GenomeSpy](https://genomespy.app)
-visualizations with a familiar grammar, serialize them to valid
-GenomeSpy JSON, and render them — pannable and zoomable — wherever you work.
+**genome-spy-python** builds validated [GenomeSpy](https://genomespy.app)
+specifications from Python chart definitions. Display them in notebooks or web
+pages with chromosome-aware zooming and panning.
 ```
 
 ::::{grid} 1 1 2 2
