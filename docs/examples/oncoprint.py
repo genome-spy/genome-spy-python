@@ -14,7 +14,7 @@ META = {
     "category": "Oncoprints and cohort summaries",
     "tags": ("rect", "cohort", "real-data", "concat", "shared-scale"),
     "order": 25,
-    "height": 660,
+    "height": 480,
     "max_width": 760,
 }
 

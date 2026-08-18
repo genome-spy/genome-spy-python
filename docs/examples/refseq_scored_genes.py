@@ -10,7 +10,7 @@ META = {
     "category": "Reference annotation tracks",
     "tags": ("refseq", "semantic-zoom", "scored-labels", "real-data"),
     "order": 15,
-    "height": 220,
+    "height": 110,
     "max_width": 980,
 }
 

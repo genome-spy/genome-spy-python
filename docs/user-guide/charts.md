@@ -36,7 +36,7 @@ the data:
 | --- | --- | --- |
 | Mark | `filled=True`, `stroke="white"` | Applies to every point |
 | Encoding | `color="sample:N"`, `size="amount:Q"` | Reads a value from each row |
-| View | `height=220`, `title=...` | Describes the chart area as a whole |
+| View | `title=...`, `description=...` | Describes the chart area as a whole |
 
 Put a visual value directly in the mark method when every instance should look
 the same. Put it in `encode()` when the value should represent a field.

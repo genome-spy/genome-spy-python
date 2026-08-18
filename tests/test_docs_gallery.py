@@ -46,6 +46,14 @@ def test_gallery_has_examples() -> None:
     assert _example_paths(), "no gallery examples found under docs/examples/"
 
 
+def test_gallery_root_pixel_sizes_are_owned_by_the_embedder() -> None:
+    gallery = _load_gallery()
+
+    for example in gallery.collect_examples():
+        assert not isinstance(example.spec.get("width"), (int, float)), example.name
+        assert not isinstance(example.spec.get("height"), (int, float)), example.name
+
+
 def test_pik3ca_lollipop_uses_reactive_collision_displacement() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "pik3ca_tcga_brca_lollipop.py")
@@ -301,7 +309,7 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "oncoprint.py")
 
-    assert example.height == 660
+    assert example.height == 480
     assert example.max_width == 760
     top_row, matrix_row = example.spec["concat"]
     matrix_panel, percent_panel, counts_panel = matrix_row["concat"]
@@ -756,7 +764,6 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     assert example.spec["assembly"] == "hg18"
     assert "genomes" not in example.spec
     assert "vconcat" not in example.spec
-    assert example.spec["height"] == 360
     point_data = example.spec["layer"][2]["data"]["values"]
     assert {row["chrom"] for row in point_data} <= {
         *(f"chr{number}" for number in range(1, 23)),
@@ -952,7 +959,7 @@ def test_gallery_generation_writes_prepared_arrow_assets(
     assert (extension.core.ARROW_DIR / f"{identifier}.arrow").read_bytes() == payload
 
 
-def test_gallery_detail_embed_uses_shadow_dom_and_stable_reveal() -> None:
+def test_gallery_detail_embed_uses_direct_container_sizing() -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
     example = gallery.collect_example(EXAMPLES_DIR / "airway_volcano_plot.py")
@@ -960,7 +967,6 @@ def test_gallery_detail_embed_uses_shadow_dom_and_stable_reveal() -> None:
     markdown = extension._detail_md(example, "https://example.test/bundle.js")
 
     assert 'class="gs-doc-embed"' in markdown
-    assert "attachShadow({ mode: 'open' })" in markdown
     assert "import { embed } from 'https://example.test/bundle.js';" in markdown
     assert "await embed(c, spec, { bare: true });" in markdown
     assert f"airway_volcano_plot.json?v={expected}" in markdown
@@ -972,15 +978,10 @@ def test_gallery_detail_embed_uses_shadow_dom_and_stable_reveal() -> None:
     )
     assert "references assets hosted with these docs" in markdown
     assert "Download the generated GenomeSpy spec" not in markdown
-    assert (
-        "#shell{position:relative;width:100%;height:100%;overflow:hidden}" in markdown
-    )
-    assert (
-        "#c{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .2s ease}"
-        in markdown
-    )
-    assert "Math.round(r.width)}x${Math.round(r.height)" in markdown
-    assert "stable >= 3" in markdown
+    assert "Loading chart" not in markdown
+    assert "attachShadow" not in markdown
+    assert "setInterval" not in markdown
+    assert "style.opacity" not in markdown
 
 
 def test_gallery_example_can_cap_embed_width() -> None:

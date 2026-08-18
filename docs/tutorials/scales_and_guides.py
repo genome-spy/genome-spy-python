@@ -24,7 +24,7 @@ automatic_chart = (
         y="value:Q",
         color="sample:N",
     )
-    .properties(height=210, title="Automatic scales and guides")
+    .properties(title="Automatic scales and guides")
 )
 # scales-guides-automatic-end
 
@@ -49,7 +49,7 @@ customized_chart = (
         )
         .legend(title="Sample group", orient="top", direction="horizontal"),
     )
-    .properties(height=210, title="Selected scale and guide options")
+    .properties(title="Selected scale and guide options")
 )
 # scales-guides-custom-end
 
@@ -63,7 +63,7 @@ minimal_chart = (
         y=gs.Y("value:Q").scale(zero=False).title("Response"),
         color=gs.Color("sample:N").legend(None),
     )
-    .properties(height=160, title="Guides can be removed independently")
+    .properties(title="Guides can be removed independently")
 )
 # scales-guides-hidden-end
 

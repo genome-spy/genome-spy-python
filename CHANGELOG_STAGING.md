@@ -1,5 +1,10 @@
 # Changelog Staging
 
+## 2026-08-18
+
+- Fixed documentation chart embeds to render immediately at embedder-owned
+  dimensions, with responsive specs and tighter example containers.
+
 ## 2026-08-13
 
 - Refined the documentation gallery examples with shared scales, typed channel

@@ -10,8 +10,8 @@ META = {
     "category": "Set intersections",
     "tags": ("upset", "set-intersection", "concat", "interactive"),
     "order": 10,
-    "height": 430,
-    "max_width": 1200,
+    "height": 390,
+    "max_width": 650,
 }
 
 CURSOR = "!isValid(setCursor.values.y) || datum.profileContainsHoveredSet == 1"

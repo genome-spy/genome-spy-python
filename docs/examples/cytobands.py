@@ -99,7 +99,6 @@ chart = (
         description=(
             "A whole-genome ideogram showing hg38 cytobands and chromosome boundaries."
         ),
-        height=24,
         data=gs.Data(
             url="https://data.genomespy.app/genomes/hg38/cytoBand.txt.gz",
             format=gs.data_format(

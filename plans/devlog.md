@@ -1,5 +1,21 @@
 # Dev Log
 
+## 2026-08-18 - Made documentation embeds own chart dimensions
+
+- Removed the gallery loading label, delayed reveal, shadow DOM, and canvas-size
+  polling; gallery examples now use the fixed-height host as the direct
+  `embed(c, spec, { bare: true })` container.
+- Removed presentation-only root pixel sizes from gallery and live tutorial
+  specs. Preserved the fixed-dimension teaching example plus semantic child,
+  step, viewport, and aligned-panel sizes; the Quartz example explicitly uses
+  container width and height so theme defaults cannot override the embedder.
+- Measured all 36 gallery and 40 tutorial embeds in a browser, retained space
+  required by parameter controls, and tightened containers that only contained
+  unused space.
+- Validation: 110 gallery/tutorial tests passed, Ruff passed, the strict Sphinx
+  HTML build passed, and browser checks confirmed representative unit,
+  composed, scrollable, themed, OncoPrint, cytoband, and Manhattan examples.
+
 ## 2026-08-17 - Reduced the beginner documentation scope
 
 - Removed the planned troubleshooting chapter and stripped error-message

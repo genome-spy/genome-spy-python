@@ -55,7 +55,7 @@ channel_chart = (
             gs.Tooltip("confidence:Q").format(".0%").title("Confidence"),
         ],
     )
-    .properties(height=210, title="Several channels can describe each row")
+    .properties(title="Several channels can describe each row")
 )
 # encoding-channels-visual-end
 
@@ -79,7 +79,7 @@ index_chart = (
         text="base:N",
         color=gs.Color("base:N").legend(None),
     )
-    .properties(height=70, title="Index values occupy regular slots")
+    .properties(title="Index values occupy regular slots")
 )
 # encoding-channels-index-end
 
@@ -100,7 +100,7 @@ locus_chart = (
         y=gs.Y("kind:N").title("Feature kind"),
         color=gs.Color("kind:N").legend(None),
     )
-    .properties(assembly="hg38", height=110, title="Locus values follow the genome")
+    .properties(assembly="hg38", title="Locus values follow the genome")
 )
 # encoding-channels-locus-end
 
@@ -118,7 +118,7 @@ definition_chart = (
             type="quantitative",
         ).legend(None),
     )
-    .properties(height=100, title="Field, datum, value, and expression definitions")
+    .properties(title="Field, datum, value, and expression definitions")
 )
 # encoding-channels-definitions-end
 

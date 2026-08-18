@@ -241,9 +241,6 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
     spec_token = core.build_token([example])
     spec_url = f"../_static/specs/{example.name}.json?v={spec_token}"
     download_url = f"../_static/specs/{example.name}.json"
-    # GenomeSpy's own docs use an inline custom element backed by shadow DOM
-    # instead of an iframe. Follow that pattern here so the chart feels like a
-    # native part of the page while still isolating embed styles from Sphinx.
     host_id = f"gs-embed-{example.name}"
     host_style = f"height:{example.height}px"
     if example.max_width is not None:
@@ -253,35 +250,9 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         f'role="img" aria-label="{html.escape(example.title)}"></div>\n'
         '<script type="module">\n'
         f"import {{ embed }} from '{bundle_url}';\n"
-        f"const host = document.getElementById('{host_id}');\n"
-        "if (host && !host.shadowRoot) {\n"
-        "  const shadow = host.attachShadow({ mode: 'open' });\n"
-        "  shadow.innerHTML = `"
-        "<style>"
-        ":host{display:block}"
-        "#shell{position:relative;width:100%;height:100%;overflow:hidden}"
-        "#c{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .2s ease}"
-        "#c canvas{display:block}"
-        "#load{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"
-        "color:#8a97a8;font:14px/1.4 Lato,system-ui,sans-serif}"
-        "</style>"
-        "<div id='shell'><div id='load'>Loading chart...</div><div id='c'></div></div>`;\n"
-        "  const c = shadow.getElementById('c');\n"
-        "  const load = shadow.getElementById('load');\n"
-        f"  const spec = '{spec_url}';\n"
-        "  await embed(c, spec, { bare: true });\n"
-        "  let last = '', stable = 0;\n"
-        "  const reveal = () => { c.style.opacity = '1'; if (load) load.remove(); };\n"
-        "  const iv = setInterval(() => {\n"
-        "    const cv = c.querySelector('canvas'); if (!cv) return;\n"
-        "    const r = cv.getBoundingClientRect();\n"
-        "    const size = `${Math.round(r.width)}x${Math.round(r.height)}`;\n"
-        "    if (size === last && r.width > 0 && r.height > 0) {\n"
-        "      if (++stable >= 3) { clearInterval(iv); reveal(); }\n"
-        "    } else { stable = 0; last = size; }\n"
-        "  }, 160);\n"
-        "  setTimeout(() => { clearInterval(iv); reveal(); }, 4000);\n"
-        "}\n"
+        f"const c = document.getElementById('{host_id}');\n"
+        f"const spec = '{spec_url}';\n"
+        "if (c) await embed(c, spec, { bare: true });\n"
         "</script>"
     )
     parts = [

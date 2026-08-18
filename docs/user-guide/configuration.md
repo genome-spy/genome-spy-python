@@ -32,7 +32,7 @@ This example uses all three non-data appearance levels deliberately:
 ```
 
 ```{genomespy-chart} configuration:configured_chart
-:height: 340
+:height: 300
 :title: Explicit view properties with configured defaults
 ```
 
@@ -124,7 +124,7 @@ combine fixed pixels with flex-like growth through `gs.SizeDef()`:
 ```
 
 ```{genomespy-chart} configuration:flex_chart
-:height: 190
+:height: 110
 :title: One fixed child and one growing child
 ```
 

@@ -56,7 +56,7 @@ step_chart = (
         x=gs.X("category:N").title("Category"),
         y=gs.Y("value:Q").title("Value"),
     )
-    .properties(width=gs.step(48), height=150, title="48 pixels per category")
+    .properties(width=gs.step(48), title="48 pixels per category")
 )
 # configuration-step-end
 
@@ -88,7 +88,12 @@ themed_chart = (
     gs.Chart(measurements)
     .mark_point(filled=True, size=100)
     .encode(x="time:Q", y="value:Q", color="sample:N")
-    .properties(height=190, title="The Quartz built-in theme", theme="quartz")
+    .properties(
+        width="container",
+        height="container",
+        title="The Quartz built-in theme",
+        theme="quartz",
+    )
 )
 # configuration-theme-end
 

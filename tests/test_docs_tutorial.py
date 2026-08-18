@@ -44,6 +44,7 @@ NOTEBOOKS_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "notebooks.md"
 SERIALIZATION_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "serialization.py"
 SERIALIZATION_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "serialization.md"
 GALLERY_EXTENSION_PATH = REPO_ROOT / "docs" / "_ext" / "genomespy_gallery.py"
+TUTORIALS_DIR = REPO_ROOT / "docs" / "tutorials"
 
 
 def _load_module(name: str, path: Path) -> ModuleType:
@@ -53,6 +54,30 @@ def _load_module(name: str, path: Path) -> ModuleType:
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def test_live_tutorial_sizes_are_owned_by_the_embedder() -> None:
+    sizing_demonstrations = {"configuration:configured_chart"}
+    blocks: list[tuple[str, str]] = []
+    pattern = re.compile(
+        r"^```\{genomespy-chart\}\s+(\S+)\n((?::[^\n]+\n)*)", re.MULTILINE
+    )
+    for path in sorted((REPO_ROOT / "docs").rglob("*.md")):
+        if "_build" in path.parts:
+            continue
+        blocks.extend(pattern.findall(path.read_text(encoding="utf-8")))
+
+    assert blocks
+    for target, options in blocks:
+        assert re.search(r"^:height:\s*\d+", options, re.MULTILINE), target
+        module_name, attribute = target.split(":")
+        tutorial = _load_module(
+            f"_sizing_{module_name}", TUTORIALS_DIR / f"{module_name}.py"
+        )
+        spec = getattr(tutorial, attribute).to_dict()
+        if target not in sizing_demonstrations:
+            assert not isinstance(spec.get("width"), (int, float)), target
+            assert not isinstance(spec.get("height"), (int, float)), target
 
 
 def test_getting_started_charts_serialize_and_validate() -> None:
@@ -122,7 +147,7 @@ def test_charts_and_marks_guide_examples_serialize() -> None:
         "strokeWidth": 1,
     }
     assert point_spec["encoding"]["size"]["field"] == "amount"
-    assert point_spec["height"] == 220
+    assert "height" not in point_spec
     assert point_spec["description"] == "Six measurements grouped by sample."
 
     interval_spec = tutorial.interval_chart.to_dict()

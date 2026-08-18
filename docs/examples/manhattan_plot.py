@@ -92,9 +92,7 @@ highlight_points = (
     )
 )
 
-association_track = (
-    genome_wide_rule + suggestive_rule + points + highlight_points
-).properties(height=360)
+association_track = genome_wide_rule + suggestive_rule + points + highlight_points
 
 chart = association_track.properties(
     assembly="hg18",

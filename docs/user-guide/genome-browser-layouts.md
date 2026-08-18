@@ -51,7 +51,7 @@ the shared genomic context:
 ```
 
 ```{genomespy-chart} genome_browser_layouts:browser
-:height: 390
+:height: 260
 :title: Two tracks sharing one zoomable genomic axis
 ```
 

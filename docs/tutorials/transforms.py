@@ -26,7 +26,7 @@ filtered_chart = (
         color=gs.Color("group:N").legend(title="Group"),
         tooltip=["sample:N", "quality:Q"],
     )
-    .properties(height=160, title="Keep rows with sufficient quality")
+    .properties(title="Keep rows with sufficient quality")
 )
 # transforms-filter-end
 
@@ -44,7 +44,7 @@ formula_chart = (
         y=gs.Y("responsePercent:Q").scale(domain=[0, 100]).title("Response (%)"),
         color=gs.Color("group:N").legend(title="Group"),
     )
-    .properties(height=190, title="Derive a percentage field")
+    .properties(title="Derive a percentage field")
 )
 # transforms-formula-end
 
@@ -69,7 +69,7 @@ aggregate_chart = (
         color=gs.Color("group:N").legend(None),
         tooltip=[gs.Tooltip("group:N"), gs.Tooltip("meanResponse:Q").format(".1f")],
     )
-    .properties(height=190, title="One summarized row per group")
+    .properties(title="One summarized row per group")
 )
 # transforms-aggregate-end
 

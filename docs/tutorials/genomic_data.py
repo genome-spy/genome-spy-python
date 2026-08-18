@@ -18,7 +18,7 @@ bigwig_chart = (
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("score:Q").scale(domain=[0, 100]).axis(title="GC (%)"),
     )
-    .properties(assembly="hg38", height=110, title="Lazy BigWig signal")
+    .properties(assembly="hg38", title="Lazy BigWig signal")
 )
 # genomic-data-bigwig-end
 
@@ -36,7 +36,7 @@ bigbed_chart = (
         x2=gs.Locus("chrom", "chromEnd"),
         color=gs.Color("ucscLabel:N").legend(title="cCRE class"),
     )
-    .properties(assembly="hg38", height=70, title="Lazy BigBed intervals")
+    .properties(assembly="hg38", title="Lazy BigBed intervals")
 )
 # genomic-data-bigbed-end
 

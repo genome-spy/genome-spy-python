@@ -56,7 +56,7 @@ zoom_chart = (
         color=gs.Color("impact:N"),
         tooltip=["id:N", "score:Q", "impact:N"],
     )
-    .properties(assembly="hg38", height=150, title="Zoomable locus scale")
+    .properties(assembly="hg38", title="Zoomable locus scale")
 )
 # interaction-zoom-end
 
@@ -75,7 +75,6 @@ bound_chart = (
         y=gs.Y("score:Q").scale(domain=[0, 1]).title("Score"),
     )
     .properties(
-        height=150,
         title="Filter with a bound parameter",
         params=[
             gs.param(
@@ -115,7 +114,6 @@ selection_chart = (
     )
     .properties(
         assembly="hg38",
-        height=150,
         title="Click a variant to select it",
         params=[gs.param("selectedVariant", select="point")],
     )

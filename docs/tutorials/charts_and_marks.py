@@ -26,7 +26,6 @@ point_chart = (
         size=gs.Size("amount:Q").legend(title="Amount"),
     )
     .properties(
-        height=220,
         title="Measurements by sample",
         description="Six measurements grouped by sample.",
     )
@@ -50,7 +49,7 @@ interval_chart = (
         y=gs.Y("feature:N").title("Feature"),
         color=gs.Color("group:N").legend(title="Group"),
     )
-    .properties(height=150, title="Intervals have two endpoints")
+    .properties(title="Intervals have two endpoints")
 )
 # charts-marks-ranges-end
 
@@ -65,7 +64,7 @@ text_chart = (
         text="sample:N",
         color="sample:N",
     )
-    .properties(height=180, title="Text can represent a field")
+    .properties(title="Text can represent a field")
 )
 # charts-marks-text-end
 
@@ -86,11 +85,11 @@ relation_base = gs.Chart(relations).encode(
 )
 
 link_chart = relation_base.mark_link(linkShape="diagonal", size=2).properties(
-    height=190, title="Links connect two positions"
+    title="Links connect two positions"
 )
 
 arrow_chart = relation_base.mark_arrow(size=5, headWidth=3).properties(
-    height=190, title="Arrows add direction"
+    title="Arrows add direction"
 )
 # charts-marks-relations-end
 

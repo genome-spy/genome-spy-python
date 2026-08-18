@@ -123,7 +123,7 @@ Define one ruler at the common parent of the tracks it should span:
 ```
 
 ```{genomespy-chart} interaction:ruler_chart
-:height: 360
+:height: 240
 :title: One pointer ruler spanning two linked tracks
 ```
 

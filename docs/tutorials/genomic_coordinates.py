@@ -27,7 +27,7 @@ point_chart = (
         y=gs.Y("impact:N").title("Impact"),
         color=gs.Color("impact:N").legend(None),
     )
-    .properties(assembly="hg38", height=120, title="Point variants on chr17")
+    .properties(assembly="hg38", title="Point variants on chr17")
 )
 # genomic-coordinates-points-end
 
@@ -48,7 +48,7 @@ interval_chart = (
         y=gs.Y("kind:N").title("Feature kind"),
         color=gs.Color("kind:N").legend(None),
     )
-    .properties(assembly="hg38", height=110, title="Half-open genomic intervals")
+    .properties(assembly="hg38", title="Half-open genomic intervals")
 )
 # genomic-coordinates-intervals-end
 
@@ -67,7 +67,7 @@ offset_chart = (
         x2=gs.Locus("seqid", "end1"),
         y=gs.Y("name:N").title("Feature"),
     )
-    .properties(assembly="hg38", height=90, title="One-based inclusive input")
+    .properties(assembly="hg38", title="One-based inclusive input")
 )
 # genomic-coordinates-offset-end
 
@@ -98,7 +98,6 @@ custom_assembly_chart = (
     .properties(
         genomes={"toy": toy_genome},
         assembly="toy",
-        height=100,
         title="A custom three-contig assembly",
     )
 )
@@ -147,7 +146,7 @@ multiple_assembly_chart = (
         .axis(title="Mouse mm10"),
         tooltip="gene:N",
     )
-    .properties(height=210, title="Two locus scales, two assemblies")
+    .properties(title="Two locus scales, two assemblies")
 )
 # genomic-coordinates-multiple-end
 

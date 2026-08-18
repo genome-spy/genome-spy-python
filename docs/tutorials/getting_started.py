@@ -61,7 +61,7 @@ genomic_track = (
         y=gs.Y("kind:N").title("Feature kind"),
         color=gs.Color("kind:N").legend(None),
     )
-    .properties(assembly="hg38", height=120)
+    .properties(assembly="hg38")
 )
 # getting-started-genomic-chart-end
 

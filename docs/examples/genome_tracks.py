@@ -13,7 +13,7 @@ META = {
     "category": "Genome browser tracks",
     "tags": ("vconcat", "bigwig", "refseq", "lazy", "real-data"),
     "order": 10,
-    "height": 320,
+    "height": 250,
     "max_width": 920,
 }
 

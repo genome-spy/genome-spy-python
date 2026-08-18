@@ -26,7 +26,7 @@ layered_chart = (
         y=gs.Y("signal:Q").scale(zero=False).title("Signal"),
         color=gs.Color("group:N").legend(title="Group"),
     )
-    .properties(data=measurements, height=210, title="Points with labels")
+    .properties(data=measurements, title="Points with labels")
 )
 # composition-layer-end
 
@@ -76,7 +76,7 @@ treated_panel = (
 
 horizontal_chart = (
     (control_panel | treated_panel)
-    .properties(data=measurements, height=180, spacing=18)
+    .properties(data=measurements, spacing=18)
     .resolve_scale(x="shared", y="shared")
     .resolve_axis(x="independent", y="shared")
 )
