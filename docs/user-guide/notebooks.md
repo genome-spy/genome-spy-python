@@ -46,7 +46,9 @@ datasets={"measurements": initial_rows},
 ```
 
 `data.name` tells the chart which dataset to read. The root `datasets` mapping
-provides its initial rows and gives later updates a stable target.
+provides its initial rows and gives later updates a stable target. The GenomeSpy
+documentation describes this indirection in
+[named data](https://genomespy.app/docs/grammar/data/eager/#named-data).
 
 ## Replace the named dataset
 

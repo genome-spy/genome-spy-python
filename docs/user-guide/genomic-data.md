@@ -8,6 +8,8 @@ and causes the source to request another indexed slice.
 This is **viewport-driven loading**: the current locus scale domain—the interval
 visible on screen—determines which data are loaded. Python constructs the
 specification, but the browser performs the requests while the chart is open.
+The GenomeSpy documentation covers every source type in
+[lazy data sources](https://genomespy.app/docs/grammar/data/lazy/).
 
 ## A lazy quantitative signal
 
@@ -57,13 +59,16 @@ Choose the builder that matches the hosted file:
 
 | Format | Builder | Rows provided to the chart |
 | --- | --- | --- |
-| BigWig | `gs.lazy.bigwig(url)` | Quantitative genomic intervals |
-| BigBed | `gs.lazy.bigbed(url)` | Annotation intervals |
-| FASTA | `gs.lazy.indexed_fasta(url)` | Sequence chunks |
-| BAM | `gs.lazy.bam(url)` | Read alignments |
-| Tabix TSV | `gs.lazy.tabix(url)` | Parsed tabular intervals |
-| GFF3 | `gs.lazy.gff3(url)` | Gene and transcript features |
-| VCF | `gs.lazy.vcf(url)` | Variant records |
+| [BigWig](https://genomespy.app/docs/grammar/data/lazy/#bigwig) | `gs.lazy.bigwig(url)` | Quantitative genomic intervals |
+| [BigBed](https://genomespy.app/docs/grammar/data/lazy/#bigbed) | `gs.lazy.bigbed(url)` | Annotation intervals |
+| [FASTA](https://genomespy.app/docs/grammar/data/lazy/#indexed-fasta) | `gs.lazy.indexed_fasta(url)` | Sequence chunks |
+| [BAM](https://genomespy.app/docs/grammar/data/lazy/#bam) | `gs.lazy.bam(url)` | Read alignments |
+| [Tabix TSV](https://genomespy.app/docs/grammar/data/lazy/#tabix-tsv) | `gs.lazy.tabix(url)` | Parsed tabular intervals |
+| [GFF3](https://genomespy.app/docs/grammar/data/lazy/#gff3) | `gs.lazy.gff3(url)` | Gene and transcript features |
+| [VCF](https://genomespy.app/docs/grammar/data/lazy/#vcf) | `gs.lazy.vcf(url)` | Variant records |
+
+Each format links to its section in the GenomeSpy documentation, which lists the
+source's parameters and the fields it returns.
 
 The BigWig and BigBed examples above use working public files. For the other
 formats, the gallery links below provide complete charts backed by real data.
@@ -88,7 +93,8 @@ signal at progressively coarser resolutions.
 
 The `debounce`, `debounceDomainChange`, and `debounceMode` options control how
 quickly requests follow scale changes. Keep their defaults until a real track
-shows excessive requests or noticeable latency.
+shows excessive requests or noticeable latency. Each source's own defaults are
+listed with its parameters in the GenomeSpy documentation.
 
 ## Index files and hosting
 

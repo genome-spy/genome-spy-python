@@ -46,7 +46,9 @@ Choose a type from what a field means, not merely from how Python stores it:
 A numeric identifier is usually nominal, not quantitative: sample `12` is not
 twice sample `6`. Likewise, an ordinal field describes order but does not claim
 that the distance from low to medium equals the distance from medium to high.
-The selected type affects the default scale and the guide GenomeSpy creates.
+The selected type affects the default scale and the guide GenomeSpy creates, as
+described in
+[visual encoding](https://genomespy.app/docs/grammar/mark/#visual-encoding).
 
 ## Visual channels
 
@@ -76,7 +78,9 @@ The most common channels have distinct jobs:
 Position is generally the easiest visual channel to compare accurately. Color
 and shape are useful for categories; size and opacity can show quantities but
 are harder to compare precisely. A tooltip adds details without replacing a
-clear visible encoding.
+clear visible encoding. The GenomeSpy documentation lists every channel,
+including the offset channels, in
+[channels](https://genomespy.app/docs/grammar/mark/#channels).
 
 ## Index positions
 
@@ -95,7 +99,9 @@ for bases, amino acids, matrix columns, and other ordered integer locations:
 ```
 
 Unlike an ordinal category, an index remains linear and can be zoomed. Each
-integer also has a band, allowing a rectangle to fill one indexed position.
+integer also has a band, allowing a rectangle to fill one indexed position. The
+[index scale](https://genomespy.app/docs/grammar/scale/#index-scale) describes
+that behavior in detail.
 
 ## Genomic loci
 
@@ -115,7 +121,9 @@ clearest form when chromosome and position are stored in separate fields:
 
 The chart's `assembly="hg38"` supplies chromosome names, lengths, and order.
 The genomic coordinates guide covers locus domains and coordinate conventions
-in detail.
+in detail, as does the
+[locus scale](https://genomespy.app/docs/grammar/scale/#locus-scale) in the
+GenomeSpy documentation.
 
 ## Field, datum, value, and expression
 
@@ -146,7 +154,9 @@ start of the visual range and a value of `0.5` means its midpoint.
 
 Expressions that participate in a scale need an explicit type, as the size
 expression above demonstrates. GenomeSpy cannot infer whether an arbitrary
-expression returns a quantity, category, index, or locus.
+expression returns a quantity, category, index, or locus. The
+[expression language](https://genomespy.app/docs/grammar/expressions/) describes
+what an expression may contain.
 
 Scales translate data values into visual values. Axes and legends explain those
 translations to the reader. Their defaults and focused customization are the

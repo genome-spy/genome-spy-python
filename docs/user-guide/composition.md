@@ -10,7 +10,9 @@ uses three concise operators for the most common layouts:
 | `a \| b` | Horizontal concatenation | Place `a` to the left of `b` |
 
 Use `gs.concat(..., columns=n)` when the layout is an explicit wrapping grid.
-Composition is hierarchical, so layers and concatenations can be nested.
+Composition is hierarchical, so layers and concatenations can be nested. The
+GenomeSpy documentation introduces the same model in
+[view composition](https://genomespy.app/docs/grammar/composition/).
 
 ```{literalinclude} ../tutorials/composition.py
 :language: python
@@ -40,7 +42,9 @@ only the `text` encoding that it alone needs.
 
 Place shared properties at the nearest common parent. Descendants can override
 an inherited data source, encoding, transform, or view property when their
-behavior differs.
+behavior differs. See
+[layering views](https://genomespy.app/docs/grammar/composition/layer/) for the
+layer-specific options.
 
 ## Stack aligned tracks vertically
 
@@ -83,7 +87,9 @@ The `|` operator keeps panels separate while arranging them horizontally:
 
 The children filter the inherited data independently. Shared `x` and `y`
 scales make positions directly comparable, while independent x axes let each
-panel label that shared mapping within its own column.
+panel label that shared mapping within its own column. Child sizing, spacing,
+and separators are documented in
+[view concatenation](https://genomespy.app/docs/grammar/composition/concat/).
 
 ## Shared, independent, and excluded resolution
 
@@ -100,7 +106,18 @@ or legend:
 
 Configure these relationships with `resolve_scale()`, `resolve_axis()`, and
 `resolve_legend()`. An axis can be shared only when its scale is shared. Legend
-resolution normally follows the corresponding visual scale.
+resolution normally follows the corresponding visual scale. The GenomeSpy
+documentation describes the rules in
+[scale, axis, and legend resolution](https://genomespy.app/docs/grammar/composition/#scale-axis-and-legend-resolution)
+and the aligned-axis case in
+[shared axes](https://genomespy.app/docs/grammar/composition/concat/#shared-axes).
+
+Two composition features have no dedicated page in this guide:
+[`multiscale`](https://genomespy.app/docs/grammar/composition/multiscale/) for
+semantic zoom between detail levels, and
+[importing views](https://genomespy.app/docs/grammar/import/) for reusing a view
+by URL or template. Both are available through `gs.multiscale(...)` and
+`gs.import_view(...)`.
 
 ## Advanced grid layouts
 

@@ -17,7 +17,10 @@ strings, and numbers:
 
 The result uses GenomeSpy property names. For example, `gs.X("sample:N")`
 becomes an x-channel definition with `field` and `type`. The root `$schema` URL
-identifies the GenomeSpy schema used to validate the chart.
+identifies the GenomeSpy schema used to validate the chart. Those property names
+are the ones documented in the
+[GenomeSpy grammar](https://genomespy.app/docs/grammar/), so a serialized chart
+can be read against it directly.
 
 Use `to_json()` when another program expects JSON text:
 
@@ -54,3 +57,9 @@ file.
 Use `chart.to_html()` when integration code needs the HTML as a string rather
 than a file. Complete method signatures and validation options are listed in the
 [API reference](../api.md).
+
+The generated HTML calls GenomeSpy's own `embed` function. To adapt it for
+another page or build system, see
+[embedding](https://genomespy.app/docs/api/embedding/) and the available
+[embed options](https://genomespy.app/docs/api/embed-options/), which
+`chart.widget(embed_options=...)` also accepts.

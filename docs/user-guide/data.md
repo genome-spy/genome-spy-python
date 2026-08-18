@@ -30,7 +30,9 @@ Pass the records as the first argument to `Chart`:
 
 The chart stores these rows as inline `data.values` in the generated GenomeSpy
 specification. Inline data is a good fit for examples and small tables because
-the specification remains self-contained.
+the specification remains self-contained. The GenomeSpy documentation describes
+this and the other eager sources in
+[inline data](https://genomespy.app/docs/grammar/data/eager/#inline-data).
 
 ## DataFrames and Arrow tables
 
@@ -75,6 +77,11 @@ directory.
 URL data is useful when embedding the rows would make the specification too
 large. Indexed genomic formats use a separate lazy-loading API described later
 in the genomic data guide.
+
+The GenomeSpy documentation lists the supported
+[tabular formats](https://genomespy.app/docs/grammar/data/eager/#tabular-formats)
+and their parsing options under
+[URL data](https://genomespy.app/docs/grammar/data/eager/#url-data).
 
 ## Inherit data in a composed view
 

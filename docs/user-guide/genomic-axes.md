@@ -29,7 +29,8 @@ the domain change interactively.
 
 `GenomeAxis` options are available through `.axis(...)`. In the example,
 `chromGrid=True` enables chromosome-aware grid styling and the title identifies
-the coordinate channel.
+the coordinate channel. The remaining options are listed in
+[genome axis for loci](https://genomespy.app/docs/grammar/axis/#genome-axis-for-loci).
 
 ## Genomic intervals
 
@@ -61,7 +62,8 @@ inserts the required coordinate-linearization step automatically.
 Usually, keep chromosome and position in separate fields and let GenomeSpy
 linearize them. A pre-linearized field can be encoded with a regular channel of
 type `L`, but it is then your responsibility to ensure that it matches the
-selected assembly.
+selected assembly. The GenomeSpy documentation covers both forms in
+[encoding genomic coordinates](https://genomespy.app/docs/grammar/genomic-coordinates/#encoding-genomic-coordinates).
 
 ## Coordinate counting and offsets
 
@@ -96,12 +98,15 @@ zero-based half-open interval `[0, 10)`. That is why the example sets
 For a one-based point such as a VCF `POS`, set `offset=1` on its single locus
 channel. Do not apply an offset merely because labels should begin at one; an
 offset changes data coordinates, while axis label numbering is a presentation
-choice.
+choice. The same convention is described in
+[coordinate counting](https://genomespy.app/docs/grammar/genomic-coordinates/#coordinate-counting).
 
 ## Built-in assemblies
 
-GenomeSpy includes `hg38`, `hg19`, `hg18`, `mm10`, `mm9`, and `dm6`. Set one as
-the root default when all locus scales use it:
+GenomeSpy includes `hg38`, `hg19`, `hg18`, `mm10`, `mm9`, and `dm6`; the current
+list is in
+[supported genomes](https://genomespy.app/docs/grammar/genomic-coordinates/#supported-genomes).
+Set one as the root default when all locus scales use it:
 
 ```python
 chart.properties(assembly="hg38")
@@ -135,6 +140,8 @@ reuse it; a one-off inline definition can be placed in `scale.assembly`.
 
 Contig names in the data must match the assembly. For example, `1` and `chr1`
 are different names unless the data loader or preparation step normalizes them.
+The accepted definition forms are described in
+[custom genomes](https://genomespy.app/docs/grammar/genomic-coordinates/#custom-genomes).
 
 ## Multiple assemblies
 

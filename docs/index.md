@@ -16,7 +16,9 @@ sd_hide_title: true
 ```{rst-class} lead
 **genome-spy-python** builds validated [GenomeSpy](https://genomespy.app)
 specifications from Python chart definitions. Display them in notebooks or web
-pages with chromosome-aware zooming and panning.
+pages with chromosome-aware zooming and panning. The
+[GenomeSpy documentation](https://genomespy.app/docs/grammar/) describes the
+underlying grammar in full.
 ```
 
 ::::{grid} 1 1 2 2

@@ -7,6 +7,11 @@ html_theme.sidebar_secondary.remove: false
 The public API covers chart construction, every schema-derived encoding
 channel, composition, schema helpers, and notebook rendering.
 
+Most classes here are generated from the GenomeSpy JSON schema and keep their
+upstream names and property names, so
+[types used in the grammar](https://genomespy.app/docs/grammar/types/) documents
+the same objects.
+
 Generated `configure(...)` and `configure_* (...)` methods on `Chart` and
 composition specs are the preferred way to author top-level config. Helper
 constructors such as `gs.config(...)` and `gs.view_config(...)` remain
