@@ -14,8 +14,7 @@ has three central ingredients:
 
 ## Install
 
-`genome-spy-python` has not published its first package release yet. Until then,
-install the current version directly from its Git repository in a virtual
+Install the current version directly from its Git repository in a virtual
 environment:
 
 ```bash

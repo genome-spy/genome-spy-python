@@ -65,6 +65,9 @@ html_theme_options = {
     "navbar_align": "left",
     "navbar_end": ["navbar-icon-links"],
     "show_prev_next": False,
+    # Navigation
+    "show_nav_level": 2,
+    "navigation_depth": 4,
     "icon_links": [
         {
             "name": "GitHub",

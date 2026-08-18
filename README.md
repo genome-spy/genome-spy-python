@@ -170,10 +170,10 @@ package from the pinned `@genome-spy/core` release. See
 
 - [GenomeSpy] — the upstream visualization grammar and JavaScript renderer.
 - [Altair] — the primary design inspiration for this Python API.
-- [Gosling] — a related grammar and Python-wrapper design reference for
+- [Gos] — a related grammar and Python-wrapper design reference for
   genomics visualization.
 
 [Altair]: https://altair-viz.github.io/
 [GenomeSpy]: https://genome-spy.org/
-[Gosling]: https://gosling-lang.org/
+[Gos]: https://gosling-lang.org/
 [uv]: https://docs.astral.sh/uv/

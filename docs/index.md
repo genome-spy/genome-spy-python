@@ -54,6 +54,8 @@ Detailed reference for the public Python API.
 
 ```{toctree}
 :hidden:
+:includehidden:
+:maxdepth: 3
 
 Getting started <getting-started>
 User guide <user-guide/index>
