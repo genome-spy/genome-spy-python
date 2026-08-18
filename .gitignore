@@ -231,6 +231,7 @@ CHANGELOG_STAGING.md
 # Documentation build output and generated gallery artifacts
 docs/_build/
 docs/gallery/
+docs/generated/
 docs/_static/specs/
 docs/_static/generated/arrow/
 

@@ -129,6 +129,19 @@ regenerate them when updating the pinned GenomeSpy Core version:
 uv run python tools/generate_schema_wrapper.py
 ```
 
+### Regenerate the API reference index
+
+`docs/api.md` lists every public object as an `autosummary` entry and is
+generated from `genome_spy.__all__`. Regenerate it after changing the public
+API:
+
+```bash
+uv run python tools/generate_api_docs.py
+```
+
+Sphinx writes one page per object into the ignored `docs/generated/` directory
+during the build.
+
 ### Build and preview the documentation
 
 Build the HTML documentation with:
