@@ -1,24 +1,21 @@
 /* genome-spy-python documentation theme.
  *
- * Brands the pydata-sphinx-theme with the genomespy.app design language: Lato
+ * Brands the Furo theme with the genomespy.app design language: Lato
  * body text, a Special Elite wordmark, brand blues (#3e8cb6 / #3797ce /
  * #7fbbdd), and an image-tile showcase on the landing page. */
 
 @import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Special+Elite&display=swap");
 
 :root,
-html[data-theme="light"],
-html[data-theme="dark"] {
+body[data-theme="light"],
+body[data-theme="dark"] {
   --gs-brand: #3e8cb6;
   --gs-link: #3797ce;
   --gs-ring: #7fbbdd;
   --gs-signal: #c53b2c;
-  --pst-color-primary: #3e8cb6;
-  --pst-color-link: #3797ce;
-  --pst-color-link-hover: #2f6f92;
-  --pst-color-inline-code: #2f6f92;
-  --pst-font-family-base: "Lato", var(--pst-font-family-base-system);
-  --pst-font-family-heading: "Lato", var(--pst-font-family-base-system);
+  --color-brand-primary: #3e8cb6;
+  --color-brand-content: #3797ce;
+  --font-stack: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 /* ---------- Landing hero ---------- */
@@ -40,9 +37,8 @@ html[data-theme="dark"] {
   max-width: 42rem;
   margin: 1rem auto 0;
   font-size: clamp(1.05rem, 2.2vw, 1.3rem);
-  color: var(--pst-color-text-muted);
+  color: var(--color-foreground-muted);
 }
-.bd-content .lead,
 p.lead {
   text-align: center;
   max-width: 46rem;
@@ -122,7 +118,7 @@ p.lead {
 }
 .gs-data-preview th,
 .gs-data-preview td {
-  border: 1px solid var(--pst-color-border);
+  border: 1px solid var(--color-background-border);
   padding: 0.3rem 0.5rem;
   text-align: left;
 }
@@ -165,7 +161,7 @@ p.lead {
 }
 .gs-card__body {
   padding: 0.7rem 0.85rem 0.85rem;
-  background: var(--pst-color-surface, #fff);
+  background: var(--color-background-primary, #fff);
 }
 .gs-card__title {
   display: block;

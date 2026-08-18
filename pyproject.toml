@@ -15,8 +15,8 @@ arrow = ["pyarrow>=18.0.0"]
 
 [dependency-groups]
 docs = [
+    "furo>=2024.8.6",
     "sphinx>=7.3",
-    "pydata-sphinx-theme>=0.15",
     "myst-parser>=3.0",
     "scipy>=1.14.0",
     "sphinx-design>=0.6",

@@ -48,8 +48,8 @@ napoleon_numpy_docstring = False
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 # -- HTML output ------------------------------------------------------------
-html_theme = "pydata_sphinx_theme"
-html_title = "genome-spy-python"
+html_theme = "furo"
+html_title = "GenomeSpy for Python"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_css_files = ["genomespy.css"]
@@ -62,22 +62,27 @@ html_meta = {
 }
 
 html_theme_options = {
-    "navbar_align": "left",
-    "navbar_end": ["navbar-icon-links"],
-    "show_prev_next": False,
-    # Navigation
-    "show_nav_level": 2,
-    "navigation_depth": 4,
-    "icon_links": [
+    "light_css_variables": {
+        "color-brand-primary": "#3e8cb6",
+        "color-brand-content": "#3797ce",
+        "font-stack": '"Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    },
+    "footer_icons": [
         {
             "name": "GitHub",
             "url": "https://github.com/genome-spy/genome-spy-python",
-            "icon": "fa-brands fa-github",
+            "html": """
+                <svg stroke="currentColor" fill="currentColor" stroke-width="0"
+                     viewBox="0 0 16 16" height="1em" width="1em"
+                     xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 0C3.58 0 0 3.64 0 8.13c0 3.59 2.29 6.64 5.47 7.71.4.08.55-.18.55-.39 0-.19-.01-.83-.01-1.51-2.01.38-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.15-.28-.15-.68-.52-.01-.53.63-.01 1.08.59 1.23.83.72 1.23 1.87.88 2.33.67.07-.53.28-.88.51-1.08-1.78-.21-3.64-.91-3.64-4.02 0-.89.31-1.62.82-2.19-.08-.2-.36-1.04.08-2.16 0 0 .67-.22 2.2.84A7.5 7.5 0 0 1 8 3.92a7.5 7.5 0 0 1 2 .27c1.53-1.06 2.2-.84 2.2-.84.44 1.12.16 1.96.08 2.16.51.57.82 1.3.82 2.19 0 3.12-1.87 3.81-3.65 4.02.29.25.54.74.54 1.51 0 1.09-.01 1.97-.01 2.24 0 .21.15.47.55.39A8.15 8.15 0 0 0 16 8.13C16 3.64 12.42 0 8 0Z"></path>
+                </svg>
+            """,
+            "class": "",
         }
     ],
-    "logo": {"text": "GenomeSpy for Python"},
+    "navigation_with_keys": True,
 }
-html_context = {"default_mode": "light"}
 
 # The landing page is a full-width showcase, so drop its sidebars.
 html_sidebars = {"index": []}

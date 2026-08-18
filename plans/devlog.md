@@ -1,5 +1,16 @@
 # Dev Log
 
+## 2026-08-18 - Switched the Sphinx documentation to Furo
+
+- Replaced `pydata-sphinx-theme` with Furo in the docs dependency group and
+  lockfile.
+- Migrated the Sphinx theme options and branded CSS variables to Furo while
+  preserving the light presentation, landing-page layout, and GitHub link.
+- Removed PyData-only secondary-sidebar metadata from authored and generated
+  pages; generated pages no longer emit empty YAML front matter.
+- Validation: 112 focused documentation tests, repository-wide Ruff, and the
+  strict Sphinx HTML build passed.
+
 ## 2026-08-18 - Expanded official companion gallery prose
 
 - Added optional same-stem Markdown companions for gallery examples; the

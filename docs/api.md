@@ -1,7 +1,3 @@
----
-html_theme.sidebar_secondary.remove: false
----
-
 # API reference
 
 The public API covers chart construction, every schema-derived encoding

@@ -115,10 +115,6 @@ def _card_html(
 def _gallery_index_md(examples: list[core.Example]) -> str:
     token = core.build_token(examples)
     blocks = [
-        "---",
-        "html_theme.sidebar_secondary.remove: true",
-        "---",
-        "",
         "# Example gallery",
         "",
         "Each card opens the live chart and the Python code that produced it.",
@@ -256,10 +252,6 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         "</script>"
     )
     parts = [
-        "---",
-        "html_theme.sidebar_secondary.remove: true",
-        "---",
-        "",
         f"# {example.title}",
         "",
         example.description or "",
