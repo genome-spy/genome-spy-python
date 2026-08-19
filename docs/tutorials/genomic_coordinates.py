@@ -2,7 +2,6 @@
 
 import genome_spy as gs
 
-
 BRCA1_DOMAIN = [
     {"chrom": "chr17", "pos": 43_040_000},
     {"chrom": "chr17", "pos": 43_090_000},
@@ -128,83 +127,6 @@ homologs = [
         "mmChrom": "chr15",
         "mmPos": 61_985_341,
     },
-    {
-        "gene": "EGFR",
-        "hsChrom": "chr7",
-        "hsPos": 55_019_017,
-        "mmChrom": "chr11",
-        "mmPos": 16_752_203,
-    },
-    {
-        "gene": "KRAS",
-        "hsChrom": "chr12",
-        "hsPos": 25_205_246,
-        "mmChrom": "chr6",
-        "mmPos": 145_216_699,
-    },
-    {
-        "gene": "SOX2",
-        "hsChrom": "chr3",
-        "hsPos": 181_711_925,
-        "mmChrom": "chr3",
-        "mmPos": 34_560_381,
-    },
-    {
-        "gene": "PAX6",
-        "hsChrom": "chr11",
-        "hsPos": 31_789_026,
-        "mmChrom": "chr2",
-        "mmPos": 105_536_080,
-    },
-    {
-        "gene": "FOXP2",
-        "hsChrom": "chr7",
-        "hsPos": 114_414_815,
-        "mmChrom": "chr6",
-        "mmPos": 14_901_349,
-    },
-    {
-        "gene": "CFTR",
-        "hsChrom": "chr7",
-        "hsPos": 117_480_025,
-        "mmChrom": "chr6",
-        "mmPos": 18_170_687,
-    },
-    {
-        "gene": "APOE",
-        "hsChrom": "chr19",
-        "hsPos": 44_905_796,
-        "mmChrom": "chr7",
-        "mmPos": 19_696_244,
-    },
-    {
-        "gene": "RB1",
-        "hsChrom": "chr13",
-        "hsPos": 48_303_751,
-        "mmChrom": "chr14",
-        "mmPos": 73_195_502,
-    },
-    {
-        "gene": "PTEN",
-        "hsChrom": "chr10",
-        "hsPos": 87_863_625,
-        "mmChrom": "chr19",
-        "mmPos": 32_757_577,
-    },
-    {
-        "gene": "GATA1",
-        "hsChrom": "chrX",
-        "hsPos": 48_786_590,
-        "mmChrom": "chrX",
-        "mmPos": 7_959_260,
-    },
-    {
-        "gene": "SHH",
-        "hsChrom": "chr7",
-        "hsPos": 155_799_980,
-        "mmChrom": "chr5",
-        "mmPos": 28_456_840,
-    },
 ]
 
 multiple_assembly_chart = (
@@ -219,6 +141,7 @@ multiple_assembly_chart = (
         y=gs.Locus("mmChrom", "mmPos")
         .scale(type="locus", assembly="mm10")
         .axis(title="Mouse mm10", chromGrid=True),
+        color=gs.Color("gene:N").legend(title="Gene"),
         tooltip="gene:N",
     )
     .properties(title="Orthologous genes in two assemblies")
