@@ -50,6 +50,7 @@ LegendOrient_T: TypeAlias = Literal[
     "bottom-left",
     "bottom-right",
 ]
+LegendRegionAnchor_T: TypeAlias = Literal["start", "middle", "end"]
 LegendTitleOrient_T: TypeAlias = Literal["top", "bottom", "left", "right"]
 MarkType_T: TypeAlias = Literal[
     "rect", "point", "rule", "tick", "text", "link", "arrow"
@@ -59,6 +60,7 @@ OffsetChannel_T: TypeAlias = Literal["xOffset", "yOffset"]
 ParseValue_T: TypeAlias = str | None
 PrimaryPositionalChannel_T: TypeAlias = Literal["x", "y"]
 ResolutionBehavior_T: TypeAlias = Literal["independent", "shared", "excluded", "forced"]
+LegendResolutionBehavior_T: TypeAlias = ResolutionBehavior_T | Literal["collected"]
 RulerClear_T: TypeAlias = Literal["mouseleave", "mouseup", False]
 RulerDisplay_T: TypeAlias = Literal["line", "center", "band", "none"]
 RulerEventType_T: TypeAlias = Literal["mousemove", "mousedown"]
@@ -149,6 +151,7 @@ __all__ = [
     "DomEventType_T",
     "LegendDirection_T",
     "LegendOrient_T",
+    "LegendRegionAnchor_T",
     "LegendTitleOrient_T",
     "MarkType_T",
     "NumericDomain_T",
@@ -156,6 +159,7 @@ __all__ = [
     "ParseValue_T",
     "PrimaryPositionalChannel_T",
     "ResolutionBehavior_T",
+    "LegendResolutionBehavior_T",
     "RulerClear_T",
     "RulerDisplay_T",
     "RulerEventType_T",

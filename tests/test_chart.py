@@ -280,7 +280,7 @@ def test_top_level_constructors_and_properties_are_root_variant_specific() -> No
     assert "stops" in inspect.signature(gs.MultiscaleChart).parameters
     assert "stops" not in inspect.signature(gs.Chart).parameters
     imported_signature = inspect.signature(gs.ImportedView)
-    assert {"import_", "config", "name", "params", "visible"} == set(
+    assert {"import_", "config", "name", "params", "visible", "zindex"} == set(
         imported_signature.parameters
     )
     assert all(

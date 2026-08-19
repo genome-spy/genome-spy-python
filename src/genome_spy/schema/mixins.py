@@ -21,6 +21,7 @@ from genome_spy.schema._typing import (
     FontWeight_T,
     LegendDirection_T,
     LegendOrient_T,
+    LegendResolutionBehavior_T,
     LegendTitleOrient_T,
     MarkType_T,
     PrimaryPositionalChannel_T,
@@ -618,14 +619,38 @@ class MarkMethodMixin:
         | None
         | Literal[False]
         | UndefinedType = Undefined,
-        viewportEdgeFadeDistanceBottom: float | UndefinedType = Undefined,
-        viewportEdgeFadeDistanceLeft: float | UndefinedType = Undefined,
-        viewportEdgeFadeDistanceRight: float | UndefinedType = Undefined,
-        viewportEdgeFadeDistanceTop: float | UndefinedType = Undefined,
-        viewportEdgeFadeWidthBottom: float | UndefinedType = Undefined,
-        viewportEdgeFadeWidthLeft: float | UndefinedType = Undefined,
-        viewportEdgeFadeWidthRight: float | UndefinedType = Undefined,
-        viewportEdgeFadeWidthTop: float | UndefinedType = Undefined,
+        viewportEdgeFadeDistanceBottom: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeDistanceLeft: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeDistanceRight: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeDistanceTop: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeWidthBottom: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeWidthLeft: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeWidthRight: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeWidthTop: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -664,14 +689,14 @@ class MarkMethodMixin:
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             text (Scalar_T | ExprRef | dict[str, Any]): The text to display. The format of numeric data can be customized by setting a format specifier to channel definition's ``format`` property. **Default value:** ``""``
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
-            viewportEdgeFadeDistanceBottom (float): Schema-defined ``viewportEdgeFadeDistanceBottom`` property.
-            viewportEdgeFadeDistanceLeft (float): Schema-defined ``viewportEdgeFadeDistanceLeft`` property.
-            viewportEdgeFadeDistanceRight (float): Schema-defined ``viewportEdgeFadeDistanceRight`` property.
-            viewportEdgeFadeDistanceTop (float): Schema-defined ``viewportEdgeFadeDistanceTop`` property.
-            viewportEdgeFadeWidthBottom (float): Schema-defined ``viewportEdgeFadeWidthBottom`` property.
-            viewportEdgeFadeWidthLeft (float): Schema-defined ``viewportEdgeFadeWidthLeft`` property.
-            viewportEdgeFadeWidthRight (float): Schema-defined ``viewportEdgeFadeWidthRight`` property.
-            viewportEdgeFadeWidthTop (float): Schema-defined ``viewportEdgeFadeWidthTop`` property.
+            viewportEdgeFadeDistanceBottom (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceBottom`` property.
+            viewportEdgeFadeDistanceLeft (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceLeft`` property.
+            viewportEdgeFadeDistanceRight (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceRight`` property.
+            viewportEdgeFadeDistanceTop (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceTop`` property.
+            viewportEdgeFadeWidthBottom (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeWidthBottom`` property.
+            viewportEdgeFadeWidthLeft (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeWidthLeft`` property.
+            viewportEdgeFadeWidthRight (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeWidthRight`` property.
+            viewportEdgeFadeWidthTop (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeWidthTop`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -1367,7 +1392,7 @@ class EncodingMethodMixin:
 
         Args:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
-            color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the scale documentation for more information about customizing color scheme.
+            color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the GenomeSpy scale documentation for more information about customizing color schemes.
             direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
             dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
             dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
@@ -1503,34 +1528,34 @@ class ResolutionMethodMixin:
     def resolve_legend(
         self,
         *,
-        angle: ResolutionBehavior_T | UndefinedType = Undefined,
-        color: ResolutionBehavior_T | UndefinedType = Undefined,
-        default: ResolutionBehavior_T | UndefinedType = Undefined,
-        direction: ResolutionBehavior_T | UndefinedType = Undefined,
-        dx: ResolutionBehavior_T | UndefinedType = Undefined,
-        dy: ResolutionBehavior_T | UndefinedType = Undefined,
-        facetIndex: ResolutionBehavior_T | UndefinedType = Undefined,
-        fill: ResolutionBehavior_T | UndefinedType = Undefined,
-        fillOpacity: ResolutionBehavior_T | UndefinedType = Undefined,
-        key: ResolutionBehavior_T | UndefinedType = Undefined,
-        opacity: ResolutionBehavior_T | UndefinedType = Undefined,
-        sample: ResolutionBehavior_T | UndefinedType = Undefined,
-        search: ResolutionBehavior_T | UndefinedType = Undefined,
-        semanticScore: ResolutionBehavior_T | UndefinedType = Undefined,
-        shape: ResolutionBehavior_T | UndefinedType = Undefined,
-        size: ResolutionBehavior_T | UndefinedType = Undefined,
-        stroke: ResolutionBehavior_T | UndefinedType = Undefined,
-        strokeOpacity: ResolutionBehavior_T | UndefinedType = Undefined,
-        strokeWidth: ResolutionBehavior_T | UndefinedType = Undefined,
-        text: ResolutionBehavior_T | UndefinedType = Undefined,
-        tooltip: ResolutionBehavior_T | UndefinedType = Undefined,
-        uniqueId: ResolutionBehavior_T | UndefinedType = Undefined,
-        x: ResolutionBehavior_T | UndefinedType = Undefined,
-        x2: ResolutionBehavior_T | UndefinedType = Undefined,
-        xOffset: ResolutionBehavior_T | UndefinedType = Undefined,
-        y: ResolutionBehavior_T | UndefinedType = Undefined,
-        y2: ResolutionBehavior_T | UndefinedType = Undefined,
-        yOffset: ResolutionBehavior_T | UndefinedType = Undefined,
+        angle: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        color: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        default: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        direction: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        dx: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        dy: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        facetIndex: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        fill: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        fillOpacity: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        key: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        opacity: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        sample: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        search: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        semanticScore: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        shape: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        size: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        stroke: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        strokeOpacity: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        strokeWidth: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        text: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        tooltip: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        uniqueId: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        x: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        x2: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        xOffset: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        y: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        y2: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        yOffset: LegendResolutionBehavior_T | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with merged legend resolutions."""
         properties = {
@@ -1690,7 +1715,7 @@ class TopLevelMergeMixin:
             axisX (AxisConfig | AxisConfigKwds): Defaults for x axes.
             axisY (AxisConfig | AxisConfigKwds): Defaults for y axes.
             legend (LegendConfig | LegendConfigKwds): Defaults shared by all legends. Set ``disable`` to ``true`` to suppress automatic legend creation by default.
-            legendTrack (LegendConfig | LegendConfigKwds): Defaults for legends of track-like views that use ``index`` or ``locus`` scales on the x channel. __Default value:__ ``{ "style": "track-bottom" }``
+            legendTrack (LegendConfig | LegendConfigKwds): Defaults for legends of track-like views that use ``index`` or ``locus`` scales on the x channel. __Default value:__ ``{ "style": "track-bottom-legend" }``
             link (LinkConfig | LinkConfigKwds): Defaults for link marks.
             mark (MarkConfig | MarkConfigKwds): Defaults shared by all mark types.
             point (PointConfig | PointConfigKwds): Defaults for point marks.
@@ -1895,6 +1920,7 @@ class ImportedViewConstructorMixin:
         | dict[str, Any]
         | UndefinedType = Undefined,
         visible: bool | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> None:
         """Initialize an imported child view.
 
@@ -1904,6 +1930,7 @@ class ImportedViewConstructorMixin:
             name (str): The name given to the imported view. This property overrides the name specified in the imported specification and defines an import scope that is used for bookmarkable view visibility and parameter addressing.
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter] | dict[str, Any]): Dynamic variables that parameterize a visualization. Parameters defined here override the parameters defined in the imported specification.
             visible (bool): Overrides the visibility of the imported view. If not specified, the imported specification's ``visible`` property is used.
+            zindex (float): Overrides the imported view's z-order among sibling views. Higher values render later. This does not affect layout order. __Default value:__ the imported view's ``zindex``, or ``0``
         """
         properties = {
             "config": config,
@@ -1911,6 +1938,7 @@ class ImportedViewConstructorMixin:
             "name": name,
             "params": params,
             "visible": visible,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -2000,6 +2028,7 @@ class UnitPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -2046,6 +2075,7 @@ class UnitPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
         schema_url: str | None = None,
     ) -> None:
         """Initialize a schema-derived top-level specification.
@@ -2077,12 +2107,13 @@ class UnitPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
             schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
         """
         properties = {
@@ -2118,6 +2149,7 @@ class UnitPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -2203,6 +2235,7 @@ class UnitPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -2249,6 +2282,7 @@ class UnitPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a new specification with updated top-level properties.
 
@@ -2279,12 +2313,13 @@ class UnitPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -2319,6 +2354,7 @@ class UnitPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -2405,6 +2441,7 @@ class UnitPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -2451,6 +2488,7 @@ class UnitPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with updated top-level properties.
 
@@ -2481,12 +2519,13 @@ class UnitPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -2521,6 +2560,7 @@ class UnitPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -2608,6 +2648,7 @@ class LayerPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -2654,6 +2695,7 @@ class LayerPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
         schema_url: str | None = None,
     ) -> None:
         """Initialize a schema-derived top-level specification.
@@ -2685,12 +2727,13 @@ class LayerPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
             schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
         """
         properties = {
@@ -2726,6 +2769,7 @@ class LayerPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -2809,6 +2853,7 @@ class LayerPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -2855,6 +2900,7 @@ class LayerPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a new specification with updated top-level properties.
 
@@ -2885,12 +2931,13 @@ class LayerPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -2925,6 +2972,7 @@ class LayerPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -3009,6 +3057,7 @@ class LayerPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -3055,6 +3104,7 @@ class LayerPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with updated top-level properties.
 
@@ -3085,12 +3135,13 @@ class LayerPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -3125,6 +3176,7 @@ class LayerPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -3214,6 +3266,7 @@ class HConcatPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -3259,6 +3312,7 @@ class HConcatPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
         schema_url: str | None = None,
     ) -> None:
         """Initialize a schema-derived top-level specification.
@@ -3291,11 +3345,12 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
             schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
         """
         properties = {
@@ -3331,6 +3386,7 @@ class HConcatPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -3416,6 +3472,7 @@ class HConcatPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -3461,6 +3518,7 @@ class HConcatPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a new specification with updated top-level properties.
 
@@ -3492,11 +3550,12 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -3531,6 +3590,7 @@ class HConcatPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -3617,6 +3677,7 @@ class HConcatPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -3662,6 +3723,7 @@ class HConcatPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with updated top-level properties.
 
@@ -3693,11 +3755,12 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -3732,6 +3795,7 @@ class HConcatPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -3821,6 +3885,7 @@ class VConcatPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -3866,6 +3931,7 @@ class VConcatPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
         schema_url: str | None = None,
     ) -> None:
         """Initialize a schema-derived top-level specification.
@@ -3897,12 +3963,13 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``vconcat`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
             schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
         """
         properties = {
@@ -3938,6 +4005,7 @@ class VConcatPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -4012,6 +4080,7 @@ class VConcatPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -4068,6 +4137,7 @@ class VConcatPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a new specification with updated top-level properties.
 
@@ -4098,12 +4168,13 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``vconcat`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -4138,6 +4209,7 @@ class VConcatPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -4213,6 +4285,7 @@ class VConcatPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -4269,6 +4342,7 @@ class VConcatPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with updated top-level properties.
 
@@ -4299,12 +4373,13 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``vconcat`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -4339,6 +4414,7 @@ class VConcatPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -4429,6 +4505,7 @@ class ConcatPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -4474,6 +4551,7 @@ class ConcatPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
         schema_url: str | None = None,
     ) -> None:
         """Initialize a schema-derived top-level specification.
@@ -4507,11 +4585,12 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
             schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
         """
         properties = {
@@ -4548,6 +4627,7 @@ class ConcatPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -4634,6 +4714,7 @@ class ConcatPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -4679,6 +4760,7 @@ class ConcatPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a new specification with updated top-level properties.
 
@@ -4711,11 +4793,12 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -4751,6 +4834,7 @@ class ConcatPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -4838,6 +4922,7 @@ class ConcatPropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -4883,6 +4968,7 @@ class ConcatPropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with updated top-level properties.
 
@@ -4915,11 +5001,12 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -4955,6 +5042,7 @@ class ConcatPropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -5047,6 +5135,7 @@ class MultiscalePropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -5093,6 +5182,7 @@ class MultiscalePropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
         schema_url: str | None = None,
     ) -> None:
         """Initialize a schema-derived top-level specification.
@@ -5125,12 +5215,13 @@ class MultiscalePropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
             schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
         """
         properties = {
@@ -5167,6 +5258,7 @@ class MultiscalePropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -5255,6 +5347,7 @@ class MultiscalePropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -5301,6 +5394,7 @@ class MultiscalePropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a new specification with updated top-level properties.
 
@@ -5332,12 +5426,13 @@ class MultiscalePropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -5373,6 +5468,7 @@ class MultiscalePropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -5462,6 +5558,7 @@ class MultiscalePropertiesMixin:
             | core.LookupParams
             | core.ExprFilterParams
             | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
             | core.FilterScoredLabelsParams
             | core.FlattenParams
             | core.FlattenCompressedExonsParams
@@ -5508,6 +5605,7 @@ class MultiscalePropertiesMixin:
         | dict[str, Any]
         | Literal["container"]
         | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with updated top-level properties.
 
@@ -5539,12 +5637,13 @@ class MultiscalePropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
             width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
             "assembly": assembly,
@@ -5580,6 +5679,7 @@ class MultiscalePropertiesMixin:
             "viewportWidth": viewportWidth,
             "visible": visible,
             "width": width,
+            "zindex": zindex,
         }
         defined = {
             key: value for key, value in properties.items() if value is not Undefined
@@ -5640,7 +5740,7 @@ class ConfigMethodMixin:
             axisX (AxisConfig | AxisConfigKwds): Defaults for x axes.
             axisY (AxisConfig | AxisConfigKwds): Defaults for y axes.
             legend (LegendConfig | LegendConfigKwds): Defaults shared by all legends. Set ``disable`` to ``true`` to suppress automatic legend creation by default.
-            legendTrack (LegendConfig | LegendConfigKwds): Defaults for legends of track-like views that use ``index`` or ``locus`` scales on the x channel. __Default value:__ ``{ "style": "track-bottom" }``
+            legendTrack (LegendConfig | LegendConfigKwds): Defaults for legends of track-like views that use ``index`` or ``locus`` scales on the x channel. __Default value:__ ``{ "style": "track-bottom-legend" }``
             link (LinkConfig | LinkConfigKwds): Defaults for link marks.
             mark (MarkConfig | MarkConfigKwds): Defaults shared by all mark types.
             point (PointConfig | PointConfigKwds): Defaults for point marks.
@@ -5893,12 +5993,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -5959,7 +6066,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -5972,12 +6079,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -6003,7 +6114,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -6049,12 +6160,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -6133,12 +6248,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -6199,7 +6321,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6212,12 +6334,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -6243,7 +6369,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -6289,12 +6415,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -6373,12 +6503,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -6439,7 +6576,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6452,12 +6589,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -6483,7 +6624,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -6529,12 +6670,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -6613,12 +6758,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -6679,7 +6831,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6692,12 +6844,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -6723,7 +6879,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -6769,12 +6925,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -6853,12 +7013,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -6919,7 +7086,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6932,12 +7099,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -6963,7 +7134,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -7009,12 +7180,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7093,12 +7268,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7159,7 +7341,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7172,12 +7354,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7203,7 +7389,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -7249,12 +7435,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7333,12 +7523,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7399,7 +7596,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7412,12 +7609,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7443,7 +7644,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -7489,12 +7690,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7573,12 +7778,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7639,7 +7851,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7652,12 +7864,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7683,7 +7899,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -7729,12 +7945,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7813,12 +8033,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7879,7 +8106,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7892,12 +8119,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7923,7 +8154,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -7969,12 +8200,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -8053,12 +8288,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -8119,7 +8361,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -8132,12 +8374,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -8163,7 +8409,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -8209,12 +8455,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -8293,12 +8543,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -8359,7 +8616,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -8372,12 +8629,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -8403,7 +8664,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -8449,12 +8710,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -8533,12 +8798,19 @@ class ConfigMethodMixin:
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -8599,7 +8871,7 @@ class ConfigMethodMixin:
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -8612,12 +8884,16 @@ class ConfigMethodMixin:
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -8643,7 +8919,7 @@ class ConfigMethodMixin:
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -8689,12 +8965,16 @@ class ConfigMethodMixin:
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -8740,6 +9020,11 @@ class ConfigMethodMixin:
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         disable: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelAlign: Align_T | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
@@ -8749,6 +9034,7 @@ class ConfigMethodMixin:
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         labelOffset: float | UndefinedType = Undefined,
+        layout: core.LegendLayout | dict[str, Any] | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
         | core.ExprRef
@@ -8764,6 +9050,7 @@ class ConfigMethodMixin:
         symbolSize: float | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleColor: str | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
@@ -8785,8 +9072,13 @@ class ConfigMethodMixin:
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columnPadding (float): Padding between legend columns in pixels.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             disable (bool | ExprRef | dict[str, Any]): Disable automatic legend creation. Use ``legend: null`` on an encoding channel to remove that channel's legend. __Default value:__ ``false``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelAlign (Align_T): Horizontal alignment of legend labels.
             labelBaseline (Baseline_T): Baseline alignment of legend labels.
             labelColor (str): Legend label color.
@@ -8796,6 +9088,7 @@ class ConfigMethodMixin:
             labelFontWeight (FontWeight_T): Legend label font weight.
             labelLimit (float): Maximum label text width in pixels.
             labelOffset (float): Offset between legend symbols and labels in pixels.
+            layout (LegendLayout | dict[str, Any]): Layout of complete legends within each orientation region. A general direction or anchor applies to every region unless the orientation has its own override.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
@@ -8808,6 +9101,7 @@ class ConfigMethodMixin:
             symbolSize (float): Symbol size in pixels squared.
             symbolStrokeWidth (float): Legend symbol stroke width in pixels.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleColor (str): Legend title color.
             titleFont (str): Legend title font.
@@ -8829,6 +9123,11 @@ class ConfigMethodMixin:
             "columns": columns,
             "direction": direction,
             "disable": disable,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelAlign": labelAlign,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
@@ -8838,6 +9137,7 @@ class ConfigMethodMixin:
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
             "labelOffset": labelOffset,
+            "layout": layout,
             "offset": offset,
             "orient": orient,
             "padding": padding,
@@ -8850,6 +9150,7 @@ class ConfigMethodMixin:
             "symbolSize": symbolSize,
             "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleColor": titleColor,
             "titleFont": titleFont,
@@ -8878,6 +9179,11 @@ class ConfigMethodMixin:
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         disable: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelAlign: Align_T | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
@@ -8887,6 +9193,7 @@ class ConfigMethodMixin:
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         labelOffset: float | UndefinedType = Undefined,
+        layout: core.LegendLayout | dict[str, Any] | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
         | core.ExprRef
@@ -8902,6 +9209,7 @@ class ConfigMethodMixin:
         symbolSize: float | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleColor: str | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
@@ -8923,8 +9231,13 @@ class ConfigMethodMixin:
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columnPadding (float): Padding between legend columns in pixels.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             disable (bool | ExprRef | dict[str, Any]): Disable automatic legend creation. Use ``legend: null`` on an encoding channel to remove that channel's legend. __Default value:__ ``false``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelAlign (Align_T): Horizontal alignment of legend labels.
             labelBaseline (Baseline_T): Baseline alignment of legend labels.
             labelColor (str): Legend label color.
@@ -8934,6 +9247,7 @@ class ConfigMethodMixin:
             labelFontWeight (FontWeight_T): Legend label font weight.
             labelLimit (float): Maximum label text width in pixels.
             labelOffset (float): Offset between legend symbols and labels in pixels.
+            layout (LegendLayout | dict[str, Any]): Layout of complete legends within each orientation region. A general direction or anchor applies to every region unless the orientation has its own override.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
@@ -8946,6 +9260,7 @@ class ConfigMethodMixin:
             symbolSize (float): Symbol size in pixels squared.
             symbolStrokeWidth (float): Legend symbol stroke width in pixels.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleColor (str): Legend title color.
             titleFont (str): Legend title font.
@@ -8967,6 +9282,11 @@ class ConfigMethodMixin:
             "columns": columns,
             "direction": direction,
             "disable": disable,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelAlign": labelAlign,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
@@ -8976,6 +9296,7 @@ class ConfigMethodMixin:
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
             "labelOffset": labelOffset,
+            "layout": layout,
             "offset": offset,
             "orient": orient,
             "padding": padding,
@@ -8988,6 +9309,7 @@ class ConfigMethodMixin:
             "symbolSize": symbolSize,
             "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleColor": titleColor,
             "titleFont": titleFont,
@@ -9674,13 +9996,14 @@ class ConfigMethodMixin:
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         index: dict[str, Any] | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
@@ -9726,13 +10049,13 @@ class ConfigMethodMixin:
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             index (dict[str, Any]): Defaults for GenomeSpy's ``index`` scales.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
@@ -9744,17 +10067,17 @@ class ConfigMethodMixin:
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
             ordinal (dict[str, Any]): Defaults for ordinal scales.
             ordinalColorScheme (str | SchemeParams | SchemeParamsKwds): Default color scheme for ordinal color scales.
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
             quantitative (dict[str, Any]): Defaults for quantitative scales.
             quantitativeColorScheme (str | SchemeParams | SchemeParamsKwds): Default color scheme for quantitative color scales when no named range such as ``"heatmap"`` or ``"ramp"`` applies.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -9845,14 +10168,38 @@ class ConfigMethodMixin:
         | None
         | Literal[False]
         | UndefinedType = Undefined,
-        viewportEdgeFadeDistanceBottom: float | UndefinedType = Undefined,
-        viewportEdgeFadeDistanceLeft: float | UndefinedType = Undefined,
-        viewportEdgeFadeDistanceRight: float | UndefinedType = Undefined,
-        viewportEdgeFadeDistanceTop: float | UndefinedType = Undefined,
-        viewportEdgeFadeWidthBottom: float | UndefinedType = Undefined,
-        viewportEdgeFadeWidthLeft: float | UndefinedType = Undefined,
-        viewportEdgeFadeWidthRight: float | UndefinedType = Undefined,
-        viewportEdgeFadeWidthTop: float | UndefinedType = Undefined,
+        viewportEdgeFadeDistanceBottom: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeDistanceLeft: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeDistanceRight: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeDistanceTop: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeWidthBottom: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeWidthLeft: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeWidthRight: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        viewportEdgeFadeWidthTop: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         x: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         x2Offset: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -9891,14 +10238,14 @@ class ConfigMethodMixin:
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             text (Scalar_T | ExprRef | dict[str, Any]): The text to display. The format of numeric data can be customized by setting a format specifier to channel definition's ``format`` property. **Default value:** ``""``
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
-            viewportEdgeFadeDistanceBottom (float): Schema-defined ``viewportEdgeFadeDistanceBottom`` property.
-            viewportEdgeFadeDistanceLeft (float): Schema-defined ``viewportEdgeFadeDistanceLeft`` property.
-            viewportEdgeFadeDistanceRight (float): Schema-defined ``viewportEdgeFadeDistanceRight`` property.
-            viewportEdgeFadeDistanceTop (float): Schema-defined ``viewportEdgeFadeDistanceTop`` property.
-            viewportEdgeFadeWidthBottom (float): Schema-defined ``viewportEdgeFadeWidthBottom`` property.
-            viewportEdgeFadeWidthLeft (float): Schema-defined ``viewportEdgeFadeWidthLeft`` property.
-            viewportEdgeFadeWidthRight (float): Schema-defined ``viewportEdgeFadeWidthRight`` property.
-            viewportEdgeFadeWidthTop (float): Schema-defined ``viewportEdgeFadeWidthTop`` property.
+            viewportEdgeFadeDistanceBottom (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceBottom`` property.
+            viewportEdgeFadeDistanceLeft (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceLeft`` property.
+            viewportEdgeFadeDistanceRight (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceRight`` property.
+            viewportEdgeFadeDistanceTop (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceTop`` property.
+            viewportEdgeFadeWidthBottom (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeWidthBottom`` property.
+            viewportEdgeFadeWidthLeft (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeWidthLeft`` property.
+            viewportEdgeFadeWidthRight (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeWidthRight`` property.
+            viewportEdgeFadeWidthTop (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeWidthTop`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -10581,6 +10928,76 @@ class TransformMethodMixin:
             transform["param"] = param
         return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
 
+    def transform_axis_label_layout(
+        self,
+        *,
+        channel: PrimaryPositionalChannel_T,
+        labelAlign: Literal["left", "center", "right"],
+        labelAngle: float,
+        labelBaseline: Baseline_T,
+        labelFlush: Literal[False] | float,
+        labelFlushOffset: float,
+        labelFlushZoomExtent: bool,
+        labelFontSize: float,
+        labelOffset: str,
+        labelOverlap: Literal[False, "auto", "parity", "greedy"],
+        labelSeparation: float,
+        labelVisible: str,
+        labelWidth: Field_T,
+        chromLabelAlign: Literal["left", "center", "right"] | UndefinedType = Undefined,
+        chromLabelPadding: float | UndefinedType = Undefined,
+        chromLabelSpacing: float | UndefinedType = Undefined,
+        chromLabelWidth: Field_T | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+    ) -> Self:
+        """Add a ``axisLabelLayout`` transform.
+
+        Args:
+            channel (PrimaryPositionalChannel_T): Schema-defined ``channel`` property.
+            labelAlign (Literal['left', 'center', 'right']): Schema-defined ``labelAlign`` property.
+            labelAngle (float): Schema-defined ``labelAngle`` property.
+            labelBaseline (Baseline_T): Schema-defined ``labelBaseline`` property.
+            labelFlush (Literal[False] | float): Schema-defined ``labelFlush`` property.
+            labelFlushOffset (float): Schema-defined ``labelFlushOffset`` property.
+            labelFlushZoomExtent (bool): Schema-defined ``labelFlushZoomExtent`` property.
+            labelFontSize (float): Schema-defined ``labelFontSize`` property.
+            labelOffset (str): Schema-defined ``labelOffset`` property.
+            labelOverlap (Literal[False, 'auto', 'parity', 'greedy']): Schema-defined ``labelOverlap`` property.
+            labelSeparation (float): Schema-defined ``labelSeparation`` property.
+            labelVisible (str): Schema-defined ``labelVisible`` property.
+            labelWidth (Field_T): Schema-defined ``labelWidth`` property.
+            chromLabelAlign (Literal['left', 'center', 'right']): Schema-defined ``chromLabelAlign`` property.
+            chromLabelPadding (float): Schema-defined ``chromLabelPadding`` property.
+            chromLabelSpacing (float): Schema-defined ``chromLabelSpacing`` property.
+            chromLabelWidth (Field_T): Schema-defined ``chromLabelWidth`` property.
+            description (str): A description of the transform step. Can be used for documentation and agent context.
+        """
+        transform: dict[str, Any] = {"type": "axisLabelLayout"}
+        transform["channel"] = channel
+        transform["labelAlign"] = labelAlign
+        transform["labelAngle"] = labelAngle
+        transform["labelBaseline"] = labelBaseline
+        transform["labelFlush"] = labelFlush
+        transform["labelFlushOffset"] = labelFlushOffset
+        transform["labelFlushZoomExtent"] = labelFlushZoomExtent
+        transform["labelFontSize"] = labelFontSize
+        transform["labelOffset"] = labelOffset
+        transform["labelOverlap"] = labelOverlap
+        transform["labelSeparation"] = labelSeparation
+        transform["labelVisible"] = labelVisible
+        transform["labelWidth"] = labelWidth
+        if chromLabelAlign is not Undefined:
+            transform["chromLabelAlign"] = chromLabelAlign
+        if chromLabelPadding is not Undefined:
+            transform["chromLabelPadding"] = chromLabelPadding
+        if chromLabelSpacing is not Undefined:
+            transform["chromLabelSpacing"] = chromLabelSpacing
+        if chromLabelWidth is not Undefined:
+            transform["chromLabelWidth"] = chromLabelWidth
+        if description is not Undefined:
+            transform["description"] = description
+        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
+
     def transform_filter_scored_labels(
         self,
         *,
@@ -10738,7 +11155,7 @@ class TransformMethodMixin:
         """Add a ``identifier`` transform.
 
         Args:
-            as\\_ (str): **Default:** ``"_uniqueId"``
+            as\\_ (str): The field where the identifier is stored. __Default value:__ ``"_uniqueId"``
             description (str): A description of the transform step. Can be used for documentation and agent context.
         """
         transform: dict[str, Any] = {"type": "identifier"}

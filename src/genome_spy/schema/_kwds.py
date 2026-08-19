@@ -17,7 +17,6 @@ from genome_spy.schema._typing import (
     LegendOrient_T,
     LegendTitleOrient_T,
     PrimaryPositionalChannel_T,
-    ResolutionBehavior_T,
     RulerClear_T,
     RulerDisplay_T,
     RulerEventType_T,
@@ -60,6 +59,7 @@ if TYPE_CHECKING:
         IntervalSelectionConfig,
         Legend,
         LegendConfig,
+        LegendLayout,
         LerpTransition,
         LinkConfig,
         MarkConfig,
@@ -98,6 +98,7 @@ if TYPE_CHECKING:
         ValueDefWithConditionStringNullType,
         ValueDefWithConditionStringNullTypeForShape,
         ViewConfig,
+        ViewportDomainRef,
         ZoomParams,
     )
 
@@ -124,12 +125,16 @@ class AxisKwds(TypedDict, total=False):
     labelAngle: float
     labelBaseline: Baseline_T
     labelColor: str
+    labelFlush: bool | float
+    labelFlushOffset: float
     labelFont: str
     labelFontSize: float
     labelFontStyle: FontStyle_T
     labelFontWeight: FontWeight_T
     labelLimit: float
+    labelOverlap: bool | Literal["parity"] | Literal["greedy"]
     labelPadding: float
+    labelSeparation: float
     labels: bool
     maxExtent: float
     minExtent: float
@@ -204,12 +209,16 @@ class AxisConfigKwds(TypedDict, total=False):
     labelAngle: float
     labelBaseline: Baseline_T
     labelColor: str
+    labelFlush: bool | float
+    labelFlushOffset: float
     labelFont: str
     labelFontSize: float
     labelFontStyle: FontStyle_T
     labelFontWeight: FontWeight_T
     labelLimit: float
+    labelOverlap: bool | Literal["parity"] | Literal["greedy"]
     labelPadding: float
+    labelSeparation: float
     labels: bool
     maxExtent: float
     minExtent: float
@@ -507,12 +516,16 @@ class GenomeAxisKwds(TypedDict, total=False):
     labelAngle: float
     labelBaseline: Baseline_T
     labelColor: str
+    labelFlush: bool | float
+    labelFlushOffset: float
     labelFont: str
     labelFontSize: float
     labelFontStyle: FontStyle_T
     labelFontWeight: FontWeight_T
     labelLimit: float
+    labelOverlap: bool | Literal["parity"] | Literal["greedy"]
     labelPadding: float
+    labelSeparation: float
     labels: bool
     maxExtent: float
     minExtent: float
@@ -591,6 +604,11 @@ class LegendKwds(TypedDict, total=False):
     backgroundStrokeWidth: float
     columns: float
     direction: LegendDirection_T
+    gradientLength: float
+    gradientOpacity: float
+    gradientStrokeColor: str
+    gradientStrokeWidth: float
+    gradientThickness: float
     labelLimit: float
     offset: float
     orient: LegendOrient_T | ExprRef | dict[str, Any]
@@ -598,6 +616,7 @@ class LegendKwds(TypedDict, total=False):
     style: str | Sequence[str] | None
     symbolSize: float
     symbolType: str
+    tickCount: float
     title: str | None
     titleOrient: LegendTitleOrient_T
     values: Sequence[str | float | bool]
@@ -615,6 +634,11 @@ class LegendConfigKwds(TypedDict, total=False):
     columns: float
     direction: LegendDirection_T
     disable: bool | ExprRef | dict[str, Any]
+    gradientLength: float
+    gradientOpacity: float
+    gradientStrokeColor: str
+    gradientStrokeWidth: float
+    gradientThickness: float
     labelAlign: Align_T
     labelBaseline: Baseline_T
     labelColor: str
@@ -624,6 +648,7 @@ class LegendConfigKwds(TypedDict, total=False):
     labelFontWeight: FontWeight_T
     labelLimit: float
     labelOffset: float
+    layout: LegendLayout | dict[str, Any]
     offset: float
     orient: LegendOrient_T | ExprRef | dict[str, Any]
     padding: float
@@ -636,6 +661,7 @@ class LegendConfigKwds(TypedDict, total=False):
     symbolSize: float
     symbolStrokeWidth: float
     symbolType: str
+    tickCount: float
     title: str | None
     titleColor: str
     titleFont: str
@@ -940,13 +966,14 @@ class ScaleKwds(TypedDict, total=False):
         | Sequence[ChromosomalLocus | dict[str, Any]]
         | SelectionDomainRef
         | dict[str, Any]
+        | ViewportDomainRef
         | ExprRef
         | Sequence[float | str | bool | ExprRef | dict[str, Any]]
     )
     domainMax: float
     domainMid: float
     domainMin: float
-    domainTransition: bool | dict[str, Any]
+    domainTransition: bool
     exponent: float
     interpolate: (
         ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds
@@ -980,13 +1007,14 @@ class ScaleConfigKwds(TypedDict, total=False):
         | Sequence[ChromosomalLocus | dict[str, Any]]
         | SelectionDomainRef
         | dict[str, Any]
+        | ViewportDomainRef
         | ExprRef
         | Sequence[float | str | bool | ExprRef | dict[str, Any]]
     )
     domainMax: float
     domainMid: float
     domainMin: float
-    domainTransition: bool | dict[str, Any]
+    domainTransition: bool
     exponent: float
     index: dict[str, Any]
     interpolate: (
@@ -1109,14 +1137,14 @@ class TextConfigKwds(TypedDict, total=False):
     style: str | Sequence[str]
     text: Scalar_T | ExprRef | dict[str, Any]
     tooltip: HandledTooltip | HandledTooltipKwds | None | Literal[False]
-    viewportEdgeFadeDistanceBottom: float
-    viewportEdgeFadeDistanceLeft: float
-    viewportEdgeFadeDistanceRight: float
-    viewportEdgeFadeDistanceTop: float
-    viewportEdgeFadeWidthBottom: float
-    viewportEdgeFadeWidthLeft: float
-    viewportEdgeFadeWidthRight: float
-    viewportEdgeFadeWidthTop: float
+    viewportEdgeFadeDistanceBottom: float | ExprRef | dict[str, Any]
+    viewportEdgeFadeDistanceLeft: float | ExprRef | dict[str, Any]
+    viewportEdgeFadeDistanceRight: float | ExprRef | dict[str, Any]
+    viewportEdgeFadeDistanceTop: float | ExprRef | dict[str, Any]
+    viewportEdgeFadeWidthBottom: float | ExprRef | dict[str, Any]
+    viewportEdgeFadeWidthLeft: float | ExprRef | dict[str, Any]
+    viewportEdgeFadeWidthRight: float | ExprRef | dict[str, Any]
+    viewportEdgeFadeWidthTop: float | ExprRef | dict[str, Any]
     x: float | ExprRef | dict[str, Any]
     x2: float | ExprRef | dict[str, Any]
     x2Offset: float | ExprRef | dict[str, Any]
@@ -1266,100 +1294,19 @@ class LegendsKwds(TypedDict, total=False):
 class AxisResolveKwds(TypedDict, total=False):
     """TypedDict helper for raw ``AxisResolve`` mappings."""
 
-    angle: ResolutionBehavior_T
-    color: ResolutionBehavior_T
-    default: ResolutionBehavior_T
-    direction: ResolutionBehavior_T
-    dx: ResolutionBehavior_T
-    dy: ResolutionBehavior_T
-    facetIndex: ResolutionBehavior_T
-    fill: ResolutionBehavior_T
-    fillOpacity: ResolutionBehavior_T
-    key: ResolutionBehavior_T
-    opacity: ResolutionBehavior_T
-    sample: ResolutionBehavior_T
-    search: ResolutionBehavior_T
-    semanticScore: ResolutionBehavior_T
-    shape: ResolutionBehavior_T
-    size: ResolutionBehavior_T
-    stroke: ResolutionBehavior_T
-    strokeOpacity: ResolutionBehavior_T
-    strokeWidth: ResolutionBehavior_T
-    text: ResolutionBehavior_T
-    tooltip: ResolutionBehavior_T
-    uniqueId: ResolutionBehavior_T
-    x: ResolutionBehavior_T
-    x2: ResolutionBehavior_T
-    xOffset: ResolutionBehavior_T
-    y: ResolutionBehavior_T
-    y2: ResolutionBehavior_T
-    yOffset: ResolutionBehavior_T
+    pass
 
 
 class LegendResolveKwds(TypedDict, total=False):
     """TypedDict helper for raw ``LegendResolve`` mappings."""
 
-    angle: ResolutionBehavior_T
-    color: ResolutionBehavior_T
-    default: ResolutionBehavior_T
-    direction: ResolutionBehavior_T
-    dx: ResolutionBehavior_T
-    dy: ResolutionBehavior_T
-    facetIndex: ResolutionBehavior_T
-    fill: ResolutionBehavior_T
-    fillOpacity: ResolutionBehavior_T
-    key: ResolutionBehavior_T
-    opacity: ResolutionBehavior_T
-    sample: ResolutionBehavior_T
-    search: ResolutionBehavior_T
-    semanticScore: ResolutionBehavior_T
-    shape: ResolutionBehavior_T
-    size: ResolutionBehavior_T
-    stroke: ResolutionBehavior_T
-    strokeOpacity: ResolutionBehavior_T
-    strokeWidth: ResolutionBehavior_T
-    text: ResolutionBehavior_T
-    tooltip: ResolutionBehavior_T
-    uniqueId: ResolutionBehavior_T
-    x: ResolutionBehavior_T
-    x2: ResolutionBehavior_T
-    xOffset: ResolutionBehavior_T
-    y: ResolutionBehavior_T
-    y2: ResolutionBehavior_T
-    yOffset: ResolutionBehavior_T
+    pass
 
 
 class ScaleResolveKwds(TypedDict, total=False):
     """TypedDict helper for raw ``ScaleResolve`` mappings."""
 
-    angle: ResolutionBehavior_T
-    color: ResolutionBehavior_T
-    default: ResolutionBehavior_T
-    direction: ResolutionBehavior_T
-    dx: ResolutionBehavior_T
-    dy: ResolutionBehavior_T
-    facetIndex: ResolutionBehavior_T
-    fill: ResolutionBehavior_T
-    fillOpacity: ResolutionBehavior_T
-    key: ResolutionBehavior_T
-    opacity: ResolutionBehavior_T
-    sample: ResolutionBehavior_T
-    search: ResolutionBehavior_T
-    semanticScore: ResolutionBehavior_T
-    shape: ResolutionBehavior_T
-    size: ResolutionBehavior_T
-    stroke: ResolutionBehavior_T
-    strokeOpacity: ResolutionBehavior_T
-    strokeWidth: ResolutionBehavior_T
-    text: ResolutionBehavior_T
-    tooltip: ResolutionBehavior_T
-    uniqueId: ResolutionBehavior_T
-    x: ResolutionBehavior_T
-    x2: ResolutionBehavior_T
-    xOffset: ResolutionBehavior_T
-    y: ResolutionBehavior_T
-    y2: ResolutionBehavior_T
-    yOffset: ResolutionBehavior_T
+    pass
 
 
 class ResolveKwds(TypedDict, total=False):

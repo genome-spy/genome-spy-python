@@ -90,8 +90,8 @@ class Angle(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -244,6 +244,11 @@ class Angle(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -254,6 +259,7 @@ class Angle(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -267,7 +273,12 @@ class Angle(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -275,6 +286,7 @@ class Angle(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -287,6 +299,11 @@ class Angle(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -294,6 +311,7 @@ class Angle(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -320,13 +338,14 @@ class Angle(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -355,27 +374,27 @@ class Angle(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -447,8 +466,8 @@ class Color(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -601,6 +620,11 @@ class Color(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -611,6 +635,7 @@ class Color(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -624,7 +649,12 @@ class Color(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -632,6 +662,7 @@ class Color(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -644,6 +675,11 @@ class Color(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -651,6 +687,7 @@ class Color(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -677,13 +714,14 @@ class Color(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -712,27 +750,27 @@ class Color(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -793,8 +831,8 @@ class Direction(Channel):
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
             title (str | None): A title for the field. If ``null``, the title will be removed.
@@ -931,13 +969,14 @@ class Direction(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -966,27 +1005,27 @@ class Direction(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -1058,8 +1097,8 @@ class Dx(Channel):
             description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -1212,6 +1251,11 @@ class Dx(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -1222,6 +1266,7 @@ class Dx(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -1235,7 +1280,12 @@ class Dx(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -1243,6 +1293,7 @@ class Dx(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -1255,6 +1306,11 @@ class Dx(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -1262,6 +1318,7 @@ class Dx(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -1288,13 +1345,14 @@ class Dx(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -1323,27 +1381,27 @@ class Dx(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -1415,8 +1473,8 @@ class Dy(Channel):
             description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -1569,6 +1627,11 @@ class Dy(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -1579,6 +1642,7 @@ class Dy(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -1592,7 +1656,12 @@ class Dy(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -1600,6 +1669,7 @@ class Dy(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -1612,6 +1682,11 @@ class Dy(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -1619,6 +1694,7 @@ class Dy(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -1645,13 +1721,14 @@ class Dy(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -1680,27 +1757,27 @@ class Dy(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -1751,7 +1828,7 @@ class FacetIndex(Channel):
 
         Args:
             description (str): A description of the encoded field. Can be used for documentation and to explain the meaning of the channel mapping.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             title (str | None): A title for the field. If ``null``, the title will be removed.
         """
         properties = {
@@ -1847,8 +1924,8 @@ class Fill(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -2001,6 +2078,11 @@ class Fill(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -2011,6 +2093,7 @@ class Fill(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -2024,7 +2107,12 @@ class Fill(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -2032,6 +2120,7 @@ class Fill(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -2044,6 +2133,11 @@ class Fill(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -2051,6 +2145,7 @@ class Fill(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -2077,13 +2172,14 @@ class Fill(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -2112,27 +2208,27 @@ class Fill(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -2204,8 +2300,8 @@ class FillOpacity(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -2358,6 +2454,11 @@ class FillOpacity(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -2368,6 +2469,7 @@ class FillOpacity(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -2381,7 +2483,12 @@ class FillOpacity(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -2389,6 +2496,7 @@ class FillOpacity(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -2401,6 +2509,11 @@ class FillOpacity(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -2408,6 +2521,7 @@ class FillOpacity(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -2434,13 +2548,14 @@ class FillOpacity(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -2469,27 +2584,27 @@ class FillOpacity(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -2540,7 +2655,7 @@ class Key(Channel):
 
         Args:
             description (str): A description of the encoded field. Can be used for documentation and to explain the meaning of the channel mapping.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             title (str | None): A title for the field. If ``null``, the title will be removed.
         """
         properties = {
@@ -2636,8 +2751,8 @@ class Opacity(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -2790,6 +2905,11 @@ class Opacity(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -2800,6 +2920,7 @@ class Opacity(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -2813,7 +2934,12 @@ class Opacity(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -2821,6 +2947,7 @@ class Opacity(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -2833,6 +2960,11 @@ class Opacity(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -2840,6 +2972,7 @@ class Opacity(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -2866,13 +2999,14 @@ class Opacity(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -2901,27 +3035,27 @@ class Opacity(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -2972,7 +3106,7 @@ class Sample(Channel):
 
         Args:
             description (str): A description of the encoded field. Can be used for documentation and to explain the meaning of the channel mapping.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             title (str | None): A title for the field. If ``null``, the title will be removed.
         """
         properties = {
@@ -3047,7 +3181,7 @@ class Search(Channel):
 
         Args:
             description (str): A description of the encoded field. Can be used for documentation and to explain the meaning of the channel mapping.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             title (str | None): A title for the field. If ``null``, the title will be removed.
         """
         properties = {
@@ -3123,7 +3257,7 @@ class SemanticScore(Channel):
 
         Args:
             description (str): A description of the encoded field. Can be used for documentation and to explain the meaning of the channel mapping.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             title (str | None): A title for the field. If ``null``, the title will be removed.
             type (Type_T): Schema-defined ``type`` property.
         """
@@ -3228,8 +3362,8 @@ class Shape(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -3382,6 +3516,11 @@ class Shape(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -3392,6 +3531,7 @@ class Shape(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -3405,7 +3545,12 @@ class Shape(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -3413,6 +3558,7 @@ class Shape(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -3425,6 +3571,11 @@ class Shape(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -3432,6 +3583,7 @@ class Shape(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -3458,13 +3610,14 @@ class Shape(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -3493,27 +3646,27 @@ class Shape(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -3585,8 +3738,8 @@ class Size(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -3739,6 +3892,11 @@ class Size(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -3749,6 +3907,7 @@ class Size(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -3762,7 +3921,12 @@ class Size(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -3770,6 +3934,7 @@ class Size(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -3782,6 +3947,11 @@ class Size(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -3789,6 +3959,7 @@ class Size(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -3815,13 +3986,14 @@ class Size(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -3850,27 +4022,27 @@ class Size(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -3942,8 +4114,8 @@ class Stroke(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -4096,6 +4268,11 @@ class Stroke(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -4106,6 +4283,7 @@ class Stroke(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -4119,7 +4297,12 @@ class Stroke(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -4127,6 +4310,7 @@ class Stroke(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -4139,6 +4323,11 @@ class Stroke(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -4146,6 +4335,7 @@ class Stroke(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -4172,13 +4362,14 @@ class Stroke(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -4207,27 +4398,27 @@ class Stroke(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -4299,8 +4490,8 @@ class StrokeOpacity(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -4453,6 +4644,11 @@ class StrokeOpacity(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -4463,6 +4659,7 @@ class StrokeOpacity(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -4476,7 +4673,12 @@ class StrokeOpacity(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -4484,6 +4686,7 @@ class StrokeOpacity(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -4496,6 +4699,11 @@ class StrokeOpacity(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -4503,6 +4711,7 @@ class StrokeOpacity(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -4529,13 +4738,14 @@ class StrokeOpacity(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -4564,27 +4774,27 @@ class StrokeOpacity(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -4656,8 +4866,8 @@ class StrokeWidth(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -4810,6 +5020,11 @@ class StrokeWidth(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -4820,6 +5035,7 @@ class StrokeWidth(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -4833,7 +5049,12 @@ class StrokeWidth(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -4841,6 +5062,7 @@ class StrokeWidth(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -4853,6 +5075,11 @@ class StrokeWidth(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -4860,6 +5087,7 @@ class StrokeWidth(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -4886,13 +5114,14 @@ class StrokeWidth(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -4921,27 +5150,27 @@ class StrokeWidth(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -5004,8 +5233,8 @@ class Text(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
             title (str | None): A title for the field. If ``null``, the title will be removed.
@@ -5150,13 +5379,14 @@ class Text(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -5185,27 +5415,27 @@ class Text(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -5268,8 +5498,8 @@ class Tooltip(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
             title (str | None): A title for the field. If ``null``, the title will be removed.
@@ -5414,13 +5644,14 @@ class Tooltip(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -5449,27 +5680,27 @@ class Tooltip(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -5520,7 +5751,7 @@ class UniqueId(Channel):
 
         Args:
             description (str): A description of the encoded field. Can be used for documentation and to explain the meaning of the channel mapping.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             title (str | None): A title for the field. If ``null``, the title will be removed.
         """
         properties = {
@@ -5614,7 +5845,7 @@ class X(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             offset (float): An offset or offsets that allow for adjusting the numbering base. The offset is subtracted from the positions. GenomeSpy uses internally zero-based indexing with half-open intervals. UCSC-based formats (BED, etc.) generally use this scheme. However, for example, VCF files use one-based indexing and must be adjusted by setting the offset to ``1``. **Default:** ``0``
             pos (FieldName_T): The field having an intra-chromosomal position.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
@@ -5814,12 +6045,19 @@ class X(Channel):
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -5880,7 +6118,7 @@ class X(Channel):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -5893,12 +6131,16 @@ class X(Channel):
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -5924,7 +6166,7 @@ class X(Channel):
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -5970,12 +6212,16 @@ class X(Channel):
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -6026,13 +6272,14 @@ class X(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -6061,27 +6308,27 @@ class X(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -6149,7 +6396,7 @@ class X2(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             offset (float): An offset or offsets that allow for adjusting the numbering base. The offset is subtracted from the positions. GenomeSpy uses internally zero-based indexing with half-open intervals. UCSC-based formats (BED, etc.) generally use this scheme. However, for example, VCF files use one-based indexing and must be adjusted by setting the offset to ``1``. **Default:** ``0``
             pos (FieldName_T): The field having an intra-chromosomal position.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
@@ -6341,12 +6588,19 @@ class X2(Channel):
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -6407,7 +6661,7 @@ class X2(Channel):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -6420,12 +6674,16 @@ class X2(Channel):
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -6451,7 +6709,7 @@ class X2(Channel):
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -6497,12 +6755,16 @@ class X2(Channel):
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -6553,13 +6815,14 @@ class X2(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -6588,27 +6851,27 @@ class X2(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -6680,8 +6943,8 @@ class XOffset(Channel):
             description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -6834,6 +7097,11 @@ class XOffset(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -6844,6 +7112,7 @@ class XOffset(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -6857,7 +7126,12 @@ class XOffset(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -6865,6 +7139,7 @@ class XOffset(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -6877,6 +7152,11 @@ class XOffset(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -6884,6 +7164,7 @@ class XOffset(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -6910,13 +7191,14 @@ class XOffset(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -6945,27 +7227,27 @@ class XOffset(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -7033,7 +7315,7 @@ class Y(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             offset (float): An offset or offsets that allow for adjusting the numbering base. The offset is subtracted from the positions. GenomeSpy uses internally zero-based indexing with half-open intervals. UCSC-based formats (BED, etc.) generally use this scheme. However, for example, VCF files use one-based indexing and must be adjusted by setting the offset to ``1``. **Default:** ``0``
             pos (FieldName_T): The field having an intra-chromosomal position.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
@@ -7225,12 +7507,19 @@ class Y(Channel):
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7291,7 +7580,7 @@ class Y(Channel):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7304,12 +7593,16 @@ class Y(Channel):
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7335,7 +7628,7 @@ class Y(Channel):
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -7381,12 +7674,16 @@ class Y(Channel):
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7437,13 +7734,14 @@ class Y(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -7472,27 +7770,27 @@ class Y(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -7560,7 +7858,7 @@ class Y2(Channel):
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
             offset (float): An offset or offsets that allow for adjusting the numbering base. The offset is subtracted from the positions. GenomeSpy uses internally zero-based indexing with half-open intervals. UCSC-based formats (BED, etc.) generally use this scheme. However, for example, VCF files use one-based indexing and must be adjusted by setting the offset to ``1``. **Default:** ``0``
             pos (FieldName_T): The field having an intra-chromosomal position.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
@@ -7752,12 +8050,19 @@ class Y2(Channel):
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
         labelColor: str | UndefinedType = Undefined,
+        labelFlush: bool | float | UndefinedType = Undefined,
+        labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
         labelFontWeight: FontWeight_T | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
+        labelOverlap: bool
+        | Literal["parity"]
+        | Literal["greedy"]
+        | UndefinedType = Undefined,
         labelPadding: float | UndefinedType = Undefined,
+        labelSeparation: float | UndefinedType = Undefined,
         labels: bool | UndefinedType = Undefined,
         maxExtent: float | UndefinedType = Undefined,
         minExtent: float | UndefinedType = Undefined,
@@ -7818,7 +8123,7 @@ class Y2(Channel):
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
-            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. This property is ignored on discrete scales and when ``values`` is set.
+            extraValues (Sequence[float]): Additional tick and label values to include alongside automatically generated ticks on continuous scales. Values outside the visible scale range are omitted and duplicates are removed. During automatic overlap removal, these labels are reduced against other explicitly specified labels but take precedence over automatically generated labels. This property is ignored on discrete scales and when ``values`` is set.
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
@@ -7831,12 +8136,16 @@ class Y2(Channel):
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
             labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
+            labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
             labelFontSize (float): The font size of the label, in pixels.
             labelFontStyle (FontStyle_T): Font style of the title.
             labelFontWeight (FontWeight_T): Font weight of axis tick labels.
             labelLimit (float): Maximum allowed pixel width of axis tick labels. __Default value:__ ``180``
+            labelOverlap (bool | Literal['parity'] | Literal['greedy']): The strategy for removing overlapping axis labels. ``true`` uses the ``"parity"`` strategy. ``"parity"`` removes every other label until the remaining labels no longer overlap. ``"greedy"`` keeps each label that does not overlap the previously retained label. ``false`` disables overlap removal. By default, overlap removal uses ``"parity"`` for linear-like continuous scales and ``"greedy"`` for logarithmic and symlog scales. It is disabled for discrete scales. Overlap removal supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelPadding (float): The padding, in pixels, between axis and text labels. __Default value:__ ``2``
+            labelSeparation (float): The minimum separation, in pixels, between retained axis labels. __Default value:__ ``2``
             labels (bool): A boolean flag indicating if labels should be included as part of the axis. __Default value:__ ``true``.
             maxExtent (float): The maximum extent in pixels that axis ticks and labels should use. This determines a maximum offset value for axis titles. __Default value:__ ``undefined``.
             minExtent (float): The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles. __Default value:__ ``30`` for y-axis; ``undefined`` for x-axis.
@@ -7862,7 +8171,7 @@ class Y2(Channel):
             titleFontWeight (FontWeight_T): Font weight of the title. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
             titleOpacity (float): Opacity of the axis title.
             titlePadding (float): The padding, in pixels, between title and axis.
-            values (Sequence[Any]): Explicitly set the visible axis tick and label values.
+            values (Sequence[Any]): Explicitly set the visible axis tick and label values. During automatic overlap removal, these labels are reduced against each other but take precedence over automatically generated labels.
             zindex (float): Z-order of the axis relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
         """
         defined = {
@@ -7908,12 +8217,16 @@ class Y2(Channel):
             "labelAngle": labelAngle,
             "labelBaseline": labelBaseline,
             "labelColor": labelColor,
+            "labelFlush": labelFlush,
+            "labelFlushOffset": labelFlushOffset,
             "labelFont": labelFont,
             "labelFontSize": labelFontSize,
             "labelFontStyle": labelFontStyle,
             "labelFontWeight": labelFontWeight,
             "labelLimit": labelLimit,
+            "labelOverlap": labelOverlap,
             "labelPadding": labelPadding,
+            "labelSeparation": labelSeparation,
             "labels": labels,
             "maxExtent": maxExtent,
             "minExtent": minExtent,
@@ -7964,13 +8277,14 @@ class Y2(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -7999,27 +8313,27 @@ class Y2(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
@@ -8091,8 +8405,8 @@ class YOffset(Channel):
             description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
             expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
-            field (str): __Required.__ A string defining the name of the field from which to pull a data value or an object defining iterated values from the ``repeat`` operator. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the field documentation. 2) ``field`` is not required if ``aggregate`` is ``count``.
-            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the format documentation for more examples.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
             legend (Legend | LegendKwds | None): Legend properties for the encoding channel. If ``null``, the legend for the channel is removed. If an object is provided, a legend is created even when legends are disabled by default in the config. __Default value:__ If undefined, configured legend defaults are applied.
             resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
             scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
@@ -8245,6 +8559,11 @@ class YOffset(Channel):
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         orient: LegendOrient_T
@@ -8255,6 +8574,7 @@ class YOffset(Channel):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
         values: Sequence[str | float | bool] | UndefinedType = Undefined,
@@ -8268,7 +8588,12 @@ class YOffset(Channel):
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
-            direction (LegendDirection_T): The direction in which legend entries are laid out.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
             offset (float): External gap in pixels between the legend and the plot edge.
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
@@ -8276,6 +8601,7 @@ class YOffset(Channel):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolSize (float): Symbol size in pixels squared.
             symbolType (str): Symbol shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
             values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
@@ -8288,6 +8614,11 @@ class YOffset(Channel):
             "backgroundStrokeWidth": backgroundStrokeWidth,
             "columns": columns,
             "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
             "labelLimit": labelLimit,
             "offset": offset,
             "orient": orient,
@@ -8295,6 +8626,7 @@ class YOffset(Channel):
             "style": style,
             "symbolSize": symbolSize,
             "symbolType": symbolType,
+            "tickCount": tickCount,
             "title": title,
             "titleOrient": titleOrient,
             "values": values,
@@ -8321,13 +8653,14 @@ class YOffset(Channel):
         | Sequence[core.ChromosomalLocus | dict[str, Any]]
         | core.SelectionDomainRef
         | dict[str, Any]
+        | core.ViewportDomainRef
         | core.ExprRef
         | Sequence[float | str | bool | core.ExprRef | dict[str, Any]]
         | UndefinedType = Undefined,
         domainMax: float | UndefinedType = Undefined,
         domainMid: float | UndefinedType = Undefined,
         domainMin: float | UndefinedType = Undefined,
-        domainTransition: bool | dict[str, Any] | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -8356,27 +8689,27 @@ class YOffset(Channel):
             assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
             base (float): The logarithm base of the ``log`` scale (default ``10``).
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
-            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the scale config's ``clamp`` (``true`` by default).
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Piecewise scales can be created by providing a ``domain`` with more than two entries. For temporal fields, ``domain`` can be a two-element array minimum and maximum values, in the form of either timestamps or the DateTime definition objects. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
-            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
-            domainTransition (bool | dict[str, Any]): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
             numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
-            padding (float): For continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
-            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the scale config's ``bandPaddingInner``.
-            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range (e.g., example, ``"symbol"``, or ``"diverging"``). - For continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a piecewise scale. Array elements may also be expression references. - For discrete and discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding size (``width`` and ``height``).
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
-            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color scheme name (e.g., ``"category10"`` or ``"blues"``) or a scheme parameter object. Discrete color schemes may be used with discrete or discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
-            type (ScaleType_T): The type of scale. Vega-Lite supports the following categories of scale types: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``. 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. __Default value:__ please see the scale type table.
-            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log, time, and utc scales do not support ``zero``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
             zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
         """
         defined = {
