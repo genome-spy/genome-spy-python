@@ -92,6 +92,13 @@ def test_getting_started_charts_serialize_and_validate() -> None:
     genomic_spec = tutorial.CHARTS["genomic_track"].to_dict()
     assert genomic_spec["assembly"] == "hg38"
     assert genomic_spec["encoding"]["x"]["type"] == "locus"
+    # Without a domain the whole assembly is visible and the features vanish.
+    assert genomic_spec["encoding"]["x"]["scale"] == {
+        "domain": [
+            {"chrom": "chr17", "pos": 43_040_000},
+            {"chrom": "chr17", "pos": 43_080_000},
+        ]
+    }
     assert genomic_spec["encoding"]["x2"] == {"chrom": "chrom", "pos": "end"}
 
 

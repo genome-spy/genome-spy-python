@@ -158,6 +158,10 @@ Use a rectangle mark for each interval. The `x` encoding maps the start, and
 into a **locus**, meaning a place in the genome. The `hg38` **genome assembly**
 supplies the chromosome names, lengths, and order needed by the locus scale.
 
+The scale's `domain` chooses the region the chart opens on. Without it the view
+would span all three billion bases of the assembly, leaving these features too
+small to see. Drag and scroll the chart to move beyond that opening window.
+
 These example intervals use zero-based, half-open coordinates: the start is
 included and the end is excluded. This is the convention used by formats such
 as BED. Other formats may require a coordinate offset, as described in
