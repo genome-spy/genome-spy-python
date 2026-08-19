@@ -150,6 +150,14 @@ Build the HTML documentation with:
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
+To view it in a browser, build and serve the output, then open
+<http://localhost:8000>:
+
+```bash
+uv run sphinx-build -b html docs docs/_build/html
+cd docs/_build/html && python3 -m http.server
+```
+
 NOTE: The live examples load the pinned GenomeSpy JavaScript bundle from the
 CDN, so an internet connection is needed when viewing interactive charts.
 Gallery cards require manually reviewed PNG thumbnails to exist before the
