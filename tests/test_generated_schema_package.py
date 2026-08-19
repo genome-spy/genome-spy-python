@@ -4,7 +4,9 @@ import inspect
 import json
 import subprocess
 import sys
+import tomllib
 from importlib.resources import files
+from pathlib import Path
 
 import genome_spy as gs
 import pytest
@@ -34,6 +36,13 @@ from genome_spy.schema import (
 from genome_spy.schema import channels as generated_channels
 from genome_spy.schema.mixins import TransformMethodMixin
 from genome_spy.schemapi import SchemaValidationError
+
+
+def _configured_core_version() -> str:
+    """Read the pinned `@genome-spy/core` version from pyproject.toml."""
+    pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"
+    with pyproject.open("rb") as file:
+        return tomllib.load(file)["tool"]["genome-spy"]["core-version"]
 
 
 def test_package_declares_inline_typing_support() -> None:
@@ -74,7 +83,9 @@ def test_generated_schema_package_loads_real_genomespy_schema() -> None:
     assert len(schema["definitions"]) >= 200
     assert "UnitSpec" in schema["definitions"]
     assert MARK_TYPES == ("rect", "point", "rule", "tick", "text", "link", "arrow")
-    assert SCHEMA_VERSION == "0.85.0"
+    # The committed package must match the pin the generator reads, which a
+    # literal cannot check: a bumped pin leaves the old literal passing.
+    assert SCHEMA_VERSION == _configured_core_version()
 
 
 def test_generated_schema_wrappers_serialize_keyword_properties() -> None:
