@@ -154,7 +154,7 @@ views can assign a different assembly to each locus scale:
 ```
 
 ```{genomespy-chart} genomic_coordinates:multiple_assembly_chart
-:height: 320
+:height: 620
 :title: Human positions on x and mouse positions on y
 ```
 

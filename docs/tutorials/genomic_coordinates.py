@@ -105,20 +105,105 @@ custom_assembly_chart = (
 
 
 # genomic-coordinates-multiple-start
+# Orthologous gene starts from the UCSC hg38 and mm10 RefSeq annotations.
 homologs = [
     {
-        "humanChrom": "chr17",
-        "humanPos": 43_044_000,
-        "mouseChrom": "chr11",
-        "mousePos": 101_488_000,
         "gene": "BRCA1",
+        "hsChrom": "chr17",
+        "hsPos": 43_044_295,
+        "mmChrom": "chr11",
+        "mmPos": 101_488_764,
     },
     {
-        "humanChrom": "chr17",
-        "humanPos": 43_070_000,
-        "mouseChrom": "chr11",
-        "mousePos": 101_512_000,
-        "gene": "BRCA1",
+        "gene": "TP53",
+        "hsChrom": "chr17",
+        "hsPos": 7_668_421,
+        "mmChrom": "chr11",
+        "mmPos": 69_580_359,
+    },
+    {
+        "gene": "MYC",
+        "hsChrom": "chr8",
+        "hsPos": 127_736_231,
+        "mmChrom": "chr15",
+        "mmPos": 61_985_341,
+    },
+    {
+        "gene": "EGFR",
+        "hsChrom": "chr7",
+        "hsPos": 55_019_017,
+        "mmChrom": "chr11",
+        "mmPos": 16_752_203,
+    },
+    {
+        "gene": "KRAS",
+        "hsChrom": "chr12",
+        "hsPos": 25_205_246,
+        "mmChrom": "chr6",
+        "mmPos": 145_216_699,
+    },
+    {
+        "gene": "SOX2",
+        "hsChrom": "chr3",
+        "hsPos": 181_711_925,
+        "mmChrom": "chr3",
+        "mmPos": 34_560_381,
+    },
+    {
+        "gene": "PAX6",
+        "hsChrom": "chr11",
+        "hsPos": 31_789_026,
+        "mmChrom": "chr2",
+        "mmPos": 105_536_080,
+    },
+    {
+        "gene": "FOXP2",
+        "hsChrom": "chr7",
+        "hsPos": 114_414_815,
+        "mmChrom": "chr6",
+        "mmPos": 14_901_349,
+    },
+    {
+        "gene": "CFTR",
+        "hsChrom": "chr7",
+        "hsPos": 117_480_025,
+        "mmChrom": "chr6",
+        "mmPos": 18_170_687,
+    },
+    {
+        "gene": "APOE",
+        "hsChrom": "chr19",
+        "hsPos": 44_905_796,
+        "mmChrom": "chr7",
+        "mmPos": 19_696_244,
+    },
+    {
+        "gene": "RB1",
+        "hsChrom": "chr13",
+        "hsPos": 48_303_751,
+        "mmChrom": "chr14",
+        "mmPos": 73_195_502,
+    },
+    {
+        "gene": "PTEN",
+        "hsChrom": "chr10",
+        "hsPos": 87_863_625,
+        "mmChrom": "chr19",
+        "mmPos": 32_757_577,
+    },
+    {
+        "gene": "GATA1",
+        "hsChrom": "chrX",
+        "hsPos": 48_786_590,
+        "mmChrom": "chrX",
+        "mmPos": 7_959_260,
+    },
+    {
+        "gene": "SHH",
+        "hsChrom": "chr7",
+        "hsPos": 155_799_980,
+        "mmChrom": "chr5",
+        "mmPos": 28_456_840,
     },
 ]
 
@@ -128,15 +213,15 @@ multiple_assembly_chart = (
     .encode(
         # A chrom/pos domain is linearized without the scale's assembly, so it
         # only resolves under a root assembly. These scales carry their own.
-        x=gs.Locus("humanChrom", "humanPos")
+        x=gs.Locus("hsChrom", "hsPos")
         .scale(type="locus", assembly="hg38")
         .axis(title="Human hg38", chromGrid=True),
-        y=gs.Locus("mouseChrom", "mousePos")
+        y=gs.Locus("mmChrom", "mmPos")
         .scale(type="locus", assembly="mm10")
         .axis(title="Mouse mm10", chromGrid=True),
         tooltip="gene:N",
     )
-    .properties(title="Two locus scales, two assemblies")
+    .properties(title="Orthologous genes in two assemblies")
 )
 # genomic-coordinates-multiple-end
 
