@@ -70,6 +70,19 @@ variation in measurements far from zero, while leaving the other scale choices
 automatic. The GenomeSpy documentation lists the scale types and every scale
 option in [scale](https://genomespy.app/docs/grammar/scale/#properties).
 
+## Zoomable positional scales
+
+Set `zoom=True` on a positional scale to allow its visible domain to change
+interactively:
+
+```python
+gs.X("time:Q").scale(domain=[0.5, 3.5], zoom=True)
+```
+
+The customized chart above uses a zoomable horizontal scale. Zoom
+extent and domain transitions are described in
+[zooming and panning](https://genomespy.app/docs/grammar/scale/#zooming-and-panning).
+
 ## Axes explain positional scales
 
 GenomeSpy creates axes for scaled `x` and `y` field encodings. Axis options
@@ -137,21 +150,3 @@ Removing a guide also removes its explanation. Keep at least one clear label or
 guide for every visual distinction the reader must interpret. The GenomeSpy
 documentation covers the alternatives in
 [disabling legends](https://genomespy.app/docs/grammar/legend/#disabling-legends).
-
-## Zoomable positional scales
-
-Set `zoom=True` on a positional scale to allow its visible domain to change
-interactively:
-
-```python
-gs.X("time:Q").scale(domain=[0.5, 3.5], zoom=True)
-```
-
-The customized chart above uses a zoomable horizontal scale. Its axis updates
-with the domain, so the guide continues to describe the visible data. Zoom
-extent and domain transitions are described in
-[zooming and panning](https://genomespy.app/docs/grammar/scale/#zooming-and-panning).
-
-In composed views, scales and guides may be shared or independent. Configure
-that relationship with scale, axis, and legend resolution at the composition
-level; named and shared scales are covered in the composition guide.

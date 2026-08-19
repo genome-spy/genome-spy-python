@@ -128,6 +128,7 @@ multiple_assembly_chart = (
     .encode(
         x=gs.Locus("humanChrom", "humanPos")
         .scale(
+            type="locus",
             assembly="hg38",
             domain=[
                 {"chrom": "chr17", "pos": 43_035_000},
@@ -137,6 +138,7 @@ multiple_assembly_chart = (
         .axis(title="Human hg38"),
         y=gs.Locus("mouseChrom", "mousePos")
         .scale(
+            type="locus",
             assembly="mm10",
             domain=[
                 {"chrom": "chr11", "pos": 101_480_000},

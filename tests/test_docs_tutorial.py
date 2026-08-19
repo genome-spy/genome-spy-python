@@ -508,8 +508,12 @@ def test_genomic_coordinate_examples_serialize_assembly_scope() -> None:
 
     multiple_spec = tutorial.multiple_assembly_chart.to_dict()
     assert "assembly" not in multiple_spec
-    assert multiple_spec["encoding"]["x"]["scale"]["assembly"] == "hg38"
-    assert multiple_spec["encoding"]["y"]["scale"]["assembly"] == "mm10"
+    for channel, assembly in (("x", "hg38"), ("y", "mm10")):
+        scale = multiple_spec["encoding"][channel]["scale"]
+        assert scale["assembly"] == assembly
+        # Without an explicit scale type, a scale-level assembly is not
+        # resolved and GenomeSpy reports that no genomes are configured.
+        assert scale["type"] == "locus"
 
 
 def test_genomic_coordinate_guide_embeds_only_named_tutorial_charts() -> None:
