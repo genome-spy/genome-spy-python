@@ -7,6 +7,7 @@ this test doubles as a schema check for the authored examples.
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 from hashlib import sha256
 from pathlib import Path
@@ -1102,3 +1103,12 @@ class FakeEnv:
 class FakeStateMachine:
     def __init__(self) -> None:
         self.reporter = object()
+
+
+def test_stylesheet_gives_the_tooltip_an_explicit_text_color() -> None:
+    """GenomeSpy paints the tooltip background but inherits its text color."""
+    css = (REPO_ROOT / "docs" / "_static" / "genomespy.css").read_text(encoding="utf-8")
+
+    rule = re.search(r"\.genome-spy \.tooltip \{([^}]*)\}", css)
+    assert rule is not None, "no tooltip rule in the documentation stylesheet"
+    assert re.search(r"color:\s*#", rule.group(1))

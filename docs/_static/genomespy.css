@@ -194,3 +194,9 @@ p.lead {
   margin-inline: auto;
   margin: 1.25rem 0 0.5rem;
 }
+
+/* GenomeSpy paints the tooltip on a light background but leaves its text color
+   to the host page, so a dark page theme renders it light on light. */
+.genome-spy .tooltip {
+  color: #1a1a1a;
+}
