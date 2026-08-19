@@ -4,6 +4,8 @@ import importlib.util
 import sys
 from pathlib import Path
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -96,3 +98,30 @@ def test_card_css_matches_the_thumbnail_capture_ratio() -> None:
 
     assert renderer.CARD_WIDTH / renderer.CARD_HEIGHT == 16 / 9
     assert "aspect-ratio: 16 / 9;" in css
+
+
+def test_stable_capture_stops_once_two_frames_match() -> None:
+    renderer = _load_renderer()
+    frames = iter([b"loading", b"half", b"done", b"done", b"never reached"])
+    waits = []
+
+    result = renderer.wait_until_stable(lambda: next(frames), lambda: waits.append(1))
+
+    assert result == b"done"
+    assert len(waits) == 3
+
+
+def test_stable_capture_gives_up_on_a_chart_that_keeps_changing() -> None:
+    renderer = _load_renderer()
+    frames = iter([b"a", b"b", b"c", b"d"])
+
+    result = renderer.wait_until_stable(lambda: next(frames), lambda: None, attempts=3)
+
+    assert result == b"c"
+
+
+def test_stable_capture_rejects_a_zero_attempt_budget() -> None:
+    renderer = _load_renderer()
+
+    with pytest.raises(ValueError, match="at least one"):
+        renderer.wait_until_stable(lambda: b"", lambda: None, attempts=0)

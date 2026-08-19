@@ -26,6 +26,7 @@ import copy
 import importlib.util
 import json
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -40,6 +41,46 @@ INK_THRESHOLD = 248
 STAGE_WIDTH_BUFFER = 240
 READY_TIMEOUT_MS = 45_000
 SETTLE_DELAY_MS = 6_000
+# `embed()` resolves before lazy sources finish loading and drawing, so the
+# settle delay alone can capture a half-drawn chart. Keep polling until two
+# consecutive frames are identical.
+STABLE_POLL_MS = 2_000
+STABLE_ATTEMPTS = 6
+
+
+def wait_until_stable(
+    capture: Callable[[], bytes],
+    wait: Callable[[], None],
+    *,
+    attempts: int = STABLE_ATTEMPTS,
+) -> bytes:
+    """Capture until two consecutive frames match, or until attempts run out.
+
+    Args:
+        capture: Takes one screenshot and returns its bytes.
+        wait: Pauses between captures.
+        attempts: Maximum number of captures.
+
+    Returns:
+        The first repeated frame, or the last one taken.
+
+    Raises:
+        ValueError: If ``attempts`` is less than one.
+
+    Example:
+        >>> wait_until_stable(next_frame, pause)
+    """
+    if attempts < 1:
+        raise ValueError("attempts must be at least one.")
+
+    previous: bytes | None = None
+    for _ in range(attempts):
+        current = capture()
+        if current == previous:
+            return current
+        previous = current
+        wait()
+    return previous if previous is not None else capture()
 
 
 @dataclass(frozen=True, slots=True)
@@ -164,6 +205,16 @@ def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Recapture thumbnails that already exist.",
     )
+    parser.add_argument(
+        "--settle-ms",
+        type=int,
+        default=SETTLE_DELAY_MS,
+        help=(
+            "Milliseconds to wait after a chart mounts before capturing. "
+            "Raise it for examples that keep loading data. "
+            f"Defaults to {SETTLE_DELAY_MS}."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -280,6 +331,7 @@ def main() -> int:
         return 0
 
     rendered = 0
+    settle_delay_ms = args.settle_ms
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         page = browser.new_page(
@@ -318,7 +370,11 @@ def main() -> int:
                 page.wait_for_load_state("networkidle", timeout=READY_TIMEOUT_MS)
             except Exception:
                 pass
-            page.wait_for_timeout(SETTLE_DELAY_MS)
+            page.wait_for_timeout(settle_delay_ms)
+            wait_until_stable(
+                page.screenshot,
+                lambda: page.wait_for_timeout(STABLE_POLL_MS),
+            )
             runtime_error = page.locator("#c").inner_text().strip()
             if runtime_error.startswith("Error:"):
                 print(
