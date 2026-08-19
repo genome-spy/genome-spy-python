@@ -143,12 +143,12 @@ def _gallery_index_md(examples: list[core.Example]) -> str:
         blocks.append("```")
         blocks.append("")
 
-    # Keep generated detail pages in visible navigation. PyData's sidebar is
-    # built from toctrees, so every generated example must be listed here.
-    blocks.append("## Browse by Category")
-    blocks.append("")
+    # The sidebar is built from toctrees, so every generated detail page must be
+    # listed here. They are hidden because the cards above already link them;
+    # a visible toctree would repeat the whole gallery as a plain list.
     for category, items in core.grouped_by_category(examples):
         blocks.append("```{toctree}")
+        blocks.append(":hidden:")
         blocks.append(":maxdepth: 1")
         blocks.append(f":caption: {category}")
         blocks.append("")

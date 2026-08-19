@@ -771,9 +771,10 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     }
 
 
-def test_gallery_index_keeps_examples_in_visible_navigation(
+def test_gallery_index_lists_every_example_in_hidden_navigation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    """Toctrees feed the sidebar; the cards above are the visible listing."""
     gallery = _load_gallery()
     extension = _load_gallery_extension()
     examples = gallery.collect_examples()
@@ -785,7 +786,8 @@ def test_gallery_index_keeps_examples_in_visible_navigation(
     markdown = extension._gallery_index_md(examples)
     build_token = gallery.build_token(examples)
 
-    assert ":hidden:" not in markdown
+    assert markdown.count(":hidden:") == len(gallery.grouped_by_category(examples))
+    assert "## Browse by Category" not in markdown
     assert ":caption: Volcano and MA plots" in markdown
     assert "airway_ma_plot" in markdown
     assert "airway_volcano_plot" in markdown
