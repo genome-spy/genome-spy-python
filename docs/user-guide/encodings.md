@@ -98,8 +98,9 @@ for bases, amino acids, matrix columns, and other ordered integer locations:
 :title: Bases positioned with an index channel
 ```
 
-Unlike an ordinal category, an index remains linear and can be zoomed. Each
-integer also has a band, allowing a rectangle to fill one indexed position. The
+Unlike an ordinal category, an index remains linear and can be zoomed: index and
+locus scales both zoom and pan by default, with no option to set. Each integer
+also has a band, allowing a rectangle to fill one indexed position. The
 [index scale](https://genomespy.app/docs/grammar/scale/#index-scale) describes
 that behavior in detail.
 
@@ -122,8 +123,7 @@ clearest form when chromosome and position are stored in separate fields:
 The chart's `assembly="hg38"` supplies chromosome names, lengths, and order.
 Without a `domain`, the scale would span the whole genome and these 31 kb of
 features would collapse into one thin line, so the example opens on a 40 kb
-window around them. Locus scales are zoomable by default, so the rest of the
-assembly stays one gesture away.
+window around them.
 The genomic coordinates guide covers locus domains and coordinate conventions
 in detail, as does the
 [locus scale](https://genomespy.app/docs/grammar/scale/#locus-scale) in the

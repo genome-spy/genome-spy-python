@@ -12,8 +12,8 @@ describes the complete parameter model in
 
 ## Zoom and pan
 
-Index and locus scales are zoomable and pannable from the start, so this chart
-sets no zoom option:
+The simplest interaction needs no parameter at all. This chart's locus scale is
+navigable as it stands:
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -26,11 +26,9 @@ sets no zoom option:
 :title: A locus scale, zoomable without any configuration
 ```
 
-The scale domain is the state being changed. No explicit parameter is needed.
-A continuous quantitative scale is static instead, and takes `zoom=True` to
-become navigable, as shown in
-[scales, axes, and legends](scales-axes-legends.md). In a linked-track browser,
-put the domain on the one shared scale so every track follows it.
+The scale domain is the state being changed, and no explicit parameter holds it.
+In a linked-track browser, put the domain on the one shared scale so every track
+follows it.
 
 ## Bind a parameter to an input
 

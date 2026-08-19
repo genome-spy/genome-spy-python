@@ -157,8 +157,6 @@ Use a rectangle mark for each interval. The `x` encoding maps the start, and
 `gs.Locus("chrom", "start")` combines a chromosome field and a position field
 into a **locus**, meaning a place in the genome. The `hg38` **genome assembly**
 supplies the chromosome names, lengths, and order needed by the locus scale.
-Locus scales are zoomable by default, so you can already zoom and pan along the
-chart above without setting anything.
 
 These example intervals use zero-based, half-open coordinates: the start is
 included and the end is excluded. This is the convention used by formats such
