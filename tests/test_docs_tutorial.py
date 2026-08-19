@@ -197,11 +197,19 @@ def test_encoding_guide_examples_serialize_with_expected_definitions() -> None:
 
     locus_spec = tutorial.locus_chart.to_dict()
     assert locus_spec["assembly"] == "hg38"
+    # An explicit domain keeps the features visible; the whole-genome default
+    # would render them as one thin line.
     assert locus_spec["encoding"]["x"] == {
         "chrom": "chrom",
         "pos": "start",
         "type": "locus",
-        "scale": {"zoom": True},
+        "scale": {
+            "domain": [
+                {"chrom": "chr17", "pos": 43_040_000},
+                {"chrom": "chr17", "pos": 43_080_000},
+            ],
+            "zoom": True,
+        },
     }
     assert locus_spec["encoding"]["x2"] == {
         "chrom": "chrom",
