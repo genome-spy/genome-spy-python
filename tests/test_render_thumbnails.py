@@ -87,3 +87,12 @@ def test_select_examples_rejects_unknown_name() -> None:
         assert "Unknown example name(s): missing" in str(error)
     else:
         raise AssertionError("unknown example name should fail")
+
+
+def test_card_css_matches_the_thumbnail_capture_ratio() -> None:
+    """Gallery cards letterbox their thumbnails when the two ratios diverge."""
+    renderer = _load_renderer()
+    css = (REPO_ROOT / "docs" / "_static" / "genomespy.css").read_text(encoding="utf-8")
+
+    assert renderer.CARD_WIDTH / renderer.CARD_HEIGHT == 16 / 9
+    assert "aspect-ratio: 16 / 9;" in css

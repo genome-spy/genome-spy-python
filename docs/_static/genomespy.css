@@ -149,11 +149,14 @@ p.lead {
 }
 .gs-card__shot {
   display: block;
-  height: 180px;
+  /* Matches the 720x405 capture box in tools/render_thumbnails.py, so a
+     contained thumbnail fills the card at every column width instead of
+     leaving bars beside it. */
+  aspect-ratio: 16 / 9;
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #f4f8fb;
+  background-color: #fff;
   transition: transform 0.35s ease;
 }
 .gs-card:hover .gs-card__shot {
