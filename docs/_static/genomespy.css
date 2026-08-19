@@ -196,7 +196,8 @@ p.lead {
 }
 
 /* GenomeSpy paints the tooltip on a light background but leaves its text color
-   to the host page, so a dark page theme renders it light on light. */
-.genome-spy .tooltip {
+   to the host page, so a dark page theme renders it light on light. The class
+   is bundle-versioned: core 0.85.0 renamed `tooltip` to `gs-tooltip`. */
+.gs-tooltip {
   color: #1a1a1a;
 }

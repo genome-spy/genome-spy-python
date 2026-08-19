@@ -1109,6 +1109,6 @@ def test_stylesheet_gives_the_tooltip_an_explicit_text_color() -> None:
     """GenomeSpy paints the tooltip background but inherits its text color."""
     css = (REPO_ROOT / "docs" / "_static" / "genomespy.css").read_text(encoding="utf-8")
 
-    rule = re.search(r"\.genome-spy \.tooltip \{([^}]*)\}", css)
+    rule = re.search(r"\.gs-tooltip \{([^}]*)\}", css)
     assert rule is not None, "no tooltip rule in the documentation stylesheet"
     assert re.search(r"color:\s*#", rule.group(1))
