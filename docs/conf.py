@@ -83,6 +83,3 @@ html_theme_options = {
     ],
     "navigation_with_keys": True,
 }
-
-# The landing page is a full-width showcase, so drop its sidebars.
-html_sidebars = {"index": []}
