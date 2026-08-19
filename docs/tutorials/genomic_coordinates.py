@@ -126,26 +126,14 @@ multiple_assembly_chart = (
     gs.Chart(homologs)
     .mark_point(filled=True, size=120)
     .encode(
+        # A chrom/pos domain is linearized without the scale's assembly, so it
+        # only resolves under a root assembly. These scales carry their own.
         x=gs.Locus("humanChrom", "humanPos")
-        .scale(
-            type="locus",
-            assembly="hg38",
-            domain=[
-                {"chrom": "chr17", "pos": 43_035_000},
-                {"chrom": "chr17", "pos": 43_080_000},
-            ],
-        )
-        .axis(title="Human hg38"),
+        .scale(type="locus", assembly="hg38")
+        .axis(title="Human hg38", chromGrid=True),
         y=gs.Locus("mouseChrom", "mousePos")
-        .scale(
-            type="locus",
-            assembly="mm10",
-            domain=[
-                {"chrom": "chr11", "pos": 101_480_000},
-                {"chrom": "chr11", "pos": 101_520_000},
-            ],
-        )
-        .axis(title="Mouse mm10"),
+        .scale(type="locus", assembly="mm10")
+        .axis(title="Mouse mm10", chromGrid=True),
         tooltip="gene:N",
     )
     .properties(title="Two locus scales, two assemblies")

@@ -511,9 +511,10 @@ def test_genomic_coordinate_examples_serialize_assembly_scope() -> None:
     for channel, assembly in (("x", "hg38"), ("y", "mm10")):
         scale = multiple_spec["encoding"][channel]["scale"]
         assert scale["assembly"] == assembly
-        # Without an explicit scale type, a scale-level assembly is not
-        # resolved and GenomeSpy reports that no genomes are configured.
         assert scale["type"] == "locus"
+        # A chrom/pos domain is linearized without consulting the scale's own
+        # assembly, so it throws "No genomes have been configured!" here.
+        assert "domain" not in scale
 
 
 def test_genomic_coordinate_guide_embeds_only_named_tutorial_charts() -> None:
