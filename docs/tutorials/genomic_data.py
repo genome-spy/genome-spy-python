@@ -14,7 +14,7 @@ bigwig_chart = (
     gs.Chart(gs.lazy.bigwig("https://data.genomespy.app/genomes/hg38/hg38.gc5Base.bw"))
     .mark_rect(color="#4c78a8", minWidth=0.5, tooltip=None)
     .encode(
-        x=gs.Locus("chrom", "start").scale(domain=REGION, zoom=True),
+        x=gs.Locus("chrom", "start").scale(domain=REGION),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("score:Q").scale(domain=[0, 100]).axis(title="GC (%)"),
     )
@@ -32,7 +32,7 @@ bigbed_chart = (
     )
     .mark_rect()
     .encode(
-        x=gs.Locus("chrom", "chromStart").scale(domain=REGION, zoom=True),
+        x=gs.Locus("chrom", "chromStart").scale(domain=REGION),
         x2=gs.Locus("chrom", "chromEnd"),
         color=gs.Color("ucscLabel:N").legend(title="cCRE class"),
     )

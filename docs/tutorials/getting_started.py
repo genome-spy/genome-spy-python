@@ -56,7 +56,7 @@ genomic_track = (
     gs.Chart(features)
     .mark_rect()
     .encode(
-        x=gs.Locus("chrom", "start").scale(zoom=True),
+        x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("kind:N").title("Feature kind"),
         color=gs.Color("kind:N").legend(None),

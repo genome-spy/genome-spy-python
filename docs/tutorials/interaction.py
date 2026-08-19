@@ -49,9 +49,7 @@ zoom_chart = (
     gs.Chart(VARIANTS)
     .mark_point(filled=True, size=110)
     .encode(
-        x=gs.Locus("chrom", "pos")
-        .scale(domain=REGION, zoom=True)
-        .axis(title="Genomic position"),
+        x=gs.Locus("chrom", "pos").scale(domain=REGION).axis(title="Genomic position"),
         y=gs.Y("score:Q").scale(domain=[0, 1]).title("Score"),
         color=gs.Color("impact:N"),
         tooltip=["id:N", "score:Q", "impact:N"],
@@ -141,7 +139,7 @@ ruler_chart = (
     .properties(
         data=VARIANTS,
         assembly="hg38",
-        scales=gs.scales(x=gs.Scale(domain=REGION, zoom=True)),
+        scales=gs.scales(x=gs.Scale(domain=REGION)),
         axes=gs.axes(x=gs.GenomeAxis(title="Genomic position")),
         params=[
             gs.param(

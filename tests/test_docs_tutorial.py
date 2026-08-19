@@ -207,8 +207,7 @@ def test_encoding_guide_examples_serialize_with_expected_definitions() -> None:
             "domain": [
                 {"chrom": "chr17", "pos": 43_040_000},
                 {"chrom": "chr17", "pos": 43_080_000},
-            ],
-            "zoom": True,
+            ]
         },
     }
     assert locus_spec["encoding"]["x2"] == {
@@ -468,10 +467,7 @@ def test_genomic_coordinate_examples_serialize_locus_semantics() -> None:
     assert point_spec["encoding"]["x"]["type"] == "locus"
     assert point_spec["encoding"]["x"]["chrom"] == "chrom"
     assert point_spec["encoding"]["x"]["pos"] == "pos"
-    assert point_spec["encoding"]["x"]["scale"] == {
-        "domain": tutorial.BRCA1_DOMAIN,
-        "zoom": True,
-    }
+    assert point_spec["encoding"]["x"]["scale"] == {"domain": tutorial.BRCA1_DOMAIN}
 
     interval_spec = tutorial.interval_chart.to_dict()
     assert interval_spec["encoding"]["x2"] == {"chrom": "chrom", "pos": "end"}
@@ -525,10 +521,7 @@ def test_genomic_data_examples_serialize_lazy_sources() -> None:
     bigwig_spec = tutorial.bigwig_chart.to_dict()
     assert bigwig_spec["data"]["lazy"]["type"] == "bigwig"
     assert bigwig_spec["encoding"]["x"]["type"] == "locus"
-    assert bigwig_spec["encoding"]["x"]["scale"] == {
-        "domain": tutorial.REGION,
-        "zoom": True,
-    }
+    assert bigwig_spec["encoding"]["x"]["scale"] == {"domain": tutorial.REGION}
 
     bigbed_spec = tutorial.bigbed_chart.to_dict()
     assert bigbed_spec["data"]["lazy"]["type"] == "bigbed"
@@ -572,7 +565,7 @@ def test_genome_browser_parent_owns_shared_genomic_resolution() -> None:
     spec = tutorial.browser.to_dict()
 
     assert spec["assembly"] == "hg38"
-    assert spec["scales"]["x"] == {"domain": tutorial.REGION, "zoom": True}
+    assert spec["scales"]["x"] == {"domain": tutorial.REGION}
     assert spec["axes"]["x"] == {
         "orient": "bottom",
         "title": "Genomic position",
@@ -604,10 +597,8 @@ def test_interaction_zoom_and_bound_parameters_serialize() -> None:
     tutorial = _load_module("_interaction_parameters", INTERACTION_TUTORIAL_PATH)
 
     zoom_spec = tutorial.zoom_chart.to_dict()
-    assert zoom_spec["encoding"]["x"]["scale"] == {
-        "domain": tutorial.REGION,
-        "zoom": True,
-    }
+    # Locus scales zoom by default, so the example sets no zoom option.
+    assert zoom_spec["encoding"]["x"]["scale"] == {"domain": tutorial.REGION}
 
     bound_spec = tutorial.bound_chart.to_dict()
     assert bound_spec["transform"] == [

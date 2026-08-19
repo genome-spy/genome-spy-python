@@ -22,7 +22,7 @@ point_chart = (
     .mark_point(filled=True, size=110)
     .encode(
         x=gs.Locus("chrom", "pos")
-        .scale(domain=BRCA1_DOMAIN, zoom=True)
+        .scale(domain=BRCA1_DOMAIN)
         .axis(title="Genomic position", chromGrid=True),
         y=gs.Y("impact:N").title("Impact"),
         color=gs.Color("impact:N").legend(None),
@@ -43,7 +43,7 @@ interval_chart = (
     gs.Chart(features)
     .mark_rect()
     .encode(
-        x=gs.Locus("chrom", "start").scale(domain=BRCA1_DOMAIN, zoom=True),
+        x=gs.Locus("chrom", "start").scale(domain=BRCA1_DOMAIN),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("kind:N").title("Feature kind"),
         color=gs.Color("kind:N").legend(None),
@@ -90,7 +90,7 @@ custom_assembly_chart = (
     gs.Chart(toy_features)
     .mark_rect()
     .encode(
-        x=gs.Locus("chrom", "start").scale(zoom=True),
+        x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("label:N").axis(None),
         color=gs.Color("label:N").legend(None),

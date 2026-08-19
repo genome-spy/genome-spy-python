@@ -10,9 +10,10 @@ when the chart needs another named piece of state. The GenomeSpy documentation
 describes the complete parameter model in
 [parameters](https://genomespy.app/docs/grammar/parameters/).
 
-## Enable zoom and pan
+## Zoom and pan
 
-Set `zoom=True` on a positional scale to enable interactive navigation:
+Index and locus scales are zoomable and pannable from the start, so this chart
+sets no zoom option:
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -22,12 +23,14 @@ Set `zoom=True` on a positional scale to enable interactive navigation:
 
 ```{genomespy-chart} interaction:zoom_chart
 :height: 280
-:title: A locus scale with zooming and panning enabled
+:title: A locus scale, zoomable without any configuration
 ```
 
 The scale domain is the state being changed. No explicit parameter is needed.
-In a linked-track browser, put the zoom option on the one shared scale so every
-track follows the same domain.
+A continuous quantitative scale is static instead, and takes `zoom=True` to
+become navigable, as shown in
+[scales, axes, and legends](scales-axes-legends.md). In a linked-track browser,
+put the domain on the one shared scale so every track follows it.
 
 ## Bind a parameter to an input
 

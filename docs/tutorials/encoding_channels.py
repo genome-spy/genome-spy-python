@@ -99,8 +99,7 @@ locus_chart = (
             domain=[
                 {"chrom": "chr17", "pos": 43_040_000},
                 {"chrom": "chr17", "pos": 43_080_000},
-            ],
-            zoom=True,
+            ]
         ),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("kind:N").title("Feature kind"),

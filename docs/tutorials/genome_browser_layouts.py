@@ -67,7 +67,7 @@ browser = (
     (signal_track & annotation_track)
     .properties(
         assembly="hg38",
-        scales=gs.scales(x=gs.Scale(domain=REGION, zoom=True)),
+        scales=gs.scales(x=gs.Scale(domain=REGION)),
         axes=gs.axes(
             x=gs.GenomeAxis(
                 orient="bottom",

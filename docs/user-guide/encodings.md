@@ -122,7 +122,8 @@ clearest form when chromosome and position are stored in separate fields:
 The chart's `assembly="hg38"` supplies chromosome names, lengths, and order.
 Without a `domain`, the scale would span the whole genome and these 31 kb of
 features would collapse into one thin line, so the example opens on a 40 kb
-window around them; `zoom=True` then reaches the rest of the assembly.
+window around them. Locus scales are zoomable by default, so the rest of the
+assembly stays one gesture away.
 The genomic coordinates guide covers locus domains and coordinate conventions
 in detail, as does the
 [locus scale](https://genomespy.app/docs/grammar/scale/#locus-scale) in the

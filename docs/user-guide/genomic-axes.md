@@ -24,8 +24,8 @@ Single nucleotide variants and other point features need one locus:
 ```
 
 The root `assembly="hg38"` supplies chromosome sizes and order. The scale domain
-focuses the initial view on a region of chromosome 17, while `zoom=True` lets
-the domain change interactively.
+focuses the initial view on a region of chromosome 17; because locus scales are
+zoomable by default, that domain is a starting point rather than a limit.
 
 `GenomeAxis` options are available through `.axis(...)`. In the example,
 `chromGrid=True` enables chromosome-aware grid styling and the title identifies

@@ -148,9 +148,12 @@ gs.X("time:Q").scale(domain=[0.5, 3.5], zoom=True)
 ```
 
 The customized chart above uses a zoomable horizontal scale. Its axis updates
-with the domain, so the guide continues to describe the visible data. Zoom is
-especially useful for dense genomic and indexed views where the full domain
-cannot be inspected at once. Zoom extent and domain transitions are described in
+with the domain, so the guide continues to describe the visible data.
+
+Index and locus scales are zoomable by default, so genomic and indexed views
+need no `zoom=True`; the option is for the continuous scales that are static
+unless you ask for navigation. Zoom extent and domain transitions are described
+in
 [zooming and panning](https://genomespy.app/docs/grammar/scale/#zooming-and-panning).
 
 In composed views, scales and guides may be shared or independent. Configure
