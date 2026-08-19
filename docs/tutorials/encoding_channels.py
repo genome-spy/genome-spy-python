@@ -116,12 +116,14 @@ definition_chart = (
     .mark_point(filled=True)
     .encode(
         x=gs.X("score:Q").scale(zero=False),
-        y=gs.datum(0, type="quantitative"),
+        y=gs.datum(0, type="quantitative").scale(domain=[-1, 1]),
         color=gs.value("#4c78a8"),
         size=gs.Size(
             gs.expr("datum.amount * datum.confidence"),
             type="quantitative",
-        ).legend(None),
+        )
+        .scale(domain=[0, 35])
+        .legend(None),
     )
     .properties(title="Field, datum, value, and expression definitions")
 )

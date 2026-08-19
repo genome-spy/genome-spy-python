@@ -152,11 +152,20 @@ four ways:
 | Value | Use a constant visual value without a scale | `gs.value("#4c78a8")` |
 | Expression | Calculate a value while the chart runs | `gs.expr("datum.amount * datum.confidence")` |
 
-A datum and a value are deliberately different. A quantitative datum of `0`
-is mapped through the channel's scale; a positional value of `0` means the
-start of the visual range and a value of `0.5` means its midpoint.
+The chart shows all four at once: each point takes its horizontal position from
+a field, sits on the shared baseline given by the datum, is colored by the
+constant value, and is sized by the expression.
 
-Expressions that participate in a scale need an explicit type, as the size
+A datum and a value are deliberately different. A quantitative datum of `0`
+is mapped through the channel's scale, which is why the points sit at the middle
+of the `[-1, 1]` domain rather than at the bottom; a positional value of `0`
+means the start of the visual range and a value of `0.5` means its midpoint.
+
+Both the datum and the expression need an explicit `domain` here. A scale
+derives its domain from the data it sees, and a single constant or a calculated
+value gives it nothing to work with.
+
+Expressions that participate in a scale also need an explicit type, as the size
 expression above demonstrates. GenomeSpy cannot infer whether an arbitrary
 expression returns a quantity, category, index, or locus. The
 [expression language](https://genomespy.app/docs/grammar/expressions/) describes

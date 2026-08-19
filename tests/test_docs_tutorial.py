@@ -225,12 +225,19 @@ def test_encoding_guide_examples_serialize_with_expected_definitions() -> None:
         "pos": "end",
     }
 
+    # A constant datum and a calculated expression give a scale no domain to
+    # derive, so both need an explicit one or the marks never resolve.
     definition_spec = tutorial.definition_chart.to_dict()["encoding"]
-    assert definition_spec["y"] == {"datum": 0, "type": "quantitative"}
+    assert definition_spec["y"] == {
+        "datum": 0,
+        "type": "quantitative",
+        "scale": {"domain": [-1, 1]},
+    }
     assert definition_spec["color"] == {"value": "#4c78a8"}
     assert definition_spec["size"] == {
         "expr": "datum.amount * datum.confidence",
         "type": "quantitative",
+        "scale": {"domain": [0, 35]},
         "legend": None,
     }
 
