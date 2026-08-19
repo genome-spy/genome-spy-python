@@ -59,8 +59,7 @@ Different marks emphasize different aspects of the data:
 | `mark_link()` | Connections between two positions | [Link](https://genomespy.app/docs/grammar/mark/link/) |
 | `mark_arrow()` | Directed connections or events | [Arrow](https://genomespy.app/docs/grammar/mark/arrow/) |
 
-`mark_circle()` is a convenient point mark with a circular shape. Marks can
-often express related tasks, so choose the one that makes the intended reading
+Marks can often express related tasks, so choose the one that makes the intended reading
 most direct. Each reference page lists the properties that mark supports.
 
 ## Ranged marks use secondary positions
