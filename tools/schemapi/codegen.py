@@ -1376,6 +1376,11 @@ class SchemaWrapperGenerator:
                 for property_spec in specs
             ),
             *transform_annotations,
+            *(
+                property_spec.annotation
+                for property_specs in resolution_method_specs.values()
+                for property_spec in property_specs
+            ),
         ]
         needs_literal = any(
             annotation.needs_literal for annotation in all_method_annotations
@@ -1388,8 +1393,6 @@ class SchemaWrapperGenerator:
             for annotation in all_method_annotations
             for alias_name in _annotation_alias_names(annotation.annotation)
         }
-        if resolution_method_specs:
-            transform_alias_names.add("ResolutionBehavior_T")
         transform_kwds_names = {
             kwds_name
             for annotation in all_method_annotations
@@ -1656,8 +1659,15 @@ class SchemaWrapperGenerator:
         for name, schema in sorted(properties.items()):
             if not isinstance(name, str) or not isinstance(schema, dict):
                 continue
+            # Since 0.85.0 the components reference a shared ResolutionMap
+            # definition instead of inlining their channel properties.
+            ref_name = _ref_name(schema)
+            if ref_name is not None:
+                referenced = self._definitions_map.get(ref_name)
+                if isinstance(referenced, dict):
+                    schema = referenced
             nested_properties = schema.get("properties", {})
-            if isinstance(nested_properties, dict):
+            if isinstance(nested_properties, dict) and nested_properties:
                 specs[name] = self._analyzer.property_specs_from_properties(
                     nested_properties
                 )
