@@ -129,6 +129,8 @@ def test_data_guide_charts_serialize_with_expected_data_ownership() -> None:
     inherited_spec = tutorial.inherited_chart.to_dict()
     assert inherited_spec["data"]["values"] == tutorial.measurements
     assert all("data" not in layer for layer in inherited_spec["layer"])
+    # Headroom for the dy=-12 labels, which the unit view would otherwise clip.
+    assert inherited_spec["layer"][0]["encoding"]["y"]["scale"]["padding"] == 20
 
 
 def test_data_guide_embeds_only_named_tutorial_charts() -> None:

@@ -48,7 +48,7 @@ points = (
     .mark_point(size=90)
     .encode(
         x="time:O",
-        y=gs.Y("value:Q").scale(zero=False),
+        y=gs.Y("value:Q").scale(zero=False, padding=20),
         color="sample:N",
     )
 )
