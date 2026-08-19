@@ -51,7 +51,7 @@ Different marks emphasize different aspects of the data:
 
 | Mark method | Useful for | GenomeSpy reference |
 | --- | --- | --- |
-| `mark_point()` or `mark_circle()` | Individual observations and distributions | [Point](https://genomespy.app/docs/grammar/mark/point/) |
+| `mark_point()`  | Individual observations and distributions | [Point](https://genomespy.app/docs/grammar/mark/point/) |
 | `mark_rect()` | Bands, intervals, and heatmaps | [Rect](https://genomespy.app/docs/grammar/mark/rect/) |
 | `mark_rule()` | Ranges, boundaries, and reference lines | [Rule](https://genomespy.app/docs/grammar/mark/rule/) |
 | `mark_tick()` | Compact positions along one axis | [Tick](https://genomespy.app/docs/grammar/mark/tick/) |
