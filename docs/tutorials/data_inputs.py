@@ -3,7 +3,6 @@
 # data-inputs-records-start
 import genome_spy as gs
 
-
 measurements = [
     {"sample": "A", "time": 0, "value": 2.1},
     {"sample": "A", "time": 1, "value": 3.4},
@@ -48,7 +47,7 @@ points = (
     .mark_point(size=90)
     .encode(
         x="time:O",
-        y=gs.Y("value:Q").scale(zero=False, padding=20),
+        y=gs.Y("value:Q").scale(zero=False),
         color="sample:N",
     )
 )
@@ -58,12 +57,15 @@ labels = (
     .encode(
         x="time:O",
         y="value:Q",
-        text="value:Q",
+        text="value",
         color="sample:N",
     )
 )
 
-inherited_chart = (points + labels).properties(data=measurements)
+inherited_chart = (points + labels).properties(
+    data=measurements,
+    title="Measurements over time",
+)
 # data-inputs-inheritance-end
 
 
