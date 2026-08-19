@@ -679,3 +679,69 @@ def test_generated_channel_title_methods_are_schema_backed() -> None:
 
     assert isinstance(titled, gs.X)
     assert titled.to_dict()["title"] == "Coverage"
+
+
+def test_resolution_methods_follow_referenced_resolution_maps() -> None:
+    """0.85.0 moved resolve channels behind a shared ResolutionMap reference."""
+    schema = {
+        "definitions": {
+            "ResolutionBehavior": {
+                "enum": ["independent", "shared"],
+                "type": "string",
+            },
+            "LegendResolutionBehavior": {
+                "anyOf": [
+                    {"$ref": "#/definitions/ResolutionBehavior"},
+                    {"const": "collected", "type": "string"},
+                ]
+            },
+            "ResolutionMap<ResolutionBehavior>": {
+                "properties": {
+                    "color": {"$ref": "#/definitions/ResolutionBehavior"},
+                    "x": {"$ref": "#/definitions/ResolutionBehavior"},
+                },
+                "type": "object",
+            },
+            "ResolutionMap<LegendResolutionBehavior>": {
+                "properties": {
+                    "color": {"$ref": "#/definitions/LegendResolutionBehavior"},
+                },
+                "type": "object",
+            },
+            "CoreRootSpec": {
+                "anyOf": [
+                    {
+                        "properties": {
+                            "resolve": {
+                                "properties": {
+                                    "axis": {
+                                        "$ref": "#/definitions/ResolutionMap%3CResolutionBehavior%3E"
+                                    },
+                                    "legend": {
+                                        "$ref": "#/definitions/ResolutionMap%3CLegendResolutionBehavior%3E"
+                                    },
+                                    "scale": {
+                                        "$ref": "#/definitions/ResolutionMap%3CResolutionBehavior%3E"
+                                    },
+                                },
+                                "type": "object",
+                            }
+                        },
+                        "type": "object",
+                    }
+                ]
+            },
+        }
+    }
+
+    source = SchemaWrapperGenerator(schema).generate_mark_mixins_module().source
+
+    # A dropped reference produced `def resolve_axis(self, *, ) -> Self:`, which
+    # is not valid Python, and an uncollected alias left the name undefined.
+    start = source.index("class ResolutionMethodMixin:")
+    end = source.index("\nclass ", start + 1)
+    compile(source[start:end], "mixins.py", "exec")
+
+    assert "def resolve_axis(\n        self,\n        *,\n        color:" in source
+    assert "LegendResolutionBehavior_T" in source
+    assert "ResolutionBehavior_T" in source
