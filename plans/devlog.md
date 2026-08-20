@@ -1,5 +1,49 @@
 # Dev Log
 
+## 2026-08-20 - Fixed the CI test failure and added a release workflow
+
+- Made the oncoprint gene ranking deterministic. `laml_oncoplot_data` sorted
+  per-gene sample counts with pandas' default quicksort, so NRAS and TP53 (both
+  altered in 15 samples) came out in a platform-dependent order; every CI run
+  failed `test_laml_oncoprint_uses_shared_sample_index_scale` on Linux while
+  passing on macOS. Both this sort and the LUAD `np.argsort(...)[::-1]` gene
+  ranking now use stable sorts, so ties keep their input order.
+- Added `tests/test_datasets.py::test_laml_gene_order_breaks_sample_count_ties_alphabetically`
+  as the regression guard at the dataset level.
+- Replaced the wheel-contents check in `ci.yml` with `grep -Fxq`; ripgrep is not
+  part of the runner image, so that step would have failed once the suite got
+  far enough to reach it.
+- Added `.github/workflows/release.yml`: `ci.yml` is now also `workflow_call`
+  and runs as the pre-publish gate, then a build job verifies that a release tag
+  matches `uv version --short --frozen`, builds both distributions, and runs
+  `twine check --strict`. Publishing uses `pypa/gh-action-pypi-publish` with API
+  token secrets (`PYPI_API_TOKEN`, `TEST_PYPI_API_TOKEN`) scoped to the `pypi`
+  and `testpypi` environments. `workflow_dispatch` takes a target input so the
+  workflow can be rehearsed with build-only or TestPyPI runs.
+- Added the packaging metadata PyPI needs: MIT `LICENSE`, `license`/
+  `license-files`, authors, keywords, classifiers, and `[project.urls]`.
+- Bumped every action to its current major; the pinned versions still target
+  Node 20, which the runners already force onto Node 24.
+- Added `windows-latest` to the CI test matrix (`fail-fast: false`). Formatting,
+  linting, and typing stay on the Linux leg, and the wheel-contents check moved
+  from `unzip | grep` to a `python -c` one-liner that runs under both bash and
+  PowerShell. Prerequisites for the Windows leg: `.gitattributes` pins every
+  checkout to LF, because `test_upstream_mutation_files_are_byte_exact` hashes
+  the packaged `.tsv` files and a CRLF checkout would change their bytes; and
+  `tests/test_docs_api_reference.py` now reads `api.md` as UTF-8 instead of the
+  locale encoding, which is cp1252 on Windows. The two `subprocess.run` calls in
+  the suite decode child output as UTF-8 rather than `text=True`, for the same
+  reason. `src/` had no implicit-encoding I/O to begin with.
+- Validated locally: full suite (317 passed), `ruff format --check`, `ruff
+  check`, `mypy src/`, the codegen job's `git diff --exit-code`, `uv build`,
+  `twine check --strict`, the wheel-contents check, `node --test
+  tests/widget.test.mjs`, and the tag/version comparison. The suite was also run
+  under `PYTHONWARNDEFAULTENCODING=1 -W error::EncodingWarning` to catch the
+  implicit-encoding reads that fail on Windows. The workflows themselves have
+  not run on GitHub, and the Windows leg cannot be reproduced locally at all.
+- Follow-up: confirm the copyright holder named in `LICENSE`, and decide whether
+  CI should test a Python version matrix rather than 3.11 alone.
+
 ## 2026-08-18 - Split the API reference into one page per object
 
 - Replaced the single-page API reference with Altair's three-layer structure: a
