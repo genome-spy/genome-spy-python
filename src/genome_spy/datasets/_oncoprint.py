@@ -129,10 +129,12 @@ def laml_oncoplot_data() -> LamlOncoplotData:
     variants = maf.loc[
         maf["Variant_Classification"].isin(_NON_SYNONYMOUS_CLASSES)
     ].copy()
+    # A stable sort keeps the alphabetical groupby order among genes with the
+    # same sample count, so the top-ten selection is reproducible.
     altered_by_gene = (
         variants.groupby("Hugo_Symbol")["Tumor_Sample_Barcode"]
         .nunique()
-        .sort_values(ascending=False)
+        .sort_values(ascending=False, kind="stable")
     )
     gene_order = altered_by_gene.head(10).index.tolist()
     top_variants = variants[variants["Hugo_Symbol"].isin(gene_order)].copy()
@@ -313,7 +315,10 @@ def luad_oncoprint_data() -> LuadOncoprintData:
     gene_scores = (
         score_rows.groupby("gene").size().reindex(recurrence.index, fill_value=0)
     )
-    gene_order = gene_scores.index[np.argsort(gene_scores.to_numpy())[::-1]].tolist()
+    # Negate instead of reversing so that ties keep their input order.
+    gene_order = gene_scores.index[
+        np.argsort(-gene_scores.to_numpy(), kind="stable")
+    ].tolist()
     recurrence = recurrence.reindex(gene_order)
 
     mutation_weights = {

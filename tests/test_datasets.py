@@ -248,6 +248,27 @@ def test_oncoprint_helpers_return_chart_ready_data() -> None:
     assert luad["grid"]["gene"].dtype.name == "category"
 
 
+def test_laml_gene_order_breaks_sample_count_ties_alphabetically() -> None:
+    genes = laml_oncoplot_data()["genes"]
+
+    # NRAS and TP53 are altered in the same number of samples; an unstable sort
+    # ordered them differently on other platforms.
+    tied = genes.loc[genes["altered_samples"].eq(15), "gene"].tolist()
+    assert tied == ["NRAS", "TP53"]
+    assert genes["gene"].tolist() == [
+        "FLT3",
+        "DNMT3A",
+        "NPM1",
+        "IDH2",
+        "IDH1",
+        "TET2",
+        "RUNX1",
+        "NRAS",
+        "TP53",
+        "CEBPA",
+    ]
+
+
 def test_airway_paired_logcounts_uses_packaged_data() -> None:
     base_mean, treated, control = airway_paired_logcounts()
 
