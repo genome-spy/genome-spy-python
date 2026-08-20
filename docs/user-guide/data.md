@@ -56,6 +56,18 @@ one observation and categories such as `sample` are stored as values in a
 field. If category names are spread across several columns, reshape the table
 before constructing the chart or use a suitable GenomeSpy transform.
 
+## Try it with packaged data
+
+The package ships the tables used by the gallery examples:
+
+```python
+from genome_spy.datasets import load_dataset
+
+gwas = load_dataset("hapmap_gwas")
+```
+
+[Example datasets](../datasets.md) lists them and their sources.
+
 ## Load a URL in the browser
 
 For a CSV, TSV, JSON, or another eager file source, use `gs.Data` with a URL.

@@ -73,6 +73,13 @@ constructing the namespace.
 
 {data}
 
+## Example datasets
+
+Packaged tables used by the gallery examples. See
+[example datasets](datasets.md) for their contents and sources.
+
+{datasets}
+
 ## Notebook rendering
 
 {notebook}
@@ -171,6 +178,11 @@ def render_api_page() -> str:
         functions=_section(api_functions(), group="functions"),
         schema=_section(schema_objects(), group="schema"),
         data=_section(["LazyNamespace"], group="data", module="genome_spy.data"),
+        datasets=_section(
+            ["available_datasets", "load_dataset", "DatasetNotFoundError"],
+            group="datasets",
+            module="genome_spy.datasets",
+        ),
         # The widget inherits a large ipywidgets surface whose docstrings are
         # not valid reStructuredText, so document only what this package adds.
         # The ``autosummary/`` prefix is required: Sphinx resolves ``:template:``

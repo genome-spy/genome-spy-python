@@ -156,6 +156,23 @@ constructing the namespace.
    LazyNamespace
 ```
 
+## Example datasets
+
+Packaged tables used by the gallery examples. See
+[example datasets](datasets.md) for their contents and sources.
+
+```{eval-rst}
+.. currentmodule:: genome_spy.datasets
+
+.. autosummary::
+   :toctree: generated/datasets/
+   :nosignatures:
+
+   available_datasets
+   load_dataset
+   DatasetNotFoundError
+```
+
 ## Notebook rendering
 
 ```{eval-rst}

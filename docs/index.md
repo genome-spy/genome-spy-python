@@ -61,6 +61,7 @@ Detailed reference for the public Python API.
 Getting started <getting-started>
 User guide <user-guide/index>
 Gallery <gallery/index>
+Example datasets <datasets>
 API reference <api>
 About <about>
 ```
