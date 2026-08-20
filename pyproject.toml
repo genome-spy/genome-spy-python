@@ -4,11 +4,32 @@ version = "0.1.0"
 description = "genome-spy-python is a declarative genomics visualization library for Python, built on top of the genome-spy JSON specification."
 readme = "README.md"
 requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Oskari Lehtonen", email = "oskarilehtonen4@gmail.com" }]
+keywords = ["genomics", "visualization", "genome-spy", "jupyter", "anywidget"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Framework :: Jupyter",
+]
 dependencies = [
     "anywidget>=0.9.18",
     "jsonschema>=4.26.0",
     "traitlets>=5.14.3",
 ]
+
+[project.urls]
+Homepage = "https://github.com/genome-spy/genome-spy-python"
+Documentation = "https://genome-spy.github.io/genome-spy-python/"
+Repository = "https://github.com/genome-spy/genome-spy-python"
+Issues = "https://github.com/genome-spy/genome-spy-python/issues"
 
 [project.optional-dependencies]
 arrow = ["pyarrow>=18.0.0"]
