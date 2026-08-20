@@ -68,7 +68,7 @@ def test_external_type_checker_sees_generated_public_signatures(tmp_path) -> Non
         [sys.executable, "-m", "mypy", "--no-error-summary", str(consumer)],
         check=False,
         capture_output=True,
-        text=True,
+        encoding="utf-8",
     )
 
     assert completed.returncode == 1

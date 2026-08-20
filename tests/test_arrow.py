@@ -113,7 +113,7 @@ def test_importing_genome_spy_does_not_import_optional_table_libraries() -> None
         ],
         check=False,
         capture_output=True,
-        text=True,
+        encoding="utf-8",
     )
 
     assert result.returncode == 0, result.stderr

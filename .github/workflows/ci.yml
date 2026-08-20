@@ -4,36 +4,50 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Reused by the release workflow as a pre-publish gate.
+  workflow_call:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
         with:
           enable-cache: true
           python-version: "3.11"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
       - run: uv sync --locked --dev
-      - run: uv run ruff format --check .
-      - run: uv run ruff check .
-      - run: uv run mypy src/
+      # Formatting, linting, and typing are platform-independent, so one
+      # runner checks them for the whole matrix.
+      - if: runner.os == 'Linux'
+        run: uv run ruff format --check .
+      - if: runner.os == 'Linux'
+        run: uv run ruff check .
+      - if: runner.os == 'Linux'
+        run: uv run mypy src/
       - run: uv run pytest tests/ -x
       - run: node --test tests/widget.test.mjs
       - run: uv build --wheel
-      - run: unzip -Z1 dist/*.whl | rg --fixed-strings --line-regexp "genome_spy/static/widget.js"
+      # Portable across the shells the matrix runs: bash on Linux, PowerShell
+      # on Windows.
+      - name: Check that the wheel bundles the widget
+        run: uv run python -c "import glob, zipfile; names = zipfile.ZipFile(glob.glob('dist/*.whl')[0]).namelist(); assert 'genome_spy/static/widget.js' in names, names"
 
   codegen:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v10
         with:
           enable-cache: true
           python-version: "3.11"

@@ -1,0 +1,7 @@
+# Check every text file out with LF on all platforms. The packaged datasets are
+# hashed byte-for-byte in the test suite, and Ruff's formatter expects LF, so a
+# CRLF checkout on Windows would fail both.
+* text=auto eol=lf
+
+*.gz binary
+*.png binary

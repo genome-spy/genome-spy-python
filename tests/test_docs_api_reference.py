@@ -25,7 +25,8 @@ def _load_generator():
 
 
 def _listed_names() -> list[str]:
-    entries = re.findall(r"^   ([A-Za-z_][A-Za-z_0-9]*)$", API_PAGE.read_text(), re.M)
+    page = API_PAGE.read_text(encoding="utf-8")
+    entries = re.findall(r"^   ([A-Za-z_][A-Za-z_0-9]*)$", page, re.M)
     return entries
 
 
