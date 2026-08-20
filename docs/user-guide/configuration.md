@@ -145,7 +145,9 @@ becoming too narrow. `gs.SizeDef` can combine:
 
 Use `viewportWidth` or `viewportHeight` when the content should retain its
 calculated size but appear inside a smaller scrollable viewport. This is often
-preferable to squeezing a long categorical or sequence view. The GenomeSpy
+preferable to squeezing a long categorical or sequence view. The
+[scrollable viewport](../gallery/scrollable_viewport.md) example shows this on
+a long view. The GenomeSpy
 documentation covers both in
 [child sizing](https://genomespy.app/docs/grammar/composition/concat/#child-sizing)
 and

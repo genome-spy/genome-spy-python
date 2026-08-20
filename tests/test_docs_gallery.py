@@ -799,6 +799,7 @@ def test_gallery_index_lists_every_example_in_hidden_navigation(
     assert "Each card opens the live chart and the Python code that produced it." in (
         markdown
     )
+    assert "[user guide](../user-guide/index.md)" in markdown
     assert 'class="gs-card__tags"' not in markdown
     for example in examples:
         assert f"\n{example.name}\n" in markdown

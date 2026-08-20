@@ -166,3 +166,6 @@ Parameter scope follows the view hierarchy:
 
 This placement mirrors data and scale ownership. It reduces repeated
 definitions and makes it clear which views participate in an interaction.
+
+The [ASCAT fitting](../gallery/ascat_fitting.md) example drives a whole
+visualization from bound parameters.

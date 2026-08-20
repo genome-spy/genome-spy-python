@@ -162,3 +162,7 @@ Here, x uses human `hg38` coordinates and y uses mouse `mm10` coordinates. A
 root assembly is unnecessary because every locus scale identifies its own
 assembly. Keep this scale-local form for genuinely different coordinate systems;
 ordinary aligned genome-browser tracks should share one root assembly.
+
+The [cytoband ideogram](../gallery/cytobands.md) and
+[Manhattan plot](../gallery/manhattan_plot.md) examples put whole-genome locus
+scales to work.

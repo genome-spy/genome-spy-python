@@ -117,7 +117,8 @@ def _gallery_index_md(examples: list[core.Example]) -> str:
     blocks = [
         "# Example gallery",
         "",
-        "Each card opens the live chart and the Python code that produced it.",
+        "Each card opens the live chart and the Python code that produced it. "
+        "The [user guide](../user-guide/index.md) teaches the grammar they use.",
         "",
     ]
     for category, items in core.grouped_by_category(examples):

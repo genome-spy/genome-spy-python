@@ -62,6 +62,10 @@ Different marks emphasize different aspects of the data:
 Marks can often express related tasks, so choose the one that makes the intended reading
 most direct. Each reference page lists the properties that mark supports.
 
+The [point mark](../gallery/point_mark.md) and
+[rect heatmap](../gallery/rect_heatmap.md) examples show two of them on real
+tables.
+
 ## Ranged marks use secondary positions
 
 A point needs one position on each axis. An interval needs a start and an end.

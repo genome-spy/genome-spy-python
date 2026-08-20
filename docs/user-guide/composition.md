@@ -150,3 +150,6 @@ and matrix indices into incompatible resolutions.
 The parent owns the data and shared index-scale domains. This keeps row and
 column order in one place and links later zooming or panning across the matrix
 and its summaries.
+
+The [UpSet plot](../gallery/upset_mutations.md) and
+[oncoprint](../gallery/oncoprint.md) examples use this layout at full size.
