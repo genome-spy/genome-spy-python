@@ -159,5 +159,5 @@ set an explicit `domain`. Expressions also need an explicit `type`. The
 [expression language](https://genomespy.app/docs/grammar/expressions/) describes
 what an expression may contain.
 
-The [sequence logo](../gallery/sequence_logo.md) example combines index
-positions, text marks, and a stacked size encoding.
+The [multiple sequence alignment](../gallery/multiple_sequence_alignment.md)
+example encodes index positions, text, and color from the same rows.

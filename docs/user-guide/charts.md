@@ -63,8 +63,7 @@ Marks can often express related tasks, so choose the one that makes the intended
 most direct. Each reference page lists the properties that mark supports.
 
 The [point mark](../gallery/point_mark.md) and
-[rect heatmap](../gallery/rect_heatmap.md) examples show two of them on real
-tables.
+[rect heatmap](../gallery/rect_heatmap.md) examples show two of them in full.
 
 ## Ranged marks use secondary positions
 

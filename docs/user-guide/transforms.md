@@ -125,8 +125,8 @@ specification, should run after browser-side data loading, or needs to react to
 an interactive parameter. Keeping that boundary clear makes both the analysis
 and visualization easier to test.
 
-The [rainfall plot](../gallery/rainfall_plot.md) example builds its distances
-and categories with a transform pipeline.
+The [linked genome tracks](../gallery/genome_tracks.md) example chains nine of
+them, including pileup, label placement, and coordinate linearization.
 
 GenomeSpy also provides transforms for sorting and stacking, lookups, windows,
 genomic coordinates, sequence data, read alignments, and label placement.
