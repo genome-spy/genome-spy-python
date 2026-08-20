@@ -70,18 +70,6 @@ variation in measurements far from zero, while leaving the other scale choices
 automatic. The GenomeSpy documentation lists the scale types and every scale
 option in [scale](https://genomespy.app/docs/grammar/scale/#properties).
 
-## Zoomable positional scales
-
-Set `zoom=True` on a positional scale to allow its visible domain to change
-interactively:
-
-```python
-gs.X("time:Q").scale(domain=[0.5, 3.5], zoom=True)
-```
-
-The customized chart above uses a zoomable horizontal scale. Zoom
-extent and domain transitions are described in
-[zooming and panning](https://genomespy.app/docs/grammar/scale/#zooming-and-panning).
 
 ## Axes explain positional scales
 
@@ -105,6 +93,19 @@ nearby set of round, readable values. A channel `.title(...)` supplies the
 default axis title; `.axis(title=...)` can override it when necessary. See
 [ticks, labels, and grid lines](https://genomespy.app/docs/grammar/axis/#ticks-labels-and-grid-lines)
 for the remaining axis options.
+
+## Zoomable positional scales
+
+Set `zoom=True` on a positional scale to allow its visible domain to change
+interactively:
+
+```python
+gs.X("time:Q").scale(domain=[0.5, 3.5], zoom=True)
+```
+
+The customized chart above uses a zoomable horizontal scale. Zoom
+extent and domain transitions are described in
+[zooming and panning](https://genomespy.app/docs/grammar/scale/#zooming-and-panning).
 
 ## Legends explain visual scales
 
