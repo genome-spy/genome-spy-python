@@ -6,6 +6,14 @@ It targets the reusable `@genome-spy/core`
 richer [cohort application](https://genomespy.app/docs/sample-collections/)
 concepts over time.
 
+If you know Altair or Vega-Lite, the grammar will look familiar. GenomeSpy
+adds three things for genomics:
+
+- locus scales that place chromosome and position on one continuous axis;
+- lazy sources for indexed formats such as BigWig, BAM, and GFF3, which load
+  only the visible region;
+- GPU rendering, so a track stays interactive with millions of marks.
+
 ## Versioning and the GenomeSpy core pin
 
 The chart API is generated from and validated against a pinned version of the

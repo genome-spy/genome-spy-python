@@ -12,9 +12,10 @@ has three central ingredients:
 - a **mark**: the shape used to represent a row, such as a point or rectangle;
 - **encodings**: rules that map data fields to visible properties.
 
-This library builds the same specifications that the
-[GenomeSpy visualization grammar](https://genomespy.app/docs/grammar/) defines,
-so its documentation applies to the charts you write here.
+Your Python objects become a validated GenomeSpy specification, which the
+browser renders. The specification follows the
+[GenomeSpy visualization grammar](https://genomespy.app/docs/grammar/), so its
+documentation applies to the charts you write here.
 
 ## Install
 
@@ -169,12 +170,16 @@ as BED. Other formats may require a coordinate offset, as described in
 
 ## Where to go next
 
+- Start the user guide with [data and chart inputs](user-guide/data.md).
 - Learn more about [encodings and channels](user-guide/encodings.md).
 - Read about [genomic axes and intervals](user-guide/genomic-axes.md).
 - Combine linked tracks with [composition](user-guide/composition.md).
-- Browse complete applications in the [example gallery](gallery/index.md).
-- Use `chart.to_dict()` or `chart.to_json()` when you are ready to inspect the
-  generated GenomeSpy specification.
+- Browse complete applications in the [example gallery](gallery/index.md), or
+  try the [packaged datasets](datasets.md) behind them.
+- [Save and inspect charts](user-guide/serialization.md) writes the generated
+  specification with `to_dict()`, `to_json()`, and `save()`.
+- Advanced: [update a displayed chart](user-guide/notebooks.md) without
+  rebuilding it.
 - Consult the [GenomeSpy documentation](https://genomespy.app/docs/grammar/) for
   the complete grammar. This guide teaches a subset; every property it describes
   is available here through the same names.
