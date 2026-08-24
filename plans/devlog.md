@@ -1,5 +1,13 @@
 # Dev Log
 
+## 2026-08-24 - Tidied stacked genome-browser guides
+
+- Replaced long rotated labels with short horizontal `track-title` labels and
+  removed duplicate y-axis titles in the stacked genome-browser example.
+- Kept the unrelated cCRE and nucleotide color scales independent while using
+  GenomeSpy's collected legend resolution to place both legends together at
+  the parent track stack.
+
 ## 2026-08-24 - Fixed setup-uv action pins
 
 - Replaced nonexistent `astral-sh/setup-uv@v10` references in the CI,

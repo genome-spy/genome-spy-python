@@ -510,8 +510,9 @@ def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
         {"chrom": "chr7", "pos": 55120000},
     ]
     assert example.spec["resolve"] == {
-        "scale": {"x": "shared", "y": "independent"},
+        "scale": {"x": "shared", "y": "independent", "color": "independent"},
         "axis": {"x": "shared", "y": "independent"},
+        "legend": {"color": "collected"},
     }
     assert example.spec["axes"] == {
         "x": {"orient": "bottom", "title": "Genomic position"}
@@ -526,6 +527,15 @@ def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
         "sequence",
         "refseq-track",
     ]
+    assert [track["title"] for track in tracks] == [
+        {"text": "GC (%)", "style": "track-title"},
+        {"text": "phyloP", "style": "track-title"},
+        {"text": "cCRE", "style": "track-title"},
+        {"text": "Sequence", "style": "track-title"},
+        {"text": "Genes", "style": "track-title"},
+    ]
+    assert tracks[0]["encoding"]["y"]["axis"]["title"] is None
+    assert tracks[1]["encoding"]["y"]["axis"]["title"] is None
     assert [track["data"]["lazy"]["type"] for track in tracks[:4]] == [
         "bigwig",
         "bigwig",

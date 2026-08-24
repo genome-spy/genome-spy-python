@@ -30,10 +30,10 @@ gc_track = (
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("score:Q")
         .scale(domain=[0, 100])
-        .axis(title="GC (%)", grid=True, gridDash=[2, 2]),
+        .axis(title=None, grid=True, gridDash=[2, 2]),
     )
     .properties(
-        name="gc-content", title=gs.title("GC content", orient="left"), height=80
+        name="gc-content", title=gs.title("GC (%)", style="track-title"), height=80
     )
 )
 
@@ -51,11 +51,11 @@ conservation_track = (
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("score:Q")
         .scale(domain=[-5, 5])
-        .axis(title="phyloP", grid=True, gridDash=[2, 2]),
+        .axis(title=None, grid=True, gridDash=[2, 2]),
     )
     .properties(
         name="phylop-100way",
-        title=gs.title("100-way conservation", orient="left"),
+        title=gs.title("phyloP", style="track-title"),
         height=80,
     )
 )
@@ -76,7 +76,7 @@ ccre_track = (
             range=["#e45756", "#f2a541", "#f6cf65", "#d99ac5", "#4f9fc4"],
         ),
     )
-    .properties(name="ccre", title=gs.title("ENCODE cCRE", orient="left"), height=42)
+    .properties(name="ccre", title=gs.title("cCRE", style="track-title"), height=42)
 )
 
 
@@ -99,7 +99,7 @@ sequence_track = (
     (sequence_rects + sequence_labels)
     .properties(
         name="sequence",
-        title=gs.title("Reference sequence", orient="left"),
+        title=gs.title("Sequence", style="track-title"),
         height=52,
         data=gs.lazy.indexed_fasta(
             "https://data.genomespy.app/genomes/hg38/hg38.fa", windowSize=30_000
@@ -201,7 +201,7 @@ refseq_track = (
     gs.layer(transcripts, symbols)
     .properties(
         name="refseq-track",
-        title=gs.title("RefSeq genes", orient="left"),
+        title=gs.title("Genes", style="track-title"),
         height=gs.step(23),
         data=gs.Data(
             url="https://data.genomespy.app/genomes/hg38/refSeqGenes-hg38-release232.tsv.gz",
@@ -259,6 +259,7 @@ chart = (
         spacing=8,
         scales=gs.scales(x=gs.Scale(domain=DOMAIN)),
     )
-    .resolve_scale(x="shared", y="independent")
+    .resolve_scale(x="shared", y="independent", color="independent")
     .resolve_axis(x="shared", y="independent")
+    .resolve_legend(color="collected")
 )
