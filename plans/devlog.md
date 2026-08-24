@@ -1,5 +1,11 @@
 # Dev Log
 
+## 2026-08-24 - Fixed CI workflow YAML parsing
+
+- Changed the wheel metadata check to a folded YAML block so the metadata
+  fields containing colon-space sequences are passed to the shell instead of
+  being misparsed as YAML mappings.
+
 ## 2026-08-24 - Removed gallery data previews
 
 - Removed opt-in data tables from all gallery examples and deleted the preview

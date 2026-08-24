@@ -38,7 +38,8 @@ jobs:
       # Portable across the shells the matrix runs: bash on Linux, PowerShell
       # on Windows.
       - name: Check wheel contents and license metadata
-        run: uv run python -c "import glob, zipfile; wheel = zipfile.ZipFile(glob.glob('dist/*.whl')[0]); names = wheel.namelist(); metadata = wheel.read(next(name for name in names if name.endswith('.dist-info/METADATA'))).decode(); metadata_lines = set(metadata.splitlines()); assert 'genome_spy/static/widget.js' in names, names; assert any(name.endswith('.dist-info/licenses/LICENSE') for name in names), names; assert any(name.endswith('.dist-info/licenses/LICENSES/ALTAIR-BSD-3-Clause.txt') for name in names), names; assert any(name.endswith('.dist-info/licenses/THIRD_PARTY_NOTICES.md') for name in names), names; assert {'License-Expression: MIT AND BSD-3-Clause', 'License-File: LICENSE', 'License-File: LICENSES/ALTAIR-BSD-3-Clause.txt', 'License-File: THIRD_PARTY_NOTICES.md'} <= metadata_lines, metadata"
+        run: >-
+          uv run python -c "import glob, zipfile; wheel = zipfile.ZipFile(glob.glob('dist/*.whl')[0]); names = wheel.namelist(); metadata = wheel.read(next(name for name in names if name.endswith('.dist-info/METADATA'))).decode(); metadata_lines = set(metadata.splitlines()); assert 'genome_spy/static/widget.js' in names, names; assert any(name.endswith('.dist-info/licenses/LICENSE') for name in names), names; assert any(name.endswith('.dist-info/licenses/LICENSES/ALTAIR-BSD-3-Clause.txt') for name in names), names; assert any(name.endswith('.dist-info/licenses/THIRD_PARTY_NOTICES.md') for name in names), names; assert {'License-Expression: MIT AND BSD-3-Clause', 'License-File: LICENSE', 'License-File: LICENSES/ALTAIR-BSD-3-Clause.txt', 'License-File: THIRD_PARTY_NOTICES.md'} <= metadata_lines, metadata"
 
   codegen:
     runs-on: ubuntu-latest
