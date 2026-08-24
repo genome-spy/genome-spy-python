@@ -71,15 +71,6 @@ UNKNOWN_CATEGORY = (100, "")
 
 
 @dataclass(frozen=True, slots=True)
-class DataPreview:
-    """Small, serializable table preview captured from an example module."""
-
-    title: str
-    columns: tuple[str, ...]
-    rows: tuple[tuple[str, ...], ...]
-
-
-@dataclass(frozen=True, slots=True)
 class Example:
     """Metadata and rendered artifacts for one gallery example."""
 
@@ -94,7 +85,6 @@ class Example:
     max_width: int | None
     source: str
     spec: dict
-    previews: tuple[DataPreview, ...] = ()
 
 
 def _ensure_src_on_path() -> None:
@@ -131,31 +121,6 @@ def _docstring_parts(module: ModuleType, fallback: str) -> tuple[str, str]:
     return title, summary
 
 
-def _data_previews(module: ModuleType) -> tuple[DataPreview, ...]:
-    configured = getattr(module, "DATA_PREVIEW", None)
-    if configured is None:
-        return ()
-    if hasattr(configured, "head"):
-        configured = {"Data preview": configured}
-    if not isinstance(configured, dict):
-        raise TypeError(
-            "DATA_PREVIEW must be a DataFrame or mapping of names to DataFrames"
-        )
-
-    previews: list[DataPreview] = []
-    for title, frame in configured.items():
-        if not hasattr(frame, "head") or not hasattr(frame, "itertuples"):
-            raise TypeError(f"DATA_PREVIEW[{title!r}] must be a DataFrame-like object")
-        head = frame.head(5)
-        columns = tuple(str(column) for column in head.columns)
-        rows = tuple(
-            tuple(str(value) for value in row)
-            for row in head.itertuples(index=False, name=None)
-        )
-        previews.append(DataPreview(str(title), columns, rows))
-    return tuple(previews)
-
-
 def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
     """Capture one already-imported example module with a supplied spec."""
     meta = getattr(module, "META", {}) or {}
@@ -179,7 +144,6 @@ def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
         ),
         source=path.read_text(encoding="utf-8"),
         spec=spec,
-        previews=_data_previews(module),
     )
 
 

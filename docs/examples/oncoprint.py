@@ -30,10 +30,6 @@ CLASS_ORDER = [
 ]
 
 data = laml_oncoplot_data()
-DATA_PREVIEW = {
-    "Samples": data["samples"],
-    "Mutation matrix": data["events"],
-}
 
 class_colors = (
     Scale()

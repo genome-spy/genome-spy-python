@@ -16,7 +16,6 @@ META = {
 }
 
 data = sequence_logo_data()
-DATA_PREVIEW = data
 
 base_colors = Scale(
     domain=["A", "C", "T", "G"],

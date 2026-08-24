@@ -15,7 +15,6 @@ META = {
 }
 
 data = ranged_rule_data()
-DATA_PREVIEW = data
 
 chart = (
     gs.Chart(data)

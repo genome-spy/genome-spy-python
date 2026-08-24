@@ -384,22 +384,14 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
     assert count_title["encoding"]["x"] == {"value": 0.5}
 
 
-def test_gallery_data_preview_is_rendered_for_opt_in_example() -> None:
+def test_gallery_examples_do_not_render_data_previews() -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
-    example = gallery.collect_example(EXAMPLES_DIR / "luad_oncoprint.py")
 
-    assert [preview.title for preview in example.previews] == [
-        "Samples",
-        "Mutation matrix",
-    ]
-    markdown = extension._detail_md(example, "https://example.test/bundle.js")
-
-    assert "## Data preview" in markdown
-    assert '<figure class="gs-data-preview"><figcaption>Samples' in markdown
-    assert "<th>sample</th>" in markdown
-    assert "<th>class</th>" in markdown
-    assert "<table><thead>" in markdown
+    for example in gallery.collect_examples():
+        markdown = extension._detail_md(example, "https://example.test/bundle.js")
+        assert "## Data preview" not in markdown
+        assert "gs-data-preview" not in markdown
 
 
 def test_sashimi_plot_uses_direct_data_urls() -> None:
@@ -1023,7 +1015,6 @@ def test_gallery_build_token_changes_with_companion_prose() -> None:
         max_width=example.max_width,
         source=example.source,
         spec=example.spec,
-        previews=example.previews,
     )
 
     assert gallery.build_token([mutated]) != gallery.build_token([example])

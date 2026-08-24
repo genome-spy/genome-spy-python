@@ -15,7 +15,6 @@ META = {
 }
 
 data = link_data()
-DATA_PREVIEW = data
 
 chart = (
     gs.Chart(data)

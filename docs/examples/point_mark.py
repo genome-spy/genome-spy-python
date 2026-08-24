@@ -15,7 +15,6 @@ META = {
 }
 
 data = sincos_data()
-DATA_PREVIEW = data
 
 chart = (
     gs.Chart(data)

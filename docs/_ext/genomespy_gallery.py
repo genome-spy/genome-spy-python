@@ -159,26 +159,6 @@ def _gallery_index_md(examples: list[core.Example]) -> str:
     return "\n".join(blocks)
 
 
-def _preview_html(example: core.Example) -> str:
-    sections = []
-    for preview in example.previews:
-        header = "".join(
-            f"<th>{html.escape(column)}</th>" for column in preview.columns
-        )
-        rows = "".join(
-            "<tr>"
-            + "".join(f"<td>{html.escape(value)}</td>" for value in row)
-            + "</tr>"
-            for row in preview.rows
-        )
-        sections.append(
-            f'<figure class="gs-data-preview"><figcaption>{html.escape(preview.title)}'
-            f'</figcaption><div class="gs-data-preview__scroll"><table><thead><tr>{header}'
-            f"</tr></thead><tbody>{rows}</tbody></table></div></figure>"
-        )
-    return '<div class="gs-data-previews">' + "".join(sections) + "</div>"
-
-
 def _load_tutorial_chart(target: str) -> Any:
     """Load one named chart from a docs-only tutorial module."""
     match = _TUTORIAL_TARGET.fullmatch(target)
@@ -264,15 +244,6 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
     ]
     if example.prose:
         parts += [example.prose, ""]
-    if example.previews:
-        parts += [
-            "## Data preview",
-            "",
-            "```{raw} html",
-            _preview_html(example),
-            "```",
-            "",
-        ]
     parts += [
         "## Code",
         "",

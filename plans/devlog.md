@@ -1,5 +1,12 @@
 # Dev Log
 
+## 2026-08-24 - Removed gallery data previews
+
+- Removed opt-in data tables from all gallery examples and deleted the preview
+  collection, HTML generation, and CSS that supported them.
+- Added a gallery regression check ensuring generated example pages contain no
+  data-preview section.
+
 ## 2026-08-24 - Added Altair attribution and distribution notices
 
 - Added the complete Vega-Altair BSD-3-Clause license and a third-party notice

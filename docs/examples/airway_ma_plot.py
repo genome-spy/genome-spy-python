@@ -32,7 +32,6 @@ data, domains = airway_differential_expression(
     pvalue_cutoff=PVALUE_CUTOFF,
     padj_alpha=PADJ_CUTOFF,
 )
-DATA_PREVIEW = data
 
 direction_colors = (
     Scale()

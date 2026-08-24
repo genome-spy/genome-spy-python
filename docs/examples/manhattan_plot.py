@@ -25,7 +25,6 @@ data, top_hits, domains = hapmap_manhattan_data(
     genome_wide_p=GENOME_WIDE_P,
     suggestive_p=SUGGESTIVE_P,
 )
-DATA_PREVIEW = {"GWAS points": data, "Top hits": top_hits}
 
 # --- Visualization -------------------------------------------------------------
 

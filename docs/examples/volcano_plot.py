@@ -16,7 +16,6 @@ META = {
 }
 
 data, domains = hapmap_volcano_data()
-DATA_PREVIEW = data
 X_DOMAIN = domains["x_domain"]
 Y_DOMAIN = domains["y_domain"]
 EFFECT_CUTOFF = domains["effect_cutoff"]

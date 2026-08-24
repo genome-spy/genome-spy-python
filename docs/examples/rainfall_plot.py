@@ -26,7 +26,6 @@ CONVERSION_COLORS = ["#f64b3c", "#4f63c9", "#2891e8", "#f6b617", "#4caf50", "#f7
 data = brca_rainfall_data()
 points = data["points"]
 change_points = data["change_points"]
-DATA_PREVIEW = {"Mutations": points, "Change points": change_points}
 y_domain = [0.0, data["y_max"]]
 sample_name = data["sample"]
 assembly = data["reference_build"]

@@ -16,7 +16,6 @@ META = {
 }
 
 data = heatmap_data()
-DATA_PREVIEW = data
 
 chart = (
     gs.Chart(data)

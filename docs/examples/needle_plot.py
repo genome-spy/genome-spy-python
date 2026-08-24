@@ -48,7 +48,6 @@ features["label_y"] = features["count"] + 1.2
 features["label_text"] = features["position"].map(
     lambda pos: f"R{pos}" if pos == 882 else ""
 )
-DATA_PREVIEW = {"Mutation features": features, "Protein domains": domains}
 protein_length = data["protein_length"]
 max_count = int(features["count"].max())
 x_domain = [0, protein_length]

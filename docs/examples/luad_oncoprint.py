@@ -87,11 +87,6 @@ MICROBIOME_GROUP = "Microbiome Signatures (log RNA Seq CPM)"
 
 data = luad_oncoprint_data()
 
-DATA_PREVIEW = {
-    "Samples": data["samples"],
-    "Mutation matrix": data["events"],
-}
-
 sample_domain = data["sample_domain"]
 gene_order = data["gene_order"]
 burden_limit = data["burden_limit"]

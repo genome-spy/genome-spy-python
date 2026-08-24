@@ -21,7 +21,6 @@ event_colors = gs.Scale(
 )
 
 data = tcga_ov_gistic_data()
-DATA_PREVIEW = {"GISTIC scores": data["scores"], "GISTIC lesions": data["lesions"]}
 
 zero_line = (
     gs.Chart([{"value": 0}])
