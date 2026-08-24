@@ -1,5 +1,11 @@
 # Dev Log
 
+## 2026-08-24 - Fixed setup-uv action pins
+
+- Replaced nonexistent `astral-sh/setup-uv@v10` references in the CI,
+  documentation, and release workflows with the current immutable `v9.0.0`
+  release tag.
+
 ## 2026-08-24 - Fixed CI workflow YAML parsing
 
 - Changed the wheel metadata check to a folded YAML block so the metadata
