@@ -1,5 +1,54 @@
 # Dev Log
 
+## 2026-08-24 - Refreshed LUAD oncoprint thumbnail
+
+- Re-captured the complete LUAD composition so the burden and clinical tracks,
+  mutation matrix, summary bars, and lower heatmaps all appear in the gallery
+  card instead of showing only a cropped middle section.
+
+## 2026-08-24 - Compacted LUAD oncoprint layout
+
+- Reduced the live gallery viewport while retaining the chart's existing outer
+  scroll container, and narrowed the percentage summary column and adjacent
+  gaps between the mutation matrix and per-gene count bars.
+
+## 2026-08-24 - Fixed simple oncoplot live layout
+
+- Increased the gallery embed height to match GenomeSpy's rendered canvas and
+  narrowed the mutation legend to three columns, preventing the legend and
+  lower chart edge from being clipped or colliding with the count axis.
+
+## 2026-08-24 - Refreshed simple oncoplot thumbnail
+
+- Re-captured the LAML oncoplot with the complete burden bars, mutation matrix,
+  per-gene counts, and mutation legend fitted into a single gallery card.
+
+## 2026-08-24 - Fixed flat link-mark example
+
+- Added explicit dome heights to the link dataset and encoded the y channel so
+  the example renders curved links instead of zero-height baseline segments.
+
+## 2026-08-24 - Refreshed RefSeq and translation thumbnails
+
+- Re-captured the scored RefSeq gene and indexed-FASTA six-frame translation
+  thumbnails with full-canvas fitting so their labels and all reading frames
+  remain visible in the gallery cards.
+
+## 2026-08-24 - Refreshed chromosome ideogram thumbnail
+
+- Re-captured the cytoband ideogram with a full-canvas fit so all chromosome
+  segments and labels are visible in the gallery card.
+
+## 2026-08-24 - Refreshed Dynseq bQTL thumbnail
+
+- Re-captured the Dynseq reference/alternate allele thumbnail with a full-canvas
+  fit so both sequence-logo tracks remain visible in the gallery card.
+
+## 2026-08-24 - Fixed repeated BAM zoom-message marks
+
+- Moved the BAM example's one-row message data to the parent layer so its text
+  mark no longer inherits the full alignment dataset and renders once per read.
+
 ## 2026-08-24 - Simplified gallery metadata presentation
 
 - Removed unused `META["tags"]` values and the corresponding collector field;
