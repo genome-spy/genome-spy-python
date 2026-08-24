@@ -32,7 +32,11 @@ jobs:
         run: uv run ruff check .
       - if: runner.os == 'Linux'
         run: uv run mypy src/
-      - run: uv run pytest tests/ -x
+      - name: Run package tests
+        run: >-
+          uv run pytest tests/ -x
+          -m "not docs and not codegen"
+          --durations=10
       - run: node --test tests/widget.test.mjs
       - run: uv build --wheel
       # Portable across the shells the matrix runs: bash on Linux, PowerShell
@@ -53,6 +57,7 @@ jobs:
           enable-cache: true
           python-version: "3.11"
       - run: uv sync --locked --dev
+      - run: uv run pytest tests/test_schema_codegen.py -x --durations=10
       - run: uv run python tools/generate_schema_wrapper.py
       - run: uv run ruff format src/genome_spy/schema
       - run: git diff --exit-code src/genome_spy/schema tools

@@ -90,6 +90,10 @@ core-version = "0.85.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "codegen: schema-generation tooling tests run by the dedicated codegen job",
+    "docs: documentation and gallery tests excluded from package CI",
+]
 
 [tool.mypy]
 python_version = "3.11"

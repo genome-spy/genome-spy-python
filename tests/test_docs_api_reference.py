@@ -8,6 +8,9 @@ import sys
 from pathlib import Path
 
 import genome_spy as gs
+import pytest
+
+pytestmark = pytest.mark.docs
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 API_PAGE = REPO_ROOT / "docs" / "api.md"

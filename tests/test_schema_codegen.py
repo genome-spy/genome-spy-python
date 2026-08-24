@@ -5,8 +5,11 @@ import json
 from pathlib import Path
 
 import genome_spy as gs
+import pytest
 from tools.generate_schema_wrapper import write_schema_files, write_schema_package
 from tools.schemapi.codegen import SchemaWrapperGenerator
+
+pytestmark = pytest.mark.codegen
 
 
 def test_schema_wrapper_generator_summarizes_definitions() -> None:

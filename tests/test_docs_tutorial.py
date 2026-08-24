@@ -9,6 +9,7 @@ from types import ModuleType
 
 import pytest
 
+pytestmark = pytest.mark.docs
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "getting_started.py"

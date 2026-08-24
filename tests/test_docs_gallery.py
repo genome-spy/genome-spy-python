@@ -15,6 +15,8 @@ from urllib.parse import urljoin
 
 import pytest
 
+pytestmark = pytest.mark.docs
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 EXAMPLES_DIR = REPO_ROOT / "docs" / "examples"
 

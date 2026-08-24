@@ -1,5 +1,14 @@
 # Dev Log
 
+## 2026-08-24 - Split package CI from docs and example tests
+
+- Added pytest markers for package-external documentation and code-generation
+  tests, and removed the AlphaGenome-only adapter, backend, request, and
+  notebook test modules because AlphaGenome is outside the package scope.
+- Limited the Ubuntu/Windows matrix to installable-package behavior and moved
+  schema-generator unit tests into the existing codegen job. Both jobs now
+  report their ten slowest tests to make future CI bottlenecks visible.
+
 ## 2026-08-24 - Tidied stacked genome-browser guides
 
 - Replaced long rotated labels with short horizontal `track-title` labels and
