@@ -31,3 +31,9 @@ regenerated together, and the documentation is rebuilt on the next release.
   and rendering engine, and its
   [documentation](https://genomespy.app/docs/).
 - Example pages show the exact Python source used to build each visualization.
+
+Portions of the schema-wrapper implementation and selected tests are adapted
+from [Vega-Altair](https://github.com/vega/altair) under the BSD-3-Clause
+license. The repository records the exact sources in its
+[third-party notices](https://github.com/genome-spy/genome-spy-python/blob/main/THIRD_PARTY_NOTICES.md)
+and includes the complete Altair license in source and binary distributions.

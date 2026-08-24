@@ -1,12 +1,13 @@
 """Minimal code generator scaffolding for GenomeSpy schema wrappers.
 
-The module is adapted from Altair's schema-generation architecture.
-Altair's generator is broad and mature: it walks Vega-Lite definitions,
-derives constructors, emits type annotations, generates channels, and wires
-runtime validation. This module is the GenomeSpy starting point. It currently
-summarizes JSON Schema definitions and emits simple wrapper class source;
-the interfaces are shaped so they can grow toward Altair's architecture while
-accounting for GenomeSpy-specific schema conventions.
+This module summarizes JSON Schema definitions and emits simple wrapper class
+source while accounting for GenomeSpy-specific schema conventions.
+
+Portions are adapted from Vega-Altair's schema-generation tooling:
+https://github.com/vega/altair/tree/main/tools/schemapi and
+https://github.com/vega/altair/blob/main/tools/generate_schema_wrapper.py
+Copyright (c) 2015-2025, Vega-Altair Developers. BSD-3-Clause license; see
+``LICENSES/ALTAIR-BSD-3-Clause.txt``.
 """
 
 from __future__ import annotations

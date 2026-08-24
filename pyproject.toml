@@ -4,8 +4,12 @@ version = "0.1.0"
 description = "genome-spy-python is a declarative genomics visualization library for Python, built on top of the genome-spy JSON specification."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT"
-license-files = ["LICENSE"]
+license = "MIT AND BSD-3-Clause"
+license-files = [
+    "LICENSE",
+    "LICENSES/ALTAIR-BSD-3-Clause.txt",
+    "THIRD_PARTY_NOTICES.md",
+]
 authors = [{ name = "Oskari Lehtonen", email = "oskarilehtonen4@gmail.com" }]
 keywords = ["genomics", "visualization", "genome-spy", "jupyter", "anywidget"]
 classifiers = [

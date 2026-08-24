@@ -3,6 +3,11 @@
 Unlike Altair, this small GenomeSpy-specific runtime is maintained directly in
 the installable package. Generation tooling imports it from generated classes
 but does not maintain a duplicate source copy.
+
+Portions are adapted from Vega-Altair's schema runtime:
+https://github.com/vega/altair/blob/main/altair/utils/schemapi.py
+Copyright (c) 2015-2025, Vega-Altair Developers. BSD-3-Clause license; see
+``LICENSES/ALTAIR-BSD-3-Clause.txt``.
 """
 
 from __future__ import annotations

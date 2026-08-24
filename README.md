@@ -195,9 +195,13 @@ package from the pinned `@genome-spy/core` release. See
 ## References
 
 - [GenomeSpy] — the upstream visualization grammar and JavaScript renderer.
-- [Altair] — the primary design inspiration for this Python API.
+- [Altair] — a schema-wrapper design reference.
 - [Gos] — a related grammar and Python-wrapper design reference for
   genomics visualization.
+
+Portions of the schema-wrapper implementation and selected tests are adapted
+from Altair under its BSD-3-Clause license. See
+[Third-party notices](THIRD_PARTY_NOTICES.md) for the exact sources and license.
 
 [Altair]: https://altair-viz.github.io/
 [GenomeSpy]: https://genome-spy.org/

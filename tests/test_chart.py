@@ -444,6 +444,8 @@ def test_chart_serializes_core_spec() -> None:
     }
 
 
+# Adapted from Vega-Altair's multifeature scatter-plot example:
+# https://github.com/vega/altair/blob/main/tests/examples_methods_syntax/multifeature_scatter_plot.py
 def test_altair_style_penguins_snippet_serializes() -> None:
     class DataFrameLike:
         def to_dict(self, *, orient: str) -> list[dict[str, object]]:
@@ -982,6 +984,8 @@ def test_additional_transform_helpers_cover_common_docs_patterns() -> None:
     ]
 
 
+# Adapted from Vega-Altair's tick-mark documentation:
+# https://github.com/vega/altair/blob/main/doc/user_guide/marks/tick.rst
 def test_altair_style_tick_shorthand_serializes() -> None:
     chart = (
         gs.Chart(

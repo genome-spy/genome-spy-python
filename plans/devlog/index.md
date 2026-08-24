@@ -5,6 +5,12 @@ Read the active log first, then open only the archive relevant to the question.
 
 ## Archives
 
+### `2026-08-14_to_2026-08-17.md`
+
+- Date range: 2026-08-14 to 2026-08-17
+- Topics: beginner documentation planning and foundational guides for data,
+  charts, encodings, scales, transforms, and composition.
+
 ### `2026-08-10_to_2026-08-13.md`
 
 - Date range: 2026-08-10 to 2026-08-13

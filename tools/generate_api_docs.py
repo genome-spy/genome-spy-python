@@ -7,6 +7,9 @@ hand-maintained list, which keeps the index in step with ``genome_spy.__all__``.
 
 Run ``uv run python tools/generate_api_docs.py`` after changing the public API.
 ``tests/test_docs_api_reference.py`` fails when the committed file is stale.
+
+The API grouping follows Vega-Altair's documentation generator:
+https://github.com/vega/altair/blob/main/tools/generate_api_docs.py
 """
 
 from __future__ import annotations
