@@ -9,7 +9,6 @@ from genome_spy.datasets._grammar import ranged_rule_data
 
 META = {
     "category": "Basics",
-    "tags": ("rule", "interval", "categorical"),
     "order": 30,
     "height": 280,
 }

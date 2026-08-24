@@ -8,7 +8,6 @@ from genome_spy.datasets._grammar import sincos_data
 
 META = {
     "category": "Basics",
-    "tags": ("vconcat", "composition", "shared-data"),
     "order": 60,
     "height": 460,
 }

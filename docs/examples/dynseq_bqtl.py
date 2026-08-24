@@ -8,7 +8,6 @@ import genome_spy as gs
 
 META = {
     "category": "Genome browser tracks",
-    "tags": ("bigwig", "fasta", "bqtl", "sequence-logo", "template"),
     "order": 34,
     "height": 300,
     "max_width": 980,

@@ -1,5 +1,12 @@
 # Dev Log
 
+## 2026-08-24 - Simplified gallery metadata presentation
+
+- Removed unused `META["tags"]` values and the corresponding collector field;
+  gallery category, order, and embed dimensions remain as functional metadata.
+- Kept that layout metadata internal to the generated gallery pages so the
+  displayed example snippets focus on chart-building code.
+
 ## 2026-08-24 - Split package CI from docs and example tests
 
 - Added pytest markers for package-external documentation and code-generation

@@ -8,7 +8,6 @@ import genome_spy as gs
 
 META = {
     "category": "Reference annotation tracks",
-    "tags": ("refseq", "semantic-zoom", "scored-labels", "real-data"),
     "order": 15,
     "height": 110,
     "max_width": 980,

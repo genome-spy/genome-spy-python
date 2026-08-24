@@ -13,7 +13,6 @@ from genome_spy.schema import Scale
 
 META = {
     "category": "Volcano and MA plots",
-    "tags": ("ma-plot", "real-data"),
     "order": 11,
     "height": 420,
     "max_width": 760,

@@ -8,7 +8,6 @@ import genome_spy as gs
 
 META = {
     "category": "Mutation position plots",
-    "tags": ("lollipop", "displace1d", "x-offset", "tcga"),
     "order": 12,
     "height": 400,
     "max_width": 980,

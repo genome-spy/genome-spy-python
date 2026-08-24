@@ -8,7 +8,6 @@ import genome_spy as gs
 
 META = {
     "category": "Copy-number plots",
-    "tags": ("ascat", "locus", "segmentation", "real-data"),
     "order": 22,
     "height": 500,
     "max_width": 980,

@@ -13,7 +13,6 @@ from genome_spy.schema import GenomeAxis, Legend, Scale
 
 META = {
     "category": "Mutation position plots",
-    "tags": ("rainfall", "locus", "layer", "real-data"),
     "order": 18,
     "height": 420,
     "max_width": 980,

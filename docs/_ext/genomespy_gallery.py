@@ -17,6 +17,7 @@ thumbnail renderer can reuse it.
 
 from __future__ import annotations
 
+import ast
 import html
 import importlib.util
 import json
@@ -214,6 +215,29 @@ def _tutorial_embed_html(
     )
 
 
+def _source_without_gallery_meta(source: str) -> str:
+    """Remove the internal gallery layout metadata from displayed source."""
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return source
+
+    lines = source.splitlines(keepends=True)
+    meta_spans = [
+        (node.lineno - 1, node.end_lineno)
+        for node in tree.body
+        if isinstance(node, ast.Assign)
+        and any(
+            isinstance(target, ast.Name) and target.id == "META"
+            for target in node.targets
+        )
+        and node.end_lineno is not None
+    ]
+    for start, end in reversed(meta_spans):
+        del lines[start:end]
+    return "".join(lines).lstrip()
+
+
 def _detail_md(example: core.Example, bundle_url: str) -> str:
     spec_token = core.build_token([example])
     spec_url = f"../_static/specs/{example.name}.json?v={spec_token}"
@@ -248,7 +272,7 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         "## Code",
         "",
         "```python",
-        example.source.rstrip(),
+        _source_without_gallery_meta(example.source).rstrip(),
         "```",
         "",
         f'<a href="{download_url}">View the generated render spec</a> '

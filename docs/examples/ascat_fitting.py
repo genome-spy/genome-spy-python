@@ -9,7 +9,6 @@ import genome_spy as gs
 
 META = {
     "category": "Copy-number plots",
-    "tags": ("ascat", "interactive", "cross", "parameters", "real-data"),
     "order": 24,
     "height": 900,
     "max_width": 980,

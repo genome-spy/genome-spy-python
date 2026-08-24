@@ -9,7 +9,6 @@ import genome_spy as gs
 
 META = {
     "category": "Genome browser tracks",
-    "tags": ("bam", "coverage", "pileup", "cigar", "mismatches"),
     "order": 26,
     "height": 600,
     "max_width": 980,

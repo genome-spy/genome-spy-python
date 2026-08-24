@@ -10,7 +10,6 @@ import genome_spy as gs
 
 META = {
     "category": "Genome browser tracks",
-    "tags": ("vconcat", "bigwig", "bigbed", "fasta", "refseq", "lazy"),
     "order": 12,
     "height": 440,
     "max_width": 980,

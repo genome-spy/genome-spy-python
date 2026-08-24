@@ -13,7 +13,6 @@ from genome_spy.schema import Legend, Scale
 
 META = {
     "category": "Mutation position plots",
-    "tags": ("lollipop", "layer", "real-data"),
     "order": 10,
     "height": 360,
     "max_width": 760,

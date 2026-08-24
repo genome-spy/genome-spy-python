@@ -10,7 +10,6 @@ import genome_spy as gs
 
 META = {
     "category": "Reference annotation tracks",
-    "tags": ("bigbed", "ccre", "lazy", "rect", "real-data"),
     "order": 18,
     "height": 180,
     "max_width": 920,

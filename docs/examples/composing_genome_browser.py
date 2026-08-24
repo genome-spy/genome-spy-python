@@ -8,7 +8,6 @@ import genome_spy as gs
 
 META = {
     "category": "Genome browser tracks",
-    "tags": ("import", "vconcat", "shared-axis", "genome-browser"),
     "order": 38,
     "height": 650,
     "max_width": 980,

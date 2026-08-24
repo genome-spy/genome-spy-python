@@ -10,7 +10,6 @@ from genome_spy.schema import Scale
 
 META = {
     "category": "Basics",
-    "tags": ("rect", "heatmap", "color"),
     "order": 20,
     "height": 360,
 }

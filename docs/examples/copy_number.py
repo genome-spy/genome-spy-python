@@ -10,7 +10,6 @@ from genome_spy.schema import GenomeAxis, Scale
 
 META = {
     "category": "Copy-number plots",
-    "tags": ("locus", "real-data", "segments"),
     "order": 10,
     "height": 300,
 }

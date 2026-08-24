@@ -9,7 +9,6 @@ from genome_spy.datasets._gistic import tcga_ov_gistic_data
 
 META = {
     "category": "Copy-number plots",
-    "tags": ("gistic", "copy-number", "locus", "transforms"),
     "order": 36,
     "height": 280,
     "max_width": 980,

@@ -13,7 +13,6 @@ from genome_spy.schema import Scale
 
 META = {
     "category": "Oncoprints and cohort summaries",
-    "tags": ("oncoprint", "cohort", "heatmap", "real-data", "zoom"),
     "order": 35,
     "height": 920,
     "max_width": 1680,

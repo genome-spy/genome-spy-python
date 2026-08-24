@@ -9,7 +9,6 @@ from genome_spy.datasets._grammar import link_data
 
 META = {
     "category": "Basics",
-    "tags": ("link", "dome", "interval"),
     "order": 40,
     "height": 300,
 }

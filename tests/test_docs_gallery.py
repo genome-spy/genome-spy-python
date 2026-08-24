@@ -396,6 +396,17 @@ def test_gallery_examples_do_not_render_data_previews() -> None:
         assert "gs-data-preview" not in markdown
 
 
+def test_gallery_code_snippets_hide_internal_layout_metadata() -> None:
+    gallery = _load_gallery()
+    extension = _load_gallery_extension()
+    example = gallery.collect_example(EXAMPLES_DIR / "airway_ma_plot.py")
+
+    markdown = extension._detail_md(example, "https://example.test/bundle.js")
+
+    assert "META = {" not in markdown
+    assert "LOG2FC_CUTOFF = 1.0" in markdown
+
+
 def test_sashimi_plot_uses_direct_data_urls() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "sashimi_plot.py")
@@ -820,7 +831,6 @@ def test_gallery_build_token_changes_with_example_content() -> None:
             description=example.description,
             prose=example.prose,
             category=example.category,
-            tags=example.tags,
             order=example.order,
             height=example.height,
             max_width=example.max_width,
@@ -941,7 +951,6 @@ def test_gallery_generation_writes_prepared_arrow_assets(
         description="",
         prose="",
         category="Basics",
-        tags=(),
         order=1,
         height=200,
         max_width=None,
@@ -1021,7 +1030,6 @@ def test_gallery_build_token_changes_with_companion_prose() -> None:
         description=example.description,
         prose=example.prose + "\nChanged prose.",
         category=example.category,
-        tags=example.tags,
         order=example.order,
         height=example.height,
         max_width=example.max_width,

@@ -8,7 +8,6 @@ import genome_spy as gs
 
 META = {
     "category": "Copy-number plots",
-    "tags": ("structural-variants", "vcf", "copy-number", "lookup"),
     "order": 35,
     "height": 420,
     "max_width": 980,

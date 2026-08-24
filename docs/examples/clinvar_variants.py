@@ -10,7 +10,6 @@ import genome_spy as gs
 
 META = {
     "category": "Mutation position plots",
-    "tags": ("vcf", "clinvar", "lazy", "variants", "layer", "real-data"),
     "order": 24,
     "height": 145,
     "max_width": 920,

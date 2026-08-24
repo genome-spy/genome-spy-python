@@ -8,7 +8,6 @@ import genome_spy as gs
 
 META = {
     "category": "Set intersections",
-    "tags": ("upset", "set-intersection", "concat", "interactive"),
     "order": 10,
     "height": 390,
     "max_width": 650,

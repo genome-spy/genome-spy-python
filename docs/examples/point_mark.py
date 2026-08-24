@@ -9,7 +9,6 @@ from genome_spy.datasets._grammar import sincos_data
 
 META = {
     "category": "Basics",
-    "tags": ("point", "transform", "encoding"),
     "order": 10,
     "height": 300,
 }

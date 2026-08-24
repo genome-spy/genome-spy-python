@@ -11,7 +11,6 @@ import genome_spy as gs
 
 META = {
     "category": "Genome browser tracks",
-    "tags": ("sashimi", "splice", "lazy", "layer", "real-data"),
     "order": 20,
     "height": 360,
     "max_width": 920,

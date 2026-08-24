@@ -11,7 +11,6 @@ import genome_spy as gs
 
 META = {
     "category": "Reference annotation tracks",
-    "tags": ("cytobands", "ideogram", "locus", "layer", "real-data"),
     "order": 5,
     "height": 120,
     "max_width": 920,

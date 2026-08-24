@@ -11,7 +11,6 @@ from genome_spy.schema import GenomeAxis, Scale
 
 META = {
     "category": "Association plots",
-    "tags": ("locus", "layer", "real-data"),
     "order": 10,
     "height": 500,
     "max_width": 980,

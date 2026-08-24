@@ -9,7 +9,6 @@ from genome_spy.schema import Scale
 
 META = {
     "category": "Reference annotation tracks",
-    "tags": ("fasta", "alignment", "sequence-logo", "vconcat"),
     "order": 28,
     "height": 440,
     "max_width": 980,

@@ -79,7 +79,6 @@ class Example:
     description: str
     prose: str
     category: str
-    tags: tuple[str, ...]
     order: int
     height: int
     max_width: int | None
@@ -136,7 +135,6 @@ def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
         description=meta.get("description", description),
         prose=prose,
         category=meta.get("category", "Basics"),
-        tags=tuple(meta.get("tags", ())),
         order=int(meta.get("order", 100)),
         height=int(meta.get("height", 400)),
         max_width=(
