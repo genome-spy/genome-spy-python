@@ -39,11 +39,11 @@ def link_data() -> pd.DataFrame:
     """Return interval pairs for the link-mark example."""
     return pd.DataFrame(
         [
-            {"x": 1, "x2": 5},
-            {"x": 3, "x2": 8},
-            {"x": 5, "x2": 11},
-            {"x": 7, "x2": 13},
-            {"x": 9, "x2": 16},
+            {"x": 1, "x2": 5, "y": 2},
+            {"x": 3, "x2": 8, "y": 4},
+            {"x": 5, "x2": 11, "y": 6},
+            {"x": 7, "x2": 13, "y": 8},
+            {"x": 9, "x2": 16, "y": 10},
         ]
     )
 

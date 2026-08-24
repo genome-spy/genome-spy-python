@@ -14,7 +14,7 @@ from genome_spy.schema import Scale
 META = {
     "category": "Oncoprints and cohort summaries",
     "order": 35,
-    "height": 920,
+    "height": 720,
     "max_width": 1680,
 }
 
@@ -63,7 +63,7 @@ STAGE_COLORS = [
 ]
 
 SAMPLE_TRACK_WIDTH = "container"
-PERCENT_WIDTH = 44
+PERCENT_WIDTH = 32
 COUNTS_WIDTH = 120
 TMB_HEIGHT = 54
 SPECTRUM_HEIGHT = 28
@@ -76,7 +76,7 @@ MICROBIOME_HEIGHT = 28
 SAMPLE_LABEL_HEIGHT = 80
 TRACK_TICK_FONT_SIZE = 9
 HEATMAP_LABEL_FONT_SIZE = 9
-SUMMARY_WIDTH = PERCENT_WIDTH + COUNTS_WIDTH + 4
+SUMMARY_WIDTH = PERCENT_WIDTH + COUNTS_WIDTH + 2
 TOP_TRACKS_HEIGHT = TMB_HEIGHT + SPECTRUM_HEIGHT + MSI_HEIGHT + STAGE_HEIGHT + 16
 
 MRNA_GROUP = "mRNA expression z-scores relative to diploid samples (RNA Seq V2 RSEM)"
@@ -325,7 +325,7 @@ gene_count_panel = (
 )
 
 matrix_summary = (
-    gs.concat(percent_panel, gene_count_panel, columns=2, spacing=4)
+    gs.concat(percent_panel, gene_count_panel, columns=2, spacing=2)
     .properties(scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.03}})
     .resolve_scale(x="excluded", y="shared")
 )
@@ -416,7 +416,7 @@ summary_column = gs.concat(
 )
 
 chart = (
-    gs.concat(center_column, summary_column, columns=2, spacing=4)
+    gs.concat(center_column, summary_column, columns=2, spacing=2)
     .resolve_scale(x="shared", y="independent")
     .properties(width=SAMPLE_TRACK_WIDTH)
     .properties(

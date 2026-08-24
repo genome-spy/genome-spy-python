@@ -13,7 +13,7 @@ from genome_spy.schema import Legend, Scale
 META = {
     "category": "Oncoprints and cohort summaries",
     "order": 25,
-    "height": 480,
+    "height": 530,
     "max_width": 760,
 }
 
@@ -62,7 +62,7 @@ mutation_legend = (
     .title("Mutation class")
     .orient("bottom")
     .direction("horizontal")
-    .columns(4)
+    .columns(3)
     .symbolSize(90)
 )
 

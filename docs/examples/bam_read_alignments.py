@@ -247,7 +247,12 @@ read_layers = (
     .resolve_scale(opacity="independent")
 )
 
-zoom_message = gs.Chart([{}]).properties(
+zoom_message = gs.layer(
+    gs.Chart().mark_rect(fill="white", opacity=0.7),
+    gs.Chart()
+    .mark_text(text="Zoom in closer to load data.", color="#333", size=13, yOffset=20)
+    .encode(x=gs.value(0.5), y=gs.value(1)),
+    data=[{}],
     name="zoom-message",
     params=[
         gs.param(
@@ -257,9 +262,7 @@ zoom_message = gs.Chart([{}]).properties(
         )
     ],
     opacity=gs.expr("zoomMessageState"),
-).mark_rect(fill="white", opacity=0.7) + gs.Chart().mark_text(
-    text="Zoom in closer to load data.", color="#333", size=13, yOffset=20
-).encode(x=gs.value(0.5), y=gs.value(1))
+)
 
 read_alignments = (
     gs.layer(read_layers, zoom_message)

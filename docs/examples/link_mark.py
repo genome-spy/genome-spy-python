@@ -21,6 +21,7 @@ chart = (
     .encode(
         x=gs.X("x:Q").scale(domain=[0, 18], zoom=True).title("Start"),
         x2=gs.X2("x2:Q"),
+        y=gs.Y("y:Q").scale(domain=[0, 12]).title("Height"),
     )
     .properties(title="Dome-shaped links")
 )

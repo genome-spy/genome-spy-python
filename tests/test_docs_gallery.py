@@ -120,6 +120,25 @@ def test_composed_examples_use_fluent_shared_encodings() -> None:
     assert transcripts["encoding"] == {"color": {"value": "#909090"}}
 
 
+def test_link_example_encodes_dome_heights() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "link_mark.py")
+
+    assert [row["y"] for row in example.spec["data"]["values"]] == [
+        2,
+        4,
+        6,
+        8,
+        10,
+    ]
+    assert example.spec["encoding"]["y"] == {
+        "field": "y",
+        "type": "quantitative",
+        "scale": {"domain": [0, 12]},
+        "title": "Height",
+    }
+
+
 def test_sequence_examples_use_typed_sort_and_data_format_helpers() -> None:
     gallery = _load_gallery()
     alignment = gallery.collect_example(EXAMPLES_DIR / "multiple_sequence_alignment.py")
@@ -190,12 +209,15 @@ def test_luad_oncoprint_uses_sample_index_scale_and_categorical_genes() -> None:
     example = gallery.collect_example(EXAMPLES_DIR / "luad_oncoprint.py")
 
     assert example.spec["viewportHeight"] == "container"
-    assert example.height == 920
+    assert example.height == 720
     center_column, summary_column = example.spec["concat"]
     sample_tracks = center_column["vconcat"][0]
     matrix_panel = sample_tracks["vconcat"][4]
     placeholder, matrix_summary = summary_column["concat"]
     percent_panel, gene_count_panel = matrix_summary["concat"]
+    assert example.spec["spacing"] == 2
+    assert matrix_summary["spacing"] == 2
+    assert percent_panel["width"] == 32
     matrix_layers = matrix_panel["layer"]
     assert matrix_panel["scales"]["y"]["domain"]
     assert matrix_panel["scales"]["y"]["reverse"] is True
@@ -312,7 +334,7 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "oncoprint.py")
 
-    assert example.height == 480
+    assert example.height == 530
     assert example.max_width == 760
     top_row, matrix_row = example.spec["concat"]
     matrix_panel, percent_panel, counts_panel = matrix_row["concat"]
@@ -342,6 +364,8 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
             },
         }
     ]
+    assert top_row["concat"][0]["encoding"]["color"]["legend"] is None
+    assert matrix_panel["layer"][1]["encoding"]["color"]["legend"]["columns"] == 3
 
     assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
     assert matrix_panel["scales"]["x"] == {
@@ -504,6 +528,10 @@ def test_bam_example_uses_full_alignment_dataflow() -> None:
     read_spec = example.spec["vconcat"][1]
     assert read_spec["viewportHeight"] == "container"
     assert read_spec["layer"][0]["layer"][0]["mark"]["type"] == "arrow"
+    zoom_message = read_spec["layer"][1]
+    assert zoom_message["name"] == "zoom-message"
+    assert zoom_message["data"] == {"values": [{}]}
+    assert all("data" not in layer for layer in zoom_message["layer"])
     assert [transform["type"] for transform in example.spec["transform"]] == [
         "filter",
         "formula",
