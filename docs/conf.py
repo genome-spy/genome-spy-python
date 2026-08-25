@@ -49,7 +49,8 @@ intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
 # -- HTML output ------------------------------------------------------------
 html_theme = "furo"
-html_title = "GenomeSpy for Python"
+html_title = "genome-spy-python"
+html_logo = "_static/snaketie.svg"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_css_files = ["genomespy.css"]

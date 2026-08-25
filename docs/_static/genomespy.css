@@ -23,6 +23,12 @@ body[data-theme="dark"] {
   text-align: center;
   padding: 2.5rem 1rem 1rem;
 }
+.gs-hero__logo {
+  display: block;
+  width: clamp(6.5rem, 15vw, 8.5rem);
+  height: auto;
+  margin: 0 auto 0.8rem;
+}
 .gs-hero__mark {
   font-family: "Special Elite", "Lato", cursive;
   font-weight: 400;
@@ -44,6 +50,17 @@ p.lead {
   max-width: 46rem;
   margin: 1.5rem auto 2rem;
   font-size: 1.15rem;
+}
+
+/* Keep the emblem compact in Furo's sidebar brand lockup so the project name
+   remains the heading rather than being pushed below the first viewport. */
+.sidebar-logo {
+  width: 5.5rem;
+  height: auto;
+}
+
+.sidebar-logo-container {
+  margin-bottom: 0.35rem;
 }
 
 /* ---------- Showcase band ---------- */

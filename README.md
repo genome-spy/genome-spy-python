@@ -1,4 +1,8 @@
-# genome-spy-python
+<p align="center">
+  <img src="docs/_static/snaketie.svg" width="180" alt="GenomeSpy for Python logo">
+</p>
+
+<h1 align="center">genome-spy-python</h1>
 
 `genome-spy-python` is a Python interface for [GenomeSpy], a grammar for
 interactive and scalable genomic visualization. It lets Python users build
