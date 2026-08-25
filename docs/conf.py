@@ -35,6 +35,7 @@ myst_enable_extensions = [
     "attrs_inline",
     "deflist",
 ]
+myst_links_external_new_tab = True
 
 # Generated gallery pages and Sphinx scaffolding are not prose sources.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "examples"]
@@ -54,7 +55,7 @@ html_logo = "_static/snaketie.svg"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_css_files = ["genomespy.css"]
-html_js_files = ["force-light-theme.js"]
+html_js_files = ["force-light-theme.js", "external-links.js"]
 html_show_sourcelink = False
 html_meta = {
     "Cache-Control": "no-cache, no-store, must-revalidate",
