@@ -1,5 +1,69 @@
 # Dev Log
 
+## 2026-08-25 - Opened external documentation links in new tabs
+
+- Configured MyST links and theme/raw-HTML links to open external destinations
+  in new tabs with `noopener noreferrer` protection.
+- Kept internal documentation navigation in the current tab.
+
+## 2026-08-25 - Refreshed selected gallery thumbnails
+
+- Re-rendered the Manhattan, BigBed cCRE, and ClinVar gallery thumbnails with
+  the current gallery capture framing.
+- Verified the ClinVar thumbnail against 204 records queried from the example's
+  indexed source release and locus, avoiding a broken browser-side range load
+  during capture.
+
+## 2026-08-25 - Added the repository logo
+
+- Added the snake-and-tie SVG as the canonical logo asset under the
+  documentation static files.
+- Used the mark in the documentation landing hero, Furo sidebar brand heading,
+  and centered README header with context-appropriate sizing.
+- Kept the landing-page wordmark as "GenomeSpy for Python" while using the
+  package name, `genome-spy-python`, for the sidebar heading.
+
+## 2026-08-25 - Added gallery specification controls
+
+- Replaced the standalone generated-spec link on every gallery detail page with
+  compact controls modelled on GenomeSpy's documentation embeds.
+- Added an on-demand formatted specification panel with a familiar top-right
+  copy button, a visible copied-to-clipboard message, and a fallback that also
+  works when local HTTP previews cannot use the modern Clipboard API.
+- Placed the specification toggle and panel after the displayed Python source.
+- Made the specification panel a styled, two-axis scrollable code viewport and
+  initialized gallery actions before awaiting visualization rendering.
+
+## 2026-08-25 - Added statistical-plot data acknowledgements
+
+- Added concise source, license, data-use, and Python-preparation notes to the
+  HapMap Manhattan and volcano examples and the airway MA and volcano examples.
+- Explicitly identified the HapMap association statistics as simulated.
+- Clarified that preprocessing occurs in the package's data-loading step before
+  GenomeSpy renders the prepared tables.
+
+## 2026-08-25 - Added oncoprint data acknowledgements
+
+- Added concise provenance notes for the packaged maftools TCGA LAML and
+  pyoncoprint TCGA LUAD inputs, including source licensing, open-access status,
+  and the Python-side preparation performed before GenomeSpy rendering.
+- Clarified that the package performs this preprocessing during data loading.
+
+## 2026-08-25 - Shared oncoplot sample zoom
+
+- Removed the matrix row's x-scale exclusion and its local sample scale so the
+  mutation matrix and upper burden bars use the same root zoomable x scale.
+- Kept the per-gene count bars excluded because their x values represent counts
+  rather than samples.
+
+## 2026-08-25 - Verified and revised installation instructions
+
+- Tested clean Python 3.11 installations from a built wheel and the public Git
+  URL, verified package import/spec generation, and confirmed the JupyterLab
+  command is installed and runnable.
+- Listed the concise `pip` installation from PyPI first and the source checkout
+  workflow second, including `uv` installation and `uv sync`.
+
 ## 2026-08-24 - Refreshed LUAD oncoprint thumbnail
 
 - Re-captured the complete LUAD composition so the burden and clinical tracks,
