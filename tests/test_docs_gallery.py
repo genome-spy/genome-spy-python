@@ -425,6 +425,43 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
     assert count_title["encoding"]["x"] == {"value": 0.5}
 
 
+def test_oncoprint_examples_include_data_provenance() -> None:
+    gallery = _load_gallery()
+    laml = gallery.collect_example(EXAMPLES_DIR / "oncoprint.py")
+    luad = gallery.collect_example(EXAMPLES_DIR / "luad_oncoprint.py")
+
+    for example in (laml, luad):
+        prose = " ".join(example.prose.split())
+        assert ":::{admonition} Data use and provenance" in prose
+        assert "TCGA data are open-access" in prose
+        assert "During data loading" in prose
+        assert "GenomeSpy then renders" in prose
+    assert "maftools" in laml.prose
+    assert "pyoncoprint" in luad.prose
+
+
+@pytest.mark.parametrize(
+    ("filename", "source"),
+    [
+        ("manhattan_plot.py", "HapMap"),
+        ("volcano_plot.py", "HapMap"),
+        ("airway_ma_plot.py", "GSE52778"),
+        ("airway_volcano_plot.py", "GSE52778"),
+    ],
+)
+def test_association_and_expression_plots_include_data_provenance(
+    filename: str, source: str
+) -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / filename)
+    prose = " ".join(example.prose.split())
+
+    assert ":::{admonition} Data use and provenance" in prose
+    assert source in prose
+    assert "During data loading" in prose
+    assert "GenomeSpy then renders" in prose
+
+
 def test_gallery_examples_do_not_render_data_previews() -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
