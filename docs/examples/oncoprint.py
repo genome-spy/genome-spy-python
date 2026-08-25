@@ -56,6 +56,7 @@ tmb_limit = data["tmb_limit"]
 count_limit = data["count_limit"]
 sample_domain = data["sample_domain"]
 gene_order = data["genes"].sort_values("gene_order")["gene"].tolist()
+gene_scale = {"domain": gene_order, "reverse": True, "padding": 0.08}
 
 mutation_legend = (
     Legend()
@@ -107,14 +108,7 @@ matrix = (
 matrix_panel = (grid + matrix).properties(
     width=matrix_width,
     height=matrix_height,
-    scales={
-        "x": {
-            "domain": sample_domain,
-            "paddingInner": 0,
-            "paddingOuter": 0,
-            "zoom": True,
-        }
-    },
+    scales={"y": gene_scale},
     params=[
         gs.param(
             "sampleRuler",
@@ -136,7 +130,7 @@ percent_panel = (
         y=gs.Y("gene:N").axis(None).title(None),
         text=gs.Text("label:N"),
     )
-    .properties(width=percent_width, height=matrix_height)
+    .properties(width=percent_width, height=matrix_height, scales={"y": gene_scale})
 )
 
 percent_header = (
@@ -179,27 +173,12 @@ count_grid = (
     .properties(width=counts_width, height=matrix_height)
 )
 
-counts_panel = (
-    (count_grid + count_bars)
-    .properties(width=counts_width, height=matrix_height)
-    .resolve_scale(x="excluded")
+counts_panel = (count_grid + count_bars).properties(
+    width=counts_width, height=matrix_height, scales={"y": gene_scale}
 )
 
-matrix_row = (
-    gs.concat(matrix_panel, percent_panel, counts_panel, columns=3, spacing=4)
-    .properties(scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.08}})
-    .resolve_scale(x="excluded", y="shared")
-)
-
-summary = f"Altered in {data['altered_samples']} ({data['altered_samples'] / data['total_samples']:.2%}) of {data['total_samples']} samples."
-
-chart = (
-    gs.concat(
-        gs.concat(tmb, percent_header, count_title, columns=3, spacing=4),
-        matrix_row,
-        columns=1,
-        spacing=4,
-    )
+sample_column = (
+    gs.concat(tmb, matrix_panel, columns=1, spacing=4)
     .properties(
         scales={
             "x": {
@@ -208,9 +187,18 @@ chart = (
                 "paddingOuter": 0,
                 "zoom": True,
             }
-        },
+        }
     )
     .resolve_scale(x="shared", y="independent")
+)
+percent_column = gs.concat(percent_header, percent_panel, columns=1, spacing=4)
+counts_column = gs.concat(count_title, counts_panel, columns=1, spacing=4)
+
+summary = f"Altered in {data['altered_samples']} ({data['altered_samples'] / data['total_samples']:.2%}) of {data['total_samples']} samples."
+
+chart = (
+    gs.concat(sample_column, percent_column, counts_column, columns=3, spacing=4)
+    .resolve_scale(x="independent", y="independent")
     .resolve_axis(y="independent")
     .properties(
         title=summary,

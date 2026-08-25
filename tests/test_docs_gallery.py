@@ -336,23 +336,30 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
 
     assert example.height == 530
     assert example.max_width == 760
-    top_row, matrix_row = example.spec["concat"]
-    matrix_panel, percent_panel, counts_panel = matrix_row["concat"]
-    assert top_row["concat"][0]["width"] == matrix_panel["width"] == 400
-    assert matrix_row["scales"]["y"]["domain"] == [
-        "FLT3",
-        "DNMT3A",
-        "NPM1",
-        "IDH2",
-        "IDH1",
-        "TET2",
-        "RUNX1",
-        "NRAS",
-        "TP53",
-        "CEBPA",
-    ]
-    assert matrix_row["scales"]["y"]["reverse"] is True
-    assert matrix_row["resolve"]["scale"]["y"] == "shared"
+    sample_column, percent_column, counts_column = example.spec["concat"]
+    tmb, matrix_panel = sample_column["concat"]
+    _, percent_panel = percent_column["concat"]
+    count_title, counts_panel = counts_column["concat"]
+    assert tmb["width"] == matrix_panel["width"] == 400
+    gene_scale = {
+        "domain": [
+            "FLT3",
+            "DNMT3A",
+            "NPM1",
+            "IDH2",
+            "IDH1",
+            "TET2",
+            "RUNX1",
+            "NRAS",
+            "TP53",
+            "CEBPA",
+        ],
+        "reverse": True,
+        "padding": 0.08,
+    }
+    assert matrix_panel["scales"]["y"] == gene_scale
+    assert percent_panel["scales"]["y"] == gene_scale
+    assert counts_panel["scales"]["y"] == gene_scale
     assert matrix_panel["params"] == [
         {
             "name": "sampleRuler",
@@ -364,21 +371,30 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
             },
         }
     ]
-    assert top_row["concat"][0]["encoding"]["color"]["legend"] is None
+    assert tmb["encoding"]["color"]["legend"] is None
     assert matrix_panel["layer"][1]["encoding"]["color"]["legend"]["columns"] == 3
 
-    assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
-    assert matrix_panel["scales"]["x"] == {
+    assert example.spec["resolve"]["scale"] == {
+        "x": "independent",
+        "y": "independent",
+    }
+    assert sample_column["resolve"]["scale"] == {
+        "x": "shared",
+        "y": "independent",
+    }
+    assert sample_column["scales"]["x"] == {
         "domain": [-0.5, 192.5],
         "paddingInner": 0,
         "paddingOuter": 0,
         "zoom": True,
     }
-    for layer in [top_row["concat"][0], *matrix_panel["layer"]]:
+    assert "scales" not in example.spec
+    assert "resolve" not in counts_panel
+    for layer in [tmb, *matrix_panel["layer"]]:
         assert layer["encoding"]["x"]["field"] == "sample_order"
         assert layer["encoding"]["x"]["type"] == "index"
         assert "x2" not in layer["encoding"]
-    assert top_row["concat"][0]["transform"][0] == {
+    assert tmb["transform"][0] == {
         "type": "stack",
         "groupby": ["sample_order"],
         "as": ["_y0", "_y1"],
@@ -406,7 +422,6 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
         "8%",
         "7%",
     ]
-    count_title = top_row["concat"][2]
     assert count_title["encoding"]["x"] == {"value": 0.5}
 
 
