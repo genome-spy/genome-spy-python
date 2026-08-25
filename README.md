@@ -17,20 +17,30 @@ will come later.
 
 ## Installation
 
-The package requires Python 3.11 or newer. Until a package release is
-published, install it from source with [uv]:
+The package requires Python 3.11 or newer.
+
+From PyPI:
 
 ```bash
+pip install genome-spy-python
+```
+
+From source:
+
+```bash
+pip install uv
 git clone https://github.com/genome-spy/genome-spy-python.git
 cd genome-spy-python
 uv sync
 ```
 
-For dataframe-backed charts using Arrow transport, install the optional extra:
+For dataframe-backed charts using Arrow transport:
 
 ```bash
-uv sync --extra arrow
+pip install "genome-spy-python[arrow]"
 ```
+
+See the [getting-started guide](docs/getting-started.md) for the first example.
 
 ## Examples
 

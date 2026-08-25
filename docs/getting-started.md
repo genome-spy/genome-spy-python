@@ -19,24 +19,25 @@ documentation applies to the charts you write here.
 
 ## Install
 
-Install the current version directly from its Git repository in a virtual
-environment:
+GenomeSpy Python requires Python 3.11 or newer.
+
+### From PyPI
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-python -m pip install "genome-spy-python @ git+https://github.com/genome-spy/genome-spy-python.git"
-python -m pip install jupyterlab
-jupyter lab
+pip install genome-spy-python
 ```
 
-On Windows PowerShell, activate the environment with
-`.venv\Scripts\Activate.ps1`. Cloning the repository and running `uv sync` is
-needed only when developing the library itself.
+### From source
 
-The examples work in JupyterLab, Jupyter Notebook, VS Code notebooks, and
-Marimo. Notebook rendering loads the pinned GenomeSpy JavaScript bundle from a
-CDN, so the browser needs network access when a chart first appears.
+```bash
+pip install uv
+git clone https://github.com/genome-spy/genome-spy-python.git
+cd genome-spy-python
+uv sync
+```
+
+Notebook rendering loads the pinned GenomeSpy JavaScript bundle from a CDN, so
+the browser needs network access when a chart first appears.
 
 Start a notebook and import the package:
 
