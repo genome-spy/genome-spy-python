@@ -1070,12 +1070,22 @@ def test_gallery_detail_embed_uses_direct_container_sizing() -> None:
     assert "await embed(c, spec, { bare: true });" in markdown
     assert f"airway_volcano_plot.json?v={expected}" in markdown
     assert "const spec = '../_static/specs/airway_volcano_plot.json" in markdown
-    assert "await fetch(" not in markdown
-    assert (
-        '<a href="../_static/specs/airway_volcano_plot.json">'
-        "View the generated render spec</a>" in markdown
-    )
-    assert "references assets hosted with these docs" in markdown
+    assert "Show specification</button>" in markdown
+    assert "Hide specification" in markdown
+    assert "loadedSpec = fetch(spec).then((response) =>" in markdown
+    assert "JSON.stringify(await loadSpec(), null, 2)" in markdown
+    assert "await copyText(text)" in markdown
+    assert "navigator.clipboard && window.isSecureContext" in markdown
+    assert "document.execCommand('copy')" in markdown
+    assert "Copied to clipboard" in markdown
+    assert 'class="gs-embed-copy"' in markdown
+    assert 'class="gs-embed-copy-message"' in markdown
+    assert 'aria-label="Copy specification"' in markdown
+    assert 'class="gs-embed-spec-wrapper" hidden' in markdown
+    assert "Playground" not in markdown
+    assert markdown.index("```python") < markdown.index("Show specification</button>")
+    assert "View the generated render spec" not in markdown
+    assert "references assets hosted with these docs" not in markdown
     assert "Download the generated GenomeSpy spec" not in markdown
     assert "Loading chart" not in markdown
     assert "attachShadow" not in markdown
@@ -1204,3 +1214,20 @@ def test_stylesheet_gives_the_tooltip_an_explicit_text_color() -> None:
     rule = re.search(r"\.gs-tooltip \{([^}]*)\}", css)
     assert rule is not None, "no tooltip rule in the documentation stylesheet"
     assert re.search(r"color:\s*#", rule.group(1))
+
+
+def test_stylesheet_makes_the_specification_panel_scrollable() -> None:
+    css = (REPO_ROOT / "docs" / "_static" / "genomespy.css").read_text(encoding="utf-8")
+
+    rule = re.search(r"\.gs-embed-spec \{([^}]*)\}", css)
+    assert rule is not None, "no specification panel rule in the stylesheet"
+    declarations = rule.group(1)
+    assert "max-height:" in declarations
+    assert "overflow-x: auto" in declarations
+    assert "overflow-y: auto" in declarations
+    assert "white-space: pre" in declarations
+
+    copy_rule = re.search(r"\.gs-embed-copy \{([^}]*)\}", css)
+    assert copy_rule is not None, "no specification copy-button rule"
+    assert "position: absolute" in copy_rule.group(1)
+    assert "right:" in copy_rule.group(1)

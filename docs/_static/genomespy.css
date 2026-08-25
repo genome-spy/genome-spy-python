@@ -153,6 +153,126 @@ p.lead {
   margin: 1.25rem 0 0.5rem;
 }
 
+.gs-embed-actions {
+  margin: 0.3rem 0 0.6rem;
+  text-align: center;
+  font-size: 0.82rem;
+}
+
+.gs-embed-action {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--color-link, var(--gs-link));
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.gs-embed-action:hover {
+  color: var(--color-link--hover, var(--gs-brand));
+  text-decoration: underline;
+}
+
+.gs-embed-spec-wrapper {
+  position: relative;
+  margin: 0.5rem 0 1rem;
+}
+
+.gs-embed-spec-wrapper[hidden] {
+  display: none;
+}
+
+.gs-embed-spec {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  max-height: min(32rem, 70vh);
+  margin: 0;
+  padding: 1rem;
+  overflow-x: auto;
+  overflow-y: auto;
+  border: 1px solid var(--color-background-border);
+  border-radius: 4px;
+  background: var(--color-background-secondary);
+  color: var(--color-foreground-primary);
+  font-family: var(--font-stack--monospace);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  overflow-wrap: normal;
+  tab-size: 2;
+  white-space: pre;
+  word-break: normal;
+}
+
+.gs-embed-spec code {
+  display: block;
+  min-width: max-content;
+  color: inherit;
+  font: inherit;
+  white-space: inherit;
+}
+
+.gs-embed-copy {
+  position: absolute;
+  z-index: 1;
+  top: 0.55rem;
+  right: 0.55rem;
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.42rem;
+  place-items: center;
+  border: 1px solid var(--color-background-border);
+  border-radius: 4px;
+  background: var(--color-background-primary);
+  color: var(--color-foreground-muted);
+  cursor: pointer;
+}
+
+.gs-embed-copy:hover {
+  color: var(--color-foreground-primary);
+}
+
+.gs-embed-copy svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.gs-embed-copy[data-copied="true"]::after {
+  color: #20844a;
+  content: "✓";
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.gs-embed-copy[data-copied="true"] svg {
+  display: none;
+}
+
+.gs-embed-copy-message {
+  position: absolute;
+  z-index: 1;
+  top: 0.72rem;
+  right: 3rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  background: var(--color-background-primary);
+  color: var(--color-foreground-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.gs-embed-copy-message:empty {
+  display: none;
+}
+
 /* GenomeSpy paints the tooltip on a light background but leaves its text color
    to the host page, so a dark page theme renders it light on light. The class
    is bundle-versioned: core 0.85.0 renamed `tooltip` to `gs-tooltip`. */

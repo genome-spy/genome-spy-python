@@ -241,18 +241,112 @@ def _source_without_gallery_meta(source: str) -> str:
 def _detail_md(example: core.Example, bundle_url: str) -> str:
     spec_token = core.build_token([example])
     spec_url = f"../_static/specs/{example.name}.json?v={spec_token}"
-    download_url = f"../_static/specs/{example.name}.json"
     host_id = f"gs-embed-{example.name}"
+    spec_toggle_id = f"gs-spec-toggle-{example.name}"
+    spec_wrapper_id = f"gs-spec-wrapper-{example.name}"
+    spec_output_id = f"gs-spec-output-{example.name}"
+    spec_copy_id = f"gs-spec-copy-{example.name}"
+    spec_copy_message_id = f"gs-spec-copy-message-{example.name}"
     host_style = f"height:{example.height}px"
     if example.max_width is not None:
         host_style += f";max-width:{example.max_width}px"
-    embed = (
+    chart = (
         f'<div id="{host_id}" class="gs-doc-embed" style="{host_style}" '
         f'role="img" aria-label="{html.escape(example.title)}"></div>\n'
+    )
+    specification_controls = (
+        '<div class="gs-embed-actions">\n'
+        f'<button id="{spec_toggle_id}" class="gs-embed-action" type="button" '
+        f'aria-controls="{spec_wrapper_id}" aria-expanded="false">'
+        "Show specification</button>\n"
+        "</div>\n"
+        f'<div id="{spec_wrapper_id}" class="gs-embed-spec-wrapper" hidden>\n'
+        f'<button id="{spec_copy_id}" class="gs-embed-copy" type="button" '
+        'aria-label="Copy specification" title="Copy specification">'
+        '<svg aria-hidden="true" viewBox="0 0 24 24">'
+        '<path d="M8 7V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/>'
+        '<rect x="3" y="8" width="13" height="13" rx="2"/>'
+        "</svg></button>\n"
+        f'<span id="{spec_copy_message_id}" class="gs-embed-copy-message" '
+        'role="status" aria-live="polite"></span>\n'
+        f'<pre class="gs-embed-spec"><code id="{spec_output_id}"></code></pre>\n'
+        "</div>\n"
         '<script type="module">\n'
         f"import {{ embed }} from '{bundle_url}';\n"
         f"const c = document.getElementById('{host_id}');\n"
         f"const spec = '{spec_url}';\n"
+        f"const specToggle = document.getElementById('{spec_toggle_id}');\n"
+        f"const specWrapper = document.getElementById('{spec_wrapper_id}');\n"
+        f"const specOutput = document.getElementById('{spec_output_id}');\n"
+        f"const specCopy = document.getElementById('{spec_copy_id}');\n"
+        f"const specCopyMessage = document.getElementById('{spec_copy_message_id}');\n"
+        "let loadedSpec;\n"
+        "const loadSpec = async () => {\n"
+        "  if (!loadedSpec) {\n"
+        "    loadedSpec = fetch(spec).then((response) => {\n"
+        "      if (!response.ok) throw new Error(`HTTP ${response.status}`);\n"
+        "      return response.json();\n"
+        "    });\n"
+        "  }\n"
+        "  return loadedSpec;\n"
+        "};\n"
+        "const copyText = async (text) => {\n"
+        "  if (navigator.clipboard && window.isSecureContext) {\n"
+        "    try {\n"
+        "      await navigator.clipboard.writeText(text);\n"
+        "      return;\n"
+        "    } catch {}\n"
+        "  }\n"
+        "  const textarea = document.createElement('textarea');\n"
+        "  textarea.value = text;\n"
+        "  textarea.setAttribute('readonly', '');\n"
+        "  textarea.style.cssText = 'position:fixed;opacity:0';\n"
+        "  document.body.appendChild(textarea);\n"
+        "  textarea.select();\n"
+        "  const copied = document.execCommand('copy');\n"
+        "  textarea.remove();\n"
+        "  if (!copied) throw new Error('Clipboard access was denied');\n"
+        "};\n"
+        "if (specCopy) {\n"
+        "  specCopy.addEventListener('click', async () => {\n"
+        "    try {\n"
+        "      const text = JSON.stringify(await loadSpec(), null, 2);\n"
+        "      await copyText(text);\n"
+        "      specCopy.dataset.copied = 'true';\n"
+        "      specCopy.setAttribute('aria-label', 'Specification copied');\n"
+        "      specCopy.title = 'Copied';\n"
+        "      if (specCopyMessage) specCopyMessage.textContent = 'Copied to clipboard';\n"
+        "      window.setTimeout(() => {\n"
+        "        delete specCopy.dataset.copied;\n"
+        "        specCopy.setAttribute('aria-label', 'Copy specification');\n"
+        "        specCopy.title = 'Copy specification';\n"
+        "        if (specCopyMessage) specCopyMessage.textContent = '';\n"
+        "      }, 1600);\n"
+        "    } catch (error) {\n"
+        "      specCopy.setAttribute('aria-label', `Unable to copy specification: ${error}`);\n"
+        "      specCopy.title = 'Unable to copy specification';\n"
+        "      if (specCopyMessage) specCopyMessage.textContent = 'Unable to copy';\n"
+        "    }\n"
+        "  });\n"
+        "}\n"
+        "if (specToggle && specWrapper && specOutput) {\n"
+        "  specToggle.addEventListener('click', async () => {\n"
+        "    const show = specWrapper.hidden;\n"
+        "    specWrapper.hidden = !show;\n"
+        "    specToggle.textContent = show ? 'Hide specification' : "
+        "'Show specification';\n"
+        "    specToggle.setAttribute('aria-expanded', String(show));\n"
+        "    if (show && !specOutput.dataset.loaded) {\n"
+        "      specOutput.textContent = 'Loading specification…';\n"
+        "      try {\n"
+        "        specOutput.textContent = JSON.stringify(await loadSpec(), null, 2);\n"
+        "        specOutput.dataset.loaded = 'true';\n"
+        "      } catch (error) {\n"
+        "        specOutput.textContent = `Unable to load specification: ${error}`;\n"
+        "      }\n"
+        "    }\n"
+        "  });\n"
+        "}\n"
         "if (c) await embed(c, spec, { bare: true });\n"
         "</script>"
     )
@@ -262,7 +356,7 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         example.description or "",
         "",
         "```{raw} html",
-        embed,
+        chart,
         "```",
         "",
     ]
@@ -275,8 +369,9 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         _source_without_gallery_meta(example.source).rstrip(),
         "```",
         "",
-        f'<a href="{download_url}">View the generated render spec</a> '
-        "(references assets hosted with these docs)",
+        "```{raw} html",
+        specification_controls,
+        "```",
         "",
     ]
     return "\n".join(parts)
