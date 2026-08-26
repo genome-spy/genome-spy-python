@@ -223,6 +223,7 @@ __marimo__/
 # Reference material and repos (large, locally cloned)
 material/
 tmp/
+plans/private_plans/
 
 # Planning scratch files
 scratchbook.md
@@ -236,7 +237,6 @@ docs/_static/specs/
 docs/_static/generated/arrow/
 
 # Local assistant state
-.agent-workflow
 .pre-commit-cache/
 .uv-cache/
 .cache/

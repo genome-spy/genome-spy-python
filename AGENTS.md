@@ -104,7 +104,6 @@ Git rules:
 | Document | When to Read |
 |---|---|
 | `plans/implementation_plan.md` | At the start of implementation work to understand current phases and open questions |
-| `plans/devlog.md` | Every session to rebuild recent context quickly |
 | `plans/deferred.md` | Before adding scope, to avoid implementing intentionally deferred work |
 | `plans/architecture.md` | Before changing public API shape, schema strategy, or notebook integration |
 | `plans/tmp_repo_index.md` | When using reference repos in `tmp/` for wrapper or widget design decisions |
@@ -115,7 +114,6 @@ Before handing work off:
 - Run targeted tests for the changed behavior.
 - Run `uv run ruff check .`.
 - Run `uv run mypy src/` when public Python code changes.
-- Update `plans/devlog.md` with meaningful decisions or completed work.
 - Call out anything you could not validate locally.
 
 ## Documentation Gallery Policy
