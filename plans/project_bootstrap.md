@@ -205,22 +205,6 @@ Structure:
 Link to plans/deferred.md for anything explicitly out of scope.
 ```
 
-### `plans/devlog.md`
-
-Running log of what has been built, decided, and done. Agents read this every session to rebuild context without re-reading git history.
-
-Structure:
-```markdown
-# Dev Log
-
-## YYYY-MM-DD — Session title
-- What was done
-- Decisions made and why
-- Numbers/results if relevant
-```
-
-Add a `.claude/skills/devlog/SKILL.md` so agents can append to it with `/devlog`.
-
 ### `plans/deferred.md`
 
 Explicit list of things that are out of scope. Prevents agents from implementing features that were intentionally excluded. Format:
@@ -306,13 +290,7 @@ jobs:
 Create `.claude/skills/` for reusable agent commands. Each skill is a folder with a
 `SKILL.md` that defines what the skill does and how to invoke it.
 
-### Mandatory skills to create
-
-**`/devlog`** — appends a dated entry to `plans/devlog.md`
-```
-.claude/skills/devlog/SKILL.md
-```
-Contents: instructions to append a `## YYYY-MM-DD — <title>` block summarising what was done in the current session.
+### Mandatory skill to create
 
 **`/commit`** — enforces conventional commits format
 ```
@@ -393,9 +371,8 @@ Verify CI passes on the first push before doing any implementation work.
 - [ ] `CLAUDE.md` → `@AGENTS.md`
 - [ ] `AGENTS.md` with all 9 sections filled in
 - [ ] `plans/implementation_plan.md` drafted
-- [ ] `plans/devlog.md` with session 0 entry
 - [ ] `plans/deferred.md` created (even if empty)
 - [ ] Pre-commit installed and hooks passing
 - [ ] `.github/workflows/ci.yml` in place
-- [ ] `.claude/skills/devlog/` and `.claude/skills/commit/` created
+- [ ] `.claude/skills/commit/` created
 - [ ] First commit pushed, CI green
