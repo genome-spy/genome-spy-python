@@ -66,12 +66,36 @@ format="records")` is a shorter equivalent.
 
 Supported pandas, Polars, and PyArrow tables can also be passed directly.
 GenomeSpy uses Arrow transport for those tables when available; this affects
-transfer efficiency, not the chart definition.
+transfer efficiency, not the chart definition. See
+[Arrow data transport](arrow-transport.md) for installation and supported
+inputs.
 
 In a reactive notebook, create and display the widget in a stable cell. Let
 dependent cells prepare new rows and call `set_dataset()` on that same object.
 Create a new chart only when its fields, marks, encodings, or composition need
 to change.
+
+## Use Marimo
+
+Marimo displays the same widget through its anywidget support. Create and wrap
+the widget once in a stable cell:
+
+```python
+import marimo as mo
+
+view = chart.widget()
+chart_widget = mo.ui.anywidget(view)
+chart_widget
+```
+
+Dependent cells can prepare a new dataframe and update the existing widget:
+
+```python
+view.set_dataset("measurements", updated_frame)
+```
+
+Keeping the widget in its original cell avoids rebuilding the chart whenever a
+Marimo control changes.
 
 See the {py:class}`genome_spy.api.JupyterChart` reference for multiple datasets,
 transport options, and method signatures.

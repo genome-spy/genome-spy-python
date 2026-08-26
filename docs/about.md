@@ -25,6 +25,14 @@ Where this documentation is silent about a property, the
 When the schema pin is bumped, the generated wrappers and the gallery are
 regenerated together, and the documentation is rebuilt on the next release.
 
+## Project
+
+`genome-spy-python` is developed and maintained by Oskari Lehtonen and the
+GenomeSpy team.
+
+OpenAI Codex has assisted with code and documentation. Project maintainers
+review and validate AI-assisted changes before they are included.
+
 ## Credits and references
 
 - [GenomeSpy](https://github.com/genome-spy/genome-spy) — the underlying grammar
