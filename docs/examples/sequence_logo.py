@@ -42,7 +42,7 @@ chart = (
         logoLetters=True,
     )
     .encode(
-        x=gs.X("pos:O").scale(zoom=True).title("Position"),
+        x=gs.X("pos:O").title("Position"),
         y=gs.Y("_y0:Q").scale(domain=[0, 2], zoom=True).title("Information"),
         y2=gs.Y2("_y1"),
         text=gs.Text("base:N"),

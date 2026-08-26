@@ -60,7 +60,7 @@ alignment = (
     )
     .encode(
         x=gs.X("pos:I"),
-        y=gs.Y("identifier:N").scale(zoom=True).title(None),
+        y=gs.Y("identifier:N").title(None),
         color=gs.Color("sequence:N").scale(BASE_COLORS).legend(None),
     )
     .properties(height=gs.step(14), viewportHeight="container", title="Alignment")

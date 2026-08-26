@@ -21,7 +21,7 @@ chart = (
     .encode(
         x=gs.X("x:Q").scale(zoom=True).title("Start"),
         x2=gs.X2("x2"),
-        y=gs.Y("y:N").scale(zoom=True).title("Interval"),
+        y=gs.Y("y:N").title("Interval"),
     )
     .properties(title="Ranged rule mark")
 )

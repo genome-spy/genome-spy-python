@@ -20,8 +20,8 @@ chart = (
     gs.Chart(data)
     .mark_rect()
     .encode(
-        x=gs.X("x:O").scale(zoom=True).axis(None),
-        y=gs.Y("y:O").scale(zoom=True).axis(None),
+        x=gs.X("x:O").axis(None),
+        y=gs.Y("y:O").axis(None),
         color=gs.Color("z:Q").scale(Scale(scheme="magma")).title("value"),
     )
     .properties(title="Rect heatmap")
