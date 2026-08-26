@@ -23,6 +23,8 @@ event_colors = gs.Scale(
 data = tcga_ov_gistic_data()
 genes = refseq_gene_bodies("hg19")
 
+# Negating deletion scores places amplifications and deletions on opposite sides
+# of the shared zero line.
 zero_line = (
     gs.Chart([{"value": 0}])
     .mark_rule(color="black", opacity=0.3)
@@ -61,6 +63,8 @@ score_track = gs.layer(zero_line, q_values, thresholds).properties(
     ),
 )
 
+# GISTIC stores wide peak, peak, and region limits in separate columns. Fold
+# them into rows so one rule layer can draw all three interval types.
 lesion_track = (
     gs.Chart(data["lesions"])
     .transform_regex_extract(
@@ -153,6 +157,8 @@ gene_bodies = (
     )
 )
 
+# Label scores only decide which colliding names survive; they do not filter the
+# gene bodies themselves.
 gene_labels = (
     gs.Chart()
     .transform_measure_text(field="symbol", as_="label_width", fontSize=11)
@@ -218,6 +224,7 @@ gene_track = (
     .transform_filter("datum.lane < 3")
 )
 
+# All three tracks share genomic zooming but keep independent vertical scales.
 chart = (
     gs.vconcat(score_track, lesion_track, gene_track)
     .properties(

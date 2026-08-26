@@ -39,6 +39,8 @@ RAW_URL = {
     )
 }
 
+# The sunrise panel builds the purity/ploidy candidate grid in GenomeSpy. Its
+# ruler writes the selectedFit parameter used by every panel below.
 sunrise_rects = (
     gs.Chart()
     .mark_rect(tooltip=None)
@@ -185,6 +187,8 @@ for field, expression in [
 ]:
     sunrise = sunrise.transform_formula(expr=expression, as_=field)
 
+# Recalculate one fit score from all visible segments whenever selectedFit or a
+# fitting option changes.
 fit_bar = (
     gs.Chart()
     .mark_rect(color="#a0e7e5", tooltip=None)
@@ -249,6 +253,8 @@ selected_fit = (
     )
 )
 
+# These layers show the gap between continuous copy-number estimates and the
+# integer states selected for the current purity/ploidy solution.
 minor_error = (
     gs.Chart()
     .mark_rect(
@@ -389,6 +395,8 @@ baf_track = (
     title=gs.title("Observed and fitted B-allele frequency", style="overlay-title"),
 )
 
+# The parent owns the segment table and controls. Child tracks inherit both the
+# data and the shared genomic x scale.
 chart = (
     (sunrise & selected_solution & logr_track & baf_track)
     .properties(
@@ -439,6 +447,8 @@ chart = (
     .transform_collect()
 )
 
+# Derive the fitted allele counts, residuals, LogR, and BAF in the browser so
+# dragging the sunrise ruler updates all tracks immediately.
 for field, expression in [
     (
         "aRaw",

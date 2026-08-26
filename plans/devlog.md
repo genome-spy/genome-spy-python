@@ -1,5 +1,16 @@
 # Dev Log
 
+## 2026-08-26 - Clarified project and notebook documentation
+
+- Added concise authorship and AI-assistance statements to the About page.
+- Added a focused Arrow transport guide and a short Marimo pattern to the
+  notebook guide, with matching README and data-guide links.
+- Added intent comments to complex gallery examples without changing their
+  specifications or thumbnails.
+- Validation: 154 focused tests, Ruff, MyPy, Marimo static checking, frontend
+  widget tests, and the strict Sphinx build passed. A live Marimo browser check
+  was unavailable because no browser was connected.
+
 ## 2026-08-26 - Restored complete TCGA OV GISTIC inputs
 
 - Confirmed that the upstream GenomeSpy example and Broad GDAC source use hg19,

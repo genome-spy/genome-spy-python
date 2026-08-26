@@ -16,6 +16,7 @@ META = {
 SV_URL = "https://data.genomespy.app/sample-data/HCC1954/severus_somatic.vcf.gz"
 CN_URL = "https://data.genomespy.app/sample-data/HCC1954/copy-numbers.tsv"
 
+# Fold each link's two endpoints into rows so both receive a breakpoint marker.
 endpoint_markers = (
     gs.Chart()
     .transform_regex_fold(
@@ -126,6 +127,8 @@ sv_track = (
         as_=["_source_order"],
         description="Record VCF order so one BND mate is retained.",
     )
+    # BND records describe each link twice. Look up the mate and keep the first
+    # record so the arc is drawn only once.
     .transform_formula(
         expr=("datum.INFO.SVTYPE[0] == 'BND' ? datum.INFO.MATE_ID[0] : datum.ID[0]"),
         as_="_lookup_mate_id",
@@ -177,6 +180,8 @@ copy_numbers = (
     )
 )
 
+# A shared locus scale keeps the SV endpoints aligned with their copy-number
+# segments while panning and zooming.
 chart = (
     (sv_track & copy_numbers)
     .properties(

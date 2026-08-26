@@ -46,6 +46,8 @@ intersection_labels = (
     .properties(name="intersection-labels")
 )
 
+# Set-intersection output repeats each profile once per set. One representative
+# row is enough for each intersection bar.
 intersection_sizes = (
     gs.layer(intersection_bars, intersection_labels)
     .properties(
@@ -92,6 +94,7 @@ set_labels = (
     .properties(name="set-labels")
 )
 
+# Likewise, one profile column is enough when calculating and drawing set sizes.
 set_sizes = (
     gs.layer(set_bars, set_labels)
     .properties(
@@ -191,6 +194,8 @@ members = (
     .properties(name="members")
 )
 
+# The matrix layers share setCursor so hovering a row fades unrelated profiles
+# in both the matrix and the bars above it.
 matrix = (
     gs.layer(
         set_names,
@@ -220,6 +225,8 @@ matrix = (
     )
 )
 
+# Fold the five gene columns into rows before calculating exact intersections.
+# The remaining transforms derive set sizes, hover membership, and bar order.
 chart = (
     gs.concat(
         gs.Chart([]).mark_point().properties(name="empty-space", width=0, height=0),
