@@ -20,7 +20,7 @@ chart = (
     .mark_rule(size=10, strokeCap="round")
     .encode(
         x=gs.X("x:Q").scale(zoom=True).title("Start"),
-        x2=gs.X2("x2:Q"),
+        x2=gs.X2("x2"),
         y=gs.Y("y:N").scale(zoom=True).title("Interval"),
     )
     .properties(title="Ranged rule mark")

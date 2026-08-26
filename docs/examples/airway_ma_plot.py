@@ -70,11 +70,11 @@ ma_callout_lines = (
         x=gs.X("log10_base_mean:Q")
         .scale(domain=domains["ma_x"], zoom=True)
         .title("log10 mean count"),
-        x2=gs.X2("ma_label_x:Q"),
+        x2=gs.X2("ma_label_x"),
         y=gs.Y("log2fc:Q")
         .scale(reverse=False, domain=domains["ma_y"], zoom=True)
         .title("log2 fold change"),
-        y2=gs.Y2("ma_label_y:Q"),
+        y2=gs.Y2("ma_label_y"),
     )
 )
 

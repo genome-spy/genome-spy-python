@@ -44,9 +44,9 @@ leader_lines = (
     .mark_rule(color="#555", size=1)
     .encode(
         x=gs.X("effect:Q").title("Effect"),
-        x2="label_x:Q",
+        x2="label_x",
         y=gs.Y("significance:Q").title("Significance"),
-        y2="label_y:Q",
+        y2="label_y",
     )
 )
 

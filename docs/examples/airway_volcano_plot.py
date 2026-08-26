@@ -80,11 +80,11 @@ volcano_callout_lines = (
         x=gs.X("log2fc:Q")
         .scale(domain=domains["volcano_x"], zoom=True)
         .title("log2 fold change (treated / control)"),
-        x2=gs.X2("volcano_label_x:Q"),
+        x2=gs.X2("volcano_label_x"),
         y=gs.Y("neglog10_pvalue_plot:Q")
         .scale(reverse=False, domain=domains["volcano_y"], zoom=True)
         .title("-log10 p-value"),
-        y2=gs.Y2("volcano_label_y:Q"),
+        y2=gs.Y2("volcano_label_y"),
     )
 )
 

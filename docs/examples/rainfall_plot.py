@@ -79,7 +79,7 @@ change_point_stems = (
         y=gs.Y(gs.datum(0), type="quantitative")
         .scale(reverse=False, domain=y_domain)
         .title("log10 inter-event distance"),
-        y2=gs.Y2("arrow_y:Q"),
+        y2=gs.Y2("arrow_y"),
     )
 )
 

@@ -44,7 +44,7 @@ logo = (
     .encode(
         x=gs.X("pos:I").axis(None),
         y=gs.Y("_y0:Q").scale(domain=[0, 2], zoom=True).title("Information"),
-        y2=gs.Y2("_y1:Q"),
+        y2=gs.Y2("_y1"),
         text=gs.Text("base:N"),
         color=gs.Color("base:N").scale(BASE_COLORS).legend(None),
     )
