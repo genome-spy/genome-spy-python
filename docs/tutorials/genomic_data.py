@@ -14,11 +14,15 @@ bigwig_chart = (
     gs.Chart(gs.lazy.bigwig("https://data.genomespy.app/genomes/hg38/hg38.gc5Base.bw"))
     .mark_rect(color="#4c78a8", minWidth=0.5, tooltip=None)
     .encode(
-        x=gs.Locus("chrom", "start").scale(domain=REGION),
+        x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("score:Q").scale(domain=[0, 100]).axis(title="GC (%)"),
     )
-    .properties(assembly="hg38", title="Lazy BigWig signal")
+    .properties(
+        assembly="hg38",
+        scales=gs.scales(x=gs.Scale(domain=REGION)),
+        title="Lazy BigWig signal",
+    )
 )
 # genomic-data-bigwig-end
 
@@ -32,11 +36,15 @@ bigbed_chart = (
     )
     .mark_rect()
     .encode(
-        x=gs.Locus("chrom", "chromStart").scale(domain=REGION),
+        x=gs.Locus("chrom", "chromStart"),
         x2=gs.Locus("chrom", "chromEnd"),
         color=gs.Color("ucscLabel:N").legend(title="cCRE class"),
     )
-    .properties(assembly="hg38", title="Lazy BigBed intervals")
+    .properties(
+        assembly="hg38",
+        scales=gs.scales(x=gs.Scale(domain=REGION)),
+        title="Lazy BigBed intervals",
+    )
 )
 # genomic-data-bigbed-end
 

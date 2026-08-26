@@ -20,13 +20,15 @@ point_chart = (
     gs.Chart(variants)
     .mark_point(filled=True, size=110)
     .encode(
-        x=gs.Locus("chrom", "pos")
-        .scale(domain=BRCA1_DOMAIN)
-        .axis(title="Genomic position", chromGrid=True),
+        x=gs.Locus("chrom", "pos").axis(title="Genomic position", chromGrid=True),
         y=gs.Y("impact:N").title("Impact"),
         color=gs.Color("impact:N").legend(None),
     )
-    .properties(assembly="hg38", title="Point variants on chr17")
+    .properties(
+        assembly="hg38",
+        scales=gs.scales(x=gs.Scale(domain=BRCA1_DOMAIN)),
+        title="Point variants on chr17",
+    )
 )
 # genomic-coordinates-points-end
 
@@ -42,12 +44,16 @@ interval_chart = (
     gs.Chart(features)
     .mark_rect()
     .encode(
-        x=gs.Locus("chrom", "start").scale(domain=BRCA1_DOMAIN),
+        x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("kind:N").title("Feature kind"),
         color=gs.Color("kind:N").legend(None),
     )
-    .properties(assembly="hg38", title="Half-open genomic intervals")
+    .properties(
+        assembly="hg38",
+        scales=gs.scales(x=gs.Scale(domain=BRCA1_DOMAIN)),
+        title="Half-open genomic intervals",
+    )
 )
 # genomic-coordinates-intervals-end
 
@@ -62,11 +68,15 @@ offset_chart = (
     gs.Chart(gff_features)
     .mark_rect(color="#4c78a8")
     .encode(
-        x=gs.Locus("seqid", "start1", offset=1).scale(domain=BRCA1_DOMAIN),
+        x=gs.Locus("seqid", "start1", offset=1),
         x2=gs.Locus("seqid", "end1"),
         y=gs.Y("name:N").title("Feature"),
     )
-    .properties(assembly="hg38", title="One-based inclusive input")
+    .properties(
+        assembly="hg38",
+        scales=gs.scales(x=gs.Scale(domain=BRCA1_DOMAIN)),
+        title="One-based inclusive input",
+    )
 )
 # genomic-coordinates-offset-end
 

@@ -56,17 +56,22 @@ genomic_track = (
     gs.Chart(features)
     .mark_rect()
     .encode(
-        x=gs.Locus("chrom", "start").scale(
-            domain=[
-                {"chrom": "chr17", "pos": 43_040_000},
-                {"chrom": "chr17", "pos": 43_080_000},
-            ]
-        ),
+        x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("kind:N").title("Feature kind"),
         color=gs.Color("kind:N").legend(None),
     )
-    .properties(assembly="hg38")
+    .properties(
+        assembly="hg38",
+        scales=gs.scales(
+            x=gs.Scale(
+                domain=[
+                    {"chrom": "chr17", "pos": 43_040_000},
+                    {"chrom": "chr17", "pos": 43_080_000},
+                ]
+            )
+        ),
+    )
 )
 # getting-started-genomic-chart-end
 

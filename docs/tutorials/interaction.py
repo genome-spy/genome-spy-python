@@ -49,12 +49,16 @@ zoom_chart = (
     gs.Chart(VARIANTS)
     .mark_point(filled=True, size=110)
     .encode(
-        x=gs.Locus("chrom", "pos").scale(domain=REGION).axis(title="Genomic position"),
+        x=gs.Locus("chrom", "pos").axis(title="Genomic position"),
         y=gs.Y("score:Q").scale(domain=[0, 1]).title("Score"),
         color=gs.Color("impact:N"),
         tooltip=["id:N", "score:Q", "impact:N"],
     )
-    .properties(assembly="hg38", title="Zoomable locus scale")
+    .properties(
+        assembly="hg38",
+        scales=gs.scales(x=gs.Scale(domain=REGION)),
+        title="Zoomable locus scale",
+    )
 )
 # interaction-zoom-end
 
@@ -98,7 +102,7 @@ selection_chart = (
     gs.Chart(VARIANTS)
     .mark_point(filled=True, size=140, stroke="black")
     .encode(
-        x=gs.Locus("chrom", "pos").scale(domain=REGION),
+        x=gs.Locus("chrom", "pos"),
         y=gs.Y("score:Q").scale(domain=[0, 1]),
         color=gs.Color("impact:N"),
         key=gs.Key("id"),
@@ -113,6 +117,7 @@ selection_chart = (
     .properties(
         assembly="hg38",
         title="Click a variant to select it",
+        scales=gs.scales(x=gs.Scale(domain=REGION)),
         params=[gs.param("selectedVariant", select="point")],
     )
 )

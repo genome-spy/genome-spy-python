@@ -8,6 +8,18 @@ Use `gs.Locus(chrom_field, position_field)` for this chromosome-aware encoding.
 The resulting channel has the `locus` data type and automatically uses a locus
 scale.
 
+For genomic views, prefer putting an initial domain on the view-level scale:
+
+```python
+chart.properties(
+    scales=gs.scales(x=gs.Scale(domain=REGION)),
+)
+```
+
+A view-level domain is easier to reason about than one buried in an encoding
+deep in the view hierarchy. It also makes the owner of a domain explicit when
+several linked tracks share the same genomic scale.
+
 ## Point features
 
 Single nucleotide variants and other point features need one locus:
