@@ -1,5 +1,14 @@
 # Dev Log
 
+## 2026-08-26 - Scoped genomic domain placement guidance
+
+- Kept encoding-level domains in single-unit examples for shorter, more local
+  code while retaining view-level domains for shared or composed views.
+- Revised the genomic-axes guidance to explain that view-level domains are
+  easier to reason about when they belong to a common parent.
+- Validation: forty-one tutorial tests, Ruff format/check, and a strict Sphinx
+  build passed.
+
 ## 2026-08-26 - Corrected documentation example guidance
 
 - Removed data-type suffixes from secondary positional channels and removed
