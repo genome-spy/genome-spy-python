@@ -1,5 +1,11 @@
 # Dev Log
 
+## 2026-08-26 - Prevented sidebar brand wrapping
+
+- Reduced the generated documentation sidebar brand text to `1.4em` so
+  `genome-spy-python` remains on one line.
+- Validation: strict Sphinx build passed and confirmed the generated CSS rule.
+
 ## 2026-08-26 - Scoped genomic domain placement guidance
 
 - Kept encoding-level domains in single-unit examples for shorter, more local
