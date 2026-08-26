@@ -95,23 +95,17 @@ locus_chart = (
     gs.Chart(features)
     .mark_rect()
     .encode(
-        x=gs.Locus("chrom", "start"),
+        x=gs.Locus("chrom", "start").scale(
+            domain=[
+                {"chrom": "chr17", "pos": 43_040_000},
+                {"chrom": "chr17", "pos": 43_080_000},
+            ]
+        ),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("kind:N").title("Feature kind"),
         color=gs.Color("kind:N").legend(None),
     )
-    .properties(
-        assembly="hg38",
-        scales=gs.scales(
-            x=gs.Scale(
-                domain=[
-                    {"chrom": "chr17", "pos": 43_040_000},
-                    {"chrom": "chr17", "pos": 43_080_000},
-                ]
-            )
-        ),
-        title="Locus values follow the genome",
-    )
+    .properties(assembly="hg38", title="Locus values follow the genome")
 )
 # encoding-channels-locus-end
 

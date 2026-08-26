@@ -96,13 +96,12 @@ def test_getting_started_charts_serialize_and_validate() -> None:
     assert genomic_spec["assembly"] == "hg38"
     assert genomic_spec["encoding"]["x"]["type"] == "locus"
     # Without a domain the whole assembly is visible and the features vanish.
-    assert genomic_spec["scales"]["x"] == {
+    assert genomic_spec["encoding"]["x"]["scale"] == {
         "domain": [
             {"chrom": "chr17", "pos": 43_040_000},
             {"chrom": "chr17", "pos": 43_080_000},
         ]
     }
-    assert "scale" not in genomic_spec["encoding"]["x"]
     assert genomic_spec["encoding"]["x2"] == {"chrom": "chrom", "pos": "end"}
 
 
@@ -217,12 +216,12 @@ def test_encoding_guide_examples_serialize_with_expected_definitions() -> None:
         "chrom": "chrom",
         "pos": "start",
         "type": "locus",
-    }
-    assert locus_spec["scales"]["x"] == {
-        "domain": [
-            {"chrom": "chr17", "pos": 43_040_000},
-            {"chrom": "chr17", "pos": 43_080_000},
-        ]
+        "scale": {
+            "domain": [
+                {"chrom": "chr17", "pos": 43_040_000},
+                {"chrom": "chr17", "pos": 43_080_000},
+            ]
+        },
     }
     assert locus_spec["encoding"]["x2"] == {
         "chrom": "chrom",
@@ -496,8 +495,7 @@ def test_genomic_coordinate_examples_serialize_locus_semantics() -> None:
     assert point_spec["encoding"]["x"]["type"] == "locus"
     assert point_spec["encoding"]["x"]["chrom"] == "chrom"
     assert point_spec["encoding"]["x"]["pos"] == "pos"
-    assert point_spec["scales"]["x"] == {"domain": tutorial.BRCA1_DOMAIN}
-    assert "scale" not in point_spec["encoding"]["x"]
+    assert point_spec["encoding"]["x"]["scale"] == {"domain": tutorial.BRCA1_DOMAIN}
 
     interval_spec = tutorial.interval_chart.to_dict()
     assert interval_spec["encoding"]["x2"] == {"chrom": "chrom", "pos": "end"}
@@ -556,8 +554,7 @@ def test_genomic_data_examples_serialize_lazy_sources() -> None:
     bigwig_spec = tutorial.bigwig_chart.to_dict()
     assert bigwig_spec["data"]["lazy"]["type"] == "bigwig"
     assert bigwig_spec["encoding"]["x"]["type"] == "locus"
-    assert bigwig_spec["scales"]["x"] == {"domain": tutorial.REGION}
-    assert "scale" not in bigwig_spec["encoding"]["x"]
+    assert bigwig_spec["encoding"]["x"]["scale"] == {"domain": tutorial.REGION}
 
     bigbed_spec = tutorial.bigbed_chart.to_dict()
     assert bigbed_spec["data"]["lazy"]["type"] == "bigbed"
@@ -702,8 +699,7 @@ def test_interaction_zoom_and_bound_parameters_serialize() -> None:
 
     zoom_spec = tutorial.zoom_chart.to_dict()
     # Locus scales zoom by default, so the example sets no zoom option.
-    assert zoom_spec["scales"]["x"] == {"domain": tutorial.REGION}
-    assert "scale" not in zoom_spec["encoding"]["x"]
+    assert zoom_spec["encoding"]["x"]["scale"] == {"domain": tutorial.REGION}
 
     bound_spec = tutorial.bound_chart.to_dict()
     assert bound_spec["transform"] == [
@@ -731,8 +727,6 @@ def test_interaction_selection_uses_key_and_conditional_encodings() -> None:
     tutorial = _load_module("_interaction_selection", INTERACTION_TUTORIAL_PATH)
     spec = tutorial.selection_chart.to_dict()
 
-    assert spec["scales"]["x"] == {"domain": tutorial.REGION}
-    assert "scale" not in spec["encoding"]["x"]
     assert spec["params"] == [{"name": "selectedVariant", "select": "point"}]
     assert spec["encoding"]["key"] == {"field": "id"}
     assert spec["encoding"]["opacity"] == {
