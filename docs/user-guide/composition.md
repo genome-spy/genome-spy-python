@@ -58,7 +58,7 @@ for aligned tracks that share horizontal positions:
 ```
 
 ```{genomespy-chart} composition:vertical_chart
-:height: 320
+:height: 330
 :title: Two vertically concatenated tracks with one horizontal scale
 ```
 
