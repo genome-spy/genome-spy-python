@@ -22,6 +22,7 @@ sin_chart = (
         x=gs.X("x:Q").scale(zoom=True),
         y=gs.Y("value:Q").scale(zoom=True).title("sin"),
     )
+    .with_view(stroke="lightgray")
 )
 cos_chart = (
     gs.Chart(data)
@@ -31,8 +32,9 @@ cos_chart = (
         x=gs.X("x:Q").scale(zoom=True).title("Position"),
         y=gs.Y("value:Q").scale(zoom=True).title("cos"),
     )
+    .with_view(stroke="lightgray")
 )
 
-chart = gs.vconcat(sin_chart, cos_chart, spacing=18).properties(
+chart = gs.vconcat(sin_chart, cos_chart, spacing=20).properties(
     title="Vertical concatenation"
 )

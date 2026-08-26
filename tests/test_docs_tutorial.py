@@ -375,7 +375,11 @@ def test_composition_guide_examples_serialize_inherited_properties() -> None:
 
     vertical_spec = tutorial.vertical_chart.to_dict()
     assert "data" in vertical_spec
+    assert vertical_spec["spacing"] == 20
     assert vertical_spec["encoding"]["x"]["scale"]["zoom"] is True
+    assert all(
+        child["view"] == {"stroke": "lightgray"} for child in vertical_spec["vconcat"]
+    )
     assert all("data" not in child for child in vertical_spec["vconcat"])
     assert vertical_spec["resolve"] == {
         "scale": {"x": "shared", "y": "independent"},
@@ -384,6 +388,10 @@ def test_composition_guide_examples_serialize_inherited_properties() -> None:
 
     horizontal_spec = tutorial.horizontal_chart.to_dict()
     assert len(horizontal_spec["hconcat"]) == 2
+    assert horizontal_spec["spacing"] == 20
+    assert all(
+        child["view"] == {"stroke": "lightgray"} for child in horizontal_spec["hconcat"]
+    )
     assert horizontal_spec["resolve"]["scale"] == {"x": "shared", "y": "shared"}
 
 

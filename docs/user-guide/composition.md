@@ -66,6 +66,9 @@ The parent supplies the data and `x` encoding. Both tracks therefore use one
 zoomable horizontal scale. Their `y` scales remain independent because signal
 and quality have different units and domains.
 
+The light-gray view strokes and 20-pixel gap make the two schematic child views
+easy to distinguish while reading the composition.
+
 Vertical concatenation shares `x` resolution by default because aligned tracks
 are common in GenomeSpy. The explicit calls above document the intended
 relationship and keep it visible when the chart becomes more complex.
