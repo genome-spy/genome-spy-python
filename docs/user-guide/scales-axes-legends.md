@@ -103,6 +103,10 @@ interactively:
 gs.X("time:Q").scale(domain=[0.5, 3.5], zoom=True)
 ```
 
+Zooming applies to quantitative, index, and locus scales. Nominal and ordinal
+positional scales represent categorical data and do not support interactive
+zooming, so leave `zoom` unset for them.
+
 The customized chart above uses a zoomable horizontal scale. Zoom
 extent and domain transitions are described in
 [zooming and panning](https://genomespy.app/docs/grammar/scale/#zooming-and-panning).

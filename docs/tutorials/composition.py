@@ -40,18 +40,20 @@ signal_track = (
         color="group:N",
     )
     .properties(height=150)
+    .with_view(stroke="lightgray")
 )
 quality_track = (
     gs.Chart()
     .mark_point(filled=True, size=90, color="#6f6f6f")
     .encode(y=gs.Y("quality:Q").scale(domain=[0, 1]).title("Quality"))
     .properties(height=90)
+    .with_view(stroke="lightgray")
 )
 
 vertical_chart = (
     (signal_track & quality_track)
     .encode(x=gs.X("position:Q").scale(domain=[0.5, 3.5], zoom=True))
-    .properties(data=measurements, spacing=8, title="Two aligned tracks")
+    .properties(data=measurements, spacing=20, title="Two aligned tracks")
     .resolve_scale(x="shared", y="independent")
     .resolve_axis(x="shared", y="independent")
 )
@@ -65,6 +67,7 @@ control_panel = (
     .mark_point(filled=True, size=100, color="#4c78a8")
     .encode(x="position:Q", y=gs.Y("signal:Q").scale(zero=False))
     .properties(title="Control")
+    .with_view(stroke="lightgray")
 )
 treated_panel = (
     gs.Chart()
@@ -72,11 +75,12 @@ treated_panel = (
     .mark_point(filled=True, size=100, color="#e45756")
     .encode(x="position:Q", y=gs.Y("signal:Q").scale(zero=False))
     .properties(title="Treated")
+    .with_view(stroke="lightgray")
 )
 
 horizontal_chart = (
     (control_panel | treated_panel)
-    .properties(data=measurements, spacing=18)
+    .properties(data=measurements, spacing=20)
     .resolve_scale(x="shared", y="shared")
     .resolve_axis(x="independent", y="shared")
 )

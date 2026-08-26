@@ -20,7 +20,7 @@ chart = (
     .mark_link(linkShape="dome", size=2)
     .encode(
         x=gs.X("x:Q").scale(domain=[0, 18], zoom=True).title("Start"),
-        x2=gs.X2("x2:Q"),
+        x2=gs.X2("x2"),
         y=gs.Y("y:Q").scale(domain=[0, 12]).title("Height"),
     )
     .properties(title="Dome-shaped links")

@@ -43,6 +43,8 @@ REGION = [
     {"chrom": "chr17", "pos": 43_090_000},
 ]
 
+VARIANT_DOMAIN = ["v1", "v2", "v3", "v4"]
+
 
 # interaction-zoom-start
 zoom_chart = (
@@ -69,7 +71,7 @@ bound_chart = (
         size=gs.expr("pointSize"),
     )
     .encode(
-        x=gs.X("id:N").title("Variant"),
+        x=gs.X("id:N").scale(domain=VARIANT_DOMAIN).title("Variant"),
         y=gs.Y("score:Q").scale(domain=[0, 1]).title("Score"),
     )
     .properties(

@@ -374,7 +374,11 @@ def test_composition_guide_examples_serialize_inherited_properties() -> None:
 
     vertical_spec = tutorial.vertical_chart.to_dict()
     assert "data" in vertical_spec
+    assert vertical_spec["spacing"] == 20
     assert vertical_spec["encoding"]["x"]["scale"]["zoom"] is True
+    assert all(
+        child["view"] == {"stroke": "lightgray"} for child in vertical_spec["vconcat"]
+    )
     assert all("data" not in child for child in vertical_spec["vconcat"])
     assert vertical_spec["resolve"] == {
         "scale": {"x": "shared", "y": "independent"},
@@ -383,6 +387,10 @@ def test_composition_guide_examples_serialize_inherited_properties() -> None:
 
     horizontal_spec = tutorial.horizontal_chart.to_dict()
     assert len(horizontal_spec["hconcat"]) == 2
+    assert horizontal_spec["spacing"] == 20
+    assert all(
+        child["view"] == {"stroke": "lightgray"} for child in horizontal_spec["hconcat"]
+    )
     assert horizontal_spec["resolve"]["scale"] == {"x": "shared", "y": "shared"}
 
 
@@ -627,15 +635,56 @@ def test_annotation_layers_keep_targets_and_labels_separate() -> None:
         "rule",
         "text",
     ]
+    assert spec["layer"][0]["encoding"]["tooltip"] == [
+        {"field": "gene", "type": "nominal", "title": "Gene"},
+        {"field": "effect", "type": "quantitative", "title": "Effect"},
+        {
+            "field": "significance",
+            "type": "quantitative",
+            "title": "Significance",
+        },
+    ]
+    assert spec["layer"][1]["mark"]["tooltip"] is None
     assert spec["layer"][1]["encoding"] == {
         "x": {"field": "effect", "type": "quantitative", "title": "Effect"},
-        "x2": {"field": "label_x"},
+        "xOffset": {
+            "field": "label_x_offset",
+            "type": "quantitative",
+            "scale": None,
+        },
+        "x2": {"field": "effect"},
         "y": {
             "field": "significance",
             "type": "quantitative",
             "title": "Significance",
         },
-        "y2": {"field": "label_y"},
+        "yOffset": {
+            "field": "label_y_offset",
+            "type": "quantitative",
+            "scale": None,
+        },
+        "y2": {"field": "significance"},
+    }
+    assert spec["layer"][2]["mark"]["tooltip"] is None
+    assert spec["layer"][2]["encoding"]["x"] == {
+        "field": "effect",
+        "type": "quantitative",
+        "title": "Effect",
+    }
+    assert spec["layer"][2]["encoding"]["xOffset"] == {
+        "field": "label_x_offset",
+        "type": "quantitative",
+        "scale": None,
+    }
+    assert spec["layer"][2]["encoding"]["y"] == {
+        "field": "significance",
+        "type": "quantitative",
+        "title": "Significance",
+    }
+    assert spec["layer"][2]["encoding"]["yOffset"] == {
+        "field": "label_y_offset",
+        "type": "quantitative",
+        "scale": None,
     }
     assert spec["layer"][2]["encoding"]["text"] == {
         "field": "gene",
@@ -698,6 +747,7 @@ def test_interaction_zoom_and_bound_parameters_serialize() -> None:
         {"type": "filter", "expr": "datum.score >= minScore"}
     ]
     assert bound_spec["mark"]["size"] == {"expr": "pointSize"}
+    assert bound_spec["encoding"]["x"]["scale"] == {"domain": tutorial.VARIANT_DOMAIN}
     assert bound_spec["params"] == [
         {
             "name": "minScore",

@@ -6,9 +6,9 @@ lets the same labels update with the chart's scales and zoom state.
 
 ## Label selected points
 
-Give each annotation both the coordinates of its target and a separate pair of
-label coordinates. A rule connects the two positions and a text mark draws the
-label:
+Give each annotation the coordinates of its target and a pair of pixel offsets
+for the label endpoint. A rule connects the offset endpoint to the point, and a
+text mark draws the label:
 
 ```{literalinclude} ../tutorials/annotations.py
 :language: python
@@ -22,14 +22,15 @@ label:
 ```
 
 The annotation table contains only deliberately labelled rows. This is usually
-clearer than drawing a text mark for every observation. Prepare the selection
-and label coordinates with the chart-ready data when they depend on analysis
-or require manual placement; use GenomeSpy transforms when the choice should
-respond to browser-side filtering or interaction.
+clearer than drawing a text mark for every observation. Pixel offsets keep the
+label spacing stable while the data scales zoom. Prepare the selection and
+offsets with the chart-ready data when they depend on analysis or require
+manual placement; use GenomeSpy transforms when the choice should respond to
+browser-side filtering or interaction.
 
 Leader lines are optional when a label can sit directly above its point. When
-several labels are close together, move their label coordinates rather than
-moving the points, and keep the number of callouts small. The
+several labels are close together, adjust their offsets rather than moving the
+points, and keep the number of callouts small. The
 [airway volcano plot](../gallery/airway_volcano_plot.md) and
 [airway MA plot](../gallery/airway_ma_plot.md) apply this pattern to selected
 genes.

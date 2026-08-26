@@ -45,7 +45,7 @@ interval_chart = (
     .mark_rule(size=8, strokeCap="round")
     .encode(
         x=gs.X("start:Q").scale(domain=[0, 12]).title("Position"),
-        x2=gs.X2("end:Q"),
+        x2=gs.X2("end"),
         y=gs.Y("feature:N").title("Feature"),
         color=gs.Color("group:N").legend(title="Group"),
     )
@@ -78,9 +78,9 @@ relations = [
 
 relation_base = gs.Chart(relations).encode(
     x=gs.X("x:Q").scale(domain=[0, 9]).title("Source x"),
-    x2=gs.X2("x2:Q"),
+    x2=gs.X2("x2"),
     y=gs.Y("y:Q").scale(domain=[0, 5]).title("Source y"),
-    y2=gs.Y2("y2:Q"),
+    y2=gs.Y2("y2"),
     color=gs.Color("kind:N").legend(title="Relation"),
 )
 

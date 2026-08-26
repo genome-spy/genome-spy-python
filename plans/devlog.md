@@ -1,5 +1,42 @@
 # Dev Log
 
+## 2026-08-26 - Stabilized airway volcano callouts and tooltips
+
+- Replaced the airway volcano example's data-domain label endpoints with fixed
+  logical-pixel offsets, putting the label endpoint on primary offset channels
+  so the leader line remains a single layer.
+- Added explicit point tooltips for the airway volcano and MA examples so
+  plotting-only helper fields are not shown by the default handler.
+- Validation: focused gallery and dataset tests, Ruff, MyPy, strict Sphinx, and
+  a live browser render passed; the browser reported only the unrelated missing
+  `/favicon.ico` resource.
+
+## 2026-08-26 - Prevented sidebar brand wrapping
+
+- Reduced the generated documentation sidebar brand text to `1.4em` so
+  `genome-spy-python` remains on one line.
+- Validation: strict Sphinx build passed and confirmed the generated CSS rule.
+
+## 2026-08-26 - Scoped genomic domain placement guidance
+
+- Kept encoding-level domains in single-unit examples for shorter, more local
+  code while retaining view-level domains for shared or composed views.
+- Revised the genomic-axes guidance to explain that view-level domains are
+  easier to reason about when they belong to a common parent.
+- Validation: forty-one tutorial tests, Ruff format/check, and a strict Sphinx
+  build passed.
+
+## 2026-08-26 - Corrected documentation example guidance
+
+- Removed data-type suffixes from secondary positional channels and removed
+  unsupported zoom settings from nominal and ordinal examples.
+- Moved genomic viewport domains to owning view-level scales and documented why
+  that placement is easier to reason about in deep view hierarchies.
+- Added light-gray borders and 20-pixel spacing to schematic composition
+  examples, clarified that transforms execute browser-side in GenomeSpy, and
+  fixed the bound-parameter example with an explicit categorical domain.
+- Validation: 127 documentation tutorial/gallery tests, Ruff format/check,
+  MyPy, and a strict Sphinx build passed.
 ## 2026-08-26 - Clarified project and notebook documentation
 
 - Added concise authorship and AI-assistance statements to the About page.

@@ -3,11 +3,11 @@
 Composition combines complete views into a larger visualization. GenomeSpy
 uses three concise operators for the most common layouts:
 
-| Operator | Composition | Result |
-| --- | --- | --- |
-| `a + b` | Layer | Draw `b` over `a` in the same plot area |
-| `a & b` | Vertical concatenation | Place `a` above `b` |
-| `a \| b` | Horizontal concatenation | Place `a` to the left of `b` |
+| Operator | Composition              | Result                                  |
+| -------- | ------------------------ | --------------------------------------- |
+| `a + b`  | Layer                    | Draw `b` over `a` in the same plot area |
+| `a & b`  | Vertical concatenation   | Place `a` above `b`                     |
+| `a \| b` | Horizontal concatenation | Place `a` to the left of `b`            |
 
 Use `gs.concat(..., columns=n)` when the layout is an explicit wrapping grid.
 Composition is hierarchical, so layers and concatenations can be nested. The
@@ -58,13 +58,16 @@ for aligned tracks that share horizontal positions:
 ```
 
 ```{genomespy-chart} composition:vertical_chart
-:height: 300
+:height: 330
 :title: Two vertically concatenated tracks with one horizontal scale
 ```
 
 The parent supplies the data and `x` encoding. Both tracks therefore use one
 zoomable horizontal scale. Their `y` scales remain independent because signal
 and quality have different units and domains.
+
+The light-gray view strokes and 20-pixel gap make the two schematic child views
+easy to distinguish while reading the composition.
 
 Vertical concatenation shares `x` resolution by default because aligned tracks
 are common in GenomeSpy. The explicit calls above document the intended
@@ -138,9 +141,9 @@ matrix:
 
 The child order fills the grid row by row:
 
-| Empty placeholder | Column summary |
-| --- | --- |
-| Row summary | Membership matrix |
+| Empty placeholder | Column summary    |
+| ----------------- | ----------------- |
+| Row summary       | Membership matrix |
 
 The column summary shares its `x` index scale with the matrix but excludes its
 quantitative `y` scale. The row summary does the converse. The matrix and

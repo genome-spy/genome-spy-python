@@ -21,7 +21,7 @@ chart = (
     .mark_point(size=55)
     .encode(
         x=gs.X("value:Q").scale(zoom=True).title("Value"),
-        y=gs.Y("x:O").scale(zoom=True).title("Row"),
+        y=gs.Y("x:O").title("Row"),
     )
     .properties(
         height=gs.step(20),

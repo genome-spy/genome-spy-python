@@ -3,13 +3,13 @@
 GenomeSpy exposes appearance and layout at several levels. Choosing the narrowest
 appropriate level keeps a specification predictable:
 
-| Level | Typical API | Scope |
-| --- | --- | --- |
-| Mark | `mark_point(size=...)` | Every instance of that mark |
-| Encoding | `size="amount:Q"` | Varies from row to row |
-| View | `.properties(...)`, `.with_view(...)` | One chart or composed subtree |
-| Configuration | `.configure_*()` | Defaults within a configuration scope |
-| Theme | `.properties(theme=...)` | Broad root-level visual preset |
+| Level         | Typical API                           | Scope                                 |
+| ------------- | ------------------------------------- | ------------------------------------- |
+| Mark          | `mark_point(size=...)`                | Every instance of that mark           |
+| Encoding      | `size="amount:Q"`                     | Varies from row to row                |
+| View          | `.properties(...)`, `.with_view(...)` | One chart or composed subtree         |
+| Configuration | `.configure_*()`                      | Defaults within a configuration scope |
+| Theme         | `.properties(theme=...)`              | Broad root-level visual preset        |
 
 Explicit properties win over configured defaults. A configured point size, for
 example, applies only when the point mark or size encoding does not provide a
@@ -131,7 +131,7 @@ combine fixed pixels with flex-like growth through `gs.SizeDef()`:
 ```
 
 ```{genomespy-chart} configuration:flex_chart
-:height: 110
+:height: 120
 :title: One fixed child and one growing child
 ```
 

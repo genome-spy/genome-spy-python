@@ -5,6 +5,14 @@ marks. Transforms can remove rows, add fields, summarize groups, or perform
 more specialized visualization operations. They run in the browser before the
 marks are drawn.
 
+::::{admonition} Transforms define GenomeSpy's data flow
+:class: note
+
+Transform methods define the data flow inside the serialized GenomeSpy
+specification. They do not process data in Python: the browser-side GenomeSpy
+runtime executes them when it renders or interacts with the visualization.
+::::
+
 ```{literalinclude} ../tutorials/transforms.py
 :language: python
 :start-after: transforms-data-start

@@ -95,7 +95,7 @@ def airway_differential_expression(
         Hochberg adjusted p-values, then adds the transformed fields and
         significance classification shared by the MA and volcano examples.
         A small curated set of genes also receives chart-ready callout labels
-        and label coordinates.
+        and label offsets.
 
     Args:
         min_base_mean: Minimum mean count required before testing.
@@ -172,10 +172,12 @@ def _add_airway_annotation_positions(
     data: pd.DataFrame, domains: dict[str, list[float]]
 ) -> None:
     """Add sparse label endpoints used by the airway gallery examples."""
+    # Volcano offsets are logical pixels so callouts keep their visual spacing
+    # when the reader zooms the chart. MA offsets remain data-domain positions.
     volcano_offsets = {
-        "ZBTB16": (-0.85, 0.65),
-        "PLA2G4A": (-0.85, 0.75),
-        "TSLP": (-1.0, -0.55),
+        "ZBTB16": (-42, -45),
+        "PLA2G4A": (-42, -52),
+        "TSLP": (-50, 38),
     }
     ma_offsets = {
         "ZBTB16": (0.35, -0.55),
@@ -201,9 +203,7 @@ def _add_airway_annotation_positions(
         {symbol: offset[1] for symbol, offset in ma_offsets.items()}
     )
 
-    data["volcano_label_x"] = (data["log2fc"] + volcano_dx).clip(*domains["volcano_x"])
-    data["volcano_label_y"] = (data["neglog10_pvalue_plot"] + volcano_dy).clip(
-        *domains["volcano_y"]
-    )
+    data["volcano_x_offset"] = volcano_dx
+    data["volcano_y_offset"] = volcano_dy
     data["ma_label_x"] = (data["log10_base_mean"] + ma_dx).clip(*domains["ma_x"])
     data["ma_label_y"] = (data["log2fc"] + ma_dy).clip(*domains["ma_y"])

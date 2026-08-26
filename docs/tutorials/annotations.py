@@ -18,16 +18,22 @@ annotations = [
         "gene": "A",
         "effect": -1.8,
         "significance": 2.1,
-        "label_x": -2.15,
-        "label_y": 2.65,
+        "label_x_offset": -16,
+        "label_y_offset": -16,
     },
     {
         "gene": "E",
         "effect": 2.0,
         "significance": 2.8,
-        "label_x": 1.55,
-        "label_y": 3.35,
+        "label_x_offset": -16,
+        "label_y_offset": 16,
     },
+]
+
+point_tooltip = [
+    gs.Tooltip("gene:N").title("Gene"),
+    gs.Tooltip("effect:Q").title("Effect"),
+    gs.Tooltip("significance:Q").title("Significance"),
 ]
 
 point_marks = (
@@ -36,26 +42,38 @@ point_marks = (
     .encode(
         x=gs.X("effect:Q").title("Effect"),
         y=gs.Y("significance:Q").title("Significance"),
+        tooltip=point_tooltip,
     )
 )
 
+# Use pixel offsets for the label endpoint so zooming the data scales does not
+# move the label. The primary x/y endpoint is shifted; x2/y2 stays on the point.
 leader_lines = (
     gs.Chart(annotations)
-    .mark_rule(color="#555", size=1)
+    .mark_rule(color="#555", size=1, tooltip=None)
     .encode(
         x=gs.X("effect:Q").title("Effect"),
-        x2="label_x:Q",
+        xOffset=gs.XOffset("label_x_offset:Q").scale(None),
+        x2="effect",
         y=gs.Y("significance:Q").title("Significance"),
-        y2="label_y:Q",
+        yOffset=gs.YOffset("label_y_offset:Q").scale(None),
+        y2="significance",
     )
 )
 
 point_labels = (
     gs.Chart(annotations)
-    .mark_text(baseline="bottom", yOffset=-3, fontWeight="bold")
+    .mark_text(
+        baseline="bottom",
+        yOffset=-3,
+        fontWeight="bold",
+        tooltip=None,
+    )
     .encode(
-        x=gs.X("label_x:Q").title("Effect"),
-        y=gs.Y("label_y:Q").title("Significance"),
+        x=gs.X("effect:Q").title("Effect"),
+        xOffset=gs.XOffset("label_x_offset:Q").scale(None),
+        y=gs.Y("significance:Q").title("Significance"),
+        yOffset=gs.YOffset("label_y_offset:Q").scale(None),
         text="gene:N",
     )
 )
