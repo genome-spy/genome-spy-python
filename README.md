@@ -4,13 +4,15 @@
 
 <h1 align="center">genome-spy-python</h1>
 
-`genome-spy-python` is a Python interface for [GenomeSpy], a grammar for
-interactive and scalable genomic visualization. It lets Python users build
-GenomeSpy specifications with a declarative, fluent API, serialize them to
-JSON, and display them in Jupyter notebooks.
+`genome-spy-python` is a Python interface for
+<a href="https://genomespy.app/" target="_blank" rel="noopener noreferrer">GenomeSpy</a>,
+a grammar for interactive and scalable genomic visualization. It lets Python
+users build GenomeSpy specifications with a declarative, fluent API, serialize
+them to JSON, and display them in Jupyter notebooks.
 
-[Altair] is the project's main source of inspiration. This codebase follows
-Altair's approach of combining schema-backed specification objects with a small
+<a href="https://altair-viz.github.io/" target="_blank" rel="noopener noreferrer">Altair</a>
+is the project's main source of inspiration. This codebase follows Altair's
+approach of combining schema-backed specification objects with a small
 handwritten Python API for marks, encodings, composition, and rendering. It
 adapts that model to GenomeSpy's genomics-native grammar: locus scales, genomic
 data sources, and coordinated genomic views.
@@ -208,16 +210,14 @@ package from the pinned `@genome-spy/core` release. See
 
 ## References
 
-- [GenomeSpy] — the upstream visualization grammar and JavaScript renderer.
-- [Altair] — a schema-wrapper design reference.
-- [Gos] — a related grammar and Python-wrapper design reference for
+- <a href="https://genomespy.app/" target="_blank" rel="noopener noreferrer">GenomeSpy</a>
+  — the upstream visualization grammar and JavaScript renderer.
+- <a href="https://altair-viz.github.io/" target="_blank" rel="noopener noreferrer">Altair</a>
+  — a schema-wrapper design reference.
+- <a href="https://gosling-lang.org/" target="_blank" rel="noopener noreferrer">Gos</a>
+  — a related grammar and Python-wrapper design reference for
   genomics visualization.
 
 Portions of the schema-wrapper implementation and selected tests are adapted
 from Altair under its BSD-3-Clause license. See
 [Third-party notices](THIRD_PARTY_NOTICES.md) for the exact sources and license.
-
-[Altair]: https://altair-viz.github.io/
-[GenomeSpy]: https://genome-spy.org/
-[Gos]: https://gosling-lang.org/
-[uv]: https://docs.astral.sh/uv/
