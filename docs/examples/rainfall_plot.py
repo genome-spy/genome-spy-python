@@ -59,6 +59,8 @@ mutation_legend = (
 
 # --- Visualization -------------------------------------------------------------
 
+# MAF positions are one-based. The offset aligns them with the zero-based RefSeq
+# intervals used by the lower track.
 rainfall_points = (
     gs.Chart(points)
     .mark_point(size=18, filled=True, opacity=0.95)
@@ -71,6 +73,7 @@ rainfall_points = (
     )
 )
 
+# Rules provide the callout stems; separate triangle marks provide arrowheads.
 change_point_stems = (
     gs.Chart(change_points)
     .mark_rule(color="#111111", size=1.2)
@@ -131,6 +134,7 @@ gene_bodies = (
     )
 )
 
+# Keep every gene body but show only the best-scoring non-overlapping labels.
 gene_labels = (
     gs.Chart()
     .transform_measure_text(field="symbol", as_="label_width", fontSize=11)
@@ -196,6 +200,8 @@ gene_track = (
     .transform_filter("datum.lane < 3")
 )
 
+# Sharing x keeps mutation points and genes aligned during zooming. Their y
+# scales remain unrelated.
 chart = (
     (rainfall_track & gene_track)
     .properties(

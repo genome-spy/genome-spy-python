@@ -8,7 +8,7 @@
 <a href="https://genomespy.app/" target="_blank" rel="noopener noreferrer">GenomeSpy</a>,
 a grammar for interactive and scalable genomic visualization. It lets Python
 users build GenomeSpy specifications with a declarative, fluent API, serialize
-them to JSON, and display them in Jupyter notebooks.
+them to JSON, and display them in Jupyter or Marimo notebooks.
 
 <a href="https://altair-viz.github.io/" target="_blank" rel="noopener noreferrer">Altair</a>
 is the project's main source of inspiration. This codebase follows Altair's
@@ -40,11 +40,14 @@ cd genome-spy-python
 uv sync
 ```
 
-For dataframe-backed charts using Arrow transport:
+For efficient dataframe transport:
 
 ```bash
 pip install "genome-spy-python[arrow]"
 ```
+
+See [Arrow data transport](docs/user-guide/arrow-transport.md) for supported
+tables and live updates.
 
 See the [getting-started guide](docs/getting-started.md) for the first example.
 
@@ -107,22 +110,23 @@ chart.save("intervals.html")
 
 ### Update data without recreating the chart
 
-For reactive notebooks, create a widget with an explicitly named dataset and
-replace that dataset as inputs change. The browser keeps the existing
-GenomeSpy instance, so view state such as zoom is preserved.
+For reactive Jupyter or Marimo notebooks, create a widget with an explicitly
+named dataset and replace that dataset as inputs change. The browser keeps the
+existing GenomeSpy instance, so view state such as zoom is preserved.
 
 ```python
-chart = gs.Chart(data={"name": "table"}, datasets={"table": []})
+chart = (
+    gs.Chart(data={"name": "table"}, datasets={"table": []})
+    .mark_point()
+    .encode(x="x:Q", y="y:Q")
+)
 view = chart.widget()
 
 view.set_dataset("table", updated_dataframe)
 ```
 
-Install the Arrow extra when updating from Polars, pandas, or PyArrow tables:
-
-```bash
-uv sync --extra arrow
-```
+See [notebook display and updates](docs/user-guide/notebooks.md) for the Marimo
+pattern.
 
 ## Contributing
 

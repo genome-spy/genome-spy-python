@@ -32,6 +32,8 @@ base_colors = gs.Scale(
     range=["#4FBF45", "#4D96E8", "#E85F78", "#E8B322", "#BDBDBD"],
 )
 
+# Coverage and mismatch summaries are derived from the same reads as the pileup
+# instead of loading separate summary files.
 depth = (
     gs.Chart()
     .transform_flatten_cigar(copyFields=["chrom"])
@@ -109,6 +111,8 @@ coverage = (
     .resolve_scale(color="independent")
 )
 
+# Draw the unmodified read interval first. CIGAR operations and mismatches are
+# flattened into separate overlay rows below.
 read_backbone = (
     gs.Chart()
     .mark_arrow(
@@ -194,6 +198,7 @@ soft_clips = (
     .properties(name="soft-clips", title="Soft-clipped bases")
 )
 
+# Flatten CIGAR only once for all operation-specific overlays.
 cigar_overlays = (
     gs.layer(deletions, skips, insertions, soft_clips)
     .transform_formula(expr="datum.seq", as_="_seq")
@@ -220,6 +225,8 @@ mismatch_labels = (
     .properties(name="mismatch-labels", title="Mismatch base")
 )
 
+# MD tags provide mismatch positions; base quality controls both filtering and
+# the opacity of retained bases.
 mismatches = (
     (mismatch_rects + mismatch_labels)
     .transform_filter("datum.md != null")
@@ -247,6 +254,7 @@ read_layers = (
     .resolve_scale(opacity="independent")
 )
 
+# This singleton overlay avoids creating one zoom message for every BAM read.
 zoom_message = gs.layer(
     gs.Chart().mark_rect(fill="white", opacity=0.7),
     gs.Chart()
@@ -283,6 +291,8 @@ read_alignments = (
     .resolve_scale(color="independent", opacity="independent")
 )
 
+# The lazy BAM source requests only the visible window. Both tracks inherit it
+# and therefore stay synchronized while zooming.
 chart = (
     (coverage & read_alignments)
     .properties(

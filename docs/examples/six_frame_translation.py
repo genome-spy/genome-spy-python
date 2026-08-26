@@ -112,6 +112,8 @@ base_colors = gs.Scale(
     ],
 )
 
+# Reference bases and translations share the same locus scale, so each codon
+# stays aligned with its three source bases.
 reference_background = (
     gs.Chart().mark_rect(tooltip=None).properties(name="reference-base-background")
 )
@@ -166,6 +168,8 @@ amino_acid_labels = (
     .properties(name="amino-acid-labels")
 )
 
+# One template handles both strands. Imported views only change the strand
+# parameter, avoiding two copies of the translation logic.
 translation_template = (
     (amino_acids + amino_acid_labels)
     .properties(params=[gs.param("strand", value="forward")])
@@ -222,6 +226,7 @@ translation = (
         values=["complement"],
         default="N",
     )
+    # Lead windows collect the next two bases needed to form each codon.
     .transform_window(
         sort=gs.compare("pos"),
         ops=["lead", "lead", "lead", "lead"],
@@ -233,6 +238,8 @@ translation = (
     .transform_formula(expr="datum.pos + 3", as_="end")
 )
 
+# Indexed FASTA loads the visible sequence only. Flattening turns that sequence
+# into one row per base for the reference and all six reading frames.
 chart = (
     (reference & translation)
     .properties(

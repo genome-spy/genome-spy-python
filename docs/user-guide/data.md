@@ -49,7 +49,8 @@ uses column names as fields. A pandas index is not a field, so call
 When a supported table is displayed in a notebook, the renderer uses Arrow IPC
 transport when available. `chart.to_dict()` still produces ordinary
 JSON-compatible records. This distinction changes transport efficiency, not
-the chart grammar.
+the chart grammar. See [Arrow data transport](arrow-transport.md) for setup and
+live dataset updates.
 
 The grammar is easiest to use with **long-form data**, where one row represents
 one observation and categories such as `sample` are stored as values in a

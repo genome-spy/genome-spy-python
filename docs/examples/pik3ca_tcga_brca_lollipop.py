@@ -216,6 +216,8 @@ DOMAINS = [
     },
 ]
 
+# Labels, stems, points, and counts use separate layers because each needs its
+# own sizing and alignment.
 mutation_labels = (
     gs.Chart()
     .mark_text(
@@ -264,6 +266,9 @@ sample_counts = (
 mutation_marks = gs.layer(stems, upper_guides, lollipops, sample_counts).properties(
     name="mutations"
 )
+
+# Dense hotspots are displaced for readability. These connectors still point
+# back to each mutation's true residue position.
 connectors = (
     gs.Chart()
     .mark_link(
@@ -283,6 +288,9 @@ anchors = (
     .encode(xOffset=gs.XOffset(gs.value(0)), y=gs.value(0), y2=gs.value(0))
     .properties(name="true-position-anchors")
 )
+
+# displace1d changes only the screen offset; the shared x value remains the real
+# protein coordinate used by the domain track.
 mutation_view = (
     gs.vconcat(
         mutation_labels,
@@ -311,6 +319,7 @@ mutation_view = (
     )
 )
 
+# The protein backbone and domains share the mutation view's x scale.
 backbone = (
     gs.Chart([{"start": 1}])
     .transform_formula(expr="proteinLength", as_="end")
@@ -366,6 +375,8 @@ protein = (
     )
 )
 
+# pixelsPerResidue lets the displacement transform adapt when the chart width
+# changes.
 chart = (
     gs.vconcat(mutation_view, protein, spacing=0)
     .properties(
