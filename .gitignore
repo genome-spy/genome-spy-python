@@ -223,7 +223,7 @@ __marimo__/
 # Reference material and repos (large, locally cloned)
 material/
 tmp/
-plans/private_plans/
+plans/
 
 # Planning scratch files
 scratchbook.md
