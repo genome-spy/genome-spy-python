@@ -31,7 +31,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/genome-spy/genome-spy-python"
-Documentation = "https://genome-spy.github.io/genome-spy-python/"
+Documentation = "https://genomespy.app/genome-spy-python/"
 Repository = "https://github.com/genome-spy/genome-spy-python"
 Issues = "https://github.com/genome-spy/genome-spy-python/issues"
 
