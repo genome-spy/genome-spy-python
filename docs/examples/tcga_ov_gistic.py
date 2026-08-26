@@ -5,12 +5,13 @@ shown over a shared hg19 genomic axis.
 """
 
 import genome_spy as gs
+from genome_spy.datasets._annotations import refseq_gene_bodies
 from genome_spy.datasets._gistic import tcga_ov_gistic_data
 
 META = {
     "category": "Copy-number plots",
     "order": 36,
-    "height": 280,
+    "height": 400,
     "max_width": 980,
 }
 
@@ -20,6 +21,7 @@ event_colors = gs.Scale(
 )
 
 data = tcga_ov_gistic_data()
+genes = refseq_gene_bodies("hg19")
 
 zero_line = (
     gs.Chart([{"value": 0}])
@@ -118,22 +120,127 @@ lesion_track = (
     )
 )
 
+gene_tooltip = [
+    gs.Tooltip("symbol:N").title("Gene"),
+    gs.Tooltip("identifier:N").title("RefSeq locus"),
+    gs.Tooltip("chrom:N").title("Chromosome"),
+    gs.Tooltip("start:Q").title("Start").format(",d"),
+    gs.Tooltip("end:Q").title("End").format(",d"),
+    gs.Tooltip("strand:N").title("Strand"),
+]
+
+gene_bodies = (
+    gs.Chart()
+    .mark_arrow(
+        style="arrow-block",
+        fill="#d5d9de",
+        stroke="#59636e",
+        strokeWidth=1,
+        yOffset=5,
+        size=7,
+        tooltip=gs.HandledTooltip(handler="default"),
+    )
+    .encode(
+        x=gs.Locus("chrom", "start"),
+        x2=gs.Locus("chrom", "end"),
+        direction=gs.Direction("strand:N").scale(
+            domain=["+", "-"], range=["forward", "reverse"]
+        ),
+        tooltip=gene_tooltip,
+    )
+    .properties(
+        opacity=gs.dynamic_opacity(unitsPerPixel=[100000, 40000], values=[0, 1])
+    )
+)
+
+gene_labels = (
+    gs.Chart()
+    .transform_measure_text(field="symbol", as_="label_width", fontSize=11)
+    .transform_filter_scored_labels(
+        pos="linear_start",
+        pos2="linear_end",
+        asMidpoint="label_position",
+        score="score",
+        width="label_width",
+        lane="lane",
+        padding=5,
+    )
+    .mark_text(
+        baseline="middle",
+        align="center",
+        clip=False,
+        yOffset=-5,
+        size=11,
+        color="#20262d",
+        tooltip=gs.HandledTooltip(handler="default"),
+    )
+    .encode(
+        x=gs.X("label_position:L"),
+        text="symbol:N",
+        tooltip=gene_tooltip,
+    )
+)
+
+gene_track = (
+    (gene_bodies + gene_labels)
+    .properties(
+        name="refseq-genes",
+        data=genes,
+        title=gs.title("RefSeq genes", orient="left"),
+        height=gs.step(24),
+    )
+    .encode(
+        y=gs.Y("lane:O")
+        .scale(
+            type="index",
+            domain=[0, 3],
+            reverse=True,
+            align=0,
+            paddingInner=0.4,
+            paddingOuter=0.2,
+            zoom=False,
+        )
+        .axis(None)
+    )
+    .transform_linearize_genomic_coordinate(
+        chrom="chrom",
+        pos=["start", "end"],
+        as_=["linear_start", "linear_end"],
+    )
+    .transform_collect(sort=gs.compare(field=["linear_start", "linear_end"]))
+    .transform_pileup(
+        start="linear_start",
+        end="linear_end",
+        as_="lane",
+        preference="strand",
+        preferredOrder=["-", "+"],
+    )
+    .transform_filter("datum.lane < 3")
+)
+
 chart = (
-    gs.vconcat(score_track, lesion_track)
+    gs.vconcat(score_track, lesion_track, gene_track)
     .properties(
         assembly="hg19",
         name="gistic-track",
+        width="container",
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr18", "pos": 14593640},
-                    {"chrom": "chr20", "pos": 22538731},
+                    {"chrom": "chr19", "pos": 400_000},
+                    {"chrom": "chr19", "pos": 2_000_000},
                 ]
             )
         ),
-        description="TCGA OV-TP GISTIC2 copy-number scores and recurrent lesions.",
+        axes=gs.axes(x=gs.GenomeAxis(title="Genomic position")),
+        spacing=8,
+        description=(
+            "TCGA OV-TP GISTIC2 copy-number scores, recurrent lesions, and "
+            "aligned RefSeq gene bodies around the 19p13.3 deletion peak."
+        ),
     )
-    .resolve_axis(x="shared")
+    .resolve_scale(x="shared", y="independent")
+    .resolve_axis(x="shared", y="independent")
     .configure_legend(disable=True)
     .configure_view(stroke="lightgray")
 )

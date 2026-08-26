@@ -483,6 +483,28 @@ def test_gallery_code_snippets_hide_internal_layout_metadata() -> None:
     assert "LOG2FC_CUTOFF = 1.0" in markdown
 
 
+@pytest.mark.parametrize(
+    ("filename", "label_field"),
+    [
+        ("airway_volcano_plot.py", "volcano_label"),
+        ("airway_ma_plot.py", "ma_label"),
+    ],
+)
+def test_airway_expression_plots_include_gene_callouts(
+    filename: str, label_field: str
+) -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / filename)
+    layers = example.spec["layer"]
+
+    assert layers[-2]["mark"]["type"] == "rule"
+    assert layers[-1]["mark"]["type"] == "text"
+    assert layers[-1]["transform"] == [
+        {"type": "filter", "expr": f"datum.{label_field}"}
+    ]
+    assert layers[-1]["encoding"]["text"]["field"] == label_field
+
+
 def test_sashimi_plot_uses_direct_data_urls() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "sashimi_plot.py")
@@ -535,15 +557,17 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
     example = gallery.collect_example(EXAMPLES_DIR / "tcga_ov_gistic.py")
 
     assert example.spec["assembly"] == "hg19"
-    assert len(example.spec["vconcat"]) == 2
+    assert len(example.spec["vconcat"]) == 3
 
-    score_track, lesion_track = example.spec["vconcat"]
+    score_track, lesion_track, gene_track = example.spec["vconcat"]
     assert [layer["name"] for layer in score_track["layer"]] == [
         "zero-line",
         "q-value-rects",
         "q-value-thresholds",
     ]
+    assert len(score_track["layer"][1]["data"]["values"]) == 90_240
     assert lesion_track["name"] == "gistic-all-lesions"
+    assert len(lesion_track["data"]["values"]) == 146
     assert [transform["type"] for transform in lesion_track["transform"]] == [
         "regexExtract",
         "filter",
@@ -553,7 +577,44 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
     ]
     assert lesion_track["encoding"]["opacity"]["field"] == "Segment type"
     assert lesion_track["encoding"]["size"]["field"] == "Segment type"
+    assert gene_track["name"] == "refseq-genes"
+    assert gene_track["layer"][0]["opacity"]["unitsPerPixel"] == [100000, 40000]
+    assert [transform["type"] for transform in gene_track["transform"]] == [
+        "linearizeGenomicCoordinate",
+        "collect",
+        "pileup",
+        "filter",
+    ]
+    assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
+    assert "offset" not in gene_track["transform"][0]
+    assert len(gene_track["data"]["values"]) == 29_599
+    assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
     assert "https://data.genomespy.app" not in str(example.spec)
+
+
+def test_rainfall_includes_shared_refseq_annotation_track() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "rainfall_plot.py")
+
+    assert example.spec["assembly"] == "hg19"
+    assert [view["name"] for view in example.spec["vconcat"]] == [
+        "rainfall-track",
+        "refseq-genes",
+    ]
+    assert example.spec["resolve"] == {
+        "scale": {"x": "shared", "y": "independent"},
+        "axis": {"x": "shared", "y": "independent"},
+    }
+    gene_track = example.spec["vconcat"][1]
+    assert gene_track["title"]["offset"] == 8
+    assert gene_track["layer"][0]["mark"]["style"] == "arrow-block"
+    assert gene_track["layer"][0]["opacity"]["unitsPerPixel"] == [100000, 40000]
+    assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
+    assert "offset" not in gene_track["transform"][0]
+    assert len(gene_track["data"]["values"]) == 29_599
+    assert "offset" not in gene_track["layer"][0]["encoding"]["x"]
+    rainfall_layers = example.spec["vconcat"][0]["layer"]
+    assert all(layer["encoding"]["x"]["offset"] == 1 for layer in rainfall_layers)
 
 
 def test_bam_example_uses_full_alignment_dataflow() -> None:

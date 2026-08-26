@@ -56,11 +56,53 @@ ma_fc_rules = (
     gs.Chart([{"y": -LOG2FC_CUTOFF}, {"y": 0.0}, {"y": LOG2FC_CUTOFF}])
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
-        y=gs.Y("y:Q").scale(reverse=False, domain=domains["ma_y"], zoom=True),
+        y=gs.Y("y:Q")
+        .scale(reverse=False, domain=domains["ma_y"], zoom=True)
+        .title("log2 fold change"),
     )
 )
 
-chart = (ma_fc_rules + ma_points).properties(
+ma_callout_lines = (
+    gs.Chart(data)
+    .transform_filter("datum.ma_label")
+    .mark_rule(color="#3f4750", size=1)
+    .encode(
+        x=gs.X("log10_base_mean:Q")
+        .scale(domain=domains["ma_x"], zoom=True)
+        .title("log10 mean count"),
+        x2=gs.X2("ma_label_x:Q"),
+        y=gs.Y("log2fc:Q")
+        .scale(reverse=False, domain=domains["ma_y"], zoom=True)
+        .title("log2 fold change"),
+        y2=gs.Y2("ma_label_y:Q"),
+    )
+)
+
+ma_callout_labels = (
+    gs.Chart(data)
+    .transform_filter("datum.ma_label")
+    .mark_text(
+        align="center",
+        baseline="bottom",
+        yOffset=-3,
+        fontWeight="bold",
+        color="#20262d",
+    )
+    .encode(
+        x=gs.X("ma_label_x:Q")
+        .scale(domain=domains["ma_x"], zoom=True)
+        .title("log10 mean count"),
+        y=gs.Y("ma_label_y:Q")
+        .scale(reverse=False, domain=domains["ma_y"], zoom=True)
+        .title("log2 fold change"),
+        text=gs.Text("ma_label:N"),
+    )
+)
+
+chart = (ma_fc_rules + ma_points + ma_callout_lines + ma_callout_labels).properties(
     title="Airway dexamethasone response: MA plot",
-    description="A paired differential-expression MA plot showing mean expression against fold change.",
+    description=(
+        "A paired differential-expression MA plot showing mean expression "
+        "against fold change, with selected genes identified by callouts."
+    ),
 )

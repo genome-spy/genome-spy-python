@@ -23,6 +23,8 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
 ## Larger and genomic views
 
 - [Composition](composition.md) layers charts and arranges linked panels.
+- [Annotations](annotations.md) adds selected point callouts and scored gene
+  tracks.
 - [Configuration](configuration.md) sets dimensions, titles, and shared visual
   defaults.
 - [Chromosomes and locus scales](genomic-axes.md) introduces assemblies and
@@ -59,6 +61,7 @@ transforms
 :caption: Building larger views
 
 composition
+annotations
 configuration
 ```
 

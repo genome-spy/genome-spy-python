@@ -25,3 +25,7 @@ Altair also informed the separation between generated schema bindings and the
 handwritten chart API, composition operators, channel shorthand, and API
 reference organization. Those areas use project-specific implementations and
 are acknowledged as design references rather than adapted Altair code.
+
+MutGlyph informed the generic scored gene-annotation track used by the
+rainfall and GISTIC examples. The implementation and UCSC-derived data are
+maintained independently in this repository.

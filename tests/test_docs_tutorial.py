@@ -38,6 +38,8 @@ BROWSER_LAYOUT_TUTORIAL_PATH = (
 BROWSER_LAYOUT_GUIDE_PATH = (
     REPO_ROOT / "docs" / "user-guide" / "genome-browser-layouts.md"
 )
+ANNOTATIONS_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "annotations.py"
+ANNOTATIONS_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "annotations.md"
 INTERACTION_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "interaction.py"
 INTERACTION_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "interaction.md"
 NOTEBOOKS_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "notebooks.py"
@@ -613,6 +615,74 @@ def test_genome_browser_guide_embeds_only_completed_browser() -> None:
     )
 
     assert targets == ["browser"]
+    assert set(targets) <= tutorial.CHARTS.keys()
+
+
+def test_annotation_layers_keep_targets_and_labels_separate() -> None:
+    tutorial = _load_module("_annotations", ANNOTATIONS_TUTORIAL_PATH)
+    spec = tutorial.point_annotation_chart.to_dict()
+
+    assert [layer["mark"]["type"] for layer in spec["layer"]] == [
+        "point",
+        "rule",
+        "text",
+    ]
+    assert spec["layer"][1]["encoding"] == {
+        "x": {"field": "effect", "type": "quantitative", "title": "Effect"},
+        "x2": {"field": "label_x"},
+        "y": {
+            "field": "significance",
+            "type": "quantitative",
+            "title": "Significance",
+        },
+        "y2": {"field": "label_y"},
+    }
+    assert spec["layer"][2]["encoding"]["text"] == {
+        "field": "gene",
+        "type": "nominal",
+    }
+
+
+def test_gene_annotation_track_prioritizes_overlapping_labels() -> None:
+    tutorial = _load_module("_gene_annotations", ANNOTATIONS_TUTORIAL_PATH)
+    spec = tutorial.gene_annotation_track.to_dict()
+    body, labels = spec["layer"]
+
+    assert body["mark"]["type"] == "arrow"
+    assert body["mark"]["style"] == "arrow-block"
+    assert body["opacity"] == {
+        "unitsPerPixel": [100000, 40000],
+        "values": [0, 1],
+    }
+    assert body["encoding"]["direction"]["field"] == "strand"
+    assert labels["transform"][-1] == {
+        "type": "filterScoredLabels",
+        "pos": "linear_start",
+        "pos2": "linear_end",
+        "asMidpoint": "label_position",
+        "score": "score",
+        "width": "label_width",
+        "lane": "lane",
+        "padding": 5,
+    }
+    assert [transform["type"] for transform in spec["transform"]] == [
+        "linearizeGenomicCoordinate",
+        "collect",
+        "pileup",
+        "filter",
+    ]
+    assert "offset" not in spec["transform"][0]
+    assert "offset" not in body["encoding"]["x"]
+    assert len(tutorial.genes) == 29_599
+    assert {"CPQ", "TSPYL5", "MTDH", "MATN2"} <= set(tutorial.genes["symbol"])
+
+
+def test_annotations_guide_embeds_only_named_tutorial_charts() -> None:
+    tutorial = _load_module("_annotation_targets", ANNOTATIONS_TUTORIAL_PATH)
+    source = ANNOTATIONS_GUIDE_PATH.read_text(encoding="utf-8")
+    targets = re.findall(r"\{genomespy-chart\} annotations:([A-Za-z0-9_]+)", source)
+
+    assert targets == ["point_annotation_chart", "gene_annotation_track"]
     assert set(targets) <= tutorial.CHARTS.keys()
 
 

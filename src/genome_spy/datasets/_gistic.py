@@ -1,4 +1,4 @@
-"""Load the packaged in-view subset of the TCGA OV GISTIC2 results."""
+"""Load the complete packaged TCGA OV GISTIC2 example results."""
 
 from __future__ import annotations
 
@@ -21,10 +21,11 @@ def tcga_ov_gistic_data() -> TcgaOvGisticData:
     """Load the TCGA OV GISTIC2 data displayed by the gallery example.
 
     Description:
-        The tables are the chromosome 18--20 subset of the original TCGA OV-TP
-        GISTIC2 Level 4 archive published by the Broad GDAC Firehose on
-        2016-01-28. This is the complete interval shown by the gallery chart's
-        fixed genomic domain, retained locally so rendering does not depend on
+        The tables are the complete ``scores.gistic`` and
+        ``all_lesions.conf_99.txt`` files used by GenomeSpy's TCGA OV example.
+        They originate from the TCGA OV-TP GISTIC2 Level 4 archive published by
+        the Broad GDAC Firehose on 2016-01-28 and use hg19 coordinates. The
+        copies are retained locally so rendering does not depend on
         GenomeSpy's external data host.
 
     Returns:

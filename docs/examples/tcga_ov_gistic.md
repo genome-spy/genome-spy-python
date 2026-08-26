@@ -10,20 +10,29 @@ Broad Institute TCGA Genome Data Analysis Center.
 Source: Broad Institute TCGA Genome Data Analysis Center (2016), TCGA OV-TP
 CopyNumber GISTIC2 Level 4, Firehose run 2016-01-28, GISTIC2.0.22, hg19.
 [Download the source archive](https://gdac.broadinstitute.org/runs/analyses__2016_01_28/data/OV-TP/20160128/gdac.broadinstitute.org_OV-TP.CopyNumber_Gistic2.Level_4.2016012800.0.0.tar.gz).
+The aligned hg19 RefSeq bodies come from the assembly-wide resource
+independently prepared from the official UCSC `refGene` table. The track design
+follows the
+[MutGlyph gene-annotation pattern](https://genomespy.app/MutGlyph/articles/gene-annotations.html).
 :::
 
 ## What to notice
 
 The upper track places amplification scores above zero and deletion scores
-below it. The lower track distinguishes each recurrent event's peak, wide peak,
-and broader region by stroke width and opacity.
+below it. The middle track distinguishes each recurrent event's peak, wide
+peak, and broader region by stroke width and opacity. The lower gene track
+places the strong 19p13.3 deletion peak in local context, including **STK11**,
+**GPX4**, **PTBP1**, and other RefSeq genes.
 
 ## Python implementation
 
-The chart loads packaged subsets of the original GISTIC score and lesion tables
-for the displayed chromosome 18–20 region. Formula, regex extraction, regex
-folding, filtering, and projection transforms derive the fields needed by the
-two tracks in the browser.
+The chart loads packaged copies of the complete GISTIC score and lesion tables
+and opens at chr19:400,000–2,000,000. Formula, regex extraction, regex folding,
+filtering, and projection transforms derive the fields needed by the score and
+lesion tracks in the browser. The initial chr19 domain does not pre-filter the
+GISTIC or complete hg19 gene tables. GenomeSpy packs overlapping gene bodies,
+filters colliding labels by score, and keeps all three tracks on one shared
+zoomable locus scale.
 
 See the [official GenomeSpy example](https://genomespy.app/docs/examples/genomic-data/tcga-ov-gistic/)
 for the original input-file and transform details.

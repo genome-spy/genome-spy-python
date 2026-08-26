@@ -24,6 +24,7 @@ _DATASETS = {
     "pik3ca_mutations": "pik3ca_mutations.json",
     "tal1_alphagenome_reference": "tal1_alphagenome_reference.json.gz",
     "pyoncoprint_tcga": "tcga.tsv",
+    "refseq_gene_bodies": "refseq_gene_bodies.csv.gz",
     "tcga_laml_annotations": "tcga_laml_annot.tsv",
     "tcga_laml_maf": "tcga_laml.maf.gz",
     "tcga_ov_gistic_lesions": "tcga_ov_gistic_lesions.tsv.gz",

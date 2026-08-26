@@ -12,6 +12,14 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
+_AIRWAY_GENE_SYMBOLS = {
+    "ENSG00000109906": "ZBTB16",
+    "ENSG00000116711": "PLA2G4A",
+    "ENSG00000145777": "TSLP",
+    "ENSG00000152583": "SPARCL1",
+}
+
+
 def airway_paired_logcounts(
     *, min_base_mean: float = 10.0
 ) -> tuple[pd.Series, pd.DataFrame, pd.DataFrame]:
@@ -86,6 +94,8 @@ def airway_differential_expression(
         :func:`airway_paired_logcounts`, computes paired t-tests and Benjamini-
         Hochberg adjusted p-values, then adds the transformed fields and
         significance classification shared by the MA and volcano examples.
+        A small curated set of genes also receives chart-ready callout labels
+        and label coordinates.
 
     Args:
         min_base_mean: Minimum mean count required before testing.
@@ -153,4 +163,47 @@ def airway_differential_expression(
         "volcano_y": [0.0, volcano_y_max],
         "pvalue_cutoff": [-float(np.log10(pvalue_cutoff))],
     }
+    data["gene_symbol"] = data["ensgene"].map(_AIRWAY_GENE_SYMBOLS)
+    _add_airway_annotation_positions(data, domains)
     return data, domains
+
+
+def _add_airway_annotation_positions(
+    data: pd.DataFrame, domains: dict[str, list[float]]
+) -> None:
+    """Add sparse label endpoints used by the airway gallery examples."""
+    volcano_offsets = {
+        "ZBTB16": (-0.85, 0.65),
+        "PLA2G4A": (-0.85, 0.75),
+        "TSLP": (-1.0, -0.55),
+    }
+    ma_offsets = {
+        "ZBTB16": (0.35, -0.55),
+        "PLA2G4A": (-0.25, -0.55),
+        "SPARCL1": (0.4, -0.45),
+    }
+
+    data["volcano_label"] = data["gene_symbol"].where(
+        data["gene_symbol"].isin(volcano_offsets)
+    )
+    data["ma_label"] = data["gene_symbol"].where(data["gene_symbol"].isin(ma_offsets))
+
+    volcano_dx = data["gene_symbol"].map(
+        {symbol: offset[0] for symbol, offset in volcano_offsets.items()}
+    )
+    volcano_dy = data["gene_symbol"].map(
+        {symbol: offset[1] for symbol, offset in volcano_offsets.items()}
+    )
+    ma_dx = data["gene_symbol"].map(
+        {symbol: offset[0] for symbol, offset in ma_offsets.items()}
+    )
+    ma_dy = data["gene_symbol"].map(
+        {symbol: offset[1] for symbol, offset in ma_offsets.items()}
+    )
+
+    data["volcano_label_x"] = (data["log2fc"] + volcano_dx).clip(*domains["volcano_x"])
+    data["volcano_label_y"] = (data["neglog10_pvalue_plot"] + volcano_dy).clip(
+        *domains["volcano_y"]
+    )
+    data["ma_label_x"] = (data["log10_base_mean"] + ma_dx).clip(*domains["ma_x"])
+    data["ma_label_y"] = (data["log2fc"] + ma_dy).clip(*domains["ma_y"])

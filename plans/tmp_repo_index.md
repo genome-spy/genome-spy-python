@@ -11,6 +11,7 @@
 | `tmp/dataviz-genomicsdata` | Broad Python genomics-visualization course, deterministic example datasets, and future gallery inspiration | `README.md`, `genomics_course/genomics_course/data/`, `day1/sections/`, `day2/sections/`, `day3/sections/` |
 | `tmp/ggwas` | Focused GWAS plot gallery and composable R/ggplot2 design reference | `README.md`, `R/manhattan-plot.R`, `R/qq-plot.R`, `R/locus-plot.R`, `R/gene-track.R`, `R/downsample.R` |
 | `tmp/maftools` | Primary cancer-genomics example source with real TCGA MAF/CNV/cohort data and explicit plot semantics in the `.Rd` docs | `inst/extdata/`, `man/oncoplot.Rd`, `man/rainfallPlot.Rd`, `man/lollipopPlot.Rd`, `man/tcgaCompare.Rd`, `man/plotCBSsegments.Rd` |
+| `tmp/mutglyph` | GenomeSpy-based R reference for mutation-plot callouts and generic scored genomic annotation tracks | `vignettes/gene-annotations.Rmd`, `vignettes/rainfall-plots.Rmd`, `vignettes/gistic-plots.Rmd`, `R/annotation-views.R`, `R/rainfall-spec.R`, `R/gistic-spec.R` |
 | `tmp/pyGenomeTracks` | Track-layout reference for browser-style genomics views, including signal, genes, Hi-C, and matrix examples | `examples/`, especially `bigwig_with_genes.ini`, `hic_track.ini`, and `bedgraph_matrix*.ini` |
 | `tmp/pyGenomeViz` | Comparative-genomics and link-layout reference, especially for conserved-block or fastANI-style cross-genome views | `notebooks/fastANI/README.md`, `notebooks/fastANI/visualize.py` |
 
@@ -35,6 +36,9 @@
   gallery work: its bundled extdata and `.Rd` files jointly define candidate
   oncoplots, rainfall plots, mutation burden bars, lollipop plots, and CNV
   segment views without inventing synthetic cohorts.
+- `MutGlyph` demonstrates that callouts and gene tracks can remain ordinary
+  composable GenomeSpy layers: point annotations use explicit target and label
+  positions, while interval-track label scores control layout priority only.
 - `pyGenomeTracks` is best used as a composition and data-shape reference rather
   than a direct dependency. Its bigWig and Hi-C examples reinforce that lazy or
   indexed data loaders are the main blocker for truly browser-native track

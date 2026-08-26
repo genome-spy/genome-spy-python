@@ -13,6 +13,7 @@ from genome_spy.datasets._airway import (
     airway_differential_expression,
     airway_paired_logcounts,
 )
+from genome_spy.datasets._annotations import refseq_gene_bodies
 from genome_spy.datasets._hapmap import (
     hapmap_manhattan_data,
     hapmap_qq_data,
@@ -32,6 +33,7 @@ def test_available_datasets_are_stable() -> None:
         "mutation_impact_reference",
         "pik3ca_mutations",
         "pyoncoprint_tcga",
+        "refseq_gene_bodies",
         "tal1_alphagenome_reference",
         "tcga_laml_annotations",
         "tcga_laml_maf",
@@ -105,12 +107,29 @@ def test_load_upstream_mutation_tables() -> None:
     assert "Tumor_Sample_Barcode" in laml
 
 
-def test_load_gistic_tables_for_the_displayed_genomic_interval() -> None:
+def test_load_complete_gistic_tables() -> None:
     data = tcga_ov_gistic_data()
 
-    assert data["scores"].shape == (9046, 8)
-    assert set(data["scores"]["Chromosome"]) == {18, 19, 20}
-    assert data["lesions"].shape == (22, 589)
+    assert data["scores"].shape == (90_240, 8)
+    assert set(data["scores"]["Chromosome"]) == set(range(1, 24))
+    assert data["lesions"].shape == (146, 589)
+
+
+def test_refseq_gene_bodies_cover_both_complete_assemblies() -> None:
+    hg38 = refseq_gene_bodies("hg38")
+    hg19 = refseq_gene_bodies("hg19")
+
+    assert hg38.shape == (29_835, 8)
+    assert hg19.shape == (29_599, 8)
+    assert {"POP1", "NIPAL2", "STK3"} <= set(hg38["symbol"])
+    assert {"PTBP1", "GPX4", "STK11", "TCF3"} <= set(hg19["symbol"])
+    assert {"chr1", "chr8", "chr19", "chrX", "chrY"} <= set(hg38["chrom"])
+    assert set(hg38["assembly"]) == {"hg38"}
+    assert set(hg19["assembly"]) == {"hg19"}
+    assert hg38["start"].ge(0).all()
+    assert hg19["end"].ge(hg19["start"]).all()
+    assert (hg38["end"] - hg38["start"]).max() < 3_000_000
+    assert (hg19["end"] - hg19["start"]).max() < 3_000_000
 
 
 def test_upstream_mutation_files_are_byte_exact() -> None:
@@ -119,12 +138,13 @@ def test_upstream_mutation_files_are_byte_exact() -> None:
         "brca.maf.gz": "61d5355e960bd480bec4f245b8f096e2333408659ced0d196e42b0e38de3d724",
         "oncoprint_dataset3.json": "e07aa6ae9cf4f5f3a9f331d9979855ccf33bc47ed1bb2f4b871939b47c2a09ef",
         "pik3ca_mutations.json": "4f36df9ad960c1429827522bbd4fce0cb47520d14a5c642abe8a55969f177aec",
+        "refseq_gene_bodies.csv.gz": "6ecb8f12d120cc10724a816d4dc6f8ebdf5e468f725950809de5082f8db17785",
         "tal1_alphagenome_reference.json.gz": "10702eaaee63d2a4f600bf23ea4fac913db720aba56d33868b0f32590fc7b77e",
         "tcga.tsv": "39a90fc1f50ebcd113c37fd03894fb41b17dca4d6014f7efcf0e3f234c957742",
         "tcga_laml.maf.gz": "d102b071a052265b6f8ad7947bad1d58d3e3036fd17d6b274f7ea09a376cd6a0",
         "tcga_laml_annot.tsv": "7033030d52868e9a0f35ffd78f45a9d7a126c2edef90cf9e74e4f5d78990a710",
-        "tcga_ov_gistic_lesions.tsv.gz": "e301075b6742cb8fc4d4bc0b5c125bea5b6b8eee60b196a75d9baa7825cb46b7",
-        "tcga_ov_gistic_scores.tsv.gz": "2c61eb4a5f26afa9a026994cbf116796f663f74a320382ad20b50e6a9d6f30a0",
+        "tcga_ov_gistic_lesions.tsv.gz": "ac2a6d445a4f085419987629e7fd63f77bbedfacb9e50c9f0c06b43ec50fd6e2",
+        "tcga_ov_gistic_scores.tsv.gz": "6361638a2921cae4abd13956cd710035eb31f5cc0bfd554fe155f61f2a7883be",
     }
 
     for filename, expected_hash in expected_hashes.items():
@@ -145,7 +165,7 @@ def test_mutation_helpers_return_chart_ready_data() -> None:
     assert hotspot["is_hotspot"]
 
     assert rainfall["sample"] == "TCGA-A8-A08B"
-    assert rainfall["reference_build"] == "hg38"
+    assert rainfall["reference_build"] == "hg19"
     assert len(rainfall["points"]) == 1890
     assert len(rainfall["change_points"]) == 7
     assert rainfall["y_max"] == 7.56
@@ -155,6 +175,17 @@ def test_mutation_helpers_return_chart_ready_data() -> None:
     assert {"chrom", "start", "end", "count", "mean_distance", "arrow_y"} <= set(
         rainfall["change_points"]
     )
+    tbc1d31 = rainfall["points"].loc[rainfall["points"]["gene"].eq("TBC1D31")].iloc[0]
+    assert tbc1d31["chrom"] == "chr8"
+    assert tbc1d31["pos"] == 124_090_377
+    hg19_genes = refseq_gene_bodies("hg19")
+    zero_based_pos = tbc1d31["pos"] - 1
+    overlap = hg19_genes.loc[
+        hg19_genes["chrom"].eq(tbc1d31["chrom"])
+        & hg19_genes["start"].le(zero_based_pos)
+        & hg19_genes["end"].gt(zero_based_pos)
+    ]
+    assert "TBC1D31" in set(overlap["symbol"])
 
 
 def test_oncoprint_helpers_return_chart_ready_data() -> None:
@@ -291,6 +322,13 @@ def test_airway_differential_expression_is_chart_ready() -> None:
         "neglog10_pvalue",
         "neglog10_pvalue_plot",
         "direction",
+        "gene_symbol",
+        "volcano_label",
+        "volcano_label_x",
+        "volcano_label_y",
+        "ma_label",
+        "ma_label_x",
+        "ma_label_y",
     } <= set(data.columns)
     assert set(data["direction"]) <= {"up in dex", "down in dex", "n.s."}
     assert set(domains) == {"ma_x", "ma_y", "volcano_x", "volcano_y", "pvalue_cutoff"}

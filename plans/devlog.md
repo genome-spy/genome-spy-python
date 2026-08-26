@@ -1,5 +1,47 @@
 # Dev Log
 
+## 2026-08-26 - Restored complete TCGA OV GISTIC inputs
+
+- Confirmed that the upstream GenomeSpy example and Broad GDAC source use hg19,
+  matching the chart and its RefSeq annotation track.
+- Replaced the chromosome 18–20 score and lesion subsets with compressed,
+  otherwise unmodified copies of the complete files used by GenomeSpy: 90,240
+  score intervals and 146 lesion-report rows.
+- Kept the focused chr19 opening domain as a viewport only, documented that it
+  does not filter either complete input table, and added provenance hashes.
+- Added spacing between the rainfall plot's left-side RefSeq title and track.
+
+## 2026-08-25 - Fixed README external links
+
+- Replaced the obsolete GenomeSpy domain with the current official site.
+- Made README links to GenomeSpy, Altair, and Gos explicitly open in new tabs
+  with opener protection while leaving repository-local links unchanged.
+
+## 2026-08-25 - Added annotation guidance and gene callouts
+
+- Added a user-guide page for leader-line point annotations and compact gene
+  annotation tracks, based on layered GenomeSpy marks and MutGlyph's generic
+  scored-interval approach.
+- Expanded the gene tutorial with assembly-wide, assembly-matched RefSeq
+  bodies, packed strand-aware lanes, scored collision filtering, and
+  shared-scale guidance.
+- Added aligned RefSeq tracks to regional hg19 rainfall and GISTIC plots;
+  zooming either primary plot or its annotation track now updates both views.
+- Corrected the rainfall MAF assembly from hg38 to hg19, normalized chromosome
+  names and one-based point coordinates, and added an overlap regression for
+  the chr8 TBC1D31 kataegis locus.
+- Independently prepared complete hg19 and hg38 gene-body resources from the
+  official UCSC `refGene` tables, keeping MutGlyph as a design reference rather
+  than a copied data source.
+- Added sparse gene callouts to the airway volcano and MA gallery examples,
+  prepared their symbols and label endpoints with the chart-ready data, and
+  refreshed the affected thumbnails.
+- Added regressions for the annotation layers, scored-label transform,
+  assembly-wide shared tracks, guide embeds, prepared airway fields, and
+  gallery callouts.
+- Validation: 145 focused dataset/tutorial/gallery tests, repository-wide Ruff,
+  MyPy, visual thumbnail inspection, and the strict Sphinx build passed.
+
 ## 2026-08-25 - Opened external documentation links in new tabs
 
 - Configured MyST links and theme/raw-HTML links to open external destinations

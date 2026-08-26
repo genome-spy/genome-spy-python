@@ -181,12 +181,14 @@ def brca_rainfall_data() -> BrcaRainfallData:
         )[["chrom", "pos", "gene", "distance", "log10_distance", "con_class"]]
         .copy()
     )
-    points["chrom"] = points["chrom"].astype("object")
+    points["chrom"] = "chr" + points["chrom"].astype(str).str.removeprefix("chr")
     points["distance"] = points["distance"].astype(int)
 
     return {
         "sample": sample,
-        "reference_build": "hg38",
+        # The trimmed maftools example omits NCBI_Build, but its coordinates
+        # and Hugo symbols match hg19 (for example, chr8:124090377 TBC1D31).
+        "reference_build": "hg19",
         "points": points.reset_index(drop=True),
         "change_points": _detect_kataegis(points),
         "y_max": round(float(points["log10_distance"].max()) + 0.2, 2),
