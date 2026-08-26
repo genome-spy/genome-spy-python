@@ -505,6 +505,64 @@ def test_airway_expression_plots_include_gene_callouts(
     assert layers[-1]["encoding"]["text"]["field"] == label_field
 
 
+def test_airway_volcano_callouts_use_pixel_offsets() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "airway_volcano_plot.py")
+    rule = example.spec["layer"][-2]
+    labels = example.spec["layer"][-1]
+
+    assert rule["mark"]["type"] == "rule"
+    assert rule["mark"]["tooltip"] is None
+    assert "x2Offset" not in rule["mark"]
+    assert "y2Offset" not in rule["mark"]
+    assert rule["transform"] == [{"type": "filter", "expr": "datum.volcano_label"}]
+    assert rule["encoding"]["x2"] == {"field": "log2fc"}
+    assert rule["encoding"]["y2"] == {"field": "neglog10_pvalue_plot"}
+    assert rule["encoding"]["xOffset"] == {
+        "field": "volcano_x_offset",
+        "type": "quantitative",
+        "scale": None,
+    }
+    assert rule["encoding"]["yOffset"] == {
+        "field": "volcano_y_offset",
+        "type": "quantitative",
+        "scale": None,
+    }
+
+    assert labels["encoding"]["x"]["field"] == "log2fc"
+    assert labels["encoding"]["y"]["field"] == "neglog10_pvalue_plot"
+    assert labels["encoding"]["xOffset"] == {
+        "field": "volcano_x_offset",
+        "type": "quantitative",
+        "scale": None,
+    }
+    assert labels["encoding"]["yOffset"] == {
+        "field": "volcano_y_offset",
+        "type": "quantitative",
+        "scale": None,
+    }
+
+
+@pytest.mark.parametrize("filename", ["airway_volcano_plot.py", "airway_ma_plot.py"])
+def test_airway_point_tooltips_exclude_plotting_helpers(filename: str) -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / filename)
+    points = next(
+        layer for layer in example.spec["layer"] if layer["mark"]["type"] == "point"
+    )
+
+    assert [field["field"] for field in points["encoding"]["tooltip"]] == [
+        "ensgene",
+        "base_mean",
+        "log2fc",
+        "pvalue",
+        "padj",
+        "neglog10_pvalue",
+        "neglog10_padj",
+        "direction",
+    ]
+
+
 def test_sashimi_plot_uses_direct_data_urls() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "sashimi_plot.py")

@@ -38,6 +38,17 @@ direction_colors = (
     .range(["#3e8cb6", "#c9d1d9", "#c53b2c"])
 )
 
+airway_tooltip = [
+    gs.Tooltip("ensgene:N"),
+    gs.Tooltip("base_mean:Q"),
+    gs.Tooltip("log2fc:Q"),
+    gs.Tooltip("pvalue:Q"),
+    gs.Tooltip("padj:Q"),
+    gs.Tooltip("neglog10_pvalue:Q"),
+    gs.Tooltip("neglog10_padj:Q"),
+    gs.Tooltip("direction:N"),
+]
+
 volcano_points = (
     gs.Chart(data)
     .mark_point(size=14, filled=True, opacity=0.58)
@@ -49,6 +60,7 @@ volcano_points = (
         .scale(reverse=False, domain=domains["volcano_y"], zoom=True)
         .title("-log10 p-value"),
         color=gs.Color("direction:N").scale(direction_colors).legend(title="Direction"),
+        tooltip=airway_tooltip,
     )
 )
 
@@ -72,49 +84,57 @@ volcano_padj_rule = (
     )
 )
 
+# Offsets are logical pixels, so zooming the data scales does not move labels.
+# The shifted label endpoint uses the primary channels; the point is x2/y2.
 volcano_callout_lines = (
     gs.Chart(data)
     .transform_filter("datum.volcano_label")
-    .mark_rule(color="#3f4750", size=1)
+    .mark_rule(color="#3f4750", size=1, tooltip=None)
     .encode(
         x=gs.X("log2fc:Q")
         .scale(domain=domains["volcano_x"], zoom=True)
         .title("log2 fold change (treated / control)"),
-        x2=gs.X2("volcano_label_x"),
+        xOffset=gs.XOffset("volcano_x_offset:Q").scale(None),
         y=gs.Y("neglog10_pvalue_plot:Q")
         .scale(reverse=False, domain=domains["volcano_y"], zoom=True)
         .title("-log10 p-value"),
-        y2=gs.Y2("volcano_label_y"),
+        yOffset=gs.YOffset("volcano_y_offset:Q").scale(None),
+        x2=gs.X2("log2fc"),
+        y2=gs.Y2("neglog10_pvalue_plot"),
     )
 )
 
 volcano_callout_labels = (
     gs.Chart(data)
     .transform_filter("datum.volcano_label")
+    # Primary offset channels can read the per-row pixel displacements.
     .mark_text(
         align="center",
         baseline="bottom",
         yOffset=-3,
         fontWeight="bold",
         color="#20262d",
+        tooltip=None,
     )
     .encode(
-        x=gs.X("volcano_label_x:Q")
+        x=gs.X("log2fc:Q")
         .scale(domain=domains["volcano_x"], zoom=True)
         .title("log2 fold change (treated / control)"),
-        y=gs.Y("volcano_label_y:Q")
+        xOffset=gs.XOffset("volcano_x_offset:Q").scale(None),
+        y=gs.Y("neglog10_pvalue_plot:Q")
         .scale(reverse=False, domain=domains["volcano_y"], zoom=True)
         .title("-log10 p-value"),
+        yOffset=gs.YOffset("volcano_y_offset:Q").scale(None),
         text=gs.Text("volcano_label:N"),
     )
 )
 
-chart = (
-    volcano_fc_rules
-    + volcano_padj_rule
-    + volcano_points
-    + volcano_callout_lines
-    + volcano_callout_labels
+chart = gs.layer(
+    volcano_fc_rules,
+    volcano_padj_rule,
+    volcano_points,
+    volcano_callout_lines,
+    volcano_callout_labels,
 ).properties(
     title="Airway dexamethasone response: volcano plot",
     description=(

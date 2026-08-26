@@ -38,6 +38,17 @@ direction_colors = (
     .range(["#3e8cb6", "#c9d1d9", "#c53b2c"])
 )
 
+airway_tooltip = [
+    gs.Tooltip("ensgene:N"),
+    gs.Tooltip("base_mean:Q"),
+    gs.Tooltip("log2fc:Q"),
+    gs.Tooltip("pvalue:Q"),
+    gs.Tooltip("padj:Q"),
+    gs.Tooltip("neglog10_pvalue:Q"),
+    gs.Tooltip("neglog10_padj:Q"),
+    gs.Tooltip("direction:N"),
+]
+
 ma_points = (
     gs.Chart(data)
     .mark_point(size=14, filled=True, opacity=0.58)
@@ -49,6 +60,7 @@ ma_points = (
         .scale(reverse=False, domain=domains["ma_y"], zoom=True)
         .title("log2 fold change"),
         color=gs.Color("direction:N").scale(direction_colors).legend(title="Direction"),
+        tooltip=airway_tooltip,
     )
 )
 

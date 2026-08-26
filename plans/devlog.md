@@ -1,5 +1,16 @@
 # Dev Log
 
+## 2026-08-26 - Stabilized airway volcano callouts and tooltips
+
+- Replaced the airway volcano example's data-domain label endpoints with fixed
+  logical-pixel offsets, putting the label endpoint on primary offset channels
+  so the leader line remains a single layer.
+- Added explicit point tooltips for the airway volcano and MA examples so
+  plotting-only helper fields are not shown by the default handler.
+- Validation: focused gallery and dataset tests, Ruff, MyPy, strict Sphinx, and
+  a live browser render passed; the browser reported only the unrelated missing
+  `/favicon.ico` resource.
+
 ## 2026-08-26 - Prevented sidebar brand wrapping
 
 - Reduced the generated documentation sidebar brand text to `1.4em` so
