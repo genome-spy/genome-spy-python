@@ -44,6 +44,13 @@ jobs:
       - name: Check wheel contents and license metadata
         run: >-
           uv run python -c "import glob, zipfile; wheel = zipfile.ZipFile(glob.glob('dist/*.whl')[0]); names = wheel.namelist(); metadata = wheel.read(next(name for name in names if name.endswith('.dist-info/METADATA'))).decode(); metadata_lines = set(metadata.splitlines()); assert 'genome_spy/static/widget.js' in names, names; assert any(name.endswith('.dist-info/licenses/LICENSE') for name in names), names; assert any(name.endswith('.dist-info/licenses/LICENSES/ALTAIR-BSD-3-Clause.txt') for name in names), names; assert any(name.endswith('.dist-info/licenses/THIRD_PARTY_NOTICES.md') for name in names), names; assert {'License-Expression: MIT AND BSD-3-Clause', 'License-File: LICENSE', 'License-File: LICENSES/ALTAIR-BSD-3-Clause.txt', 'License-File: THIRD_PARTY_NOTICES.md'} <= metadata_lines, metadata"
+      - if: runner.os == 'Linux'
+        name: Smoke-test installed wheel
+        working-directory: /tmp
+        run: >-
+          uv run --isolated --no-project
+          --with "$GITHUB_WORKSPACE"/dist/*.whl
+          python -c "from importlib.resources import files; import genome_spy as gs; package = files('genome_spy'); assert package.joinpath('schema/genome-spy-schema.json').is_file(); assert package.joinpath('schema/capabilities.json').is_file(); assert package.joinpath('static/widget.js').is_file(); chart = gs.Chart([{'x': 1}]).mark_point().encode(x='x:Q'); spec = chart.to_dict(); assert spec['mark'] == 'point'; assert spec['encoding']['x']['field'] == 'x'; assert spec[chr(36) + 'schema'].endswith('/schema.json')"
 
   codegen:
     runs-on: ubuntu-latest
