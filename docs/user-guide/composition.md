@@ -3,11 +3,11 @@
 Composition combines complete views into a larger visualization. GenomeSpy
 uses three concise operators for the most common layouts:
 
-| Operator | Composition | Result |
-| --- | --- | --- |
-| `a + b` | Layer | Draw `b` over `a` in the same plot area |
-| `a & b` | Vertical concatenation | Place `a` above `b` |
-| `a \| b` | Horizontal concatenation | Place `a` to the left of `b` |
+| Operator | Composition              | Result                                  |
+| -------- | ------------------------ | --------------------------------------- |
+| `a + b`  | Layer                    | Draw `b` over `a` in the same plot area |
+| `a & b`  | Vertical concatenation   | Place `a` above `b`                     |
+| `a \| b` | Horizontal concatenation | Place `a` to the left of `b`            |
 
 Use `gs.concat(..., columns=n)` when the layout is an explicit wrapping grid.
 Composition is hierarchical, so layers and concatenations can be nested. The
@@ -58,7 +58,7 @@ for aligned tracks that share horizontal positions:
 ```
 
 ```{genomespy-chart} composition:vertical_chart
-:height: 300
+:height: 320
 :title: Two vertically concatenated tracks with one horizontal scale
 ```
 
@@ -141,9 +141,9 @@ matrix:
 
 The child order fills the grid row by row:
 
-| Empty placeholder | Column summary |
-| --- | --- |
-| Row summary | Membership matrix |
+| Empty placeholder | Column summary    |
+| ----------------- | ----------------- |
+| Row summary       | Membership matrix |
 
 The column summary shares its `x` index scale with the matrix but excludes its
 quantitative `y` scale. The row summary does the converse. The matrix and
