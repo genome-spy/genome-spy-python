@@ -1,5 +1,17 @@
 # Dev Log
 
+## 2026-08-26 - Corrected documentation example guidance
+
+- Removed data-type suffixes from secondary positional channels and removed
+  unsupported zoom settings from nominal and ordinal examples.
+- Moved genomic viewport domains to owning view-level scales and documented why
+  that placement is easier to reason about in deep view hierarchies.
+- Added light-gray borders and 20-pixel spacing to schematic composition
+  examples, clarified that transforms execute browser-side in GenomeSpy, and
+  fixed the bound-parameter example with an explicit categorical domain.
+- Validation: 127 documentation tutorial/gallery tests, Ruff format/check,
+  MyPy, and a strict Sphinx build passed.
+
 ## 2026-08-26 - Restored complete TCGA OV GISTIC inputs
 
 - Confirmed that the upstream GenomeSpy example and Broad GDAC source use hg19,
