@@ -710,6 +710,7 @@ def test_interaction_zoom_and_bound_parameters_serialize() -> None:
         {"type": "filter", "expr": "datum.score >= minScore"}
     ]
     assert bound_spec["mark"]["size"] == {"expr": "pointSize"}
+    assert bound_spec["encoding"]["x"]["scale"] == {"domain": tutorial.VARIANT_DOMAIN}
     assert bound_spec["params"] == [
         {
             "name": "minScore",

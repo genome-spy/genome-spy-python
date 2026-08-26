@@ -46,6 +46,11 @@ that changes it. This slider controls a filter threshold:
 :title: A slider controls filtering and point size
 ```
 
+The nominal variant axis uses an explicit domain. Filtering changes which rows
+reach the marks, and the current GenomeSpy runtime does not handle changing
+data-driven categorical domains reliably; listing all variant ids keeps the
+axis stable as the slider moves.
+
 The parameter name `minScore` becomes available to expressions in the same view
 and its descendants. The filter expression reads it directly:
 
