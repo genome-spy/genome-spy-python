@@ -462,6 +462,28 @@ def test_association_and_expression_plots_include_data_provenance(
     assert "GenomeSpy then renders" in prose
 
 
+@pytest.mark.parametrize(
+    ("filename", "initial_size"),
+    [
+        ("volcano_plot.py", 16),
+        ("airway_ma_plot.py", 14),
+        ("airway_volcano_plot.py", 14),
+    ],
+)
+def test_ma_and_volcano_points_grow_gently_when_zoomed(
+    filename: str, initial_size: int
+) -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / filename)
+    points = next(
+        layer for layer in example.spec["layer"] if layer["mark"]["type"] == "point"
+    )
+
+    assert points["mark"]["size"] == {
+        "expr": f"min({initial_size} * pow(zoomLevel, 0.75), 64)"
+    }
+
+
 def test_gallery_examples_do_not_render_data_previews() -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()

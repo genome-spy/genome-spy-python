@@ -19,6 +19,9 @@ X_DOMAIN = domains["x_domain"]
 Y_DOMAIN = domains["y_domain"]
 EFFECT_CUTOFF = domains["effect_cutoff"]
 NEGLOG_P_CUTOFF = domains["neglog_pvalue_cutoff"]
+# zoomLevel is 1 at the initial domain. The exponent makes growth gradual,
+# while the cap prevents points from becoming oversized at deep zoom levels.
+POINT_SIZE = gs.expr("min(16 * pow(zoomLevel, 0.75), 64)")
 
 # --- Visualization -------------------------------------------------------------
 
@@ -29,7 +32,7 @@ association_colors = Scale(
 
 points = (
     gs.Chart(data)
-    .mark_point(size=16, filled=True, opacity=0.6)
+    .mark_point(size=POINT_SIZE, filled=True, opacity=0.6)
     .encode(
         x=gs.X("EFFECTSIZE:Q")
         .scale(domain=X_DOMAIN, zoom=True)

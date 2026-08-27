@@ -23,6 +23,9 @@ PVALUE_CUTOFF = 0.01
 PADJ_CUTOFF = 0.1
 MIN_BASE_MEAN = 10.0
 MAX_GENES = 12_000
+# zoomLevel is 1 at the initial domain. The exponent makes growth gradual,
+# while the cap prevents points from becoming oversized at deep zoom levels.
+POINT_SIZE = gs.expr("min(14 * pow(zoomLevel, 0.75), 64)")
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -51,7 +54,7 @@ airway_tooltip = [
 
 ma_points = (
     gs.Chart(data)
-    .mark_point(size=14, filled=True, opacity=0.58)
+    .mark_point(size=POINT_SIZE, filled=True, opacity=0.58)
     .encode(
         x=gs.X("log10_base_mean:Q")
         .scale(domain=domains["ma_x"], zoom=True)
