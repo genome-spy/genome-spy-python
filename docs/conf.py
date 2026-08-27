@@ -5,6 +5,9 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
+from pygments.lexers.python import PythonLexer
+from sphinx.application import Sphinx
+
 _DOCS = Path(__file__).resolve().parent
 _ROOT = _DOCS.parent
 sys.path.insert(0, str(_ROOT / "src"))
@@ -22,6 +25,7 @@ extensions = [
     "myst_parser",
     "sphinx_design",
     "sphinx_copybutton",
+    "sphinx_github_style",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",
@@ -47,6 +51,7 @@ napoleon_google_docstring = True
 napoleon_numpy_docstring = False
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+pygments_style = "a11y-light"
 
 # -- HTML output ------------------------------------------------------------
 html_theme = "furo"
@@ -55,7 +60,7 @@ html_logo = "_static/snaketie.svg"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_css_files = ["genomespy.css"]
-html_js_files = ["force-light-theme.js", "external-links.js"]
+html_js_files = ["external-links.js"]
 html_show_sourcelink = False
 html_meta = {
     "Cache-Control": "no-cache, no-store, must-revalidate",
@@ -64,6 +69,8 @@ html_meta = {
 }
 
 html_theme_options = {
+    # The view-button component is overridden with a repository link.
+    "top_of_page_buttons": ["view"],
     "light_css_variables": {
         "color-brand-primary": "#3e8cb6",
         "color-brand-content": "#3797ce",
@@ -85,3 +92,13 @@ html_theme_options = {
     ],
     "navigation_with_keys": True,
 }
+
+linkcode_url = "https://github.com/genome-spy/genome-spy-python"
+linkcode_blob = "main"
+
+
+def setup(app: Sphinx) -> None:
+    """Register documentation build hooks."""
+    # sphinx-github-style also installs a high-contrast palette and custom Python
+    # lexer. Keep only its source links and preserve Furo's original code styling.
+    app.add_lexer("python", PythonLexer)

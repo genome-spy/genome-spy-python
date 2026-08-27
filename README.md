@@ -10,6 +10,9 @@ a grammar for interactive and scalable genomic visualization. It lets Python
 users build GenomeSpy specifications with a declarative, fluent API, serialize
 them to JSON, and display them in Jupyter or Marimo notebooks.
 
+Read the [documentation](https://genomespy.app/genome-spy-python/) for the
+getting-started guide, user guide, examples, and API reference.
+
 <a href="https://altair-viz.github.io/" target="_blank" rel="noopener noreferrer">Altair</a>
 is the project's main source of inspiration. This codebase follows Altair's
 approach of combining schema-backed specification objects with a small
