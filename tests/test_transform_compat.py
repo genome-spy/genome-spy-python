@@ -309,3 +309,89 @@ def test_transform_filter_rejects_non_scalar_or_non_finite_constraints(
 ) -> None:
     with pytest.raises((TypeError, ValueError), match="Filter constraint"):
         gs.Chart([{"value": 1}]).transform_filter(value=value)  # type: ignore[arg-type]
+
+
+def test_transform_stack_accepts_altair_positional_form() -> None:
+    chart = (
+        gs.Chart([{"group": "a", "site": "x", "value": 1}])
+        .mark_rect()
+        .transform_stack(
+            "stacked",
+            "value",
+            ["group"],
+            sort=[{"field": "site"}],
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "stack",
+            "field": "value",
+            "groupby": ["group"],
+            "as": ["stacked", "stacked_end"],
+            "sort": {"field": ["site"], "order": ["ascending"]},
+        }
+    ]
+
+
+def test_transform_stack_normalizes_multiple_sort_fields() -> None:
+    chart = (
+        gs.Chart([{"group": "a", "site": "x", "value": 1}])
+        .mark_rect()
+        .transform_stack(
+            as_=["start", "end"],
+            field="value",
+            groupby=["group"],
+            sort=[
+                {"field": "site", "order": "descending"},
+                {"field": "value"},
+            ],
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "stack",
+            "field": "value",
+            "groupby": ["group"],
+            "as": ["start", "end"],
+            "sort": {
+                "field": ["site", "value"],
+                "order": ["descending", "ascending"],
+            },
+        }
+    ]
+
+
+def test_transform_stack_preserves_native_compare_and_information_options() -> None:
+    chart = (
+        gs.Chart([{"base": "A", "value": 1}])
+        .mark_rect()
+        .transform_stack(
+            field="value",
+            groupby=["base"],
+            offset="information",
+            baseField="base",
+            cardinality=4,
+            sort=gs.compare("base", order="ascending"),
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "stack",
+            "field": "value",
+            "groupby": ["base"],
+            "offset": "information",
+            "baseField": "base",
+            "cardinality": 4,
+            "sort": {"field": "base", "order": "ascending"},
+        }
+    ]
+
+
+def test_transform_stack_rejects_ambiguous_field_names() -> None:
+    with pytest.raises(TypeError, match="received both 'stack' and 'field'"):
+        gs.Chart([{"value": 1}]).transform_stack(
+            stack="value", field="other", groupby=["group"]
+        )

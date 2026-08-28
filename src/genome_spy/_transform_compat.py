@@ -5,10 +5,9 @@ from __future__ import annotations
 import json
 import re
 from collections.abc import Mapping, Sequence
-from typing import Any
-from typing import Self, cast
+from typing import Any, Literal, Self, cast
 
-from genome_spy.schema import AggregateOp_T, Field_T
+from genome_spy.schema import AggregateOp_T, Field_T, core
 from genome_spy.schema.mixins import TransformMethodMixin
 from genome_spy.schemapi import Undefined, UndefinedType
 
@@ -102,6 +101,32 @@ def _constraint_expression(field: str, value: _ConstraintValue) -> str:
         else f"datum[{json.dumps(field)}]"
     )
     return f"{reference} === {literal}"
+
+
+def _normalize_sort_definitions(
+    definitions: Sequence[Mapping[str, Any]],
+) -> dict[str, list[str]]:
+    if not definitions:
+        raise ValueError("Sort definitions must not be empty.")
+
+    fields: list[str] = []
+    orders: list[str] = []
+    for definition in definitions:
+        extra = set(definition) - {"field", "order"}
+        if extra:
+            names = ", ".join(sorted(extra))
+            raise ValueError(f"Unsupported sort definition properties: {names}.")
+
+        field = definition.get("field")
+        order = definition.get("order", "ascending")
+        if not isinstance(field, str):
+            raise TypeError("Sort definition 'field' must be a string.")
+        if order not in {"ascending", "descending"}:
+            raise ValueError("Sort definition 'order' must be ascending or descending.")
+        fields.append(field)
+        orders.append(cast(str, order))
+
+    return {"field": fields, "order": orders}
 
 
 class AltairTransformCompatMixin(TransformMethodMixin):
@@ -411,4 +436,77 @@ class AltairTransformCompatMixin(TransformMethodMixin):
         return super().transform_sample(
             description=description,
             size=normalized_size,
+        )
+
+    def transform_stack(
+        self,
+        as_: Sequence[str] | str | UndefinedType = Undefined,
+        stack: Field_T | UndefinedType = Undefined,
+        groupby: Sequence[Field_T] | UndefinedType = Undefined,
+        offset: Literal["zero", "center", "normalize", "information"]
+        | UndefinedType = Undefined,
+        sort: core.CompareParams
+        | Mapping[str, Any]
+        | Sequence[Mapping[str, Any]]
+        | UndefinedType = Undefined,
+        *,
+        field: Field_T | UndefinedType = Undefined,
+        baseField: Field_T | UndefinedType = Undefined,
+        cardinality: float | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+    ) -> Self:
+        """Stack values using Altair or GenomeSpy arguments.
+
+        Altair's positional ``stack`` name maps to GenomeSpy's ``field`` and a
+        list of sort definitions maps to GenomeSpy's parallel compare arrays.
+        A single output base name expands to start and ``_end`` fields.
+
+        Args:
+            as_: Output field pair or an Altair-style output base name.
+            stack: Field to stack using Altair's argument name.
+            groupby: Fields that form independent stacks.
+            offset: Stack offset mode.
+            sort: Native GenomeSpy compare definition or Altair-like sort list.
+            field: Field to stack using GenomeSpy's native argument name.
+            baseField: Native base field used by the ``information`` offset.
+            cardinality: Native cardinality used by the ``information`` offset.
+            description: Description of the transform step.
+
+        Returns:
+            A copied specification with the stack transform appended.
+
+        Raises:
+            TypeError: If ``stack`` and ``field`` are both provided, groupby is
+                omitted, or a sort definition has invalid types.
+            ValueError: If a sort definition has unsupported properties or
+                order values.
+
+        Example:
+            ``chart.transform_stack("stacked", "value", ["group"])``
+        """
+        if stack is not Undefined and field is not Undefined:
+            raise TypeError("transform_stack received both 'stack' and 'field'.")
+        if groupby is Undefined:
+            raise TypeError("transform_stack requires 'groupby'.")
+
+        normalized_field = field if stack is Undefined else stack
+        normalized_as: Sequence[str] | UndefinedType
+        if isinstance(as_, str):
+            normalized_as = [as_, f"{as_}_end"]
+        else:
+            normalized_as = as_
+
+        normalized_sort = sort
+        if isinstance(sort, Sequence) and not isinstance(sort, (str, bytes)):
+            normalized_sort = _normalize_sort_definitions(sort)
+
+        return super().transform_stack(
+            as_=normalized_as,
+            baseField=baseField,
+            cardinality=cardinality,
+            description=description,
+            field=normalized_field,
+            groupby=cast(Sequence[Field_T], groupby),
+            offset=offset,
+            sort=cast(Any, normalized_sort),
         )
