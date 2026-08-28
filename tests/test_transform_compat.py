@@ -65,3 +65,46 @@ def test_transform_calculate_accepts_altair_as_alias() -> None:
     assert chart.to_dict()["transform"] == [
         {"type": "formula", "as": "result", "expr": "datum.value"}
     ]
+
+
+@pytest.mark.parametrize(
+    ("args", "kwargs"),
+    [
+        ((["items"],), {"as_": ["item"]}),
+        ((["items"], ["item"]), {}),
+    ],
+)
+def test_transform_flatten_accepts_altair_positional_forms(
+    args: tuple[list[str], ...], kwargs: dict[str, list[str]]
+) -> None:
+    chart = (
+        gs.Chart([{"items": [1, 2]}]).mark_point().transform_flatten(*args, **kwargs)
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {"type": "flatten", "fields": ["items"], "as": ["item"]}
+    ]
+
+
+def test_transform_flatten_preserves_genomespy_arguments() -> None:
+    chart = (
+        gs.Chart([{"items": [1, 2]}])
+        .mark_point()
+        .transform_flatten(fields=["items"], as_=["item"], index="item_index")
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "flatten",
+            "fields": ["items"],
+            "as": ["item"],
+            "index": "item_index",
+        }
+    ]
+
+
+def test_transform_flatten_rejects_duplicate_field_arguments() -> None:
+    with pytest.raises(TypeError, match="received both 'flatten' and 'fields'"):
+        gs.Chart([{"items": [1, 2]}]).transform_flatten(
+            ["items"], fields=["other_items"]
+        )

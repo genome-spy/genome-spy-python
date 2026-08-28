@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Self, cast
 
+from genome_spy.schema import Field_T
 from genome_spy.schema.mixins import TransformMethodMixin
 from genome_spy.schemapi import Undefined, UndefinedType
 
@@ -64,3 +66,45 @@ class AltairTransformCompatMixin(TransformMethodMixin):
             result = result.transform_formula(as_=output, expr=expression)
 
         return result
+
+    def transform_flatten(
+        self,
+        flatten: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
+        as_: Sequence[str] | str | UndefinedType = Undefined,
+        *,
+        fields: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
+        index: str | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+    ) -> Self:
+        """Flatten array-valued fields using Altair or GenomeSpy arguments.
+
+        The positional ``flatten`` argument is an alias for GenomeSpy's native
+        ``fields`` property. GenomeSpy's optional index output remains
+        available as a keyword argument.
+
+        Args:
+            flatten: Field or fields to flatten using Altair's call shape.
+            as_: Output field name or names for flattened values.
+            fields: Field or fields to flatten using GenomeSpy's native name.
+            index: Output field for each array value's zero-based index.
+            description: Description of the transform step.
+
+        Returns:
+            A copied specification with the flatten transform appended.
+
+        Raises:
+            TypeError: If both ``flatten`` and ``fields`` are provided.
+
+        Example:
+            ``chart.transform_flatten(["items"], ["item"])``
+        """
+        if flatten is not Undefined and fields is not Undefined:
+            raise TypeError("transform_flatten received both 'flatten' and 'fields'.")
+
+        normalized_fields = fields if flatten is Undefined else flatten
+        return super().transform_flatten(
+            as_=as_,
+            description=description,
+            fields=normalized_fields,
+            index=index,
+        )
