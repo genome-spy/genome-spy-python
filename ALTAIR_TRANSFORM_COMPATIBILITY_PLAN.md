@@ -2,10 +2,11 @@
 
 ## Goal
 
-Make GenomeSpy's Python transform API more familiar to Altair users where a
-Python-side adapter can preserve GenomeSpy semantics exactly. This is an API
-compatibility effort, not an attempt to make GenomeSpy execute arbitrary
-Vega-Lite specifications.
+Make GenomeSpy's Python transform API more familiar to Altair users where the
+same behavior can be provided with little effort while preserving GenomeSpy
+semantics. This is a familiarity and ergonomics effort, not an attempt to make
+GenomeSpy execute arbitrary Vega-Lite specifications or become a drop-in
+replacement for Altair.
 
 ## Sources Reviewed
 
@@ -22,6 +23,9 @@ checkout was last updated at commit `2a670d4f` from 11 August 2026.
 ## Executive Verdict
 
 The package is **Altair-like, but not transform-API-compatible with Altair**.
+That is expected: GenomeSpy and Vega-Lite have substantially different feature
+sets. The useful target is familiar behavior where the grammars already
+overlap, not broad compatibility.
 
 - Altair exposes 19 `transform_*` methods.
 - genome-spy-python exposes 31 methods generated from GenomeSpy Core.
@@ -36,9 +40,8 @@ The package is **Altair-like, but not transform-API-compatible with Altair**.
 Calling the package a drop-in replacement for Altair would therefore be
 misleading. The chart-building style is familiar, but an Altair chart that
 uses transforms will usually need edits, and 11 Altair methods have no direct
-GenomeSpy method counterpart. One of those, `joinaggregate`, can be represented
-faithfully with GenomeSpy's window transform; the other ten require renderer
-support or Python-side data preparation.
+GenomeSpy method counterpart. Missing transforms should remain unsupported in
+the Python wrapper until GenomeSpy Core provides them.
 
 The encouraging finding is that the most commonly useful overlaps are real,
 not superficial. Formula/calculate, filtering, aggregation, flattening,
@@ -46,45 +49,39 @@ sampling, stacking, windowing, and ordinary data lookup can all gain a more
 Altair-like Python call shape without changing the JSON that GenomeSpy
 executes.
 
-## Second-Pass Review Findings
+## Review Conclusions
 
-A second scan of Altair's transform tests and shorthand parser, GenomeSpy's
-generated MRO, and the JavaScript transform implementations changed the first
-draft in several material ways:
+Code review established the following scope:
 
-- aggregate `count()` compatibility is narrower than the schemas initially
-  suggest because the Core aggregate runtime reserves fieldless aggregation
-  for one output named `count`;
-- joinaggregate remains a sound window translation, including fieldless
-  count, because GenomeSpy's window contract permits `null` fields;
-- true `transform_sample()` call compatibility requires an explicit 1000-row
-  Python default, not preservation of Core's 500-row default;
-- a string stack output must be expanded to two GenomeSpy output names rather
-  than forwarded directly;
-- positional parameter filtering is safe only for actual selection
-  parameters, and interval selections still require an explicit channel-to-
-  field projection;
-- Altair's expression namespace is much broader than GenomeSpy's. Only the
-  verified runtime intersection should be exposed; and
-- a handwritten mixin should inherit the generated transform mixin rather than
-  coexist with it as a second direct base of `TopLevelSpec`.
-
-These corrections reduce the amount of compatibility that can honestly be
-called drop-in, but they make the proposed subset implementable without hidden
-browser-time differences.
+- GenomeSpy transforms are more Vega-like than Vega-Lite-like: every transform
+  has an explicit `type`, and properties generally follow Vega where similar
+  functionality exists.
+- Do not support the legacy fieldless aggregate `count()` behavior in new
+  compatibility shorthand. It is a backward-compatibility hack in Core and is
+  expected to be deprecated.
+- Do not emulate `joinaggregate` with `window`; Core is expected to gain a
+  native joinaggregate transform later.
+- Do not translate Altair selection semantics. GenomeSpy selections are
+  similar but intentionally different.
+- Implement the small calculate, flatten, sample, aggregate, window, stack,
+  filter, and ordinary lookup improvements described below, keeping filter and
+  lookup deliberately simple.
+- Check whether Altair users prefer Python expression objects to raw strings
+  before committing to an expression-builder implementation.
+- State the compatibility boundary clearly in user documentation.
 
 ## Transform-by-Transform Comparison
 
 | Altair method | GenomeSpy support | Compatibility today | Assessment |
 |---|---|---|---|
-| `transform_aggregate` | `transform_aggregate` | Same broad operation; incompatible argument shape | Strong but bounded adapter candidate. Altair accepts field definitions or `output="op(field)"`; GenomeSpy uses parallel `fields`, `ops`, and `as_` arrays. GenomeSpy supports only a subset of Altair's aggregate operations, and Core cannot currently represent an arbitrarily named fieldless `count()` alongside other aggregate outputs. |
+| `transform_aggregate` | `transform_aggregate` | Same broad operation; incompatible argument shape | Strong adapter candidate for field-based operations. Altair accepts field definitions or `output="op(field)"`; GenomeSpy uses parallel `fields`, `ops`, and `as_` arrays. Do not add compatibility support for legacy fieldless `count()`. |
 | `transform_bin` | None | None | Renderer feature, not Python sugar. Do not add an adapter until GenomeSpy Core has binning. |
 | `transform_calculate` | `transform_formula` | Same semantics; different name and arguments | Best low-hanging fruit. An alias can translate one or many calculated fields into consecutive GenomeSpy formula transforms. |
 | `transform_density` | None | None | Statistical renderer feature. Keep preprocessing in Python unless Core gains the transform. |
 | `transform_impute` | None | None | No faithful adapter. Python preprocessing is the honest alternative. |
-| `transform_joinaggregate` | `transform_window` | No direct method, but the operation is representable | Good compatibility helper for supported aggregate ops: emit a window transform with `frame=[None, None]`. |
+| `transform_joinaggregate` | None | None | Do not emulate it with window. Add the familiar API only after GenomeSpy Core provides a native joinaggregate transform. |
 | `transform_extent` | None | None | Altair writes an extent to a parameter; GenomeSpy has no corresponding transform. |
-| `transform_filter` | `transform_filter` | Positional strings work; most Altair predicate forms do not | High-value partial compatibility. GenomeSpy supports expression strings and selection parameters, including projected selection fields, but not Vega-Lite structured field predicates or Altair's predicate composition API. |
+| `transform_filter` | `transform_filter` | Positional strings work; most Altair predicate forms do not | Keep compatibility limited to expression ergonomics and simple equality constraints. Leave GenomeSpy selection filtering native because its selection semantics differ from Vega-Lite. |
 | `transform_flatten` | `transform_flatten` | Same semantics; incompatible parameter name/position | Very small adapter. Altair's positional `flatten` can map to GenomeSpy's `fields`; GenomeSpy additionally supports an index output. |
 | `transform_fold` | None | None | `transform_regex_fold` is specialized and is not a general Vega-Lite fold. It must not be advertised as equivalent. |
 | `transform_loess` | None | None | Statistical renderer feature; not safely emulatable with Python-side spec rewriting. |
@@ -111,14 +108,10 @@ unless that alias is an explicitly documented compatibility rule. One useful
 rule is `average` to `mean`: Vega-Lite treats these as equivalent aggregate
 names, while GenomeSpy exposes only `mean`.
 
-There is one additional Core limitation. GenomeSpy's aggregate runtime treats
-the complete absence of `fields` as one default output named `count`. It cannot
-faithfully translate a general Altair aggregate such as
-`rows="count()"` mixed with other outputs. The adapter may support the exact
-special case `count="count()"`, but other fieldless-count forms must fail until
-Core can represent fieldless operations in its aligned arrays. Window and
-joinaggregate do not have this limitation because GenomeSpy window fields may
-contain `null`.
+Do not parse fieldless aggregate `count()` in the new compatibility shorthand.
+The current Core behavior is retained only for backward compatibility and is
+likely to be removed. The generated native method may continue reflecting the
+pinned Core schema until that upstream change lands.
 
 ### Window operation coverage
 
@@ -149,20 +142,22 @@ the browser. However, Altair additionally offers:
 - selection predicates through Altair parameter wrapper objects.
 
 GenomeSpy Core supports expression filtering and its own selection-parameter
-filtering, including a `fields` projection for positional channels. It does
-not support the general Vega-Lite structured-predicate grammar. The Python API
-should expose only the overlap.
+filtering. It does not support the general Vega-Lite structured-predicate
+grammar, and its selection model is not identical to Vega-Lite's. The Python
+API should improve expression ergonomics without adapting selection
+predicates.
 
-There is a useful compatibility opportunity in the existing `datum` and
+There may be a useful compatibility opportunity in the existing `datum` and
 `expr` names:
 
 - `gs.datum(value)` already constructs a constant-datum encoding;
 - `gs.expr("...")` already constructs a schema expression reference.
 
-They can become callable expression namespaces without breaking those call
-forms. `gs.datum.x` could create a field expression while `gs.datum(5)` keeps
-its current encoding behavior. Likewise, `gs.expr.cos(...)` and
-`gs.expr.PI` can coexist with `gs.expr("width / 2")`.
+If user feedback supports it, they can become callable expression namespaces
+without breaking those call forms. `gs.datum.x` could create a field
+expression while `gs.datum(5)` keeps its current encoding behavior. Likewise,
+`gs.expr.cos(...)` and `gs.expr.PI` can coexist with
+`gs.expr("width / 2")`.
 
 The expression namespaces must be derived from GenomeSpy's supported
 expression runtime, not copied wholesale from Altair. The second code scan
@@ -258,29 +253,10 @@ the native aligned-array form; kwargs may be appended after explicit mappings,
 matching Altair's ordering behavior.
 
 Map the explicit compatibility alias `average` to GenomeSpy's `mean`. Apply
-the fieldless-count restriction described above.
+the fieldless-count exclusion described above.
 
 Do not import Altair or accept Altair schema instances. Compatibility should
 be expressed through ordinary Python values owned by this package.
-
-### P1: Add `transform_joinaggregate()` through window
-
-Reuse the aggregate shorthand parser and plain-mapping definitions, and emit:
-
-```json
-{
-  "type": "window",
-  "ops": ["sum"],
-  "fields": ["response"],
-  "as": ["total_response"],
-  "groupby": ["group"],
-  "frame": [null, null]
-}
-```
-
-This is semantically faithful because GenomeSpy's window implementation
-preserves input rows and supports unbounded frames. Limit it to supported
-aggregate operations.
 
 ### P1: Add Altair-style window shorthand and sort normalization
 
@@ -303,7 +279,55 @@ Normalize omitted sort orders to `ascending` before creating parallel
 GenomeSpy `field` and `order` arrays. Allow empty fields only for genuinely
 fieldless window operations. Apply the documented `average` to `mean` alias.
 
-### P1: Add the basic expression builder
+### P1: Normalize the stack call shape
+
+Accept Altair's `stack=` alias for GenomeSpy's `field=`, an Altair-like sort
+list, and a single output base name. Preserve GenomeSpy-native extras such as
+the `information` offset. Fail on ambiguous duplicate arguments.
+
+For a single Altair output name such as `as_="stacked"`, expand the GenomeSpy
+output array to `["stacked", "stacked_end"]`. Passing the string through
+directly would be invalid against the GenomeSpy schema and would be misread
+character-by-character by the current JavaScript runtime.
+
+### P1: Add simple filter-expression convenience
+
+Accept multiple raw expressions and equality constraints:
+
+```python
+chart.transform_filter("datum.year > 1980", "datum.age != 90")
+chart.transform_filter(year=2000, sex=1)
+```
+
+Combine them with `&&` and serialize scalar constraint values safely. Keep the
+existing GenomeSpy-native `param=`, `empty=`, and `fields=` arguments, but do
+not add positional parameter translation or Vega-Lite predicate classes.
+
+### P1: Add a minimal ordinary-data lookup adapter
+
+Support Altair-like names only for ordinary data lookup where the mapping is
+unambiguous: explicit foreign `key`, explicit copied `values`, and a matching
+output-name list. Explicitly exclude selection lookup and Altair's single
+`as_` form that stores a whole foreign object, because GenomeSpy's lookup
+writer has different output semantics. Keep the adapter as a direct argument
+renaming and restructuring step; do not introduce Altair-style lookup schema
+classes.
+
+### P2: Evaluate the expression-builder preference
+
+Before implementation, check whether Altair users actually prefer Python
+expression objects to GenomeSpy's existing raw strings. Use a small set of
+side-by-side examples in the issue or PR discussion:
+
+```python
+chart.transform_filter("datum.year == 2000")
+chart.transform_filter(gs.datum.year == 2000)
+```
+
+If feedback favors the expression-object form, implement the minimal builder
+described below. Otherwise, retain raw strings and avoid the extra API surface.
+
+### Optional after P2: Add the basic expression builder
 
 Implement a small expression AST with:
 
@@ -328,45 +352,6 @@ date/time function set. Expand the namespace from an explicit verified list;
 do not dynamically accept arbitrary function names, because that would turn
 typos and unsupported Altair functions into browser-time failures.
 
-### P1: Normalize the stack call shape
-
-Accept Altair's `stack=` alias for GenomeSpy's `field=`, an Altair-like sort
-list, and a single output base name. Preserve GenomeSpy-native extras such as
-the `information` offset. Fail on ambiguous duplicate arguments.
-
-For a single Altair output name such as `as_="stacked"`, expand the GenomeSpy
-output array to `["stacked", "stacked_end"]`. Passing the string through
-directly would be invalid against the GenomeSpy schema and would be misread
-character-by-character by the current JavaScript runtime.
-
-### P2: Improve filter convenience within Core's grammar
-
-After the expression builder exists, accept:
-
-```python
-chart.transform_filter(gs.datum.year == 2000)
-chart.transform_filter(gs.datum.year > 1980, gs.datum.age != 90)
-chart.transform_filter(year=2000, sex=1)
-```
-
-Combine multiple expressions and equality constraints with `&&`. Also accept
-a GenomeSpy `Parameter` positionally only when its serialized definition has a
-`select` property; extract its name and emit a selection filter. Reject value,
-expression, transition, and ruler parameters in that position. Do not add
-Vega-Lite `FieldEqualPredicate`, range predicates, or logical predicate schema
-classes until GenomeSpy Core supports them. Preserve the existing `fields=`
-argument because interval-selection filters require at least one primary
-positional-channel mapping at runtime.
-
-### P2: Evaluate a constrained lookup adapter
-
-Support Altair-like names only for ordinary data lookup where the mapping is
-unambiguous: explicit foreign `key`, explicit copied `values`, and a matching
-output-name list. Explicitly exclude selection lookup and Altair's single
-`as_` form that stores a whole foreign object, because GenomeSpy's lookup
-writer has different output semantics. This should follow the first release
-wave because a superficial adapter would be easy to misunderstand.
-
 ## Architecture
 
 Keep Altair compatibility policy out of the schema generator's generic path.
@@ -377,12 +362,14 @@ Add a small handwritten compatibility layer, for example:
 
 - `src/genome_spy/_transform_compat.py` for the compatibility mixin and strict
   shorthand normalization;
-- `src/genome_spy/expressions.py` for expression values and namespaces; and
 - `AltairTransformCompatMixin(TransformMethodMixin)` so it inherits the full
   generated GenomeSpy surface and overrides only methods whose call shapes need
   widening; and
 - `TopLevelSpec(..., AltairTransformCompatMixin)` in place of its direct
   `TransformMethodMixin` base.
+
+Add `src/genome_spy/expressions.py` only if the expression-builder preference
+check justifies that optional feature.
 
 This matches the repository's established rule: schema coverage remains
 generated, while workflow ergonomics and transform convenience remain
@@ -421,55 +408,58 @@ Success criteria:
 
 ### Phase 2: Shared operation shorthand
 
-1. Implement a strict `op(field)` / `op()` parser.
+1. Implement a strict `op(field)` parser for field-based operations.
 2. Add aggregate mappings and kwargs for GenomeSpy-supported operations.
-3. Add `transform_joinaggregate()` as an unbounded window adapter.
-4. Add window mappings, kwargs, and Altair-like sort-list normalization.
-5. Add stack aliases using the same sort-list normalizer.
+3. Add window mappings, kwargs, and Altair-like sort-list normalization.
+4. Add stack aliases using the same sort-list normalizer.
+5. Add simple filter expression composition and scalar equality constraints.
 6. Add negative tests for every unsupported operation and malformed shorthand.
 
 Success criteria:
 
-- common Altair aggregate, joinaggregate, and window examples port with only
-  the import changed;
+- common field-based Altair aggregate and window examples port with only the
+  import changed;
 - the basic Altair positional stack example ports with only the import changed;
+- simple filter calls remain concise without adapting selection semantics;
 - unsupported Vega-Lite operations fail in Python with contextual messages;
   and
 - emitted JSON validates against the packaged GenomeSpy schema.
 
-### Phase 3: Expression ergonomics
+### Phase 3: Minimal lookup and documentation
 
-1. Implement the expression AST and literal serialization.
-2. Turn `datum` into a callable expression namespace without breaking constant
-   datum encodings.
-3. Turn `expr` into a callable function/constant namespace without breaking
-   `ExprRef` construction.
-4. Accept expression values in calculate and filter adapters.
-5. Add expression-based filter composition and equality constraints.
-
-Success criteria:
-
-- the exact expression-object form of the `cos`/`sin`/`PI` example from the
-  conversation works;
-- raw strings remain byte-for-byte unchanged in serialized transforms;
-- string quoting, `None`, booleans, item access, and operator precedence
-  have focused tests; and
-- current `gs.datum(...)` and `gs.expr(...)` uses remain compatible.
-
-### Phase 4: Remaining overlapping transforms
-
-1. Design and test the ordinary-data subset of lookup compatibility.
+1. Implement and test the explicitly supported ordinary-data lookup subset.
 2. Document the exact compatibility matrix in the transform user guide.
 3. Port two or three Altair transform examples as compatibility tests, not as
    a promise that the full Altair gallery works.
 
 Success criteria:
 
-- every overlapping transform is labeled as call-compatible, familiar alias,
-  or GenomeSpy-native;
-- selection lookup and structured Vega-Lite predicates remain explicitly out
-  of scope; and
-- documentation never describes the package as a drop-in replacement.
+- ordinary data lookup works through one documented, unambiguous call shape;
+- selection lookup and whole-object lookup output remain out of scope;
+- every overlapping transform is labeled as an implemented familiar API,
+  GenomeSpy-native API, future Core feature, or unsupported operation; and
+- documentation clearly states that drop-in compatibility is impossible and
+  not the objective.
+
+### Phase 4: Optional expression ergonomics
+
+Proceed only if Altair-user feedback favors expression objects over strings.
+
+1. Implement the minimal expression AST and literal serialization.
+2. Turn `datum` into a callable expression namespace without breaking constant
+   datum encodings.
+3. Turn `expr` into a callable function/constant namespace without breaking
+   `ExprRef` construction.
+4. Accept expression values in calculate and filter adapters.
+
+Success criteria:
+
+- the exact expression-object form of the `cos`/`sin`/`PI` example from the
+  conversation works;
+- raw strings remain byte-for-byte unchanged in serialized transforms;
+- string quoting, `None`, booleans, item access, and operator precedence have
+  focused tests; and
+- current `gs.datum(...)` and `gs.expr(...)` uses remain compatible.
 
 ## Testing Strategy
 
@@ -482,7 +472,7 @@ For every adapter, test four layers:
 3. **Schema validation tests** using normal `Chart.to_dict()` validation.
 4. **Renderer smoke tests** for representative expression and translated
    pipeline behavior, because JSON Schema cannot validate expression syntax or
-   prove that an unbounded window behaves as intended.
+   prove transform behavior.
 
 Add regression tests proving that existing GenomeSpy-native calls produce the
 same dictionaries as before. Where an adapter claims Altair call compatibility,
@@ -494,6 +484,8 @@ equivalent GenomeSpy JSON; do not depend on Altair at runtime.
 - accepting arbitrary Altair chart or schema objects;
 - serializing Vega-Lite transform JSON directly into a GenomeSpy spec;
 - implementing missing renderer transforms only in the Python wrapper;
+- emulating `joinaggregate` with window before Core provides it;
+- adapting Altair selection predicates to GenomeSpy selections;
 - reproducing all of Altair's structured predicate types;
 - treating `regex_fold` as general fold;
 - silently preprocessing user data in Python when a browser-side transform is
