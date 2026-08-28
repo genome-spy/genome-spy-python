@@ -2,14 +2,83 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+import re
+from collections.abc import Mapping, Sequence
+from typing import Any
 from typing import Self, cast
 
-from genome_spy.schema import Field_T
+from genome_spy.schema import AggregateOp_T, Field_T
 from genome_spy.schema.mixins import TransformMethodMixin
 from genome_spy.schemapi import Undefined, UndefinedType
 
 __all__ = ["AltairTransformCompatMixin"]
+
+_AGGREGATE_OPERATIONS = {
+    "count",
+    "valid",
+    "sum",
+    "min",
+    "max",
+    "mean",
+    "q1",
+    "median",
+    "q3",
+    "variance",
+}
+_OPERATION_ALIASES = {"average": "mean"}
+_OPERATION_SHORTHAND = re.compile(
+    r"^\s*(?P<operation>[A-Za-z_][A-Za-z0-9_]*)\s*"
+    r"\(\s*(?P<field>[^()]*)\s*\)\s*$"
+)
+
+
+def _parse_aggregate_shorthand(value: str) -> tuple[AggregateOp_T, str]:
+    match = _OPERATION_SHORTHAND.fullmatch(value)
+    if match is None:
+        raise ValueError(
+            f"Invalid aggregate shorthand {value!r}; expected 'operation(field)'."
+        )
+
+    operation = _OPERATION_ALIASES.get(
+        match.group("operation"), match.group("operation")
+    )
+    if operation not in _AGGREGATE_OPERATIONS:
+        raise ValueError(f"Unsupported GenomeSpy aggregate operation {operation!r}.")
+
+    field = match.group("field").strip()
+    if not field:
+        raise ValueError("Fieldless aggregate shorthand is not supported.")
+    return cast(AggregateOp_T, operation), field
+
+
+def _normalize_aggregate_definition(
+    definition: Mapping[str, Any],
+) -> tuple[AggregateOp_T, str, str]:
+    extra = set(definition) - {"op", "field", "as"}
+    if extra:
+        names = ", ".join(sorted(extra))
+        raise ValueError(f"Unsupported aggregate definition properties: {names}.")
+
+    missing = {"op", "field", "as"} - set(definition)
+    if missing:
+        names = ", ".join(sorted(missing))
+        raise ValueError(f"Aggregate definition is missing: {names}.")
+
+    operation = definition["op"]
+    field = definition["field"]
+    output = definition["as"]
+    if not all(isinstance(value, str) for value in (operation, field, output)):
+        raise TypeError("Aggregate definition 'op', 'field', and 'as' must be strings.")
+
+    normalized_operation = _OPERATION_ALIASES.get(operation, operation)
+    if normalized_operation not in _AGGREGATE_OPERATIONS:
+        raise ValueError(
+            f"Unsupported GenomeSpy aggregate operation {normalized_operation!r}."
+        )
+    if not field:
+        raise ValueError("Fieldless aggregate definitions are not supported.")
+
+    return cast(AggregateOp_T, normalized_operation), field, output
 
 
 class AltairTransformCompatMixin(TransformMethodMixin):
@@ -66,6 +135,94 @@ class AltairTransformCompatMixin(TransformMethodMixin):
             result = result.transform_formula(as_=output, expr=expression)
 
         return result
+
+    def transform_aggregate(
+        self,
+        aggregate: Sequence[Mapping[str, Any]] | UndefinedType = Undefined,
+        groupby: Sequence[Field_T] | UndefinedType = Undefined,
+        *,
+        as_: Sequence[str] | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        fields: Sequence[Field_T] | UndefinedType = Undefined,
+        ops: Sequence[AggregateOp_T] | UndefinedType = Undefined,
+        **kwargs: str,
+    ) -> Self:
+        """Aggregate fields using Altair shorthand or GenomeSpy arrays.
+
+        Compatibility definitions are normalized into GenomeSpy's aligned
+        ``fields``, ``ops``, and ``as`` arrays. Only operations supported by
+        GenomeSpy Core are accepted, and fieldless ``count()`` is deliberately
+        excluded.
+
+        Args:
+            aggregate: Altair-like mappings containing ``op``, ``field``, and
+                ``as`` properties.
+            groupby: Fields by which to group input rows.
+            as_: GenomeSpy-native output field array.
+            description: Description of the transform step.
+            fields: GenomeSpy-native input field array.
+            ops: GenomeSpy-native operation array.
+            **kwargs: Output names mapped to ``operation(field)`` shorthand.
+
+        Returns:
+            A copied specification with the aggregate transform appended.
+
+        Raises:
+            TypeError: If compatibility and native array forms are mixed, or a
+                mapping contains non-string values.
+            ValueError: If shorthand, mappings, or operations are invalid.
+
+        Example:
+            ``chart.transform_aggregate(mean_value="mean(value)")``
+        """
+        native_arguments = (as_, fields, ops)
+        uses_native_arrays = any(value is not Undefined for value in native_arguments)
+        uses_compatibility = aggregate is not Undefined or bool(kwargs)
+        if uses_native_arrays and uses_compatibility:
+            raise TypeError(
+                "transform_aggregate cannot mix compatibility definitions with "
+                "'fields', 'ops', or 'as_'."
+            )
+
+        if not uses_compatibility:
+            return super().transform_aggregate(
+                as_=as_,
+                description=description,
+                fields=fields,
+                groupby=groupby,
+                ops=ops,
+            )
+
+        definitions = (
+            []
+            if aggregate is Undefined
+            else list(cast(Sequence[Mapping[str, Any]], aggregate))
+        )
+        if not definitions and not kwargs:
+            raise ValueError("transform_aggregate requires at least one definition.")
+
+        normalized_ops: list[AggregateOp_T] = []
+        normalized_fields: list[Field_T] = []
+        normalized_outputs: list[str] = []
+        for definition in definitions:
+            operation, field, output = _normalize_aggregate_definition(definition)
+            normalized_ops.append(operation)
+            normalized_fields.append(field)
+            normalized_outputs.append(output)
+
+        for output, shorthand in kwargs.items():
+            operation, field = _parse_aggregate_shorthand(shorthand)
+            normalized_ops.append(operation)
+            normalized_fields.append(field)
+            normalized_outputs.append(output)
+
+        return super().transform_aggregate(
+            as_=normalized_outputs,
+            description=description,
+            fields=normalized_fields,
+            groupby=groupby,
+            ops=normalized_ops,
+        )
 
     def transform_flatten(
         self,

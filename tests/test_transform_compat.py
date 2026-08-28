@@ -145,3 +145,94 @@ def test_transform_sample_preserves_description() -> None:
 def test_transform_sample_rejects_duplicate_size_arguments() -> None:
     with pytest.raises(TypeError, match="received both 'sample' and 'size'"):
         gs.Chart([{"value": 1}]).transform_sample(250, size=500)
+
+
+def test_transform_aggregate_accepts_keyword_shorthand() -> None:
+    chart = (
+        gs.Chart([{"group": "a", "response": 1}])
+        .mark_point()
+        .transform_aggregate(
+            mean_response="mean(response)",
+            total_response="sum(response)",
+            groupby=["group"],
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "aggregate",
+            "fields": ["response", "response"],
+            "ops": ["mean", "sum"],
+            "as": ["mean_response", "total_response"],
+            "groupby": ["group"],
+        }
+    ]
+
+
+def test_transform_aggregate_appends_kwargs_after_mapping_definitions() -> None:
+    definition = {"op": "average", "field": "response", "as": "mean_response"}
+    chart = (
+        gs.Chart([{"response": 1}])
+        .mark_point()
+        .transform_aggregate(
+            [definition],
+            maximum="max(response)",
+        )
+    )
+
+    assert definition == {
+        "op": "average",
+        "field": "response",
+        "as": "mean_response",
+    }
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "aggregate",
+            "fields": ["response", "response"],
+            "ops": ["mean", "max"],
+            "as": ["mean_response", "maximum"],
+        }
+    ]
+
+
+def test_transform_aggregate_preserves_native_arrays() -> None:
+    chart = (
+        gs.Chart([{"response": 1}])
+        .mark_point()
+        .transform_aggregate(
+            fields=["response"],
+            ops=["median"],
+            as_=["median_response"],
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "aggregate",
+            "fields": ["response"],
+            "ops": ["median"],
+            "as": ["median_response"],
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    ("shorthand", "message"),
+    [
+        ("count()", "Fieldless aggregate shorthand is not supported"),
+        ("distinct(response)", "Unsupported GenomeSpy aggregate operation"),
+        ("mean", "expected 'operation\\(field\\)'"),
+    ],
+)
+def test_transform_aggregate_rejects_unsupported_shorthand(
+    shorthand: str, message: str
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        gs.Chart([{"response": 1}]).transform_aggregate(result=shorthand)
+
+
+def test_transform_aggregate_rejects_mixed_call_shapes() -> None:
+    with pytest.raises(TypeError, match="cannot mix compatibility definitions"):
+        gs.Chart([{"response": 1}]).transform_aggregate(
+            fields=["response"], result="mean(response)"
+        )
