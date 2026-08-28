@@ -236,3 +236,76 @@ def test_transform_aggregate_rejects_mixed_call_shapes() -> None:
         gs.Chart([{"response": 1}]).transform_aggregate(
             fields=["response"], result="mean(response)"
         )
+
+
+def test_transform_filter_combines_raw_expressions_and_constraints() -> None:
+    chart = (
+        gs.Chart([{"year": 2000, "age": 20, "sample type": "tumor"}])
+        .mark_point()
+        .transform_filter(
+            "datum.year > 1980",
+            "datum.age != 90",
+            **{"sample type": "tumor"},
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "filter",
+            "expr": "(datum.year > 1980) && (datum.age != 90) && "
+            '(datum["sample type"] === "tumor")',
+        }
+    ]
+
+
+def test_transform_filter_accepts_constraints_without_expression() -> None:
+    chart = (
+        gs.Chart([{"year": 2000, "active": True}])
+        .mark_point()
+        .transform_filter(year=2000, active=True)
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "filter",
+            "expr": "(datum.year === 2000) && (datum.active === true)",
+        }
+    ]
+
+
+def test_transform_filter_preserves_single_expression_and_native_param() -> None:
+    expression_chart = (
+        gs.Chart([{"year": 2000}]).mark_point().transform_filter("datum.year == 2000")
+    )
+    selection_chart = (
+        gs.Chart([{"year": 2000}])
+        .mark_point()
+        .transform_filter(param="brush", empty=False, fields={"x": "year"})
+    )
+
+    assert expression_chart.to_dict()["transform"] == [
+        {"type": "filter", "expr": "datum.year == 2000"}
+    ]
+    assert selection_chart.to_dict()["transform"] == [
+        {
+            "type": "filter",
+            "param": "brush",
+            "empty": False,
+            "fields": {"x": "year"},
+        }
+    ]
+
+
+def test_transform_filter_rejects_composition_with_selection() -> None:
+    with pytest.raises(TypeError, match="cannot be combined with selection 'param'"):
+        gs.Chart([{"year": 2000}]).transform_filter(
+            "datum.year > 1980", "datum.year < 2020", param="brush"
+        )
+
+
+@pytest.mark.parametrize("value", [[1, 2], {"nested": True}, float("nan")])
+def test_transform_filter_rejects_non_scalar_or_non_finite_constraints(
+    value: object,
+) -> None:
+    with pytest.raises((TypeError, ValueError), match="Filter constraint"):
+        gs.Chart([{"value": 1}]).transform_filter(value=value)  # type: ignore[arg-type]

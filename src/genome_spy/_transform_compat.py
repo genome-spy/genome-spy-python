@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from collections.abc import Mapping, Sequence
 from typing import Any
@@ -30,6 +31,9 @@ _OPERATION_SHORTHAND = re.compile(
     r"^\s*(?P<operation>[A-Za-z_][A-Za-z0-9_]*)\s*"
     r"\(\s*(?P<field>[^()]*)\s*\)\s*$"
 )
+_IDENTIFIER = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")
+
+_ConstraintValue = str | int | float | bool | None
 
 
 def _parse_aggregate_shorthand(value: str) -> tuple[AggregateOp_T, str]:
@@ -79,6 +83,25 @@ def _normalize_aggregate_definition(
         raise ValueError("Fieldless aggregate definitions are not supported.")
 
     return cast(AggregateOp_T, normalized_operation), field, output
+
+
+def _constraint_expression(field: str, value: _ConstraintValue) -> str:
+    if not isinstance(value, (str, int, float, bool)) and value is not None:
+        raise TypeError(
+            f"Filter constraint {field!r} must be a string, number, boolean, or None."
+        )
+
+    try:
+        literal = json.dumps(value, allow_nan=False, separators=(",", ":"))
+    except ValueError as error:
+        raise ValueError(f"Filter constraint {field!r} must be finite.") from error
+
+    reference = (
+        f"datum.{field}"
+        if _IDENTIFIER.fullmatch(field)
+        else f"datum[{json.dumps(field)}]"
+    )
+    return f"{reference} === {literal}"
 
 
 class AltairTransformCompatMixin(TransformMethodMixin):
@@ -264,6 +287,90 @@ class AltairTransformCompatMixin(TransformMethodMixin):
             description=description,
             fields=normalized_fields,
             index=index,
+        )
+
+    def transform_filter(
+        self,
+        expression: str | UndefinedType = Undefined,
+        *more_expressions: str,
+        description: str | UndefinedType = Undefined,
+        empty: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
+        fields: dict[str, Any] | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+        **constraints: _ConstraintValue,
+    ) -> Self:
+        """Filter rows with raw expressions or scalar equality constraints.
+
+        Multiple expressions and constraints are joined with JavaScript's
+        ``&&`` operator. GenomeSpy's native selection-parameter form remains
+        available through ``param`` but is not translated from Altair objects.
+
+        Args:
+            expression: First raw GenomeSpy expression.
+            *more_expressions: Additional raw expressions to combine.
+            description: Description of the transform step.
+            empty: Native behavior when a selection parameter is empty.
+            expr: Native keyword form of the first raw expression.
+            fields: Native positional-channel projection for selection filters.
+            param: Native GenomeSpy selection parameter name.
+            **constraints: Field names mapped to scalar values for equality
+                checks.
+
+        Returns:
+            A copied specification with the filter transform appended.
+
+        Raises:
+            TypeError: If expression forms conflict, an expression is not a
+                string, a constraint is not scalar, or compatibility filtering
+                is mixed with a selection parameter.
+            ValueError: If a numeric constraint is not finite.
+
+        Example:
+            ``chart.transform_filter("datum.year > 1980", sex=1)``
+        """
+        uses_composition = bool(more_expressions) or bool(constraints)
+        if not uses_composition:
+            return super().transform_filter(
+                expression,
+                description=description,
+                empty=empty,
+                expr=expr,
+                fields=fields,
+                param=param,
+            )
+
+        if param is not Undefined:
+            raise TypeError(
+                "Expression composition cannot be combined with selection 'param'."
+            )
+        if expression is not Undefined and expr is not Undefined:
+            raise TypeError("expression cannot be combined with expr")
+
+        first_expression = expr if expression is Undefined else expression
+        expressions: list[str] = []
+        if first_expression is not Undefined:
+            if not isinstance(first_expression, str):
+                raise TypeError("Filter expressions must be strings.")
+            expressions.append(first_expression)
+
+        if not all(isinstance(value, str) for value in more_expressions):
+            raise TypeError("Filter expressions must be strings.")
+        expressions.extend(more_expressions)
+        expressions.extend(
+            _constraint_expression(field, value) for field, value in constraints.items()
+        )
+
+        combined = (
+            expressions[0]
+            if len(expressions) == 1
+            else " && ".join(f"({value})" for value in expressions)
+        )
+        return super().transform_filter(
+            description=description,
+            empty=empty,
+            expr=combined,
+            fields=fields,
         )
 
     def transform_sample(
