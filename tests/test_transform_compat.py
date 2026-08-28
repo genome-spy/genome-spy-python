@@ -108,3 +108,40 @@ def test_transform_flatten_rejects_duplicate_field_arguments() -> None:
         gs.Chart([{"items": [1, 2]}]).transform_flatten(
             ["items"], fields=["other_items"]
         )
+
+
+@pytest.mark.parametrize(
+    ("args", "kwargs", "expected_size"),
+    [
+        ((), {}, 1000),
+        ((250,), {}, 250),
+        ((), {"size": 500}, 500),
+    ],
+)
+def test_transform_sample_accepts_altair_and_genomespy_sizes(
+    args: tuple[int, ...], kwargs: dict[str, int], expected_size: int
+) -> None:
+    chart = gs.Chart([{"value": 1}]).mark_point().transform_sample(*args, **kwargs)
+
+    assert chart.to_dict()["transform"] == [{"type": "sample", "size": expected_size}]
+
+
+def test_transform_sample_preserves_description() -> None:
+    chart = (
+        gs.Chart([{"value": 1}])
+        .mark_point()
+        .transform_sample(250, description="Keep a representative subset")
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "sample",
+            "size": 250,
+            "description": "Keep a representative subset",
+        }
+    ]
+
+
+def test_transform_sample_rejects_duplicate_size_arguments() -> None:
+    with pytest.raises(TypeError, match="received both 'sample' and 'size'"):
+        gs.Chart([{"value": 1}]).transform_sample(250, size=500)

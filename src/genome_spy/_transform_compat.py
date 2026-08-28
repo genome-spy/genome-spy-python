@@ -108,3 +108,43 @@ class AltairTransformCompatMixin(TransformMethodMixin):
             fields=normalized_fields,
             index=index,
         )
+
+    def transform_sample(
+        self,
+        sample: float | UndefinedType = Undefined,
+        *,
+        size: float | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+    ) -> Self:
+        """Sample rows using Altair or GenomeSpy arguments.
+
+        A positional sample size follows Altair's call shape. Omitting both
+        size arguments emits Altair's 1000-row default explicitly, while the
+        native GenomeSpy ``size`` keyword remains supported.
+
+        Args:
+            sample: Maximum sample size using Altair's positional name.
+            size: Maximum sample size using GenomeSpy's native name.
+            description: Description of the transform step.
+
+        Returns:
+            A copied specification with the sample transform appended.
+
+        Raises:
+            TypeError: If both ``sample`` and ``size`` are provided.
+
+        Example:
+            ``chart.transform_sample(1000)``
+        """
+        if sample is not Undefined and size is not Undefined:
+            raise TypeError("transform_sample received both 'sample' and 'size'.")
+
+        if sample is Undefined and size is Undefined:
+            normalized_size: float = 1000
+        else:
+            normalized_size = cast(float, size if sample is Undefined else sample)
+
+        return super().transform_sample(
+            description=description,
+            size=normalized_size,
+        )
