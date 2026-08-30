@@ -395,3 +395,100 @@ def test_transform_stack_rejects_ambiguous_field_names() -> None:
         gs.Chart([{"value": 1}]).transform_stack(
             stack="value", field="other", groupby=["group"]
         )
+
+
+def test_transform_window_accepts_keyword_shorthand_and_sort_list() -> None:
+    chart = (
+        gs.Chart([{"group": "a", "date": 1, "value": 2}])
+        .mark_point()
+        .transform_window(
+            rank="rank()",
+            running_total="sum(value)",
+            groupby=["group"],
+            sort=[{"field": "date"}],
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "window",
+            "ops": ["rank", "sum"],
+            "fields": [None, "value"],
+            "as": ["rank", "running_total"],
+            "groupby": ["group"],
+            "sort": {"field": ["date"], "order": ["ascending"]},
+        }
+    ]
+
+
+def test_transform_window_accepts_mapping_definitions_with_parameters() -> None:
+    chart = (
+        gs.Chart([{"group": "a", "value": 2}])
+        .mark_point()
+        .transform_window(
+            [
+                {"op": "ntile", "param": 4, "as": "quartile"},
+                {"op": "lag", "field": "value", "as": "previous_value"},
+            ],
+            groupby=["group"],
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "window",
+            "ops": ["ntile", "lag"],
+            "fields": [None, "value"],
+            "params": [4, None],
+            "as": ["quartile", "previous_value"],
+            "groupby": ["group"],
+        }
+    ]
+
+
+def test_transform_window_preserves_native_arrays() -> None:
+    chart = (
+        gs.Chart([{"date": 1, "value": 2}])
+        .mark_point()
+        .transform_window(
+            ops=["mean"],
+            fields=["value"],
+            as_=["rolling_mean"],
+            frame=[-2, 0],
+            sort=gs.compare("date", order="ascending"),
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "window",
+            "ops": ["mean"],
+            "fields": ["value"],
+            "as": ["rolling_mean"],
+            "frame": [-2, 0],
+            "sort": {"field": "date", "order": "ascending"},
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    ("shorthand", "message"),
+    [
+        ("sum()", "operation 'sum' requires a field"),
+        ("rank(value)", "operation 'rank' does not accept a field"),
+        ("distinct(value)", "Unsupported GenomeSpy window operation"),
+        ("ntile()", "operation 'ntile' requires a parameter"),
+    ],
+)
+def test_transform_window_rejects_unsupported_shorthand(
+    shorthand: str, message: str
+) -> None:
+    with pytest.raises(ValueError, match=message):
+        gs.Chart([{"value": 1}]).transform_window(result=shorthand)
+
+
+def test_transform_window_rejects_mixed_call_shapes() -> None:
+    with pytest.raises(TypeError, match="cannot mix compatibility definitions"):
+        gs.Chart([{"value": 1}]).transform_window(
+            ops=["sum"], fields=["value"], result="sum(value)"
+        )

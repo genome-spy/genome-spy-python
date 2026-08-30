@@ -7,7 +7,7 @@ import re
 from collections.abc import Mapping, Sequence
 from typing import Any, Literal, Self, cast
 
-from genome_spy.schema import AggregateOp_T, Field_T, core
+from genome_spy.schema import AggregateOp_T, Field_T, WindowOp_T, core
 from genome_spy.schema.mixins import TransformMethodMixin
 from genome_spy.schemapi import Undefined, UndefinedType
 
@@ -25,6 +25,31 @@ _AGGREGATE_OPERATIONS = {
     "q3",
     "variance",
 }
+_WINDOW_ONLY_OPERATIONS = {
+    "row_number",
+    "rank",
+    "dense_rank",
+    "percent_rank",
+    "cume_dist",
+    "ntile",
+    "lag",
+    "lead",
+    "first_value",
+    "last_value",
+    "nth_value",
+    "prev_value",
+    "next_value",
+}
+_FIELDLESS_WINDOW_OPERATIONS = {
+    "count",
+    "row_number",
+    "rank",
+    "dense_rank",
+    "percent_rank",
+    "cume_dist",
+    "ntile",
+}
+_PARAMETER_REQUIRED_WINDOW_OPERATIONS = {"ntile", "nth_value"}
 _OPERATION_ALIASES = {"average": "mean"}
 _OPERATION_SHORTHAND = re.compile(
     r"^\s*(?P<operation>[A-Za-z_][A-Za-z0-9_]*)\s*"
@@ -127,6 +152,88 @@ def _normalize_sort_definitions(
         orders.append(cast(str, order))
 
     return {"field": fields, "order": orders}
+
+
+def _normalize_window_operation(
+    operation: object,
+    field: object,
+    param: object,
+) -> tuple[WindowOp_T, str | None, float | None]:
+    if not isinstance(operation, str):
+        raise TypeError("Window definition 'op' must be a string.")
+
+    normalized_operation = _OPERATION_ALIASES.get(operation, operation)
+    supported = _AGGREGATE_OPERATIONS | _WINDOW_ONLY_OPERATIONS
+    if normalized_operation not in supported:
+        raise ValueError(
+            f"Unsupported GenomeSpy window operation {normalized_operation!r}."
+        )
+
+    allows_no_field = normalized_operation in _FIELDLESS_WINDOW_OPERATIONS
+    if field is None:
+        if not allows_no_field:
+            raise ValueError(
+                f"Window operation {normalized_operation!r} requires a field."
+            )
+    elif not isinstance(field, str):
+        raise TypeError("Window definition 'field' must be a string or None.")
+    elif allows_no_field:
+        raise ValueError(
+            f"Window operation {normalized_operation!r} does not accept a field."
+        )
+
+    if param is None:
+        if normalized_operation in _PARAMETER_REQUIRED_WINDOW_OPERATIONS:
+            raise ValueError(
+                f"Window operation {normalized_operation!r} requires a parameter."
+            )
+    elif isinstance(param, bool) or not isinstance(param, (int, float)):
+        raise TypeError("Window definition 'param' must be a number or None.")
+
+    return (
+        cast(WindowOp_T, normalized_operation),
+        field,
+        cast(float | None, param),
+    )
+
+
+def _normalize_window_definition(
+    definition: Mapping[str, Any],
+) -> tuple[WindowOp_T, str | None, float | None, str]:
+    extra = set(definition) - {"op", "field", "param", "as"}
+    if extra:
+        names = ", ".join(sorted(extra))
+        raise ValueError(f"Unsupported window definition properties: {names}.")
+
+    missing = {"op", "as"} - set(definition)
+    if missing:
+        names = ", ".join(sorted(missing))
+        raise ValueError(f"Window definition is missing: {names}.")
+
+    output = definition["as"]
+    if not isinstance(output, str):
+        raise TypeError("Window definition 'as' must be a string.")
+
+    operation, field, param = _normalize_window_operation(
+        definition["op"],
+        definition.get("field"),
+        definition.get("param"),
+    )
+    return operation, field, param, output
+
+
+def _parse_window_shorthand(value: str) -> tuple[WindowOp_T, str | None, None]:
+    match = _OPERATION_SHORTHAND.fullmatch(value)
+    if match is None:
+        raise ValueError(
+            f"Invalid window shorthand {value!r}; expected 'operation(field)'."
+        )
+
+    field = match.group("field").strip() or None
+    operation, normalized_field, _ = _normalize_window_operation(
+        match.group("operation"), field, None
+    )
+    return operation, normalized_field, None
 
 
 class AltairTransformCompatMixin(TransformMethodMixin):
@@ -508,5 +615,126 @@ class AltairTransformCompatMixin(TransformMethodMixin):
             field=normalized_field,
             groupby=cast(Sequence[Field_T], groupby),
             offset=offset,
+            sort=cast(Any, normalized_sort),
+        )
+
+    def transform_window(
+        self,
+        window: Sequence[Mapping[str, Any]] | UndefinedType = Undefined,
+        frame: Sequence[float | None] | UndefinedType = Undefined,
+        groupby: Sequence[Field_T] | UndefinedType = Undefined,
+        ignorePeers: bool | UndefinedType = Undefined,
+        sort: core.CompareParams
+        | Mapping[str, Any]
+        | Sequence[Mapping[str, Any]]
+        | UndefinedType = Undefined,
+        *,
+        ops: Sequence[WindowOp_T] | UndefinedType = Undefined,
+        as_: Sequence[str | None] | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        fields: Sequence[Field_T | None] | UndefinedType = Undefined,
+        params: Sequence[float | None] | UndefinedType = Undefined,
+        **kwargs: str,
+    ) -> Self:
+        """Calculate window values using Altair shorthand or GenomeSpy arrays.
+
+        Compatibility definitions are normalized into GenomeSpy's aligned
+        operation arrays. Altair-like sort lists are normalized to a GenomeSpy
+        compare definition, with omitted orders defaulting to ascending.
+
+        Args:
+            window: Altair-like mappings with ``op``, ``as``, and optional
+                ``field`` and ``param`` properties.
+            frame: Inclusive window-frame offsets.
+            groupby: Fields defining independent window partitions.
+            ignorePeers: Whether frame offsets ignore peer rows.
+            sort: Native GenomeSpy compare definition or Altair-like sort list.
+            ops: GenomeSpy-native operation array.
+            as_: GenomeSpy-native output field array.
+            description: Description of the transform step.
+            fields: GenomeSpy-native input field array.
+            params: GenomeSpy-native operation parameter array.
+            **kwargs: Output names mapped to ``operation(field)`` shorthand.
+
+        Returns:
+            A copied specification with the window transform appended.
+
+        Raises:
+            TypeError: If compatibility and native array forms are mixed or a
+                definition has invalid value types.
+            ValueError: If definitions, shorthand, or operations are invalid.
+
+        Example:
+            ``chart.transform_window(rank="rank()", total="sum(value)")``
+        """
+        native_arguments = (ops, as_, fields, params)
+        uses_native_arrays = any(value is not Undefined for value in native_arguments)
+        uses_compatibility = window is not Undefined or bool(kwargs)
+        if uses_native_arrays and uses_compatibility:
+            raise TypeError(
+                "transform_window cannot mix compatibility definitions with "
+                "'ops', 'fields', 'params', or 'as_'."
+            )
+
+        normalized_sort = sort
+        if isinstance(sort, Sequence) and not isinstance(sort, (str, bytes)):
+            normalized_sort = _normalize_sort_definitions(sort)
+
+        if not uses_compatibility:
+            if ops is Undefined:
+                raise TypeError(
+                    "transform_window requires 'ops' or window definitions."
+                )
+            return super().transform_window(
+                ops=cast(Sequence[WindowOp_T], ops),
+                as_=as_,
+                description=description,
+                fields=fields,
+                frame=frame,
+                groupby=groupby,
+                ignorePeers=ignorePeers,
+                params=params,
+                sort=cast(Any, normalized_sort),
+            )
+
+        definitions = (
+            []
+            if window is Undefined
+            else list(cast(Sequence[Mapping[str, Any]], window))
+        )
+        if not definitions and not kwargs:
+            raise ValueError("transform_window requires at least one definition.")
+
+        normalized_ops: list[WindowOp_T] = []
+        normalized_fields: list[str | None] = []
+        normalized_params: list[float | None] = []
+        normalized_outputs: list[str] = []
+        for definition in definitions:
+            operation, field, param, output = _normalize_window_definition(definition)
+            normalized_ops.append(operation)
+            normalized_fields.append(field)
+            normalized_params.append(param)
+            normalized_outputs.append(output)
+
+        for output, shorthand in kwargs.items():
+            operation, field, param = _parse_window_shorthand(shorthand)
+            normalized_ops.append(operation)
+            normalized_fields.append(field)
+            normalized_params.append(param)
+            normalized_outputs.append(output)
+
+        emitted_params: Sequence[float | None] | UndefinedType = Undefined
+        if any(param is not None for param in normalized_params):
+            emitted_params = normalized_params
+
+        return super().transform_window(
+            ops=normalized_ops,
+            as_=normalized_outputs,
+            description=description,
+            fields=normalized_fields,
+            frame=frame,
+            groupby=groupby,
+            ignorePeers=ignorePeers,
+            params=emitted_params,
             sort=cast(Any, normalized_sort),
         )
