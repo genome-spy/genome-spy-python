@@ -222,6 +222,63 @@ def test_generate_transform_methods_from_schema_union() -> None:
     ]
 
 
+def test_generate_transform_method_overrides_from_schema_properties() -> None:
+    schema = {
+        "definitions": {
+            "FormulaParams": {
+                "type": "object",
+                "required": ["type", "as", "expr"],
+                "properties": {
+                    "type": {"const": "formula", "type": "string"},
+                    "as": {"type": "string"},
+                    "expr": {"type": "string"},
+                    "description": {"type": "string"},
+                },
+            },
+            "FlattenParams": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                    "type": {"const": "flatten", "type": "string"},
+                    "fields": {"type": "array", "items": {"type": "string"}},
+                    "as": {"type": "array", "items": {"type": "string"}},
+                    "index": {"type": "string"},
+                },
+            },
+            "SampleParams": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                    "type": {"const": "sample", "type": "string"},
+                    "size": {"type": "number"},
+                    "description": {"type": "string"},
+                },
+            },
+            "TransformParams": {
+                "anyOf": [
+                    {"$ref": "#/definitions/FormulaParams"},
+                    {"$ref": "#/definitions/FlattenParams"},
+                    {"$ref": "#/definitions/SampleParams"},
+                ]
+            },
+        }
+    }
+
+    generator = SchemaWrapperGenerator(schema)
+    specs = {spec.method_name: spec for spec in generator.transform_method_specs()}
+    source = generator.generate_mark_mixins_module().source
+
+    assert specs["transform_calculate"].property_aliases == (("expr", "calculate"),)
+    assert specs["transform_flatten"].positional_properties == ("fields", "as")
+    assert specs["transform_sample"].positional_properties == ("size",)
+    assert "def transform_calculate(" in source
+    assert "calculate: str | UndefinedType = Undefined" in source
+    assert "transform['expr'] = calculate" in source
+    assert "for output, value in kwargs.items():" in source
+    assert "def transform_flatten(\n        self,\n        fields:" in source
+    assert "def transform_sample(\n        self,\n        size:" in source
+
+
 def test_generated_filter_requires_a_predicate() -> None:
     schema = {
         "definitions": {

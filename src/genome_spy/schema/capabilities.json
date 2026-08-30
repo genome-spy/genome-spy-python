@@ -373,6 +373,11 @@
       "method": "transform_formula"
     },
     {
+      "schema": "FormulaParams",
+      "type": "formula",
+      "method": "transform_calculate"
+    },
+    {
       "schema": "LookupParams",
       "type": "lookup",
       "method": "transform_lookup"

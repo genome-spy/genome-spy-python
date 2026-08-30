@@ -15,7 +15,6 @@ from genome_spy._chart_authoring import (
     normalize_data,
     normalize_transform,
 )
-from genome_spy._transform_compat import AltairTransformCompatMixin
 from genome_spy.channels import Channel
 from genome_spy.schema import (
     ConcatSpec,
@@ -41,6 +40,7 @@ from genome_spy.schema.mixins import (
     MultiscalePropertiesMixin,
     ResolutionMethodMixin,
     TopLevelMergeMixin,
+    TransformMethodMixin,
     UnitPropertiesMixin,
     VConcatPropertiesMixin,
 )
@@ -141,7 +141,7 @@ def _merge_encoding_definitions(
     return merge_encoding_definitions(current_encoding, updates, data=data)
 
 
-class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, AltairTransformCompatMixin):
+class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin):
     """Shared behavior for top-level GenomeSpy specifications."""
 
     _schema_spec_cls: ClassVar[type[SchemaBase]]

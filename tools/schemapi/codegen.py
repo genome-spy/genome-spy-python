@@ -146,11 +146,53 @@ class TransformMethodSpec:
     transform_type: str
     properties: tuple[PropertySpec, ...]
     required: frozenset[str]
+    method_name_override: str | None = None
+    positional_properties: tuple[str, ...] = ()
+    property_aliases: tuple[tuple[str, str], ...] = ()
+    repeat_keyword_properties: tuple[str, str] | None = None
 
     @property
     def method_name(self) -> str:
-        """Return the Altair-style method name for this transform."""
+        """Return the generated method name for this transform."""
+        if self.method_name_override is not None:
+            return self.method_name_override
         return f"transform_{_snake_name(self.transform_type)}"
+
+
+@dataclass(frozen=True, slots=True)
+class TransformMethodTemplate:
+    """Describe one additional method emitted from a transform schema."""
+
+    method_name: str
+    properties: tuple[str, ...]
+    positional_properties: tuple[str, ...] = ()
+    property_aliases: tuple[tuple[str, str], ...] = ()
+    repeat_keyword_properties: tuple[str, str] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class TransformMethodOverride:
+    """Customize generated methods for one transform schema definition."""
+
+    positional_properties: tuple[str, ...] = ()
+    additional_methods: tuple[TransformMethodTemplate, ...] = ()
+
+
+TRANSFORM_METHOD_OVERRIDES: dict[str, TransformMethodOverride] = {
+    "FormulaParams": TransformMethodOverride(
+        additional_methods=(
+            TransformMethodTemplate(
+                method_name="transform_calculate",
+                properties=("as", "expr"),
+                positional_properties=("as", "expr"),
+                property_aliases=(("expr", "calculate"),),
+                repeat_keyword_properties=("as", "expr"),
+            ),
+        )
+    ),
+    "FlattenParams": TransformMethodOverride(positional_properties=("fields", "as")),
+    "SampleParams": TransformMethodOverride(positional_properties=("size",)),
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -677,14 +719,45 @@ class SchemaWrapperGenerator:
                 for name in definition_schema.get("required", [])
                 if isinstance(name, str) and name != "type"
             )
+            override = TRANSFORM_METHOD_OVERRIDES.get(
+                schema_name, TransformMethodOverride()
+            )
             specs.append(
                 TransformMethodSpec(
                     schema_name=schema_name,
                     transform_type=transform_type,
                     properties=property_specs,
                     required=required,
+                    positional_properties=override.positional_properties,
                 )
             )
+            properties_by_name = {
+                property_spec.name: property_spec for property_spec in property_specs
+            }
+            for template in override.additional_methods:
+                missing_properties = (
+                    set(template.properties) - properties_by_name.keys()
+                )
+                if missing_properties:
+                    names = ", ".join(sorted(missing_properties))
+                    raise ValueError(
+                        f"Transform method template {template.method_name!r} refers "
+                        f"to missing {schema_name} properties: {names}."
+                    )
+                specs.append(
+                    TransformMethodSpec(
+                        schema_name=schema_name,
+                        transform_type=transform_type,
+                        properties=tuple(
+                            properties_by_name[name] for name in template.properties
+                        ),
+                        required=frozenset(),
+                        method_name_override=template.method_name,
+                        positional_properties=template.positional_properties,
+                        property_aliases=template.property_aliases,
+                        repeat_keyword_properties=template.repeat_keyword_properties,
+                    )
+                )
         return tuple(specs)
 
     def lazy_data_method_specs(self) -> tuple[LazyDataMethodSpec, ...]:
@@ -3371,28 +3444,57 @@ def _qualified_transform_annotation(annotation: str) -> str:
 
 
 def _transform_method_source(spec: TransformMethodSpec) -> str:
-    ordered_properties = sorted(
-        spec.properties,
+    aliases = dict(spec.property_aliases)
+    properties_by_name = {
+        property_spec.name: property_spec for property_spec in spec.properties
+    }
+    missing_positionals = set(spec.positional_properties) - properties_by_name.keys()
+    if missing_positionals:
+        names = ", ".join(sorted(missing_positionals))
+        raise ValueError(
+            f"Generated method {spec.method_name!r} refers to missing positional "
+            f"properties: {names}."
+        )
+
+    positional_properties = [
+        properties_by_name[name] for name in spec.positional_properties
+    ]
+    remaining_properties = sorted(
+        (
+            property_spec
+            for property_spec in spec.properties
+            if property_spec.name not in spec.positional_properties
+        ),
         key=lambda property_spec: (
             property_spec.name not in spec.required,
             property_spec.name,
         ),
     )
+    ordered_properties = [*positional_properties, *remaining_properties]
+
+    def parameter_name(property_spec: PropertySpec) -> str:
+        return _python_property_name(
+            aliases.get(property_spec.name, property_spec.name)
+        )
+
+    def parameter_source(property_spec: PropertySpec) -> str:
+        annotation = _qualified_transform_annotation(
+            property_spec.annotation.annotation
+        )
+        name = parameter_name(property_spec)
+        if property_spec.name in spec.required:
+            return f"        {name}: {annotation},"
+        return f"        {name}: {annotation} | UndefinedType = Undefined,"
+
     parameters: list[str] = []
     assignments: list[str] = []
     for property_spec in ordered_properties:
         schema_name = property_spec.name
-        python_name = _python_property_name(schema_name)
-        annotation = _qualified_transform_annotation(
-            property_spec.annotation.annotation
-        )
+        python_name = parameter_name(property_spec)
+        parameters.append(parameter_source(property_spec))
         if schema_name in spec.required:
-            parameters.append(f"        {python_name}: {annotation},")
             assignments.append(f"        transform[{schema_name!r}] = {python_name}")
         else:
-            parameters.append(
-                f"        {python_name}: {annotation} | UndefinedType = Undefined,"
-            )
             assignments.extend(
                 [
                     f"        if {python_name} is not Undefined:",
@@ -3411,20 +3513,31 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
                 "    ) -> Self:",
             ]
         )
-    elif parameters:
-        signature = "\n".join(
-            [
-                f"    def {spec.method_name}(",
-                "        self,",
-                "        *,",
-                *parameters,
-                "    ) -> Self:",
-            ]
-        )
     else:
-        signature = f"    def {spec.method_name}(self) -> Self:"
+        positional_parameters = [
+            parameter_source(property_spec) for property_spec in positional_properties
+        ]
+        remaining_parameters = [
+            parameter_source(property_spec) for property_spec in remaining_properties
+        ]
+        signature_lines = [
+            f"    def {spec.method_name}(",
+            "        self,",
+            *positional_parameters,
+        ]
+        if remaining_parameters:
+            signature_lines.extend(["        *,", *remaining_parameters])
+        if spec.repeat_keyword_properties is not None:
+            _, value_property = spec.repeat_keyword_properties
+            value_spec = properties_by_name[value_property]
+            value_annotation = _qualified_transform_annotation(
+                value_spec.annotation.annotation
+            )
+            signature_lines.append(f"        **kwargs: {value_annotation},")
+        signature_lines.append("    ) -> Self:")
+        signature = "\n".join(signature_lines)
 
-    compatibility_lines = (
+    validation_lines = (
         [
             "        if expression is not Undefined:",
             "            if expr is not Undefined or param is not Undefined:",
@@ -3436,19 +3549,66 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
         if spec.transform_type == "filter"
         else []
     )
+    doc_properties = [
+        PropertySpec(
+            name=aliases.get(property_spec.name, property_spec.name),
+            annotation=property_spec.annotation,
+            nested_schema_class_name=property_spec.nested_schema_class_name,
+            description=property_spec.description,
+        )
+        for property_spec in ordered_properties
+    ]
+
+    if spec.repeat_keyword_properties is not None:
+        output_property, value_property = spec.repeat_keyword_properties
+        if set(spec.repeat_keyword_properties) != set(properties_by_name):
+            raise ValueError(
+                f"Repeated transform method {spec.method_name!r} must contain "
+                "exactly its output and value properties."
+            )
+        output_name = parameter_name(properties_by_name[output_property])
+        value_name = parameter_name(properties_by_name[value_property])
+        missing_pair_message = (
+            f"{spec.method_name} requires {output_name!r} and {value_name!r} together."
+        )
+        repeated_lines = [
+            f"        has_output = {output_name} is not Undefined",
+            f"        has_value = {value_name} is not Undefined",
+            "        if has_output != has_value:",
+            f"            raise TypeError({missing_pair_message!r})",
+            "        result = self",
+            "        if has_output and has_value:",
+            f"            transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
+            f"            transform[{output_property!r}] = {output_name}",
+            f"            transform[{value_property!r}] = {value_name}",
+            "            result = result._append_transform(transform)  "
+            "# type: ignore[attr-defined]",
+            "        for output, value in kwargs.items():",
+            f"            transform = {{'type': {spec.transform_type!r}}}",
+            f"            transform[{output_property!r}] = output",
+            f"            transform[{value_property!r}] = value",
+            "            result = result._append_transform(transform)  "
+            "# type: ignore[attr-defined]",
+            "        return result",
+        ]
+    else:
+        repeated_lines = [
+            f"        transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
+            *validation_lines,
+            *assignments,
+            "        return self._append_transform(transform)  "
+            "# type: ignore[attr-defined, no-any-return]",
+        ]
+
     return "\n".join(
         [
             signature,
             _method_docstring(
                 f"Add a ``{spec.transform_type}`` transform.",
-                ordered_properties,
+                doc_properties,
                 indent=8,
             ),
-            f"        transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
-            *compatibility_lines,
-            *assignments,
-            "        return self._append_transform(transform)  "
-            "# type: ignore[attr-defined, no-any-return]",
+            *repeated_lines,
             "",
         ]
     )
