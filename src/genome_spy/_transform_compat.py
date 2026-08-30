@@ -421,6 +421,111 @@ class AltairTransformCompatMixin(TransformMethodMixin):
             index=index,
         )
 
+    def transform_lookup(
+        self,
+        lookup: Field_T | UndefinedType = Undefined,
+        from_: Any | UndefinedType = Undefined,
+        as_: Sequence[str] | str | UndefinedType = Undefined,
+        default: Any | UndefinedType = Undefined,
+        *,
+        key: Field_T | Sequence[Field_T] | UndefinedType = Undefined,
+        fields: Field_T | Sequence[Field_T] | None | UndefinedType = Undefined,
+        values: Sequence[Field_T] | None | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+    ) -> Self:
+        """Look up ordinary data using Altair or GenomeSpy arguments.
+
+        In the compatibility form, ``lookup`` names the local field and
+        ``from_`` is a plain mapping with ``data``, ``key``, and ``fields``.
+        These values map directly to GenomeSpy's data source, foreign key,
+        copied values, and local input field.
+
+        Args:
+            lookup: Local input field using Altair's argument name.
+            from_: Native GenomeSpy data or an Altair-like plain mapping.
+            as_: Output names matching the copied foreign fields.
+            default: Value written when no foreign row matches.
+            key: GenomeSpy-native foreign key field or fields.
+            fields: GenomeSpy-native local input field or fields.
+            values: GenomeSpy-native foreign fields to copy.
+            description: Description of the transform step.
+
+        Returns:
+            A copied specification with the lookup transform appended.
+
+        Raises:
+            TypeError: If required values have invalid types or compatibility
+                and native lookup arguments are mixed.
+            ValueError: If the compatibility mapping is incomplete, contains
+                unsupported properties, or output counts do not match.
+
+        Example:
+            ``chart.transform_lookup(lookup="id", from_={"data": data, "key":
+            "id", "fields": ["label"]}, as_=["label"])``
+        """
+        if lookup is Undefined:
+            if from_ is Undefined or key is Undefined:
+                raise TypeError("transform_lookup requires 'from_' and 'key'.")
+            return super().transform_lookup(
+                from_=cast(Any, from_),
+                key=cast(Field_T | Sequence[Field_T], key),
+                as_=cast(Any, as_),
+                default=default,
+                description=description,
+                fields=fields,
+                values=values,
+            )
+
+        if any(value is not Undefined for value in (key, fields, values)):
+            raise TypeError(
+                "Altair-style 'lookup' cannot be combined with native 'key', "
+                "'fields', or 'values'."
+            )
+        if not isinstance(from_, Mapping):
+            raise TypeError(
+                "Altair-style lookup requires a plain 'from_' mapping with "
+                "'data', 'key', and 'fields'."
+            )
+
+        extra = set(from_) - {"data", "key", "fields"}
+        if extra:
+            names = ", ".join(sorted(extra))
+            raise ValueError(f"Unsupported lookup source properties: {names}.")
+        missing = {"data", "key", "fields"} - set(from_)
+        if missing:
+            names = ", ".join(sorted(missing))
+            raise ValueError(f"Lookup source is missing: {names}.")
+
+        foreign_key = from_["key"]
+        copied_values = from_["fields"]
+        if not isinstance(foreign_key, str):
+            raise TypeError("Lookup source 'key' must be a string.")
+        if isinstance(copied_values, (str, bytes)) or not isinstance(
+            copied_values, Sequence
+        ):
+            raise TypeError("Lookup source 'fields' must be a sequence of strings.")
+        if not all(isinstance(value, str) for value in copied_values):
+            raise TypeError("Lookup source 'fields' must contain only strings.")
+        if isinstance(as_, str) or as_ is Undefined:
+            raise TypeError(
+                "Altair-style lookup requires an explicit output-name sequence."
+            )
+        output_names = cast(Sequence[str], as_)
+        if len(output_names) != len(copied_values):
+            raise ValueError(
+                "Lookup output names must match the number of copied fields."
+            )
+
+        return super().transform_lookup(
+            from_=cast(Any, from_["data"]),
+            key=foreign_key,
+            as_=output_names,
+            default=default,
+            description=description,
+            fields=lookup,
+            values=cast(Sequence[Field_T], copied_values),
+        )
+
     def transform_filter(
         self,
         expression: str | UndefinedType = Undefined,

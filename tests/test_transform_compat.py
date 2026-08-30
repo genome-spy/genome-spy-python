@@ -492,3 +492,91 @@ def test_transform_window_rejects_mixed_call_shapes() -> None:
         gs.Chart([{"value": 1}]).transform_window(
             ops=["sum"], fields=["value"], result="sum(value)"
         )
+
+
+def test_transform_lookup_accepts_plain_altair_source_mapping() -> None:
+    foreign_data = {
+        "values": [
+            {"id": 1, "label": "A", "category": "alpha"},
+            {"id": 2, "label": "B", "category": "beta"},
+        ]
+    }
+    chart = (
+        gs.Chart([{"foreign_id": 1}])
+        .mark_point()
+        .transform_lookup(
+            lookup="foreign_id",
+            from_={
+                "data": foreign_data,
+                "key": "id",
+                "fields": ["label", "category"],
+            },
+            as_=["foreign_label", "foreign_category"],
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "lookup",
+            "from": foreign_data,
+            "key": "id",
+            "fields": "foreign_id",
+            "values": ["label", "category"],
+            "as": ["foreign_label", "foreign_category"],
+        }
+    ]
+
+
+def test_transform_lookup_preserves_native_arguments() -> None:
+    foreign_data = {"values": [{"id": 1, "label": "A"}]}
+    chart = (
+        gs.Chart([{"foreign_id": 1}])
+        .mark_point()
+        .transform_lookup(
+            from_=foreign_data,
+            key="id",
+            fields="foreign_id",
+            values=["label"],
+            as_=["foreign_label"],
+        )
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {
+            "type": "lookup",
+            "from": foreign_data,
+            "key": "id",
+            "fields": "foreign_id",
+            "values": ["label"],
+            "as": ["foreign_label"],
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    ("from_", "as_", "message"),
+    [
+        (
+            {"data": {"values": []}, "key": "id", "fields": ["label"]},
+            "foreign",
+            "explicit output-name sequence",
+        ),
+        (
+            {"data": {"values": []}, "key": "id", "fields": ["label"]},
+            ["label", "extra"],
+            "must match the number of copied fields",
+        ),
+        (
+            {"key": "id", "param": "selection", "fields": ["label"]},
+            ["label"],
+            "Unsupported lookup source properties: param",
+        ),
+    ],
+)
+def test_transform_lookup_rejects_ambiguous_altair_forms(
+    from_: dict[str, object], as_: str | list[str], message: str
+) -> None:
+    with pytest.raises((TypeError, ValueError), match=message):
+        gs.Chart([{"foreign_id": 1}]).transform_lookup(
+            lookup="foreign_id", from_=from_, as_=as_
+        )
