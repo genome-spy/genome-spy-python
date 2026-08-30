@@ -97,10 +97,69 @@ that specify the input fields, aggregate operations, and output names:
 
 The six input rows become two output rows, one for `control` and one for
 `treated`. Available operations include `count`, `sum`, `min`, `max`, `mean`,
-`median`, quartiles, and variance. When no fields or operations are supplied,
-the aggregate produces a `count` for each group. The
+`median`, quartiles, and variance. GenomeSpy Core currently retains a legacy
+fieldless count when no fields or operations are supplied, but new code should
+not rely on it: the Altair-style shorthand deliberately rejects `count()`, and
+the Core behavior may be removed. The
 [aggregate transform](https://genomespy.app/docs/grammar/transform/aggregate/)
 lists every supported operation.
+
+## Familiarity with Altair
+
+GenomeSpy and Vega-Lite have different transform grammars and feature sets.
+genome-spy-python follows Altair's chart-authoring style and accepts familiar
+calls where GenomeSpy Core can perform the same operation, but it is not a
+drop-in Altair or Vega-Lite replacement.
+
+The supported overlap is:
+
+| Method | Compatibility level | Supported Altair-style form |
+|---|---|---|
+| `transform_calculate()` | Call-compatible subset | Direct `as_`/`calculate` strings and output-name keyword expressions |
+| `transform_flatten()` | Call-compatible subset | Positional fields and output names; `fields=` and `index=` remain available |
+| `transform_sample()` | Call-compatible subset | Positional size and the explicit 1000-row default |
+| `transform_aggregate()` | Familiar subset | Plain field definitions and `output="op(field)"` for GenomeSpy operations |
+| `transform_filter()` | Familiar subset | One or more raw expressions and scalar equality constraints |
+| `transform_stack()` | Familiar subset | Positional field arguments, output-name expansion, and plain sort definitions |
+| `transform_window()` | Familiar subset | Plain window definitions, shorthand expressions, and plain sort definitions |
+| `transform_lookup()` | Familiar subset | Ordinary data lookup with explicit foreign fields and matching output names |
+
+For example, calculations can use the familiar output-keyword form while
+still serializing native GenomeSpy formula transforms:
+
+```python
+chart = chart.transform_calculate(
+    doubled="datum.value * 2",
+    centered="datum.value - 10",
+)
+```
+
+Aggregate and window shorthand accepts only operations implemented by
+GenomeSpy and fails in Python for unsupported names:
+
+```python
+chart = chart.transform_aggregate(
+    mean_response="mean(response)",
+    groupby=["group"],
+)
+
+chart = chart.transform_window(
+    rank="rank()",
+    running_total="sum(response)",
+    sort=[{"field": "sample", "order": "ascending"}],
+)
+```
+
+GenomeSpy's selections are similar to, but not identical with, Vega-Lite
+selections. Use GenomeSpy's native `param=`, `empty=`, and `fields=` filter
+arguments rather than passing Altair parameter objects. Lookup compatibility
+likewise covers ordinary secondary data only; selection lookup and whole-object
+lookup output are not adapted.
+
+Transforms without a GenomeSpy Core counterpart remain unavailable. This
+includes Altair's bin, density, extent, fold, impute, loess, pivot, quantile,
+regression, and time-unit transforms. `transform_joinaggregate()` will wait for
+a native Core transform rather than being emulated with a window.
 
 ## Transform order matters
 
