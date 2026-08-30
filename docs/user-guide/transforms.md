@@ -104,28 +104,20 @@ the Core behavior may be removed. The
 [aggregate transform](https://genomespy.app/docs/grammar/transform/aggregate/)
 lists every supported operation.
 
-## Familiarity with Altair
+## Python transform conveniences
 
-GenomeSpy and Vega-Lite have different transform grammars and feature sets.
-genome-spy-python follows Altair's chart-authoring style and accepts familiar
-calls where GenomeSpy Core can perform the same operation, but it is not a
-drop-in Altair or Vega-Lite replacement.
+Transform methods and their types are generated from GenomeSpy Core's schema.
+A few generation rules provide concise Python call shapes without changing the
+underlying GenomeSpy grammar:
 
-The supported overlap is:
-
-| Method | Compatibility level | Supported Altair-style form |
+| Method | Convenience | Serialized transform |
 |---|---|---|
-| `transform_calculate()` | Call-compatible subset | Direct `as_`/`calculate` strings and output-name keyword expressions |
-| `transform_flatten()` | Call-compatible subset | Positional fields and output names; `fields=` and `index=` remain available |
-| `transform_sample()` | Call-compatible subset | Positional size and the explicit 1000-row default |
-| `transform_aggregate()` | Familiar subset | Plain field definitions and `output="op(field)"` for GenomeSpy operations |
-| `transform_filter()` | Familiar subset | One or more raw expressions and scalar equality constraints |
-| `transform_stack()` | Familiar subset | Positional field arguments, output-name expansion, and plain sort definitions |
-| `transform_window()` | Familiar subset | Plain window definitions, shorthand expressions, and plain sort definitions |
-| `transform_lookup()` | Familiar subset | Ordinary data lookup with explicit foreign fields and matching output names |
+| `transform_calculate()` | Direct `as_`/`calculate` strings or output-name keyword expressions | `formula` |
+| `transform_flatten()` | Positional fields and output names; `fields=` and `index=` remain available | `flatten` |
+| `transform_sample()` | Positional sample size | `sample` |
 
-For example, calculations can use the familiar output-keyword form while
-still serializing native GenomeSpy formula transforms:
+For example, calculations can use output keywords while still serializing
+native GenomeSpy formula transforms:
 
 ```python
 chart = chart.transform_calculate(
@@ -134,32 +126,20 @@ chart = chart.transform_calculate(
 )
 ```
 
-Aggregate and window shorthand accepts only operations implemented by
-GenomeSpy and fails in Python for unsupported names:
+Multiple keyword calculations are appended in their written order. The direct
+form is available when the output name is only known dynamically:
 
 ```python
-chart = chart.transform_aggregate(
-    mean_response="mean(response)",
-    groupby=["group"],
-)
-
-chart = chart.transform_window(
-    rank="rank()",
-    running_total="sum(response)",
-    sort=[{"field": "sample", "order": "ascending"}],
+chart = chart.transform_calculate(
+    as_=output_name,
+    calculate="datum.response * 100",
 )
 ```
 
-GenomeSpy's selections are similar to, but not identical with, Vega-Lite
-selections. Use GenomeSpy's native `param=`, `empty=`, and `fields=` filter
-arguments rather than passing Altair parameter objects. Lookup compatibility
-likewise covers ordinary secondary data only; selection lookup and whole-object
-lookup output are not adapted.
-
-Transforms without a GenomeSpy Core counterpart remain unavailable. This
-includes Altair's bin, density, extent, fold, impute, loess, pivot, quantile,
-regression, and time-unit transforms. `transform_joinaggregate()` will wait for
-a native Core transform rather than being emulated with a window.
+Calling `transform_sample()` without a size leaves the property out of the
+specification and therefore preserves GenomeSpy Core's current default. Other
+transforms use their generated GenomeSpy-native signatures. Operations absent
+from GenomeSpy Core are not emulated by the Python wrapper.
 
 ## Transform order matters
 
