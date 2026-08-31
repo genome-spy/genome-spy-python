@@ -44,6 +44,7 @@ REGION = [
 ]
 
 VARIANT_DOMAIN = ["v1", "v2", "v3", "v4"]
+MIN_SCORE = gs.Expression("minScore")
 
 
 # interaction-zoom-start
@@ -64,7 +65,7 @@ zoom_chart = (
 # interaction-binding-start
 bound_chart = (
     gs.Chart(VARIANTS)
-    .transform_filter("datum.score >= minScore")
+    .transform_filter(gs.datum.score >= MIN_SCORE)
     .mark_point(
         filled=True,
         color="#4c78a8",

@@ -149,7 +149,7 @@ four ways:
 | Field | Read a value from every row | `gs.X("score:Q")` |
 | Datum | Use a constant in the scale's data domain | `gs.datum(0, type="quantitative")` |
 | Value | Use a constant visual value without a scale | `gs.value("#4c78a8")` |
-| Expression | Calculate a value while the chart runs | `gs.expr("datum.amount * datum.confidence")` |
+| Expression | Calculate a value while the chart runs | `gs.expr(gs.datum.amount * gs.datum.confidence)` |
 
 A datum goes through the channel's scale, so these points sit mid-axis; a
 positional value of `0` would mean the start of the visual range instead.

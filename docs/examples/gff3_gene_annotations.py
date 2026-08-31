@@ -76,7 +76,7 @@ exon_rects = (
         fill="#fafafa",
         strokeWidth=1,
     )
-    .transform_filter("datum.type == 'exon'")
+    .transform_filter(gs.datum.type == "exon")
     .properties(title="GENCODE exon")
 )
 
@@ -89,7 +89,9 @@ utr_cds_rects = (
         stroke="gray",
     )
     .transform_filter(
-        "datum.type != 'exon' && datum.type != 'start_codon' && datum.type != 'stop_codon'"
+        (gs.datum.type != "exon")
+        & (gs.datum.type != "start_codon")
+        & (gs.datum.type != "stop_codon")
     )
     .encode(
         fill=gs.Fill("type:N").scale(
@@ -110,10 +112,10 @@ utr_labels = (
         tooltip=None,
     )
     .transform_filter(
-        "datum.type == 'three_prime_UTR' || datum.type == 'five_prime_UTR'"
+        (gs.datum.type == "three_prime_UTR") | (gs.datum.type == "five_prime_UTR")
     )
     .transform_formula(
-        expr="datum.type == 'three_prime_UTR' ? \"3'\" : \"5'\"",
+        expr=gs.expr.if_(gs.datum.type == "three_prime_UTR", "3'", "5'"),
         as_="label",
     )
     .encode(text=gs.Text("label:N"))
@@ -128,7 +130,11 @@ transcript_labels = (
     gs.Chart()
     .mark_text(size=10, yOffset=12, tooltip=None, color="#505050")
     .transform_formula(
-        expr="(datum.strand == '-' ? '< ' : '') + datum.transcript_name + ' - ' + datum.transcript_id + (datum.strand == '+' ? ' >' : '')",
+        expr=gs.expr.if_(gs.datum.strand == "-", "< ", "")
+        + gs.datum.transcript_name
+        + " - "
+        + gs.datum.transcript_id
+        + gs.expr.if_(gs.datum.strand == "+", " >", ""),
         as_="label",
     )
     .encode(text=gs.Text("label:N"))
@@ -163,7 +169,7 @@ chart = (
         .axis(None),
     )
     .transform_flatten()
-    .transform_formula(expr="datum.attributes.gene_name", as_="gene_name")
+    .transform_formula(expr=gs.datum.attributes.gene_name, as_="gene_name")
     .transform_flatten(fields=["child_features"])
     .transform_flatten(fields=["child_features"], as_=["child_feature"])
     .transform_project(

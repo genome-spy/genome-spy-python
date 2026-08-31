@@ -25,7 +25,8 @@ MIN_BASE_MEAN = 10.0
 MAX_GENES = 12_000
 # zoomLevel is 1 at the initial domain. The exponent makes growth gradual,
 # while the cap prevents points from becoming oversized at deep zoom levels.
-POINT_SIZE = gs.expr("min(14 * pow(zoomLevel, 0.75), 64)")
+ZOOM_LEVEL = gs.Expression("zoomLevel")
+POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -91,7 +92,7 @@ volcano_padj_rule = (
 # The shifted label endpoint uses the primary channels; the point is x2/y2.
 volcano_callout_lines = (
     gs.Chart(data)
-    .transform_filter("datum.volcano_label")
+    .transform_filter(gs.datum.volcano_label)
     .mark_rule(color="#3f4750", size=1, tooltip=None)
     .encode(
         x=gs.X("log2fc:Q")
@@ -109,7 +110,7 @@ volcano_callout_lines = (
 
 volcano_callout_labels = (
     gs.Chart(data)
-    .transform_filter("datum.volcano_label")
+    .transform_filter(gs.datum.volcano_label)
     # Primary offset channels can read the per-row pixel displacements.
     .mark_text(
         align="center",

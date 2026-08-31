@@ -73,5 +73,5 @@ chart = (
         ),
     )
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
-    .transform_formula(expr="datum.rawPos + datum.start", as_="pos")
+    .transform_formula(expr=gs.datum.rawPos + gs.datum.start, as_="pos")
 )

@@ -25,7 +25,8 @@ MIN_BASE_MEAN = 10.0
 MAX_GENES = 12_000
 # zoomLevel is 1 at the initial domain. The exponent makes growth gradual,
 # while the cap prevents points from becoming oversized at deep zoom levels.
-POINT_SIZE = gs.expr("min(14 * pow(zoomLevel, 0.75), 64)")
+ZOOM_LEVEL = gs.Expression("zoomLevel")
+POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -79,7 +80,7 @@ ma_fc_rules = (
 
 ma_callout_lines = (
     gs.Chart(data)
-    .transform_filter("datum.ma_label")
+    .transform_filter(gs.datum.ma_label)
     .mark_rule(color="#3f4750", size=1)
     .encode(
         x=gs.X("log10_base_mean:Q")
@@ -95,7 +96,7 @@ ma_callout_lines = (
 
 ma_callout_labels = (
     gs.Chart(data)
-    .transform_filter("datum.ma_label")
+    .transform_filter(gs.datum.ma_label)
     .mark_text(
         align="center",
         baseline="bottom",

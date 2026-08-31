@@ -322,7 +322,7 @@ mutation_view = (
 # The protein backbone and domains share the mutation view's x scale.
 backbone = (
     gs.Chart([{"start": 1}])
-    .transform_formula(expr="proteinLength", as_="end")
+    .transform_formula(expr=gs.Expression("proteinLength"), as_="end")
     .mark_rect(y=0.36, y2=0.64, color="#b9bdb8", tooltip=None)
     .properties(name="protein-backbone")
 )

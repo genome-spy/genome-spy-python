@@ -84,7 +84,7 @@ separator_layer = (
     gs.Chart()
     .encode(x2=None)
     .mark_rule(color="#a0a0a0", strokeDash=[3, 3], strokeDashOffset=2)
-    .transform_filter("datum.chromStart == 0 && datum.chrom != 'chr1'")
+    .transform_filter((gs.datum.chromStart == 0) & (gs.datum.chrom != "chr1"))
 )
 
 # The shared encoding lives on the layered root so each sublayer inherits the
@@ -110,7 +110,7 @@ chart = (
         x=gs.Locus("chrom", "chromStart"),
         x2=gs.Locus("chrom", "chromEnd"),
     )
-    .transform_filter("!test(/_/, datum.chrom)")
+    .transform_filter(~gs.expr.test(gs.expr.regexp("_"), gs.datum.chrom))
     .resolve_scale(color="independent")
     .configure_view(stroke="black")
 )

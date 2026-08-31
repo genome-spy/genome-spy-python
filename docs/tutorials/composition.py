@@ -63,7 +63,7 @@ vertical_chart = (
 # composition-horizontal-start
 control_panel = (
     gs.Chart()
-    .transform_filter("datum.group == 'control'")
+    .transform_filter(gs.datum.group == "control")
     .mark_point(filled=True, size=100, color="#4c78a8")
     .encode(x="position:Q", y=gs.Y("signal:Q").scale(zero=False))
     .properties(title="Control")
@@ -71,7 +71,7 @@ control_panel = (
 )
 treated_panel = (
     gs.Chart()
-    .transform_filter("datum.group == 'treated'")
+    .transform_filter(gs.datum.group == "treated")
     .mark_point(filled=True, size=100, color="#e45756")
     .encode(x="position:Q", y=gs.Y("signal:Q").scale(zero=False))
     .properties(title="Treated")
@@ -119,7 +119,7 @@ column_labels = (
 )
 column_summary = (
     (column_bars + column_labels)
-    .transform_filter("datum.row == 0")
+    .transform_filter(gs.datum.row == 0)
     .properties(height=90)
     .resolve_scale(y="excluded")
 )
@@ -143,7 +143,7 @@ row_labels = (
 )
 row_summary = (
     (row_bars + row_labels)
-    .transform_filter("datum.column == 0")
+    .transform_filter(gs.datum.column == 0)
     .properties(width=110)
     .resolve_scale(x="excluded")
 )

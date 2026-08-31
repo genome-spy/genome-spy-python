@@ -10847,6 +10847,52 @@ class TransformMethodMixin:
             transform["description"] = description
         return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
 
+    def transform_calculate(
+        self,
+        as_: str | UndefinedType = Undefined,
+        calculate: str | UndefinedType = Undefined,
+        **kwargs: str,
+    ) -> Self:
+        """Add one or more ``formula`` transforms.
+
+        Pass both direct arguments for one transform, or use keyword
+        arguments to append one transform per output in insertion order.
+
+        Args:
+            as\\_ (str): The (new) field where the computed value is written to
+            calculate (str): An expression string
+            **kwargs (str): Additional output field names
+                mapped to calculate values.
+
+        Returns:
+            Self: A new specification with the transform or transforms appended.
+
+        Raises:
+            TypeError: If only one of ``as_`` and ``calculate``
+                is provided.
+
+        Example:
+            >>> chart.transform_calculate(doubled="datum.value * 2")
+        """
+        has_output = as_ is not Undefined
+        has_value = calculate is not Undefined
+        if has_output != has_value:
+            raise TypeError(
+                "transform_calculate requires 'as_' and 'calculate' together."
+            )
+        result = self
+        if has_output and has_value:
+            transform: dict[str, Any] = {"type": "formula"}
+            transform["as"] = as_
+            transform["expr"] = calculate
+            result = result._append_transform(transform)  # type: ignore[attr-defined]
+        for output, value in kwargs.items():
+            transform = {"type": "formula"}
+            transform["as"] = output
+            transform["expr"] = value
+            result = result._append_transform(transform)  # type: ignore[attr-defined]
+        return result
+
     def transform_lookup(
         self,
         *,
@@ -11044,27 +11090,27 @@ class TransformMethodMixin:
 
     def transform_flatten(
         self,
-        *,
-        as_: Sequence[str] | str | UndefinedType = Undefined,
-        description: str | UndefinedType = Undefined,
         fields: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
+        as_: Sequence[str] | str | UndefinedType = Undefined,
+        *,
+        description: str | UndefinedType = Undefined,
         index: str | UndefinedType = Undefined,
     ) -> Self:
         """Add a ``flatten`` transform.
 
         Args:
+            fields (Sequence[Field_T] | Field_T): The field(s) to flatten. If no field is defined, the data object itself is treated as an array to be flattened.
             as\\_ (Sequence[str] | str): The output field name(s) for the flattened field. **Default:** the input fields.
             description (str): A description of the transform step. Can be used for documentation and agent context.
-            fields (Sequence[Field_T] | Field_T): The field(s) to flatten. If no field is defined, the data object itself is treated as an array to be flattened.
             index (str): The output field name for the zero-based index of the array values. If unspecified, an index field is not added.
         """
         transform: dict[str, Any] = {"type": "flatten"}
+        if fields is not Undefined:
+            transform["fields"] = fields
         if as_ is not Undefined:
             transform["as"] = as_
         if description is not Undefined:
             transform["description"] = description
-        if fields is not Undefined:
-            transform["fields"] = fields
         if index is not Undefined:
             transform["index"] = index
         return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
@@ -11480,21 +11526,21 @@ class TransformMethodMixin:
 
     def transform_sample(
         self,
+        size: float | UndefinedType = Undefined,
         *,
         description: str | UndefinedType = Undefined,
-        size: float | UndefinedType = Undefined,
     ) -> Self:
         """Add a ``sample`` transform.
 
         Args:
-            description (str): A description of the transform step. Can be used for documentation and agent context.
             size (float): The maximum sample size. **Default:** ``500``
+            description (str): A description of the transform step. Can be used for documentation and agent context.
         """
         transform: dict[str, Any] = {"type": "sample"}
-        if description is not Undefined:
-            transform["description"] = description
         if size is not Undefined:
             transform["size"] = size
+        if description is not Undefined:
+            transform["description"] = description
         return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_set_intersection(

@@ -238,7 +238,7 @@ matrix_grid = (
 full_rect_layer = (
     gs.Chart(data["events"])
     .transform_filter(
-        "datum.class === 'Amplification' || datum.class === 'Deep Deletion'"
+        (gs.datum["class"] == "Amplification") | (gs.datum["class"] == "Deep Deletion")
     )
     .mark_rect()
     .encode(
@@ -251,9 +251,10 @@ full_rect_layer = (
 putative_rect_layer = (
     gs.Chart(data["events"])
     .transform_filter(
-        "datum.class !== 'Amplification' && datum.class !== 'Deep Deletion' "
-        "&& datum.class !== 'Structural Variant (putative driver)' "
-        "&& datum.class !== 'Structural Variant (putative passenger)'"
+        (gs.datum["class"] != "Amplification")
+        & (gs.datum["class"] != "Deep Deletion")
+        & (gs.datum["class"] != "Structural Variant (putative driver)")
+        & (gs.datum["class"] != "Structural Variant (putative passenger)")
     )
     .mark_rect()
     .encode(
@@ -266,8 +267,8 @@ putative_rect_layer = (
 star_layer = (
     gs.Chart(data["events"])
     .transform_filter(
-        "datum.class === 'Structural Variant (putative driver)' || "
-        "datum.class === 'Structural Variant (putative passenger)'"
+        (gs.datum["class"] == "Structural Variant (putative driver)")
+        | (gs.datum["class"] == "Structural Variant (putative passenger)")
     )
     .mark_point(shape="cross", size=80, filled=True, strokeWidth=0)
     .encode(

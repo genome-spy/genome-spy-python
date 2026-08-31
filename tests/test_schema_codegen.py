@@ -6,10 +6,84 @@ from pathlib import Path
 
 import genome_spy as gs
 import pytest
-from tools.generate_schema_wrapper import write_schema_files, write_schema_package
-from tools.schemapi.codegen import SchemaWrapperGenerator
+from tools.generate_schema_wrapper import (
+    TRANSFORM_METHOD_OVERRIDES,
+    write_schema_files,
+    write_schema_package,
+)
+from tools.schemapi.codegen import (
+    SchemaWrapperGenerator,
+    TransformMethodOverride,
+)
+from tools.schemapi.expression_codegen import parse_expression_catalog
 
 pytestmark = pytest.mark.codegen
+
+GENOME_SPY_EXPRESSION_DOCS = """
+## Conditional operators
+And an equivalent `if` construct:
+### Constants and functions from Vega
+#### Constants
+[`NaN`](https://vega.github.io/vega/docs/expressions/#NaN)
+#### Type Checking Functions
+[`isValid`](https://vega.github.io/vega/docs/expressions/#isValid)
+#### Math Functions
+[`max`](https://vega.github.io/vega/docs/expressions/#max),
+[`sin`](https://vega.github.io/vega/docs/expressions/#sin)
+#### Sequence Functions
+[`slice`](https://vega.github.io/vega/docs/expressions/#slice)
+### Scale Functions
+<a name="scale" href="#scale">#</a>
+<b>scale</b>(<i>channel</i>, <i>value</i>)<br/>
+### Other Functions
+<a name="mapHasKey" href="#mapHasKey">#</a>
+<b>mapHasKey</b>(<i>map</i>, <i>key</i>)<br/>
+"""
+VEGA_EXPRESSION_DOCS = """
+<a name="if" href="#if">#</a>
+<b>if</b>(<i>test</i>, <i>thenValue</i>, <i>elseValue</i>)<br/>
+<a name="isValid" href="#isValid">#</a>
+<b>isValid</b>(<i>value</i>)<br/>
+<a name="max" href="#max">#</a>
+<b>max</b>(<i>value1</i>, <i>value2</i>, ...)<br/>
+<a name="sin" href="#sin">#</a>
+<b>sin</b>(<i>value</i>)<br/>
+<a name="slice" href="#slice">#</a>
+<b>slice</b>(<i>array</i>, <i>start</i>[, <i>end</i>])<br/>
+"""
+EXPRESSION_CATALOG = parse_expression_catalog(
+    GENOME_SPY_EXPRESSION_DOCS, VEGA_EXPRESSION_DOCS
+)
+
+
+def test_parse_expression_catalog_uses_upstream_surface_and_signatures() -> None:
+    catalog = EXPRESSION_CATALOG
+
+    assert catalog.constants == ("NaN",)
+    assert [function.name for function in catalog.functions] == [
+        "if",
+        "isValid",
+        "max",
+        "sin",
+        "slice",
+        "scale",
+        "mapHasKey",
+    ]
+    assert catalog.functions[0].python_name == "if_"
+    assert catalog.functions[0].parameters[1].name == "thenValue"
+    assert catalog.functions[2].parameters[-1].variadic is True
+    assert catalog.functions[2].parameters[-1].name == "args"
+    assert catalog.functions[4].parameters[-1].optional is True
+
+
+def test_parse_expression_catalog_rejects_unparsed_custom_signatures() -> None:
+    malformed_docs = GENOME_SPY_EXPRESSION_DOCS.replace(
+        "<b>scale</b>(<i>channel</i>, <i>value</i>)",
+        "scale(channel, value)",
+    )
+
+    with pytest.raises(ValueError, match="no signatures for: scale"):
+        parse_expression_catalog(malformed_docs, VEGA_EXPRESSION_DOCS)
 
 
 def test_schema_wrapper_generator_summarizes_definitions() -> None:
@@ -220,6 +294,131 @@ def test_generate_transform_methods_from_schema_union() -> None:
             "method": "transform_lookup",
         }
     ]
+
+
+def test_generate_transform_method_overrides_from_schema_properties() -> None:
+    schema = {
+        "definitions": {
+            "FormulaParams": {
+                "type": "object",
+                "required": ["type", "as", "expr"],
+                "properties": {
+                    "type": {"const": "formula", "type": "string"},
+                    "as": {"type": "string"},
+                    "expr": {"type": "string"},
+                    "description": {"type": "string"},
+                },
+            },
+            "FlattenParams": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                    "type": {"const": "flatten", "type": "string"},
+                    "fields": {"type": "array", "items": {"type": "string"}},
+                    "as": {"type": "array", "items": {"type": "string"}},
+                    "index": {"type": "string"},
+                },
+            },
+            "SampleParams": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                    "type": {"const": "sample", "type": "string"},
+                    "size": {"type": "number"},
+                    "description": {"type": "string"},
+                },
+            },
+            "TransformParams": {
+                "anyOf": [
+                    {"$ref": "#/definitions/FormulaParams"},
+                    {"$ref": "#/definitions/FlattenParams"},
+                    {"$ref": "#/definitions/SampleParams"},
+                ]
+            },
+        }
+    }
+
+    generator = SchemaWrapperGenerator(
+        schema,
+        transform_method_overrides=TRANSFORM_METHOD_OVERRIDES,
+    )
+    specs = {spec.method_name: spec for spec in generator.transform_method_specs()}
+    source = generator.generate_mark_mixins_module().source
+
+    assert specs["transform_calculate"].property_aliases == (("expr", "calculate"),)
+    assert specs["transform_flatten"].positional_properties == ("fields", "as")
+    assert specs["transform_sample"].positional_properties == ("size",)
+    assert "def transform_calculate(" in source
+    assert "calculate: str | UndefinedType = Undefined" in source
+    assert "transform['expr'] = calculate" in source
+    assert "for output, value in kwargs.items():" in source
+    assert "Add one or more ``formula`` transforms." in source
+    assert "**kwargs (str): Additional output field names" in source
+    assert "one transform per output in insertion order" in source
+    assert "Returns:" in source
+    assert "Raises:" in source
+    assert "If only one of ``as_`` and ``calculate``" in source
+    assert '>>> chart.transform_calculate(doubled="datum.value * 2")' in source
+    assert "def transform_flatten(\n        self,\n        fields:" in source
+    assert "def transform_sample(\n        self,\n        size:" in source
+
+
+def test_transform_method_overrides_must_target_union_members() -> None:
+    schema = {
+        "definitions": {
+            "LookupParams": {
+                "type": "object",
+                "properties": {
+                    "type": {"const": "lookup", "type": "string"},
+                },
+            },
+            "TransformParams": {"anyOf": [{"$ref": "#/definitions/LookupParams"}]},
+        }
+    }
+    generator = SchemaWrapperGenerator(
+        schema,
+        transform_method_overrides={"MissingParams": TransformMethodOverride()},
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="overrides refer to schemas absent from TransformParams: MissingParams",
+    ):
+        generator.transform_method_specs()
+
+
+def test_duplicate_generated_transform_methods_fail_generation() -> None:
+    schema = {
+        "definitions": {
+            "FirstSampleParams": {
+                "type": "object",
+                "properties": {
+                    "type": {"const": "sample", "type": "string"},
+                },
+            },
+            "SecondSampleParams": {
+                "type": "object",
+                "properties": {
+                    "type": {"const": "sample", "type": "string"},
+                },
+            },
+            "TransformParams": {
+                "anyOf": [
+                    {"$ref": "#/definitions/FirstSampleParams"},
+                    {"$ref": "#/definitions/SecondSampleParams"},
+                ]
+            },
+        }
+    }
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "Duplicate generated transform methods: transform_sample "
+            r"\(FirstSampleParams, SecondSampleParams\)"
+        ),
+    ):
+        SchemaWrapperGenerator(schema).transform_method_specs()
 
 
 def test_generated_filter_requires_a_predicate() -> None:
@@ -485,7 +684,13 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
     spec_dir.mkdir(parents=True)
 
     (package_dir / "package.json").write_text(
-        json.dumps({"name": "@genome-spy/core", "version": "9.8.7"}),
+        json.dumps(
+            {
+                "name": "@genome-spy/core",
+                "version": "9.8.7",
+                "dependencies": {"vega-expression": "^6.1.0"},
+            }
+        ),
         encoding="utf-8",
     )
     (schema_dir / "schema.json").write_text(
@@ -520,6 +725,8 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
         package_dir,
         output_dir,
         spec_reference_dir=reference_dir,
+        expression_catalog=EXPRESSION_CATALOG,
+        transform_method_overrides={},
     )
 
     assert (output_dir / "genome-spy-schema.json").exists()
@@ -538,6 +745,10 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
     assert (output_dir / "_kwds.py").exists()
     assert (output_dir / "lazy.py").exists()
     assert (output_dir / "ergonomics.py").exists()
+    expressions = (output_dir / "expressions.py").read_text(encoding="utf-8")
+    assert "class expr(core.ExprRef" in expressions
+    assert "def if_(" in expressions
+    assert "return _function_expression('sin', value)" in expressions
     assert json.loads(
         (output_dir / "capabilities.json").read_text(encoding="utf-8")
     ) == {
@@ -584,7 +795,13 @@ def test_write_schema_files_supports_explicit_schema_input(tmp_path: Path) -> No
         encoding="utf-8",
     )
 
-    write_schema_files(schema_path, output_dir, version="dev-local")
+    write_schema_files(
+        schema_path,
+        output_dir,
+        version="dev-local",
+        expression_catalog=EXPRESSION_CATALOG,
+        transform_method_overrides={},
+    )
 
     capabilities = json.loads(
         (output_dir / "capabilities.json").read_text(encoding="utf-8")

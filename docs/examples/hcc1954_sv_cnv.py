@@ -53,15 +53,25 @@ sv_links = (
         tooltip=[
             gs.Tooltip(
                 gs.expr(
-                    "datum.INFO.SVTYPE[0] == 'BND' ? "
-                    "replace(datum.ID[0], /_[12]$/, '') : datum.ID[0]"
+                    gs.expr.if_(
+                        gs.datum.INFO.SVTYPE[0] == "BND",
+                        gs.expr.replace(
+                            gs.datum.ID[0],
+                            gs.expr.regexp(r"_[12]$"),
+                            "",
+                        ),
+                        gs.datum.ID[0],
+                    )
                 )
             ).title("SV ID"),
             gs.Tooltip("INFO.SVTYPE[0]").title("SV type"),
             gs.Tooltip(
                 gs.expr(
-                    "isValid(datum.INFO.DETAILED_TYPE) ? "
-                    "datum.INFO.DETAILED_TYPE[0] : null"
+                    gs.expr.if_(
+                        gs.expr.isValid(gs.datum.INFO.DETAILED_TYPE),
+                        gs.datum.INFO.DETAILED_TYPE[0],
+                        None,
+                    )
                 )
             ).title("Detailed type"),
             gs.Tooltip("SAMPLES.wakhan_haplotagged.VAF[0]")
@@ -73,16 +83,28 @@ sv_links = (
             gs.Tooltip("SAMPLES.wakhan_haplotagged.GT[0]").title("Genotype"),
             gs.Tooltip(
                 gs.expr(
-                    "datum.SAMPLES.wakhan_haplotagged.DV[0] + ' variant, ' + "
-                    "datum.SAMPLES.wakhan_haplotagged.DR[0] + ' reference'"
+                    gs.datum.SAMPLES.wakhan_haplotagged.DV[0]
+                    + " variant, "
+                    + gs.datum.SAMPLES.wakhan_haplotagged.DR[0]
+                    + " reference"
                 )
             ).title("Read support"),
             gs.Tooltip(
-                gs.expr("isValid(datum.INFO.HP) ? datum.INFO.HP[0] : null")
+                gs.expr(
+                    gs.expr.if_(
+                        gs.expr.isValid(gs.datum.INFO.HP),
+                        gs.datum.INFO.HP[0],
+                        None,
+                    )
+                )
             ).title("Haplotype"),
             gs.Tooltip(
                 gs.expr(
-                    "isValid(datum.INFO.PHASESETID) ? datum.INFO.PHASESETID[0] : null"
+                    gs.expr.if_(
+                        gs.expr.isValid(gs.datum.INFO.PHASESETID),
+                        gs.datum.INFO.PHASESETID[0],
+                        None,
+                    )
                 )
             ).title("Phase set"),
             gs.Tooltip("INFO.MAPQ[0]").title("Mapping quality"),
@@ -118,9 +140,15 @@ sv_track = (
         .legend(title="Severus SV type", orient="top")
     )
     .transform_filter(
-        "datum.FILTER == 'PASS' && "
-        "test(/^chr([1-9]|1[0-9]|2[0-2]|X|Y)$/, datum.CHROM) && "
-        "test(/^(DEL|DUP|BND)$/, datum.INFO.SVTYPE[0])"
+        (gs.datum.FILTER == "PASS")
+        & gs.expr.test(
+            gs.expr.regexp(r"^chr([1-9]|1[0-9]|2[0-2]|X|Y)$"),
+            gs.datum.CHROM,
+        )
+        & gs.expr.test(
+            gs.expr.regexp(r"^(DEL|DUP|BND)$"),
+            gs.datum.INFO.SVTYPE[0],
+        )
     )
     .transform_window(
         ops=["row_number"],
@@ -130,7 +158,11 @@ sv_track = (
     # BND records describe each link twice. Look up the mate and keep the first
     # record so the arc is drawn only once.
     .transform_formula(
-        expr=("datum.INFO.SVTYPE[0] == 'BND' ? datum.INFO.MATE_ID[0] : datum.ID[0]"),
+        expr=gs.expr.if_(
+            gs.datum.INFO.SVTYPE[0] == "BND",
+            gs.datum.INFO.MATE_ID[0],
+            gs.datum.ID[0],
+        ),
         as_="_lookup_mate_id",
     )
     .transform_lookup(
@@ -141,20 +173,29 @@ sv_track = (
         as_=["mateChrom", "matePos", "mateOrder"],
     )
     .transform_filter(
-        "datum.INFO.SVTYPE[0] != 'BND' || datum._source_order < datum.mateOrder"
+        (gs.datum.INFO.SVTYPE[0] != "BND")
+        | (gs.datum._source_order < gs.datum.mateOrder)
     )
-    .transform_formula(expr="datum.CHROM", as_="chrom1")
-    .transform_formula(expr="datum.POS", as_="breakpoint1")
+    .transform_formula(expr=gs.datum.CHROM, as_="chrom1")
+    .transform_formula(expr=gs.datum.POS, as_="breakpoint1")
     .transform_formula(
-        expr=("datum.INFO.SVTYPE[0] == 'BND' ? datum.mateChrom : datum.CHROM"),
+        expr=gs.expr.if_(
+            gs.datum.INFO.SVTYPE[0] == "BND",
+            gs.datum.mateChrom,
+            gs.datum.CHROM,
+        ),
         as_="chrom2",
     )
     .transform_formula(
-        expr=("datum.INFO.SVTYPE[0] == 'BND' ? datum.matePos : datum.INFO.END[0]"),
+        expr=gs.expr.if_(
+            gs.datum.INFO.SVTYPE[0] == "BND",
+            gs.datum.matePos,
+            gs.datum.INFO.END[0],
+        ),
         as_="breakpoint2",
     )
-    .transform_formula(expr="datum.INFO.STRANDS[0][0]", as_="strand1")
-    .transform_formula(expr="datum.INFO.STRANDS[0][1]", as_="strand2")
+    .transform_formula(expr=gs.datum.INFO.STRANDS[0][0], as_="strand1")
+    .transform_formula(expr=gs.datum.INFO.STRANDS[0][1], as_="strand2")
     .transform_identifier()
 )
 

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from genome_spy.channels import DatumChannel, LocusChannel, ValueChannel
 
+from genome_spy._expressions import DatumExpression
 from genome_spy.schema._typing import (
     Align_T,
     AxisOrient_T,
@@ -1004,58 +1005,65 @@ def compare(
     return core.CompareParams(**defined)
 
 
-def datum(
-    datum: Scalar_T | core.ExprRef | dict[str, Any],
-    /,
-    *,
-    axis: core.GenomeAxis | GenomeAxisKwds | None | UndefinedType = Undefined,
-    band: float | UndefinedType = Undefined,
-    buildIndex: bool | UndefinedType = Undefined,
-    condition: Any | UndefinedType = Undefined,
-    description: str | UndefinedType = Undefined,
-    domainInert: bool | UndefinedType = Undefined,
-    format: str | UndefinedType = Undefined,
-    resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
-    scale: core.Scale | ScaleKwds | None | UndefinedType = Undefined,
-    title: str | None | UndefinedType = Undefined,
-    type: Type_T | UndefinedType = Undefined,
-) -> DatumChannel:
-    """Create a constant-datum encoding channel.
+class DatumType(DatumExpression):
+    """Build datum expressions or constant-datum channels."""
 
-    Args:
-        axis (GenomeAxis | GenomeAxisKwds | None): An object defining properties of axis's gridlines, ticks and labels. If ``null``, the axis for the encoding channel will be removed. __Default value:__ If undefined, default axis properties are applied. __See also:__ ``axis`` documentation.
-        band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-        buildIndex (bool): Builds and index for efficient rendering of subsets of the data. This setting is useful when rendering large amounts of data and often only a small subset of the data is visible. An example of such a situation is a scatter plot spanning the whole genome. This setting implicitly sorts the data by the field assigned on the ``x`` channel.
-        condition (Any): One or more value definition(s) with a parameter. __Note:__ A field definition's ``condition`` property can only contain conditional value definitions since GenomeSpy only allows at most one encoded field per encoding channel.
-        datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
-        description (str): A description of the encoded datum. Can be used for documentation and to explain the meaning of the channel mapping.
-        domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
-        format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
-        resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
-        scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
-        title (str | None): A title for the field. If ``null``, the title will be removed.
-        type (Type_T): Schema-defined ``type`` property.
-    """
-    properties = {
-        "datum": datum,
-        "axis": axis,
-        "band": band,
-        "buildIndex": buildIndex,
-        "condition": condition,
-        "description": description,
-        "domainInert": domainInert,
-        "format": format,
-        "resolutionChannel": resolutionChannel,
-        "scale": scale,
-        "title": title,
-        "type": type,
-    }
-    defined = {
-        key: value for key, value in properties.items() if value is not Undefined
-    }
-    from genome_spy.channels import DatumChannel
+    def __call__(
+        self,
+        datum: Scalar_T | core.ExprRef | dict[str, Any],
+        /,
+        *,
+        axis: core.GenomeAxis | GenomeAxisKwds | None | UndefinedType = Undefined,
+        band: float | UndefinedType = Undefined,
+        buildIndex: bool | UndefinedType = Undefined,
+        condition: Any | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        format: str | UndefinedType = Undefined,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
+        scale: core.Scale | ScaleKwds | None | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        type: Type_T | UndefinedType = Undefined,
+    ) -> DatumChannel:
+        """Create a constant-datum encoding channel.
 
-    return DatumChannel(defined)
+        Args:
+            axis (GenomeAxis | GenomeAxisKwds | None): An object defining properties of axis's gridlines, ticks and labels. If ``null``, the axis for the encoding channel will be removed. __Default value:__ If undefined, default axis properties are applied. __See also:__ ``axis`` documentation.
+            band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
+            buildIndex (bool): Builds and index for efficient rendering of subsets of the data. This setting is useful when rendering large amounts of data and often only a small subset of the data is visible. An example of such a situation is a scatter plot spanning the whole genome. This setting implicitly sorts the data by the field assigned on the ``x`` channel.
+            condition (Any): One or more value definition(s) with a parameter. __Note:__ A field definition's ``condition`` property can only contain conditional value definitions since GenomeSpy only allows at most one encoded field per encoding channel.
+            datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
+            description (str): A description of the encoded datum. Can be used for documentation and to explain the meaning of the channel mapping.
+            domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
+            format (str): When used with the default ``"number"`` format type, the text formatting pattern for labels of guides (axes, legends, headers) and text marks. - If the format type is ``"number"`` (e.g., for quantitative fields), this is D3's number format pattern. See the Vega-Lite format documentation for more examples.
+            resolutionChannel (ChannelWithScale_T): An alternative channel for scale resolution. This is mainly for internal use and allows using ``color`` channel to resolve ``fill`` and ``stroke`` channels under certain circumstances.
+            scale (Scale | ScaleKwds | None): An object defining properties of the channel's scale, which is the function that transforms values in the data domain (numbers, dates, strings, etc) to visual values (pixels, colors, sizes) of the encoding channels. If ``null``, the scale will be disabled and the data value will be directly encoded. __Default value:__ If undefined, default scale properties are applied. __See also:__ ``scale`` documentation.
+            title (str | None): A title for the field. If ``null``, the title will be removed.
+            type (Type_T): Schema-defined ``type`` property.
+        """
+        properties = {
+            "datum": datum,
+            "axis": axis,
+            "band": band,
+            "buildIndex": buildIndex,
+            "condition": condition,
+            "description": description,
+            "domainInert": domainInert,
+            "format": format,
+            "resolutionChannel": resolutionChannel,
+            "scale": scale,
+            "title": title,
+            "type": type,
+        }
+        defined = {
+            key: value for key, value in properties.items() if value is not Undefined
+        }
+        from genome_spy.channels import DatumChannel
+
+        return DatumChannel(defined)
+
+
+datum = DatumType()
 
 
 def value(

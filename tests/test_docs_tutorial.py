@@ -238,7 +238,7 @@ def test_encoding_guide_examples_serialize_with_expected_definitions() -> None:
     }
     assert definition_spec["color"] == {"value": "#4c78a8"}
     assert definition_spec["size"] == {
-        "expr": "datum.amount * datum.confidence",
+        "expr": "(datum.amount * datum.confidence)",
         "type": "quantitative",
         "scale": {"domain": [0, 35]},
         "legend": None,
@@ -318,7 +318,7 @@ def test_transform_guide_examples_serialize_in_pipeline_order() -> None:
 
     filtered_spec = tutorial.filtered_chart.to_dict()
     assert filtered_spec["transform"] == [
-        {"type": "filter", "expr": "datum.quality >= 0.7"}
+        {"type": "filter", "expr": "(datum.quality >= 0.7)"}
     ]
     assert len(filtered_spec["data"]["values"]) == 6
 
@@ -326,7 +326,7 @@ def test_transform_guide_examples_serialize_in_pipeline_order() -> None:
     assert formula_spec["transform"] == [
         {
             "type": "formula",
-            "expr": "datum.response * 100",
+            "expr": "(datum.response * 100)",
             "as": "responsePercent",
         }
     ]
@@ -336,7 +336,7 @@ def test_transform_guide_examples_serialize_in_pipeline_order() -> None:
     assert aggregate_spec["transform"] == [
         {
             "type": "formula",
-            "expr": "datum.response * 100",
+            "expr": "(datum.response * 100)",
             "as": "responsePercent",
         },
         {
@@ -744,7 +744,7 @@ def test_interaction_zoom_and_bound_parameters_serialize() -> None:
 
     bound_spec = tutorial.bound_chart.to_dict()
     assert bound_spec["transform"] == [
-        {"type": "filter", "expr": "datum.score >= minScore"}
+        {"type": "filter", "expr": "(datum.score >= minScore)"}
     ]
     assert bound_spec["mark"]["size"] == {"expr": "pointSize"}
     assert bound_spec["encoding"]["x"]["scale"] == {"domain": tutorial.VARIANT_DOMAIN}

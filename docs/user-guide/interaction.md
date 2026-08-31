@@ -52,7 +52,8 @@ data-driven categorical domains reliably; listing all variant ids keeps the
 axis stable as the slider moves.
 
 The parameter name `minScore` becomes available to expressions in the same view
-and its descendants. The filter expression reads it directly:
+and its descendants. Runtime parameter references are currently written as raw
+expression strings, so the filter reads it directly:
 
 ```python
 "datum.score >= minScore"
@@ -69,8 +70,9 @@ gs.param("pointSize", expr="60 + minScore * 100")
 
 Because `pointSize` depends on `minScore`, GenomeSpy recalculates it whenever the
 slider changes. `gs.expr("pointSize")` then supplies the current result to the
-mark's size. Expressions use GenomeSpy's JavaScript-like expression language,
-not Python syntax.
+mark's size. Datum-only expressions can use the Python authoring syntax such as
+`gs.datum.score >= 0.5`; raw strings remain the escape hatch for free runtime
+variables such as `minScore` and `pointSize`.
 
 The GenomeSpy documentation covers the available input widgets in
 [input bindings](https://genomespy.app/docs/grammar/parameters/#using-input-bindings)

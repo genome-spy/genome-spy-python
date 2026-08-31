@@ -99,8 +99,8 @@ def test_hcc_structural_variant_channels_use_typed_conditions() -> None:
     }
     assert links["encoding"]["tooltip"][0] == {
         "expr": (
-            "datum.INFO.SVTYPE[0] == 'BND' ? "
-            "replace(datum.ID[0], /_[12]$/, '') : datum.ID[0]"
+            "if((datum.INFO.SVTYPE[0] === 'BND'),"
+            "replace(datum.ID[0],regexp('_[12]$'),''),datum.ID[0])"
         ),
         "title": "SV ID",
     }
@@ -480,7 +480,7 @@ def test_ma_and_volcano_points_grow_gently_when_zoomed(
     )
 
     assert points["mark"]["size"] == {
-        "expr": f"min({initial_size} * pow(zoomLevel, 0.75), 64)"
+        "expr": f"min(({initial_size} * pow(zoomLevel,0.75)),64)"
     }
 
 
@@ -782,7 +782,7 @@ def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
     assert tracks[4]["data"]["url"].endswith("refSeqGenes-hg38-release232.tsv.gz")
     assert tracks[4]["transform"][-1] == {
         "type": "filter",
-        "expr": "datum._lane < 3",
+        "expr": "(datum._lane < 3)",
     }
 
 

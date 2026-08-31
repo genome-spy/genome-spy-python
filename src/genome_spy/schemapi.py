@@ -146,6 +146,8 @@ def _todict(value: Any) -> Any:
 
 def normalize_schema_value(value: Any, *, validate: bool = False) -> Any:
     """Recursively convert schema wrappers into plain Python values."""
+    if isinstance(value, str):
+        return str(value)
     if isinstance(value, SchemaBase):
         return value.to_dict(validate=validate)
     if isinstance(value, list | tuple):

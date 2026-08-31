@@ -12,6 +12,17 @@ META = {
     "height": 300,
     "max_width": 980,
 }
+ALLELE = gs.Expression("allele")
+REF_BIGWIG_URL = (
+    "https://raw.githubusercontent.com/kundajelab/dynseq-paper/"
+    "febc9180d72e92302d35c549002e0d56c79c536e/SPI1_bQTL/"
+    "bigwigs/chip_imp_ref.bw"
+)
+ALT_BIGWIG_URL = (
+    "https://raw.githubusercontent.com/kundajelab/dynseq-paper/"
+    "febc9180d72e92302d35c549002e0d56c79c536e/SPI1_bQTL/"
+    "bigwigs/chip_imp_alt.bw"
+)
 
 allele_track = (
     gs.layer(
@@ -59,7 +70,11 @@ allele_track = (
         params=[gs.param("allele", value="ref")],
         title=gs.Title(
             text=gs.expr(
-                "allele === 'ref' ? 'Reference allele (C)' : 'Alternate allele (G)'"
+                gs.expr.if_(
+                    ALLELE == "ref",
+                    "Reference allele (C)",
+                    "Alternate allele (G)",
+                )
             ),
             style="overlay-title",
         ),
@@ -68,21 +83,13 @@ allele_track = (
     .transform_coordinate_lookup(
         from_={
             "data": gs.lazy.bigwig(
-                gs.expr(
-                    "allele === 'ref' ? "
-                    "'https://raw.githubusercontent.com/kundajelab/dynseq-paper/"
-                    "febc9180d72e92302d35c549002e0d56c79c536e/SPI1_bQTL/"
-                    "bigwigs/chip_imp_ref.bw' : "
-                    "'https://raw.githubusercontent.com/kundajelab/dynseq-paper/"
-                    "febc9180d72e92302d35c549002e0d56c79c536e/SPI1_bQTL/"
-                    "bigwigs/chip_imp_alt.bw'"
-                ),
+                gs.expr(gs.expr.if_(ALLELE == "ref", REF_BIGWIG_URL, ALT_BIGWIG_URL)),
                 pixelsPerBin=1,
             ),
             "transform": [
                 {
                     "type": "formula",
-                    "expr": "datum.start",
+                    "expr": gs.datum.start,
                     "as": "pos",
                 }
             ],
@@ -90,9 +97,13 @@ allele_track = (
         key=["chrom", "pos"],
         values=["score"],
     )
-    .transform_filter("isValid(datum.score)")
+    .transform_filter(gs.expr.isValid(gs.datum.score))
     .transform_formula(
-        expr="allele === 'alt' && datum.pos === 43720929 ? 'G' : datum.base",
+        expr=gs.expr.if_(
+            (ALLELE == "alt") & (gs.datum.pos == 43720929),
+            "G",
+            gs.datum.base,
+        ),
         as_="base",
         description=(
             "Show the rs5764238 alternate allele while retaining the shared "
@@ -130,8 +141,8 @@ chart = (
         ),
     )
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
-    .transform_formula(expr="upper(datum.base)", as_="base")
-    .transform_formula(expr="datum.start + datum.rawPos", as_="pos")
+    .transform_formula(expr=gs.expr.upper(gs.datum.base), as_="base")
+    .transform_formula(expr=gs.datum.start + gs.datum.rawPos, as_="pos")
     .resolve_scale(y="shared")
     .resolve_axis(x="shared")
     .configure_view(fill="#FAFAFA")

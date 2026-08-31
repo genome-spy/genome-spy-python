@@ -31,13 +31,17 @@ base_colors = gs.Scale(
     domain=["A", "C", "T", "G", "N"],
     range=["#4FBF45", "#4D96E8", "#E85F78", "#E8B322", "#BDBDBD"],
 )
+LANE_HEIGHT = gs.Expression("laneHeight")
+MIN_MAPQ = gs.Expression("minMapq")
+MIN_BASE_QUALITY = gs.Expression("minBaseQuality")
+WINDOW_SIZE = gs.Expression("windowSize")
 
 # Coverage and mismatch summaries are derived from the same reads as the pileup
 # instead of loading separate summary files.
 depth = (
     gs.Chart()
     .transform_flatten_cigar(copyFields=["chrom"])
-    .transform_filter("datum.cigarType == 'aligned'")
+    .transform_filter(gs.datum.cigarType == "aligned")
     .transform_collect(sort=gs.compare(["chrom", "cigarStart"]))
     .transform_coverage(
         chrom="chrom",
@@ -59,10 +63,11 @@ depth = (
 
 mismatch_summary = (
     gs.Chart()
-    .transform_filter("datum.md != null")
+    .transform_filter(gs.datum.md != None)  # noqa: E711
     .transform_alignment_mismatches(copyFields=["chrom"])
     .transform_filter(
-        "datum.baseQuality == null || datum.baseQuality >= minBaseQuality"
+        (gs.datum.baseQuality == None)  # noqa: E711
+        | (gs.datum.baseQuality >= MIN_BASE_QUALITY)
     )
     .transform_aggregate(groupby=["chrom", "mismatchStart", "base"])
     .transform_stack(
@@ -71,7 +76,7 @@ mismatch_summary = (
         sort=gs.compare("base", order="ascending"),
         as_=["mismatchCount0", "mismatchCount1"],
     )
-    .transform_formula(expr="datum.mismatchStart + 1", as_="mismatchEnd")
+    .transform_formula(expr=gs.datum.mismatchStart + 1, as_="mismatchEnd")
     .mark_rect()
     .encode(
         x=gs.Locus("chrom", "mismatchStart", band=0),
@@ -86,7 +91,7 @@ mismatch_summary = (
 insertion_summary = (
     gs.Chart()
     .transform_flatten_cigar(copyFields=["chrom"])
-    .transform_filter("datum.cigarType == 'insertion'")
+    .transform_filter(gs.datum.cigarType == "insertion")
     .transform_aggregate(groupby=["chrom", "cigarStart"])
     .mark_rule(color="black", size=1)
     .encode(
@@ -120,7 +125,7 @@ read_backbone = (
         minStemLength=10,
         fill="#e0e0e0",
         stroke="#c4c4c4",
-        strokeWidth=gs.expr("linearstep(3, 8, laneHeight)"),
+        strokeWidth=gs.expr(gs.expr.linearstep(3, 8, LANE_HEIGHT)),
     )
     .encode(
         x=gs.Locus("chrom", "start", band=0),
@@ -141,10 +146,10 @@ read_backbone = (
 
 deletions = gs.layer(
     gs.Chart()
-    .transform_filter("datum.cigarType == 'deletion'")
+    .transform_filter(gs.datum.cigarType == "deletion")
     .mark_rect(color="white", minWidth=1),
     gs.Chart()
-    .transform_filter("datum.cigarType == 'deletion'")
+    .transform_filter(gs.datum.cigarType == "deletion")
     .mark_rule(color="#222", minLength=1),
 )
 
@@ -155,7 +160,7 @@ deletions = deletions.properties(name="deletions", title="Deletion").encode(
 
 skips = (
     gs.Chart()
-    .transform_filter("datum.cigarType == 'skip'")
+    .transform_filter(gs.datum.cigarType == "skip")
     .mark_rule(color="#6b6b6b", strokeDash=[2, 2], minLength=1)
     .encode(
         x=gs.Locus("chrom", "cigarStart", band=0),
@@ -166,11 +171,11 @@ skips = (
 
 insertions = (
     gs.Chart()
-    .transform_filter("datum.cigarType == 'insertion'")
+    .transform_filter(gs.datum.cigarType == "insertion")
     .mark_text(
         text="I",
         color="black",
-        size=gs.expr("laneHeight * 0.90"),
+        size=gs.expr(LANE_HEIGHT * 0.90),
         font="Radley",
     )
     .encode(
@@ -178,7 +183,13 @@ insertions = (
         x2=None,
         tooltip=[
             gs.Tooltip(
-                gs.expr("slice(datum._seq, datum.readStart, datum.readEnd)")
+                gs.expr(
+                    gs.expr.slice(
+                        gs.datum._seq,
+                        gs.datum.readStart,
+                        gs.datum.readEnd,
+                    )
+                )
             ).title("Inserted sequence")
         ],
     )
@@ -187,11 +198,11 @@ insertions = (
 
 soft_clips = (
     gs.Chart()
-    .transform_filter("datum.cigarType == 'softClip'")
+    .transform_filter(gs.datum.cigarType == "softClip")
     .mark_text(
         text="S",
         color="#555",
-        size=gs.expr("laneHeight * 0.90"),
+        size=gs.expr(LANE_HEIGHT * 0.90),
         font="Radley",
     )
     .encode(x=gs.Locus("chrom", "cigarStart", band=0), x2=None)
@@ -201,7 +212,7 @@ soft_clips = (
 # Flatten CIGAR only once for all operation-specific overlays.
 cigar_overlays = (
     gs.layer(deletions, skips, insertions, soft_clips)
-    .transform_formula(expr="datum.seq", as_="_seq")
+    .transform_formula(expr=gs.datum.seq, as_="_seq")
     .transform_flatten_cigar(copyFields=["chrom", "_lane", "name", "cigar", "_seq"])
     .properties(name="cigar-overlays", title="CIGAR operation")
 )
@@ -220,7 +231,7 @@ mismatch_rects = (
 
 mismatch_labels = (
     gs.Chart()
-    .mark_text(color="black", size=gs.expr("laneHeight * 0.75"), tooltip=None)
+    .mark_text(color="black", size=gs.expr(LANE_HEIGHT * 0.75), tooltip=None)
     .encode(text=gs.Text("base:N"))
     .properties(name="mismatch-labels", title="Mismatch base")
 )
@@ -229,16 +240,17 @@ mismatch_labels = (
 # the opacity of retained bases.
 mismatches = (
     (mismatch_rects + mismatch_labels)
-    .transform_filter("datum.md != null")
+    .transform_filter(gs.datum.md != None)  # noqa: E711
     .transform_alignment_mismatches(
         copyFields=["chrom", "_lane", "name", "cigar", "mapq", "strand"]
     )
     .transform_formula(
-        expr="datum.baseQuality == null ? 20 : datum.baseQuality",
+        expr=gs.expr.if_(gs.datum.baseQuality == None, 20, gs.datum.baseQuality),  # noqa: E711
         as_="_baseQualityForOpacity",
     )
     .transform_filter(
-        "datum.baseQuality == null || datum.baseQuality >= minBaseQuality"
+        (gs.datum.baseQuality == None)  # noqa: E711
+        | (gs.datum.baseQuality >= MIN_BASE_QUALITY)
     )
     .properties(name="mismatches", title="Mismatch")
     .encode(
@@ -265,7 +277,11 @@ zoom_message = gs.layer(
     params=[
         gs.param(
             "zoomMessageState",
-            expr="abs(span(domain('x'))) > windowSize ? 1 : 0",
+            expr=gs.expr.if_(
+                gs.expr.abs(gs.expr.span(gs.expr.domain("x"))) > WINDOW_SIZE,
+                1,
+                0,
+            ),
             transition={"type": "lerp", "halfLife": 60},
         )
     ],
@@ -277,7 +293,7 @@ read_alignments = (
     .properties(
         name="read-alignments",
         title=gs.Title(text="Read alignments", orient="none"),
-        height=gs.Step(step=gs.expr("laneHeight")),
+        height=gs.Step(step=gs.expr(LANE_HEIGHT)),
         viewportHeight="container",
         params=[
             gs.param(
@@ -338,9 +354,9 @@ chart = (
         spacing=5,
         description="BAM depth, alignments, CIGAR operations, and mismatches.",
     )
-    .transform_filter("datum.mapq == null || datum.mapq >= minMapq")
+    .transform_filter((gs.datum.mapq == None) | (gs.datum.mapq >= MIN_MAPQ))  # noqa: E711
     .transform_formula(
-        expr="datum.mapq == null ? 0 : datum.mapq",
+        expr=gs.expr.if_(gs.datum.mapq == None, 0, gs.datum.mapq),  # noqa: E711
         as_="_mapqOrZero",
     )
     .transform_pileup(start="start", end="end", as_="_lane")

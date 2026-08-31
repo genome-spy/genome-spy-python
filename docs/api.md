@@ -128,6 +128,7 @@ Schema-backed configuration objects accepted by charts, channels, and helpers.
    DataFormat
    DynamicOpacity
    ExprRef
+   Expression
    GenomeAxis
    HandledTooltip
    Legend

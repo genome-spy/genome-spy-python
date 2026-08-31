@@ -119,7 +119,7 @@ definition_chart = (
         y=gs.datum(0, type="quantitative").scale(domain=[-1, 1]),
         color=gs.value("#4c78a8"),
         size=gs.Size(
-            gs.expr("datum.amount * datum.confidence"),
+            gs.expr(gs.datum.amount * gs.datum.confidence),
             type="quantitative",
         )
         .scale(domain=[0, 35])

@@ -187,7 +187,7 @@ gene_annotation_track = (
         preference="strand",
         preferredOrder=["-", "+"],
     )
-    .transform_filter("datum.lane < 3")
+    .transform_filter(gs.datum.lane < 3)
 )
 # annotations-genes-end
 

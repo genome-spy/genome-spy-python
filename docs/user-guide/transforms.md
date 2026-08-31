@@ -38,13 +38,24 @@ A filter keeps rows for which its predicate is true:
 ```
 
 Inside an expression, `datum` refers to the current row. Thus,
-`datum.quality >= 0.7` is evaluated once for every input row. Four rows pass
+`gs.datum.quality >= 0.7` authors a GenomeSpy expression that is evaluated once
+for every input row. Four rows pass
 this filter, so GenomeSpy draws four points.
 
-Transform expressions use GenomeSpy's JavaScript-like expression language,
-not Python syntax. Common operators include `&&` for “and”, `||` for “or”, and
-`!` for “not”. Keep predicates short; complicated validation and cleaning are
-usually clearer in Python.
+The Python authoring API uses `gs.datum.field` for fields, `&`, `|`, and `~`
+for boolean composition, and generated functions such as `gs.expr.if_()` and
+`gs.expr.isValid()`. These objects serialize to GenomeSpy's JavaScript-like
+expression language; they do not execute in Python. Raw expression strings
+remain available when an expression reads a named runtime parameter or another
+GenomeSpy global. Keep predicates short; complicated validation and cleaning
+are usually clearer in Python.
+
+The `gs.expr` namespace is generated from the expression surface documented by
+the pinned GenomeSpy release. Standard signatures come from GenomeSpy's
+matching `vega-expression` dependency, while GenomeSpy-specific functions such
+as `scale()`, `domain()`, and `linearstep()` come from GenomeSpy's own
+documentation. Regeneration therefore adds newly documented functions without
+a handwritten Python registry.
 
 The GenomeSpy documentation describes the
 [expression language](https://genomespy.app/docs/grammar/expressions/) and the
@@ -54,8 +65,8 @@ available inside an expression, as well as the
 
 ## Derive a field with a formula
 
-A formula calculates a value and stores it in a new field. The `as_` argument
-names that output field:
+A formula calculates a value and stores it in a new field.
+`transform_calculate()` accepts the output field as a keyword:
 
 ```{literalinclude} ../tutorials/transforms.py
 :language: python
@@ -72,6 +83,8 @@ For the first row, the formula adds `responsePercent=42`. Existing fields such
 as `sample`, `group`, and `response` remain available. Encodings and later
 transforms can refer to the derived field by name.
 
+`transform_calculate()` authors native GenomeSpy `formula` transforms. The
+schema-native `transform_formula(expr=..., as_=...)` method remains available.
 Formula transforms are useful for small visualization-specific calculations:
 converting units, constructing labels, calculating interval endpoints, or
 deriving a category used only by the chart. See the
@@ -97,17 +110,55 @@ that specify the input fields, aggregate operations, and output names:
 
 The six input rows become two output rows, one for `control` and one for
 `treated`. Available operations include `count`, `sum`, `min`, `max`, `mean`,
-`median`, quartiles, and variance. When no fields or operations are supplied,
-the aggregate produces a `count` for each group. The
+`median`, quartiles, and variance. GenomeSpy Core currently retains a legacy
+fieldless count when no fields or operations are supplied, but new code should
+not rely on it because the Core behavior may be removed. The
 [aggregate transform](https://genomespy.app/docs/grammar/transform/aggregate/)
 lists every supported operation.
+
+## Python transform conveniences
+
+Transform methods and their types are generated from GenomeSpy Core's schema.
+A few generation rules provide concise Python call shapes without changing the
+underlying GenomeSpy grammar:
+
+| Method | Convenience | Serialized transform |
+|---|---|---|
+| `transform_calculate()` | Direct `as_`/`calculate` expressions or output-name keyword expressions | `formula` |
+| `transform_flatten()` | Positional fields and output names; `fields=` and `index=` remain available | `flatten` |
+| `transform_sample()` | Positional sample size | `sample` |
+
+For example, calculations can use output keywords while still serializing
+native GenomeSpy formula transforms:
+
+```python
+chart = chart.transform_calculate(
+    doubled=gs.datum.value * 2,
+    centered=gs.datum.value - 10,
+)
+```
+
+Multiple keyword calculations are appended in their written order. The direct
+form is available when the output name is only known dynamically:
+
+```python
+chart = chart.transform_calculate(
+    as_=output_name,
+    calculate=gs.datum.response * 100,
+)
+```
+
+Calling `transform_sample()` without a size leaves the property out of the
+specification and therefore preserves GenomeSpy Core's current default. Other
+transforms use their generated GenomeSpy-native signatures. Operations absent
+from GenomeSpy Core are not emulated by the Python wrapper.
 
 ## Transform order matters
 
 Transforms run from top to bottom, and each step receives the output of the
 previous step. In the aggregate example:
 
-1. `transform_formula()` adds `responsePercent` to every row.
+1. `transform_calculate()` adds `responsePercent` to every row.
 2. `transform_aggregate()` groups those rows and reads the new field.
 3. Encodings read `group` and `meanResponse` from the two summary rows.
 

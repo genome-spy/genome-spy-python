@@ -27,17 +27,23 @@ ASCAT_SOLUTIONS = [
     {"sample": "S100", "rho": 0.65, "psi": 3.4},
 ]
 
-SEGMENT_URL = {
-    "expr": (
-        "'https://data.genomespy.app/sample-data/ASCAT/"
-        "ascat_fit_segments_' + sample + '.tsv.gz'"
-    )
-}
-RAW_URL = {
-    "expr": (
-        "'https://data.genomespy.app/sample-data/ASCAT/ascat_raw_' + sample + '.tsv.gz'"
-    )
-}
+SAMPLE = gs.Expression("sample")
+ZOOM_LEVEL = gs.Expression("zoomLevel")
+WIDTH = gs.Expression("width")
+HEIGHT = gs.Expression("height")
+GAMMA = gs.Expression("gamma")
+SELECTED_FIT = gs.Expression("selectedFit")
+FIT_BOTH_ALLELES = gs.Expression("fitBothAlleles")
+DOWNWEIGHT_BALANCED = gs.Expression("downweightBalanced")
+
+SEGMENT_URL = gs.expr(
+    "https://data.genomespy.app/sample-data/ASCAT/ascat_fit_segments_"
+    + SAMPLE
+    + ".tsv.gz"
+)
+RAW_URL = gs.expr(
+    "https://data.genomespy.app/sample-data/ASCAT/ascat_raw_" + SAMPLE + ".tsv.gz"
+)
 
 # The sunrise panel builds the purity/ploidy candidate grid in GenomeSpy. Its
 # ruler writes the selectedFit parameter used by every panel below.
@@ -62,7 +68,7 @@ sunrise_rects = (
 
 published_solution = (
     gs.Chart(gs.Data(name="ascat-solutions"))
-    .transform_filter("datum.sample === sample")
+    .transform_filter(gs.datum.sample == SAMPLE)
     .mark_point(shape="x", angle=0, size=180, strokeWidth=2, color="#00d000")
     .encode(
         x=gs.X("psi:Q"),
@@ -81,7 +87,7 @@ sunrise = (
     .properties(
         name="sunrise-plot",
         title=gs.Title(
-            text=gs.expr("'Purity/ploidy integer-fit distance - ' + sample"),
+            text=gs.expr("Purity/ploidy integer-fit distance - " + SAMPLE),
             style="overlay-title",
         ),
         height=240,
@@ -126,16 +132,18 @@ sunrise = (
         from_={
             "data": {"url": SEGMENT_URL},
             "transform": [
-                {"type": "filter", "expr": "datum.chr !== 'X'"},
+                {"type": "filter", "expr": gs.datum.chr != "X"},
                 {
                     "type": "project",
                     "fields": ["logRMean", "bafMean", "nProbes"],
                 },
                 {
                     "type": "formula",
-                    "expr": (
-                        "datum.nProbes * (downweightBalanced && "
-                        "datum.bafMean === 0.5 ? 0.05 : 1)"
+                    "expr": gs.datum.nProbes
+                    * gs.expr.if_(
+                        DOWNWEIGHT_BALANCED & (gs.datum.bafMean == 0.5),
+                        0.05,
+                        1,
                     ),
                     "as": "fitWeight",
                 },
@@ -147,23 +155,45 @@ sunrise = (
 for field, expression in [
     (
         "bRawCandidate",
-        "(datum.rhoCandidate - 1 + pow(2, datum.logRMean / gamma) * "
-        "datum.bafMean * (2 * (1 - datum.rhoCandidate) + "
-        "datum.rhoCandidate * datum.psiCandidate)) / datum.rhoCandidate",
+        (
+            gs.datum.rhoCandidate
+            - 1
+            + gs.expr.pow(2, gs.datum.logRMean / GAMMA)
+            * gs.datum.bafMean
+            * (
+                2 * (1 - gs.datum.rhoCandidate)
+                + gs.datum.rhoCandidate * gs.datum.psiCandidate
+            )
+        )
+        / gs.datum.rhoCandidate,
     ),
     (
         "aRawCandidate",
-        "(datum.rhoCandidate - 1 + pow(2, datum.logRMean / gamma) * "
-        "(1 - datum.bafMean) * (2 * (1 - datum.rhoCandidate) + "
-        "datum.rhoCandidate * datum.psiCandidate)) / datum.rhoCandidate",
+        (
+            gs.datum.rhoCandidate
+            - 1
+            + gs.expr.pow(2, gs.datum.logRMean / GAMMA)
+            * (1 - gs.datum.bafMean)
+            * (
+                2 * (1 - gs.datum.rhoCandidate)
+                + gs.datum.rhoCandidate * gs.datum.psiCandidate
+            )
+        )
+        / gs.datum.rhoCandidate,
     ),
-    ("nMinorCandidate", "max(0, round(datum.bRawCandidate))"),
-    ("nMajorCandidate", "max(0, round(datum.aRawCandidate))"),
+    ("nMinorCandidate", gs.expr.max(0, gs.expr.round(gs.datum.bRawCandidate))),
+    ("nMajorCandidate", gs.expr.max(0, gs.expr.round(gs.datum.aRawCandidate))),
     (
         "errorSquaredWeighted",
-        "(pow(datum.bRawCandidate - datum.nMinorCandidate, 2) + "
-        "(fitBothAlleles ? pow(datum.aRawCandidate - datum.nMajorCandidate, 2) "
-        ": 0)) * datum.fitWeight",
+        (
+            gs.expr.pow(gs.datum.bRawCandidate - gs.datum.nMinorCandidate, 2)
+            + gs.expr.if_(
+                FIT_BOTH_ALLELES,
+                gs.expr.pow(gs.datum.aRawCandidate - gs.datum.nMajorCandidate, 2),
+                0,
+            )
+        )
+        * gs.datum.fitWeight,
     ),
 ]:
     sunrise = sunrise.transform_formula(expr=expression, as_=field)
@@ -178,12 +208,13 @@ sunrise = sunrise.transform_aggregate(
 for field, expression in [
     (
         "meanRoundingError",
-        "datum.distanceSum / (datum.totalWeight * (fitBothAlleles ? 2 : 1))",
+        gs.datum.distanceSum
+        / (gs.datum.totalWeight * gs.expr.if_(FIT_BOTH_ALLELES, 2, 1)),
     ),
-    ("rhoStart", "max(0.1, datum.rhoCandidate - 0.005)"),
-    ("rhoEnd", "min(1.05, datum.rhoCandidate + 0.005)"),
-    ("psiStart", "max(1, datum.psiCandidate - 0.025)"),
-    ("psiEnd", "min(6, datum.psiCandidate + 0.025)"),
+    ("rhoStart", gs.expr.max(0.1, gs.datum.rhoCandidate - 0.005)),
+    ("rhoEnd", gs.expr.min(1.05, gs.datum.rhoCandidate + 0.005)),
+    ("psiStart", gs.expr.max(1, gs.datum.psiCandidate - 0.025)),
+    ("psiEnd", gs.expr.min(6, gs.datum.psiCandidate + 0.025)),
 ]:
     sunrise = sunrise.transform_formula(expr=expression, as_=field)
 
@@ -206,10 +237,14 @@ fit_text = (
         x2=None,
         text=gs.Text(
             gs.expr(
-                "'rho ' + (round(selectedFit.values.y * 1000) / 1000) + "
-                "' | psi ' + (round(selectedFit.values.x * 1000) / 1000) + "
-                "' | gamma ' + gamma + ' | score ' + "
-                "(round(datum.goodnessOfFit * 100) / 100)"
+                "rho "
+                + gs.expr.round(SELECTED_FIT.values.y * 1000) / 1000
+                + " | psi "
+                + gs.expr.round(SELECTED_FIT.values.x * 1000) / 1000
+                + " | gamma "
+                + GAMMA
+                + " | score "
+                + gs.expr.round(gs.datum.goodnessOfFit * 100) / 100
             )
         ),
     )
@@ -224,19 +259,27 @@ selected_fit = (
     )
     .resolve_scale(x="excluded")
     .resolve_axis(x="excluded")
-    .transform_filter("datum.chr !== 'X'")
+    .transform_filter(gs.datum.chr != "X")
     .transform_project(fields=["bafMean", "aError", "bError", "nProbes"])
     .transform_formula(
-        expr=(
-            "datum.nProbes * (downweightBalanced && datum.bafMean === 0.5 ? 0.05 : 1)"
+        expr=gs.datum.nProbes
+        * gs.expr.if_(
+            DOWNWEIGHT_BALANCED & (gs.datum.bafMean == 0.5),
+            0.05,
+            1,
         ),
         as_="fitWeight",
     )
     .transform_formula(
         expr=(
-            "(datum.bError * datum.bError + (fitBothAlleles ? "
-            "datum.aError * datum.aError : 0)) * datum.fitWeight"
-        ),
+            gs.datum.bError * gs.datum.bError
+            + gs.expr.if_(
+                FIT_BOTH_ALLELES,
+                gs.datum.aError * gs.datum.aError,
+                0,
+            )
+        )
+        * gs.datum.fitWeight,
         as_="errorSquaredWeighted",
     )
     .transform_aggregate(
@@ -245,10 +288,10 @@ selected_fit = (
         as_=["totalWeight", "distanceSum"],
     )
     .transform_formula(
-        expr=(
-            "100 - datum.distanceSum / (datum.totalWeight * "
-            "(fitBothAlleles ? 2 : 1) * 0.25) * 100"
-        ),
+        expr=100
+        - gs.datum.distanceSum
+        / (gs.datum.totalWeight * gs.expr.if_(FIT_BOTH_ALLELES, 2, 1) * 0.25)
+        * 100,
         as_="goodnessOfFit",
     )
 )
@@ -331,14 +374,23 @@ def raw_probe_track(field: str) -> gs.Chart:
     chart = (
         gs.Chart(gs.Data(url=RAW_URL))
         .mark_point(
-            size=gs.expr("min(pow(zoomLevel, 2) * width * height / 10000, 100)"),
+            size=gs.expr(
+                gs.expr.min(
+                    gs.expr.pow(ZOOM_LEVEL, 2) * WIDTH * HEIGHT / 10000,
+                    100,
+                )
+            ),
             color="#aab",
             opacity=0.3,
         )
         .encode(x=gs.Locus("chr", "pos"), y=gs.Y(f"{field}:Q").title(None))
         .properties(title="Single probe")
     )
-    return chart.transform_filter("datum.baf !== null") if field == "baf" else chart
+    return (
+        chart.transform_filter(gs.datum.baf != None)  # noqa: E711
+        if field == "baf"
+        else chart
+    )
 
 
 logr_track = (
@@ -372,7 +424,7 @@ baf_track = (
     + gs.Chart()
     .mark_rule(minLength=3)
     .encode(
-        y=gs.Y(gs.expr("1 - datum.bafMean"), type="quantitative").title(None),
+        y=gs.Y(gs.expr(1 - gs.datum.bafMean), type="quantitative").title(None),
         size=gs.value(3),
         color=gs.value("black"),
     )
@@ -386,7 +438,7 @@ baf_track = (
     + gs.Chart()
     .mark_rule(minLength=gs.expr("minLength"))
     .encode(
-        y=gs.Y(gs.expr("1 - datum.bafMean_ASCAT"), type="quantitative").title(None),
+        y=gs.Y(gs.expr(1 - gs.datum.bafMean_ASCAT), type="quantitative").title(None),
         size=gs.value(2),
         color=gs.value("#f06850"),
     )
@@ -452,31 +504,59 @@ chart = (
 for field, expression in [
     (
         "aRaw",
-        "(selectedFit.values.y - 1 + pow(2, datum.logRMean / gamma) * "
-        "(1 - datum.bafMean) * (2 * (1 - selectedFit.values.y) + "
-        "selectedFit.values.y * selectedFit.values.x)) / selectedFit.values.y",
+        (
+            SELECTED_FIT.values.y
+            - 1
+            + gs.expr.pow(2, gs.datum.logRMean / GAMMA)
+            * (1 - gs.datum.bafMean)
+            * (
+                2 * (1 - SELECTED_FIT.values.y)
+                + SELECTED_FIT.values.y * SELECTED_FIT.values.x
+            )
+        )
+        / SELECTED_FIT.values.y,
     ),
     (
         "bRaw",
-        "(selectedFit.values.y - 1 + pow(2, datum.logRMean / gamma) * "
-        "datum.bafMean * (2 * (1 - selectedFit.values.y) + "
-        "selectedFit.values.y * selectedFit.values.x)) / selectedFit.values.y",
+        (
+            SELECTED_FIT.values.y
+            - 1
+            + gs.expr.pow(2, gs.datum.logRMean / GAMMA)
+            * gs.datum.bafMean
+            * (
+                2 * (1 - SELECTED_FIT.values.y)
+                + SELECTED_FIT.values.y * SELECTED_FIT.values.x
+            )
+        )
+        / SELECTED_FIT.values.y,
     ),
-    ("nMajor", "max(0, round(datum.aRaw))"),
-    ("nMinor", "max(0, round(datum.bRaw))"),
-    ("aError", "abs(datum.aRaw - datum.nMajor)"),
-    ("bError", "abs(datum.bRaw - datum.nMinor)"),
+    ("nMajor", gs.expr.max(0, gs.expr.round(gs.datum.aRaw))),
+    ("nMinor", gs.expr.max(0, gs.expr.round(gs.datum.bRaw))),
+    ("aError", gs.expr.abs(gs.datum.aRaw - gs.datum.nMajor)),
+    ("bError", gs.expr.abs(gs.datum.bRaw - gs.datum.nMinor)),
     (
         "logRMean_ASCAT",
-        "gamma * log((2 * (1 - selectedFit.values.y) + selectedFit.values.y * "
-        "(datum.nMajor + datum.nMinor)) / (2 * (1 - selectedFit.values.y) + "
-        "selectedFit.values.y * selectedFit.values.x)) / LN2",
+        GAMMA
+        * gs.expr.log(
+            (
+                2 * (1 - SELECTED_FIT.values.y)
+                + SELECTED_FIT.values.y * (gs.datum.nMajor + gs.datum.nMinor)
+            )
+            / (
+                2 * (1 - SELECTED_FIT.values.y)
+                + SELECTED_FIT.values.y * SELECTED_FIT.values.x
+            )
+        )
+        / gs.expr.LN2,
     ),
     (
         "bafMean_ASCAT",
-        "(1 - selectedFit.values.y + selectedFit.values.y * datum.nMinor) / "
-        "(2 - 2 * selectedFit.values.y + selectedFit.values.y * "
-        "(datum.nMajor + datum.nMinor))",
+        (1 - SELECTED_FIT.values.y + SELECTED_FIT.values.y * gs.datum.nMinor)
+        / (
+            2
+            - 2 * SELECTED_FIT.values.y
+            + SELECTED_FIT.values.y * (gs.datum.nMajor + gs.datum.nMinor)
+        ),
     ),
 ]:
     chart = chart.transform_formula(expr=expression, as_=field)
