@@ -46,6 +46,15 @@ def test_generated_expr_namespace_builds_functions_and_conditionals() -> None:
     assert str(gs.expr.slice(gs.datum.sequence, 1, 3)) == "slice(datum.sequence,1,3)"
 
 
+def test_generated_expr_namespace_covers_upstream_functions() -> None:
+    assert str(gs.expr.sqrt(gs.datum.score)) == "sqrt(datum.score)"
+    assert str(gs.expr.max(1, gs.datum.score, 10)) == "max(1,datum.score,10)"
+    assert str(gs.expr.slice(gs.datum.sequence, 1)) == "slice(datum.sequence,1)"
+    assert str(gs.expr.mapHasKey(gs.datum.values, "key")) == (
+        "mapHasKey(datum.values,'key')"
+    )
+
+
 def test_expr_call_still_builds_expression_reference() -> None:
     assert gs.expr(gs.datum.amount * 2).to_dict() == {"expr": "(datum.amount * 2)"}
 

@@ -15,8 +15,64 @@ from tools.schemapi.codegen import (
     SchemaWrapperGenerator,
     TransformMethodOverride,
 )
+from tools.schemapi.expression_codegen import parse_expression_catalog
 
 pytestmark = pytest.mark.codegen
+
+GENOME_SPY_EXPRESSION_DOCS = """
+## Conditional operators
+And an equivalent `if` construct:
+### Constants and functions from Vega
+#### Constants
+[`NaN`](https://vega.github.io/vega/docs/expressions/#NaN)
+#### Type Checking Functions
+[`isValid`](https://vega.github.io/vega/docs/expressions/#isValid)
+#### Math Functions
+[`max`](https://vega.github.io/vega/docs/expressions/#max),
+[`sin`](https://vega.github.io/vega/docs/expressions/#sin)
+#### Sequence Functions
+[`slice`](https://vega.github.io/vega/docs/expressions/#slice)
+### Scale Functions
+<a name="scale" href="#scale">#</a>
+<b>scale</b>(<i>channel</i>, <i>value</i>)<br/>
+### Other Functions
+<a name="mapHasKey" href="#mapHasKey">#</a>
+<b>mapHasKey</b>(<i>map</i>, <i>key</i>)<br/>
+"""
+VEGA_EXPRESSION_DOCS = """
+<a name="if" href="#if">#</a>
+<b>if</b>(<i>test</i>, <i>thenValue</i>, <i>elseValue</i>)<br/>
+<a name="isValid" href="#isValid">#</a>
+<b>isValid</b>(<i>value</i>)<br/>
+<a name="max" href="#max">#</a>
+<b>max</b>(<i>value1</i>, <i>value2</i>, ...)<br/>
+<a name="sin" href="#sin">#</a>
+<b>sin</b>(<i>value</i>)<br/>
+<a name="slice" href="#slice">#</a>
+<b>slice</b>(<i>array</i>, <i>start</i>[, <i>end</i>])<br/>
+"""
+EXPRESSION_CATALOG = parse_expression_catalog(
+    GENOME_SPY_EXPRESSION_DOCS, VEGA_EXPRESSION_DOCS
+)
+
+
+def test_parse_expression_catalog_uses_upstream_surface_and_signatures() -> None:
+    catalog = EXPRESSION_CATALOG
+
+    assert catalog.constants == ("NaN",)
+    assert [function.name for function in catalog.functions] == [
+        "if",
+        "isValid",
+        "max",
+        "sin",
+        "slice",
+        "scale",
+        "mapHasKey",
+    ]
+    assert catalog.functions[0].python_name == "if_"
+    assert catalog.functions[0].parameters[1].name == "then_value"
+    assert catalog.functions[2].parameters[-1].variadic is True
+    assert catalog.functions[4].parameters[-1].optional is True
 
 
 def test_schema_wrapper_generator_summarizes_definitions() -> None:
@@ -617,7 +673,13 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
     spec_dir.mkdir(parents=True)
 
     (package_dir / "package.json").write_text(
-        json.dumps({"name": "@genome-spy/core", "version": "9.8.7"}),
+        json.dumps(
+            {
+                "name": "@genome-spy/core",
+                "version": "9.8.7",
+                "dependencies": {"vega-expression": "^6.1.0"},
+            }
+        ),
         encoding="utf-8",
     )
     (schema_dir / "schema.json").write_text(
@@ -652,6 +714,7 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
         package_dir,
         output_dir,
         spec_reference_dir=reference_dir,
+        expression_catalog=EXPRESSION_CATALOG,
         transform_method_overrides={},
     )
 
@@ -725,6 +788,7 @@ def test_write_schema_files_supports_explicit_schema_input(tmp_path: Path) -> No
         schema_path,
         output_dir,
         version="dev-local",
+        expression_catalog=EXPRESSION_CATALOG,
         transform_method_overrides={},
     )
 

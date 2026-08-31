@@ -19,6 +19,8 @@ from dataclasses import dataclass, replace
 from typing import Any
 from urllib.parse import unquote
 
+from .expression_codegen import ExpressionCatalog
+
 _MISSING = object()
 KWDS_TARGETS = frozenset(
     {
@@ -74,59 +76,11 @@ ANONYMOUS_PROPERTY_KWDS = {
 }
 
 
-@dataclass(frozen=True, slots=True)
-class ExpressionFunctionSpec:
-    """A generated function in GenomeSpy's expression namespace."""
-
-    name: str
-    parameters: tuple[str, ...]
-    python_name: str | None = None
-    optional_parameters: tuple[str, ...] = ()
-
-
-# This first generated slice covers every function used by the gallery. The
-# registry is intentionally separate from transform policy because expression
-# functions are documented by the GenomeSpy runtime, not declared by its JSON
-# Schema. New documented functions can be added here without handwritten API
-# methods.
-EXPRESSION_FUNCTIONS = (
-    ExpressionFunctionSpec("abs", ("value",)),
-    ExpressionFunctionSpec("cos", ("value",)),
-    ExpressionFunctionSpec("domain", ("channel",)),
-    ExpressionFunctionSpec(
-        "if", ("test", "then_value", "else_value"), python_name="if_"
-    ),
-    ExpressionFunctionSpec("isValid", ("value",)),
-    ExpressionFunctionSpec(
-        "regexp", ("pattern", "flags"), optional_parameters=("flags",)
-    ),
-    ExpressionFunctionSpec("replace", ("string", "pattern", "replacement")),
-    ExpressionFunctionSpec("round", ("value",)),
-    ExpressionFunctionSpec("scale", ("channel", "value")),
-    ExpressionFunctionSpec("sin", ("value",)),
-    ExpressionFunctionSpec("slice", ("value", "start", "end")),
-    ExpressionFunctionSpec("span", ("value",)),
-    ExpressionFunctionSpec("test", ("regexp", "string")),
-    ExpressionFunctionSpec("upper", ("string",)),
-)
-
-EXPRESSION_CONSTANTS = (
-    "NaN",
-    "E",
-    "LN2",
-    "LN10",
-    "LOG2E",
-    "LOG10E",
-    "PI",
-    "SQRT1_2",
-    "SQRT2",
-    "MIN_VALUE",
-    "MAX_VALUE",
-)
-
-
-def generate_expression_module() -> GeneratedModule:
+def generate_expression_module(catalog: ExpressionCatalog) -> GeneratedModule:
     """Generate the documented expression authoring namespace.
+
+    Args:
+        catalog: Parsed, version-matched upstream expression definitions.
 
     Returns:
         A generated module containing constants and typed function builders.
@@ -146,37 +100,46 @@ def generate_expression_module() -> GeneratedModule:
                 f"        return Expression({name!r})",
             ]
         )
-        for name in EXPRESSION_CONSTANTS
+        for name in catalog.constants
     )
     methods: list[str] = []
-    for spec in EXPRESSION_FUNCTIONS:
-        python_name = spec.python_name or spec.name
-        optional = set(spec.optional_parameters)
-        parameters = ", ".join(
-            (
-                f"{name}: IntoExpression | UndefinedType = Undefined"
-                if name in optional
-                else f"{name}: IntoExpression"
-            )
-            for name in spec.parameters
-        )
-        if optional:
-            required = tuple(name for name in spec.parameters if name not in optional)
-            required_values = ", ".join(required)
-            optional_name = spec.optional_parameters[0]
+    for spec in catalog.functions:
+        parameters = []
+        arguments = []
+        has_optional = any(parameter.optional for parameter in spec.parameters)
+        for parameter in spec.parameters:
+            if parameter.variadic:
+                parameters.append(f"*{parameter.name}: IntoExpression")
+                arguments.append(f"*{parameter.name}")
+            elif parameter.optional:
+                parameters.append(
+                    f"{parameter.name}: IntoExpression | UndefinedType = Undefined"
+                )
+                arguments.append(parameter.name)
+            else:
+                parameters.append(f"{parameter.name}: IntoExpression")
+                arguments.append(parameter.name)
+        parameter_source = ", ".join(parameters)
+        argument_source = ", ".join(arguments)
+        if has_optional:
             body = [
-                f"        if {optional_name} is Undefined:",
-                f"            return _function_expression({spec.name!r}, {required_values})",
-                f"        return _function_expression({spec.name!r}, {required_values}, {optional_name})",
+                f"        arguments = [{', '.join(parameter.name for parameter in spec.parameters if not parameter.variadic)}]",
+                "        while arguments and arguments[-1] is Undefined:",
+                "            arguments.pop()",
+                "        if any(argument is Undefined for argument in arguments):",
+                f"            raise ValueError({f'{spec.name} optional arguments cannot contain gaps'!r})",
+                f"        return _function_expression({spec.name!r}, *arguments)",
             ]
         else:
-            arguments = ", ".join(spec.parameters)
-            body = [f"        return _function_expression({spec.name!r}, {arguments})"]
+            separator = ", " if argument_source else ""
+            body = [
+                f"        return _function_expression({spec.name!r}{separator}{argument_source})"
+            ]
         methods.append(
             "\n".join(
                 [
                     "    @classmethod",
-                    f"    def {python_name}(cls, {parameters}) -> Expression:",
+                    f"    def {spec.python_name}(cls{', ' if parameter_source else ''}{parameter_source}) -> Expression:",
                     f'        """Build a GenomeSpy ``{spec.name}`` expression."""',
                     *body,
                 ]

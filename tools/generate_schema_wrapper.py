@@ -11,12 +11,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import subprocess
 import sys
 import tarfile
 import tempfile
 import tomllib
+import urllib.request
 from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, cast
@@ -28,12 +30,20 @@ try:
         TransformMethodTemplate,
         generate_expression_module,
     )
+    from schemapi.expression_codegen import (
+        ExpressionCatalog,
+        parse_expression_catalog,
+    )
 except ModuleNotFoundError:
     from tools.schemapi.codegen import (
         SchemaWrapperGenerator,
         TransformMethodOverride,
         TransformMethodTemplate,
         generate_expression_module,
+    )
+    from tools.schemapi.expression_codegen import (
+        ExpressionCatalog,
+        parse_expression_catalog,
     )
 
 DEFAULT_OUTPUT_DIR = Path("src/genome_spy/schema")
@@ -57,6 +67,13 @@ TRANSFORM_METHOD_OVERRIDES: dict[str, TransformMethodOverride] = {
     "FlattenParams": TransformMethodOverride(positional_properties=("fields", "as")),
     "SampleParams": TransformMethodOverride(positional_properties=("size",)),
 }
+GENOME_SPY_EXPRESSION_DOCS_URL = (
+    "https://raw.githubusercontent.com/genome-spy/genome-spy/"
+    "v{version}/docs/grammar/expressions.md"
+)
+VEGA_EXPRESSION_DOCS_URL = (
+    "https://raw.githubusercontent.com/vega/vega/v{version}/docs/docs/expressions.md"
+)
 
 
 def configured_core_version(pyproject_path: Path = Path("pyproject.toml")) -> str:
@@ -110,6 +127,53 @@ def package_version(package_dir: Path) -> str:
     return version
 
 
+def package_vega_expression_version(package_dir: Path) -> str:
+    """Read the minimum vega-expression version from an npm package."""
+    metadata = json.loads((package_dir / "package.json").read_text(encoding="utf-8"))
+    dependency = metadata.get("dependencies", {}).get("vega-expression")
+    if not isinstance(dependency, str):
+        raise TypeError(
+            "GenomeSpy npm package.json must declare a vega-expression dependency."
+        )
+    match = re.search(r"\d+\.\d+\.\d+", dependency)
+    if match is None:
+        raise ValueError(f"Unsupported vega-expression version range: {dependency!r}")
+    return match.group(0)
+
+
+def fetch_expression_catalog(
+    core_version: str, vega_expression_version: str
+) -> ExpressionCatalog:
+    """Fetch and parse version-matched upstream expression documentation."""
+    genome_spy_docs = _fetch_text(
+        GENOME_SPY_EXPRESSION_DOCS_URL.format(version=core_version)
+    )
+    vega_docs = _fetch_text(
+        VEGA_EXPRESSION_DOCS_URL.format(version=vega_expression_version)
+    )
+    return parse_expression_catalog(genome_spy_docs, vega_docs)
+
+
+def _fetch_text(url: str) -> str:
+    try:
+        with urllib.request.urlopen(url) as response:  # noqa: S310
+            return response.read().decode("utf-8")
+    except OSError as error:
+        raise RuntimeError(
+            f"Could not fetch upstream expression docs: {url}"
+        ) from error
+
+
+def load_expression_catalog(
+    genome_spy_docs_path: Path, vega_docs_path: Path
+) -> ExpressionCatalog:
+    """Parse expression documentation from explicit local files."""
+    return parse_expression_catalog(
+        genome_spy_docs_path.read_text(encoding="utf-8"),
+        vega_docs_path.read_text(encoding="utf-8"),
+    )
+
+
 def load_schema(path: Path) -> dict[str, Any]:
     """Load a GenomeSpy JSON Schema file."""
     with path.open(encoding="utf-8") as file:
@@ -149,6 +213,7 @@ def write_schema_package(
     output_dir: Path,
     *,
     spec_reference_dir: Path | None,
+    expression_catalog: ExpressionCatalog | None = None,
     transform_method_overrides: Mapping[str, TransformMethodOverride] = (
         TRANSFORM_METHOD_OVERRIDES
     ),
@@ -159,10 +224,15 @@ def write_schema_package(
         raise FileNotFoundError(f"GenomeSpy package has no schema: {schema_path}")
 
     version = package_version(package_dir)
+    if expression_catalog is None:
+        expression_catalog = fetch_expression_catalog(
+            version, package_vega_expression_version(package_dir)
+        )
     write_schema_files(
         schema_path,
         output_dir,
         version=version,
+        expression_catalog=expression_catalog,
         transform_method_overrides=transform_method_overrides,
     )
 
@@ -175,6 +245,7 @@ def write_schema_files(
     output_dir: Path,
     *,
     version: str,
+    expression_catalog: ExpressionCatalog,
     transform_method_overrides: Mapping[str, TransformMethodOverride] = (
         TRANSFORM_METHOD_OVERRIDES
     ),
@@ -199,7 +270,7 @@ def write_schema_files(
     composition_module = generator.generate_composition_module()
     lazy_module = generator.generate_lazy_module()
     ergonomics_module = generator.generate_ergonomics_module()
-    expression_module = generate_expression_module()
+    expression_module = generate_expression_module(expression_catalog)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     schema_text = schema_path.read_text(encoding="utf-8").rstrip() + "\n"
@@ -258,6 +329,16 @@ def main() -> None:
             "are copied. Use an empty string to skip copying references."
         ),
     )
+    parser.add_argument(
+        "--genome-spy-expression-docs",
+        type=Path,
+        help="Use a local GenomeSpy expressions.md instead of fetching it.",
+    )
+    parser.add_argument(
+        "--vega-expression-docs",
+        type=Path,
+        help="Use a local Vega expressions.md instead of fetching it.",
+    )
     source_group = parser.add_mutually_exclusive_group()
     source_group.add_argument(
         "--package-dir",
@@ -277,15 +358,32 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    docs_paths = (
+        args.genome_spy_expression_docs,
+        args.vega_expression_docs,
+    )
+    if (docs_paths[0] is None) != (docs_paths[1] is None):
+        parser.error("Both expression documentation paths must be provided together.")
+    expression_catalog = (
+        load_expression_catalog(*docs_paths)
+        if docs_paths[0] is not None and docs_paths[1] is not None
+        else None
+    )
+
     spec_reference_dir = (
         Path(args.spec_reference_dir) if args.spec_reference_dir else None
     )
 
     if args.schema_path is not None:
+        if expression_catalog is None:
+            parser.error(
+                "--schema-path requires both local expression documentation paths."
+            )
         write_schema_files(
             args.schema_path,
             args.output_dir,
             version=args.core_version,
+            expression_catalog=expression_catalog,
         )
         source = str(args.schema_path)
     elif args.package_dir is not None:
@@ -293,6 +391,7 @@ def main() -> None:
             args.package_dir,
             args.output_dir,
             spec_reference_dir=spec_reference_dir,
+            expression_catalog=expression_catalog,
         )
         source = str(args.package_dir)
     else:
@@ -302,6 +401,7 @@ def main() -> None:
                 package_dir,
                 args.output_dir,
                 spec_reference_dir=spec_reference_dir,
+                expression_catalog=expression_catalog,
             )
         source = f"{PACKAGE_NAME}@{args.core_version}"
 
