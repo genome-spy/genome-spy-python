@@ -89,7 +89,7 @@ def generate_expression_module(catalog: ExpressionCatalog) -> GeneratedModule:
         No exceptions are raised.
 
     Example:
-        ``generate_expression_module().exports`` contains ``expr``.
+        ``generate_expression_module(catalog).exports`` contains ``expr``.
     """
     constant_properties = "\n\n".join(
         "\n".join(
@@ -120,6 +120,9 @@ def generate_expression_module(catalog: ExpressionCatalog) -> GeneratedModule:
                 parameters.append(f"{parameter.name}: IntoExpression")
                 arguments.append(parameter.name)
         parameter_source = ", ".join(parameters)
+        has_variadic = any(parameter.variadic for parameter in spec.parameters)
+        if parameter_source and not has_variadic:
+            parameter_source += ", /"
         argument_source = ", ".join(arguments)
         if has_optional:
             body = [

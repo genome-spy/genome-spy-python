@@ -70,9 +70,20 @@ def test_parse_expression_catalog_uses_upstream_surface_and_signatures() -> None
         "mapHasKey",
     ]
     assert catalog.functions[0].python_name == "if_"
-    assert catalog.functions[0].parameters[1].name == "then_value"
+    assert catalog.functions[0].parameters[1].name == "thenValue"
     assert catalog.functions[2].parameters[-1].variadic is True
+    assert catalog.functions[2].parameters[-1].name == "args"
     assert catalog.functions[4].parameters[-1].optional is True
+
+
+def test_parse_expression_catalog_rejects_unparsed_custom_signatures() -> None:
+    malformed_docs = GENOME_SPY_EXPRESSION_DOCS.replace(
+        "<b>scale</b>(<i>channel</i>, <i>value</i>)",
+        "scale(channel, value)",
+    )
+
+    with pytest.raises(ValueError, match="no signatures for: scale"):
+        parse_expression_catalog(malformed_docs, VEGA_EXPRESSION_DOCS)
 
 
 def test_schema_wrapper_generator_summarizes_definitions() -> None:

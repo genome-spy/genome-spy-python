@@ -156,7 +156,7 @@ def fetch_expression_catalog(
 
 def _fetch_text(url: str) -> str:
     try:
-        with urllib.request.urlopen(url) as response:  # noqa: S310
+        with urllib.request.urlopen(url, timeout=30) as response:  # noqa: S310
             return response.read().decode("utf-8")
     except OSError as error:
         raise RuntimeError(

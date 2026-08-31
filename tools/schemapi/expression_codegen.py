@@ -46,6 +46,7 @@ _SIGNATURE_RE = re.compile(
     r'<a name="(?P<anchor>[^"]+)"[^>]*>.*?</a>\s*\n'
     r"<b>(?P<name>[^<]+)</b>\((?P<parameters>[^\n)]*)\)",
 )
+_ANCHOR_RE = re.compile(r'<a name="(?P<name>[A-Za-z_$][\w$]*)"')
 _PARAMETER_RE = re.compile(r"<i>(?P<name>[^<]+)</i>")
 
 
@@ -89,12 +90,23 @@ def parse_expression_catalog(genome_spy_docs: str, vega_docs: str) -> Expression
     vega_signatures = _parse_signatures(vega_docs)
     custom_section = genome_spy_docs[genome_spy_docs.index("### Scale Functions") :]
     custom_signatures = _parse_signatures(custom_section)
+    custom_names = tuple(
+        match.group("name") for match in _ANCHOR_RE.finditer(custom_section)
+    )
 
     missing = [name for name in function_names if name not in vega_signatures]
     if missing:
         raise ValueError(
             "Vega expression docs contain no signatures for: " + ", ".join(missing)
         )
+    missing_custom = [name for name in custom_names if name not in custom_signatures]
+    if missing_custom:
+        raise ValueError(
+            "GenomeSpy expression docs contain no signatures for: "
+            + ", ".join(missing_custom)
+        )
+    if not custom_signatures:
+        raise ValueError("GenomeSpy expression docs contain no custom functions.")
 
     functions = [vega_signatures[name] for name in function_names]
     for name, signature in custom_signatures.items():
@@ -139,16 +151,13 @@ def _parse_parameters(source: str) -> tuple[ExpressionParameterSpec, ...]:
         parameters.append(ExpressionParameterSpec(name=name, optional=optional))
 
     if "..." in source and parameters:
-        last = parameters[-1]
-        variadic_name = "values" if last.name.startswith("value") else f"{last.name}s"
-        parameters.append(ExpressionParameterSpec(name=variadic_name, variadic=True))
+        parameters.append(ExpressionParameterSpec(name="args", variadic=True))
     return tuple(parameters)
 
 
 def _python_identifier(name: str) -> str:
-    snake_case = re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
-    snake_case = re.sub(r"\W", "_", snake_case)
-    return f"{snake_case}_" if keyword.iskeyword(snake_case) else snake_case
+    identifier = re.sub(r"\W", "_", name)
+    return f"{identifier}_" if keyword.iskeyword(identifier) else identifier
 
 
 __all__ = [

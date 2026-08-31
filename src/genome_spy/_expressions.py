@@ -14,6 +14,7 @@ Copyright (c) 2015-2025, Vega-Altair Developers. BSD-3-Clause license; see
 from __future__ import annotations
 
 import sys
+from math import isinf, isnan
 from typing import Any, Self, TypeAlias
 
 
@@ -27,9 +28,19 @@ def _js_repr(value: Any) -> str:
         return "null"
     if isinstance(value, Expression):
         return str(value)
+    if isinstance(value, float):
+        if isnan(value):
+            return "NaN"
+        if isinf(value):
+            return "Infinity" if value > 0 else "-Infinity"
+    if isinstance(value, list | tuple):
+        return "[" + ",".join(_js_repr(item) for item in value) + "]"
+    if isinstance(value, dict):
+        items = (f"{_js_repr(key)}:{_js_repr(item)}" for key, item in value.items())
+        return "{" + ",".join(items) + "}"
     numpy = sys.modules.get("numpy")
     if numpy is not None and isinstance(value, numpy.generic):
-        return repr(value.item())
+        return _js_repr(value.item())
     return repr(value)
 
 

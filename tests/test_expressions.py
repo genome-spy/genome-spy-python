@@ -55,6 +55,28 @@ def test_generated_expr_namespace_covers_upstream_functions() -> None:
     )
 
 
+def test_expression_values_serialize_as_javascript_literals() -> None:
+    assert str(gs.expr.center([True, None, gs.datum.score])) == (
+        "center([true,null,datum.score])"
+    )
+    assert str(gs.expr.mapHasKey({"selected": False}, "selected")) == (
+        "mapHasKey({'selected':false},'selected')"
+    )
+    assert str(gs.expr.max(float("nan"), float("inf"), float("-inf"))) == (
+        "max(NaN,Infinity,-Infinity)"
+    )
+
+
+def test_generated_expression_parameters_follow_upstream_names() -> None:
+    parameters = inspect.signature(gs.expr.if_).parameters
+
+    assert tuple(parameters) == ("test", "thenValue", "elseValue")
+    assert all(
+        parameter.kind is inspect.Parameter.POSITIONAL_ONLY
+        for parameter in parameters.values()
+    )
+
+
 def test_expr_call_still_builds_expression_reference() -> None:
     assert gs.expr(gs.datum.amount * 2).to_dict() == {"expr": "(datum.amount * 2)"}
 

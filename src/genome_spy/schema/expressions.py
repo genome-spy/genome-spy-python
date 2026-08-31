@@ -81,133 +81,134 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
     def if_(
         cls,
         test: IntoExpression,
-        then_value: IntoExpression,
-        else_value: IntoExpression,
+        thenValue: IntoExpression,
+        elseValue: IntoExpression,
+        /,
     ) -> Expression:
         """Build a GenomeSpy ``if`` expression."""
-        return _function_expression("if", test, then_value, else_value)
+        return _function_expression("if", test, thenValue, elseValue)
 
     @classmethod
-    def isArray(cls, value: IntoExpression) -> Expression:
+    def isArray(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isArray`` expression."""
         return _function_expression("isArray", value)
 
     @classmethod
-    def isBoolean(cls, value: IntoExpression) -> Expression:
+    def isBoolean(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isBoolean`` expression."""
         return _function_expression("isBoolean", value)
 
     @classmethod
-    def isNumber(cls, value: IntoExpression) -> Expression:
+    def isNumber(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isNumber`` expression."""
         return _function_expression("isNumber", value)
 
     @classmethod
-    def isObject(cls, value: IntoExpression) -> Expression:
+    def isObject(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isObject`` expression."""
         return _function_expression("isObject", value)
 
     @classmethod
-    def isRegExp(cls, value: IntoExpression) -> Expression:
+    def isRegExp(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isRegExp`` expression."""
         return _function_expression("isRegExp", value)
 
     @classmethod
-    def isString(cls, value: IntoExpression) -> Expression:
+    def isString(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isString`` expression."""
         return _function_expression("isString", value)
 
     @classmethod
-    def isDefined(cls, value: IntoExpression) -> Expression:
+    def isDefined(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isDefined`` expression."""
         return _function_expression("isDefined", value)
 
     @classmethod
-    def isValid(cls, value: IntoExpression) -> Expression:
+    def isValid(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isValid`` expression."""
         return _function_expression("isValid", value)
 
     @classmethod
-    def isNaN(cls, value: IntoExpression) -> Expression:
+    def isNaN(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isNaN`` expression."""
         return _function_expression("isNaN", value)
 
     @classmethod
-    def isFinite(cls, value: IntoExpression) -> Expression:
+    def isFinite(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``isFinite`` expression."""
         return _function_expression("isFinite", value)
 
     @classmethod
-    def abs(cls, value: IntoExpression) -> Expression:
+    def abs(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``abs`` expression."""
         return _function_expression("abs", value)
 
     @classmethod
-    def acos(cls, value: IntoExpression) -> Expression:
+    def acos(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``acos`` expression."""
         return _function_expression("acos", value)
 
     @classmethod
-    def asin(cls, value: IntoExpression) -> Expression:
+    def asin(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``asin`` expression."""
         return _function_expression("asin", value)
 
     @classmethod
-    def atan(cls, value: IntoExpression) -> Expression:
+    def atan(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``atan`` expression."""
         return _function_expression("atan", value)
 
     @classmethod
-    def atan2(cls, dy: IntoExpression, dx: IntoExpression) -> Expression:
+    def atan2(cls, dy: IntoExpression, dx: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``atan2`` expression."""
         return _function_expression("atan2", dy, dx)
 
     @classmethod
-    def ceil(cls, value: IntoExpression) -> Expression:
+    def ceil(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``ceil`` expression."""
         return _function_expression("ceil", value)
 
     @classmethod
-    def cos(cls, value: IntoExpression) -> Expression:
+    def cos(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``cos`` expression."""
         return _function_expression("cos", value)
 
     @classmethod
-    def exp(cls, exponent: IntoExpression) -> Expression:
+    def exp(cls, exponent: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``exp`` expression."""
         return _function_expression("exp", exponent)
 
     @classmethod
-    def floor(cls, value: IntoExpression) -> Expression:
+    def floor(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``floor`` expression."""
         return _function_expression("floor", value)
 
     @classmethod
-    def hypot(cls, value: IntoExpression) -> Expression:
+    def hypot(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``hypot`` expression."""
         return _function_expression("hypot", value)
 
     @classmethod
-    def log(cls, value: IntoExpression) -> Expression:
+    def log(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``log`` expression."""
         return _function_expression("log", value)
 
     @classmethod
     def max(
-        cls, value1: IntoExpression, value2: IntoExpression, *values: IntoExpression
+        cls, value1: IntoExpression, value2: IntoExpression, *args: IntoExpression
     ) -> Expression:
         """Build a GenomeSpy ``max`` expression."""
-        return _function_expression("max", value1, value2, *values)
+        return _function_expression("max", value1, value2, *args)
 
     @classmethod
     def min(
-        cls, value1: IntoExpression, value2: IntoExpression, *values: IntoExpression
+        cls, value1: IntoExpression, value2: IntoExpression, *args: IntoExpression
     ) -> Expression:
         """Build a GenomeSpy ``min`` expression."""
-        return _function_expression("min", value1, value2, *values)
+        return _function_expression("min", value1, value2, *args)
 
     @classmethod
-    def pow(cls, value: IntoExpression, exponent: IntoExpression) -> Expression:
+    def pow(cls, value: IntoExpression, exponent: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``pow`` expression."""
         return _function_expression("pow", value, exponent)
 
@@ -217,34 +218,34 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("random")
 
     @classmethod
-    def round(cls, value: IntoExpression) -> Expression:
+    def round(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``round`` expression."""
         return _function_expression("round", value)
 
     @classmethod
-    def sin(cls, value: IntoExpression) -> Expression:
+    def sin(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``sin`` expression."""
         return _function_expression("sin", value)
 
     @classmethod
-    def sqrt(cls, value: IntoExpression) -> Expression:
+    def sqrt(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``sqrt`` expression."""
         return _function_expression("sqrt", value)
 
     @classmethod
-    def tan(cls, value: IntoExpression) -> Expression:
+    def tan(cls, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``tan`` expression."""
         return _function_expression("tan", value)
 
     @classmethod
     def clamp(
-        cls, value: IntoExpression, min: IntoExpression, max: IntoExpression
+        cls, value: IntoExpression, min: IntoExpression, max: IntoExpression, /
     ) -> Expression:
         """Build a GenomeSpy ``clamp`` expression."""
         return _function_expression("clamp", value, min, max)
 
     @classmethod
-    def length(cls, array: IntoExpression) -> Expression:
+    def length(cls, array: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``length`` expression."""
         return _function_expression("length", array)
 
@@ -253,6 +254,7 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         cls,
         array: IntoExpression,
         separator: IntoExpression | UndefinedType = Undefined,
+        /,
     ) -> Expression:
         """Build a GenomeSpy ``join`` expression."""
         arguments = [array, separator]
@@ -263,17 +265,17 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("join", *arguments)
 
     @classmethod
-    def indexof(cls, array: IntoExpression, value: IntoExpression) -> Expression:
+    def indexof(cls, array: IntoExpression, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``indexof`` expression."""
         return _function_expression("indexof", array, value)
 
     @classmethod
-    def lastindexof(cls, array: IntoExpression, value: IntoExpression) -> Expression:
+    def lastindexof(cls, array: IntoExpression, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``lastindexof`` expression."""
         return _function_expression("lastindexof", array, value)
 
     @classmethod
-    def reverse(cls, array: IntoExpression) -> Expression:
+    def reverse(cls, array: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``reverse`` expression."""
         return _function_expression("reverse", array)
 
@@ -283,6 +285,7 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         array: IntoExpression,
         start: IntoExpression,
         end: IntoExpression | UndefinedType = Undefined,
+        /,
     ) -> Expression:
         """Build a GenomeSpy ``slice`` expression."""
         arguments = [array, start, end]
@@ -293,32 +296,32 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("slice", *arguments)
 
     @classmethod
-    def sort(cls, array: IntoExpression) -> Expression:
+    def sort(cls, array: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``sort`` expression."""
         return _function_expression("sort", array)
 
     @classmethod
-    def span(cls, array: IntoExpression) -> Expression:
+    def span(cls, array: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``span`` expression."""
         return _function_expression("span", array)
 
     @classmethod
-    def parseFloat(cls, string: IntoExpression) -> Expression:
+    def parseFloat(cls, string: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``parseFloat`` expression."""
         return _function_expression("parseFloat", string)
 
     @classmethod
-    def parseInt(cls, string: IntoExpression) -> Expression:
+    def parseInt(cls, string: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``parseInt`` expression."""
         return _function_expression("parseInt", string)
 
     @classmethod
-    def upper(cls, string: IntoExpression) -> Expression:
+    def upper(cls, string: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``upper`` expression."""
         return _function_expression("upper", string)
 
     @classmethod
-    def lower(cls, string: IntoExpression) -> Expression:
+    def lower(cls, string: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``lower`` expression."""
         return _function_expression("lower", string)
 
@@ -328,6 +331,7 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         string: IntoExpression,
         pattern: IntoExpression,
         replacement: IntoExpression,
+        /,
     ) -> Expression:
         """Build a GenomeSpy ``replace`` expression."""
         return _function_expression("replace", string, pattern, replacement)
@@ -338,6 +342,7 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         string: IntoExpression,
         separator: IntoExpression,
         limit: IntoExpression | UndefinedType = Undefined,
+        /,
     ) -> Expression:
         """Build a GenomeSpy ``split`` expression."""
         arguments = [string, separator, limit]
@@ -353,6 +358,7 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         string: IntoExpression,
         start: IntoExpression,
         end: IntoExpression | UndefinedType = Undefined,
+        /,
     ) -> Expression:
         """Build a GenomeSpy ``substring`` expression."""
         arguments = [string, start, end]
@@ -363,28 +369,31 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("substring", *arguments)
 
     @classmethod
-    def trim(cls, string: IntoExpression) -> Expression:
+    def trim(cls, string: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``trim`` expression."""
         return _function_expression("trim", string)
 
     @classmethod
-    def btoa(cls, string: IntoExpression) -> Expression:
+    def btoa(cls, string: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``btoa`` expression."""
         return _function_expression("btoa", string)
 
     @classmethod
-    def atob(cls, string: IntoExpression) -> Expression:
+    def atob(cls, string: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``atob`` expression."""
         return _function_expression("atob", string)
 
     @classmethod
-    def format(cls, value: IntoExpression, specifier: IntoExpression) -> Expression:
+    def format(cls, value: IntoExpression, specifier: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``format`` expression."""
         return _function_expression("format", value, specifier)
 
     @classmethod
     def regexp(
-        cls, pattern: IntoExpression, flags: IntoExpression | UndefinedType = Undefined
+        cls,
+        pattern: IntoExpression,
+        flags: IntoExpression | UndefinedType = Undefined,
+        /,
     ) -> Expression:
         """Build a GenomeSpy ``regexp`` expression."""
         arguments = [pattern, flags]
@@ -396,7 +405,10 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
 
     @classmethod
     def test(
-        cls, regexp: IntoExpression, string: IntoExpression | UndefinedType = Undefined
+        cls,
+        regexp: IntoExpression,
+        string: IntoExpression | UndefinedType = Undefined,
+        /,
     ) -> Expression:
         """Build a GenomeSpy ``test`` expression."""
         arguments = [regexp, string]
@@ -407,56 +419,56 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("test", *arguments)
 
     @classmethod
-    def scale(cls, channel: IntoExpression, value: IntoExpression) -> Expression:
+    def scale(cls, channel: IntoExpression, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``scale`` expression."""
         return _function_expression("scale", channel, value)
 
     @classmethod
-    def invert(cls, channel: IntoExpression, range: IntoExpression) -> Expression:
+    def invert(cls, channel: IntoExpression, range: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``invert`` expression."""
         return _function_expression("invert", channel, range)
 
     @classmethod
-    def domain(cls, channel: IntoExpression) -> Expression:
+    def domain(cls, channel: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``domain`` expression."""
         return _function_expression("domain", channel)
 
     @classmethod
-    def range(cls, channel: IntoExpression) -> Expression:
+    def range(cls, channel: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``range`` expression."""
         return _function_expression("range", channel)
 
     @classmethod
-    def bandwidth(cls, channel: IntoExpression) -> Expression:
+    def bandwidth(cls, channel: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``bandwidth`` expression."""
         return _function_expression("bandwidth", channel)
 
     @classmethod
-    def mapHasKey(cls, map: IntoExpression, key: IntoExpression) -> Expression:
+    def mapHasKey(cls, map: IntoExpression, key: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``mapHasKey`` expression."""
         return _function_expression("mapHasKey", map, key)
 
     @classmethod
-    def lerp(cls, array: IntoExpression, fraction: IntoExpression) -> Expression:
+    def lerp(cls, array: IntoExpression, fraction: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``lerp`` expression."""
         return _function_expression("lerp", array, fraction)
 
     @classmethod
     def linearstep(
-        cls, edge0: IntoExpression, edge1: IntoExpression, x: IntoExpression
+        cls, edge0: IntoExpression, edge1: IntoExpression, x: IntoExpression, /
     ) -> Expression:
         """Build a GenomeSpy ``linearstep`` expression."""
         return _function_expression("linearstep", edge0, edge1, x)
 
     @classmethod
     def smoothstep(
-        cls, edge0: IntoExpression, edge1: IntoExpression, x: IntoExpression
+        cls, edge0: IntoExpression, edge1: IntoExpression, x: IntoExpression, /
     ) -> Expression:
         """Build a GenomeSpy ``smoothstep`` expression."""
         return _function_expression("smoothstep", edge0, edge1, x)
 
     @classmethod
-    def center(cls, array: IntoExpression) -> Expression:
+    def center(cls, array: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``center`` expression."""
         return _function_expression("center", array)
 
