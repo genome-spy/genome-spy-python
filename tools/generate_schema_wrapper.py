@@ -26,12 +26,14 @@ try:
         SchemaWrapperGenerator,
         TransformMethodOverride,
         TransformMethodTemplate,
+        generate_expression_module,
     )
 except ModuleNotFoundError:
     from tools.schemapi.codegen import (
         SchemaWrapperGenerator,
         TransformMethodOverride,
         TransformMethodTemplate,
+        generate_expression_module,
     )
 
 DEFAULT_OUTPUT_DIR = Path("src/genome_spy/schema")
@@ -197,6 +199,7 @@ def write_schema_files(
     composition_module = generator.generate_composition_module()
     lazy_module = generator.generate_lazy_module()
     ergonomics_module = generator.generate_ergonomics_module()
+    expression_module = generate_expression_module()
 
     output_dir.mkdir(parents=True, exist_ok=True)
     schema_text = schema_path.read_text(encoding="utf-8").rstrip() + "\n"
@@ -213,6 +216,9 @@ def write_schema_files(
     (output_dir / "lazy.py").write_text(lazy_module.source, encoding="utf-8")
     (output_dir / "ergonomics.py").write_text(
         ergonomics_module.source, encoding="utf-8"
+    )
+    (output_dir / "expressions.py").write_text(
+        expression_module.source, encoding="utf-8"
     )
     (output_dir / CAPABILITIES_FILENAME).write_text(
         json.dumps(generator.capability_manifest(), indent=2) + "\n",

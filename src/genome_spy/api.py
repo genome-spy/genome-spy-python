@@ -1,6 +1,7 @@
 """Public API re-exports for the handwritten ergonomic layer."""
 
 from genome_spy.channels import Locus, compare, datum, locus, value
+from genome_spy._expressions import Expression
 from genome_spy.arrow import to_arrow_ipc
 from genome_spy.chart import (
     Chart,
@@ -97,6 +98,7 @@ __all__ = [
     "Dx",
     "Dy",
     "ExprRef",
+    "Expression",
     "FacetIndex",
     "Fill",
     "FillOpacity",

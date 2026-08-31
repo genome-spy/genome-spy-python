@@ -75,6 +75,153 @@ ANONYMOUS_PROPERTY_KWDS = {
 
 
 @dataclass(frozen=True, slots=True)
+class ExpressionFunctionSpec:
+    """A generated function in GenomeSpy's expression namespace."""
+
+    name: str
+    parameters: tuple[str, ...]
+    python_name: str | None = None
+    optional_parameters: tuple[str, ...] = ()
+
+
+# This first generated slice covers every function used by the gallery. The
+# registry is intentionally separate from transform policy because expression
+# functions are documented by the GenomeSpy runtime, not declared by its JSON
+# Schema. New documented functions can be added here without handwritten API
+# methods.
+EXPRESSION_FUNCTIONS = (
+    ExpressionFunctionSpec("abs", ("value",)),
+    ExpressionFunctionSpec("cos", ("value",)),
+    ExpressionFunctionSpec("domain", ("channel",)),
+    ExpressionFunctionSpec(
+        "if", ("test", "then_value", "else_value"), python_name="if_"
+    ),
+    ExpressionFunctionSpec("isValid", ("value",)),
+    ExpressionFunctionSpec(
+        "regexp", ("pattern", "flags"), optional_parameters=("flags",)
+    ),
+    ExpressionFunctionSpec("replace", ("string", "pattern", "replacement")),
+    ExpressionFunctionSpec("round", ("value",)),
+    ExpressionFunctionSpec("scale", ("channel", "value")),
+    ExpressionFunctionSpec("sin", ("value",)),
+    ExpressionFunctionSpec("span", ("value",)),
+    ExpressionFunctionSpec("test", ("regexp", "string")),
+    ExpressionFunctionSpec("upper", ("string",)),
+)
+
+EXPRESSION_CONSTANTS = (
+    "NaN",
+    "E",
+    "LN2",
+    "LN10",
+    "LOG2E",
+    "LOG10E",
+    "PI",
+    "SQRT1_2",
+    "SQRT2",
+    "MIN_VALUE",
+    "MAX_VALUE",
+)
+
+
+def generate_expression_module() -> GeneratedModule:
+    """Generate the documented expression authoring namespace.
+
+    Returns:
+        A generated module containing constants and typed function builders.
+
+    Raises:
+        No exceptions are raised.
+
+    Example:
+        ``generate_expression_module().exports`` contains ``expr``.
+    """
+    constant_properties = "\n\n".join(
+        "\n".join(
+            [
+                "    @property",
+                f"    def {name}(cls) -> Expression:",
+                f'        """Return the GenomeSpy ``{name}`` constant."""',
+                f"        return Expression({name!r})",
+            ]
+        )
+        for name in EXPRESSION_CONSTANTS
+    )
+    methods: list[str] = []
+    for spec in EXPRESSION_FUNCTIONS:
+        python_name = spec.python_name or spec.name
+        optional = set(spec.optional_parameters)
+        parameters = ", ".join(
+            (
+                f"{name}: IntoExpression | UndefinedType = Undefined"
+                if name in optional
+                else f"{name}: IntoExpression"
+            )
+            for name in spec.parameters
+        )
+        if optional:
+            required = tuple(name for name in spec.parameters if name not in optional)
+            required_values = ", ".join(required)
+            optional_name = spec.optional_parameters[0]
+            body = [
+                f"        if {optional_name} is Undefined:",
+                f"            return _function_expression({spec.name!r}, {required_values})",
+                f"        return _function_expression({spec.name!r}, {required_values}, {optional_name})",
+            ]
+        else:
+            arguments = ", ".join(spec.parameters)
+            body = [f"        return _function_expression({spec.name!r}, {arguments})"]
+        methods.append(
+            "\n".join(
+                [
+                    "    @classmethod",
+                    f"    def {python_name}(cls, {parameters}) -> Expression:",
+                    f'        """Build a GenomeSpy ``{spec.name}`` expression."""',
+                    *body,
+                ]
+            )
+        )
+    source = "\n".join(
+        [
+            '"""Generated from GenomeSpy expression-runtime documentation. Do not edit."""',
+            "",
+            "from __future__ import annotations",
+            "",
+            "from typing import TYPE_CHECKING",
+            "",
+            "from genome_spy._expressions import Expression, _function_expression",
+            "from genome_spy.schema import core",
+            "from genome_spy.schemapi import Undefined, UndefinedType",
+            "",
+            "if TYPE_CHECKING:",
+            "    from genome_spy._expressions import IntoExpression",
+            "",
+            "",
+            "class _ExprMeta(type):",
+            '    """Provide read-only GenomeSpy expression constants."""',
+            "",
+            constant_properties,
+            "",
+            "",
+            "class expr(core.ExprRef, metaclass=_ExprMeta):",
+            '    """Build expression references, constants, and function calls."""',
+            "",
+            "    def __new__(",
+            "        cls, expression: str | Expression",
+            "    ) -> core.ExprRef:  # type: ignore[misc]",
+            "        return core.ExprRef(expr=str(expression))",
+            "",
+            "\n\n".join(methods),
+            "",
+            "",
+            '__all__ = ["Expression", "expr"]',
+            "",
+        ]
+    )
+    return GeneratedModule(source=source, exports=("Expression", "expr"))
+
+
+@dataclass(frozen=True, slots=True)
 class SchemaDefinition:
     """A named definition from the GenomeSpy JSON Schema."""
 
@@ -2290,6 +2437,7 @@ class SchemaWrapperGenerator:
                     "if TYPE_CHECKING:",
                     "    from genome_spy.channels import DatumChannel, LocusChannel, ValueChannel",
                     "",
+                    "from genome_spy._expressions import DatumExpression",
                     (
                         "from genome_spy.schema._typing import " + ", ".join(aliases)
                         if aliases
@@ -2345,15 +2493,7 @@ class SchemaWrapperGenerator:
                         if has_compare
                         else []
                     ),
-                    *(
-                        [
-                            _channel_helper_source(
-                                "datum", datum_properties, "DatumChannel"
-                            )
-                        ]
-                        if has_datum
-                        else []
-                    ),
+                    *([_datum_helper_source(datum_properties)] if has_datum else []),
                     *(
                         [
                             _channel_helper_source(
@@ -2989,6 +3129,67 @@ def _channel_helper_source(
             f"    from genome_spy.channels import {channel_class_name}",
             "",
             f"    return {channel_class_name}(defined)",
+            "",
+        ]
+    )
+
+
+def _datum_helper_source(property_specs: tuple[PropertySpec, ...]) -> str:
+    """Render the callable expression-aware ``datum`` namespace."""
+    main_property = next(
+        property_spec
+        for property_spec in property_specs
+        if property_spec.name == "datum"
+    )
+    options = tuple(
+        property_spec
+        for property_spec in property_specs
+        if property_spec.name != "datum"
+    )
+    parameters = "\n".join(
+        f"        {property_spec.python_name}: "
+        f"{_qualified_transform_annotation(property_spec.annotation.annotation)} "
+        "| UndefinedType = Undefined,"
+        for property_spec in options
+    )
+    values = "\n".join(
+        f"            {property_spec.name!r}: {property_spec.python_name},"
+        for property_spec in options
+    )
+    return "\n".join(
+        [
+            "class DatumType(DatumExpression):",
+            '    """Build datum expressions or constant-datum channels."""',
+            "",
+            "    def __call__(",
+            "        self,",
+            "        datum: "
+            + _qualified_transform_annotation(main_property.annotation.annotation)
+            + ",",
+            "        /,",
+            "        *,",
+            parameters,
+            "    ) -> DatumChannel:",
+            _method_docstring(
+                "Create a constant-datum encoding channel.",
+                property_specs,
+                indent=8,
+            ),
+            "        properties = {",
+            "            'datum': datum,",
+            values,
+            "        }",
+            "        defined = {",
+            "            key: value",
+            "            for key, value in properties.items()",
+            "            if value is not Undefined",
+            "        }",
+            "        from genome_spy.channels import DatumChannel",
+            "",
+            "        return DatumChannel(defined)",
+            "",
+            "",
+            "datum = DatumType()",
             "",
         ]
     )

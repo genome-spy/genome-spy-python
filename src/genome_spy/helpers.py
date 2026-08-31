@@ -24,6 +24,7 @@ from genome_spy.schema.core import (
     Parse,
     Step,
 )
+from genome_spy.schema.expressions import expr
 from genome_spy.schema.ergonomics import (
     config,
     data_format,
@@ -59,11 +60,6 @@ __all__ = [
     "view",
     "view_config",
 ]
-
-
-def expr(expression: str) -> ExprRef:
-    """Create a GenomeSpy expression reference."""
-    return ExprRef(expr=expression)
 
 
 def axes(**kwargs: Unpack[AxesKwds]) -> AxesKwds:
