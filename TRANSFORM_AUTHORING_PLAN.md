@@ -33,6 +33,11 @@ native GenomeSpy transform. Generated output is committed in
 `src/genome_spy/schema/mixins.py` and exposed directly by `Chart` through
 `TransformMethodMixin`.
 
+The production generation entry point explicitly supplies the override
+registry. Generic generator consumers may omit it. Generation fails when an
+override's schema is no longer a member of `TransformParams` or when two
+transforms would emit the same Python method name.
+
 Do not add a runtime adapter, parallel normalization model, or transform
 definition invented solely in Python. If a convenience cannot be described by
 the transform's schema properties plus a small generation rule, defer it until
@@ -72,6 +77,18 @@ An expression-object API is a separate design problem. It should be considered
 only against GenomeSpy's supported expression runtime, not copied wholesale
 from another grammar.
 
+## Future Core Upgrades
+
+A new object included in the upstream `TransformParams` union automatically
+receives a typed `transform_<type>()` method, schema-derived documentation, and
+a capability-manifest entry. No registry entry is needed for the native method.
+
+If the new transform uses one of the established Python call shapes, a small
+registry entry can select positional properties, aliases, or an additional
+method template. Call shapes that require parsing or relationships absent from
+the schema need a deliberate new generation rule; they are not inferred or
+implemented at runtime.
+
 ## Implementation Steps
 
 1. Add schema-checked method overrides to the generator.
@@ -86,7 +103,10 @@ from another grammar.
 - `Chart` inherits the generated `TransformMethodMixin` directly.
 - No handwritten transform-authoring layer is required for this scope.
 - Regeneration reproduces all public transform signatures.
-- An upstream property rename or removal causes a clear generation error.
+- An upstream override target rename or removal causes a clear generation
+  error.
+- Duplicate method names fail generation instead of silently shadowing one
+  another.
 - Existing native transform methods and serialized GenomeSpy semantics remain
   unchanged.
 - Documentation describes only behavior covered by generated tests.

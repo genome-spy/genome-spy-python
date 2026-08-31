@@ -34,10 +34,7 @@ filtered_chart = (
 # transforms-formula-start
 formula_chart = (
     gs.Chart(measurements)
-    .transform_formula(
-        expr="datum.response * 100",
-        as_="responsePercent",
-    )
+    .transform_calculate(responsePercent="datum.response * 100")
     .mark_point(filled=True, size=100)
     .encode(
         x=gs.X("sample:N").title("Sample"),
@@ -52,9 +49,9 @@ formula_chart = (
 # transforms-aggregate-start
 aggregate_chart = (
     gs.Chart(measurements)
-    .transform_formula(
-        expr="datum.response * 100",
+    .transform_calculate(
         as_="responsePercent",
+        calculate="datum.response * 100",
     )
     .transform_aggregate(
         groupby=["group"],

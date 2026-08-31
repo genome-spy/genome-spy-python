@@ -54,8 +54,8 @@ available inside an expression, as well as the
 
 ## Derive a field with a formula
 
-A formula calculates a value and stores it in a new field. The `as_` argument
-names that output field:
+A formula calculates a value and stores it in a new field.
+`transform_calculate()` accepts the output field as a keyword:
 
 ```{literalinclude} ../tutorials/transforms.py
 :language: python
@@ -72,6 +72,8 @@ For the first row, the formula adds `responsePercent=42`. Existing fields such
 as `sample`, `group`, and `response` remain available. Encodings and later
 transforms can refer to the derived field by name.
 
+`transform_calculate()` authors native GenomeSpy `formula` transforms. The
+schema-native `transform_formula(expr=..., as_=...)` method remains available.
 Formula transforms are useful for small visualization-specific calculations:
 converting units, constructing labels, calculating interval endpoints, or
 deriving a category used only by the chart. See the
@@ -99,8 +101,7 @@ The six input rows become two output rows, one for `control` and one for
 `treated`. Available operations include `count`, `sum`, `min`, `max`, `mean`,
 `median`, quartiles, and variance. GenomeSpy Core currently retains a legacy
 fieldless count when no fields or operations are supplied, but new code should
-not rely on it: the Altair-style shorthand deliberately rejects `count()`, and
-the Core behavior may be removed. The
+not rely on it because the Core behavior may be removed. The
 [aggregate transform](https://genomespy.app/docs/grammar/transform/aggregate/)
 lists every supported operation.
 
@@ -146,7 +147,7 @@ from GenomeSpy Core are not emulated by the Python wrapper.
 Transforms run from top to bottom, and each step receives the output of the
 previous step. In the aggregate example:
 
-1. `transform_formula()` adds `responsePercent` to every row.
+1. `transform_calculate()` adds `responsePercent` to every row.
 2. `transform_aggregate()` groups those rows and reads the new field.
 3. Encodings read `group` and `meanResponse` from the two summary rows.
 
