@@ -50,6 +50,13 @@ remain available when an expression reads a named runtime parameter or another
 GenomeSpy global. Keep predicates short; complicated validation and cleaning
 are usually clearer in Python.
 
+The `gs.expr` namespace is generated from the expression surface documented by
+the pinned GenomeSpy release. Standard signatures come from GenomeSpy's
+matching `vega-expression` dependency, while GenomeSpy-specific functions such
+as `scale()`, `domain()`, and `linearstep()` come from GenomeSpy's own
+documentation. Regeneration therefore adds newly documented functions without
+a handwritten Python registry.
+
 The GenomeSpy documentation describes the
 [expression language](https://genomespy.app/docs/grammar/expressions/) and the
 [constants and functions](https://genomespy.app/docs/grammar/expressions/#provided-constants-and-functions)
