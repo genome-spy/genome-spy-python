@@ -224,7 +224,7 @@ selected_fit = (
     )
     .resolve_scale(x="excluded")
     .resolve_axis(x="excluded")
-    .transform_filter("datum.chr !== 'X'")
+    .transform_filter(gs.datum.chr != "X")
     .transform_project(fields=["bafMean", "aError", "bError", "nProbes"])
     .transform_formula(
         expr=(
@@ -338,7 +338,11 @@ def raw_probe_track(field: str) -> gs.Chart:
         .encode(x=gs.Locus("chr", "pos"), y=gs.Y(f"{field}:Q").title(None))
         .properties(title="Single probe")
     )
-    return chart.transform_filter("datum.baf !== null") if field == "baf" else chart
+    return (
+        chart.transform_filter(gs.datum.baf != None)  # noqa: E711
+        if field == "baf"
+        else chart
+    )
 
 
 logr_track = (
@@ -372,7 +376,7 @@ baf_track = (
     + gs.Chart()
     .mark_rule(minLength=3)
     .encode(
-        y=gs.Y(gs.expr("1 - datum.bafMean"), type="quantitative").title(None),
+        y=gs.Y(gs.expr(1 - gs.datum.bafMean), type="quantitative").title(None),
         size=gs.value(3),
         color=gs.value("black"),
     )
@@ -386,7 +390,7 @@ baf_track = (
     + gs.Chart()
     .mark_rule(minLength=gs.expr("minLength"))
     .encode(
-        y=gs.Y(gs.expr("1 - datum.bafMean_ASCAT"), type="quantitative").title(None),
+        y=gs.Y(gs.expr(1 - gs.datum.bafMean_ASCAT), type="quantitative").title(None),
         size=gs.value(2),
         color=gs.value("#f06850"),
     )

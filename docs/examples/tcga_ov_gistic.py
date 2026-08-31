@@ -35,7 +35,7 @@ zero_line = (
 q_values = (
     gs.Chart(data["scores"])
     .transform_formula(
-        expr="datum['-log10(q-value)'] * (datum.Type == 'Del' ? -1 : 1)",
+        expr=gs.datum["-log10(q-value)"] * gs.expr.if_(gs.datum.Type == "Del", -1, 1),
         as_="-log10(q-value)",
     )
     .mark_rect(minOpacity=1)
@@ -73,7 +73,7 @@ lesion_track = (
         as_=["Type"],
         skipInvalidInput=True,
     )
-    .transform_filter("!!datum.Type")
+    .transform_filter(gs.datum.Type)
     .transform_regex_fold(
         columnRegex=[r"^(.*) Limits$"],
         asValue=["limits"],
@@ -221,7 +221,7 @@ gene_track = (
         preference="strand",
         preferredOrder=["-", "+"],
     )
-    .transform_filter("datum.lane < 3")
+    .transform_filter(gs.datum.lane < 3)
 )
 
 # All three tracks share genomic zooming but keep independent vertical scales.

@@ -22,7 +22,10 @@ BASE_COLORS = Scale(
 logo = (
     gs.Chart()
     .transform_aggregate(groupby=["pos", "sequence"])
-    .transform_formula(expr="datum.sequence == '-' ? null : datum.sequence", as_="base")
+    .transform_formula(
+        expr=gs.expr.if_(gs.datum.sequence == "-", None, gs.datum.sequence),
+        as_="base",
+    )
     .transform_stack(
         field="count",
         groupby=["pos"],

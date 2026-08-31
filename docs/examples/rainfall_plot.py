@@ -197,7 +197,7 @@ gene_track = (
         preference="strand",
         preferredOrder=["-", "+"],
     )
-    .transform_filter("datum.lane < 3")
+    .transform_filter(gs.datum.lane < 3)
 )
 
 # Sharing x keeps mutation points and genes aligned during zooming. Their y

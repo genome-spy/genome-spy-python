@@ -41,8 +41,11 @@ diploid_baseline = (
 
 segments = (
     gs.Chart(SEGMENTS)
-    .transform_formula(expr="datum.nMajor + datum.nMinor", as_="totalCN")
-    .transform_formula(expr="datum.nMinor == 0 ? 'LOH' : 'retained'", as_="zygosity")
+    .transform_formula(expr=gs.datum.nMajor + gs.datum.nMinor, as_="totalCN")
+    .transform_formula(
+        expr=gs.expr.if_(gs.datum.nMinor == 0, "LOH", "retained"),
+        as_="zygosity",
+    )
     .mark_rect()
     .encode(
         x=gs.Locus("chr", "startpos").scale(assembly="hg38").axis(axis),

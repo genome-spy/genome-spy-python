@@ -75,7 +75,7 @@ logr = (raw_logr + mean_logr).properties(name="logRTrack")
 
 raw_baf = (
     gs.Chart(gs.Data(url=RAW_URL))
-    .transform_filter("datum.baf !== null")
+    .transform_filter(gs.datum.baf != None)  # noqa: E711
     .mark_point(size=gs.expr("min(10 * pow(zoomLevel, 1.5), 200)"))
     .encode(
         x=gs.Locus("chr", "pos"),
@@ -102,7 +102,7 @@ mirrored_baf = (
     gs.Chart()
     .mark_rule(minLength=3)
     .encode(
-        y=gs.Y(gs.expr("1 - datum.bafMean"), type="quantitative").title(None),
+        y=gs.Y(gs.expr(1 - gs.datum.bafMean), type="quantitative").title(None),
         size=gs.value(3),
         color=gs.value("black"),
     )

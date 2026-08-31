@@ -18,8 +18,8 @@ data = sincos_data()
 chart = (
     gs.Chart(data)
     .transform_calculate(
-        sin="sin(datum.x / 4)",
-        cos="cos(datum.x / 5)",
+        sin=gs.expr.sin(gs.datum.x / 4),
+        cos=gs.expr.cos(gs.datum.x / 5),
     )
     .mark_point(size=60, filled=True, opacity=0.75)
     .encode(

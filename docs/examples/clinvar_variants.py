@@ -82,7 +82,11 @@ variants = (
     # ClinVar stores classification strings in INFO fields; normalize them into a
     # compact set of labels that works well for color and y-axis ordering.
     .transform_formula(
-        expr="replace(datum.INFO['CLNSIG'], /_/g, ' ')",
+        expr=gs.expr.replace(
+            gs.datum.INFO["CLNSIG"],
+            gs.expr.regexp("_", "g"),
+            " ",
+        ),
         as_="Germline classification",
     )
     .transform_regex_extract(
@@ -91,11 +95,20 @@ variants = (
         as_="Germline classification",
     )
     .transform_formula(
-        expr="replace(datum['Germline classification'], /^Conflicting.*/g, 'Conflicting')",
+        expr=gs.expr.replace(
+            gs.datum["Germline classification"],
+            gs.expr.regexp(r"^Conflicting.*", "g"),
+            "Conflicting",
+        ),
         as_="Germline classification",
     )
     .transform_filter(
-        "datum['Germline classification'] == 'Pathogenic' || datum['Germline classification'] == 'Likely pathogenic' || datum['Germline classification'] == 'Uncertain significance' || datum['Germline classification'] == 'Likely benign' || datum['Germline classification'] == 'Benign' || datum['Germline classification'] == 'Conflicting'"
+        (gs.datum["Germline classification"] == "Pathogenic")
+        | (gs.datum["Germline classification"] == "Likely pathogenic")
+        | (gs.datum["Germline classification"] == "Uncertain significance")
+        | (gs.datum["Germline classification"] == "Likely benign")
+        | (gs.datum["Germline classification"] == "Benign")
+        | (gs.datum["Germline classification"] == "Conflicting")
     )
 )
 

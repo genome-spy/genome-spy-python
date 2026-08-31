@@ -16,7 +16,7 @@ data = sincos_data()
 
 sin_chart = (
     gs.Chart(data)
-    .transform_formula(expr="sin(datum.x / 4)", as_="value")
+    .transform_formula(expr=gs.expr.sin(gs.datum.x / 4), as_="value")
     .mark_point(size=45)
     .encode(
         x=gs.X("x:Q").scale(zoom=True),
@@ -26,7 +26,7 @@ sin_chart = (
 )
 cos_chart = (
     gs.Chart(data)
-    .transform_formula(expr="cos(datum.x / 5)", as_="value")
+    .transform_formula(expr=gs.expr.cos(gs.datum.x / 5), as_="value")
     .mark_point(size=45, color="#c53b2c")
     .encode(
         x=gs.X("x:Q").scale(zoom=True).title("Position"),

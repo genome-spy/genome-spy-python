@@ -31,7 +31,7 @@ coverage = (
         )
     )
     .mark_rect(color="lightgray", minWidth=0.5, minOpacity=1, tooltip=None)
-    .transform_filter("datum.score > 0")
+    .transform_filter(gs.datum.score > 0)
     .encode(
         x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
@@ -63,7 +63,10 @@ arc_layer = (
 label_layer = (
     gs.Chart()
     .mark_text(dy=-8, tooltip=False)
-    .transform_formula(expr="(datum.chromEnd + datum.chromStart) / 2", as_="center")
+    .transform_formula(
+        expr=(gs.datum.chromEnd + gs.datum.chromStart) / 2,
+        as_="center",
+    )
     .encode(
         x=gs.Locus("chrom", "center"),
         y=gs.Y("span:Q").scale(reverse=False),
@@ -84,9 +87,9 @@ splice_junctions = (
         ),
     )
     .transform_filter("datum.score >= minUniquelyMappedReads")
-    .transform_formula(expr="datum.chromEnd - datum.chromStart", as_="span")
+    .transform_formula(expr=gs.datum.chromEnd - gs.datum.chromStart, as_="span")
     .transform_formula(
-        expr="datum.span + (datum.span % 10 - 5) / 10 * datum.span",
+        expr=gs.datum.span + (gs.datum.span % 10 - 5) / 10 * gs.datum.span,
         as_="span",
     )
 )

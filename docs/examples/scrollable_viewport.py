@@ -17,7 +17,7 @@ data = sincos_data()
 
 chart = (
     gs.Chart(data)
-    .transform_formula(expr="sin(datum.x / 4)", as_="value")
+    .transform_formula(expr=gs.expr.sin(gs.datum.x / 4), as_="value")
     .mark_point(size=55)
     .encode(
         x=gs.X("value:Q").scale(zoom=True).title("Value"),

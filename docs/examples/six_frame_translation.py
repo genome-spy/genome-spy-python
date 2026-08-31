@@ -219,7 +219,7 @@ translation = (
         x=gs.Locus("chrom", "pos", band=0),
         x2=gs.Locus("chrom", "end", band=0),
     )
-    .transform_formula(expr="upper(datum.base)", as_="base")
+    .transform_formula(expr=gs.expr.upper(gs.datum.base), as_="base")
     .transform_lookup(
         from_={"name": "nucleotideComplements"},
         key="base",
@@ -234,8 +234,10 @@ translation = (
         params=[1, 2, 1, 2],
         as_=["base1", "base2", "complement1", "complement2"],
     )
-    .transform_filter("isValid(datum.base2) && isValid(datum.complement2)")
-    .transform_formula(expr="datum.pos + 3", as_="end")
+    .transform_filter(
+        gs.expr.isValid(gs.datum.base2) & gs.expr.isValid(gs.datum.complement2)
+    )
+    .transform_formula(expr=gs.datum.pos + 3, as_="end")
 )
 
 # Indexed FASTA loads the visible sequence only. Flattening turns that sequence
@@ -265,6 +267,6 @@ chart = (
         spacing=5,
     )
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
-    .transform_formula(expr="datum.start + datum.rawPos", as_="pos")
+    .transform_formula(expr=gs.datum.start + gs.datum.rawPos, as_="pos")
     .resolve_axis(x="shared")
 )

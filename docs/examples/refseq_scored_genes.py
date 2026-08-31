@@ -57,7 +57,10 @@ arrows = (
     .encode(
         x=gs.X("_centroid:L"),
         dx=gs.Dx(
-            gs.expr("(datum._textWidth / 2 + 5) * (datum.strand == '-' ? -1 : 1)"),
+            gs.expr(
+                (gs.datum._textWidth / 2 + 5)
+                * gs.expr.if_(gs.datum.strand == "-", -1, 1)
+            ),
             type="quantitative",
         ).scale(None),
         color=gs.value("black"),
@@ -125,8 +128,11 @@ chart = (
         .axis(None)
     )
     .transform_linearize_genomic_coordinate(chrom="chrom", pos="start", as_="_start")
-    .transform_formula(expr="datum._start + datum.length", as_="_end")
-    .transform_formula(expr="datum._start + datum.length / 2", as_="_centroid")
+    .transform_formula(expr=gs.datum._start + gs.datum.length, as_="_end")
+    .transform_formula(
+        expr=gs.datum._start + gs.datum.length / 2,
+        as_="_centroid",
+    )
     .transform_collect(sort=gs.compare(field=["_start"]))
     .transform_pileup(
         start="_start",
@@ -135,5 +141,5 @@ chart = (
         preference="strand",
         preferredOrder=["-", "+"],
     )
-    .transform_filter("datum._lane < 3")
+    .transform_filter(gs.datum._lane < 3)
 )

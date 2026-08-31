@@ -90,7 +90,7 @@ allele_track = (
         key=["chrom", "pos"],
         values=["score"],
     )
-    .transform_filter("isValid(datum.score)")
+    .transform_filter(gs.expr.isValid(gs.datum.score))
     .transform_formula(
         expr="allele === 'alt' && datum.pos === 43720929 ? 'G' : datum.base",
         as_="base",
@@ -130,8 +130,8 @@ chart = (
         ),
     )
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
-    .transform_formula(expr="upper(datum.base)", as_="base")
-    .transform_formula(expr="datum.start + datum.rawPos", as_="pos")
+    .transform_formula(expr=gs.expr.upper(gs.datum.base), as_="base")
+    .transform_formula(expr=gs.datum.start + gs.datum.rawPos, as_="pos")
     .resolve_scale(y="shared")
     .resolve_axis(x="shared")
     .configure_view(fill="#FAFAFA")

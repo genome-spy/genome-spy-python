@@ -91,7 +91,7 @@ volcano_padj_rule = (
 # The shifted label endpoint uses the primary channels; the point is x2/y2.
 volcano_callout_lines = (
     gs.Chart(data)
-    .transform_filter("datum.volcano_label")
+    .transform_filter(gs.datum.volcano_label)
     .mark_rule(color="#3f4750", size=1, tooltip=None)
     .encode(
         x=gs.X("log2fc:Q")
@@ -109,7 +109,7 @@ volcano_callout_lines = (
 
 volcano_callout_labels = (
     gs.Chart(data)
-    .transform_filter("datum.volcano_label")
+    .transform_filter(gs.datum.volcano_label)
     # Primary offset channels can read the per-row pixel displacements.
     .mark_text(
         align="center",

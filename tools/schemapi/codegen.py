@@ -104,6 +104,7 @@ EXPRESSION_FUNCTIONS = (
     ExpressionFunctionSpec("round", ("value",)),
     ExpressionFunctionSpec("scale", ("channel", "value")),
     ExpressionFunctionSpec("sin", ("value",)),
+    ExpressionFunctionSpec("slice", ("value", "start", "end")),
     ExpressionFunctionSpec("span", ("value",)),
     ExpressionFunctionSpec("test", ("regexp", "string")),
     ExpressionFunctionSpec("upper", ("string",)),

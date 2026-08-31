@@ -43,6 +43,7 @@ def test_generated_expr_namespace_builds_functions_and_conditionals() -> None:
 
     assert gs.expr is generated_expr
     assert str(expression) == ("if((datum.n_minor === 0),'LOH',upper(datum.status))")
+    assert str(gs.expr.slice(gs.datum.sequence, 1, 3)) == "slice(datum.sequence,1,3)"
 
 
 def test_expr_call_still_builds_expression_reference() -> None:

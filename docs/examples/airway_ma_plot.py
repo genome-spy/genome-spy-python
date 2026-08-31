@@ -79,7 +79,7 @@ ma_fc_rules = (
 
 ma_callout_lines = (
     gs.Chart(data)
-    .transform_filter("datum.ma_label")
+    .transform_filter(gs.datum.ma_label)
     .mark_rule(color="#3f4750", size=1)
     .encode(
         x=gs.X("log10_base_mean:Q")
@@ -95,7 +95,7 @@ ma_callout_lines = (
 
 ma_callout_labels = (
     gs.Chart(data)
-    .transform_filter("datum.ma_label")
+    .transform_filter(gs.datum.ma_label)
     .mark_text(
         align="center",
         baseline="bottom",

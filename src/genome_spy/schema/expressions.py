@@ -142,6 +142,13 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("sin", value)
 
     @classmethod
+    def slice(
+        cls, value: IntoExpression, start: IntoExpression, end: IntoExpression
+    ) -> Expression:
+        """Build a GenomeSpy ``slice`` expression."""
+        return _function_expression("slice", value, start, end)
+
+    @classmethod
     def span(cls, value: IntoExpression) -> Expression:
         """Build a GenomeSpy ``span`` expression."""
         return _function_expression("span", value)
