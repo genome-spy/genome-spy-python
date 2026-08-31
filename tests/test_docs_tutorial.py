@@ -744,7 +744,7 @@ def test_interaction_zoom_and_bound_parameters_serialize() -> None:
 
     bound_spec = tutorial.bound_chart.to_dict()
     assert bound_spec["transform"] == [
-        {"type": "filter", "expr": "datum.score >= minScore"}
+        {"type": "filter", "expr": "(datum.score >= minScore)"}
     ]
     assert bound_spec["mark"]["size"] == {"expr": "pointSize"}
     assert bound_spec["encoding"]["x"]["scale"] == {"domain": tutorial.VARIANT_DOMAIN}
