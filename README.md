@@ -133,87 +133,9 @@ pattern.
 
 ## Contributing
 
-Contributions are welcome. Set up the repository with its development and
-documentation dependencies, then run the checks before opening a pull request:
-
-```bash
-uv sync --group dev --group docs
-uv run pytest tests/ -x
-uv run ruff check .
-uv run ruff format --check .
-uv run mypy src/
-```
-
-The source lives in `src/genome_spy/`, tests are in `tests/`, and documentation
-examples are in `docs/examples/`. Generated schema wrappers are committed; only
-regenerate them when updating the pinned GenomeSpy Core version:
-
-```bash
-uv run python tools/generate_schema_wrapper.py
-```
-
-### Regenerate the API reference index
-
-`docs/api.md` lists every public object as an `autosummary` entry and is
-generated from `genome_spy.__all__`. Regenerate it after changing the public
-API:
-
-```bash
-uv run python tools/generate_api_docs.py
-```
-
-Sphinx writes one page per object into the ignored `docs/generated/` directory
-during the build.
-
-### Build and preview the documentation
-
-Build the HTML documentation with:
-
-```bash
-uv run sphinx-build -b html -W --keep-going docs docs/_build/html
-```
-
-To view it in a browser, build and serve the output, then open
-<http://localhost:8000>:
-
-```bash
-uv run sphinx-build -b html docs docs/_build/html
-cd docs/_build/html && python3 -m http.server
-```
-
-NOTE: The live examples load the pinned GenomeSpy JavaScript bundle from the
-CDN, so an internet connection is needed when viewing interactive charts.
-Gallery cards require manually reviewed PNG thumbnails to exist before the
-build.
-
-### Work on examples
-
-Documentation examples live under `docs/examples/` and are the source of truth
-for the generated gallery. An example may have an optional Markdown companion
-with the same stem, such as `bam_read_alignments.py` and
-`bam_read_alignments.md`. The companion is rendered between the live chart and
-its Python source and is the place for interpretation, data provenance,
-disclaimers, and links to the corresponding official GenomeSpy example. Add or
-update an example there, then rebuild the documentation and run the gallery
-tests:
-
-```bash
-uv run pytest tests/test_docs_gallery.py -q
-uv run sphinx-build -b html -W --keep-going docs docs/_build/html
-```
-
-### Regenerate schema wrappers
-
-Generated schema wrappers are committed to the repository. Maintainers should
-regenerate them when the pinned GenomeSpy core version changes:
-
-```bash
-uv run python tools/generate_schema_wrapper.py
-```
-
-Schema regeneration requires `npm` on `PATH` and updates the generated schema
-package from the pinned `@genome-spy/core` release. See
-[Schema Generation](#schema-generation) for local upstream audit modes.
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for development
+setup, testing, code generation, documentation, gallery, and pull-request
+guidelines.
 
 ## References
 
