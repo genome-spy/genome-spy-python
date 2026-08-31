@@ -13,7 +13,6 @@ Copyright (c) 2015-2025, Vega-Altair Developers. BSD-3-Clause license; see
 
 from __future__ import annotations
 
-import datetime as dt
 import sys
 from typing import Any, Self, TypeAlias
 
@@ -28,33 +27,10 @@ def _js_repr(value: Any) -> str:
         return "null"
     if isinstance(value, Expression):
         return str(value)
-    if isinstance(value, dt.date):
-        return _date_expression(value)
     numpy = sys.modules.get("numpy")
     if numpy is not None and isinstance(value, numpy.generic):
         return repr(value.item())
     return repr(value)
-
-
-def _date_expression(value: dt.date) -> str:
-    """Return a GenomeSpy datetime expression for a Python date value."""
-    function = "datetime"
-    arguments: tuple[int, ...] = (value.year, value.month - 1, value.day)
-    if isinstance(value, dt.datetime):
-        if value.tzinfo is dt.timezone.utc:
-            function = "utc"
-        elif value.tzinfo is not None:
-            raise TypeError(
-                f"Unsupported timezone {value.tzinfo!r}; use UTC or a naive datetime."
-            )
-        arguments = (
-            *arguments,
-            value.hour,
-            value.minute,
-            value.second,
-            value.microsecond // 1_000,
-        )
-    return _function_expression(function, *arguments)
 
 
 def _function_expression(name: str, *arguments: Any) -> Expression:
@@ -242,7 +218,6 @@ IntoExpression: TypeAlias = (
     | float
     | bool
     | None
-    | dt.date
     | Expression
     | list[Any]
     | tuple[Any, ...]
