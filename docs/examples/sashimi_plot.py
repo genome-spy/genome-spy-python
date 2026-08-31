@@ -15,6 +15,7 @@ META = {
     "height": 360,
     "max_width": 920,
 }
+MIN_UNIQUELY_MAPPED_READS = gs.Expression("minUniquelyMappedReads")
 
 DOMAIN = [
     {"chrom": "chr15", "pos": 92925000},
@@ -86,7 +87,7 @@ splice_junctions = (
             format=gs.data_format(type="bed"),
         ),
     )
-    .transform_filter("datum.score >= minUniquelyMappedReads")
+    .transform_filter(gs.datum.score >= MIN_UNIQUELY_MAPPED_READS)
     .transform_formula(expr=gs.datum.chromEnd - gs.datum.chromStart, as_="span")
     .transform_formula(
         expr=gs.datum.span + (gs.datum.span % 10 - 5) / 10 * gs.datum.span,

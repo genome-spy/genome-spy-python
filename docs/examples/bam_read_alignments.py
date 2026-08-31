@@ -31,6 +31,10 @@ base_colors = gs.Scale(
     domain=["A", "C", "T", "G", "N"],
     range=["#4FBF45", "#4D96E8", "#E85F78", "#E8B322", "#BDBDBD"],
 )
+LANE_HEIGHT = gs.Expression("laneHeight")
+MIN_MAPQ = gs.Expression("minMapq")
+MIN_BASE_QUALITY = gs.Expression("minBaseQuality")
+WINDOW_SIZE = gs.Expression("windowSize")
 
 # Coverage and mismatch summaries are derived from the same reads as the pileup
 # instead of loading separate summary files.
@@ -62,7 +66,8 @@ mismatch_summary = (
     .transform_filter(gs.datum.md != None)  # noqa: E711
     .transform_alignment_mismatches(copyFields=["chrom"])
     .transform_filter(
-        "datum.baseQuality == null || datum.baseQuality >= minBaseQuality"
+        (gs.datum.baseQuality == None)  # noqa: E711
+        | (gs.datum.baseQuality >= MIN_BASE_QUALITY)
     )
     .transform_aggregate(groupby=["chrom", "mismatchStart", "base"])
     .transform_stack(
@@ -120,7 +125,7 @@ read_backbone = (
         minStemLength=10,
         fill="#e0e0e0",
         stroke="#c4c4c4",
-        strokeWidth=gs.expr("linearstep(3, 8, laneHeight)"),
+        strokeWidth=gs.expr(gs.expr.linearstep(3, 8, LANE_HEIGHT)),
     )
     .encode(
         x=gs.Locus("chrom", "start", band=0),
@@ -170,7 +175,7 @@ insertions = (
     .mark_text(
         text="I",
         color="black",
-        size=gs.expr("laneHeight * 0.90"),
+        size=gs.expr(LANE_HEIGHT * 0.90),
         font="Radley",
     )
     .encode(
@@ -197,7 +202,7 @@ soft_clips = (
     .mark_text(
         text="S",
         color="#555",
-        size=gs.expr("laneHeight * 0.90"),
+        size=gs.expr(LANE_HEIGHT * 0.90),
         font="Radley",
     )
     .encode(x=gs.Locus("chrom", "cigarStart", band=0), x2=None)
@@ -226,7 +231,7 @@ mismatch_rects = (
 
 mismatch_labels = (
     gs.Chart()
-    .mark_text(color="black", size=gs.expr("laneHeight * 0.75"), tooltip=None)
+    .mark_text(color="black", size=gs.expr(LANE_HEIGHT * 0.75), tooltip=None)
     .encode(text=gs.Text("base:N"))
     .properties(name="mismatch-labels", title="Mismatch base")
 )
@@ -244,7 +249,8 @@ mismatches = (
         as_="_baseQualityForOpacity",
     )
     .transform_filter(
-        "datum.baseQuality == null || datum.baseQuality >= minBaseQuality"
+        (gs.datum.baseQuality == None)  # noqa: E711
+        | (gs.datum.baseQuality >= MIN_BASE_QUALITY)
     )
     .properties(name="mismatches", title="Mismatch")
     .encode(
@@ -271,7 +277,11 @@ zoom_message = gs.layer(
     params=[
         gs.param(
             "zoomMessageState",
-            expr="abs(span(domain('x'))) > windowSize ? 1 : 0",
+            expr=gs.expr.if_(
+                gs.expr.abs(gs.expr.span(gs.expr.domain("x"))) > WINDOW_SIZE,
+                1,
+                0,
+            ),
             transition={"type": "lerp", "halfLife": 60},
         )
     ],
@@ -283,7 +293,7 @@ read_alignments = (
     .properties(
         name="read-alignments",
         title=gs.Title(text="Read alignments", orient="none"),
-        height=gs.Step(step=gs.expr("laneHeight")),
+        height=gs.Step(step=gs.expr(LANE_HEIGHT)),
         viewportHeight="container",
         params=[
             gs.param(
@@ -344,7 +354,7 @@ chart = (
         spacing=5,
         description="BAM depth, alignments, CIGAR operations, and mismatches.",
     )
-    .transform_filter("datum.mapq == null || datum.mapq >= minMapq")
+    .transform_filter((gs.datum.mapq == None) | (gs.datum.mapq >= MIN_MAPQ))  # noqa: E711
     .transform_formula(
         expr=gs.expr.if_(gs.datum.mapq == None, 0, gs.datum.mapq),  # noqa: E711
         as_="_mapqOrZero",

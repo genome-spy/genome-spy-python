@@ -480,7 +480,7 @@ def test_ma_and_volcano_points_grow_gently_when_zoomed(
     )
 
     assert points["mark"]["size"] == {
-        "expr": f"min({initial_size} * pow(zoomLevel, 0.75), 64)"
+        "expr": f"min(({initial_size} * pow(zoomLevel,0.75)),64)"
     }
 
 

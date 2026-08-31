@@ -12,6 +12,8 @@ META = {
     "height": 170,
     "max_width": 980,
 }
+STRAND = gs.Expression("strand")
+WIDTH = gs.Expression("width")
 
 COMPLEMENTS = [
     {"base": base, "complement": complement}
@@ -146,11 +148,18 @@ amino_acids = (
         style="arrow-block-notch",
         stroke="#C0C0C0",
         headAngle=65,
-        strokeWidth=gs.expr("1.0 - smoothstep(0.2, 1, span(domain('x')) / width)"),
+        strokeWidth=gs.expr(
+            1.0
+            - gs.expr.smoothstep(
+                0.2,
+                1,
+                gs.expr.span(gs.expr.domain("x")) / WIDTH,
+            )
+        ),
         tooltip=None,
     )
     .encode(
-        direction=gs.value(gs.expr("strand")),
+        direction=gs.value(gs.expr(STRAND)),
         color=gs.Color("kind:N")
         .scale(
             domain=["start", "stop", "other", "?"],
@@ -174,14 +183,15 @@ translation_template = (
     (amino_acids + amino_acid_labels)
     .properties(params=[gs.param("strand", value="forward")])
     .transform_formula(
-        expr=(
-            "strand === 'reverse' ? datum.complement2 + datum.complement1 + "
-            "datum.complement : datum.base + datum.base1 + datum.base2"
+        expr=gs.expr.if_(
+            STRAND == "reverse",
+            gs.datum.complement2 + gs.datum.complement1 + gs.datum.complement,
+            gs.datum.base + gs.datum.base1 + gs.datum.base2,
         ),
         as_="codon",
     )
     .transform_lookup(from_={"name": "geneticCode"}, key="codon", default="?")
-    .transform_formula(expr="strand + ' ' + (datum.pos % 3)", as_="lane")
+    .transform_formula(expr=STRAND + " " + (gs.datum.pos % 3), as_="lane")
 )
 
 translation = (

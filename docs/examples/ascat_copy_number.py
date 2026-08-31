@@ -15,6 +15,8 @@ META = {
 
 SEGMENTS_URL = "https://data.genomespy.app/sample-data/ASCAT/segments_S96.tsv"
 RAW_URL = "https://data.genomespy.app/sample-data/ASCAT/raw_S96.tsv"
+ZOOM_LEVEL = gs.Expression("zoomLevel")
+POINT_SIZE = gs.expr(gs.expr.min(10 * gs.expr.pow(ZOOM_LEVEL, 1.5), 200))
 
 minor_copy_number = (
     gs.Chart()
@@ -49,7 +51,7 @@ copy_number = (minor_copy_number + major_copy_number).properties(
 
 raw_logr = (
     gs.Chart(gs.Data(url=RAW_URL))
-    .mark_point(size=gs.expr("min(10 * pow(zoomLevel, 1.5), 200)"))
+    .mark_point(size=POINT_SIZE)
     .encode(
         x=gs.Locus("chr", "pos"),
         y=gs.Y("logR:Q").title(None),
@@ -76,7 +78,7 @@ logr = (raw_logr + mean_logr).properties(name="logRTrack")
 raw_baf = (
     gs.Chart(gs.Data(url=RAW_URL))
     .transform_filter(gs.datum.baf != None)  # noqa: E711
-    .mark_point(size=gs.expr("min(10 * pow(zoomLevel, 1.5), 200)"))
+    .mark_point(size=POINT_SIZE)
     .encode(
         x=gs.Locus("chr", "pos"),
         y=gs.Y("baf:Q").title(None),

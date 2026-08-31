@@ -21,7 +21,8 @@ EFFECT_CUTOFF = domains["effect_cutoff"]
 NEGLOG_P_CUTOFF = domains["neglog_pvalue_cutoff"]
 # zoomLevel is 1 at the initial domain. The exponent makes growth gradual,
 # while the cap prevents points from becoming oversized at deep zoom levels.
-POINT_SIZE = gs.expr("min(16 * pow(zoomLevel, 0.75), 64)")
+ZOOM_LEVEL = gs.Expression("zoomLevel")
+POINT_SIZE = gs.expr(gs.expr.min(16 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
 
 # --- Visualization -------------------------------------------------------------
 

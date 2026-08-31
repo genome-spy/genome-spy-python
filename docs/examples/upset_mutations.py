@@ -12,8 +12,8 @@ META = {
     "height": 390,
     "max_width": 650,
 }
-
-CURSOR = "!isValid(setCursor.values.y) || datum.profileContainsHoveredSet == 1"
+SET_CURSOR_Y = gs.Expression("setCursor.values.y")
+CURSOR = ~gs.expr.isValid(SET_CURSOR_Y) | (gs.datum.profileContainsHoveredSet == 1)
 RULER = {
     "encodings": ["y"],
     "on": "mousemove",
@@ -150,7 +150,7 @@ background_points = (
         filled=True,
         size=95,
         strokeWidth=0,
-        opacity=gs.expr("isValid(setCursor.values.y) ? 0.2 : 1"),
+        opacity=gs.expr(gs.expr.if_(gs.expr.isValid(SET_CURSOR_Y), 0.2, 1)),
     )
     .encode(
         x=gs.X("profileNumber:I"),
@@ -288,9 +288,12 @@ chart = (
     )
     .transform_collect()
     .transform_formula(
-        expr=(
-            "isValid(setCursor.values.y) && round(setCursor.values.y) == "
-            "datum.setIndex && datum.member ? 1 : 0"
+        expr=gs.expr.if_(
+            gs.expr.isValid(SET_CURSOR_Y)
+            & (gs.expr.round(SET_CURSOR_Y) == gs.datum.setIndex)
+            & gs.datum.member,
+            1,
+            0,
         ),
         as_="hoveredSetMember",
     )
