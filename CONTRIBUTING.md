@@ -29,7 +29,6 @@ The main project directories are:
 - `tests/` — the pytest suite;
 - `docs/examples/` — source files for the documentation gallery;
 - `tools/` — schema, API-reference, and gallery tooling;
-- `plans/` — architectural and implementation notes.
 
 You can install the repository's pre-commit hooks with:
 
