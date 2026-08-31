@@ -20,8 +20,9 @@ and makes schema drift fail in the generator instead of at runtime.
 
 ## Architectural Decision
 
-`tools/schemapi/codegen.py` owns a small transform-method override registry.
-Each entry may only:
+`tools/generate_schema_wrapper.py` owns a small transform-method override
+registry and supplies it to the generic machinery in
+`tools/schemapi/codegen.py`. Each entry may only:
 
 - make schema properties positional;
 - expose a Python parameter alias for a schema property; or

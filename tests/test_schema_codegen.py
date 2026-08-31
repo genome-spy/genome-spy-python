@@ -6,9 +6,12 @@ from pathlib import Path
 
 import genome_spy as gs
 import pytest
-from tools.generate_schema_wrapper import write_schema_files, write_schema_package
-from tools.schemapi.codegen import (
+from tools.generate_schema_wrapper import (
     TRANSFORM_METHOD_OVERRIDES,
+    write_schema_files,
+    write_schema_package,
+)
+from tools.schemapi.codegen import (
     SchemaWrapperGenerator,
     TransformMethodOverride,
 )

@@ -23,15 +23,15 @@ from typing import Any, cast
 
 try:
     from schemapi.codegen import (
-        TRANSFORM_METHOD_OVERRIDES,
         SchemaWrapperGenerator,
         TransformMethodOverride,
+        TransformMethodTemplate,
     )
 except ModuleNotFoundError:
     from tools.schemapi.codegen import (
-        TRANSFORM_METHOD_OVERRIDES,
         SchemaWrapperGenerator,
         TransformMethodOverride,
+        TransformMethodTemplate,
     )
 
 DEFAULT_OUTPUT_DIR = Path("src/genome_spy/schema")
@@ -39,6 +39,21 @@ DEFAULT_SPEC_REFERENCE_DIR = Path(".cache/genome-spy-python/genomespy-core-spec"
 PACKAGE_NAME = "@genome-spy/core"
 SCHEMA_FILENAME = "genome-spy-schema.json"
 CAPABILITIES_FILENAME = "capabilities.json"
+TRANSFORM_METHOD_OVERRIDES: dict[str, TransformMethodOverride] = {
+    "FormulaParams": TransformMethodOverride(
+        additional_methods=(
+            TransformMethodTemplate(
+                method_name="transform_calculate",
+                properties=("as", "expr"),
+                positional_properties=("as", "expr"),
+                property_aliases=(("expr", "calculate"),),
+                repeat_keyword_properties=("as", "expr"),
+            ),
+        )
+    ),
+    "FlattenParams": TransformMethodOverride(positional_properties=("fields", "as")),
+    "SampleParams": TransformMethodOverride(positional_properties=("size",)),
+}
 
 
 def configured_core_version(pyproject_path: Path = Path("pyproject.toml")) -> str:

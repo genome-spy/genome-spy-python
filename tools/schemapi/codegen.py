@@ -179,23 +179,6 @@ class TransformMethodOverride:
     additional_methods: tuple[TransformMethodTemplate, ...] = ()
 
 
-TRANSFORM_METHOD_OVERRIDES: dict[str, TransformMethodOverride] = {
-    "FormulaParams": TransformMethodOverride(
-        additional_methods=(
-            TransformMethodTemplate(
-                method_name="transform_calculate",
-                properties=("as", "expr"),
-                positional_properties=("as", "expr"),
-                property_aliases=(("expr", "calculate"),),
-                repeat_keyword_properties=("as", "expr"),
-            ),
-        )
-    ),
-    "FlattenParams": TransformMethodOverride(positional_properties=("fields", "as")),
-    "SampleParams": TransformMethodOverride(positional_properties=("size",)),
-}
-
-
 @dataclass(frozen=True, slots=True)
 class LazyDataMethodSpec:
     """Schema-derived information for one named lazy data source helper."""
