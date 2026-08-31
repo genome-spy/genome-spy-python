@@ -7,7 +7,11 @@ from pathlib import Path
 import genome_spy as gs
 import pytest
 from tools.generate_schema_wrapper import write_schema_files, write_schema_package
-from tools.schemapi.codegen import SchemaWrapperGenerator
+from tools.schemapi.codegen import (
+    TRANSFORM_METHOD_OVERRIDES,
+    SchemaWrapperGenerator,
+    TransformMethodOverride,
+)
 
 pytestmark = pytest.mark.codegen
 
@@ -264,7 +268,10 @@ def test_generate_transform_method_overrides_from_schema_properties() -> None:
         }
     }
 
-    generator = SchemaWrapperGenerator(schema)
+    generator = SchemaWrapperGenerator(
+        schema,
+        transform_method_overrides=TRANSFORM_METHOD_OVERRIDES,
+    )
     specs = {spec.method_name: spec for spec in generator.transform_method_specs()}
     source = generator.generate_mark_mixins_module().source
 
@@ -277,6 +284,64 @@ def test_generate_transform_method_overrides_from_schema_properties() -> None:
     assert "for output, value in kwargs.items():" in source
     assert "def transform_flatten(\n        self,\n        fields:" in source
     assert "def transform_sample(\n        self,\n        size:" in source
+
+
+def test_transform_method_overrides_must_target_union_members() -> None:
+    schema = {
+        "definitions": {
+            "LookupParams": {
+                "type": "object",
+                "properties": {
+                    "type": {"const": "lookup", "type": "string"},
+                },
+            },
+            "TransformParams": {"anyOf": [{"$ref": "#/definitions/LookupParams"}]},
+        }
+    }
+    generator = SchemaWrapperGenerator(
+        schema,
+        transform_method_overrides={"MissingParams": TransformMethodOverride()},
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="overrides refer to schemas absent from TransformParams: MissingParams",
+    ):
+        generator.transform_method_specs()
+
+
+def test_duplicate_generated_transform_methods_fail_generation() -> None:
+    schema = {
+        "definitions": {
+            "FirstSampleParams": {
+                "type": "object",
+                "properties": {
+                    "type": {"const": "sample", "type": "string"},
+                },
+            },
+            "SecondSampleParams": {
+                "type": "object",
+                "properties": {
+                    "type": {"const": "sample", "type": "string"},
+                },
+            },
+            "TransformParams": {
+                "anyOf": [
+                    {"$ref": "#/definitions/FirstSampleParams"},
+                    {"$ref": "#/definitions/SecondSampleParams"},
+                ]
+            },
+        }
+    }
+
+    with pytest.raises(
+        ValueError,
+        match=(
+            "Duplicate generated transform methods: transform_sample "
+            r"\(FirstSampleParams, SecondSampleParams\)"
+        ),
+    ):
+        SchemaWrapperGenerator(schema).transform_method_specs()
 
 
 def test_generated_filter_requires_a_predicate() -> None:
@@ -577,6 +642,7 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
         package_dir,
         output_dir,
         spec_reference_dir=reference_dir,
+        transform_method_overrides={},
     )
 
     assert (output_dir / "genome-spy-schema.json").exists()
@@ -641,7 +707,12 @@ def test_write_schema_files_supports_explicit_schema_input(tmp_path: Path) -> No
         encoding="utf-8",
     )
 
-    write_schema_files(schema_path, output_dir, version="dev-local")
+    write_schema_files(
+        schema_path,
+        output_dir,
+        version="dev-local",
+        transform_method_overrides={},
+    )
 
     capabilities = json.loads(
         (output_dir / "capabilities.json").read_text(encoding="utf-8")

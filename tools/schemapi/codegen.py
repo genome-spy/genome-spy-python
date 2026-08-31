@@ -14,9 +14,10 @@ from __future__ import annotations
 
 import keyword
 import re
-from urllib.parse import unquote
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from typing import Any
+from urllib.parse import unquote
 
 _MISSING = object()
 KWDS_TARGETS = frozenset(
@@ -618,10 +619,15 @@ class SchemaWrapperGenerator:
     """
 
     def __init__(
-        self, rootschema: dict[str, Any], *, schema_version: str = "unknown"
+        self,
+        rootschema: dict[str, Any],
+        *,
+        schema_version: str = "unknown",
+        transform_method_overrides: Mapping[str, TransformMethodOverride] | None = None,
     ) -> None:
         self.rootschema = rootschema
         self.schema_version = schema_version
+        self._transform_method_overrides = dict(transform_method_overrides or {})
 
     @property
     def _definitions_map(self) -> dict[str, Any]:
@@ -682,6 +688,22 @@ class SchemaWrapperGenerator:
         if not isinstance(variants, list):
             return ()
 
+        variant_schema_names = {
+            schema_name
+            for variant in variants
+            if isinstance(variant, dict)
+            if (schema_name := _ref_name(variant)) is not None
+        }
+        unused_overrides = (
+            self._transform_method_overrides.keys() - variant_schema_names
+        )
+        if unused_overrides:
+            names = ", ".join(sorted(unused_overrides))
+            raise ValueError(
+                "Transform method overrides refer to schemas absent from "
+                f"TransformParams: {names}."
+            )
+
         specs: list[TransformMethodSpec] = []
         for variant in variants:
             if not isinstance(variant, dict):
@@ -719,7 +741,7 @@ class SchemaWrapperGenerator:
                 for name in definition_schema.get("required", [])
                 if isinstance(name, str) and name != "type"
             )
-            override = TRANSFORM_METHOD_OVERRIDES.get(
+            override = self._transform_method_overrides.get(
                 schema_name, TransformMethodOverride()
             )
             specs.append(
@@ -758,6 +780,21 @@ class SchemaWrapperGenerator:
                         repeat_keyword_properties=template.repeat_keyword_properties,
                     )
                 )
+        specs_by_method: dict[str, list[TransformMethodSpec]] = {}
+        for spec in specs:
+            specs_by_method.setdefault(spec.method_name, []).append(spec)
+        duplicate_methods = {
+            method_name: method_specs
+            for method_name, method_specs in specs_by_method.items()
+            if len(method_specs) > 1
+        }
+        if duplicate_methods:
+            details = "; ".join(
+                f"{method_name} ({', '.join(spec.schema_name for spec in method_specs)})"
+                for method_name, method_specs in sorted(duplicate_methods.items())
+            )
+            raise ValueError(f"Duplicate generated transform methods: {details}.")
+
         return tuple(specs)
 
     def lazy_data_method_specs(self) -> tuple[LazyDataMethodSpec, ...]:

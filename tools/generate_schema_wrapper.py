@@ -17,13 +17,22 @@ import sys
 import tarfile
 import tempfile
 import tomllib
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, cast
 
 try:
-    from schemapi.codegen import SchemaWrapperGenerator
+    from schemapi.codegen import (
+        TRANSFORM_METHOD_OVERRIDES,
+        SchemaWrapperGenerator,
+        TransformMethodOverride,
+    )
 except ModuleNotFoundError:
-    from tools.schemapi.codegen import SchemaWrapperGenerator
+    from tools.schemapi.codegen import (
+        TRANSFORM_METHOD_OVERRIDES,
+        SchemaWrapperGenerator,
+        TransformMethodOverride,
+    )
 
 DEFAULT_OUTPUT_DIR = Path("src/genome_spy/schema")
 DEFAULT_SPEC_REFERENCE_DIR = Path(".cache/genome-spy-python/genomespy-core-spec")
@@ -122,6 +131,9 @@ def write_schema_package(
     output_dir: Path,
     *,
     spec_reference_dir: Path | None,
+    transform_method_overrides: Mapping[str, TransformMethodOverride] = (
+        TRANSFORM_METHOD_OVERRIDES
+    ),
 ) -> None:
     """Write generated GenomeSpy schema wrapper modules from an npm package."""
     schema_path = package_dir / "dist" / "schema.json"
@@ -129,7 +141,12 @@ def write_schema_package(
         raise FileNotFoundError(f"GenomeSpy package has no schema: {schema_path}")
 
     version = package_version(package_dir)
-    write_schema_files(schema_path, output_dir, version=version)
+    write_schema_files(
+        schema_path,
+        output_dir,
+        version=version,
+        transform_method_overrides=transform_method_overrides,
+    )
 
     if spec_reference_dir is not None:
         copy_spec_references(package_dir, spec_reference_dir, version)
@@ -140,10 +157,17 @@ def write_schema_files(
     output_dir: Path,
     *,
     version: str,
+    transform_method_overrides: Mapping[str, TransformMethodOverride] = (
+        TRANSFORM_METHOD_OVERRIDES
+    ),
 ) -> None:
     """Write generated schema artifacts from an explicit JSON Schema file."""
     schema = load_schema(schema_path)
-    generator = SchemaWrapperGenerator(schema, schema_version=version)
+    generator = SchemaWrapperGenerator(
+        schema,
+        schema_version=version,
+        transform_method_overrides=transform_method_overrides,
+    )
     core_module = generator.generate_core_module()
     typing_module = generator.generate_typing_module()
     kwds_module = generator.generate_kwds_module()
