@@ -102,6 +102,7 @@ SECTION_TEMPLATE: Final = """```{{eval-rst}}
 # belongs with the channels. Keeping it out of the function group also avoids a
 # stub-file collision with ``locus`` on case-insensitive filesystems.
 CHANNEL_CONSTRUCTORS: Final = ("Locus",)
+FUNCTION_LIKE_OBJECTS: Final = ("datum", "expr")
 
 
 def _public_objects() -> list[tuple[str, object]]:
@@ -138,7 +139,8 @@ def schema_objects() -> list[str]:
     return sorted(
         name
         for name, obj in _public_objects()
-        if inspect.isclass(obj) and obj.__module__ == SCHEMA_MODULE
+        if (inspect.isclass(obj) and obj.__module__ == SCHEMA_MODULE)
+        or obj is gs.Expression
     )
 
 
@@ -147,7 +149,8 @@ def api_functions() -> list[str]:
     return sorted(
         name
         for name, obj in _public_objects()
-        if isinstance(obj, FunctionType) and name not in CHANNEL_CONSTRUCTORS
+        if (isinstance(obj, FunctionType) or name in FUNCTION_LIKE_OBJECTS)
+        and name not in CHANNEL_CONSTRUCTORS
     )
 
 

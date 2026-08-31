@@ -18,7 +18,7 @@ measurements = [
 # transforms-filter-start
 filtered_chart = (
     gs.Chart(measurements)
-    .transform_filter("datum.quality >= 0.7")
+    .transform_filter(gs.datum.quality >= 0.7)
     .mark_point(filled=True, size=100)
     .encode(
         x=gs.X("response:Q").scale(domain=[0, 1]).title("Response"),
@@ -34,7 +34,7 @@ filtered_chart = (
 # transforms-formula-start
 formula_chart = (
     gs.Chart(measurements)
-    .transform_calculate(responsePercent="datum.response * 100")
+    .transform_calculate(responsePercent=gs.datum.response * 100)
     .mark_point(filled=True, size=100)
     .encode(
         x=gs.X("sample:N").title("Sample"),
@@ -51,7 +51,7 @@ aggregate_chart = (
     gs.Chart(measurements)
     .transform_calculate(
         as_="responsePercent",
-        calculate="datum.response * 100",
+        calculate=gs.datum.response * 100,
     )
     .transform_aggregate(
         groupby=["group"],

@@ -38,13 +38,17 @@ A filter keeps rows for which its predicate is true:
 ```
 
 Inside an expression, `datum` refers to the current row. Thus,
-`datum.quality >= 0.7` is evaluated once for every input row. Four rows pass
+`gs.datum.quality >= 0.7` authors a GenomeSpy expression that is evaluated once
+for every input row. Four rows pass
 this filter, so GenomeSpy draws four points.
 
-Transform expressions use GenomeSpy's JavaScript-like expression language,
-not Python syntax. Common operators include `&&` for “and”, `||` for “or”, and
-`!` for “not”. Keep predicates short; complicated validation and cleaning are
-usually clearer in Python.
+The Python authoring API uses `gs.datum.field` for fields, `&`, `|`, and `~`
+for boolean composition, and generated functions such as `gs.expr.if_()` and
+`gs.expr.isValid()`. These objects serialize to GenomeSpy's JavaScript-like
+expression language; they do not execute in Python. Raw expression strings
+remain available when an expression reads a named runtime parameter or another
+GenomeSpy global. Keep predicates short; complicated validation and cleaning
+are usually clearer in Python.
 
 The GenomeSpy documentation describes the
 [expression language](https://genomespy.app/docs/grammar/expressions/) and the
@@ -113,7 +117,7 @@ underlying GenomeSpy grammar:
 
 | Method | Convenience | Serialized transform |
 |---|---|---|
-| `transform_calculate()` | Direct `as_`/`calculate` strings or output-name keyword expressions | `formula` |
+| `transform_calculate()` | Direct `as_`/`calculate` expressions or output-name keyword expressions | `formula` |
 | `transform_flatten()` | Positional fields and output names; `fields=` and `index=` remain available | `flatten` |
 | `transform_sample()` | Positional sample size | `sample` |
 
@@ -122,8 +126,8 @@ native GenomeSpy formula transforms:
 
 ```python
 chart = chart.transform_calculate(
-    doubled="datum.value * 2",
-    centered="datum.value - 10",
+    doubled=gs.datum.value * 2,
+    centered=gs.datum.value - 10,
 )
 ```
 
@@ -133,7 +137,7 @@ form is available when the output name is only known dynamically:
 ```python
 chart = chart.transform_calculate(
     as_=output_name,
-    calculate="datum.response * 100",
+    calculate=gs.datum.response * 100,
 )
 ```
 
