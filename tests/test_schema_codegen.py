@@ -285,6 +285,13 @@ def test_generate_transform_method_overrides_from_schema_properties() -> None:
     assert "calculate: str | UndefinedType = Undefined" in source
     assert "transform['expr'] = calculate" in source
     assert "for output, value in kwargs.items():" in source
+    assert "Add one or more ``formula`` transforms." in source
+    assert "**kwargs (str): Additional output field names" in source
+    assert "one transform per output in insertion order" in source
+    assert "Returns:" in source
+    assert "Raises:" in source
+    assert "If only one of ``as_`` and ``calculate``" in source
+    assert '>>> chart.transform_calculate(doubled="datum.value * 2")' in source
     assert "def transform_flatten(\n        self,\n        fields:" in source
     assert "def transform_sample(\n        self,\n        size:" in source
 

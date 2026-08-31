@@ -151,6 +151,7 @@ class TransformMethodSpec:
     positional_properties: tuple[str, ...] = ()
     property_aliases: tuple[tuple[str, str], ...] = ()
     repeat_keyword_properties: tuple[str, str] | None = None
+    example: str | None = None
 
     @property
     def method_name(self) -> str:
@@ -169,6 +170,7 @@ class TransformMethodTemplate:
     positional_properties: tuple[str, ...] = ()
     property_aliases: tuple[tuple[str, str], ...] = ()
     repeat_keyword_properties: tuple[str, str] | None = None
+    example: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -761,6 +763,7 @@ class SchemaWrapperGenerator:
                         positional_properties=template.positional_properties,
                         property_aliases=template.property_aliases,
                         repeat_keyword_properties=template.repeat_keyword_properties,
+                        example=template.example,
                     )
                 )
         specs_by_method: dict[str, list[TransformMethodSpec]] = {}
@@ -2541,12 +2544,22 @@ def _property_description(schema: Any) -> str:
 
 
 def _method_docstring(
-    summary: str, property_specs: tuple[PropertySpec, ...], *, indent: int
+    summary: str,
+    property_specs: tuple[PropertySpec, ...],
+    *,
+    indent: int,
+    description: tuple[str, ...] = (),
+    extra_args: tuple[str, ...] = (),
+    returns: str | None = None,
+    raises: tuple[str, ...] = (),
+    example: str | None = None,
 ) -> str:
     """Render a complete Google-style generated method docstring."""
     prefix = " " * indent
     lines = [f'{prefix}"""{summary}']
-    if property_specs:
+    if description:
+        lines.extend(["", *(f"{prefix}{line}" for line in description)])
+    if property_specs or extra_args:
         lines.extend(["", f"{prefix}Args:"])
         lines.extend(
             f"{prefix}    {_docstring_parameter_name(property_spec.python_name)} "
@@ -2557,6 +2570,14 @@ def _method_docstring(
             )
             for property_spec in property_specs
         )
+        lines.extend(f"{prefix}    {line}" for line in extra_args)
+    if returns is not None:
+        lines.extend(["", f"{prefix}Returns:", f"{prefix}    {returns}"])
+    if raises:
+        lines.extend(["", f"{prefix}Raises:"])
+        lines.extend(f"{prefix}    {line}" for line in raises)
+    if example is not None:
+        lines.extend(["", f"{prefix}Example:", f"{prefix}    >>> {example}"])
     lines.append(f'{prefix}"""')
     return "\n".join(lines)
 
@@ -3588,8 +3609,34 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             )
         output_name = parameter_name(properties_by_name[output_property])
         value_name = parameter_name(properties_by_name[value_property])
+        value_annotation = properties_by_name[value_property].annotation.annotation
         missing_pair_message = (
             f"{spec.method_name} requires {output_name!r} and {value_name!r} together."
+        )
+        if spec.example is None:
+            raise ValueError(
+                f"Repeated transform method {spec.method_name!r} requires an example."
+            )
+        docstring = _method_docstring(
+            f"Add one or more ``{spec.transform_type}`` transforms.",
+            tuple(doc_properties),
+            indent=8,
+            description=(
+                "Pass both direct arguments for one transform, or use keyword",
+                "arguments to append one transform per output in insertion order.",
+            ),
+            extra_args=(
+                f"**kwargs ({value_annotation}): Additional output field names",
+                f"    mapped to {value_name} values.",
+            ),
+            returns=(
+                "Self: A new specification with the transform or transforms appended."
+            ),
+            raises=(
+                f"TypeError: If only one of ``{output_name}`` and ``{value_name}``",
+                "    is provided.",
+            ),
+            example=spec.example,
         )
         repeated_lines = [
             f"        has_output = {output_name} is not Undefined",
@@ -3612,6 +3659,11 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             "        return result",
         ]
     else:
+        docstring = _method_docstring(
+            f"Add a ``{spec.transform_type}`` transform.",
+            tuple(doc_properties),
+            indent=8,
+        )
         repeated_lines = [
             f"        transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
             *validation_lines,
@@ -3623,11 +3675,7 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
     return "\n".join(
         [
             signature,
-            _method_docstring(
-                f"Add a ``{spec.transform_type}`` transform.",
-                doc_properties,
-                indent=8,
-            ),
+            docstring,
             *repeated_lines,
             "",
         ]

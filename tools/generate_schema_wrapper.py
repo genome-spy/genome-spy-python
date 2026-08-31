@@ -48,6 +48,7 @@ TRANSFORM_METHOD_OVERRIDES: dict[str, TransformMethodOverride] = {
                 positional_properties=("as", "expr"),
                 property_aliases=(("expr", "calculate"),),
                 repeat_keyword_properties=("as", "expr"),
+                example='chart.transform_calculate(doubled="datum.value * 2")',
             ),
         )
     ),

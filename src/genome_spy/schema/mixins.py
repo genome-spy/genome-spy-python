@@ -10853,11 +10853,26 @@ class TransformMethodMixin:
         calculate: str | UndefinedType = Undefined,
         **kwargs: str,
     ) -> Self:
-        """Add a ``formula`` transform.
+        """Add one or more ``formula`` transforms.
+
+        Pass both direct arguments for one transform, or use keyword
+        arguments to append one transform per output in insertion order.
 
         Args:
             as\\_ (str): The (new) field where the computed value is written to
             calculate (str): An expression string
+            **kwargs (str): Additional output field names
+                mapped to calculate values.
+
+        Returns:
+            Self: A new specification with the transform or transforms appended.
+
+        Raises:
+            TypeError: If only one of ``as_`` and ``calculate``
+                is provided.
+
+        Example:
+            >>> chart.transform_calculate(doubled="datum.value * 2")
         """
         has_output = as_ is not Undefined
         has_value = calculate is not Undefined
