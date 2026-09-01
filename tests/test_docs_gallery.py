@@ -506,63 +506,136 @@ def test_gallery_code_snippets_hide_internal_layout_metadata() -> None:
 
 
 @pytest.mark.parametrize(
-    ("filename", "label_field"),
+    ("filename", "prefix", "label_field"),
     [
-        ("airway_volcano_plot.py", "volcano_label"),
-        ("airway_ma_plot.py", "ma_label"),
+        ("airway_volcano_plot.py", "volcano", "volcano_label"),
+        ("airway_ma_plot.py", "ma", "ma_label"),
     ],
 )
 def test_airway_expression_plots_include_gene_callouts(
-    filename: str, label_field: str
+    filename: str, prefix: str, label_field: str
 ) -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / filename)
     layers = example.spec["layer"]
-
-    assert layers[-2]["mark"]["type"] == "rule"
-    assert layers[-1]["mark"]["type"] == "text"
-    assert layers[-1]["transform"] == [
-        {"type": "filter", "expr": f"datum.{label_field}"}
+    names = [layer.get("name") for layer in layers]
+    line = next(
+        layer for layer in layers if layer.get("name") == f"{prefix}-callout-lines"
+    )
+    halos = [
+        layer
+        for layer in layers
+        if layer.get("name", "").startswith(f"{prefix}-label-halo-")
     ]
-    assert layers[-1]["encoding"]["text"]["field"] == label_field
+    labels = [
+        layer
+        for layer in layers
+        if layer.get("name") in {f"{prefix}-label-left", f"{prefix}-label-right"}
+    ]
+
+    assert line["mark"]["type"] == "rule"
+    assert line["transform"] == [{"type": "filter", "expr": f"datum.{label_field}"}]
+    assert len(halos) == 8
+    assert len(labels) == 2
+    assert all(layer["mark"]["type"] == "text" for layer in halos + labels)
+    assert all(
+        layer["encoding"]["text"]["field"] == label_field for layer in halos + labels
+    )
+    assert names.index(f"{prefix}-callout-lines") < min(
+        names.index(layer["name"]) for layer in halos
+    )
+    assert max(names.index(layer["name"]) for layer in halos) < min(
+        names.index(layer["name"]) for layer in labels
+    )
 
 
-def test_airway_volcano_callouts_use_pixel_offsets() -> None:
+@pytest.mark.parametrize(
+    ("filename", "prefix", "x_field", "y_field"),
+    [
+        (
+            "airway_volcano_plot.py",
+            "volcano",
+            "log2fc",
+            "neglog10_pvalue_plot",
+        ),
+        ("airway_ma_plot.py", "ma", "log10_base_mean", "log2fc"),
+    ],
+)
+def test_airway_callouts_use_pixel_offsets(
+    filename: str, prefix: str, x_field: str, y_field: str
+) -> None:
     gallery = _load_gallery()
-    example = gallery.collect_example(EXAMPLES_DIR / "airway_volcano_plot.py")
-    rule = example.spec["layer"][-2]
-    labels = example.spec["layer"][-1]
+    example = gallery.collect_example(EXAMPLES_DIR / filename)
+    rule = next(
+        layer
+        for layer in example.spec["layer"]
+        if layer.get("name") == f"{prefix}-callout-lines"
+    )
+    labels = [
+        layer
+        for layer in example.spec["layer"]
+        if layer.get("name") in {f"{prefix}-label-left", f"{prefix}-label-right"}
+    ]
 
     assert rule["mark"]["type"] == "rule"
     assert rule["mark"]["tooltip"] is None
     assert "x2Offset" not in rule["mark"]
     assert "y2Offset" not in rule["mark"]
-    assert rule["transform"] == [{"type": "filter", "expr": "datum.volcano_label"}]
-    assert rule["encoding"]["x2"] == {"field": "log2fc"}
-    assert rule["encoding"]["y2"] == {"field": "neglog10_pvalue_plot"}
+    assert rule["transform"] == [{"type": "filter", "expr": f"datum.{prefix}_label"}]
+    assert rule["encoding"]["x2"] == {"field": x_field}
+    assert rule["encoding"]["y2"] == {"field": y_field}
     assert rule["encoding"]["xOffset"] == {
-        "field": "volcano_x_offset",
+        "field": f"{prefix}_x_offset",
         "type": "quantitative",
         "scale": None,
     }
     assert rule["encoding"]["yOffset"] == {
-        "field": "volcano_y_offset",
+        "field": f"{prefix}_y_offset",
         "type": "quantitative",
         "scale": None,
     }
 
-    assert labels["encoding"]["x"]["field"] == "log2fc"
-    assert labels["encoding"]["y"]["field"] == "neglog10_pvalue_plot"
-    assert labels["encoding"]["xOffset"] == {
-        "field": "volcano_x_offset",
-        "type": "quantitative",
-        "scale": None,
-    }
-    assert labels["encoding"]["yOffset"] == {
-        "field": "volcano_y_offset",
-        "type": "quantitative",
-        "scale": None,
-    }
+    for label in labels:
+        assert label["encoding"]["x"]["field"] == x_field
+        assert label["encoding"]["y"]["field"] == y_field
+        assert label["encoding"]["xOffset"] == {
+            "field": f"{prefix}_x_offset",
+            "type": "quantitative",
+            "scale": None,
+        }
+        assert label["encoding"]["yOffset"] == {
+            "field": f"{prefix}_y_offset",
+            "type": "quantitative",
+            "scale": None,
+        }
+
+
+@pytest.mark.parametrize("prefix", ["volcano", "ma"])
+def test_airway_callout_labels_have_white_halos(prefix: str) -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / f"airway_{prefix}_plot.py")
+    layers = example.spec["layer"]
+    expected_offsets = {(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)}
+
+    for side, base_dx in (("left", -4), ("right", 4)):
+        label = next(
+            layer for layer in layers if layer.get("name") == f"{prefix}-label-{side}"
+        )
+        halos = [
+            layer
+            for layer in layers
+            if layer.get("name", "").startswith(f"{prefix}-label-halo-{side}-")
+        ]
+
+        assert label["mark"]["type"] == "text"
+        assert label["mark"]["color"] == "#20262d"
+        assert label["mark"]["align"] == ("right" if side == "left" else "left")
+        assert label["mark"]["baseline"] == "middle"
+        assert label["mark"]["tooltip"] is None
+        assert {
+            (halo["mark"]["dx"] - base_dx, halo["mark"]["dy"]) for halo in halos
+        } == expected_offsets
+        assert all(halo["mark"]["color"] == "white" for halo in halos)
 
 
 @pytest.mark.parametrize("filename", ["airway_volcano_plot.py", "airway_ma_plot.py"])

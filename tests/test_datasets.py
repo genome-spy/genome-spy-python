@@ -311,7 +311,7 @@ def test_airway_paired_logcounts_uses_packaged_data() -> None:
 
 
 def test_airway_differential_expression_is_chart_ready() -> None:
-    data, domains = airway_differential_expression(max_genes=200)
+    data, domains = airway_differential_expression(max_genes=12_000)
 
     assert not data.empty
     assert {
@@ -326,11 +326,20 @@ def test_airway_differential_expression_is_chart_ready() -> None:
         "volcano_label",
         "volcano_x_offset",
         "volcano_y_offset",
+        "volcano_label_side",
         "ma_label",
-        "ma_label_x",
-        "ma_label_y",
+        "ma_x_offset",
+        "ma_y_offset",
+        "ma_label_side",
     } <= set(data.columns)
     assert set(data["direction"]) <= {"up in dex", "down in dex", "n.s."}
+    assert set(data.loc[data["volcano_label"].notna(), "volcano_label_side"]) == {
+        "left",
+    }
+    assert set(data.loc[data["ma_label"].notna(), "ma_label_side"]) == {
+        "left",
+        "right",
+    }
     assert set(domains) == {"ma_x", "ma_y", "volcano_x", "volcano_y", "pvalue_cutoff"}
 
 

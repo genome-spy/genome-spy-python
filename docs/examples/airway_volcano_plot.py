@@ -27,6 +27,7 @@ MAX_GENES = 12_000
 # while the cap prevents points from becoming oversized at deep zoom levels.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
+HALO_OFFSETS = [(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)]
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -54,7 +55,7 @@ airway_tooltip = [
 ]
 
 volcano_points = (
-    gs.Chart(data)
+    gs.Chart()
     .mark_point(size=POINT_SIZE, filled=True, opacity=0.58)
     .encode(
         x=gs.X("log2fc:Q")
@@ -91,7 +92,7 @@ volcano_padj_rule = (
 # Offsets are logical pixels, so zooming the data scales does not move labels.
 # The shifted label endpoint uses the primary channels; the point is x2/y2.
 volcano_callout_lines = (
-    gs.Chart(data)
+    gs.Chart()
     .transform_filter(gs.datum.volcano_label)
     .mark_rule(color="#3f4750", size=1, tooltip=None)
     .encode(
@@ -106,40 +107,74 @@ volcano_callout_lines = (
         x2=gs.X2("log2fc"),
         y2=gs.Y2("neglog10_pvalue_plot"),
     )
+    .properties(name="volcano-callout-lines")
 )
 
-volcano_callout_labels = (
-    gs.Chart(data)
-    .transform_filter(gs.datum.volcano_label)
-    # Primary offset channels can read the per-row pixel displacements.
-    .mark_text(
-        align="center",
-        baseline="bottom",
-        yOffset=-3,
-        fontWeight="bold",
+
+def volcano_callout_label(
+    *, side: str, color: str, dx: float, dy: float, name: str
+) -> gs.Chart:
+    """Build one edge-anchored label or halo layer."""
+    return (
+        gs.Chart()
+        .transform_filter(
+            gs.datum.volcano_label & (gs.datum.volcano_label_side == side)
+        )
+        .mark_text(
+            align="right" if side == "left" else "left",
+            baseline="middle",
+            dx=dx,
+            dy=dy,
+            fontWeight="bold",
+            color=color,
+            tooltip=None,
+        )
+        .encode(
+            x=gs.X("log2fc:Q")
+            .scale(domain=domains["volcano_x"], zoom=True)
+            .title("log2 fold change (treated / control)"),
+            xOffset=gs.XOffset("volcano_x_offset:Q").scale(None),
+            y=gs.Y("neglog10_pvalue_plot:Q")
+            .scale(reverse=False, domain=domains["volcano_y"], zoom=True)
+            .title("-log10 p-value"),
+            yOffset=gs.YOffset("volcano_y_offset:Q").scale(None),
+            text=gs.Text("volcano_label:N"),
+        )
+        .properties(name=name)
+    )
+
+
+volcano_callout_halos = [
+    volcano_callout_label(
+        side=side,
+        color="white",
+        dx=(-4 if side == "left" else 4) + halo_dx,
+        dy=halo_dy,
+        name=f"volcano-label-halo-{side}-{index}",
+    )
+    for side in ("left", "right")
+    for index, (halo_dx, halo_dy) in enumerate(HALO_OFFSETS)
+]
+volcano_callout_labels = [
+    volcano_callout_label(
+        side=side,
         color="#20262d",
-        tooltip=None,
+        dx=-4 if side == "left" else 4,
+        dy=0,
+        name=f"volcano-label-{side}",
     )
-    .encode(
-        x=gs.X("log2fc:Q")
-        .scale(domain=domains["volcano_x"], zoom=True)
-        .title("log2 fold change (treated / control)"),
-        xOffset=gs.XOffset("volcano_x_offset:Q").scale(None),
-        y=gs.Y("neglog10_pvalue_plot:Q")
-        .scale(reverse=False, domain=domains["volcano_y"], zoom=True)
-        .title("-log10 p-value"),
-        yOffset=gs.YOffset("volcano_y_offset:Q").scale(None),
-        text=gs.Text("volcano_label:N"),
-    )
-)
+    for side in ("left", "right")
+]
 
 chart = gs.layer(
     volcano_fc_rules,
     volcano_padj_rule,
     volcano_points,
     volcano_callout_lines,
-    volcano_callout_labels,
+    *volcano_callout_halos,
+    *volcano_callout_labels,
 ).properties(
+    data=data,
     title="Airway dexamethasone response: volcano plot",
     description=(
         "A paired differential-expression volcano plot showing fold change "
