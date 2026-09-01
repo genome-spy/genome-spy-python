@@ -739,6 +739,7 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
         "filter",
     ]
     assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
+    assert gene_track["layer"][1]["mark"]["clip"] == "x"
     assert "offset" not in gene_track["transform"][0]
     assert len(gene_track["data"]["values"]) == 29_599
     assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
@@ -763,6 +764,7 @@ def test_rainfall_includes_shared_refseq_annotation_track() -> None:
     assert gene_track["layer"][0]["mark"]["style"] == "arrow-block"
     assert gene_track["layer"][0]["opacity"]["unitsPerPixel"] == [100000, 40000]
     assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
+    assert gene_track["layer"][1]["mark"]["clip"] == "x"
     assert "offset" not in gene_track["transform"][0]
     assert len(gene_track["data"]["values"]) == 29_599
     assert "offset" not in gene_track["layer"][0]["encoding"]["x"]

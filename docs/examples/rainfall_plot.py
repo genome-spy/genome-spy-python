@@ -150,7 +150,9 @@ gene_labels = (
     .mark_text(
         baseline="middle",
         align="center",
-        clip=False,
+        # Clip labels at the genomic window while keeping the vertical offset
+        # free to extend above the gene body.
+        clip="x",
         yOffset=-5,
         size=11,
         color="#20262d",
