@@ -851,6 +851,7 @@ def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
         "bigbed",
         "indexedFasta",
     ]
+    assert tracks[2]["data"]["lazy"]["windowSize"] == 30_000
     assert tracks[3]["data"]["lazy"]["windowSize"] == 30_000
     assert "y" not in tracks[2]["encoding"]
     assert "y" not in tracks[3]["encoding"]

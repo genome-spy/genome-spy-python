@@ -21,6 +21,8 @@ DOMAIN = [
 ]
 
 
+# BigWig sources stream quantitative intervals for the shared visible locus;
+# each signal track keeps its own y scale.
 gc_track = (
     gs.Chart(gs.lazy.bigwig("https://data.genomespy.app/genomes/hg38/hg38.gc5Base.bw"))
     .mark_rect(color="#6c8ebf", minWidth=0.5, minOpacity=1, tooltip=None)
@@ -60,10 +62,14 @@ conservation_track = (
 )
 
 
+# Match the lazy BigBed window to the 20 kb initial locus. GenomeSpy fetches a
+# complete quantized window, so returning from a deeper zoom restores coverage
+# across the initial domain instead of retaining only the narrow request.
 ccre_track = (
     gs.Chart(
         gs.lazy.bigbed(
-            "https://data.genomespy.app/sample-data/encodeCcreCombined.hg38.bb"
+            "https://data.genomespy.app/sample-data/encodeCcreCombined.hg38.bb",
+            windowSize=30_000,
         )
     )
     .mark_rect(minWidth=0.5, tooltip=None)
@@ -79,6 +85,8 @@ ccre_track = (
 )
 
 
+# Indexed FASTA data becomes visible only at sequence-level zoom. Both layers
+# inherit the lazy source and genomic x encoding from sequence_track.
 sequence_rects = gs.Chart().mark_rect(tooltip=None)
 sequence_labels = (
     gs.Chart()
@@ -199,6 +207,8 @@ symbols = (
     )
 )
 
+# RefSeq is loaded once, then GenomeSpy linearizes, sorts, and piles up the
+# visible transcripts in its browser-side dataflow.
 refseq_track = (
     gs.layer(transcripts, symbols)
     .properties(
