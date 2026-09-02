@@ -991,36 +991,25 @@ def test_refseq_example_preserves_nested_semantic_zoom_layers() -> None:
     assert arrows["encoding"]["dx"]["scale"] is None
 
 
-def test_composed_genome_browser_builds_four_python_tracks() -> None:
+def test_composed_genome_browser_imports_four_release_pinned_tracks() -> None:
     gallery = _load_gallery()
-    example = gallery.collect_example(EXAMPLES_DIR / "composing_genome_browser.py")
-    spec = example.spec
+    spec = gallery.collect_example(EXAMPLES_DIR / "composing_genome_browser.py").spec
 
-    assert "from docs.examples" not in example.source
-    assert "gs.import_view" not in example.source
     assert spec["assembly"] == "hg38"
     assert spec["scales"]["x"]["domain"] == [
         {"chrom": "chr20", "pos": 10006452},
         {"chrom": "chr20", "pos": 10006533},
     ]
-    assert spec["vconcat"][0]["axes"]["x"] == {"orient": "top", "title": None}
-    assert spec["resolve"] == {
-        "scale": {"x": "shared", "y": "independent"},
-        "axis": {"x": "shared", "y": "independent"},
-    }
-    assert '"import"' not in str(spec)
-    assert [view.get("name") for view in spec["vconcat"]] == [
-        "ideogram-track",
-        "indexed-fasta-six-frame-translation",
-        None,
-        "refseq-track",
+    assert spec["axes"]["x"] == {"orient": "top", "title": None}
+    assert spec["resolve"]["axis"]["x"] == "shared"
+    urls = [view["import"]["url"] for view in spec["vconcat"]]
+    assert all("/d2e9bd71/" in url for url in urls)
+    assert [url.rsplit("/", 1)[-1] for url in urls] == [
+        "cytobands.json",
+        "indexed-fasta-six-frame-translation.json",
+        "bam-read-alignments.json",
+        "scored-refSeq-genes.json",
     ]
-    cytobands, translation, bam, refseq = spec["vconcat"]
-    assert cytobands["data"]["url"].endswith("cytoBand.txt.gz")
-    assert translation["data"]["lazy"]["type"] == "indexedFasta"
-    assert bam["data"]["lazy"]["type"] == "bam"
-    assert bam["vconcat"][1]["viewportHeight"] == 300
-    assert refseq["data"]["url"].endswith("refSeqGenes-hg38-release232.tsv.gz")
 
 
 def test_upset_plot_derives_and_aligns_exact_set_intersections() -> None:

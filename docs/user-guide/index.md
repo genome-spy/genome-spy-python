@@ -25,6 +25,8 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
 ## Larger and genomic views
 
 - [Composition](composition.md) layers charts and arranges linked panels.
+- [Import remote view specifications](importing-specifications.md) reuses
+  published JSON views by URL.
 - [Annotations](annotations.md) adds selected point callouts and scored gene
   tracks.
 - [Configuration](configuration.md) sets dimensions, titles, and shared visual
@@ -64,6 +66,7 @@ transforms
 :caption: Building larger views
 
 composition
+importing-specifications
 annotations
 configuration
 ```
