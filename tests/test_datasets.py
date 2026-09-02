@@ -21,6 +21,7 @@ from genome_spy.datasets._hapmap import (
 )
 from genome_spy.datasets._gistic import tcga_ov_gistic_data
 from genome_spy.datasets._mutation import brca_rainfall_data, dnmt3a_lollipop_data
+from genome_spy.datasets._mutation import pik3ca_lollipop_data
 from genome_spy.datasets._oncoprint import laml_oncoplot_data, luad_oncoprint_data
 
 
@@ -32,6 +33,7 @@ def test_available_datasets_are_stable() -> None:
         "hapmap_gwas",
         "mutation_impact_reference",
         "pik3ca_mutations",
+        "pik3ca_tcga_brca_lollipop",
         "pyoncoprint_tcga",
         "refseq_gene_bodies",
         "tal1_alphagenome_reference",
@@ -56,6 +58,21 @@ def test_load_json_dataset() -> None:
     assert isinstance(data, dict)
     assert "domains" in data
     assert isinstance(data["domains"], list)
+
+
+def test_load_pik3ca_lollipop_dataset() -> None:
+    data = pik3ca_lollipop_data()
+
+    assert data["proteinLength"] == 1068
+    assert len(data["mutations"]) == 26
+    assert data["mutations"][-1]["mutation"] == "G1049R"
+    assert [domain["label"] for domain in data["domains"]] == [
+        "ABD",
+        "RBD",
+        "C2",
+        "Helical",
+        "Kinase",
+    ]
 
 
 def test_load_mutation_impact_reference_dataset() -> None:
@@ -138,6 +155,7 @@ def test_upstream_mutation_files_are_byte_exact() -> None:
         "brca.maf.gz": "61d5355e960bd480bec4f245b8f096e2333408659ced0d196e42b0e38de3d724",
         "oncoprint_dataset3.json": "e07aa6ae9cf4f5f3a9f331d9979855ccf33bc47ed1bb2f4b871939b47c2a09ef",
         "pik3ca_mutations.json": "4f36df9ad960c1429827522bbd4fce0cb47520d14a5c642abe8a55969f177aec",
+        "pik3ca_tcga_brca_lollipop.json": "3d13291134b4bd3af801848a8be384b08936fb99d2371b34fbe49df00e42e685",
         "refseq_gene_bodies.csv.gz": "6ecb8f12d120cc10724a816d4dc6f8ebdf5e468f725950809de5082f8db17785",
         "tal1_alphagenome_reference.json.gz": "10702eaaee63d2a4f600bf23ea4fac913db720aba56d33868b0f32590fc7b77e",
         "tcga.tsv": "39a90fc1f50ebcd113c37fd03894fb41b17dca4d6014f7efcf0e3f234c957742",

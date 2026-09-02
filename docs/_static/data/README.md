@@ -142,6 +142,18 @@ metadata.
   its repository history does not identify a deeper biological source.
 - **License:** MIT (`plotly/datasets`, © Plotly Technologies Inc.).
 
+## `pik3ca_tcga_brca_lollipop.json`
+
+- **What it is:** recurrent TCGA-BRCA PIK3CA mutation counts and UniProt
+  P42336 protein domains used by the GenomeSpy lollipop example.
+- **Source:** the named datasets embedded in GenomeSpy's official
+  `pik3ca-tcga-brca-lollipop.json`, introduced in commit
+  `3b55caf5111ab769da222a93990ca38480495f9e`.
+- **Preparation:** extracted unchanged from the upstream specification and
+  packaged separately so the Python example contains visualization code only.
+- **License/provenance:** mutation and protein-domain provenance is documented
+  on the corresponding gallery page.
+
 ## `mutation_impact_reference.json`
 
 - **What it is:** a small deterministic synthetic reference window used by the
