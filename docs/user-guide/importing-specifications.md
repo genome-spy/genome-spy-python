@@ -37,16 +37,10 @@ dataflow.
 
 ## URL and version considerations
 
-- Prefer an immutable release or commit URL for reproducible charts. A moving
-  branch can change the imported visualization without changing your Python
-  code.
-- The browser must be able to fetch the JSON. The server therefore needs to be
-  available to viewers and permit cross-origin requests when origins differ.
-- Relative import URLs are resolved against the current specification's base
-  URL. Relative data URLs inside an imported specification are resolved from
-  the imported specification's directory.
-- Treat remote specifications as executable visualization dependencies. Import
-  only sources you trust and expect to remain available.
+Use an immutable release or commit URL so the imported visualization cannot
+change without a corresponding Python change. The viewer's browser must be
+able to fetch the JSON, and relative data URLs inside it are resolved from the
+imported specification's directory.
 
 Because Python does not fetch the imported file, local serialization validates
 the import declaration rather than the contents of the remote child. Loading
