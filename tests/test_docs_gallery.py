@@ -85,6 +85,28 @@ def test_pik3ca_lollipop_uses_reactive_collision_displacement() -> None:
     assert mutation_view["vconcat"][2]["layer"][0]["mark"]["x2Offset"] == 0
 
 
+def test_dnmt3a_needle_plot_uses_separate_mutation_and_protein_tracks() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "needle_plot.py").spec
+
+    assert len(spec["vconcat"]) == 2
+    assert spec["resolve"] == {
+        "scale": {"x": "shared", "y": "independent"},
+        "axis": {"x": "shared", "y": "independent"},
+    }
+    mutation_track, protein_track = spec["vconcat"]
+    assert set(mutation_track["data"]["values"][0]).isdisjoint(
+        {"base", "label_y", "label_text"}
+    )
+    assert protein_track["layer"][2]["transform"] == [
+        {
+            "type": "formula",
+            "expr": "((datum.start + datum.end) / 2)",
+            "as": "center",
+        }
+    ]
+
+
 def test_hcc_structural_variant_channels_use_typed_conditions() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "hcc1954_sv_cnv.py")
