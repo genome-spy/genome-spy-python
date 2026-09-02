@@ -49,8 +49,8 @@ labels = (
     .properties(name="labels")
 )
 
-# GenomeSpy 0.82 calls this point/text offset channel ``dx``. The upstream
-# development spec uses the equivalent forthcoming ``xOffset`` spelling.
+# ``dx`` shifts the strand arrow in screen pixels so it remains just beyond the
+# measured label edge at every genomic zoom level.
 arrows = (
     gs.Chart()
     .mark_point(yOffset=7, size=50, tooltip=None)

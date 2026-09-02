@@ -25,6 +25,8 @@ make the direction and magnitude of each contribution visible.
 A named template defines the shared baseline, BigWig lookup, and indexed-FASTA
 sequence-logo layers. Two imports instantiate it with reference and alternate
 allele parameters, which select the corresponding BigWig source and title.
+Python authors the flatten, formula, coordinate-lookup, and filter transforms;
+GenomeSpy executes them in the browser as the lazy genomic window changes.
 
 See the [official GenomeSpy example](https://genomespy.app/docs/examples/genomic-data/dynseq-spi1-bqtl/)
 for the biological context and original grammar explanation.

@@ -17,8 +17,8 @@ META = {
     "max_width": 980,
 }
 
-# Each builder owns its track dataflow. The parent owns and shares the assembly,
-# locus domain, and axis that make all four Python-authored tracks pan together.
+# Each builder owns its track dataflow. The parent owns the assembly and shared
+# locus domain; the first track supplies the single top axis for that scale.
 chart = (
     gs.vconcat(
         build_cytoband_track().properties(

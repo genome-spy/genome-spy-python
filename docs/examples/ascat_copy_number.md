@@ -17,7 +17,9 @@ same for B-allele frequency, including the mirrored `1 - BAF` line.
 
 The segment table is inherited by the copy-number and segment-mean marks, while
 the raw LogR and BAF point layers use the probe table. The three tracks are
-combined with `&` and share their locus scale and axis.
+combined with `&` and share their locus scale and axis. Both tables are loaded
+directly; Python performs no data preparation. GenomeSpy evaluates the
+zoom-responsive point size and mirrored-BAF expression in the browser.
 
 See the [official GenomeSpy example](https://genomespy.app/docs/examples/genomic-data/ascat/)
 for data-wrangling details and the original specification.

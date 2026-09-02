@@ -18,6 +18,9 @@ RAW_URL = "https://data.genomespy.app/sample-data/ASCAT/raw_S96.tsv"
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(10 * gs.expr.pow(ZOOM_LEVEL, 1.5), 200))
 
+# Segment-derived rules inherit the root segment table. The raw point layers
+# override it with the probe table, so the example performs no Python data
+# joining or statistical processing.
 minor_copy_number = (
     gs.Chart()
     .mark_rule(minLength=2, yOffset=-3)
@@ -113,6 +116,9 @@ mirrored_baf = (
 
 baf = (raw_baf + mean_baf + mirrored_baf).properties(name="bafTrack")
 
+# The three panels share genomic x while retaining independent quantitative y
+# scales. GenomeSpy evaluates the mirrored-BAF and zoom-responsive-size
+# expressions in the browser.
 chart = (
     (copy_number & logr & baf)
     .properties(

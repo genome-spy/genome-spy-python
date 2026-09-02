@@ -12,8 +12,9 @@ examples. See those pages for source details and applicable disclaimers.
 ## What to notice
 
 Four independently authored views pan and zoom together because the parent
-owns their assembly, locus scale, and genome axis. The child views retain their
-own data, marks, and vertical scales.
+owns their assembly and shared locus scale. The cytoband track supplies the
+single top genome axis. The child views retain their own data, marks, and
+vertical scales.
 
 ## Python implementation
 

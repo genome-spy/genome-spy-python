@@ -24,6 +24,9 @@ ALT_BIGWIG_URL = (
     "bigwigs/chip_imp_alt.bw"
 )
 
+# The root FASTA dataflow emits one row per reference base. For each template
+# instance, coordinateLookup joins the allele-specific BigWig score onto those
+# rows by chromosome and position; missing score positions are then filtered.
 allele_track = (
     gs.layer(
         gs.Chart(
@@ -98,6 +101,8 @@ allele_track = (
         values=["score"],
     )
     .transform_filter(gs.expr.isValid(gs.datum.score))
+    # The alternate track changes only the displayed base at rs5764238. Both
+    # tracks retain the same reference coordinate rows and shared x scale.
     .transform_formula(
         expr=gs.expr.if_(
             (ALLELE == "alt") & (gs.datum.pos == 43720929),
@@ -112,6 +117,8 @@ allele_track = (
     )
 )
 
+# Two local template instances reuse the complete browser-side lookup and logo
+# dataflow while binding only the allele parameter differently.
 chart = (
     gs.vconcat(
         gs.import_view(template="allele-track", params={"allele": "ref"}),
@@ -140,6 +147,8 @@ chart = (
             "Data source: https://github.com/kundajelab/dynseq-paper"
         ),
     )
+    # These transforms are serialized by Python and run in GenomeSpy whenever
+    # the lazy FASTA window changes.
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
     .transform_formula(expr=gs.expr.upper(gs.datum.base), as_="base")
     .transform_formula(expr=gs.datum.start + gs.datum.rawPos, as_="pos")
