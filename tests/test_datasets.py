@@ -149,7 +149,7 @@ def test_refseq_gene_bodies_cover_both_complete_assemblies() -> None:
     assert (hg19["end"] - hg19["start"]).max() < 3_000_000
 
 
-def test_upstream_mutation_files_are_byte_exact() -> None:
+def test_packaged_dataset_files_are_byte_stable() -> None:
     data_dir = files("genome_spy.datasets").joinpath("data")
     expected_hashes = {
         "brca.maf.gz": "61d5355e960bd480bec4f245b8f096e2333408659ced0d196e42b0e38de3d724",
