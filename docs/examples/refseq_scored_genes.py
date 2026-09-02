@@ -87,59 +87,70 @@ symbols = (
     )
 )
 
-chart = (
-    gs.layer(transcripts, symbols)
-    .properties(
-        assembly="hg38",
-        name="refseq-track",
-        title=gs.title("RefSeq Gene annotation", orient="none"),
-        description=(
-            "Hg38 RefSeq annotations with packed transcripts, scored labels, "
-            "and strand arrows that appear at detailed zoom levels."
-        ),
-        height=gs.step(23),
-        data=gs.Data(
-            url="https://data.genomespy.app/genomes/hg38/refSeqGenes-hg38-release232.tsv.gz",
-            format=gs.data_format(
-                parse=gs.parse(
-                    symbol="string",
-                    chrom="string",
-                    start="integer",
-                    length="integer",
-                    strand="string",
-                    score="integer",
-                    exons="string",
-                )
+
+def build_refseq_track() -> gs.Chart:
+    """Build the reusable hg38 RefSeq annotation track."""
+    # Linearization gives the pileup and label transforms one continuous
+    # coordinate system while the encodings retain genomic locus semantics.
+    return (
+        gs.layer(transcripts, symbols)
+        .properties(
+            name="refseq-track",
+            title=gs.title("RefSeq Gene annotation", orient="none"),
+            height=gs.step(23),
+            data=gs.Data(
+                url="https://data.genomespy.app/genomes/hg38/refSeqGenes-hg38-release232.tsv.gz",
+                format=gs.data_format(
+                    parse=gs.parse(
+                        symbol="string",
+                        chrom="string",
+                        start="integer",
+                        length="integer",
+                        strand="string",
+                        score="integer",
+                        exons="string",
+                    )
+                ),
             ),
-        ),
-        axes=gs.axes(x=gs.GenomeAxis(title=None)),
-    )
-    .encode(
-        y=gs.Y("_lane:O")
-        .scale(
-            type="index",
-            align=0,
-            paddingInner=0.4,
-            paddingOuter=0.2,
-            domain=[0, 3],
-            reverse=True,
-            zoom=False,
         )
-        .axis(None)
+        .encode(
+            y=gs.Y("_lane:O")
+            .scale(
+                type="index",
+                align=0,
+                paddingInner=0.4,
+                paddingOuter=0.2,
+                domain=[0, 3],
+                reverse=True,
+                zoom=False,
+            )
+            .axis(None)
+        )
+        .transform_linearize_genomic_coordinate(
+            chrom="chrom", pos="start", as_="_start"
+        )
+        .transform_formula(expr=gs.datum._start + gs.datum.length, as_="_end")
+        .transform_formula(
+            expr=gs.datum._start + gs.datum.length / 2,
+            as_="_centroid",
+        )
+        .transform_collect(sort=gs.compare(field=["_start"]))
+        .transform_pileup(
+            start="_start",
+            end="_end",
+            as_="_lane",
+            preference="strand",
+            preferredOrder=["-", "+"],
+        )
+        .transform_filter(gs.datum._lane < 3)
     )
-    .transform_linearize_genomic_coordinate(chrom="chrom", pos="start", as_="_start")
-    .transform_formula(expr=gs.datum._start + gs.datum.length, as_="_end")
-    .transform_formula(
-        expr=gs.datum._start + gs.datum.length / 2,
-        as_="_centroid",
-    )
-    .transform_collect(sort=gs.compare(field=["_start"]))
-    .transform_pileup(
-        start="_start",
-        end="_end",
-        as_="_lane",
-        preference="strand",
-        preferredOrder=["-", "+"],
-    )
-    .transform_filter(gs.datum._lane < 3)
+
+
+chart = build_refseq_track().properties(
+    assembly="hg38",
+    description=(
+        "Hg38 RefSeq annotations with packed transcripts, scored labels, "
+        "and strand arrows that appear at detailed zoom levels."
+    ),
+    axes=gs.axes(x=gs.GenomeAxis(title=None)),
 )

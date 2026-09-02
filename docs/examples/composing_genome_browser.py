@@ -1,10 +1,14 @@
 """Composing a genome browser.
 
-Independent cytoband, six-frame translation, BAM alignment, and RefSeq views
-are imported by URL and aligned under a parent-owned genomic scale and axis.
+Independent cytoband, six-frame translation, BAM alignment, and RefSeq tracks
+are built with the Python API and aligned under a parent-owned genomic scale.
 """
 
 import genome_spy as gs
+from docs.examples.bam_read_alignments import build_bam_alignment_track
+from docs.examples.cytobands import build_cytoband_track
+from docs.examples.refseq_scored_genes import build_refseq_track
+from docs.examples.six_frame_translation import build_six_frame_translation_track
 
 META = {
     "category": "Genome browser tracks",
@@ -13,26 +17,23 @@ META = {
     "max_width": 980,
 }
 
-# Pin imported views to the same upstream release as the wrapper's schema and
-# browser bundle. Absolute URLs also make imports work in docs, notebooks, and
-# the standalone thumbnail renderer without depending on a deployment base URL.
-EXAMPLE_ROOT = (
-    "https://raw.githubusercontent.com/genome-spy/genome-spy/"
-    "d2e9bd71/examples/docs/examples/genomic-data"
-)
-
+# Each builder owns its track dataflow. The parent owns and shares the assembly,
+# locus domain, and axis that make all four Python-authored tracks pan together.
 chart = (
     gs.vconcat(
-        gs.import_view(url=f"{EXAMPLE_ROOT}/cytobands.json"),
-        gs.import_view(url=f"{EXAMPLE_ROOT}/indexed-fasta-six-frame-translation.json"),
-        gs.import_view(url=f"{EXAMPLE_ROOT}/bam-read-alignments.json"),
-        gs.import_view(url=f"{EXAMPLE_ROOT}/scored-refSeq-genes.json"),
+        build_cytoband_track().properties(
+            height=30,
+            axes=gs.axes(x=gs.GenomeAxis(orient="top", title=None)),
+        ),
+        build_six_frame_translation_track(),
+        build_bam_alignment_track(viewport_height=300),
+        build_refseq_track(),
     )
     .properties(
         assembly="hg38",
         description=(
-            "Imported cytoband, six-frame translation, BAM alignment, and "
-            "RefSeq views composed into a shared-locus genome browser."
+            "Python-authored cytoband, six-frame translation, BAM alignment, "
+            "and RefSeq tracks composed into a shared-locus genome browser."
         ),
         scales=gs.scales(
             x=gs.Scale(
@@ -42,8 +43,9 @@ chart = (
                 ]
             )
         ),
-        axes=gs.axes(x=gs.GenomeAxis(orient="top", title=None)),
     )
-    .resolve_axis(x="shared")
+    .resolve_scale(x="shared", y="independent")
+    .resolve_axis(x="shared", y="independent")
+    .configure_view(stroke="lightgray")
     .configure_legend(disable=True)
 )

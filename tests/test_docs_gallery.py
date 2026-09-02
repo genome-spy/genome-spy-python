@@ -162,7 +162,9 @@ def test_examples_use_typed_axis_and_view_configuration() -> None:
     stacked = gallery.collect_example(EXAMPLES_DIR / "stacked_genome_browser.py")
     viewport = gallery.collect_example(EXAMPLES_DIR / "scrollable_viewport.py")
 
-    assert composing.spec["axes"] == {"x": {"orient": "top", "title": None}}
+    assert composing.spec["vconcat"][0]["axes"] == {
+        "x": {"orient": "top", "title": None}
+    }
     assert refseq.spec["axes"] == {"x": {"title": None}}
     assert stacked.spec["axes"] == {
         "x": {"orient": "bottom", "title": "Genomic position"}
@@ -967,7 +969,7 @@ def test_refseq_example_preserves_nested_semantic_zoom_layers() -> None:
     assert arrows["encoding"]["dx"]["scale"] is None
 
 
-def test_composed_genome_browser_imports_four_release_pinned_tracks() -> None:
+def test_composed_genome_browser_builds_four_python_tracks() -> None:
     gallery = _load_gallery()
     spec = gallery.collect_example(EXAMPLES_DIR / "composing_genome_browser.py").spec
 
@@ -976,16 +978,24 @@ def test_composed_genome_browser_imports_four_release_pinned_tracks() -> None:
         {"chrom": "chr20", "pos": 10006452},
         {"chrom": "chr20", "pos": 10006533},
     ]
-    assert spec["axes"]["x"] == {"orient": "top", "title": None}
-    assert spec["resolve"]["axis"]["x"] == "shared"
-    urls = [view["import"]["url"] for view in spec["vconcat"]]
-    assert all("/d2e9bd71/" in url for url in urls)
-    assert [url.rsplit("/", 1)[-1] for url in urls] == [
-        "cytobands.json",
-        "indexed-fasta-six-frame-translation.json",
-        "bam-read-alignments.json",
-        "scored-refSeq-genes.json",
+    assert spec["vconcat"][0]["axes"]["x"] == {"orient": "top", "title": None}
+    assert spec["resolve"] == {
+        "scale": {"x": "shared", "y": "independent"},
+        "axis": {"x": "shared", "y": "independent"},
+    }
+    assert '"import"' not in str(spec)
+    assert [view.get("name") for view in spec["vconcat"]] == [
+        "ideogram-track",
+        "indexed-fasta-six-frame-translation",
+        None,
+        "refseq-track",
     ]
+    cytobands, translation, bam, refseq = spec["vconcat"]
+    assert cytobands["data"]["url"].endswith("cytoBand.txt.gz")
+    assert translation["data"]["lazy"]["type"] == "indexedFasta"
+    assert bam["data"]["lazy"]["type"] == "bam"
+    assert bam["vconcat"][1]["viewportHeight"] == 300
+    assert refseq["data"]["url"].endswith("refSeqGenes-hg38-release232.tsv.gz")
 
 
 def test_upset_plot_derives_and_aligns_exact_set_intersections() -> None:

@@ -17,9 +17,12 @@ own data, marks, and vertical scales.
 
 ## Python implementation
 
-This example demonstrates composition rather than rebuilding every track: it
-uses `gs.import_view()` for pinned upstream specifications and combines them
-with `gs.vconcat()`.
+Each standalone example exposes a small Python builder for its reusable track.
+This example calls those builders and combines the returned charts with
+`gs.vconcat()`. No JSON specification is imported: the child dataflows and the
+parent composition are all authored through the Python API. The BAM builder is
+given an explicit viewport height because it is nested inside a larger layout;
+its standalone example instead fills its own container.
 
 See the [official GenomeSpy example](https://genomespy.app/docs/examples/genomic-data/genome-browser/)
 for the original composition discussion.
