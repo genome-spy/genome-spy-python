@@ -87,40 +87,30 @@ separator_layer = (
     .transform_filter((gs.datum.chromStart == 0) & (gs.datum.chrom != "chr1"))
 )
 
-
-def build_cytoband_track() -> gs.Chart:
-    """Build the reusable hg38 cytoband track."""
-    # The shared encoding lives on the layered root so each sublayer inherits
-    # the same genome-wide interval coordinates.
-    return (
-        gs.layer(band_layer, label_layer, separator_layer)
-        .properties(
-            name="ideogram-track",
-            title=gs.title("Chromosome Ideogram", style="track-title"),
-            data=gs.Data(
-                url="https://data.genomespy.app/genomes/hg38/cytoBand.txt.gz",
-                format=gs.data_format(
-                    type="tsv",
-                    columns=["chrom", "chromStart", "chromEnd", "name", "gieStain"],
-                ),
-            ),
-        )
-        .encode(
-            x=gs.Locus("chrom", "chromStart"),
-            x2=gs.Locus("chrom", "chromEnd"),
-        )
-        .transform_filter(~gs.expr.test(gs.expr.regexp("_"), gs.datum.chrom))
-        .resolve_scale(color="independent")
-    )
-
-
+# The shared encoding lives on the layered root so each sublayer inherits the
+# same genome-wide interval coordinates.
 chart = (
-    build_cytoband_track()
+    gs.layer(band_layer, label_layer, separator_layer)
     .properties(
         assembly="hg38",
+        name="ideogram-track",
+        title=gs.title("Chromosome Ideogram", style="track-title"),
         description=(
             "A whole-genome ideogram showing hg38 cytobands and chromosome boundaries."
         ),
+        data=gs.Data(
+            url="https://data.genomespy.app/genomes/hg38/cytoBand.txt.gz",
+            format=gs.data_format(
+                type="tsv",
+                columns=["chrom", "chromStart", "chromEnd", "name", "gieStain"],
+            ),
+        ),
     )
+    .encode(
+        x=gs.Locus("chrom", "chromStart"),
+        x2=gs.Locus("chrom", "chromEnd"),
+    )
+    .transform_filter(~gs.expr.test(gs.expr.regexp("_"), gs.datum.chrom))
+    .resolve_scale(color="independent")
     .configure_view(stroke="black")
 )

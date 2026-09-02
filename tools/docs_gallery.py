@@ -86,16 +86,15 @@ class Example:
     spec: dict
 
 
-def _ensure_import_paths() -> None:
-    """Make the library and reusable documentation examples importable."""
-    for path in (str(REPO_ROOT), str(REPO_ROOT / "src")):
-        if path not in sys.path:
-            sys.path.insert(0, path)
+def _ensure_src_on_path() -> None:
+    src = str(REPO_ROOT / "src")
+    if src not in sys.path:
+        sys.path.insert(0, src)
 
 
 def default_bundle_url() -> str:
     """The pinned GenomeSpy JS bundle URL that examples embed and render with."""
-    _ensure_import_paths()
+    _ensure_src_on_path()
     from genome_spy.chart import DEFAULT_EMBED_URL
 
     return DEFAULT_EMBED_URL
@@ -148,7 +147,7 @@ def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
 
 def _chart_from_example(path: Path) -> tuple[ModuleType, object]:
     """Return one imported example module and its serializable chart."""
-    _ensure_import_paths()
+    _ensure_src_on_path()
     module = _load_module(path)
     if not hasattr(module, "chart"):
         raise AttributeError(f"{path.name} does not define a `chart` object")

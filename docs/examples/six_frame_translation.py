@@ -250,33 +250,13 @@ translation = (
     .transform_formula(expr=gs.datum.pos + 3, as_="end")
 )
 
-
-def build_six_frame_translation_track() -> gs.Chart:
-    """Build the reusable hg38 reference and six-frame translation track."""
-    # Indexed FASTA loads the visible sequence only. Flattening turns that
-    # sequence into one row per base for the reference and all six frames.
-    return (
-        (reference & translation)
-        .properties(
-            name="indexed-fasta-six-frame-translation",
-            datasets={
-                "nucleotideComplements": COMPLEMENTS,
-                "geneticCode": GENETIC_CODE,
-            },
-            data=gs.lazy.indexed_fasta(
-                "https://data.genomespy.app/genomes/hg38/hg38.fa"
-            ),
-            spacing=5,
-        )
-        .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
-        .transform_formula(expr=gs.datum.start + gs.datum.rawPos, as_="pos")
-    )
-
-
+# Indexed FASTA loads the visible sequence only. Flattening turns that sequence
+# into one row per base for the reference and all six reading frames.
 chart = (
-    build_six_frame_translation_track()
+    (reference & translation)
     .properties(
         assembly="hg38",
+        name="indexed-fasta-six-frame-translation",
         description=(
             "The visible hg38 reference is translated in three forward and "
             "three reverse reading frames."
@@ -289,6 +269,14 @@ chart = (
                 ]
             )
         ),
+        datasets={
+            "nucleotideComplements": COMPLEMENTS,
+            "geneticCode": GENETIC_CODE,
+        },
+        data=gs.lazy.indexed_fasta("https://data.genomespy.app/genomes/hg38/hg38.fa"),
+        spacing=5,
     )
+    .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
+    .transform_formula(expr=gs.datum.start + gs.datum.rawPos, as_="pos")
     .resolve_axis(x="shared")
 )

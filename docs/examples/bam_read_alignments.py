@@ -5,8 +5,6 @@ An IGV-like alignment view with depth, mismatch, CIGAR, and read-level tracks.
 
 from __future__ import annotations
 
-from typing import Literal
-
 import genome_spy as gs
 
 META = {
@@ -309,65 +307,42 @@ read_alignments = (
     .resolve_scale(color="independent", opacity="independent")
 )
 
-
-def build_bam_alignment_track(
-    *, viewport_height: int | Literal["container"] = "container"
-) -> gs.Chart:
-    """Build the reusable BAM coverage and read-alignment track."""
-    # The lazy BAM source requests only the visible window. Both subtracks
-    # inherit it and therefore stay synchronized while zooming.
-    return (
-        (coverage & read_alignments.properties(viewportHeight=viewport_height))
-        .properties(
-            data=gs.lazy.bam(
-                "https://data.genomespy.app/sample-data/NIST-HG002/"
-                "HG002.GRCh38.chr20_9950000_10100000.downsample33pct.bam",
-                windowSize=gs.expr("windowSize"),
-            ),
-            params=[
-                gs.param(
-                    "minMapq",
-                    value=0,
-                    bind={
-                        "input": "range",
-                        "min": 0,
-                        "max": 60,
-                        "step": 1,
-                        "debounce": 100,
-                    },
-                ),
-                gs.param(
-                    "minBaseQuality",
-                    value=0,
-                    bind={
-                        "input": "range",
-                        "min": 0,
-                        "max": 40,
-                        "step": 1,
-                        "debounce": 100,
-                    },
-                ),
-                gs.param("windowSize", value=15_000),
-            ],
-            spacing=5,
-            description="BAM depth, alignments, CIGAR operations, and mismatches.",
-        )
-        .transform_filter(
-            (gs.datum.mapq == None) | (gs.datum.mapq >= MIN_MAPQ)  # noqa: E711
-        )
-        .transform_formula(
-            expr=gs.expr.if_(gs.datum.mapq == None, 0, gs.datum.mapq),  # noqa: E711
-            as_="_mapqOrZero",
-        )
-        .transform_pileup(start="start", end="end", as_="_lane")
-        .resolve_axis(x="shared")
-    )
-
-
+# The lazy BAM source requests only the visible window. Both tracks inherit it
+# and therefore stay synchronized while zooming.
 chart = (
-    build_bam_alignment_track()
+    (coverage & read_alignments)
     .properties(
         assembly="hg38",
+        data=gs.lazy.bam(
+            "https://data.genomespy.app/sample-data/NIST-HG002/"
+            "HG002.GRCh38.chr20_9950000_10100000.downsample33pct.bam",
+            windowSize=gs.expr("windowSize"),
+        ),
+        params=[
+            gs.param(
+                "minMapq",
+                value=0,
+                bind={
+                    "input": "range",
+                    "min": 0,
+                    "max": 60,
+                    "step": 1,
+                    "debounce": 100,
+                },
+            ),
+            gs.param(
+                "minBaseQuality",
+                value=0,
+                bind={
+                    "input": "range",
+                    "min": 0,
+                    "max": 40,
+                    "step": 1,
+                    "debounce": 100,
+                },
+            ),
+            gs.param("windowSize", value=15_000),
+        ],
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
@@ -376,7 +351,16 @@ chart = (
                 ]
             )
         ),
+        spacing=5,
+        description="BAM depth, alignments, CIGAR operations, and mismatches.",
     )
+    .transform_filter((gs.datum.mapq == None) | (gs.datum.mapq >= MIN_MAPQ))  # noqa: E711
+    .transform_formula(
+        expr=gs.expr.if_(gs.datum.mapq == None, 0, gs.datum.mapq),  # noqa: E711
+        as_="_mapqOrZero",
+    )
+    .transform_pileup(start="start", end="end", as_="_lane")
+    .resolve_axis(x="shared")
     .configure_view(stroke="lightgray")
     .configure_legend()
 )

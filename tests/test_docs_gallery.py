@@ -993,8 +993,11 @@ def test_refseq_example_preserves_nested_semantic_zoom_layers() -> None:
 
 def test_composed_genome_browser_builds_four_python_tracks() -> None:
     gallery = _load_gallery()
-    spec = gallery.collect_example(EXAMPLES_DIR / "composing_genome_browser.py").spec
+    example = gallery.collect_example(EXAMPLES_DIR / "composing_genome_browser.py")
+    spec = example.spec
 
+    assert "from docs.examples" not in example.source
+    assert "gs.import_view" not in example.source
     assert spec["assembly"] == "hg38"
     assert spec["scales"]["x"]["domain"] == [
         {"chrom": "chr20", "pos": 10006452},

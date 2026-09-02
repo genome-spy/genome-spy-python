@@ -11,19 +11,19 @@ examples. See those pages for source details and applicable disclaimers.
 
 ## What to notice
 
-Four independently authored views pan and zoom together because the parent
-owns their assembly and shared locus scale. The cytoband track supplies the
-single top genome axis. The child views retain their own data, marks, and
-vertical scales.
+Four views pan and zoom together because the parent owns their assembly and
+shared locus scale. The cytoband track supplies the single top genome axis.
+The child views retain their own data, marks, and vertical scales.
 
 ## Python implementation
 
-Each standalone example exposes a small Python builder for its reusable track.
-This example calls those builders and combines the returned charts with
-`gs.vconcat()`. No JSON specification is imported: the child dataflows and the
-parent composition are all authored through the Python API. The BAM builder is
-given an explicit viewport height because it is nested inside a larger layout;
-its standalone example instead fills its own container.
+The complete cytoband, six-frame translation, BAM alignment, and RefSeq track
+definitions are written in this example and combined with `gs.vconcat()`.
+There are no imported Python chart builders, JSON specifications, remote view
+specifications, or GenomeSpy view-template imports. URLs in the code identify
+the underlying biological datasets; GenomeSpy loads those data while rendering.
+The BAM track uses an explicit viewport height because it is nested inside the
+larger layout.
 
 See the [official GenomeSpy example](https://genomespy.app/docs/examples/genomic-data/genome-browser/)
 for the original composition discussion.
