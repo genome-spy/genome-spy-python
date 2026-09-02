@@ -26,6 +26,10 @@ TRANSFORMS_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "transforms.py"
 TRANSFORMS_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "transforms.md"
 COMPOSITION_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "composition.py"
 COMPOSITION_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "composition.md"
+IMPORTING_TUTORIAL_PATH = (
+    REPO_ROOT / "docs" / "tutorials" / "importing_specifications.py"
+)
+IMPORTING_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "importing-specifications.md"
 CONFIGURATION_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "configuration.py"
 CONFIGURATION_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "configuration.md"
 GENOMIC_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "genomic_coordinates.py"
@@ -421,6 +425,17 @@ def test_composition_guide_embeds_only_named_tutorial_charts() -> None:
         "grid_chart",
     ]
     assert set(targets) <= tutorial.CHARTS.keys()
+
+
+def test_importing_guide_embeds_a_pinned_remote_specification() -> None:
+    tutorial = _load_module("_importing_tutorial", IMPORTING_TUTORIAL_PATH)
+    source = IMPORTING_GUIDE_PATH.read_text(encoding="utf-8")
+    spec = tutorial.imported_chart.to_dict()
+
+    assert spec["vconcat"] == [{"import": {"url": tutorial.SPEC_URL}}]
+    assert "/d2e9bd71/" in tutorial.SPEC_URL
+    assert tutorial.SPEC_URL.endswith("/bar-and-label-layer.json")
+    assert "{genomespy-chart} importing_specifications:imported_chart" in source
 
 
 def test_configuration_guide_examples_serialize_expected_scopes() -> None:

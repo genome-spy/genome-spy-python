@@ -8,37 +8,32 @@ JSON in the browser when the chart is rendered.
 
 ## Import and compose a view
 
-Pass an absolute or relative specification URL and compose the result like any
-other chart:
+Pass an absolute or relative specification URL and place the imported child in
+a composition. This example imports a small layered bar chart with inline data
+from GenomeSpy's repository:
 
-```python
-import genome_spy as gs
-
-release = (
-    "https://raw.githubusercontent.com/genome-spy/genome-spy/"
-    "d2e9bd71/examples/docs/examples/genomic-data"
-)
-
-browser = gs.vconcat(
-    gs.import_view(url=f"{release}/cytobands.json"),
-    gs.import_view(url=f"{release}/scored-refSeq-genes.json"),
-).properties(
-    assembly="hg38",
-    scales=gs.scales(
-        x=gs.Scale(
-            domain=[
-                {"chrom": "chr20", "pos": 10_006_452},
-                {"chrom": "chr20", "pos": 10_006_533},
-            ]
-        )
-    ),
-)
+```{literalinclude} ../tutorials/importing_specifications.py
+:language: python
+:start-after: remote-spec-import-start
+:end-before: remote-spec-import-end
 ```
 
+```{genomespy-chart} importing_specifications:imported_chart
+:height: 300
+:title: A layered bar chart loaded from a remote JSON specification
+```
+
+The JSON file contains the data, shared encodings, and two layers: bars and
+their value labels. The Python code only declares where GenomeSpy should load
+that view. The one-child `vconcat` supplies the parent view context that URL
+imports require.
+
 An imported specification may contain a single view, layers, or a concatenated
-layout. Parent properties can provide shared context such as the assembly,
-genomic domain, axis resolution, and configuration. The imported view remains
-responsible for its own marks and dataflow.
+layout. The returned object composes like any other chart, so it can be passed
+to `gs.layer()`, `gs.hconcat()`, or `gs.vconcat()`. Parent properties can
+provide shared context such as the assembly, genomic domain, axis resolution,
+and configuration. The imported view remains responsible for its own marks and
+dataflow.
 
 ## URL and version considerations
 
