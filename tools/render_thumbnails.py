@@ -179,6 +179,11 @@ def thumbnail_spec(spec: dict[str, object]) -> dict[str, object]:
     return cleaned
 
 
+def has_runtime_error(text: str) -> bool:
+    """Return whether chart container text reports a GenomeSpy failure."""
+    return text.startswith(("Error:", "Loading failed:"))
+
+
 def _load_gallery():
     spec = importlib.util.spec_from_file_location(
         "_gs_docs_gallery", _TOOLS / "docs_gallery.py"
@@ -376,7 +381,7 @@ def main() -> int:
                 lambda: page.wait_for_timeout(STABLE_POLL_MS),
             )
             runtime_error = page.locator("#c").inner_text().strip()
-            if runtime_error.startswith("Error:"):
+            if has_runtime_error(runtime_error):
                 print(
                     f"[thumb] {example.name}: render failed ({runtime_error})",
                     file=sys.stderr,

@@ -126,3 +126,19 @@ def test_stable_capture_rejects_a_zero_attempt_budget() -> None:
 
     with pytest.raises(ValueError, match="at least one"):
         renderer.wait_until_stable(lambda: b"", lambda: None, attempts=0)
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "Error: invalid specification",
+        "Loading failed: Error: invalid specification",
+    ],
+)
+def test_runtime_error_detection_handles_delayed_genomespy_failures(
+    message: str,
+) -> None:
+    renderer = _load_renderer()
+
+    assert renderer.has_runtime_error(message)
+    assert not renderer.has_runtime_error("minMapq\n0\nminBaseQuality\n0")
