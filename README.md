@@ -43,7 +43,8 @@ cd genome-spy-python
 uv sync
 ```
 
-For efficient dataframe transport:
+For notebook use, install with Arrow support. This includes PyArrow for
+dataframe transport:
 
 ```bash
 pip install "genome-spy-python[arrow]"

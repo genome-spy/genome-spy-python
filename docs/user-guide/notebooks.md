@@ -4,6 +4,15 @@ GenomeSpy charts display through a notebook widget in JupyterLab, Jupyter
 Notebook, VS Code notebooks, and Marimo. The browser needs network access when
 it first loads the pinned GenomeSpy JavaScript bundle.
 
+## Install for notebooks
+
+Install the package with Arrow support when using it in a notebook. This also
+installs PyArrow for dataframe transport:
+
+```bash
+pip install "genome-spy-python[arrow]"
+```
+
 ## Display a chart
 
 Build a chart normally:
@@ -38,12 +47,6 @@ frame = pd.DataFrame({"sample": ["A", "B"], "value": [2.1, 3.4]})
 
 chart = gs.Chart(frame).mark_point().encode(x="sample:N", y="value:Q")
 chart
-```
-
-Install the Arrow extra when using pandas or PyArrow tables:
-
-```bash
-pip install "genome-spy-python[arrow]"
 ```
 
 Notebook rendering transfers supported tables with Arrow automatically. This
@@ -98,9 +101,8 @@ view.set_dataset("measurements", updated_frame)
 ```
 
 Arrow is the default transport for these updates. Keep column names and value
-types compatible with the chart fields. If a pandas update reports that
-PyArrow is missing, install the Arrow extra shown above. Most users do not need
-to call `to_arrow_ipc()` directly.
+types compatible with the chart fields. Most users do not need to call
+`to_arrow_ipc()` directly.
 
 In a reactive notebook, create and display the widget in a stable cell. Let
 dependent cells prepare new rows and call `set_dataset()` on that same object.

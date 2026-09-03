@@ -27,6 +27,13 @@ GenomeSpy Python requires Python 3.11 or newer.
 pip install genome-spy-python
 ```
 
+For notebook use, install the Arrow extra so PyArrow is available for dataframe
+transport:
+
+```bash
+pip install "genome-spy-python[arrow]"
+```
+
 ### From source
 
 ```bash
