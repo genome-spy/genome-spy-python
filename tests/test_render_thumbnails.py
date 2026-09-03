@@ -68,6 +68,14 @@ def test_thumbnail_spec_removes_transient_zoom_guidance_without_mutating_input()
     assert renderer.thumbnail_spec(nested) == {"layer": []}
 
 
+def test_thumbnail_spec_resolves_container_width_without_mutating_input() -> None:
+    renderer = _load_renderer()
+    spec = {"width": "container", "mark": "point"}
+
+    assert renderer.thumbnail_spec(spec, container_width=980)["width"] == 980
+    assert spec["width"] == "container"
+
+
 def test_select_examples_defaults_to_all_examples() -> None:
     renderer = _load_renderer()
     examples = [

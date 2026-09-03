@@ -739,6 +739,7 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
     example = gallery.collect_example(EXAMPLES_DIR / "tcga_ov_gistic.py")
 
     assert example.spec["assembly"] == "hg19"
+    assert example.thumbnail_width is None
     assert len(example.spec["vconcat"]) == 3
 
     score_track, lesion_track, gene_track = example.spec["vconcat"]
@@ -769,9 +770,14 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
     ]
     assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
     assert gene_track["layer"][1]["mark"]["clip"] == "x"
+    assert gene_track["encoding"]["y"]["scale"]["paddingOuter"] == 0.5
     assert "offset" not in gene_track["transform"][0]
     assert len(gene_track["data"]["values"]) == 29_599
     assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
+    assert example.spec["scales"]["x"]["domain"] == [
+        {"chrom": "chr1"},
+        {"chrom": "chrY"},
+    ]
     assert "https://data.genomespy.app" not in str(example.spec)
 
 
@@ -780,6 +786,7 @@ def test_rainfall_includes_shared_refseq_annotation_track() -> None:
     example = gallery.collect_example(EXAMPLES_DIR / "rainfall_plot.py")
 
     assert example.spec["assembly"] == "hg19"
+    assert example.thumbnail_width == 980
     assert [view["name"] for view in example.spec["vconcat"]] == [
         "rainfall-track",
         "refseq-genes",
@@ -788,17 +795,26 @@ def test_rainfall_includes_shared_refseq_annotation_track() -> None:
         "scale": {"x": "shared", "y": "independent"},
         "axis": {"x": "shared", "y": "independent"},
     }
+    assert (
+        example.spec["vconcat"][0]["layer"][0]["encoding"]["color"]["legend"]["orient"]
+        == "top-right"
+    )
     gene_track = example.spec["vconcat"][1]
     assert gene_track["title"]["offset"] == 8
     assert gene_track["layer"][0]["mark"]["style"] == "arrow-block"
     assert gene_track["layer"][0]["opacity"]["unitsPerPixel"] == [100000, 40000]
     assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
     assert gene_track["layer"][1]["mark"]["clip"] == "x"
+    assert gene_track["encoding"]["y"]["scale"]["paddingOuter"] == 0.5
     assert "offset" not in gene_track["transform"][0]
     assert len(gene_track["data"]["values"]) == 29_599
     assert "offset" not in gene_track["layer"][0]["encoding"]["x"]
     rainfall_layers = example.spec["vconcat"][0]["layer"]
     assert all(layer["encoding"]["x"]["offset"] == 1 for layer in rainfall_layers)
+    assert example.spec["scales"]["x"]["domain"] == [
+        {"chrom": "chr1"},
+        {"chrom": "chrY"},
+    ]
 
 
 def test_bam_example_uses_full_alignment_dataflow() -> None:

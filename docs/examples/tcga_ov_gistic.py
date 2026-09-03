@@ -15,6 +15,8 @@ META = {
     "max_width": 980,
 }
 
+GENOME_DOMAIN = [{"chrom": "chr1"}, {"chrom": "chrY"}]
+
 event_colors = gs.Scale(
     domain=["Amp", "Del"],
     range=["#e45756", "#4c78a8"],
@@ -205,7 +207,7 @@ gene_track = (
             reverse=True,
             align=0,
             paddingInner=0.4,
-            paddingOuter=0.2,
+            paddingOuter=0.5,
             zoom=False,
         )
         .axis(None)
@@ -233,19 +235,12 @@ chart = (
         assembly="hg19",
         name="gistic-track",
         width="container",
-        scales=gs.scales(
-            x=gs.Scale(
-                domain=[
-                    {"chrom": "chr19", "pos": 400_000},
-                    {"chrom": "chr19", "pos": 2_000_000},
-                ]
-            )
-        ),
+        scales=gs.scales(x=gs.Scale(domain=GENOME_DOMAIN)),
         axes=gs.axes(x=gs.GenomeAxis(title="Genomic position")),
         spacing=8,
         description=(
             "TCGA OV-TP GISTIC2 copy-number scores, recurrent lesions, and "
-            "aligned RefSeq gene bodies around the 19p13.3 deletion peak."
+            "aligned RefSeq gene bodies across the hg19 genome."
         ),
     )
     .resolve_scale(x="shared", y="independent")

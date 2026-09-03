@@ -138,9 +138,13 @@ def thumbnail_layout(example: object) -> ThumbnailLayout:
     )
 
 
-def thumbnail_spec(spec: dict[str, object]) -> dict[str, object]:
-    """Return a copy with transient zoom guidance removed from thumbnails."""
+def thumbnail_spec(
+    spec: dict[str, object], *, container_width: int | None = None
+) -> dict[str, object]:
+    """Return a stable copy of a specification for thumbnail rendering."""
     result = copy.deepcopy(spec)
+    if result.get("width") == "container" and container_width is not None:
+        result["width"] = container_width
 
     drop = object()
 
@@ -352,7 +356,11 @@ def main() -> int:
                 stage_width=layout.stage_width,
                 min_stage_height=layout.min_stage_height,
                 bundle=bundle_url,
-                spec=json.dumps(thumbnail_spec(example.spec)),
+                spec=json.dumps(
+                    thumbnail_spec(
+                        example.spec, container_width=example.thumbnail_width
+                    )
+                ),
             )
             page.set_content(html, wait_until="load")
             try:
