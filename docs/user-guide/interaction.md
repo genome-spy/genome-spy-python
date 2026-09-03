@@ -114,24 +114,54 @@ remain unchanged when data updates. It prevents a selection from depending on
 the accidental order of rows.
 
 Use `select="point"` for discrete rows. An interval selection instead describes
-a continuous brushed range:
-
-```python
-gs.param(
-    "brush",
-    select={"type": "interval", "encodings": ["x"]},
-)
-```
-
-Interval selections can filter rows or supply another scale's domain for an
-overview-and-detail layout. When an x scale is already zoomable, GenomeSpy uses
-Shift-drag to start the brush by default so brushing does not conflict with
-panning. See
+a continuous brushed range. See
 [point](https://genomespy.app/docs/grammar/parameters/#point-selection) and
 [interval selections](https://genomespy.app/docs/grammar/parameters/#interval-selection)
-for their configuration options, and
-[domain from selection parameters](https://genomespy.app/docs/grammar/scale/#domain-from-selection-parameters)
-for the overview-and-detail pattern.
+for their configuration options.
+
+## Brush an overview to navigate linked tracks
+
+A common genome-browser layout uses a compact overview to choose the locus
+shown by several detail tracks. Drag across the overview in this example. The
+score and depth tracks move together because the brush supplies their shared x
+domain:
+
+```{literalinclude} ../tutorials/interaction.py
+:language: python
+:start-after: interaction-brush-start
+:end-before: interaction-brush-end
+```
+
+```{genomespy-chart} interaction:brush_chart
+:height: 340
+:title: One overview brush controls two detail tracks
+```
+
+The parameter appears at two levels for a reason. The empty `brush` parameter
+on the outer concatenation owns the shared state. The overview defines how that
+state is selected and uses `push="outer"` to update the outer parameter.
+`SelectionDomainRef` then connects that parameter to the detail x scale, while
+`initial` supplies the locus shown before the first gesture.
+
+The overview is wrapped in its own concatenated subtree and uses
+`resolve_scale(x="excluded")`. Its non-zoomable x scale can therefore keep
+showing the full context instead of inheriting the brushed detail domain. The
+two detail tracks use a shared, zoomable x scale in their own nested group, so
+zooming a detail track also updates the overview brush.
+
+Because the overview scale has `zoom=False`, an ordinary drag creates the
+brush. On a zoomable scale, GenomeSpy uses Shift-drag by default so brushing
+does not conflict with panning. The generated `IntervalSelectionConfig`,
+`BrushConfig`, and `SelectionDomainRef` classes map directly to GenomeSpy's
+schema; no special chart adapter is involved.
+
+See GenomeSpy's documentation on
+[interval selections](https://genomespy.app/docs/grammar/parameters/#interval-selection)
+and
+[domains from selection parameters](https://genomespy.app/docs/grammar/scale/#domain-from-selection-parameters)
+for the underlying grammar. The
+[linked brush gallery example](../gallery/brush_linked_genome_tracks.md) applies
+the same pattern to three genome-wide association tracks.
 
 ## Add one ruler across linked tracks
 

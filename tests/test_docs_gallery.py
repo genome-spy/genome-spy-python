@@ -1108,6 +1108,43 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     }
 
 
+def test_brush_gallery_links_one_overview_to_three_detail_tracks() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "brush_linked_genome_tracks.py")
+    spec = example.spec
+
+    assert spec["params"] == [{"name": "brush"}]
+    detail_group = spec["vconcat"][1]
+    assert detail_group["scales"]["x"]["domain"] == {
+        "param": "brush",
+        "initial": [
+            {"chrom": "chr5", "pos": 0},
+            {"chrom": "chr5", "pos": 180_857_866},
+        ],
+    }
+    assert detail_group["resolve"]["scale"] == {
+        "x": "shared",
+        "y": "independent",
+    }
+
+    overview = spec["vconcat"][0]
+    assert overview["resolve"] == {"scale": {"x": "excluded"}}
+    brush = overview["vconcat"][0]["params"][0]
+    assert brush["name"] == "brush"
+    assert brush["push"] == "outer"
+    assert brush["persist"] is False
+    assert brush["select"]["type"] == "interval"
+    assert brush["select"]["encodings"] == ["x"]
+
+    detail_tracks = detail_group["vconcat"]
+    assert [track["name"] for track in detail_tracks] == [
+        "association-strength",
+        "effect-size",
+        "z-score",
+    ]
+    assert all("params" not in track for track in detail_tracks)
+
+
 def test_gallery_index_lists_every_example_in_hidden_navigation(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

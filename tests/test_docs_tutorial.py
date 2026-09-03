@@ -796,6 +796,45 @@ def test_interaction_selection_uses_key_and_conditional_encodings() -> None:
     }
 
 
+def test_interaction_brush_links_overview_to_two_detail_tracks() -> None:
+    tutorial = _load_module("_interaction_brush", INTERACTION_TUTORIAL_PATH)
+    spec = tutorial.brush_chart.to_dict()
+
+    assert spec["params"] == [{"name": "brush"}]
+    details = spec["vconcat"][1]
+    assert details["scales"]["x"]["domain"] == {
+        "param": "brush",
+        "initial": tutorial.DETAIL_REGION,
+    }
+    assert details["resolve"]["scale"] == {
+        "x": "shared",
+        "y": "independent",
+    }
+
+    overview = spec["vconcat"][0]
+    assert overview["resolve"] == {"scale": {"x": "excluded"}}
+    selection = overview["vconcat"][0]["params"]
+    assert selection == [
+        {
+            "name": "brush",
+            "persist": False,
+            "push": "outer",
+            "select": {
+                "encodings": ["x"],
+                "mark": {
+                    "fill": "#4c78a8",
+                    "fillOpacity": 0.18,
+                    "measure": "outside",
+                    "stroke": "#4c78a8",
+                },
+                "type": "interval",
+            },
+        }
+    ]
+    assert len(details["vconcat"]) == 2
+    assert all("params" not in track for track in details["vconcat"])
+
+
 def test_interaction_ruler_is_declared_once_on_shared_parent() -> None:
     tutorial = _load_module("_interaction_ruler", INTERACTION_TUTORIAL_PATH)
     spec = tutorial.ruler_chart.to_dict()
@@ -829,6 +868,7 @@ def test_interaction_guide_embeds_only_named_tutorial_charts() -> None:
         "zoom_chart",
         "bound_chart",
         "selection_chart",
+        "brush_chart",
         "ruler_chart",
     ]
     assert set(targets) <= tutorial.CHARTS.keys()

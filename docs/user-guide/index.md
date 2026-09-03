@@ -39,7 +39,7 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
 ## Interaction and output
 
 - [Parameters and interaction](interaction.md) covers zooming, controls,
-  selections, and cursor rulers.
+  overview brushes, selections, and cursor rulers.
 - [Create and update charts in notebooks](notebooks.md) covers display,
   dataframe transport, and live dataset updates without remounting.
 - [Save and inspect charts](serialization.md) writes specifications and

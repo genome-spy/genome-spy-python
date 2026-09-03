@@ -23,3 +23,6 @@ zoom-responsive point size and mirrored-BAF expression in the browser.
 
 See the [official GenomeSpy example](https://genomespy.app/docs/examples/genomic-data/ascat/)
 for data-wrangling details and the original specification.
+
+For an overview interval that navigates several shared-locus tracks, see the
+[brush-linked genome tracks](brush_linked_genome_tracks.md) example.

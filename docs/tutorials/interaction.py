@@ -1,6 +1,7 @@
 """Single-source chart objects used by the interaction guide."""
 
 import genome_spy as gs
+from genome_spy.schema import BrushConfig, IntervalSelectionConfig, SelectionDomainRef
 
 
 VARIANTS = [
@@ -45,6 +46,10 @@ REGION = [
 
 VARIANT_DOMAIN = ["v1", "v2", "v3", "v4"]
 MIN_SCORE = gs.Expression("minScore")
+DETAIL_REGION = [
+    {"chrom": "chr17", "pos": 43_050_000},
+    {"chrom": "chr17", "pos": 43_075_000},
+]
 
 
 # interaction-zoom-start
@@ -122,6 +127,84 @@ selection_chart = (
 # interaction-selection-end
 
 
+# interaction-brush-start
+overview_track = (
+    gs.Chart()
+    .mark_point(filled=True, size=70, color="#7f8c8d")
+    .encode(
+        x=gs.Locus("chrom", "pos").scale(domain=REGION, zoom=False).axis(None),
+        y=gs.Y("score:Q").scale(domain=[0, 1]).axis(None),
+    )
+    .properties(
+        height=55,
+        title=gs.title("Drag to choose a region", orient="left"),
+        params=[
+            gs.param(
+                "brush",
+                select=IntervalSelectionConfig(
+                    type="interval",
+                    encodings=["x"],
+                    mark=BrushConfig(
+                        fill="#4c78a8",
+                        fillOpacity=0.18,
+                        stroke="#4c78a8",
+                        measure="outside",
+                    ),
+                ),
+                push="outer",
+                persist=False,
+            )
+        ],
+    )
+)
+
+# The overview needs its own x scale while the detail tracks share another.
+overview = gs.vconcat(overview_track).resolve_scale(x="excluded")
+
+brush_score_track = (
+    gs.Chart()
+    .mark_point(filled=True, size=100, color="#4c78a8")
+    .encode(
+        x=gs.Locus("chrom", "pos"),
+        y=gs.Y("score:Q").scale(domain=[0, 1]).title("Score"),
+        tooltip=["id:N", "score:Q"],
+    )
+    .properties(height=80, title=gs.title("Score", orient="left"))
+)
+
+brush_depth_track = (
+    gs.Chart()
+    .mark_point(filled=True, size=100, color="#f58518", shape="square")
+    .encode(
+        x=gs.Locus("chrom", "pos"),
+        y=gs.Y("depth:Q").scale(domain=[0, 80]).title("Read depth"),
+        tooltip=["id:N", "depth:Q"],
+    )
+    .properties(height=80, title=gs.title("Depth", orient="left"))
+)
+
+brush_details = (
+    gs.vconcat(brush_score_track, brush_depth_track)
+    .properties(
+        scales=gs.scales(
+            x=gs.Scale(domain=SelectionDomainRef(param="brush", initial=DETAIL_REGION))
+        ),
+        axes=gs.axes(x=gs.GenomeAxis(title="Genomic position")),
+        spacing=8,
+    )
+    .resolve_scale(x="shared", y="independent")
+    .resolve_axis(x="shared", y="independent")
+)
+
+brush_chart = gs.vconcat(overview, brush_details).properties(
+    data=VARIANTS,
+    assembly="hg38",
+    params=[gs.param("brush")],
+    spacing=8,
+)
+# interaction-brush-end
+
+
 # interaction-ruler-start
 score_track = (
     gs.Chart()
@@ -169,5 +252,6 @@ CHARTS = {
     "zoom_chart": zoom_chart,
     "bound_chart": bound_chart,
     "selection_chart": selection_chart,
+    "brush_chart": brush_chart,
     "ruler_chart": ruler_chart,
 }
