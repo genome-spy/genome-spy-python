@@ -49,6 +49,7 @@ overview_track = (
                     type="interval",
                     encodings=["x"],
                     mark=BrushConfig(
+                        clip=False,
                         fill="#4c78a8",
                         fillOpacity=0.2,
                         stroke="#315f8c",
@@ -62,7 +63,11 @@ overview_track = (
         ],
     )
 )
-overview = gs.vconcat(overview_track).resolve_scale(x="excluded")
+overview = (
+    gs.vconcat(overview_track)
+    .properties(padding=gs.Paddings(top=24))
+    .resolve_scale(x="excluded")
+)
 
 
 association_track = (
@@ -76,7 +81,6 @@ association_track = (
     .properties(
         name="association-strength",
         height=95,
-        title=gs.title("Association", orient="left"),
     )
 )
 
@@ -91,7 +95,6 @@ effect_track = (
     .properties(
         name="effect-size",
         height=95,
-        title=gs.title("Effect size", orient="left"),
     )
 )
 
@@ -106,7 +109,6 @@ zscore_track = (
     .properties(
         name="z-score",
         height=95,
-        title=gs.title("Z-score", orient="left"),
     )
 )
 

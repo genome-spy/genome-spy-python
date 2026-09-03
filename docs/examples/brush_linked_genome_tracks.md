@@ -17,6 +17,20 @@ detail tracks. Association strength, effect size, and Z-score share one locus
 scale but keep independent y scales. Zooming or panning a detail track also
 updates the overview brush.
 
+## Why use this layout?
+
+This is a real genome-browser pattern. A genome-wide plot helps find an
+interesting region, while the aligned detail tracks make that region readable.
+The overview also shows where the current window is, so users do not lose their
+place while zooming.
+
+The three metrics here intentionally reuse one small dataset to keep the brush
+example focused. Association strength and Z-score contain related information,
+so this exact combination is illustrative rather than a recommended GWAS
+dashboard. A research browser could replace one of them with genes, linkage
+disequilibrium, regulatory annotations, or sequencing coverage while keeping
+the same linked-brush structure.
+
 ## Python implementation
 
 The outer composition declares an empty `brush` parameter. The nested detail

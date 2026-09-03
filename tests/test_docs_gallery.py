@@ -1129,12 +1129,14 @@ def test_brush_gallery_links_one_overview_to_three_detail_tracks() -> None:
 
     overview = spec["vconcat"][0]
     assert overview["resolve"] == {"scale": {"x": "excluded"}}
+    assert overview["padding"] == {"top": 24}
     brush = overview["vconcat"][0]["params"][0]
     assert brush["name"] == "brush"
     assert brush["push"] == "outer"
     assert brush["persist"] is False
     assert brush["select"]["type"] == "interval"
     assert brush["select"]["encodings"] == ["x"]
+    assert brush["select"]["mark"]["clip"] is False
 
     detail_tracks = detail_group["vconcat"]
     assert [track["name"] for track in detail_tracks] == [
@@ -1143,6 +1145,7 @@ def test_brush_gallery_links_one_overview_to_three_detail_tracks() -> None:
         "z-score",
     ]
     assert all("params" not in track for track in detail_tracks)
+    assert all("title" not in track for track in detail_tracks)
 
 
 def test_gallery_index_lists_every_example_in_hidden_navigation(
