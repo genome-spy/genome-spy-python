@@ -171,6 +171,7 @@ gene_track = (
         data=genes,
         title=gs.title("RefSeq genes", orient="left", offset=8),
         height=gs.step(24),
+        padding=gs.Paddings(top=10),
     )
     .encode(
         y=gs.Y("lane:O")

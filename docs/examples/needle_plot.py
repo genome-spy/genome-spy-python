@@ -44,7 +44,7 @@ def build_chart() -> gs.Chart:
     mutation_legend = (
         Legend()
         .title("Mutation class")
-        .orient("bottom")
+        .orient("top-left")
         .direction("horizontal")
         .columns(2)
         .symbolSize(72)

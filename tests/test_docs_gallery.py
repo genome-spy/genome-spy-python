@@ -100,6 +100,9 @@ def test_dnmt3a_needle_plot_uses_separate_mutation_and_protein_tracks() -> None:
         "axis": {"x": "shared", "y": "independent"},
     }
     mutation_track, protein_track = spec["vconcat"]
+    assert mutation_track["layer"][1]["encoding"]["color"]["legend"]["orient"] == (
+        "top-left"
+    )
     assert set(mutation_track["data"]["values"][0]).isdisjoint(
         {"base", "label_y", "label_text"}
     )
@@ -771,6 +774,7 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
     assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
     assert gene_track["layer"][1]["mark"]["clip"] == "x"
     assert gene_track["encoding"]["y"]["scale"]["paddingOuter"] == 0.5
+    assert gene_track["padding"] == {"top": 10}
     assert "offset" not in gene_track["transform"][0]
     assert len(gene_track["data"]["values"]) == 29_599
     assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
@@ -806,6 +810,7 @@ def test_rainfall_includes_shared_refseq_annotation_track() -> None:
     assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
     assert gene_track["layer"][1]["mark"]["clip"] == "x"
     assert gene_track["encoding"]["y"]["scale"]["paddingOuter"] == 0.5
+    assert gene_track["padding"] == {"top": 10}
     assert "offset" not in gene_track["transform"][0]
     assert len(gene_track["data"]["values"]) == 29_599
     assert "offset" not in gene_track["layer"][0]["encoding"]["x"]
