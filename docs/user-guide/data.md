@@ -46,11 +46,9 @@ Use the same chart construction for any of them: `gs.Chart(frame)`. GenomeSpy
 uses column names as fields. A pandas index is not a field, so call
 `frame.reset_index()` first when an index contains values needed by the chart.
 
-When a supported table is displayed in a notebook, the renderer uses Arrow IPC
-transport when available. `chart.to_dict()` still produces ordinary
-JSON-compatible records. This distinction changes transport efficiency, not
-the chart grammar. See [Arrow data transport](arrow-transport.md) for setup and
-live dataset updates.
+Notebook display and live updates use Arrow IPC for supported tables when
+available. See [Create and update charts in notebooks](notebooks.md) for setup
+and transport details.
 
 The grammar is easiest to use with **long-form data**, where one row represents
 one observation and categories such as `sample` are stored as values in a

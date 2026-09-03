@@ -12,8 +12,6 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
 
 - [Data and chart inputs](data.md) explains records, tables, URLs, and inherited
   data.
-- [Arrow data transport](arrow-transport.md) moves dataframe data efficiently
-  into notebook widgets.
 - [Charts and marks](charts.md) introduces the shapes that represent rows.
 - [Encodings and channels](encodings.md) maps fields to position, color, size,
   and other visible properties.
@@ -42,8 +40,8 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
 
 - [Parameters and interaction](interaction.md) covers zooming, controls,
   selections, and cursor rulers.
-- [Notebook display and updates](notebooks.md) displays a chart and replaces a
-  named dataset without remounting it.
+- [Create and update charts in notebooks](notebooks.md) covers display,
+  dataframe transport, and live dataset updates without remounting.
 - [Save and inspect charts](serialization.md) writes specifications and
   standalone HTML.
 
@@ -53,7 +51,6 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
 :caption: Foundations
 
 data
-arrow-transport
 charts
 encodings
 scales-axes-legends
