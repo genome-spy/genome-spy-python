@@ -83,6 +83,11 @@ def test_pik3ca_lollipop_uses_reactive_collision_displacement() -> None:
         "value": 0
     }
     assert mutation_view["vconcat"][2]["layer"][0]["mark"]["x2Offset"] == 0
+    assert "resolve" not in mutation_view
+    assert example.spec["resolve"] == {
+        "scale": {"x": "shared", "color": "independent"},
+        "legend": {"color": "collected"},
+    }
 
 
 def test_dnmt3a_needle_plot_uses_separate_mutation_and_protein_tracks() -> None:

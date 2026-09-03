@@ -108,7 +108,6 @@ mutation_view = (
     )
     .properties(
         data=gs.Data(name="mutations"),
-        resolve={"scale": {"color": "shared"}, "legend": {"color": "shared"}},
     )
     .encode(
         x=gs.X("position:I").axis(None),
@@ -204,5 +203,6 @@ chart = (
             ),
         ],
     )
-    .resolve_scale(x="shared")
+    .resolve_scale(x="shared", color="independent")
+    .resolve_legend(color="collected")
 )
