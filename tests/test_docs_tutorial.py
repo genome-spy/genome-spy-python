@@ -801,6 +801,15 @@ def test_interaction_brush_links_overview_to_two_detail_tracks() -> None:
     spec = tutorial.brush_chart.to_dict()
 
     assert spec["params"] == [{"name": "brush"}]
+    assert spec["data"]["values"] == tutorial.BRUSH_VARIANTS
+    assert {row["chrom"] for row in tutorial.BRUSH_VARIANTS} == {
+        "chr1",
+        "chr7",
+        "chr9",
+        "chr11",
+        "chr17",
+        "chr20",
+    }
     details = spec["vconcat"][1]
     assert details["scales"]["x"]["domain"] == {
         "param": "brush",
@@ -813,7 +822,13 @@ def test_interaction_brush_links_overview_to_two_detail_tracks() -> None:
 
     overview = spec["vconcat"][0]
     assert overview["resolve"] == {"scale": {"x": "excluded"}}
-    selection = overview["vconcat"][0]["params"]
+    ideogram = overview["vconcat"][0]
+    assert ideogram["data"] == {"lazy": {"type": "axisGenome", "channel": "x"}}
+    assert [layer["mark"]["type"] for layer in ideogram["layer"]] == [
+        "rect",
+        "text",
+    ]
+    selection = ideogram["params"]
     assert selection == [
         {
             "name": "brush",
@@ -822,10 +837,12 @@ def test_interaction_brush_links_overview_to_two_detail_tracks() -> None:
             "select": {
                 "encodings": ["x"],
                 "mark": {
+                    "clip": False,
                     "fill": "#4c78a8",
                     "fillOpacity": 0.18,
                     "measure": "outside",
                     "stroke": "#4c78a8",
+                    "zindex": 11,
                 },
                 "type": "interval",
             },
@@ -833,6 +850,15 @@ def test_interaction_brush_links_overview_to_two_detail_tracks() -> None:
     ]
     assert len(details["vconcat"]) == 2
     assert all("params" not in track for track in details["vconcat"])
+    assert [track["encoding"]["y"]["title"] for track in details["vconcat"]] == [
+        None,
+        None,
+    ]
+    assert [track["title"]["text"] for track in details["vconcat"]] == [
+        "Score",
+        "Depth",
+    ]
+    assert spec["padding"] == {"top": 20}
 
 
 def test_interaction_ruler_is_declared_once_on_shared_parent() -> None:

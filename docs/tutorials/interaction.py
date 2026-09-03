@@ -1,7 +1,12 @@
 """Single-source chart objects used by the interaction guide."""
 
 import genome_spy as gs
-from genome_spy.schema import BrushConfig, IntervalSelectionConfig, SelectionDomainRef
+from genome_spy.schema import (
+    AxisGenomeData,
+    BrushConfig,
+    IntervalSelectionConfig,
+    SelectionDomainRef,
+)
 
 
 VARIANTS = [
@@ -47,8 +52,16 @@ REGION = [
 VARIANT_DOMAIN = ["v1", "v2", "v3", "v4"]
 MIN_SCORE = gs.Expression("minScore")
 DETAIL_REGION = [
-    {"chrom": "chr17", "pos": 43_050_000},
-    {"chrom": "chr17", "pos": 43_075_000},
+    {"chrom": "chr6", "pos": 20_000_000},
+    {"chrom": "chr11", "pos": 40_000_000},
+]
+BRUSH_VARIANTS = [
+    {"id": "g1", "chrom": "chr1", "pos": 45_000_000, "score": 0.42, "depth": 38},
+    {"id": "g2", "chrom": "chr7", "pos": 35_000_000, "score": 0.91, "depth": 72},
+    {"id": "g3", "chrom": "chr9", "pos": 60_000_000, "score": 0.27, "depth": 51},
+    {"id": "g4", "chrom": "chr11", "pos": 20_000_000, "score": 0.73, "depth": 64},
+    {"id": "g5", "chrom": "chr17", "pos": 43_000_000, "score": 0.58, "depth": 46},
+    {"id": "g6", "chrom": "chr20", "pos": 30_000_000, "score": 0.36, "depth": 57},
 ]
 
 
@@ -128,16 +141,31 @@ selection_chart = (
 
 
 # interaction-brush-start
-overview_track = (
+chromosome_rects = (
     gs.Chart()
-    .mark_point(filled=True, size=70, color="#7f8c8d")
+    .mark_rect(tooltip=None)
     .encode(
-        x=gs.Locus("chrom", "pos").scale(domain=REGION, zoom=False).axis(None),
-        y=gs.Y("score:Q").scale(domain=[0, 1]).axis(None),
+        fill=gs.Fill("odd:N")
+        .scale(domain=[True, False], range=["#e8e8e8", "white"])
+        .legend(None)
+    )
+)
+
+chromosome_labels = (
+    gs.Chart()
+    .mark_text(paddingX=3, paddingY=5, tooltip=None)
+    .encode(text=gs.Text("name:N"))
+)
+
+overview_track = (
+    gs.layer(chromosome_rects, chromosome_labels)
+    .encode(
+        x=gs.X("continuousStart:L").scale(zoom=False).axis(None),
+        x2=gs.X2("continuousEnd"),
     )
     .properties(
-        height=55,
-        title=gs.title("Drag to choose a region", orient="left"),
+        data=gs.Data(lazy=AxisGenomeData(type="axisGenome", channel="x")),
+        height=26,
         params=[
             gs.param(
                 "brush",
@@ -145,10 +173,12 @@ overview_track = (
                     type="interval",
                     encodings=["x"],
                     mark=BrushConfig(
+                        clip=False,
                         fill="#4c78a8",
                         fillOpacity=0.18,
                         stroke="#4c78a8",
                         measure="outside",
+                        zindex=11,
                     ),
                 ),
                 push="outer",
@@ -166,7 +196,7 @@ brush_score_track = (
     .mark_point(filled=True, size=100, color="#4c78a8")
     .encode(
         x=gs.Locus("chrom", "pos"),
-        y=gs.Y("score:Q").scale(domain=[0, 1]).title("Score"),
+        y=gs.Y("score:Q").scale(domain=[0, 1]).title(None),
         tooltip=["id:N", "score:Q"],
     )
     .properties(height=80, title=gs.title("Score", orient="left"))
@@ -177,7 +207,7 @@ brush_depth_track = (
     .mark_point(filled=True, size=100, color="#f58518", shape="square")
     .encode(
         x=gs.Locus("chrom", "pos"),
-        y=gs.Y("depth:Q").scale(domain=[0, 80]).title("Read depth"),
+        y=gs.Y("depth:Q").scale(domain=[0, 80]).title(None),
         tooltip=["id:N", "depth:Q"],
     )
     .properties(height=80, title=gs.title("Depth", orient="left"))
@@ -197,8 +227,9 @@ brush_details = (
 )
 
 brush_chart = gs.vconcat(overview, brush_details).properties(
-    data=VARIANTS,
+    data=BRUSH_VARIANTS,
     assembly="hg38",
+    padding=gs.Paddings(top=20),
     params=[gs.param("brush")],
     spacing=8,
 )

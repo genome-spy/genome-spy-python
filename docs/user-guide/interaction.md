@@ -121,10 +121,8 @@ for their configuration options.
 
 ## Brush an overview to navigate linked tracks
 
-A common genome-browser layout uses a compact overview to choose the locus
-shown by several detail tracks. Drag across the overview in this example. The
-score and depth tracks move together because the brush supplies their shared x
-domain:
+The top row is a map of the chromosomes. Drag across it to choose which part of
+the genome appears below. Both detail tracks move together.
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -133,27 +131,16 @@ domain:
 ```
 
 ```{genomespy-chart} interaction:brush_chart
-:height: 340
-:title: One overview brush controls two detail tracks
+:height: 370
+:title: Drag across the chromosome map to navigate both tracks
 ```
 
-The parameter appears at two levels for a reason. The empty `brush` parameter
-on the outer concatenation owns the shared state. The overview defines how that
-state is selected and uses `push="outer"` to update the outer parameter.
-`SelectionDomainRef` then connects that parameter to the detail x scale, while
-`initial` supplies the locus shown before the first gesture.
+`brush` stores the highlighted region. `initial` chooses what is visible when
+the chart first opens. Both detail tracks use the highlighted region as their
+horizontal range, so they always show the same place.
 
-The overview is wrapped in its own concatenated subtree and uses
-`resolve_scale(x="excluded")`. Its non-zoomable x scale can therefore keep
-showing the full context instead of inheriting the brushed detail domain. The
-two detail tracks use a shared, zoomable x scale in their own nested group, so
-zooming a detail track also updates the overview brush.
-
-Because the overview scale has `zoom=False`, an ordinary drag creates the
-brush. On a zoomable scale, GenomeSpy uses Shift-drag by default so brushing
-does not conflict with panning. The generated `IntervalSelectionConfig`,
-`BrushConfig`, and `SelectionDomainRef` classes map directly to GenomeSpy's
-schema; no special chart adapter is involved.
+The chromosome row always shows the whole genome. Drag its brush, or zoom one
+of the detail tracks, and the other views follow automatically.
 
 See GenomeSpy's documentation on
 [interval selections](https://genomespy.app/docs/grammar/parameters/#interval-selection)
