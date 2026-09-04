@@ -52,9 +52,11 @@ def build_chart() -> gs.Chart:
 
     # Stems and heads inherit one prepared mutation table. Their y encodings
     # differ, while the parent owns their common amino-acid position encoding.
+    # The offset carries stems through the shared-axis overhang so they meet
+    # the protein schematic in the next track.
     stems = (
         gs.Chart()
-        .mark_rule(color="#c0c0c0", size=1)
+        .mark_rule(color="#c0c0c0", size=1, y2Offset=32)
         .encode(
             y=gs.Y(gs.datum(0), type="quantitative")
             .scale(reverse=False, domain=[0, max_count + 4])
