@@ -116,7 +116,7 @@ gene_bodies = (
         fill="#d5d9de",
         stroke="#59636e",
         strokeWidth=1,
-        yOffset=5,
+        yOffset=8,
         size=7,
         tooltip=gs.HandledTooltip(handler="default"),
     )
@@ -152,7 +152,7 @@ gene_labels = (
         # Clip labels at the genomic window while keeping the vertical offset
         # free to extend above the gene body.
         clip="x",
-        yOffset=-5,
+        yOffset=-2,
         size=11,
         color="#20262d",
         tooltip=gs.HandledTooltip(handler="default"),
