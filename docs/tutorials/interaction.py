@@ -195,7 +195,9 @@ brush_score_track = (
     gs.Chart()
     .mark_point(filled=True, size=100, color="#4c78a8")
     .encode(
-        x=gs.Locus("chrom", "pos"),
+        x=gs.Locus("chrom", "pos")
+        .scale(domain=SelectionDomainRef(param="brush", initial=DETAIL_REGION))
+        .axis(None),
         y=gs.Y("score:Q").scale(domain=[0, 1]).title(None),
         tooltip=["id:N", "score:Q"],
     )
@@ -206,32 +208,26 @@ brush_depth_track = (
     gs.Chart()
     .mark_point(filled=True, size=100, color="#f58518", shape="square")
     .encode(
-        x=gs.Locus("chrom", "pos"),
+        x=gs.Locus("chrom", "pos").scale(
+            domain=SelectionDomainRef(param="brush", initial=DETAIL_REGION)
+        ),
         y=gs.Y("depth:Q").scale(domain=[0, 80]).title(None),
         tooltip=["id:N", "depth:Q"],
     )
     .properties(height=80, title=gs.title("Depth", orient="left"))
 )
 
-brush_details = (
-    gs.vconcat(brush_score_track, brush_depth_track)
+brush_chart = (
+    gs.vconcat(overview, brush_score_track, brush_depth_track)
     .properties(
-        scales=gs.scales(
-            x=gs.Scale(domain=SelectionDomainRef(param="brush", initial=DETAIL_REGION))
-        ),
-        axes=gs.axes(x=gs.GenomeAxis(title="Genomic position")),
+        data=BRUSH_VARIANTS,
+        assembly="hg38",
+        padding=gs.Paddings(top=20),
+        params=[gs.param("brush")],
         spacing=8,
     )
-    .resolve_scale(x="shared", y="independent")
-    .resolve_axis(x="shared", y="independent")
-)
-
-brush_chart = gs.vconcat(overview, brush_details).properties(
-    data=BRUSH_VARIANTS,
-    assembly="hg38",
-    padding=gs.Paddings(top=20),
-    params=[gs.param("brush")],
-    spacing=8,
+    .resolve_scale(x="independent", y="independent")
+    .resolve_axis(x="independent", y="independent")
 )
 # interaction-brush-end
 

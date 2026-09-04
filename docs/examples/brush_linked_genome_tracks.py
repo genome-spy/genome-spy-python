@@ -74,7 +74,9 @@ association_track = (
     gs.Chart()
     .mark_point(filled=True, size=24, opacity=0.78, color="#4c78a8")
     .encode(
-        x=gs.Locus("chrom", "BP"),
+        x=gs.Locus("chrom", "BP")
+        .scale(domain=SelectionDomainRef(param="brush", initial=INITIAL_REGION))
+        .axis(None),
         y=gs.Y("neglog:Q").scale(domain=domains["y_domain"]).title("−log10 p"),
         tooltip=["SNP:N", "GENE:N", "P:Q"],
     )
@@ -88,7 +90,9 @@ effect_track = (
     gs.Chart()
     .mark_point(filled=True, size=24, opacity=0.78, color="#f58518")
     .encode(
-        x=gs.Locus("chrom", "BP"),
+        x=gs.Locus("chrom", "BP")
+        .scale(domain=SelectionDomainRef(param="brush", initial=INITIAL_REGION))
+        .axis(None),
         y=gs.Y("EFFECTSIZE:Q").scale(domain=[-3, 3]).title("Effect size"),
         tooltip=["SNP:N", "GENE:N", "EFFECTSIZE:Q"],
     )
@@ -102,7 +106,9 @@ zscore_track = (
     gs.Chart()
     .mark_point(filled=True, size=24, opacity=0.78, color="#54a24b")
     .encode(
-        x=gs.Locus("chrom", "BP"),
+        x=gs.Locus("chrom", "BP").scale(
+            domain=SelectionDomainRef(param="brush", initial=INITIAL_REGION)
+        ),
         y=gs.Y("ZSCORE:Q").scale(domain=[0, 7]).title("Z-score"),
         tooltip=["SNP:N", "GENE:N", "ZSCORE:Q"],
     )
@@ -113,28 +119,19 @@ zscore_track = (
 )
 
 
-detail_tracks = (
-    gs.vconcat(association_track, effect_track, zscore_track)
+chart = (
+    gs.vconcat(overview, association_track, effect_track, zscore_track)
     .properties(
-        scales=gs.scales(
-            x=gs.Scale(domain=SelectionDomainRef(param="brush", initial=INITIAL_REGION))
+        data=data,
+        assembly="hg18",
+        title="Brush-linked HapMap association tracks",
+        description=(
+            "A whole-genome interval selection controls three synchronized "
+            "association detail tracks."
         ),
-        axes=gs.axes(x=gs.GenomeAxis(title="Genomic position")),
+        params=[gs.param("brush")],
         spacing=8,
     )
-    .resolve_scale(x="shared", y="independent")
-    .resolve_axis(x="shared", y="independent")
-)
-
-
-chart = gs.vconcat(overview, detail_tracks).properties(
-    data=data,
-    assembly="hg18",
-    title="Brush-linked HapMap association tracks",
-    description=(
-        "A whole-genome interval selection controls three association "
-        "detail tracks on one shared locus scale."
-    ),
-    params=[gs.param("brush")],
-    spacing=8,
+    .resolve_scale(x="independent", y="independent")
+    .resolve_axis(x="independent", y="independent")
 )
