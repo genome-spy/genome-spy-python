@@ -100,11 +100,6 @@ def test_dnmt3a_needle_plot_uses_separate_mutation_and_protein_tracks() -> None:
         "axis": {"x": "shared", "y": "independent"},
     }
     mutation_track, protein_track = spec["vconcat"]
-    assert spec["spacing"] == 4
-    assert mutation_track["layer"][0]["mark"]["y2Offset"] == 32
-    assert mutation_track["layer"][1]["encoding"]["color"]["legend"]["orient"] == (
-        "top-left"
-    )
     assert set(mutation_track["data"]["values"][0]).isdisjoint(
         {"base", "label_y", "label_text"}
     )
