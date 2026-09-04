@@ -1131,6 +1131,7 @@ def title(
     """Create a chart title object.
 
     Args:
+        text (str | ExprRef | dict[str, Any]): The title text.
         align (Align_T): Horizontal text alignment for title text. One of ``"left"``, ``"center"``, or ``"right"``.
         anchor (TitleAnchor_T): The anchor position for placing the title and subtitle text. One of ``"start"``, ``"middle"``, or ``"end"``. For example, with an orientation of top these anchor positions map to a left-, center-, or right-aligned title.
         angle (float | ExprRef | dict[str, Any]): Angle in degrees of title and subtitle text.
@@ -1154,7 +1155,6 @@ def title(
         subtitleFontStyle (FontStyle_T): Font style for subtitle text.
         subtitleFontWeight (FontWeight_T): Font weight for subtitle text. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
         subtitlePadding (float): Padding in pixels between title and subtitle text. __Default value:__ ``3``
-        text (str | ExprRef | dict[str, Any]): The title text.
         zindex (float): Z-order of the title relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``1``
     """
     properties = {
@@ -1274,10 +1274,10 @@ def param(
     """Create a parameter definition.
 
     Args:
+        name (str): A unique name for the variable parameter. Parameter names should be valid JavaScript identifiers: they should contain only alphanumeric characters (or "$", or "_") and may not start with a digit. Reserved keywords that may not be used as parameter names are: "datum".
         bind (BindCheckbox | BindCheckboxKwds | BindRadioSelect | BindRadioSelectKwds | BindRange | BindRangeKwds | BindInput | BindInputKwds): Binds the parameter to an external input element such as a slider, selection list or radio button group.
         description (str): A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
         expr (str): An expression for the value of the parameter. This expression may include other parameters, in which case the parameter will automatically update in response to upstream parameter changes.
-        name (str): A unique name for the variable parameter. Parameter names should be valid JavaScript identifiers: they should contain only alphanumeric characters (or "$", or "_") and may not start with a digit. Reserved keywords that may not be used as parameter names are: "datum".
         persist (bool): Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
         push (Literal['outer']): Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
         ruler (RulerConfig | RulerConfigKwds): Tracks a domain coordinate and displays it as a ruler in compatible views.
@@ -1521,6 +1521,160 @@ def config(
     return core.GenomeSpyConfig(**defined)
 
 
+def binding(
+    *,
+    autocomplete: str | UndefinedType = Undefined,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    input: Literal["text", "number", "color"] | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+    placeholder: str | UndefinedType = Undefined,
+) -> core.BindInput:
+    """Create a generic input binding.
+
+    Args:
+        autocomplete (str): A hint for form autofill. See the HTML autocomplete attribute for additional information.
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        input (Literal['text', 'number', 'color']): The type of input element to use. The valid values are ``"checkbox"``, ``"radio"``, ``"range"``, ``"select"``, ``"text"``, ``"number"``, and ``"color"``.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+        placeholder (str): Text that appears in the form control when it has no value set.
+    """
+    properties = {
+        "autocomplete": autocomplete,
+        "debounce": debounce,
+        "description": description,
+        "input": input,
+        "name": name,
+        "placeholder": placeholder,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindInput(**defined)
+
+
+def binding_checkbox(
+    *,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+) -> core.BindCheckbox:
+    """Create a checkbox input binding.
+
+    Args:
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+    """
+    properties = {
+        "input": "checkbox",
+        "debounce": debounce,
+        "description": description,
+        "name": name,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindCheckbox(**defined)
+
+
+def binding_radio(
+    *,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    labels: Sequence[str] | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+    options: Sequence[Any] | UndefinedType = Undefined,
+) -> core.BindRadioSelect:
+    """Create a radio input binding.
+
+    Args:
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        labels (Sequence[str]): An array of label strings to represent the ``options`` values. If unspecified, the ``options`` value will be coerced to a string and used as the label.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+        options (Sequence[Any]): An array of options to select from.
+    """
+    properties = {
+        "input": "radio",
+        "debounce": debounce,
+        "description": description,
+        "labels": labels,
+        "name": name,
+        "options": options,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindRadioSelect(**defined)
+
+
+def binding_range(
+    *,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    max: float | UndefinedType = Undefined,
+    min: float | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+    step: float | UndefinedType = Undefined,
+) -> core.BindRange:
+    """Create a range input binding.
+
+    Args:
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        max (float): Sets the maximum slider value. Defaults to the larger of the signal value and ``100``.
+        min (float): Sets the minimum slider value. Defaults to the smaller of the signal value and ``0``.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+        step (float): Sets the minimum slider increment. If undefined, the step size will be automatically determined based on the ``min`` and ``max`` values.
+    """
+    properties = {
+        "input": "range",
+        "debounce": debounce,
+        "description": description,
+        "max": max,
+        "min": min,
+        "name": name,
+        "step": step,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindRange(**defined)
+
+
+def binding_select(
+    *,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    labels: Sequence[str] | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+    options: Sequence[Any] | UndefinedType = Undefined,
+) -> core.BindRadioSelect:
+    """Create a select input binding.
+
+    Args:
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        labels (Sequence[str]): An array of label strings to represent the ``options`` values. If unspecified, the ``options`` value will be coerced to a string and used as the label.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+        options (Sequence[Any]): An array of options to select from.
+    """
+    properties = {
+        "input": "select",
+        "debounce": debounce,
+        "description": description,
+        "labels": labels,
+        "name": name,
+        "options": options,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindRadioSelect(**defined)
+
+
 __all__ = [
     "Locus",
     "locus",
@@ -1534,6 +1688,11 @@ __all__ = [
     "view",
     "view_config",
     "config",
+    "binding",
+    "binding_checkbox",
+    "binding_radio",
+    "binding_range",
+    "binding_select",
     "DatumChannelMethodMixin",
     "LocusChannelMethodMixin",
     "ValueChannelMethodMixin",

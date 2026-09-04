@@ -150,6 +150,28 @@ def test_public_api_exposes_additional_ergonomic_builders() -> None:
         "chrom": "string",
         "start": "integer",
     }
+    assert gs.binding(input="text", placeholder="Search").to_dict() == {
+        "input": "text",
+        "placeholder": "Search",
+    }
+    assert gs.binding_checkbox(name="Enabled").to_dict() == {
+        "input": "checkbox",
+        "name": "Enabled",
+    }
+    assert gs.binding_radio(options=["A", "B"]).to_dict() == {
+        "input": "radio",
+        "options": ["A", "B"],
+    }
+    assert gs.binding_select(options=["A", "B"]).to_dict() == {
+        "input": "select",
+        "options": ["A", "B"],
+    }
+    assert gs.binding_range(min=0, max=1, step=0.1).to_dict() == {
+        "input": "range",
+        "min": 0,
+        "max": 1,
+        "step": 0.1,
+    }
     assert gs.param("threshold", value=5).to_dict() == {"name": "threshold", "value": 5}
     assert gs.compare("site", order="ascending").to_dict() == {
         "field": "site",

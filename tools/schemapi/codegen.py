@@ -254,6 +254,39 @@ class PropertySpec:
 
 
 @dataclass(frozen=True, slots=True)
+class UnionVariantSpec:
+    """One concrete leaf of a recursively expanded schema union."""
+
+    schema_name: str | None
+    properties: tuple[PropertySpec, ...]
+    required: frozenset[str]
+    discriminators: tuple[tuple[str, tuple[Any, ...]], ...]
+    additional_properties: bool | dict[str, Any] | None
+
+
+@dataclass(frozen=True, slots=True)
+class SchemaFactorySpec:
+    """One generated schema-backed convenience factory."""
+
+    helper_name: str
+    class_name: str
+    docstring: str
+    positional_property: str | None = None
+    normalize_view_background: bool = False
+    fixed_properties: tuple[tuple[str, Any], ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class _RawUnionVariant:
+    """Internal schema fragments accumulated while expanding a union."""
+
+    schema_name: str | None
+    properties: dict[str, Any]
+    required: frozenset[str]
+    additional_properties: bool | dict[str, Any] | None
+
+
+@dataclass(frozen=True, slots=True)
 class TransformMethodSpec:
     """Schema-derived information for one transform convenience method."""
 
@@ -399,6 +432,138 @@ class SchemaAnalyzer:
                     for choice_variant in choice_variants
                 )
         return variants
+
+    def union_variants(self, definition_name: str) -> tuple[UnionVariantSpec, ...]:
+        """Expand a named union into concrete, branch-preserving leaves."""
+        schema = self.definitions.get(definition_name)
+        if not isinstance(schema, dict):
+            return ()
+        raw_variants = self._union_variants(
+            schema,
+            seen=frozenset({definition_name}),
+            schema_name=definition_name,
+        )
+        variants: list[UnionVariantSpec] = []
+        for variant in raw_variants:
+            discriminators: list[tuple[str, tuple[Any, ...]]] = []
+            for name, property_schema in sorted(variant.properties.items()):
+                if not isinstance(property_schema, dict):
+                    continue
+                if "const" in property_schema:
+                    values = (property_schema["const"],)
+                else:
+                    enum = property_schema.get("enum")
+                    values = tuple(enum) if isinstance(enum, list) else ()
+                if values:
+                    discriminators.append((name, values))
+            variants.append(
+                UnionVariantSpec(
+                    schema_name=variant.schema_name,
+                    properties=self.property_specs_from_properties(variant.properties),
+                    required=variant.required,
+                    discriminators=tuple(discriminators),
+                    additional_properties=variant.additional_properties,
+                )
+            )
+        return tuple(variants)
+
+    def _union_variants(
+        self,
+        schema: dict[str, Any],
+        *,
+        seen: frozenset[str],
+        schema_name: str | None,
+    ) -> tuple[_RawUnionVariant, ...]:
+        ref_name = _ref_name(schema)
+        if ref_name is not None:
+            if ref_name in seen:
+                return ()
+            target = self.definitions.get(ref_name)
+            if not isinstance(target, dict):
+                return ()
+            return self._union_variants(
+                target,
+                seen=seen | {ref_name},
+                schema_name=ref_name,
+            )
+
+        properties = schema.get("properties", {})
+        local_properties = dict(properties) if isinstance(properties, dict) else {}
+        required = schema.get("required", [])
+        local_required = (
+            frozenset(name for name in required if isinstance(name, str))
+            if isinstance(required, list)
+            else frozenset()
+        )
+        additional_properties = schema.get("additionalProperties")
+        if not isinstance(additional_properties, bool | dict):
+            additional_properties = None
+        variants = (
+            _RawUnionVariant(
+                schema_name=schema_name,
+                properties=local_properties,
+                required=local_required,
+                additional_properties=additional_properties,
+            ),
+        )
+
+        all_of = schema.get("allOf", [])
+        if isinstance(all_of, list):
+            for component in all_of:
+                if not isinstance(component, dict):
+                    continue
+                component_variants = self._union_variants(
+                    component,
+                    seen=seen,
+                    schema_name=None,
+                )
+                variants = tuple(
+                    self._merge_union_variants(
+                        base, extension, prefer_extension_name=False
+                    )
+                    for base in variants
+                    for extension in component_variants
+                )
+
+        choices = schema.get("oneOf", schema.get("anyOf", []))
+        if isinstance(choices, list) and choices:
+            choice_variants = tuple(
+                variant
+                for choice in choices
+                if isinstance(choice, dict)
+                for variant in self._union_variants(
+                    choice,
+                    seen=seen,
+                    schema_name=None,
+                )
+            )
+            variants = tuple(
+                self._merge_union_variants(base, choice, prefer_extension_name=True)
+                for base in variants
+                for choice in choice_variants
+            )
+        return variants
+
+    @staticmethod
+    def _merge_union_variants(
+        base: _RawUnionVariant,
+        extension: _RawUnionVariant,
+        *,
+        prefer_extension_name: bool,
+    ) -> _RawUnionVariant:
+        additional_properties = extension.additional_properties
+        if additional_properties is None:
+            additional_properties = base.additional_properties
+        return _RawUnionVariant(
+            schema_name=(
+                extension.schema_name or base.schema_name
+                if prefer_extension_name
+                else base.schema_name or extension.schema_name
+            ),
+            properties={**base.properties, **extension.properties},
+            required=base.required | extension.required,
+            additional_properties=additional_properties,
+        )
 
     def property_specs(self, definition: SchemaDefinition) -> tuple[PropertySpec, ...]:
         resolved_properties = self.resolve_properties(definition.schema)
@@ -777,6 +942,45 @@ class SchemaWrapperGenerator:
             return ()
         return tuple(sorted(name for name in properties if isinstance(name, str)))
 
+    def binding_factory_specs(self) -> tuple[SchemaFactorySpec, ...]:
+        """Return factories discovered from concrete ``Binding`` leaves."""
+        specs: list[SchemaFactorySpec] = []
+        for variant in self._analyzer.union_variants("Binding"):
+            if variant.schema_name is None:
+                continue
+            discriminator = next(
+                (values for name, values in variant.discriminators if name == "input"),
+                (),
+            )
+            if "input" not in variant.required:
+                specs.append(
+                    SchemaFactorySpec(
+                        helper_name="binding",
+                        class_name=variant.schema_name,
+                        docstring="Create a generic input binding.",
+                    )
+                )
+                continue
+            for value in discriminator:
+                if not isinstance(value, str):
+                    continue
+                specs.append(
+                    SchemaFactorySpec(
+                        helper_name=f"binding_{_snake_name(value)}",
+                        class_name=variant.schema_name,
+                        docstring=f"Create a {value} input binding.",
+                        fixed_properties=(("input", value),),
+                    )
+                )
+        names = [spec.helper_name for spec in specs]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError(
+                "Binding helper discovery produced duplicate names: "
+                + ", ".join(duplicates)
+            )
+        return tuple(sorted(specs, key=lambda spec: spec.helper_name))
+
     def transform_method_specs(self) -> tuple[TransformMethodSpec, ...]:
         """Return method metadata for every member of ``TransformParams``."""
         transform_union = self._definitions_map.get("TransformParams", {})
@@ -1001,6 +1205,16 @@ class SchemaWrapperGenerator:
                 }
                 for spec in self.lazy_data_method_specs()
             ],
+            "interaction": {
+                "bindings": [
+                    {
+                        "helper": spec.helper_name,
+                        "schema": spec.class_name,
+                        "fixed": dict(spec.fixed_properties),
+                    }
+                    for spec in self.binding_factory_specs()
+                ]
+            },
             "root_spec_variants": root_variants,
         }
 
@@ -2276,61 +2490,41 @@ class SchemaWrapperGenerator:
         datum_properties = self.channel_helper_property_specs("datum")
         value_properties = self.channel_helper_property_specs("value")
         factory_helpers = (
-            ("title", "Title", "Create a chart title object.", "text", False),
-            (
+            SchemaFactorySpec("title", "Title", "Create a chart title object.", "text"),
+            SchemaFactorySpec(
                 "dynamic_opacity",
                 "DynamicOpacity",
                 "Create a zoom-dependent opacity definition.",
-                None,
-                False,
             ),
-            (
+            SchemaFactorySpec(
                 "data_format",
                 "DataFormat",
                 "Create a data-format wrapper.",
-                None,
-                False,
             ),
-            ("param", "Parameter", "Create a parameter definition.", "name", False),
-            (
-                "view",
-                "ViewBackground",
-                "Create a view background configuration.",
-                None,
-                False,
+            SchemaFactorySpec(
+                "param", "Parameter", "Create a parameter definition.", "name"
             ),
-            (
-                "view_config",
-                "ViewConfig",
-                "Create a top-level view config object.",
-                None,
-                False,
+            SchemaFactorySpec(
+                "view", "ViewBackground", "Create a view background configuration."
             ),
-            (
+            SchemaFactorySpec(
+                "view_config", "ViewConfig", "Create a top-level view config object."
+            ),
+            SchemaFactorySpec(
                 "config",
                 "GenomeSpyConfig",
                 "Create a top-level GenomeSpy config object.",
-                None,
-                True,
+                normalize_view_background=True,
             ),
+            *self.binding_factory_specs(),
         )
         factory_helper_specs = tuple(
             (
-                helper_name,
-                class_name,
-                docstring,
-                positional_property,
-                normalize_view_background,
-                self.schema_property_specs(class_name),
+                spec,
+                self.schema_property_specs(spec.class_name),
             )
-            for (
-                helper_name,
-                class_name,
-                docstring,
-                positional_property,
-                normalize_view_background,
-            ) in factory_helpers
-            if self.schema_property_specs(class_name)
+            for spec in factory_helpers
+            if self.schema_property_specs(spec.class_name)
         )
         has_locus = any(
             property_spec.name == "chrom" for property_spec in locus_properties
@@ -2367,7 +2561,7 @@ class SchemaWrapperGenerator:
             *(p.annotation for p in value_properties),
             *(
                 p.annotation
-                for *_, property_specs in factory_helper_specs
+                for _, property_specs in factory_helper_specs
                 for p in property_specs
             ),
         ]
@@ -2472,21 +2666,15 @@ class SchemaWrapperGenerator:
                     ),
                     *(
                         _schema_factory_helper_source(
-                            helper_name,
-                            class_name,
+                            spec.helper_name,
+                            spec.class_name,
                             property_specs,
-                            docstring=docstring,
-                            positional_property=positional_property,
-                            normalize_view_background=normalize_view_background,
+                            docstring=spec.docstring,
+                            positional_property=spec.positional_property,
+                            normalize_view_background=spec.normalize_view_background,
+                            fixed_properties=spec.fixed_properties,
                         )
-                        for (
-                            helper_name,
-                            class_name,
-                            docstring,
-                            positional_property,
-                            normalize_view_background,
-                            property_specs,
-                        ) in factory_helper_specs
+                        for spec, property_specs in factory_helper_specs
                     ),
                     "",
                     "__all__ = "
@@ -2496,7 +2684,7 @@ class SchemaWrapperGenerator:
                             *(["compare"] if has_compare else []),
                             *(["datum"] if has_datum else []),
                             *(["value"] if has_value else []),
-                            *(helper_name for helper_name, *_ in factory_helper_specs),
+                            *(spec.helper_name for spec, _ in factory_helper_specs),
                             "DatumChannelMethodMixin",
                             "LocusChannelMethodMixin",
                             "ValueChannelMethodMixin",
@@ -2511,7 +2699,7 @@ class SchemaWrapperGenerator:
                     *(["compare"] if has_compare else []),
                     *(["datum"] if has_datum else []),
                     *(["value"] if has_value else []),
-                    *(helper_name for helper_name, *_ in factory_helper_specs),
+                    *(spec.helper_name for spec, _ in factory_helper_specs),
                     "DatumChannelMethodMixin",
                     "LocusChannelMethodMixin",
                     "ValueChannelMethodMixin",
@@ -3223,8 +3411,10 @@ def _schema_factory_helper_source(
     docstring: str,
     positional_property: str | None,
     normalize_view_background: bool,
+    fixed_properties: tuple[tuple[str, Any], ...] = (),
 ) -> str:
     """Render a schema-object factory with explicit generated properties."""
+    fixed_names = {name for name, _ in fixed_properties}
     positional_spec = next(
         (
             property_spec
@@ -3237,6 +3427,7 @@ def _schema_factory_helper_source(
         property_spec
         for property_spec in property_specs
         if property_spec is not positional_spec
+        and property_spec.name not in fixed_names
     )
     parameters = "\n".join(
         f"    {property_spec.python_name}: "
@@ -3259,6 +3450,10 @@ def _schema_factory_helper_source(
         if positional_spec is not None
         else ""
     )
+    documented_properties = (
+        *((positional_spec,) if positional_spec is not None else ()),
+        *options,
+    )
     signature = [f"def {helper_name}("]
     if positional_parameter:
         signature.extend([positional_parameter, "    /,"])
@@ -3274,8 +3469,9 @@ def _schema_factory_helper_source(
     return "\n".join(
         [
             *signature,
-            _method_docstring(docstring, property_specs, indent=4),
+            _method_docstring(docstring, documented_properties, indent=4),
             "    properties = {",
+            *(f"        {name!r}: {value!r}," for name, value in fixed_properties),
             *([positional_value] if positional_value else []),
             *([values] if values else []),
             "    }",

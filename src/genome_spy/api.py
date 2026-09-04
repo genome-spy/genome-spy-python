@@ -16,6 +16,11 @@ from genome_spy.chart import (
 from genome_spy.data import Data, lazy
 from genome_spy.helpers import (
     axes,
+    binding,
+    binding_checkbox,
+    binding_radio,
+    binding_range,
+    binding_select,
     config,
     condition,
     data_format,
@@ -86,6 +91,11 @@ from genome_spy.schema.composition import (
 __all__ = [
     "Angle",
     "axes",
+    "binding",
+    "binding_checkbox",
+    "binding_radio",
+    "binding_range",
+    "binding_select",
     "Chart",
     "Color",
     "condition",

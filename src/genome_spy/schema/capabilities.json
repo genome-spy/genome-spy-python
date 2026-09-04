@@ -518,6 +518,43 @@
       "method": "vcf"
     }
   ],
+  "interaction": {
+    "bindings": [
+      {
+        "helper": "binding",
+        "schema": "BindInput",
+        "fixed": {}
+      },
+      {
+        "helper": "binding_checkbox",
+        "schema": "BindCheckbox",
+        "fixed": {
+          "input": "checkbox"
+        }
+      },
+      {
+        "helper": "binding_radio",
+        "schema": "BindRadioSelect",
+        "fixed": {
+          "input": "radio"
+        }
+      },
+      {
+        "helper": "binding_range",
+        "schema": "BindRange",
+        "fixed": {
+          "input": "range"
+        }
+      },
+      {
+        "helper": "binding_select",
+        "schema": "BindRadioSelect",
+        "fixed": {
+          "input": "select"
+        }
+      }
+    ]
+  },
   "root_spec_variants": [
     "mark",
     "layer",

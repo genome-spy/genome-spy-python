@@ -26,6 +26,11 @@ from genome_spy.schema.core import (
 )
 from genome_spy.schema.expressions import expr
 from genome_spy.schema.ergonomics import (
+    binding,
+    binding_checkbox,
+    binding_radio,
+    binding_range,
+    binding_select,
     config,
     data_format,
     dynamic_opacity,
@@ -47,6 +52,11 @@ def _normalized_mapping_payload(**kwargs: Any) -> dict[str, Any]:
 
 __all__ = [
     "axes",
+    "binding",
+    "binding_checkbox",
+    "binding_radio",
+    "binding_range",
+    "binding_select",
     "config",
     "condition",
     "data_format",

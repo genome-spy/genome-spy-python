@@ -12,6 +12,7 @@ from tools.generate_schema_wrapper import (
     write_schema_package,
 )
 from tools.schemapi.codegen import (
+    SchemaAnalyzer,
     SchemaWrapperGenerator,
     TransformMethodOverride,
 )
@@ -215,6 +216,72 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     )
 
 
+def test_union_variants_preserve_nested_alternatives_and_inheritance() -> None:
+    analyzer = SchemaAnalyzer(
+        {
+            "Family": {
+                "anyOf": [
+                    {"$ref": "#/definitions/Nested"},
+                    {"$ref": "#/definitions/Direct"},
+                ]
+            },
+            "Nested": {
+                "oneOf": [
+                    {"$ref": "#/definitions/First"},
+                    {"$ref": "#/definitions/Second"},
+                ]
+            },
+            "Base": {
+                "type": "object",
+                "properties": {"name": {"type": "string"}},
+                "required": ["name"],
+            },
+            "First": {
+                "allOf": [
+                    {"$ref": "#/definitions/Base"},
+                    {
+                        "type": "object",
+                        "properties": {"kind": {"const": "first"}},
+                        "required": ["kind"],
+                    },
+                ],
+                "additionalProperties": False,
+            },
+            "Second": {
+                "type": "object",
+                "properties": {
+                    "kind": {"enum": ["second", "alternate"]},
+                    "value": {"type": "number"},
+                },
+                "required": ["kind", "value"],
+                "additionalProperties": False,
+            },
+            "Direct": {
+                "type": "object",
+                "properties": {"direct": {"type": "boolean"}},
+                "required": ["direct"],
+            },
+        }
+    )
+
+    variants = analyzer.union_variants("Family")
+
+    assert [variant.schema_name for variant in variants] == [
+        "First",
+        "Second",
+        "Direct",
+    ]
+    assert [variant.required for variant in variants] == [
+        frozenset({"name", "kind"}),
+        frozenset({"kind", "value"}),
+        frozenset({"direct"}),
+    ]
+    assert variants[0].discriminators == (("kind", ("first",)),)
+    assert variants[1].discriminators == (("kind", ("second", "alternate")),)
+    assert {prop.name for prop in variants[0].properties} == {"kind", "name"}
+    assert variants[0].additional_properties is False
+
+
 def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     schema = json.loads(
         Path("src/genome_spy/schema/genome-spy-schema.json").read_text(encoding="utf-8")
@@ -222,6 +289,11 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     ergonomics_module = SchemaWrapperGenerator(schema).generate_ergonomics_module()
 
     assert {
+        "binding",
+        "binding_checkbox",
+        "binding_radio",
+        "binding_range",
+        "binding_select",
         "title",
         "dynamic_opacity",
         "data_format",
@@ -231,6 +303,11 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
         "config",
     } <= set(ergonomics_module.exports)
     assert "def title(\n    text:" in ergonomics_module.source
+    assert "def binding(\n    *," in ergonomics_module.source
+    assert "input: Literal['text', 'number', 'color']" in ergonomics_module.source
+    assert "def binding_range(\n    *," in ergonomics_module.source
+    assert "'input': 'range'" in ergonomics_module.source
+    assert "input: Literal['range']" not in ergonomics_module.source
     assert "def param(\n    name: str," in ergonomics_module.source
     assert "def config(\n    *," in ergonomics_module.source
     assert "if isinstance(defined.get('view'), core.ViewBackground):" in (
@@ -758,6 +835,7 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
         "encoding_channels": ["color", "x"],
         "transforms": [],
         "lazy_data_sources": [],
+        "interaction": {"bindings": []},
         "root_spec_variants": [],
     }
     assert "MARK_TYPES = ('point', 'rect')" in (output_dir / "core.py").read_text(
