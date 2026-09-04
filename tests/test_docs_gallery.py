@@ -491,6 +491,62 @@ def test_ma_and_volcano_points_grow_gently_when_zoomed(
     }
 
 
+@pytest.mark.parametrize(
+    ("filename", "effect_param", "significance_param", "classification"),
+    [
+        (
+            "volcano_plot.py",
+            "hapmapEffectCutoff",
+            "hapmapSignificanceCutoff",
+            "association",
+        ),
+        (
+            "airway_volcano_plot.py",
+            "airwayVolcanoEffectCutoff",
+            "airwayVolcanoSignificanceCutoff",
+            "direction",
+        ),
+        (
+            "airway_ma_plot.py",
+            "airwayMaEffectCutoff",
+            "airwayMaSignificanceCutoff",
+            "direction",
+        ),
+    ],
+)
+def test_ma_and_volcano_thresholds_drive_point_classification(
+    filename: str,
+    effect_param: str,
+    significance_param: str,
+    classification: str,
+) -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / filename).spec
+
+    assert [param["name"] for param in spec["params"]] == [
+        effect_param,
+        significance_param,
+    ]
+    assert all(param["bind"]["input"] == "range" for param in spec["params"])
+
+    points = next(layer for layer in spec["layer"] if layer["mark"]["type"] == "point")
+    classification_formula = points["transform"][0]
+    assert classification_formula["type"] == "formula"
+    assert classification_formula["as"] == classification
+    assert effect_param in classification_formula["expr"]
+    assert significance_param in classification_formula["expr"]
+
+    rule_expressions = {
+        layer["transform"][0]["expr"]
+        for layer in spec["layer"]
+        if layer["mark"]["type"] == "rule"
+        and layer.get("transform", [{}])[0].get("type") == "formula"
+    }
+    assert f"datum.side * {effect_param}" in rule_expressions
+    if "volcano" in filename:
+        assert significance_param in rule_expressions
+
+
 def test_gallery_examples_do_not_render_data_previews() -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
@@ -1102,11 +1158,29 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     assert example.spec["assembly"] == "hg18"
     assert "genomes" not in example.spec
     assert "vconcat" not in example.spec
-    point_data = example.spec["layer"][2]["data"]["values"]
+    point_data = example.spec["data"]["values"]
     assert {row["chrom"] for row in point_data} <= {
         *(f"chr{number}" for number in range(1, 23)),
         "chrX",
     }
+
+    threshold = example.spec["params"][0]
+    assert threshold["name"] == "manhattanSignificanceCutoff"
+    assert threshold["bind"]["input"] == "range"
+    assert example.spec["layer"][0]["transform"] == [
+        {
+            "type": "formula",
+            "expr": "manhattanSignificanceCutoff",
+            "as": "threshold",
+        }
+    ]
+    assert example.spec["layer"][3]["transform"] == [
+        {
+            "type": "filter",
+            "expr": "datum.neglog >= manhattanSignificanceCutoff",
+        }
+    ]
+    assert example.spec["layer"][3]["mark"]["color"] == "#c53b2c"
 
 
 def test_brush_gallery_links_one_overview_to_three_detail_tracks() -> None:

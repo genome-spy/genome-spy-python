@@ -23,6 +23,11 @@ NEGLOG_P_CUTOFF = domains["neglog_pvalue_cutoff"]
 # while the cap prevents points from becoming oversized at deep zoom levels.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(16 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
+ASSOCIATION_EXPRESSION = gs.Expression(
+    "datum.neglog >= hapmapSignificanceCutoff && "
+    "abs(datum.EFFECTSIZE) >= hapmapEffectCutoff "
+    "? (datum.EFFECTSIZE < 0 ? 'protective' : 'risk') : 'n.s.'"
+)
 
 # --- Visualization -------------------------------------------------------------
 
@@ -32,7 +37,8 @@ association_colors = Scale(
 )
 
 points = (
-    gs.Chart(data)
+    gs.Chart()
+    .transform_formula(expr=ASSOCIATION_EXPRESSION, as_="association")
     .mark_point(size=POINT_SIZE, filled=True, opacity=0.6)
     .encode(
         x=gs.X("EFFECTSIZE:Q")
@@ -48,13 +54,15 @@ points = (
 )
 
 effect_cutoffs = (
-    gs.Chart([{"x": -EFFECT_CUTOFF}, {"x": EFFECT_CUTOFF}])
+    gs.Chart([{"side": -1}, {"side": 1}])
+    .transform_formula(expr=gs.Expression("datum.side * hapmapEffectCutoff"), as_="x")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(x=gs.X("x:Q").scale(domain=X_DOMAIN, zoom=True).title("Effect size (beta)"))
 )
 
 significance_cutoff = (
-    gs.Chart([{"y": NEGLOG_P_CUTOFF}])
+    gs.Chart([{}])
+    .transform_formula(expr=gs.Expression("hapmapSignificanceCutoff"), as_="y")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         y=gs.Y("y:Q").scale(reverse=False, domain=Y_DOMAIN, zoom=True).title("−log10 p")
@@ -63,5 +71,33 @@ significance_cutoff = (
 
 chart = (effect_cutoffs + significance_cutoff + points).properties(
     title="HapMap association volcano",
-    description="Effect size versus significance, classified by effect-size and p-value cutoffs.",
+    data=data,
+    params=[
+        gs.param(
+            "hapmapEffectCutoff",
+            value=EFFECT_CUTOFF,
+            bind={
+                "input": "range",
+                "min": 0,
+                "max": X_DOMAIN[1],
+                "step": 0.1,
+                "name": "Absolute effect cutoff: ",
+            },
+        ),
+        gs.param(
+            "hapmapSignificanceCutoff",
+            value=NEGLOG_P_CUTOFF,
+            bind={
+                "input": "range",
+                "min": 0,
+                "max": Y_DOMAIN[1],
+                "step": 0.25,
+                "name": "−log10 p cutoff: ",
+            },
+        ),
+    ],
+    description=(
+        "Effect size versus significance, with interactive effect-size and "
+        "p-value cutoffs controlling the guide lines and point colors."
+    ),
 )

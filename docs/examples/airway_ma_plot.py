@@ -28,6 +28,11 @@ MAX_GENES = 12_000
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
 HALO_OFFSETS = [(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)]
+DIRECTION_EXPRESSION = gs.Expression(
+    "datum.neglog10_pvalue >= airwayMaSignificanceCutoff && "
+    "abs(datum.log2fc) >= airwayMaEffectCutoff "
+    "? (datum.log2fc < 0 ? 'down in dex' : 'up in dex') : 'n.s.'"
+)
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -56,6 +61,7 @@ airway_tooltip = [
 
 ma_points = (
     gs.Chart()
+    .transform_formula(expr=DIRECTION_EXPRESSION, as_="direction")
     .mark_point(size=POINT_SIZE, filled=True, opacity=0.58)
     .encode(
         x=gs.X("log10_base_mean:Q")
@@ -70,7 +76,8 @@ ma_points = (
 )
 
 ma_fc_rules = (
-    gs.Chart([{"y": -LOG2FC_CUTOFF}, {"y": 0.0}, {"y": LOG2FC_CUTOFF}])
+    gs.Chart([{"side": -1}, {"side": 0}, {"side": 1}])
+    .transform_formula(expr=gs.Expression("datum.side * airwayMaEffectCutoff"), as_="y")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         y=gs.Y("y:Q")
@@ -161,8 +168,33 @@ chart = gs.layer(
 ).properties(
     data=data,
     title="Airway dexamethasone response: MA plot",
+    params=[
+        gs.param(
+            "airwayMaEffectCutoff",
+            value=LOG2FC_CUTOFF,
+            bind={
+                "input": "range",
+                "min": 0,
+                "max": 3,
+                "step": 0.1,
+                "name": "Absolute log2 fold-change cutoff: ",
+            },
+        ),
+        gs.param(
+            "airwayMaSignificanceCutoff",
+            value=domains["pvalue_cutoff"][0],
+            bind={
+                "input": "range",
+                "min": 0,
+                "max": domains["volcano_y"][1],
+                "step": 0.25,
+                "name": "−log10 p cutoff: ",
+            },
+        ),
+    ],
     description=(
         "A paired differential-expression MA plot showing mean expression "
-        "against fold change, with selected genes identified by callouts."
+        "against fold change, with interactive thresholds and selected genes "
+        "identified by callouts."
     ),
 )

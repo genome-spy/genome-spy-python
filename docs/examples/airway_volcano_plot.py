@@ -28,6 +28,11 @@ MAX_GENES = 12_000
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
 HALO_OFFSETS = [(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)]
+DIRECTION_EXPRESSION = gs.Expression(
+    "datum.neglog10_pvalue >= airwayVolcanoSignificanceCutoff && "
+    "abs(datum.log2fc) >= airwayVolcanoEffectCutoff "
+    "? (datum.log2fc < 0 ? 'down in dex' : 'up in dex') : 'n.s.'"
+)
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -56,6 +61,7 @@ airway_tooltip = [
 
 volcano_points = (
     gs.Chart()
+    .transform_formula(expr=DIRECTION_EXPRESSION, as_="direction")
     .mark_point(size=POINT_SIZE, filled=True, opacity=0.58)
     .encode(
         x=gs.X("log2fc:Q")
@@ -70,7 +76,10 @@ volcano_points = (
 )
 
 volcano_fc_rules = (
-    gs.Chart([{"x": -LOG2FC_CUTOFF}, {"x": LOG2FC_CUTOFF}])
+    gs.Chart([{"side": -1}, {"side": 1}])
+    .transform_formula(
+        expr=gs.Expression("datum.side * airwayVolcanoEffectCutoff"), as_="x"
+    )
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         x=gs.X("x:Q")
@@ -80,7 +89,8 @@ volcano_fc_rules = (
 )
 
 volcano_padj_rule = (
-    gs.Chart([{"y": domains["pvalue_cutoff"][0]}])
+    gs.Chart([{}])
+    .transform_formula(expr=gs.Expression("airwayVolcanoSignificanceCutoff"), as_="y")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         y=gs.Y("y:Q")
@@ -176,8 +186,33 @@ chart = gs.layer(
 ).properties(
     data=data,
     title="Airway dexamethasone response: volcano plot",
+    params=[
+        gs.param(
+            "airwayVolcanoEffectCutoff",
+            value=LOG2FC_CUTOFF,
+            bind={
+                "input": "range",
+                "min": 0,
+                "max": 3,
+                "step": 0.1,
+                "name": "Absolute log2 fold-change cutoff: ",
+            },
+        ),
+        gs.param(
+            "airwayVolcanoSignificanceCutoff",
+            value=domains["pvalue_cutoff"][0],
+            bind={
+                "input": "range",
+                "min": 0,
+                "max": domains["volcano_y"][1],
+                "step": 0.25,
+                "name": "−log10 p cutoff: ",
+            },
+        ),
+    ],
     description=(
         "A paired differential-expression volcano plot showing fold change "
-        "against significance, with selected genes identified by callouts."
+        "against significance, with interactive thresholds and selected "
+        "genes identified by callouts."
     ),
 )
