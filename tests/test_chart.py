@@ -24,9 +24,14 @@ from genome_spy.schema import (
     LayerSpec,
     Legend,
     MultiscaleSpec,
+    ExprParameter,
+    PlainValueParameter,
+    RulerParameter,
     SCHEMA_VERSION,
     Step,
+    SelectionParameter,
     Title,
+    TransitionedValueParameter,
     Scale,
     UnitSpec,
     VConcatSpec,
@@ -172,7 +177,9 @@ def test_public_api_exposes_additional_ergonomic_builders() -> None:
         "max": 1,
         "step": 0.1,
     }
-    assert gs.param("threshold", value=5).to_dict() == {"name": "threshold", "value": 5}
+    threshold = gs.param("threshold", value=5)
+    assert threshold.to_dict() == {"expr": "threshold"}
+    assert threshold.param.to_dict() == {"name": "threshold", "value": 5}
     assert gs.compare("site", order="ascending").to_dict() == {
         "field": "site",
         "order": "ascending",
@@ -544,6 +551,69 @@ def test_chart_properties_support_genomic_top_level_config() -> None:
     assert spec["viewportHeight"] == "container"
     assert spec["view"] == {"stroke": "lightgray"}
     assert spec["params"] == [{"name": "threshold", "value": 5}]
+
+
+def test_parameter_handles_attach_and_participate_in_expressions() -> None:
+    threshold = gs.param(
+        "threshold",
+        value=0.5,
+        bind=gs.binding_range(min=0, max=1, step=0.1),
+    )
+    chart = (
+        gs.Chart([{"score": 0.8}])
+        .transform_filter(gs.datum.score >= threshold)
+        .mark_point(opacity=threshold)
+        .add_params(threshold)
+    )
+
+    spec = chart.to_dict()
+
+    assert spec["params"] == [
+        {
+            "name": "threshold",
+            "value": 0.5,
+            "bind": {"input": "range", "min": 0, "max": 1, "step": 0.1},
+        }
+    ]
+    assert spec["transform"] == [
+        {"type": "filter", "expr": "(datum.score >= threshold)"}
+    ]
+    assert spec["mark"] == {"type": "point", "opacity": {"expr": "threshold"}}
+
+
+def test_parameter_factory_selects_exact_schema_leaf() -> None:
+    value = gs.param("value", value="A")
+    transitioned = gs.param("transitioned", value=1, transition={"type": "lerp"})
+    expression = gs.param("derived", expr=value + " suffix")
+    selection = gs.param("selected", select="point")
+    ruler = gs.param("cursor", ruler={"encodings": ["x"]})
+
+    assert type(value.param) is PlainValueParameter
+    assert type(transitioned.param) is TransitionedValueParameter
+    assert type(expression.param) is ExprParameter
+    assert type(selection.param) is SelectionParameter
+    assert type(ruler.param) is RulerParameter
+    assert expression.param.to_dict()["expr"] == "(value + ' suffix')"
+    with pytest.raises(TypeError, match="Selection parameters cannot"):
+        _ = selection + 1
+    with pytest.raises(TypeError, match="condition or filter context"):
+        selection.to_dict()
+
+
+def test_unnamed_parameters_are_stable_and_deduplicate() -> None:
+    first = gs.param(value=0.5)
+    second = gs.param(value=0.5)
+
+    assert first.name == second.name
+    spec = gs.Chart().add_params(first, second).to_dict(validate=False)
+    assert spec["params"] == [{"name": first.name, "value": 0.5}]
+
+
+def test_add_params_rejects_duplicate_explicit_names_and_non_parameters() -> None:
+    with pytest.raises(ValueError, match="already declared"):
+        gs.Chart().add_params(gs.param("cutoff"), gs.param("cutoff"))
+    with pytest.raises(TypeError, match="parameter definition"):
+        gs.Chart().add_params(gs.Scale())
 
 
 def test_generated_configure_methods_merge_top_level_config() -> None:

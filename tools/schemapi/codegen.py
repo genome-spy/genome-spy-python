@@ -2489,6 +2489,7 @@ class SchemaWrapperGenerator:
         compare_properties = self.schema_property_specs("CompareParams")
         datum_properties = self.channel_helper_property_specs("datum")
         value_properties = self.channel_helper_property_specs("value")
+        parameter_variants = self._analyzer.union_variants("Parameter")
         factory_helpers = (
             SchemaFactorySpec("title", "Title", "Create a chart title object.", "text"),
             SchemaFactorySpec(
@@ -2500,9 +2501,6 @@ class SchemaWrapperGenerator:
                 "data_format",
                 "DataFormat",
                 "Create a data-format wrapper.",
-            ),
-            SchemaFactorySpec(
-                "param", "Parameter", "Create a parameter definition.", "name"
             ),
             SchemaFactorySpec(
                 "view", "ViewBackground", "Create a view background configuration."
@@ -2560,6 +2558,11 @@ class SchemaWrapperGenerator:
             *(p.annotation for p in datum_properties),
             *(p.annotation for p in value_properties),
             *(
+                property_spec.annotation
+                for variant in parameter_variants
+                for property_spec in variant.properties
+            ),
+            *(
                 p.annotation
                 for _, property_specs in factory_helper_specs
                 for p in property_specs
@@ -2591,12 +2594,18 @@ class SchemaWrapperGenerator:
                     "from __future__ import annotations",
                     ("from collections.abc import Sequence" if needs_sequence else ""),
                     "from typing import Any, Self"
-                    + (", Literal" if needs_literal else ""),
+                    + (", Literal" if needs_literal else "")
+                    + (", overload" if parameter_variants else ""),
                     "",
                     "from typing import TYPE_CHECKING",
                     "",
                     "if TYPE_CHECKING:",
                     "    from genome_spy.channels import DatumChannel, LocusChannel, ValueChannel",
+                    *(
+                        ["    from genome_spy._parameters import Parameter"]
+                        if parameter_variants
+                        else []
+                    ),
                     "",
                     "from genome_spy._expressions import DatumExpression",
                     (
@@ -2665,6 +2674,11 @@ class SchemaWrapperGenerator:
                         else []
                     ),
                     *(
+                        [_parameter_helper_source(parameter_variants)]
+                        if parameter_variants
+                        else []
+                    ),
+                    *(
                         _schema_factory_helper_source(
                             spec.helper_name,
                             spec.class_name,
@@ -2685,6 +2699,7 @@ class SchemaWrapperGenerator:
                             *(["datum"] if has_datum else []),
                             *(["value"] if has_value else []),
                             *(spec.helper_name for spec, _ in factory_helper_specs),
+                            *(["param"] if parameter_variants else []),
                             "DatumChannelMethodMixin",
                             "LocusChannelMethodMixin",
                             "ValueChannelMethodMixin",
@@ -2700,6 +2715,7 @@ class SchemaWrapperGenerator:
                     *(["datum"] if has_datum else []),
                     *(["value"] if has_value else []),
                     *(spec.helper_name for spec, _ in factory_helper_specs),
+                    *(["param"] if parameter_variants else []),
                     "DatumChannelMethodMixin",
                     "LocusChannelMethodMixin",
                     "ValueChannelMethodMixin",
@@ -3482,6 +3498,133 @@ def _schema_factory_helper_source(
             f"    return core.{class_name}(**defined)",
             "",
             "",
+        ]
+    )
+
+
+def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
+    """Render a branch-preserving parameter factory from concrete union leaves."""
+    overloads: list[str] = []
+    property_specs_by_name: dict[str, list[PropertySpec]] = {}
+    for variant in variants:
+        for property_spec in variant.properties:
+            property_specs_by_name.setdefault(property_spec.name, []).append(
+                property_spec
+            )
+
+        properties = {
+            property_spec.name: property_spec for property_spec in variant.properties
+        }
+        keyword_specs = [
+            properties[name]
+            for name in sorted(variant.required - {"name"})
+            if name in properties
+        ]
+        keyword_specs.extend(
+            property_spec
+            for property_spec in variant.properties
+            if property_spec.name not in variant.required
+            and property_spec.name != "name"
+        )
+        parameters = []
+        for property_spec in keyword_specs:
+            annotation = _qualified_transform_annotation(
+                property_spec.annotation.annotation
+            )
+            default = (
+                ""
+                if property_spec.name in variant.required
+                else " | UndefinedType = Undefined"
+            )
+            parameters.append(
+                f"    {property_spec.python_name}: {annotation}{default},"
+            )
+        parameters.append("    empty: bool = True,")
+        overloads.append(
+            "\n".join(
+                [
+                    "@overload",
+                    "def param(",
+                    "    name: str | None = None,",
+                    "    /,",
+                    "    *,",
+                    *parameters,
+                    ") -> Parameter: ...",
+                ]
+            )
+        )
+
+    merged_specs: list[PropertySpec] = []
+    for name, specs in sorted(property_specs_by_name.items()):
+        if name == "name":
+            continue
+        annotations = _dedupe_preserve_order(
+            spec.annotation.annotation for spec in specs
+        )
+        annotation = "Any" if "Any" in annotations else " | ".join(annotations)
+        merged_specs.append(
+            PropertySpec(
+                name=name,
+                annotation=AnnotationSpec(annotation),
+                description=next(
+                    (spec.description for spec in specs if spec.description), ""
+                ),
+            )
+        )
+
+    implementation_parameters = [
+        "    name: str | None = None,",
+        "    /,",
+        "    *,",
+        *(
+            f"    {spec.python_name}: "
+            f"{_qualified_transform_annotation(spec.annotation.annotation)} "
+            "| UndefinedType = Undefined,"
+            for spec in merged_specs
+        ),
+        "    empty: bool = True,",
+    ]
+    forwarded = ", ".join(
+        f"{spec.python_name}={spec.python_name}" for spec in merged_specs
+    )
+    if forwarded:
+        forwarded += ", "
+    return "\n\n".join(
+        [
+            "\n\n".join(overloads),
+            "\n".join(
+                [
+                    "def param(",
+                    *implementation_parameters,
+                    ") -> Parameter:",
+                    '    """Create a reusable GenomeSpy parameter handle.',
+                    "",
+                    "    The overloads and accepted properties are generated from the",
+                    "    concrete leaves of GenomeSpy's ``Parameter`` union.",
+                    "",
+                    "    Args:",
+                    "        name: Parameter name. A stable name is generated when omitted.",
+                    *(
+                        f"        {spec.python_name}: {spec.description or 'Schema-defined parameter property.'}"
+                        for spec in merged_specs
+                    ),
+                    "        empty: Whether an empty selection matches as a predicate.",
+                    "",
+                    "    Returns:",
+                    "        A reusable parameter handle.",
+                    "",
+                    "    Raises:",
+                    "        TypeError: If the arguments match no unique parameter branch.",
+                    "",
+                    "    Example:",
+                    '        >>> param("cutoff", value=0.5).param.to_dict()',
+                    "        {'name': 'cutoff', 'value': 0.5}",
+                    '    """',
+                    "    from genome_spy._parameters import _make_parameter",
+                    "",
+                    f"    return _make_parameter(name, {forwarded}empty=empty)",
+                ]
+            ),
         ]
     )
 

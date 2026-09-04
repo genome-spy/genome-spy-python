@@ -15,7 +15,15 @@ from __future__ import annotations
 
 import sys
 from math import isinf, isnan
-from typing import Any, Self, TypeAlias
+from typing import Any, Protocol, Self, TypeAlias, runtime_checkable
+
+
+@runtime_checkable
+class ExpressionOperand(Protocol):
+    """A value that can provide a GenomeSpy expression reference."""
+
+    def _to_expr(self) -> Expression:
+        """Return this value's expression representation."""
 
 
 def _js_repr(value: Any) -> str:
@@ -26,8 +34,8 @@ def _js_repr(value: Any) -> str:
         return "false"
     if value is None:
         return "null"
-    if isinstance(value, Expression):
-        return str(value)
+    if isinstance(value, ExpressionOperand):
+        return str(value._to_expr())
     if isinstance(value, float):
         if isnan(value):
             return "NaN"
@@ -50,32 +58,13 @@ def _function_expression(name: str, *arguments: Any) -> Expression:
     return Expression(f"{name}({rendered})")
 
 
-class Expression(str):
-    """A composable GenomeSpy expression string.
-
-    Python operators build the JavaScript-like expression syntax understood by
-    GenomeSpy. The class remains a string for direct compatibility with every
-    generated schema property whose upstream type is ``string``.
-
-    Args:
-        value: Serialized expression source.
-
-    Returns:
-        A composable expression value.
-
-    Raises:
-        TypeError: If Python evaluates an expression as a boolean.
-
-    Example:
-        >>> from genome_spy import datum
-        >>> str((datum.score >= 10) & (datum.kind == "PASS"))
-        "((datum.score >= 10) && (datum.kind === 'PASS'))"
-    """
+class ExpressionOperatorMixin:
+    """Python operators shared by expression strings and parameter handles."""
 
     __hash__ = None  # type: ignore[assignment]
 
-    def __repr__(self) -> str:
-        return str(self)
+    def _to_expr(self) -> Expression:
+        raise NotImplementedError
 
     def __bool__(self) -> bool:
         raise TypeError(
@@ -86,16 +75,16 @@ class Expression(str):
     def __getattr__(self, name: str) -> Expression:
         if name.startswith("__") and name.endswith("__"):
             raise AttributeError(name)
-        return Expression(f"{self}.{name}")
+        return Expression(f"{self._to_expr()}.{name}")
 
     def __getitem__(self, key: Any) -> Expression:
-        return Expression(f"{self}[{_js_repr(key)}]")
+        return Expression(f"{self._to_expr()}[{_js_repr(key)}]")
 
     def _binary(self, operator: str, other: Any) -> Expression:
-        return Expression(f"({self} {operator} {_js_repr(other)})")
+        return Expression(f"({self._to_expr()} {operator} {_js_repr(other)})")
 
     def _reverse_binary(self, operator: str, other: Any) -> Expression:
-        return Expression(f"({_js_repr(other)} {operator} {self})")
+        return Expression(f"({_js_repr(other)} {operator} {self._to_expr()})")
 
     def __add__(self, other: Any) -> Expression:
         return self._binary("+", other)
@@ -134,10 +123,10 @@ class Expression(str):
         return _function_expression("pow", other, self)
 
     def __neg__(self) -> Expression:
-        return Expression(f"(-{self})")
+        return Expression(f"(-{self._to_expr()})")
 
     def __pos__(self) -> Expression:
-        return Expression(f"(+{self})")
+        return Expression(f"(+{self._to_expr()})")
 
     def __eq__(self, other: object) -> Expression:  # type: ignore[override]
         return self._binary("===", other)
@@ -145,16 +134,16 @@ class Expression(str):
     def __ne__(self, other: object) -> Expression:  # type: ignore[override]
         return self._binary("!==", other)
 
-    def __lt__(self, other: Any) -> Expression:  # type: ignore[override]
+    def __lt__(self, other: Any) -> Expression:
         return self._binary("<", other)
 
-    def __le__(self, other: Any) -> Expression:  # type: ignore[override]
+    def __le__(self, other: Any) -> Expression:
         return self._binary("<=", other)
 
-    def __gt__(self, other: Any) -> Expression:  # type: ignore[override]
+    def __gt__(self, other: Any) -> Expression:
         return self._binary(">", other)
 
-    def __ge__(self, other: Any) -> Expression:  # type: ignore[override]
+    def __ge__(self, other: Any) -> Expression:
         return self._binary(">=", other)
 
     def __and__(self, other: Any) -> Expression:
@@ -170,10 +159,39 @@ class Expression(str):
         return self._reverse_binary("||", other)
 
     def __invert__(self) -> Expression:
-        return Expression(f"(!{self})")
+        return Expression(f"(!{self._to_expr()})")
 
     def __abs__(self) -> Expression:
         return _function_expression("abs", self)
+
+
+class Expression(ExpressionOperatorMixin, str):  # type: ignore[misc]
+    """A composable GenomeSpy expression string.
+
+    Python operators build the JavaScript-like expression syntax understood by
+    GenomeSpy. The class remains a string for direct compatibility with every
+    generated schema property whose upstream type is ``string``.
+
+    Args:
+        value: Serialized expression source.
+
+    Returns:
+        A composable expression value.
+
+    Raises:
+        TypeError: If Python evaluates an expression as a boolean.
+
+    Example:
+        >>> from genome_spy import datum
+        >>> str((datum.score >= 10) & (datum.kind == "PASS"))
+        "((datum.score >= 10) && (datum.kind === 'PASS'))"
+    """
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def _to_expr(self) -> Expression:
+        return self
 
     def copy(self) -> Self:
         """Return an equivalent expression value.
@@ -233,7 +251,14 @@ IntoExpression: TypeAlias = (
     | list[Any]
     | tuple[Any, ...]
     | dict[str, Any]
+    | ExpressionOperand
 )
 
 
-__all__ = ["DatumExpression", "Expression", "IntoExpression"]
+__all__ = [
+    "DatumExpression",
+    "Expression",
+    "ExpressionOperand",
+    "ExpressionOperatorMixin",
+    "IntoExpression",
+]

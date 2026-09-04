@@ -308,7 +308,12 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     assert "def binding_range(\n    *," in ergonomics_module.source
     assert "'input': 'range'" in ergonomics_module.source
     assert "input: Literal['range']" not in ergonomics_module.source
-    assert "def param(\n    name: str," in ergonomics_module.source
+    assert "def param(\n    name: str | None = None," in ergonomics_module.source
+    assert "transition: core.LerpTransition | dict[str, Any]," in (
+        ergonomics_module.source
+    )
+    assert "value: float," in ergonomics_module.source
+    assert "return _make_parameter(" in ergonomics_module.source
     assert "def config(\n    *," in ergonomics_module.source
     assert "if isinstance(defined.get('view'), core.ViewBackground):" in (
         ergonomics_module.source

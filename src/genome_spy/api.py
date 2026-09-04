@@ -2,6 +2,7 @@
 
 from genome_spy.channels import Locus, compare, datum, locus, value
 from genome_spy._expressions import Expression
+from genome_spy._parameters import Parameter
 from genome_spy.arrow import to_arrow_ipc
 from genome_spy.chart import (
     Chart,
@@ -71,7 +72,6 @@ from genome_spy.schema.core import (
     GenomeAxis,
     HandledTooltip,
     Legend,
-    Parameter,
     Paddings,
     Parse,
     Scale,

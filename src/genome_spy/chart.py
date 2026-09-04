@@ -61,6 +61,7 @@ from genome_spy.schemapi import (
 )
 
 if TYPE_CHECKING:
+    from genome_spy._parameters import Parameter
     from genome_spy._render import _PreparedSpec
 
 _CORE_DIST_URL = f"https://cdn.jsdelivr.net/npm/@genome-spy/core@{SCHEMA_VERSION}/dist"
@@ -139,6 +140,31 @@ def _merge_encoding_definitions(
     data: Any,
 ) -> dict[str, Any]:
     return merge_encoding_definitions(current_encoding, updates, data=data)
+
+
+def _parameter_declaration_identity(value: Parameter | SchemaBase) -> tuple[str, bool]:
+    """Return a parameter declaration's name and explicit-name status."""
+    from genome_spy._parameters import Parameter
+    from genome_spy.schema import core
+
+    if isinstance(value, Parameter):
+        return value.name, value.name_is_explicit
+    parameter_types = (
+        core.PlainValueParameter,
+        core.TransitionedValueParameter,
+        core.ExprParameter,
+        core.SelectionParameter,
+        core.RulerParameter,
+        core.Parameter,
+    )
+    if not isinstance(value, parameter_types):
+        raise TypeError(
+            f"Expected a generated GenomeSpy parameter definition, got {type(value)!r}."
+        )
+    name = value.to_dict(validate=False).get("name")
+    if not isinstance(name, str):
+        raise TypeError("A parameter declaration must have a string name.")
+    return name, True
 
 
 class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin):
@@ -271,7 +297,9 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         """Return top-level properties normalized for schema-backed copying."""
         normalized: dict[str, Any] = {}
         for key, value in properties.items():
-            if key == "templates" and isinstance(value, Mapping):
+            if key == "params" and isinstance(value, Sequence):
+                normalized[key] = list(value)
+            elif key == "templates" and isinstance(value, Mapping):
                 normalized[key] = {
                     name: (
                         template.to_dict(include_schema=False, validate=False)
@@ -283,6 +311,55 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
             else:
                 normalized[key] = normalize_schema_value(value, validate=False)
         return normalized
+
+    def add_params(self, *params: Parameter | SchemaBase) -> Self:
+        """Return a chart with parameter declarations appended.
+
+        Parameter handles are unwrapped only when the chart is serialized, so
+        the same handle can also be reused in expressions, conditions, and
+        filters.
+
+        Args:
+            *params: Parameter handles or generated parameter definitions.
+
+        Returns:
+            A new chart with the declarations appended in argument order.
+
+        Raises:
+            TypeError: If an argument is not a parameter declaration.
+            ValueError: If an explicit parameter name is declared twice.
+
+        Example:
+            >>> import genome_spy as gs
+            >>> cutoff = gs.param("cutoff", value=0.5)
+            >>> gs.Chart().add_params(cutoff).to_dict(validate=False)["params"]
+            [{'name': 'cutoff', 'value': 0.5}]
+        """
+        from genome_spy._parameters import Parameter
+
+        current = self._kwds.get("params", Undefined)  # type: ignore[attr-defined]
+        declarations = [] if current is Undefined else list(current)
+        names: dict[str, bool] = {}
+        for declaration in declarations:
+            name, explicit = _parameter_declaration_identity(declaration)
+            names[name] = explicit
+
+        for parameter in params:
+            if not isinstance(parameter, Parameter | SchemaBase):
+                raise TypeError(
+                    "add_params() arguments must be parameter handles or generated "
+                    f"schema definitions, got {type(parameter)!r}."
+                )
+            name, explicit = _parameter_declaration_identity(parameter)
+            if name in names:
+                if explicit or names[name]:
+                    raise ValueError(f"Parameter name {name!r} is already declared.")
+                continue
+            names[name] = explicit
+            declarations.append(parameter)
+        return cast(
+            Self, cast(_CopyableSpec, self)._copy(deep=False, params=declarations)
+        )
 
     def _appended_transform(self, transform: dict[str, Any]) -> Self:
         """Return a copy with one normalized transform appended."""
@@ -363,6 +440,14 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
                 values.pop("data")
             else:
                 values["data"] = normalized_data
+        params = values.get("params", Undefined)
+        if params is not Undefined:
+            from genome_spy._parameters import _unwrap_parameter
+
+            values["params"] = [
+                normalize_schema_value(_unwrap_parameter(param), validate=False)
+                for param in params
+            ]
         return values
 
     def _validated_root_spec(
