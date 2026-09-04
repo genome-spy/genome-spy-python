@@ -1189,17 +1189,9 @@ def test_brush_gallery_links_one_overview_to_three_detail_tracks() -> None:
     spec = example.spec
 
     assert spec["params"] == [{"name": "brush"}]
-    detail_group = spec["vconcat"][1]
-    assert detail_group["scales"]["x"]["domain"] == {
-        "param": "brush",
-        "initial": [
-            {"chrom": "chr5", "pos": 0},
-            {"chrom": "chr5", "pos": 180_857_866},
-        ],
-    }
-    assert detail_group["resolve"]["scale"] == {
-        "x": "shared",
-        "y": "independent",
+    assert spec["resolve"] == {
+        "scale": {"x": "independent", "y": "independent"},
+        "axis": {"x": "independent", "y": "independent"},
     }
 
     overview = spec["vconcat"][0]
@@ -1213,12 +1205,23 @@ def test_brush_gallery_links_one_overview_to_three_detail_tracks() -> None:
     assert brush["select"]["encodings"] == ["x"]
     assert brush["select"]["mark"]["clip"] is False
 
-    detail_tracks = detail_group["vconcat"]
+    detail_tracks = spec["vconcat"][1:]
     assert [track["name"] for track in detail_tracks] == [
         "association-strength",
         "effect-size",
         "z-score",
     ]
+    expected_domain = {
+        "param": "brush",
+        "initial": [
+            {"chrom": "chr5", "pos": 0},
+            {"chrom": "chr5", "pos": 180_857_866},
+        ],
+    }
+    assert all(
+        track["encoding"]["x"]["scale"]["domain"] == expected_domain
+        for track in detail_tracks
+    )
     assert all("params" not in track for track in detail_tracks)
     assert all("title" not in track for track in detail_tracks)
 

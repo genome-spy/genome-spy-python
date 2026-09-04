@@ -33,11 +33,10 @@ the same linked-brush structure.
 
 ## Python implementation
 
-The outer composition declares an empty `brush` parameter. The nested detail
-group uses it as the domain of its shared x scale. The overview declares the
-interval selection with the same name and `push="outer"`, which writes gestures
-back to the outer parameter. An excluded x-scale resolution keeps the overview
-on the full genome instead of shrinking it to the selected detail interval.
+The outer composition declares an empty `brush` parameter. The overview writes
+gestures to it with `push="outer"`, and each detail scale links its domain to the
+same parameter. The scales remain synchronized through the brush while the
+overview stays on the full genome.
 
 Python loads the prepared packaged table and authors the selection and scale
 definitions. GenomeSpy executes the interaction and updates the linked scales
