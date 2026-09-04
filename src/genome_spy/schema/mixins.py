@@ -123,7 +123,6 @@ class MarkMethodMixin:
         | core.ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minHeight: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         minOpacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         minWidth: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -167,7 +166,7 @@ class MarkMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cornerRadius (float | ExprRef | dict[str, Any]): Radius of the rounded corners. **Default value:** ``0``
             cornerRadiusBottomLeft (float | ExprRef | dict[str, Any]): Radius of the bottom left rounded corner. Has higher precedence than ``cornerRadius``. **Default value:** (None)
@@ -180,7 +179,6 @@ class MarkMethodMixin:
             fillOpacity (float | ExprRef | dict[str, Any]): The fill opacity. Value between ``0`` and ``1``.
             filled (bool): Whether the ``color`` represents the ``fill`` color (``true``) or the ``stroke`` color (``false``).
             hatch (Literal['none'] | Literal['diagonal'] | Literal['antiDiagonal'] | Literal['cross'] | Literal['vertical'] | Literal['horizontal'] | Literal['grid'] | Literal['dots'] | Literal['rings'] | Literal['ringsLarge'] | ExprRef | dict[str, Any]): A hatch pattern drawn inside the mark using the stroke width, color, and opacity. The pattern is aligned in screen space and scaled by the stroke width. **Default value:** ``"none"``
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minHeight (float | ExprRef | dict[str, Any]): The minimum height of a rectangle in pixels. The property clamps rectangles' heights. **Default value:** ``0``
             minOpacity (float | ExprRef | dict[str, Any]): Clamps the minimum size-dependent opacity. The property does not affect the ``opacity`` channel. Valid values are between ``0`` and ``1``. When a rectangle would be smaller than what is specified in ``minHeight`` and ``minWidth``, it is faded out proportionally. Example: a rectangle would be rendered as one pixel wide, but ``minWidth`` clamps it to five pixels. The rectangle is actually rendered as five pixels wide, but its opacity is multiplied by 0.2. With this setting, you can limit the factor to, for example, 0.5 to keep the rectangles more clearly visible. **Default value:** ``0``
             minWidth (float | ExprRef | dict[str, Any]): The minimum width of a rectangle in pixels. The property clamps rectangles' widths when the viewport is zoomed out. This property also reduces flickering of very narrow rectangles when zooming. The value should generally be at least one. **Default value:** ``1``
@@ -219,7 +217,6 @@ class MarkMethodMixin:
             "fillOpacity": fillOpacity,
             "filled": filled,
             "hatch": hatch,
-            "minBufferSize": minBufferSize,
             "minHeight": minHeight,
             "minOpacity": minOpacity,
             "minWidth": minWidth,
@@ -275,7 +272,6 @@ class MarkMethodMixin:
         filled: bool | UndefinedType = Undefined,
         geometricZoomBound: float | UndefinedType = Undefined,
         inwardStroke: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minPickingSize: float
         | core.ExprRef
         | dict[str, Any]
@@ -316,7 +312,7 @@ class MarkMethodMixin:
         Args:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
@@ -328,7 +324,6 @@ class MarkMethodMixin:
             filled (bool): Whether the ``color`` represents the ``fill`` color (``true``) or the ``stroke`` color (``false``).
             geometricZoomBound (float): Enables geometric zooming. The value is the base two logarithmic zoom level where the maximum point size is reached. **Default value:** ``0``
             inwardStroke (bool | ExprRef | dict[str, Any]): Should the stroke only grow inwards, e.g, the diameter/outline is not affected by the stroke width. Thus, a point that has a zero size has no visible stroke. This allows strokes to be used with geometric zoom, etc. **Default value:** ``false``
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             sampleFacetPadding (float): Additional padding used by sample facets. **Default value:** ``0.1``
@@ -363,7 +358,6 @@ class MarkMethodMixin:
             "filled": filled,
             "geometricZoomBound": geometricZoomBound,
             "inwardStroke": inwardStroke,
-            "minBufferSize": minBufferSize,
             "minPickingSize": minPickingSize,
             "opacity": opacity,
             "sampleFacetPadding": sampleFacetPadding,
@@ -403,7 +397,6 @@ class MarkMethodMixin:
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minLength: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         size: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -434,11 +427,10 @@ class MarkMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minLength (float | ExprRef | dict[str, Any]): The minimum stroke length in pixels. Use this property to ensure that very short strokes remain visible even when the user zooms out. **Default value:** ``0``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
@@ -462,7 +454,6 @@ class MarkMethodMixin:
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
             "cursor": cursor,
-            "minBufferSize": minBufferSize,
             "minLength": minLength,
             "opacity": opacity,
             "size": size,
@@ -500,7 +491,6 @@ class MarkMethodMixin:
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minLength: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         orient: Literal["vertical", "horizontal"] | UndefinedType = Undefined,
@@ -530,11 +520,10 @@ class MarkMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minLength (float | ExprRef | dict[str, Any]): The minimum stroke length in pixels. Use this property to ensure that very short strokes remain visible even when the user zooms out. **Default value:** ``0``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             orient (Literal['vertical', 'horizontal']): The orientation of the tick mark. If omitted, GenomeSpy infers the orientation when one positional channel uses a band-like scale and the other does not, or when the orthogonal channel is omitted. Specify ``orient`` explicitly when both ``x`` and ``y`` use band-like scales. **Default value:** inferred
@@ -557,7 +546,6 @@ class MarkMethodMixin:
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
             "cursor": cursor,
-            "minBufferSize": minBufferSize,
             "minLength": minLength,
             "opacity": opacity,
             "orient": orient,
@@ -606,7 +594,6 @@ class MarkMethodMixin:
         fontStyle: FontStyle_T | UndefinedType = Undefined,
         fontWeight: FontWeight_T | UndefinedType = Undefined,
         logoLetters: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         paddingX: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         paddingY: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -667,20 +654,19 @@ class MarkMethodMixin:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             baseline (Baseline_T): The vertical alignment of the text. One of ``"top"``, ``"middle"``, ``"bottom"``. **Default value:** ``"bottom"``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
             dx (float): The horizontal offset between the text and its anchor point, in pixels. Applied after the rotation by ``angle``.
             dy (float): The vertical offset between the text and its anchor point, in pixels. Applied after the rotation by ``angle``.
-            fitToBand (bool | ExprRef | dict[str, Any]): If true, sets the secondary positional channel that allows the text to be squeezed (see the ``squeeze`` property). Can be used when: 1) ``"band"``, ``"index"``, or ``"locus"`` scale is being used and 2) only the primary positional channel is specified. **Default value:** ``false``
+            fitToBand (bool | ExprRef | dict[str, Any]): If true, sets the secondary positional channel that allows the text to be squeezed (see the ``squeeze`` property). Can be used when: 1) ``"band"``, ``"index"``, or ``"locus"`` scale is being used and 2) only the primary positional channel is specified. Expressions are evaluated when the mark is initialized and cannot change reactively. **Default value:** ``false``
             flushX (bool | ExprRef | dict[str, Any]): If true, the text is kept inside the viewport when the range of ``x`` and ``x2`` intersect the viewport.
             flushY (bool | ExprRef | dict[str, Any]): If true, the text is kept inside the viewport when the range of ``y`` and ``y2`` intersect the viewport.
             font (str): The font typeface. GenomeSpy uses SDF versions of Google Fonts. Check their availability at the A-Frame Fonts repository. System fonts are **not** supported. **Default value:** ``"Lato"``
             fontStyle (FontStyle_T): The font style. Valid values: ``"normal"`` and ``"italic"``. **Default value:** ``"normal"``
             fontWeight (FontWeight_T): The font weight. The following strings and numbers are valid values: ``"thin"`` (``100``), ``"light"`` (``300``), ``"regular"`` (``400``), ``"normal"`` (``400``), ``"medium"`` (``500``), ``"bold"`` (``700``), ``"black"`` (``900``) **Default value:** ``"regular"``
             logoLetters (bool | ExprRef | dict[str, Any]): Stretch letters so that they can be used with sequence logos, etc...
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             paddingX (float | ExprRef | dict[str, Any]): The horizontal padding, in pixels, when the ``x2`` channel is used for ranged text. **Default value:** ``0``
             paddingY (float | ExprRef | dict[str, Any]): The vertical padding, in pixels, when the ``y2`` channel is used for ranged text. **Default value:** ``0``
@@ -724,7 +710,6 @@ class MarkMethodMixin:
             "fontStyle": fontStyle,
             "fontWeight": fontWeight,
             "logoLetters": logoLetters,
-            "minBufferSize": minBufferSize,
             "opacity": opacity,
             "paddingX": paddingX,
             "paddingY": paddingY,
@@ -792,7 +777,6 @@ class MarkMethodMixin:
         | dict[str, Any]
         | UndefinedType = Undefined,
         minArcHeight: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minPickingSize: float
         | core.ExprRef
         | dict[str, Any]
@@ -831,14 +815,13 @@ class MarkMethodMixin:
             arcHeightFactor (float | ExprRef | dict[str, Any]): Scaling factor for the ``"arc``" shape's height. The default value ``1.0`` produces roughly circular arcs. **Default value:** ``1.0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
             clampApex (bool | ExprRef | dict[str, Any]): Whether the apex of the ``"dome"`` shape is clamped to the viewport edge. When over a half of the dome is located outside the viewport, clamping allows for more accurate reading of the value encoded by the apex' position. **Default value:** ``false``
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
             linkShape (Literal['arc'] | Literal['diagonal'] | Literal['line'] | Literal['dome'] | ExprRef | dict[str, Any]): The shape of the link path. The ``"arc"`` shape draws a circular arc between the two points. The apex of the arc resides on the left side of the line that connects the two points. The ``"dome"`` shape draws a vertical or horizontal arc with a specific height. The primary positional channel determines the apex of the arc and the secondary determines the endpoint placement. The ``"diagonal"`` shape draws an "S"-shaped curve between the two points. The ``"line"`` shape draws a straight line between the two points. See an example of the different shapes below. **Default value:** ``"arc"``
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
             noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading of the link when an mark instance is subject to any point selection. As the fading distance is unavailable as a visual channel, this property allows for enhancing the visibility of the selected links. **Default value:** ``true``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
@@ -868,7 +851,6 @@ class MarkMethodMixin:
             "linkShape": linkShape,
             "maxChordLength": maxChordLength,
             "minArcHeight": minArcHeight,
-            "minBufferSize": minBufferSize,
             "minPickingSize": minPickingSize,
             "noFadingOnPointSelection": noFadingOnPointSelection,
             "opacity": opacity,
@@ -935,7 +917,6 @@ class MarkMethodMixin:
         | dict[str, Any]
         | UndefinedType = Undefined,
         headWidth: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minSize: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         minStemLength: float
         | core.ExprRef
@@ -974,7 +955,7 @@ class MarkMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
@@ -988,7 +969,6 @@ class MarkMethodMixin:
             headShape (Literal['triangle'] | Literal['open'] | ExprRef | dict[str, Any]): Shape of the arrowhead. ``"triangle"`` draws a filled head. ``"open"`` draws an open head whose thickness matches the resolved ``size``, even when ``stem`` is ``false``. __Default value:__ ``"triangle"``
             headSpacing (float | None | ExprRef | dict[str, Any]): Spacing between repeated arrowheads as a multiplier of resolved ``size``. The effective spacing is at least the rendered arrowhead footprint, including stroke. If ``null``, arrowheads are not repeated. __Default value:__ ``null``
             headWidth (float | ExprRef | dict[str, Any]): Width of the arrowhead as a multiplier of resolved ``size``. Values above ``1`` make the arrowhead wider than the stem. __Default value:__ ``3``
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minSize (float | ExprRef | dict[str, Any]): Minimum resolved arrow stem thickness in pixels. Applies to numeric, band-relative, and encoded ``size`` values. __Default value:__ ``1``
             minStemLength (float | ExprRef | dict[str, Any]): Minimum visible length of the arrow stem in pixels. When a non-repeated arrow is too short for the configured shape and minimum stem length, the affected notch or head angle is made blunter toward 90 degrees. For ``"inside"`` placement, this applies to ``"triangle"`` heads and is measured from the start of the stem to where the stem meets the head notch edge. For ``"outside"`` placement, this applies when ``startNotch`` is ``true`` and is measured from the start notch to the head start. Has no effect when ``stem`` is ``false``. __Default value:__ ``0``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
@@ -1025,7 +1005,6 @@ class MarkMethodMixin:
             "headShape": headShape,
             "headSpacing": headSpacing,
             "headWidth": headWidth,
-            "minBufferSize": minBufferSize,
             "minSize": minSize,
             "minStemLength": minStemLength,
             "opacity": opacity,
@@ -1078,7 +1057,6 @@ class MarkMethodMixin:
         filled: bool | UndefinedType = Undefined,
         geometricZoomBound: float | UndefinedType = Undefined,
         inwardStroke: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minPickingSize: float
         | core.ExprRef
         | dict[str, Any]
@@ -1119,7 +1097,7 @@ class MarkMethodMixin:
         Args:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
@@ -1131,7 +1109,6 @@ class MarkMethodMixin:
             filled (bool): Whether the ``color`` represents the ``fill`` color (``true``) or the ``stroke`` color (``false``).
             geometricZoomBound (float): Enables geometric zooming. The value is the base two logarithmic zoom level where the maximum point size is reached. **Default value:** ``0``
             inwardStroke (bool | ExprRef | dict[str, Any]): Should the stroke only grow inwards, e.g, the diameter/outline is not affected by the stroke width. Thus, a point that has a zero size has no visible stroke. This allows strokes to be used with geometric zoom, etc. **Default value:** ``false``
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             sampleFacetPadding (float): Additional padding used by sample facets. **Default value:** ``0.1``
@@ -1166,7 +1143,6 @@ class MarkMethodMixin:
             "filled": filled,
             "geometricZoomBound": geometricZoomBound,
             "inwardStroke": inwardStroke,
-            "minBufferSize": minBufferSize,
             "minPickingSize": minPickingSize,
             "opacity": opacity,
             "sampleFacetPadding": sampleFacetPadding,
@@ -1399,10 +1375,10 @@ class EncodingMethodMixin:
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
             fill (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Fill color of the marks. Note: The ``fill`` encoding has higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified.
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
-            key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify data objects for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
+            key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
-            search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match data objects in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term.
+            search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
             shape (FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefTypeForShape | ValueDefWithConditionStringNullTypeForShape): Shape of the mark. For ``point`` marks the supported values include: - plotting shapes: ``"circle"``, ``"square"``, ``"cross"``, ``"diamond"``, ``"triangle-up"``, ``"triangle-down"``, ``"triangle-right"``, or ``"triangle-left"``. - stroke-only ``"x"`` and ``"+"`` shapes, whose line thickness is controlled by ``strokeWidth`` - centered directional shape ``"triangle"``
             size (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Size of the mark. - For ``"point"`` – the symbol size, or pixel area of the mark. - For ``"text"`` – the text's font size. - For ``"arrow"`` – the stem thickness in pixels.
@@ -2096,14 +2072,14 @@ class UnitPropertiesMixin:
             genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
             height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
             legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            mark (MarkType_T | RectProps | dict[str, Any] | ArrowProps | TextProps | RuleProps | TickProps | LinkProps | PointProps): The graphical mark presenting the data objects.
+            mark (MarkType_T | RectProps | dict[str, Any] | ArrowProps | TextProps | RuleProps | TickProps | LinkProps | PointProps): The graphical mark presenting the rows.
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
@@ -2302,14 +2278,14 @@ class UnitPropertiesMixin:
             genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
             height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
             legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            mark (MarkType_T | RectProps | dict[str, Any] | ArrowProps | TextProps | RuleProps | TickProps | LinkProps | PointProps): The graphical mark presenting the data objects.
+            mark (MarkType_T | RectProps | dict[str, Any] | ArrowProps | TextProps | RuleProps | TickProps | LinkProps | PointProps): The graphical mark presenting the rows.
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
@@ -2508,14 +2484,14 @@ class UnitPropertiesMixin:
             genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
             height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
             legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            mark (MarkType_T | RectProps | dict[str, Any] | ArrowProps | TextProps | RuleProps | TickProps | LinkProps | PointProps): The graphical mark presenting the data objects.
+            mark (MarkType_T | RectProps | dict[str, Any] | ArrowProps | TextProps | RuleProps | TickProps | LinkProps | PointProps): The graphical mark presenting the rows.
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
             opacity (float | DynamicOpacity | DynamicOpacityKwds | ExprRef | dict[str, Any]): Opacity of the view and all its children. This can be: - a fixed number between ``0`` and ``1`` - an expression reference (``ExprRef``) - a ``DynamicOpacity`` definition for zoom-dependent opacity Dynamic opacity is useful for semantic zooming where layers are faded in and out as the user zooms. Example: ```json "opacity": { "unitsPerPixel": [100000, 40000], "values": [0, 1] } ``` In this example, the view fades in while zooming in from 100 000 to 40 000 units per pixel. __Default value:__ ``1.0``
             overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
@@ -2723,7 +2699,7 @@ class LayerPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
@@ -2927,7 +2903,7 @@ class LayerPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
@@ -3131,7 +3107,7 @@ class LayerPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
@@ -3339,7 +3315,7 @@ class HConcatPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
             spacing (float): The gap between the views, in pixels.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
@@ -3544,7 +3520,7 @@ class HConcatPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
             spacing (float): The gap between the views, in pixels.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
@@ -3749,7 +3725,7 @@ class HConcatPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
             spacing (float): The gap between the views, in pixels.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
@@ -3957,7 +3933,7 @@ class VConcatPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
             spacing (float): The gap between the views, in pixels.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
@@ -4162,7 +4138,7 @@ class VConcatPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
             spacing (float): The gap between the views, in pixels.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
@@ -4367,7 +4343,7 @@ class VConcatPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
             spacing (float): The gap between the views, in pixels.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
@@ -4579,7 +4555,7 @@ class ConcatPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
             spacing (float): The gap between the views, in pixels.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
@@ -4787,7 +4763,7 @@ class ConcatPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
             spacing (float): The gap between the views, in pixels.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
@@ -4995,7 +4971,7 @@ class ConcatPropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             separator (bool | SeparatorProps | SeparatorPropsKwds): Draws separator rules between visible child views. The separators are centered within the spacing gaps and do not affect layout. If ``true``, the defaults are equivalent to: ``{"type":"rule","size":1,"color":"#ccc","opacity":1,"strokeDash":[4,4],"strokeCap":"butt"}`` Use ``includePlotMargin`` to control whether the separators extend into the plot margin. __Default value:__ ``false``
             spacing (float): The gap between the views, in pixels.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
@@ -5210,7 +5186,7 @@ class MultiscalePropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             stops (Sequence[float | ExprRef | dict[str, Any]] | FadedMultiscaleStops | dict[str, Any] | TransitionedMultiscaleStops): Stop definition that controls transitions between the multiscale levels. - ``number[]`` is shorthand for ``{ metric: "unitsPerPixel", values: ... }`` - ``(number | ExprRef)[]`` supports mixed constants and expressions - Object form allows configuring metric, channel, and fade.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
@@ -5421,7 +5397,7 @@ class MultiscalePropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             stops (Sequence[float | ExprRef | dict[str, Any]] | FadedMultiscaleStops | dict[str, Any] | TransitionedMultiscaleStops): Stop definition that controls transitions between the multiscale levels. - ``number[]`` is shorthand for ``{ metric: "unitsPerPixel", values: ... }`` - ``(number | ExprRef)[]`` supports mixed constants and expressions - Object form allows configuring metric, channel, and fade.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
@@ -5632,7 +5608,7 @@ class MultiscalePropertiesMixin:
             padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
             params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | ExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
             resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
-            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
             stops (Sequence[float | ExprRef | dict[str, Any]] | FadedMultiscaleStops | dict[str, Any] | TransitionedMultiscaleStops): Stop definition that controls transitions between the multiscale levels. - ``number[]`` is shorthand for ``{ metric: "unitsPerPixel", values: ... }`` - ``(number | ExprRef)[]`` supports mixed constants and expressions - Object form allows configuring metric, channel, and fade.
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
@@ -5832,7 +5808,6 @@ class ConfigMethodMixin:
         | dict[str, Any]
         | UndefinedType = Undefined,
         headWidth: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minSize: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         minStemLength: float
         | core.ExprRef
@@ -5871,7 +5846,7 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
@@ -5885,7 +5860,6 @@ class ConfigMethodMixin:
             headShape (Literal['triangle'] | Literal['open'] | ExprRef | dict[str, Any]): Shape of the arrowhead. ``"triangle"`` draws a filled head. ``"open"`` draws an open head whose thickness matches the resolved ``size``, even when ``stem`` is ``false``. __Default value:__ ``"triangle"``
             headSpacing (float | None | ExprRef | dict[str, Any]): Spacing between repeated arrowheads as a multiplier of resolved ``size``. The effective spacing is at least the rendered arrowhead footprint, including stroke. If ``null``, arrowheads are not repeated. __Default value:__ ``null``
             headWidth (float | ExprRef | dict[str, Any]): Width of the arrowhead as a multiplier of resolved ``size``. Values above ``1`` make the arrowhead wider than the stem. __Default value:__ ``3``
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minSize (float | ExprRef | dict[str, Any]): Minimum resolved arrow stem thickness in pixels. Applies to numeric, band-relative, and encoded ``size`` values. __Default value:__ ``1``
             minStemLength (float | ExprRef | dict[str, Any]): Minimum visible length of the arrow stem in pixels. When a non-repeated arrow is too short for the configured shape and minimum stem length, the affected notch or head angle is made blunter toward 90 degrees. For ``"inside"`` placement, this applies to ``"triangle"`` heads and is measured from the start of the stem to where the stem meets the head notch edge. For ``"outside"`` placement, this applies when ``startNotch`` is ``true`` and is measured from the start notch to the head start. Has no effect when ``stem`` is ``false``. __Default value:__ ``0``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
@@ -5922,7 +5896,6 @@ class ConfigMethodMixin:
             "headShape": headShape,
             "headSpacing": headSpacing,
             "headWidth": headWidth,
-            "minBufferSize": minBufferSize,
             "minSize": minSize,
             "minStemLength": minStemLength,
             "opacity": opacity,
@@ -9363,7 +9336,6 @@ class ConfigMethodMixin:
         | dict[str, Any]
         | UndefinedType = Undefined,
         minArcHeight: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minPickingSize: float
         | core.ExprRef
         | dict[str, Any]
@@ -9402,14 +9374,13 @@ class ConfigMethodMixin:
             arcHeightFactor (float | ExprRef | dict[str, Any]): Scaling factor for the ``"arc``" shape's height. The default value ``1.0`` produces roughly circular arcs. **Default value:** ``1.0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
             clampApex (bool | ExprRef | dict[str, Any]): Whether the apex of the ``"dome"`` shape is clamped to the viewport edge. When over a half of the dome is located outside the viewport, clamping allows for more accurate reading of the value encoded by the apex' position. **Default value:** ``false``
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
             linkShape (Literal['arc'] | Literal['diagonal'] | Literal['line'] | Literal['dome'] | ExprRef | dict[str, Any]): The shape of the link path. The ``"arc"`` shape draws a circular arc between the two points. The apex of the arc resides on the left side of the line that connects the two points. The ``"dome"`` shape draws a vertical or horizontal arc with a specific height. The primary positional channel determines the apex of the arc and the secondary determines the endpoint placement. The ``"diagonal"`` shape draws an "S"-shaped curve between the two points. The ``"line"`` shape draws a straight line between the two points. See an example of the different shapes below. **Default value:** ``"arc"``
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
             noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading of the link when an mark instance is subject to any point selection. As the fading distance is unavailable as a visual channel, this property allows for enhancing the visibility of the selected links. **Default value:** ``true``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
@@ -9439,7 +9410,6 @@ class ConfigMethodMixin:
             "linkShape": linkShape,
             "maxChordLength": maxChordLength,
             "minArcHeight": minArcHeight,
-            "minBufferSize": minBufferSize,
             "minPickingSize": minPickingSize,
             "noFadingOnPointSelection": noFadingOnPointSelection,
             "opacity": opacity,
@@ -9477,7 +9447,6 @@ class ConfigMethodMixin:
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         style: str | Sequence[str] | UndefinedType = Undefined,
         tooltip: core.HandledTooltip
@@ -9496,11 +9465,10 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
@@ -9517,7 +9485,6 @@ class ConfigMethodMixin:
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
             "cursor": cursor,
-            "minBufferSize": minBufferSize,
             "opacity": opacity,
             "style": style,
             "tooltip": tooltip,
@@ -9560,7 +9527,6 @@ class ConfigMethodMixin:
         filled: bool | UndefinedType = Undefined,
         geometricZoomBound: float | UndefinedType = Undefined,
         inwardStroke: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minPickingSize: float
         | core.ExprRef
         | dict[str, Any]
@@ -9601,7 +9567,7 @@ class ConfigMethodMixin:
         Args:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
@@ -9613,7 +9579,6 @@ class ConfigMethodMixin:
             filled (bool): Whether the ``color`` represents the ``fill`` color (``true``) or the ``stroke`` color (``false``).
             geometricZoomBound (float): Enables geometric zooming. The value is the base two logarithmic zoom level where the maximum point size is reached. **Default value:** ``0``
             inwardStroke (bool | ExprRef | dict[str, Any]): Should the stroke only grow inwards, e.g, the diameter/outline is not affected by the stroke width. Thus, a point that has a zero size has no visible stroke. This allows strokes to be used with geometric zoom, etc. **Default value:** ``false``
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             sampleFacetPadding (float): Additional padding used by sample facets. **Default value:** ``0.1``
@@ -9648,7 +9613,6 @@ class ConfigMethodMixin:
             "filled": filled,
             "geometricZoomBound": geometricZoomBound,
             "inwardStroke": inwardStroke,
-            "minBufferSize": minBufferSize,
             "minPickingSize": minPickingSize,
             "opacity": opacity,
             "sampleFacetPadding": sampleFacetPadding,
@@ -9757,7 +9721,6 @@ class ConfigMethodMixin:
         | core.ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minHeight: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         minOpacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         minWidth: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -9801,7 +9764,7 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cornerRadius (float | ExprRef | dict[str, Any]): Radius of the rounded corners. **Default value:** ``0``
             cornerRadiusBottomLeft (float | ExprRef | dict[str, Any]): Radius of the bottom left rounded corner. Has higher precedence than ``cornerRadius``. **Default value:** (None)
@@ -9814,7 +9777,6 @@ class ConfigMethodMixin:
             fillOpacity (float | ExprRef | dict[str, Any]): The fill opacity. Value between ``0`` and ``1``.
             filled (bool): Whether the ``color`` represents the ``fill`` color (``true``) or the ``stroke`` color (``false``).
             hatch (Literal['none'] | Literal['diagonal'] | Literal['antiDiagonal'] | Literal['cross'] | Literal['vertical'] | Literal['horizontal'] | Literal['grid'] | Literal['dots'] | Literal['rings'] | Literal['ringsLarge'] | ExprRef | dict[str, Any]): A hatch pattern drawn inside the mark using the stroke width, color, and opacity. The pattern is aligned in screen space and scaled by the stroke width. **Default value:** ``"none"``
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minHeight (float | ExprRef | dict[str, Any]): The minimum height of a rectangle in pixels. The property clamps rectangles' heights. **Default value:** ``0``
             minOpacity (float | ExprRef | dict[str, Any]): Clamps the minimum size-dependent opacity. The property does not affect the ``opacity`` channel. Valid values are between ``0`` and ``1``. When a rectangle would be smaller than what is specified in ``minHeight`` and ``minWidth``, it is faded out proportionally. Example: a rectangle would be rendered as one pixel wide, but ``minWidth`` clamps it to five pixels. The rectangle is actually rendered as five pixels wide, but its opacity is multiplied by 0.2. With this setting, you can limit the factor to, for example, 0.5 to keep the rectangles more clearly visible. **Default value:** ``0``
             minWidth (float | ExprRef | dict[str, Any]): The minimum width of a rectangle in pixels. The property clamps rectangles' widths when the viewport is zoomed out. This property also reduces flickering of very narrow rectangles when zooming. The value should generally be at least one. **Default value:** ``1``
@@ -9853,7 +9815,6 @@ class ConfigMethodMixin:
             "fillOpacity": fillOpacity,
             "filled": filled,
             "hatch": hatch,
-            "minBufferSize": minBufferSize,
             "minHeight": minHeight,
             "minOpacity": minOpacity,
             "minWidth": minWidth,
@@ -9897,7 +9858,6 @@ class ConfigMethodMixin:
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minLength: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         size: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -9928,11 +9888,10 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minLength (float | ExprRef | dict[str, Any]): The minimum stroke length in pixels. Use this property to ensure that very short strokes remain visible even when the user zooms out. **Default value:** ``0``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
@@ -9956,7 +9915,6 @@ class ConfigMethodMixin:
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
             "cursor": cursor,
-            "minBufferSize": minBufferSize,
             "minLength": minLength,
             "opacity": opacity,
             "size": size,
@@ -10051,7 +10009,7 @@ class ConfigMethodMixin:
             bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
             clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
             constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
-            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references.
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor.
             domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
             domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
@@ -10072,7 +10030,7 @@ class ConfigMethodMixin:
             paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
             quantitative (dict[str, Any]): Defaults for quantitative scales.
             quantitativeColorScheme (str | SchemeParams | SchemeParamsKwds): Default color scheme for quantitative color scales when no named range such as ``"heatmap"`` or ``"ramp"`` applies.
-            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
             reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
             round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
             scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
@@ -10155,7 +10113,6 @@ class ConfigMethodMixin:
         fontStyle: FontStyle_T | UndefinedType = Undefined,
         fontWeight: FontWeight_T | UndefinedType = Undefined,
         logoLetters: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         paddingX: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         paddingY: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -10216,20 +10173,19 @@ class ConfigMethodMixin:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             baseline (Baseline_T): The vertical alignment of the text. One of ``"top"``, ``"middle"``, ``"bottom"``. **Default value:** ``"bottom"``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
             dx (float): The horizontal offset between the text and its anchor point, in pixels. Applied after the rotation by ``angle``.
             dy (float): The vertical offset between the text and its anchor point, in pixels. Applied after the rotation by ``angle``.
-            fitToBand (bool | ExprRef | dict[str, Any]): If true, sets the secondary positional channel that allows the text to be squeezed (see the ``squeeze`` property). Can be used when: 1) ``"band"``, ``"index"``, or ``"locus"`` scale is being used and 2) only the primary positional channel is specified. **Default value:** ``false``
+            fitToBand (bool | ExprRef | dict[str, Any]): If true, sets the secondary positional channel that allows the text to be squeezed (see the ``squeeze`` property). Can be used when: 1) ``"band"``, ``"index"``, or ``"locus"`` scale is being used and 2) only the primary positional channel is specified. Expressions are evaluated when the mark is initialized and cannot change reactively. **Default value:** ``false``
             flushX (bool | ExprRef | dict[str, Any]): If true, the text is kept inside the viewport when the range of ``x`` and ``x2`` intersect the viewport.
             flushY (bool | ExprRef | dict[str, Any]): If true, the text is kept inside the viewport when the range of ``y`` and ``y2`` intersect the viewport.
             font (str): The font typeface. GenomeSpy uses SDF versions of Google Fonts. Check their availability at the A-Frame Fonts repository. System fonts are **not** supported. **Default value:** ``"Lato"``
             fontStyle (FontStyle_T): The font style. Valid values: ``"normal"`` and ``"italic"``. **Default value:** ``"normal"``
             fontWeight (FontWeight_T): The font weight. The following strings and numbers are valid values: ``"thin"`` (``100``), ``"light"`` (``300``), ``"regular"`` (``400``), ``"normal"`` (``400``), ``"medium"`` (``500``), ``"bold"`` (``700``), ``"black"`` (``900``) **Default value:** ``"regular"``
             logoLetters (bool | ExprRef | dict[str, Any]): Stretch letters so that they can be used with sequence logos, etc...
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             paddingX (float | ExprRef | dict[str, Any]): The horizontal padding, in pixels, when the ``x2`` channel is used for ranged text. **Default value:** ``0``
             paddingY (float | ExprRef | dict[str, Any]): The vertical padding, in pixels, when the ``y2`` channel is used for ranged text. **Default value:** ``0``
@@ -10273,7 +10229,6 @@ class ConfigMethodMixin:
             "fontStyle": fontStyle,
             "fontWeight": fontWeight,
             "logoLetters": logoLetters,
-            "minBufferSize": minBufferSize,
             "opacity": opacity,
             "paddingX": paddingX,
             "paddingY": paddingY,
@@ -10319,7 +10274,6 @@ class ConfigMethodMixin:
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        minBufferSize: float | UndefinedType = Undefined,
         minLength: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         orient: Literal["vertical", "horizontal"] | UndefinedType = Undefined,
@@ -10349,11 +10303,10 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
-            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ the direction of zoomable positional scales
+            clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
-            minBufferSize (float): Minimum size for WebGL buffers (number of data items). Allows for using ``bufferSubData()`` to update graphics. This property is intended for internal use.
             minLength (float | ExprRef | dict[str, Any]): The minimum stroke length in pixels. Use this property to ensure that very short strokes remain visible even when the user zooms out. **Default value:** ``0``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             orient (Literal['vertical', 'horizontal']): The orientation of the tick mark. If omitted, GenomeSpy infers the orientation when one positional channel uses a band-like scale and the other does not, or when the orthogonal channel is omitted. Specify ``orient`` explicitly when both ``x`` and ``y`` use band-like scales. **Default value:** inferred
@@ -10376,7 +10329,6 @@ class ConfigMethodMixin:
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
             "cursor": cursor,
-            "minBufferSize": minBufferSize,
             "minLength": minLength,
             "opacity": opacity,
             "orient": orient,
@@ -10619,7 +10571,7 @@ class TransformMethodMixin:
             as\\_ (Sequence[str]): The names for the output fields corresponding to each aggregated field. If not provided, names will be automatically created using the operation and field names (e.g., ``sum_field``, ``average_field``).
             description (str): A description of the transform step. Can be used for documentation and agent context.
             fields (Sequence[Field_T]): The data fields to apply aggregate functions to. This array should correspond with the ``ops`` and ``as`` arrays. If no fields or operations are specified, a count aggregation will be applied by default.
-            groupby (Sequence[Field_T]): The fields by which to group the data. If these are not defined, all data objects will be grouped into a single category.
+            groupby (Sequence[Field_T]): The fields by which to group the data. If these are not defined, all rows will be grouped into a single category.
             ops (Sequence[AggregateOp_T]): The aggregation operations to be performed on the fields, such as ``"sum"``, ``"q1"``, ``"median"``, ``"q3"``, or ``"count"``.
         """
         transform: dict[str, Any] = {"type": "aggregate"}
@@ -10950,10 +10902,10 @@ class TransformMethodMixin:
 
         Args:
             description (str): A description of the transform step. Can be used for documentation and agent context.
-            empty (bool): If true, the filter retains all data objects when the selection is empty. **Default:** ``true``
-            expr (str): An expression string. The data object is removed if the expression evaluates to false.
+            empty (bool): If true, the filter retains all rows when the selection is empty. **Default:** ``true``
+            expr (str): An expression string. The row is removed if the expression evaluates to false.
             fields (dict[str, Any]): An optional mapping of positional channels to fields. Used to determine which fields are checked against the selection intervals.
-            param (str): A selection parameter. The data object is removed if it is not part of the selection.
+            param (str): A selection parameter. The row is removed if it is not part of the selection.
         """
         transform: dict[str, Any] = {"type": "filter"}
         if expression is not Undefined:
@@ -11099,7 +11051,7 @@ class TransformMethodMixin:
         """Add a ``flatten`` transform.
 
         Args:
-            fields (Sequence[Field_T] | Field_T): The field(s) to flatten. If no field is defined, the data object itself is treated as an array to be flattened.
+            fields (Sequence[Field_T] | Field_T): The field(s) to flatten. If no field is defined, the input row itself is treated as an array to be flattened.
             as\\_ (Sequence[str] | str): The output field name(s) for the flattened field. **Default:** the input fields.
             description (str): A description of the transform step. Can be used for documentation and agent context.
             index (str): The output field name for the zero-based index of the array values. If unspecified, an index field is not added.
@@ -11483,7 +11435,7 @@ class TransformMethodMixin:
             field (Field_T): The source field
             regex (str): A valid JavaScript regular expression with at least one group. For example: ``"^Sample(\\d+)$"``. Read more at: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
             description (str): A description of the transform step. Can be used for documentation and agent context.
-            skipInvalidInput (bool): Do not complain about invalid input. Just skip it and leave the new fields undefined on the affected datum. **Default:** ``false``
+            skipInvalidInput (bool): Do not complain about invalid input. Just skip it and leave the new fields undefined on the affected row. **Default:** ``false``
         """
         transform: dict[str, Any] = {"type": "regexExtract"}
         transform["as"] = as_
@@ -11511,7 +11463,7 @@ class TransformMethodMixin:
             columnRegex (Sequence[str] | str): A regular expression that matches to column names. The regex must have one capturing group that is used for extracting the key (e.g., a sample id) from the column name.
             asKey (str): **Default:** ``"sample"``
             description (str): A description of the transform step. Can be used for documentation and agent context.
-            skipRegex (str): An optional regex that matches to fields that should not be included in the new folded data objects.
+            skipRegex (str): An optional regex that matches to fields that should not be included in the new folded rows.
         """
         transform: dict[str, Any] = {"type": "regexFold"}
         transform["asValue"] = asValue
@@ -11586,7 +11538,7 @@ class TransformMethodMixin:
         Args:
             groupby (Sequence[Field_T]): The fields to be used for forming groups for different stacks.
             as\\_ (Sequence[str]): Fields to write the stacked values. **Default:** ``["y0", "y1"]``
-            baseField (Field_T): The field that contains the base or amino acid. Used for information content calculation when the offset is ``"information"``. The data objects that have ``null`` in the baseField are considered gaps and they are taken into account when scaling the the locus' information content.
+            baseField (Field_T): The field that contains the base or amino acid. Used for information content calculation when the offset is ``"information"``. Rows that have ``null`` in the baseField are considered gaps and they are taken into account when scaling the the locus' information content.
             cardinality (float): Cardinality, e.g., the number if distinct bases or amino acids. Used for information content calculation when the offset is ``"information"``. **Default:** ``4``
             description (str): A description of the transform step. Can be used for documentation and agent context.
             field (Field_T): The field to stack. If no field is defined, a constant value of one is assumed.

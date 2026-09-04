@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.85.0",
+  "schema_version": "0.86.0",
   "definitions": [
     "AggregateOp",
     "AggregateParams",

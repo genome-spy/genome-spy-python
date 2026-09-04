@@ -39,7 +39,7 @@
           "type": "array"
         },
         "groupby": {
-          "description": "The fields by which to group the data. If these are not defined, all data objects will be grouped into a single category.",
+          "description": "The fields by which to group the data. If these are not defined, all rows will be grouped into a single category.",
           "items": {
             "$ref": "#/definitions/Field"
           },
@@ -73,7 +73,7 @@
     },
     "AlignmentMismatchesParams": {
       "additionalProperties": false,
-      "description": "Emits one row per mismatching aligned base in a read alignment.\n\nThe transform uses the read sequence, CIGAR string, and MD tag. The MD tag is required because ordinary `M` CIGAR operations do not distinguish matches from mismatches. The output rows preserve the input datum fields, or only the fields listed in `copyFields` when it is defined, and add fixed mismatch fields: `mismatchStart`, `mismatchEnd`, `readOffset`, `base`, `refBase`, and optionally `baseQuality`. Reference coordinates are 0-based, half-open.",
+      "description": "Emits one row per mismatching aligned base in a read alignment.\n\nThe transform uses the read sequence, CIGAR string, and MD tag. The MD tag is required because ordinary `M` CIGAR operations do not distinguish matches from mismatches. The output rows preserve the input row fields, or only the fields listed in `copyFields` when it is defined, and add fixed mismatch fields: `mismatchStart`, `mismatchEnd`, `readOffset`, `base`, `refBase`, and optionally `baseQuality`. Reference coordinates are 0-based, half-open.",
       "properties": {
         "cigar": {
           "$ref": "#/definitions/Field",
@@ -142,7 +142,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -302,10 +302,6 @@
             }
           ],
           "description": "Width of the arrowhead as a multiplier of resolved `size`. Values above `1` make the arrowhead wider than the stem.\n\n__Default value:__ `3`"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minSize": {
           "anyOf": [
@@ -540,7 +536,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -700,10 +696,6 @@
             }
           ],
           "description": "Width of the arrowhead as a multiplier of resolved `size`. Values above `1` make the arrowhead wider than the stem.\n\n__Default value:__ `3`"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minSize": {
           "anyOf": [
@@ -3631,7 +3623,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -5378,7 +5370,7 @@
                   "$ref": "#/definitions/MarkProps"
                 }
               ],
-              "description": "The graphical mark presenting the data objects."
+              "description": "The graphical mark presenting the rows."
             },
             "name": {
               "description": "An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.",
@@ -5421,7 +5413,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -6639,7 +6631,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -7856,7 +7848,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -9055,7 +9047,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -10287,7 +10279,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -11510,7 +11502,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -12270,7 +12262,7 @@
         },
         "key": {
           "$ref": "#/definitions/KeyDef",
-          "description": "One or more data fields that uniquely identify data objects for stable point selections and bookmarking across sessions. Unlike `uniqueId` (an implicit surrogate key), key fields must be stable in the source data.\n\nUse a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant."
+          "description": "One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike `uniqueId` (an implicit surrogate key), key fields must be stable in the source data.\n\nUse a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant."
         },
         "opacity": {
           "$ref": "#/definitions/NumericMarkPropDef",
@@ -12282,7 +12274,7 @@
         },
         "search": {
           "$ref": "#/definitions/SearchDef",
-          "description": "One or more fields used by the App's location/search input to match data objects in this view.\n\nUse a single field definition for simple search, or an array for matching against multiple fields. A datum matches when any configured search field matches the entered term."
+          "description": "One or more fields used by the App's location/search input to match rows in this view.\n\nUse a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term."
         },
         "semanticScore": {
           "additionalProperties": false,
@@ -12770,7 +12762,7 @@
           "type": "string"
         },
         "expr": {
-          "description": "An expression string. The data object is removed if the expression evaluates to false.",
+          "description": "An expression string. The row is removed if the expression evaluates to false.",
           "type": "string"
         },
         "type": {
@@ -12806,6 +12798,7 @@
         },
         "push": {
           "const": "outer",
+          "description": "Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first.\n\nThis is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.",
           "type": "string"
         },
         "transition": {
@@ -13336,7 +13329,7 @@
     },
     "FlattenCigarParams": {
       "additionalProperties": false,
-      "description": "Expands a read alignment into one row per CIGAR operation.\n\nThe output rows preserve the input datum fields, or only the fields listed in `copyFields` when it is defined, and add fixed CIGAR fields: `cigarOp`, `cigarLength`, `cigarStart`, `cigarEnd`, `readStart`, `readEnd`, and `cigarType`. Reference coordinates are 0-based, half-open.",
+      "description": "Expands a read alignment into one row per CIGAR operation.\n\nThe output rows preserve the input row fields, or only the fields listed in `copyFields` when it is defined, and add fixed CIGAR fields: `cigarOp`, `cigarLength`, `cigarStart`, `cigarEnd`, `readStart`, `readEnd`, and `cigarType`. Reference coordinates are 0-based, half-open.",
       "properties": {
         "cigar": {
           "$ref": "#/definitions/Field",
@@ -13498,7 +13491,7 @@
               "$ref": "#/definitions/Field"
             }
           ],
-          "description": "The field(s) to flatten. If no field is defined, the data object itself is treated as an array to be flattened."
+          "description": "The field(s) to flatten. If no field is defined, the input row itself is treated as an array to be flattened."
         },
         "index": {
           "description": "The output field name for the zero-based index of the array values. If unspecified, an index field is not added.",
@@ -15266,7 +15259,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -16861,7 +16854,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -17828,7 +17821,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -17913,10 +17906,6 @@
             }
           ],
           "description": "The minimum height of an `\"arc\"` shape. Makes very short links more clearly visible.\n\n**Default value:** `1.5`"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minPickingSize": {
           "anyOf": [
@@ -18165,7 +18154,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -18250,10 +18239,6 @@
             }
           ],
           "description": "The minimum height of an `\"arc\"` shape. Makes very short links more clearly visible.\n\n**Default value:** `1.5`"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minPickingSize": {
           "anyOf": [
@@ -18567,7 +18552,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -18606,10 +18591,6 @@
             }
           ],
           "description": "Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors.\n\n__Default value:__ browser default"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "opacity": {
           "anyOf": [
@@ -20096,7 +20077,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -20638,6 +20619,7 @@
         },
         "push": {
           "const": "outer",
+          "description": "Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first.\n\nThis is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.",
           "type": "string"
         },
         "value": {
@@ -20685,7 +20667,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -20787,6 +20769,7 @@
           "type": "boolean"
         },
         "geometricZoomBound": {
+          "deprecated": "This property will be removed in GenomeSpy v2.0. Use an\nexpression-valued `size` instead.",
           "description": "Enables geometric zooming. The value is the base two logarithmic zoom level where the maximum point size is reached.\n\n**Default value:** `0`",
           "type": "number"
         },
@@ -20800,10 +20783,6 @@
             }
           ],
           "description": "Should the stroke only grow inwards, e.g, the diameter/outline is not affected by the stroke width. Thus, a point that has a zero size has no visible stroke. This allows strokes to be used with geometric zoom, etc.\n\n**Default value:** `false`"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minPickingSize": {
           "anyOf": [
@@ -21031,7 +21010,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -21133,6 +21112,7 @@
           "type": "boolean"
         },
         "geometricZoomBound": {
+          "deprecated": "This property will be removed in GenomeSpy v2.0. Use an\nexpression-valued `size` instead.",
           "description": "Enables geometric zooming. The value is the base two logarithmic zoom level where the maximum point size is reached.\n\n**Default value:** `0`",
           "type": "number"
         },
@@ -21146,10 +21126,6 @@
             }
           ],
           "description": "Should the stroke only grow inwards, e.g, the diameter/outline is not affected by the stroke width. Thus, a point that has a zero size has no visible stroke. This allows strokes to be used with geometric zoom, etc.\n\n**Default value:** `false`"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minPickingSize": {
           "anyOf": [
@@ -21849,7 +21825,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -22017,10 +21993,6 @@
             }
           ],
           "description": "A hatch pattern drawn inside the mark using the stroke width, color, and opacity. The pattern is aligned in screen space and scaled by the stroke width.\n\n**Default value:** `\"none\"`"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minHeight": {
           "anyOf": [
@@ -22288,7 +22260,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -22456,10 +22428,6 @@
             }
           ],
           "description": "A hatch pattern drawn inside the mark using the stroke width, color, and opacity. The pattern is aligned in screen space and scaled by the stroke width.\n\n**Default value:** `\"none\"`"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minHeight": {
           "anyOf": [
@@ -22739,7 +22707,7 @@
           "type": "string"
         },
         "skipInvalidInput": {
-          "description": "Do not complain about invalid input. Just skip it and leave the new fields undefined on the affected datum.\n\n**Default:** `false`",
+          "description": "Do not complain about invalid input. Just skip it and leave the new fields undefined on the affected row.\n\n**Default:** `false`",
           "type": "boolean"
         },
         "type": {
@@ -22796,7 +22764,7 @@
           "type": "string"
         },
         "skipRegex": {
-          "description": "An optional regex that matches to fields that should not be included in the new folded data objects.",
+          "description": "An optional regex that matches to fields that should not be included in the new folded rows.",
           "type": "string"
         },
         "type": {
@@ -23027,7 +22995,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -23066,10 +23034,6 @@
             }
           ],
           "description": "Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors.\n\n__Default value:__ browser default"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minLength": {
           "anyOf": [
@@ -23269,7 +23233,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -23308,10 +23272,6 @@
             }
           ],
           "description": "Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors.\n\n__Default value:__ browser default"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minLength": {
           "anyOf": [
@@ -23730,6 +23690,7 @@
         },
         "push": {
           "const": "outer",
+          "description": "Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first.\n\nThis is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.",
           "type": "string"
         },
         "ruler": {
@@ -23871,7 +23832,7 @@
               "$ref": "#/definitions/DomainValueArray"
             }
           ],
-          "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references."
+          "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor."
         },
         "domainMax": {
           "description": "Sets the maximum value in the scale domain, overriding the `domain` property. This property is only intended for use with scales having continuous domains.",
@@ -23978,7 +23939,7 @@
               "type": "string"
             }
           ],
-          "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
+          "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
         },
         "reverse": {
           "description": "If true, reverses the order of the scale range.\n\n__Default value:__ `false`.",
@@ -24079,7 +24040,7 @@
               "$ref": "#/definitions/DomainValueArray"
             }
           ],
-          "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references."
+          "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor."
         },
         "domainMax": {
           "description": "Sets the maximum value in the scale domain, overriding the `domain` property. This property is only intended for use with scales having continuous domains.",
@@ -24160,7 +24121,7 @@
                   "$ref": "#/definitions/DomainValueArray"
                 }
               ],
-              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references."
+              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor."
             },
             "domainMax": {
               "description": "Sets the maximum value in the scale domain, overriding the `domain` property. This property is only intended for use with scales having continuous domains.",
@@ -24267,7 +24228,7 @@
                   "type": "string"
                 }
               ],
-              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
+              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
             },
             "reverse": {
               "description": "If true, reverses the order of the scale range.\n\n__Default value:__ `false`.",
@@ -24380,7 +24341,7 @@
                   "$ref": "#/definitions/DomainValueArray"
                 }
               ],
-              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references."
+              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor."
             },
             "domainMax": {
               "description": "Sets the maximum value in the scale domain, overriding the `domain` property. This property is only intended for use with scales having continuous domains.",
@@ -24487,7 +24448,7 @@
                   "type": "string"
                 }
               ],
-              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
+              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
             },
             "reverse": {
               "description": "If true, reverses the order of the scale range.\n\n__Default value:__ `false`.",
@@ -24620,7 +24581,7 @@
                   "$ref": "#/definitions/DomainValueArray"
                 }
               ],
-              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references."
+              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor."
             },
             "domainMax": {
               "description": "Sets the maximum value in the scale domain, overriding the `domain` property. This property is only intended for use with scales having continuous domains.",
@@ -24727,7 +24688,7 @@
                   "type": "string"
                 }
               ],
-              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
+              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
             },
             "reverse": {
               "description": "If true, reverses the order of the scale range.\n\n__Default value:__ `false`.",
@@ -24837,7 +24798,7 @@
                   "$ref": "#/definitions/DomainValueArray"
                 }
               ],
-              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references."
+              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor."
             },
             "domainMax": {
               "description": "Sets the maximum value in the scale domain, overriding the `domain` property. This property is only intended for use with scales having continuous domains.",
@@ -24944,7 +24905,7 @@
                   "type": "string"
                 }
               ],
-              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
+              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
             },
             "reverse": {
               "description": "If true, reverses the order of the scale range.\n\n__Default value:__ `false`.",
@@ -25067,7 +25028,7 @@
                   "$ref": "#/definitions/DomainValueArray"
                 }
               ],
-              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references."
+              "description": "Customized domain values.\n\nFor _quantitative_ fields, `domain` can take the form of a two-element array with minimum and maximum values. [Vega-Lite piecewise scales](https://vega.github.io/vega-lite/docs/scale.html#piecewise) can be created by providing a `domain` with more than two entries.\n\nFor _ordinal_ and _nominal_ fields, `domain` can be an array that lists valid input values.\n\nThe domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor."
             },
             "domainMax": {
               "description": "Sets the maximum value in the scale domain, overriding the `domain` property. This property is only intended for use with scales having continuous domains.",
@@ -25174,7 +25135,7 @@
                   "type": "string"
                 }
               ],
-              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
+              "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
             },
             "reverse": {
               "description": "If true, reverses the order of the scale range.\n\n__Default value:__ `false`.",
@@ -25243,7 +25204,7 @@
               "type": "string"
             }
           ],
-          "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
+          "description": "The range of the scale. One of:\n\n- A string indicating a [pre-defined named scale range from Vega-Lite](https://vega.github.io/vega-lite/docs/scale.html#range-config) (e.g., example, `\"symbol\"`, or `\"diverging\"`).\n\n- For [Vega-Lite continuous scales](https://vega.github.io/vega-lite/docs/scale.html#continuous), two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a [Vega-Lite piecewise scale](https://vega.github.io/vega-lite/docs/scale.html#piecewise). Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n- For [Vega-Lite discrete](https://vega.github.io/vega-lite/docs/scale.html#discrete) and [Vega-Lite discretizing](https://vega.github.io/vega-lite/docs/scale.html#discretizing) scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution.\n\n__Notes:__\n\n1) For color scales you can also specify a color [`scheme`](https://vega.github.io/vega-lite/docs/scale.html#scheme) instead of `range`.\n\n2) Any directly specified `range` for `x` and `y` channels will be ignored. Range can be customized via the view's corresponding [Vega-Lite size](https://vega.github.io/vega-lite/docs/size.html) (`width` and `height`)."
         },
         "reverse": {
           "description": "If true, reverses the order of the scale range.\n\n__Default value:__ `false`.",
@@ -25459,7 +25420,7 @@
           "description": "Initial configured domain for the linked scale when the linked interval selection is empty.\n\nOnly supported when the linked scale is zoomable.\n\nClearing the linked interval selection resets the domain to the normal default/data-derived domain instead of restoring `initial`."
         },
         "param": {
-          "description": "Name of an interval selection parameter that provides the domain.",
+          "description": "Name of an interval selection parameter that provides the domain. The name resolves from the view that owns the scale resolution.",
           "type": "string"
         }
       },
@@ -25484,7 +25445,7 @@
           "type": "string"
         },
         "empty": {
-          "description": "If true, the filter retains all data objects when the selection is empty.\n\n**Default:** `true`",
+          "description": "If true, the filter retains all rows when the selection is empty.\n\n**Default:** `true`",
           "type": "boolean"
         },
         "fields": {
@@ -25507,7 +25468,7 @@
           "type": "object"
         },
         "param": {
-          "description": "A selection parameter. The data object is removed if it is not part of the selection.",
+          "description": "A selection parameter. The row is removed if it is not part of the selection.",
           "type": "string"
         },
         "type": {
@@ -25561,6 +25522,7 @@
         },
         "push": {
           "const": "outer",
+          "description": "Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first.\n\nThis is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.",
           "type": "string"
         },
         "select": {
@@ -25620,7 +25582,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -25663,10 +25625,6 @@
         "includePlotMargin": {
           "description": "Whether separators extend into the plot margin (axes/padding) around the grid.\n\n__Default value:__ `true`",
           "type": "boolean"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minLength": {
           "anyOf": [
@@ -26024,7 +25982,7 @@
         },
         "baseField": {
           "$ref": "#/definitions/Field",
-          "description": "The field that contains the base or amino acid. Used for information content calculation when the offset is `\"information\"`. The data objects that have `null` in the baseField are considered gaps and they are taken into account when scaling the the locus' information content."
+          "description": "The field that contains the base or amino acid. Used for information content calculation when the offset is `\"information\"`. Rows that have `null` in the baseField are considered gaps and they are taken into account when scaling the the locus' information content."
         },
         "cardinality": {
           "description": "Cardinality, e.g., the number if distinct bases or amino acids. Used for information content calculation when the offset is `\"information\"`.\n\n**Default:** `4`",
@@ -26466,7 +26424,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -26752,7 +26710,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "If true, sets the secondary positional channel that allows the text to be squeezed (see the `squeeze` property). Can be used when: 1) `\"band\"`, `\"index\"`, or `\"locus\"` scale is being used and 2) only the primary positional channel is specified.\n\n**Default value:** `false`"
+          "description": "If true, sets the secondary positional channel that allows the text to be squeezed (see the `squeeze` property). Can be used when: 1) `\"band\"`, `\"index\"`, or `\"locus\"` scale is being used and 2) only the primary positional channel is specified.\n\nExpressions are evaluated when the mark is initialized and cannot change reactively.\n\n**Default value:** `false`"
         },
         "flushX": {
           "anyOf": [
@@ -26833,6 +26791,7 @@
           "description": "The reference frame for the title anchor. `\"group\"` anchors the title along the plot area. `\"bounds\"` anchors the title along the full bounds, including axes, legends, and other reserved space.\n\n__Default value:__ `\"group\"`"
         },
         "geometricZoomBound": {
+          "deprecated": "This property will be removed in GenomeSpy v2.0. Use an\nexpression-valued `size` instead.",
           "description": "Enables geometric zooming. The value is the base two logarithmic zoom level where the maximum point size is reached.\n\n**Default value:** `0`",
           "type": "number"
         },
@@ -27246,10 +27205,6 @@
             }
           ],
           "description": "The minimum height of an `\"arc\"` shape. Makes very short links more clearly visible.\n\n**Default value:** `1.5`"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minExtent": {
           "description": "The minimum extent in pixels that axis ticks and labels should use. This determines a minimum offset value for axis titles.\n\n__Default value:__ `30` for y-axis; `undefined` for x-axis.",
@@ -28367,7 +28322,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -28424,7 +28379,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "If true, sets the secondary positional channel that allows the text to be squeezed (see the `squeeze` property). Can be used when: 1) `\"band\"`, `\"index\"`, or `\"locus\"` scale is being used and 2) only the primary positional channel is specified.\n\n**Default value:** `false`"
+          "description": "If true, sets the secondary positional channel that allows the text to be squeezed (see the `squeeze` property). Can be used when: 1) `\"band\"`, `\"index\"`, or `\"locus\"` scale is being used and 2) only the primary positional channel is specified.\n\nExpressions are evaluated when the mark is initialized and cannot change reactively.\n\n**Default value:** `false`"
         },
         "flushX": {
           "anyOf": [
@@ -28470,10 +28425,6 @@
             }
           ],
           "description": "Stretch letters so that they can be used with [sequence logos](https://en.wikipedia.org/wiki/Sequence_logo), etc..."
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "opacity": {
           "anyOf": [
@@ -28790,7 +28741,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -28847,7 +28798,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "If true, sets the secondary positional channel that allows the text to be squeezed (see the `squeeze` property). Can be used when: 1) `\"band\"`, `\"index\"`, or `\"locus\"` scale is being used and 2) only the primary positional channel is specified.\n\n**Default value:** `false`"
+          "description": "If true, sets the secondary positional channel that allows the text to be squeezed (see the `squeeze` property). Can be used when: 1) `\"band\"`, `\"index\"`, or `\"locus\"` scale is being used and 2) only the primary positional channel is specified.\n\nExpressions are evaluated when the mark is initialized and cannot change reactively.\n\n**Default value:** `false`"
         },
         "flushX": {
           "anyOf": [
@@ -28893,10 +28844,6 @@
             }
           ],
           "description": "Stretch letters so that they can be used with [sequence logos](https://en.wikipedia.org/wiki/Sequence_logo), etc..."
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "opacity": {
           "anyOf": [
@@ -29185,7 +29132,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -29224,10 +29171,6 @@
             }
           ],
           "description": "Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors.\n\n__Default value:__ browser default"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minLength": {
           "anyOf": [
@@ -29406,7 +29349,7 @@
               "type": "string"
             }
           ],
-          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ the direction of zoomable positional scales"
+          "description": "Controls whether the mark is clipped to the UnitView's rectangle. The values `\"x\"` and `\"y\"` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless `\"never\"` is used.\n\n__Default value:__ `true` when either positional scale is zoomable; otherwise `false`"
         },
         "color": {
           "anyOf": [
@@ -29445,10 +29388,6 @@
             }
           ],
           "description": "Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors.\n\n__Default value:__ browser default"
-        },
-        "minBufferSize": {
-          "description": "Minimum size for WebGL buffers (number of data items). Allows for using `bufferSubData()` to update graphics.\n\nThis property is intended for internal use.",
-          "type": "number"
         },
         "minLength": {
           "anyOf": [
@@ -30143,6 +30082,7 @@
         },
         "push": {
           "const": "outer",
+          "description": "Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first.\n\nThis is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.",
           "type": "string"
         },
         "transition": {
@@ -31200,7 +31140,7 @@
               "$ref": "#/definitions/MarkProps"
             }
           ],
-          "description": "The graphical mark presenting the data objects."
+          "description": "The graphical mark presenting the rows."
         },
         "name": {
           "description": "An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.",
@@ -31243,7 +31183,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -32565,7 +32505,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"

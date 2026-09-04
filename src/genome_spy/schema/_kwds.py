@@ -695,7 +695,6 @@ class LinkConfigKwds(TypedDict, total=False):
     )
     maxChordLength: float | ExprRef | dict[str, Any]
     minArcHeight: float | ExprRef | dict[str, Any]
-    minBufferSize: float
     minPickingSize: float | ExprRef | dict[str, Any]
     noFadingOnPointSelection: bool | ExprRef | dict[str, Any]
     opacity: float | ExprRef | dict[str, Any]
@@ -722,7 +721,6 @@ class MarkConfigKwds(TypedDict, total=False):
     color: str | ExprRef | dict[str, Any]
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
     cursor: str | ExprRef | dict[str, Any]
-    minBufferSize: float
     opacity: float | ExprRef | dict[str, Any]
     style: str | Sequence[str]
     tooltip: HandledTooltip | HandledTooltipKwds | None | Literal[False]
@@ -795,7 +793,6 @@ class PointConfigKwds(TypedDict, total=False):
     filled: bool
     geometricZoomBound: float
     inwardStroke: bool | ExprRef | dict[str, Any]
-    minBufferSize: float
     minPickingSize: float | ExprRef | dict[str, Any]
     opacity: float | ExprRef | dict[str, Any]
     sampleFacetPadding: float
@@ -857,7 +854,6 @@ class RectConfigKwds(TypedDict, total=False):
         | ExprRef
         | dict[str, Any]
     )
-    minBufferSize: float
     minHeight: float | ExprRef | dict[str, Any]
     minOpacity: float | ExprRef | dict[str, Any]
     minWidth: float | ExprRef | dict[str, Any]
@@ -890,7 +886,6 @@ class RuleConfigKwds(TypedDict, total=False):
     color: str | ExprRef | dict[str, Any]
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
     cursor: str | ExprRef | dict[str, Any]
-    minBufferSize: float
     minLength: float | ExprRef | dict[str, Any]
     opacity: float | ExprRef | dict[str, Any]
     size: float | ExprRef | dict[str, Any]
@@ -1066,7 +1061,6 @@ class SeparatorPropsKwds(TypedDict, total=False):
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
     cursor: str | ExprRef | dict[str, Any]
     includePlotMargin: bool
-    minBufferSize: float
     minLength: float | ExprRef | dict[str, Any]
     opacity: float | ExprRef | dict[str, Any]
     size: float | ExprRef | dict[str, Any]
@@ -1128,7 +1122,6 @@ class TextConfigKwds(TypedDict, total=False):
     fontStyle: FontStyle_T
     fontWeight: FontWeight_T
     logoLetters: bool | ExprRef | dict[str, Any]
-    minBufferSize: float
     opacity: float | ExprRef | dict[str, Any]
     paddingX: float | ExprRef | dict[str, Any]
     paddingY: float | ExprRef | dict[str, Any]
