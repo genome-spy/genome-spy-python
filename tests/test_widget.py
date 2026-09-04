@@ -30,6 +30,21 @@ def test_widget_rewrites_eager_records_as_a_named_dataset() -> None:
     assert widget.spec["datasets"] == {"__genome_spy_python_data_0": [{"x": 1, "y": 2}]}
     assert widget.dataset_names == ("__genome_spy_python_data_0",)
     assert "import(moduleUrl)" in widget._esm
+    assert widget.controls == ["svg", "png", "inspector"]
+    assert widget._control_definitions["png"] == {
+        "module": "core",
+        "export": "pngButton",
+    }
+
+
+def test_widget_accepts_selected_or_disabled_controls() -> None:
+    chart = gs.Chart().mark_point()
+
+    selected = chart.widget(controls=["png", "full-window"])
+    disabled = chart.widget(controls=False)
+
+    assert selected.controls == ["png", "full-window"]
+    assert disabled.controls == []
 
 
 def test_jupyter_chart_rewrites_raw_eager_spec_dict() -> None:

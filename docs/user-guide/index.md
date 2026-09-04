@@ -42,6 +42,8 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
   overview brushes, selections, and cursor rulers.
 - [Create and update charts in notebooks](notebooks.md) covers display,
   dataframe transport, and live dataset updates without remounting.
+- [Display controls and embed options](display-controls.md) covers image export,
+  the Inspector, and rendering-time settings.
 - [Save and inspect charts](serialization.md) writes specifications and
   standalone HTML.
 
@@ -85,5 +87,6 @@ annotations
 
 interaction
 notebooks
+display-controls
 serialization
 ```

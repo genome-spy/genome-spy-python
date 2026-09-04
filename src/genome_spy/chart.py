@@ -9,6 +9,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, ClassVar, Protocol, Self, cast
 from uuid import uuid4
 
+from genome_spy._embed import (
+    DEFAULT_CONTROLS_MODULE_URL,
+    DEFAULT_EMBED_URL,
+    DEFAULT_INSPECTOR_MODULE_URL,
+    Controls,
+    control_definitions,
+    normalize_controls,
+)
 from genome_spy._utils import JsonSpec, compact_json, pretty_json
 from genome_spy._chart_authoring import (
     merge_encoding_definitions,
@@ -55,6 +63,7 @@ from genome_spy.schema.composition import (
 from genome_spy.schemapi import (
     SchemaBase,
     Undefined,
+    UndefinedType,
     merge_mapping_value,
     normalize_mapping_value,
     normalize_schema_value,
@@ -66,7 +75,6 @@ if TYPE_CHECKING:
 
 _CORE_DIST_URL = f"https://cdn.jsdelivr.net/npm/@genome-spy/core@{SCHEMA_VERSION}/dist"
 DEFAULT_SCHEMA_URL = f"{_CORE_DIST_URL}/schema.json"
-DEFAULT_EMBED_URL = f"{_CORE_DIST_URL}/bundle/index.es.js"
 
 
 class _CopyableSpec(Protocol):
@@ -82,7 +90,7 @@ class _SerializableView(Protocol):
 HTML_TEMPLATE = """
 <div id="{container_id}"></div>
 <script type="text/javascript">
-  (function(spec, moduleUrl) {{
+  (function(spec, moduleUrl, embedOptions, controlOptions) {{
     let outputDiv = document.currentScript.previousElementSibling;
     if (!outputDiv || outputDiv.id !== "{container_id}") {{
       outputDiv = document.getElementById("{container_id}");
@@ -99,6 +107,15 @@ HTML_TEMPLATE = """
       throw error;
     }}
 
+    function showControlError(error) {{
+      const message = document.createElement("p");
+      message.setAttribute("role", "status");
+      message.style.color = "red";
+      message.textContent = "GenomeSpy controls failed to load: " + error.message;
+      outputDiv.appendChild(message);
+      console.error(error);
+    }}
+
     (async function() {{
       try {{
         const module = await import(moduleUrl);
@@ -106,12 +123,42 @@ HTML_TEMPLATE = """
         if (typeof embed !== "function") {{
           throw new Error("GenomeSpy embed export was not found.");
         }}
-        await embed(outputDiv, spec);
+        const api = await embed(outputDiv, spec, embedOptions);
+        if (controlOptions.names.length) {{
+          try {{
+            const controlsModule = await import(controlOptions.moduleUrls.core);
+            const modules = {{ core: controlsModule }};
+            const controls = [];
+            for (const name of controlOptions.names) {{
+              const definition = controlOptions.definitions[name];
+              if (!definition) {{
+                throw new Error(`Control ${{name}} has no definition.`);
+              }}
+              if (!modules[definition.module]) {{
+                const moduleUrl = controlOptions.moduleUrls[definition.module];
+                if (!moduleUrl) {{
+                  throw new Error(
+                    `Control module ${{definition.module}} has no URL.`
+                  );
+                }}
+                modules[definition.module] = await import(moduleUrl);
+              }}
+              const factory = modules[definition.module][definition.export];
+              if (typeof factory !== "function") {{
+                throw new Error(`Control ${{name}} is unavailable.`);
+              }}
+              controls.push(factory());
+            }}
+            controlsModule.attachControls(outputDiv, api, {{ controls }});
+          }} catch (error) {{
+            showControlError(error);
+          }}
+        }}
       }} catch (error) {{
         showError(error);
       }}
     }})();
-  }})({spec_json}, {module_url_json});
+  }})({spec_json}, {module_url_json}, {embed_options_json}, {control_options_json});
 </script>
 """.strip()
 
@@ -589,27 +636,136 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         self,
         *,
         bundle_url: str = DEFAULT_EMBED_URL,
+        embed_options: Mapping[str, Any] | None = None,
+        controls: Controls | UndefinedType = Undefined,
+        controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
+        inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
         container_id: str | None = None,
     ) -> str:
-        """Render the spec as a small self-contained HTML snippet."""
+        """Render the chart as an HTML snippet.
+
+        Description:
+            The snippet loads the pinned GenomeSpy browser modules. Controls
+            affect only this HTML representation and are not serialized into
+            the chart specification.
+
+        Args:
+            bundle_url: Browser module containing GenomeSpy's ``embed`` function.
+            embed_options: Options passed directly to ``embed``.
+            controls: Controls to mount, ``True`` for defaults, or ``False`` to
+                disable them.
+            controls_module_url: Browser module containing Core controls.
+            inspector_module_url: Browser module containing the Inspector control.
+            container_id: Optional HTML id for the chart container.
+
+        Returns:
+            An HTML snippet containing the chart specification and embed code.
+
+        Raises:
+            TypeError: If the controls value has an invalid type.
+            ValueError: If a control name is unknown or duplicated.
+
+        Example:
+            >>> chart.to_html(controls=["svg", "png"])
+        """
         container_id = container_id or f"genome-spy-{uuid4().hex}"
         spec_json = compact_json(self.to_dict())
         module_url_json = compact_json(bundle_url)
+        embed_options_json = compact_json(dict(embed_options or {}))
+        control_options_json = compact_json(
+            {
+                "names": normalize_controls(controls),
+                "definitions": control_definitions(),
+                "moduleUrls": {
+                    "core": controls_module_url,
+                    "inspector": inspector_module_url,
+                },
+            }
+        )
         return HTML_TEMPLATE.format(
             container_id=container_id,
             spec_json=spec_json,
             module_url_json=module_url_json,
+            embed_options_json=embed_options_json,
+            control_options_json=control_options_json,
         )
 
-    def save(self, path: str | Path, *, format: str | None = None) -> None:
-        """Save the spec as JSON or HTML based on suffix or explicit format."""
+    def save(
+        self,
+        path: str | Path,
+        *,
+        format: str | None = None,
+        bundle_url: str = DEFAULT_EMBED_URL,
+        embed_options: Mapping[str, Any] | None = None,
+        controls: Controls | UndefinedType = Undefined,
+        controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
+        inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
+    ) -> None:
+        """Save the chart as JSON or HTML.
+
+        Description:
+            The filename suffix selects the format unless ``format`` is given.
+            Rendering controls and embed options apply only to HTML output.
+
+        Args:
+            path: Destination path.
+            format: Explicit ``"json"`` or ``"html"`` format.
+            bundle_url: Browser module containing GenomeSpy's ``embed`` function.
+            embed_options: Options passed directly to ``embed`` for HTML output.
+            controls: HTML controls, ``True`` for defaults, or ``False`` to
+                disable them.
+            controls_module_url: Browser module containing Core controls.
+            inspector_module_url: Browser module containing the Inspector control.
+
+        Returns:
+            None.
+
+        Raises:
+            ValueError: If the format is unsupported or HTML-only options are
+                supplied for JSON output.
+
+        Example:
+            >>> chart.save("chart.html", controls=False)
+        """
         output_path = Path(path)
         file_format = format or output_path.suffix.lstrip(".")
         if file_format == "json":
+            html_options = [
+                name
+                for name, supplied in (
+                    ("bundle_url", bundle_url != DEFAULT_EMBED_URL),
+                    ("embed_options", embed_options is not None),
+                    ("controls", controls is not Undefined),
+                    (
+                        "controls_module_url",
+                        controls_module_url != DEFAULT_CONTROLS_MODULE_URL,
+                    ),
+                    (
+                        "inspector_module_url",
+                        inspector_module_url != DEFAULT_INSPECTOR_MODULE_URL,
+                    ),
+                )
+                if supplied
+            ]
+            if html_options:
+                raise ValueError(
+                    f"The {', '.join(html_options)} option(s) apply only to HTML "
+                    "rendering."
+                )
             output_path.write_text(self.to_json() + "\n", encoding="utf-8")
             return
         if file_format == "html":
-            output_path.write_text(self.to_html() + "\n", encoding="utf-8")
+            output_path.write_text(
+                self.to_html(
+                    bundle_url=bundle_url,
+                    embed_options=embed_options,
+                    controls=controls,
+                    controls_module_url=controls_module_url,
+                    inspector_module_url=inspector_module_url,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
             return
         raise ValueError("Unsupported format. Use 'json' or 'html'.")
 
@@ -618,6 +774,9 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         *,
         bundle_url: str = DEFAULT_EMBED_URL,
         embed_options: dict[str, Any] | None = None,
+        controls: Controls | UndefinedType = Undefined,
+        controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
+        inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
         parameter_names: Sequence[str] = (),
         parameter_values: Mapping[str, Any] | None = None,
         enable_click_events: bool = False,
@@ -627,6 +786,9 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         Args:
             bundle_url: GenomeSpy bundle URL used by the widget.
             embed_options: Options passed to GenomeSpy's ``embed`` function.
+            controls: Display controls, or ``False`` to disable them.
+            controls_module_url: Browser module containing Core controls.
+            inspector_module_url: Browser module containing the Inspector control.
             parameter_names: Named GenomeSpy parameters synchronized with the
                 widget's ``parameter_values`` trait.
             parameter_values: Initial values for the synchronized parameters.
@@ -635,6 +797,13 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
 
         Returns:
             An anywidget-backed :class:`JupyterChart`.
+
+        Raises:
+            TypeError: If the controls value has an invalid type.
+            ValueError: If a control name is unknown or duplicated.
+
+        Example:
+            >>> widget = chart.widget(controls=["png", "inspector"])
         """
         from genome_spy.jupyter import JupyterChart
 
@@ -642,9 +811,65 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
             self,
             bundle_url=bundle_url,
             embed_options=embed_options,
+            controls=controls,
+            controls_module_url=controls_module_url,
+            inspector_module_url=inspector_module_url,
             parameter_names=parameter_names,
             parameter_values=parameter_values,
             enable_click_events=enable_click_events,
+        )
+
+    def display(
+        self,
+        *,
+        bundle_url: str = DEFAULT_EMBED_URL,
+        embed_options: dict[str, Any] | None = None,
+        controls: Controls | UndefinedType = Undefined,
+        controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
+        inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
+    ) -> None:
+        """Display this chart once with temporary rendering options.
+
+        Description:
+            This mirrors Altair's display-time configuration: the supplied
+            options affect this display call without changing chart JSON.
+
+        Args:
+            bundle_url: Browser module containing GenomeSpy's ``embed`` function.
+            embed_options: Options passed directly to ``embed``.
+            controls: Controls to mount, ``True`` for defaults, or ``False`` to
+                disable them.
+            controls_module_url: Browser module containing Core controls.
+            inspector_module_url: Browser module containing the Inspector control.
+
+        Returns:
+            None.
+
+        Raises:
+            ImportError: If IPython is unavailable.
+            TypeError: If the controls value has an invalid type.
+            ValueError: If a control name is unknown or duplicated.
+
+        Example:
+            >>> chart.display(controls=False)
+        """
+        try:
+            from IPython.display import display
+        except ImportError as error:
+            raise ImportError(
+                "Chart.display() requires IPython. Use chart.to_html() outside "
+                "a notebook."
+            ) from error
+
+        display_chart = cast(Callable[[Any], None], display)
+        display_chart(
+            self.widget(
+                bundle_url=bundle_url,
+                embed_options=embed_options,
+                controls=controls,
+                controls_module_url=controls_module_url,
+                inspector_module_url=inspector_module_url,
+            )
         )
 
     def _repr_mimebundle_(
