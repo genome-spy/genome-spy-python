@@ -19,6 +19,7 @@ for JSON files. Pass `as_format="text"` to get the raw file contents instead.
 | `airway_scaledcounts` | Gene-level counts for the same eight samples |
 | `hapmap_gwas` | Genome-wide association results with p-values and effect sizes |
 | `brca_maf` | Somatic mutation calls for TCGA breast tumors |
+| `pik3ca_tcga_brca_lollipop` | Prepared recurrent PIK3CA mutations and protein domains |
 | `tcga_laml_maf` | Somatic mutation calls for TCGA acute myeloid leukemia |
 | `tcga_laml_annotations` | Clinical annotations for those leukemia samples |
 | `pyoncoprint_tcga` | Alteration matrix for TCGA lung adenocarcinoma samples |
@@ -40,6 +41,10 @@ for JSON files. Pass `as_format="text"` to get the raw file contents instead.
 - `brca_maf`, `tcga_laml_maf`, and `tcga_laml_annotations` are the example
   files bundled with [maftools](https://bioconductor.org/packages/maftools/)
   (MIT) and contain open-access TCGA mutation calls.
+- `pik3ca_tcga_brca_lollipop` contains the chart-ready named datasets from
+  GenomeSpy's official TCGA-BRCA PIK3CA lollipop example. Mutation counts come
+  from GDC masked somatic MAFs and protein domains from UniProt P42336; see the
+  gallery example for full provenance.
 - `pyoncoprint_tcga` is the example alteration table from
   [pyoncoprint](https://github.com/pnucolab/pyoncoprint) (BSD 2-Clause).
 - `tcga_ov_gistic_scores` and `tcga_ov_gistic_lesions` are the complete

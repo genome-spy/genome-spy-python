@@ -1,8 +1,17 @@
-# Display and update charts in notebooks
+# Create and update charts in notebooks
 
 GenomeSpy charts display through a notebook widget in JupyterLab, Jupyter
 Notebook, VS Code notebooks, and Marimo. The browser needs network access when
 it first loads the pinned GenomeSpy JavaScript bundle.
+
+## Install for notebooks
+
+Install the package with Arrow support when using it in a notebook. This also
+installs PyArrow for dataframe transport:
+
+```bash
+pip install "genome-spy-python[arrow]"
+```
 
 ## Display a chart
 
@@ -24,6 +33,27 @@ Leave the chart as the final expression in a notebook cell to display it:
 
 This form is enough when later Python cells do not need to update the displayed
 data.
+
+## Display a dataframe
+
+`Chart` accepts pandas and Polars dataframes, plus PyArrow `Table` and
+`RecordBatch` objects:
+
+```python
+import genome_spy as gs
+import pandas as pd
+
+frame = pd.DataFrame({"sample": ["A", "B"], "value": [2.1, 3.4]})
+
+chart = gs.Chart(frame).mark_point().encode(x="sample:N", y="value:Q")
+chart
+```
+
+Notebook rendering transfers supported tables with Arrow automatically. This
+changes only how data reaches the widget: `chart.to_dict()` and
+`chart.to_json()` still produce ordinary JSON-compatible specifications. A
+pandas index is not a chart field, so use `frame.reset_index()` first when the
+index contains values the chart needs.
 
 ## Keep a widget for updates
 
@@ -64,11 +94,15 @@ New rows should retain the fields and value types expected by the chart. For a
 widget with exactly one named dataset, `view.set_data(updated_rows,
 format="records")` is a shorter equivalent.
 
-Supported pandas, Polars, and PyArrow tables can also be passed directly.
-GenomeSpy uses Arrow transport for those tables when available; this affects
-transfer efficiency, not the chart definition. See
-[Arrow data transport](arrow-transport.md) for installation and supported
-inputs.
+Dataframes and PyArrow tables can be passed directly:
+
+```python
+view.set_dataset("measurements", updated_frame)
+```
+
+Arrow is the default transport for these updates. Keep column names and value
+types compatible with the chart fields. Most users do not need to call
+`to_arrow_ipc()` directly.
 
 In a reactive notebook, create and display the widget in a stable cell. Let
 dependent cells prepare new rows and call `set_dataset()` on that same object.

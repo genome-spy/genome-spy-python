@@ -24,9 +24,11 @@ lower track locates mutations within protein domains.
 
 ## Python implementation
 
-The Python chart embeds two prepared tables, uses `transform_displace1d()` for
-reactive collision handling, and composes label, lollipop, connector, and
-domain layers on one shared index scale.
+The example loads two prepared packaged tables with
+`pik3ca_lollipop_data()`, then embeds them as named datasets. The Python API
+authors `transform_displace1d()` and GenomeSpy executes that transform
+reactively in the browser. Label, lollipop, connector, and domain layers share
+one index scale.
 
 See the [official GenomeSpy example](https://genomespy.app/docs/examples/genomic-data/pik3ca-tcga-brca-lollipop/)
 for a detailed explanation of the displacement calculation.

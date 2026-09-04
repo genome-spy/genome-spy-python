@@ -26,6 +26,10 @@ TRANSFORMS_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "transforms.py"
 TRANSFORMS_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "transforms.md"
 COMPOSITION_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "composition.py"
 COMPOSITION_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "composition.md"
+IMPORTING_TUTORIAL_PATH = (
+    REPO_ROOT / "docs" / "tutorials" / "importing_specifications.py"
+)
+IMPORTING_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "importing-specifications.md"
 CONFIGURATION_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "configuration.py"
 CONFIGURATION_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "configuration.md"
 GENOMIC_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "genomic_coordinates.py"
@@ -423,6 +427,17 @@ def test_composition_guide_embeds_only_named_tutorial_charts() -> None:
     assert set(targets) <= tutorial.CHARTS.keys()
 
 
+def test_importing_guide_embeds_a_pinned_remote_specification() -> None:
+    tutorial = _load_module("_importing_tutorial", IMPORTING_TUTORIAL_PATH)
+    source = IMPORTING_GUIDE_PATH.read_text(encoding="utf-8")
+    spec = tutorial.imported_chart.to_dict()
+
+    assert spec["vconcat"] == [{"import": {"url": tutorial.SPEC_URL}}]
+    assert "/d2e9bd71/" in tutorial.SPEC_URL
+    assert tutorial.SPEC_URL.endswith("/bar-and-label-layer.json")
+    assert "{genomespy-chart} importing_specifications:imported_chart" in source
+
+
 def test_configuration_guide_examples_serialize_expected_scopes() -> None:
     tutorial = _load_module("_configuration_tutorial", CONFIGURATION_TUTORIAL_PATH)
 
@@ -781,6 +796,71 @@ def test_interaction_selection_uses_key_and_conditional_encodings() -> None:
     }
 
 
+def test_interaction_brush_links_overview_to_two_detail_tracks() -> None:
+    tutorial = _load_module("_interaction_brush", INTERACTION_TUTORIAL_PATH)
+    spec = tutorial.brush_chart.to_dict()
+
+    assert spec["params"] == [{"name": "brush"}]
+    assert spec["data"]["values"] == tutorial.BRUSH_VARIANTS
+    assert {row["chrom"] for row in tutorial.BRUSH_VARIANTS} == {
+        "chr1",
+        "chr7",
+        "chr9",
+        "chr11",
+        "chr17",
+        "chr20",
+    }
+    details = spec["vconcat"][1]
+    assert details["scales"]["x"]["domain"] == {
+        "param": "brush",
+        "initial": tutorial.DETAIL_REGION,
+    }
+    assert details["resolve"]["scale"] == {
+        "x": "shared",
+        "y": "independent",
+    }
+
+    overview = spec["vconcat"][0]
+    assert overview["resolve"] == {"scale": {"x": "excluded"}}
+    ideogram = overview["vconcat"][0]
+    assert ideogram["data"] == {"lazy": {"type": "axisGenome", "channel": "x"}}
+    assert [layer["mark"]["type"] for layer in ideogram["layer"]] == [
+        "rect",
+        "text",
+    ]
+    selection = ideogram["params"]
+    assert selection == [
+        {
+            "name": "brush",
+            "persist": False,
+            "push": "outer",
+            "select": {
+                "encodings": ["x"],
+                "mark": {
+                    "clip": False,
+                    "fill": "#4c78a8",
+                    "fillOpacity": 0.18,
+                    "measure": "outside",
+                    "stroke": "#4c78a8",
+                    "zindex": 11,
+                },
+                "type": "interval",
+            },
+        }
+    ]
+    assert len(details["vconcat"]) == 2
+    assert all("params" not in track for track in details["vconcat"])
+    assert [track["encoding"]["y"]["title"] for track in details["vconcat"]] == [
+        None,
+        None,
+    ]
+    assert [track["title"]["text"] for track in details["vconcat"]] == [
+        "Score",
+        "Depth",
+    ]
+    assert spec["padding"] == {"top": 20}
+
+
 def test_interaction_ruler_is_declared_once_on_shared_parent() -> None:
     tutorial = _load_module("_interaction_ruler", INTERACTION_TUTORIAL_PATH)
     spec = tutorial.ruler_chart.to_dict()
@@ -814,6 +894,7 @@ def test_interaction_guide_embeds_only_named_tutorial_charts() -> None:
         "zoom_chart",
         "bound_chart",
         "selection_chart",
+        "brush_chart",
         "ruler_chart",
     ]
     assert set(targets) <= tutorial.CHARTS.keys()

@@ -1,3 +1,7 @@
+The sliders control the minimum absolute fold change and p-value evidence.
+Genes that pass both cutoffs become red or blue, and the guide lines move to
+show the active boundaries.
+
 :::{admonition} Data use and provenance
 :class: note
 
@@ -7,5 +11,6 @@ distributed through the LGPL-licensed Bioconductor
 [`airway` package](https://bioconductor.org/packages/airway/). During data
 loading, the package filters genes, computes paired treated-versus-control
 log-count tests and Benjamini-Hochberg adjusted p-values, and selects the genes
-to plot. GenomeSpy then renders the prepared table.
+to plot. GenomeSpy then renders the prepared table and applies the interactive
+classification in the browser.
 :::

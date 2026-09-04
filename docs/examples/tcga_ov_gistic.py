@@ -15,6 +15,8 @@ META = {
     "max_width": 980,
 }
 
+GENOME_DOMAIN = [{"chrom": "chr1"}, {"chrom": "chrY"}]
+
 event_colors = gs.Scale(
     domain=["Amp", "Del"],
     range=["#e45756", "#4c78a8"],
@@ -140,7 +142,7 @@ gene_bodies = (
         fill="#d5d9de",
         stroke="#59636e",
         strokeWidth=1,
-        yOffset=5,
+        yOffset=8,
         size=7,
         tooltip=gs.HandledTooltip(handler="default"),
     )
@@ -174,8 +176,10 @@ gene_labels = (
     .mark_text(
         baseline="middle",
         align="center",
-        clip=False,
-        yOffset=-5,
+        # Clip labels at the genomic window while keeping the vertical offset
+        # free to extend above the gene body.
+        clip="x",
+        yOffset=-2,
         size=11,
         color="#20262d",
         tooltip=gs.HandledTooltip(handler="default"),
@@ -194,6 +198,7 @@ gene_track = (
         data=genes,
         title=gs.title("RefSeq genes", orient="left"),
         height=gs.step(24),
+        padding=gs.Paddings(top=10),
     )
     .encode(
         y=gs.Y("lane:O")
@@ -203,7 +208,7 @@ gene_track = (
             reverse=True,
             align=0,
             paddingInner=0.4,
-            paddingOuter=0.2,
+            paddingOuter=0.5,
             zoom=False,
         )
         .axis(None)
@@ -231,19 +236,12 @@ chart = (
         assembly="hg19",
         name="gistic-track",
         width="container",
-        scales=gs.scales(
-            x=gs.Scale(
-                domain=[
-                    {"chrom": "chr19", "pos": 400_000},
-                    {"chrom": "chr19", "pos": 2_000_000},
-                ]
-            )
-        ),
+        scales=gs.scales(x=gs.Scale(domain=GENOME_DOMAIN)),
         axes=gs.axes(x=gs.GenomeAxis(title="Genomic position")),
         spacing=8,
         description=(
             "TCGA OV-TP GISTIC2 copy-number scores, recurrent lesions, and "
-            "aligned RefSeq gene bodies around the 19p13.3 deletion peak."
+            "aligned RefSeq gene bodies across the hg19 genome."
         ),
     )
     .resolve_scale(x="shared", y="independent")

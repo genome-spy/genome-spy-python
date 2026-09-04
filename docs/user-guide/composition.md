@@ -115,12 +115,10 @@ documentation describes the rules in
 and the aligned-axis case in
 [shared axes](https://genomespy.app/docs/grammar/composition/concat/#shared-axes).
 
-Two composition features have no dedicated page in this guide:
-[`multiscale`](https://genomespy.app/docs/grammar/composition/multiscale/) for
-semantic zoom between detail levels, and
-[importing views](https://genomespy.app/docs/grammar/import/) for reusing a view
-by URL or template. Both are available through `gs.multiscale(...)` and
-`gs.import_view(...)`.
+[`multiscale`](https://genomespy.app/docs/grammar/composition/multiscale/) has no
+dedicated page in this guide. It provides semantic zoom between detail levels
+through `gs.multiscale(...)`. To reuse a view stored in another JSON file, see
+[Import remote view specifications](importing-specifications.md).
 
 ## Advanced grid layouts
 

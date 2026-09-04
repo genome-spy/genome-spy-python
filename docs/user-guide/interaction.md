@@ -114,24 +114,41 @@ remain unchanged when data updates. It prevents a selection from depending on
 the accidental order of rows.
 
 Use `select="point"` for discrete rows. An interval selection instead describes
-a continuous brushed range:
-
-```python
-gs.param(
-    "brush",
-    select={"type": "interval", "encodings": ["x"]},
-)
-```
-
-Interval selections can filter rows or supply another scale's domain for an
-overview-and-detail layout. When an x scale is already zoomable, GenomeSpy uses
-Shift-drag to start the brush by default so brushing does not conflict with
-panning. See
+a continuous brushed range. See
 [point](https://genomespy.app/docs/grammar/parameters/#point-selection) and
 [interval selections](https://genomespy.app/docs/grammar/parameters/#interval-selection)
-for their configuration options, and
-[domain from selection parameters](https://genomespy.app/docs/grammar/scale/#domain-from-selection-parameters)
-for the overview-and-detail pattern.
+for their configuration options.
+
+## Brush an overview to navigate linked tracks
+
+The top row is a map of the chromosomes. Drag across it to choose which part of
+the genome appears below. Both detail tracks move together.
+
+```{literalinclude} ../tutorials/interaction.py
+:language: python
+:start-after: interaction-brush-start
+:end-before: interaction-brush-end
+```
+
+```{genomespy-chart} interaction:brush_chart
+:height: 370
+:title: Drag across the chromosome map to navigate both tracks
+```
+
+`brush` stores the highlighted region. `initial` chooses what is visible when
+the chart first opens. Both detail tracks use the highlighted region as their
+horizontal range, so they always show the same place.
+
+The chromosome row always shows the whole genome. Drag its brush, or zoom one
+of the detail tracks, and the other views follow automatically.
+
+See GenomeSpy's documentation on
+[interval selections](https://genomespy.app/docs/grammar/parameters/#interval-selection)
+and
+[domains from selection parameters](https://genomespy.app/docs/grammar/scale/#domain-from-selection-parameters)
+for the underlying grammar. The
+[linked brush gallery example](../gallery/brush_linked_genome_tracks.md) applies
+the same pattern to three genome-wide association tracks.
 
 ## Add one ruler across linked tracks
 

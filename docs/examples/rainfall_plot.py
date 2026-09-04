@@ -16,14 +16,13 @@ META = {
     "category": "Mutation position plots",
     "order": 18,
     "height": 500,
+    "max_width": 980,
+    "thumbnail_width": 980,
 }
 
 CONVERSION_ORDER = ["C>T", "C>G", "C>A", "T>C", "T>A", "T>G"]
 CONVERSION_COLORS = ["#f64b3c", "#4f63c9", "#2891e8", "#f6b617", "#4caf50", "#f7931a"]
-REGION = [
-    {"chrom": "chr8", "pos": 97_900_000},
-    {"chrom": "chr8", "pos": 99_000_000},
-]
+GENOME_DOMAIN = [{"chrom": "chr1"}, {"chrom": "chrY"}]
 
 
 data = brca_rainfall_data()
@@ -50,7 +49,7 @@ axis = (
 mutation_scale = Scale().domain(CONVERSION_ORDER).range(CONVERSION_COLORS)
 mutation_legend = (
     Legend()
-    .orient("bottom")
+    .orient("top-right")
     .direction("horizontal")
     .columns(3)
     .symbolSize(80)
@@ -117,7 +116,7 @@ gene_bodies = (
         fill="#d5d9de",
         stroke="#59636e",
         strokeWidth=1,
-        yOffset=5,
+        yOffset=8,
         size=7,
         tooltip=gs.HandledTooltip(handler="default"),
     )
@@ -150,8 +149,10 @@ gene_labels = (
     .mark_text(
         baseline="middle",
         align="center",
-        clip=False,
-        yOffset=-5,
+        # Clip labels at the genomic window while keeping the vertical offset
+        # free to extend above the gene body.
+        clip="x",
+        yOffset=-2,
         size=11,
         color="#20262d",
         tooltip=gs.HandledTooltip(handler="default"),
@@ -170,6 +171,7 @@ gene_track = (
         data=genes,
         title=gs.title("RefSeq genes", orient="left", offset=8),
         height=gs.step(24),
+        padding=gs.Paddings(top=10),
     )
     .encode(
         y=gs.Y("lane:O")
@@ -179,7 +181,7 @@ gene_track = (
             reverse=True,
             align=0,
             paddingInner=0.4,
-            paddingOuter=0.2,
+            paddingOuter=0.5,
             zoom=False,
         )
         .axis(None)
@@ -207,11 +209,11 @@ chart = (
     .properties(
         assembly=assembly,
         width="container",
-        scales=gs.scales(x=gs.Scale(domain=REGION)),
+        scales=gs.scales(x=gs.Scale(domain=GENOME_DOMAIN)),
         axes=gs.axes(x=axis),
         spacing=8,
         description=(
-            "A regional rainfall plot with substitution classes, arrowed "
+            "A genome-wide rainfall plot with substitution classes, arrowed "
             "change-point annotations, and aligned RefSeq gene bodies."
         ),
     )

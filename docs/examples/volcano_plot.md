@@ -1,3 +1,7 @@
+Use the two sliders to define how large an effect must be and how strong its
+p-value evidence must be. The guide lines move with the sliders, and points
+that pass both cutoffs are recolored in the browser.
+
 :::{admonition} Data use and provenance
 :class: note
 
@@ -6,6 +10,6 @@ The packaged table is a subset of HapMap variants from the MIT-licensed
 [Plotly datasets](https://github.com/plotly/datasets/blob/master/Dash_Bio/Chromosomal/manhattan_data.csv)
 projects. The association p-values and effect sizes are simulated, so the plot
 is for visualization demonstration only. During data loading, the package
-calculates `-log10(p)` and classifies points using the displayed thresholds.
-GenomeSpy then renders the prepared table.
+calculates `-log10(p)`. GenomeSpy then renders the prepared table and classifies
+the points again whenever a threshold slider moves.
 :::

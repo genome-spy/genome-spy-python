@@ -83,6 +83,11 @@ def test_pik3ca_lollipop_uses_reactive_collision_displacement() -> None:
         "value": 0
     }
     assert mutation_view["vconcat"][2]["layer"][0]["mark"]["x2Offset"] == 0
+    assert "resolve" not in mutation_view
+    assert example.spec["resolve"] == {
+        "scale": {"x": "shared", "color": "independent"},
+        "legend": {"color": "collected"},
+    }
 
 
 def test_hcc_structural_variant_channels_use_typed_conditions() -> None:
@@ -162,7 +167,9 @@ def test_examples_use_typed_axis_and_view_configuration() -> None:
     stacked = gallery.collect_example(EXAMPLES_DIR / "stacked_genome_browser.py")
     viewport = gallery.collect_example(EXAMPLES_DIR / "scrollable_viewport.py")
 
-    assert composing.spec["axes"] == {"x": {"orient": "top", "title": None}}
+    assert composing.spec["vconcat"][0]["axes"] == {
+        "x": {"orient": "top", "title": None}
+    }
     assert refseq.spec["axes"] == {"x": {"title": None}}
     assert stacked.spec["axes"] == {
         "x": {"orient": "bottom", "title": "Genomic position"}
@@ -484,6 +491,62 @@ def test_ma_and_volcano_points_grow_gently_when_zoomed(
     }
 
 
+@pytest.mark.parametrize(
+    ("filename", "effect_param", "significance_param", "classification"),
+    [
+        (
+            "volcano_plot.py",
+            "hapmapEffectCutoff",
+            "hapmapSignificanceCutoff",
+            "association",
+        ),
+        (
+            "airway_volcano_plot.py",
+            "airwayVolcanoEffectCutoff",
+            "airwayVolcanoSignificanceCutoff",
+            "direction",
+        ),
+        (
+            "airway_ma_plot.py",
+            "airwayMaEffectCutoff",
+            "airwayMaSignificanceCutoff",
+            "direction",
+        ),
+    ],
+)
+def test_ma_and_volcano_thresholds_drive_point_classification(
+    filename: str,
+    effect_param: str,
+    significance_param: str,
+    classification: str,
+) -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / filename).spec
+
+    assert [param["name"] for param in spec["params"]] == [
+        effect_param,
+        significance_param,
+    ]
+    assert all(param["bind"]["input"] == "range" for param in spec["params"])
+
+    points = next(layer for layer in spec["layer"] if layer["mark"]["type"] == "point")
+    classification_formula = points["transform"][0]
+    assert classification_formula["type"] == "formula"
+    assert classification_formula["as"] == classification
+    assert effect_param in classification_formula["expr"]
+    assert significance_param in classification_formula["expr"]
+
+    rule_expressions = {
+        layer["transform"][0]["expr"]
+        for layer in spec["layer"]
+        if layer["mark"]["type"] == "rule"
+        and layer.get("transform", [{}])[0].get("type") == "formula"
+    }
+    assert f"datum.side * {effect_param}" in rule_expressions
+    if "volcano" in filename:
+        assert significance_param in rule_expressions
+
+
 def test_gallery_examples_do_not_render_data_previews() -> None:
     gallery = _load_gallery()
     extension = _load_gallery_extension()
@@ -506,63 +569,136 @@ def test_gallery_code_snippets_hide_internal_layout_metadata() -> None:
 
 
 @pytest.mark.parametrize(
-    ("filename", "label_field"),
+    ("filename", "prefix", "label_field"),
     [
-        ("airway_volcano_plot.py", "volcano_label"),
-        ("airway_ma_plot.py", "ma_label"),
+        ("airway_volcano_plot.py", "volcano", "volcano_label"),
+        ("airway_ma_plot.py", "ma", "ma_label"),
     ],
 )
 def test_airway_expression_plots_include_gene_callouts(
-    filename: str, label_field: str
+    filename: str, prefix: str, label_field: str
 ) -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / filename)
     layers = example.spec["layer"]
-
-    assert layers[-2]["mark"]["type"] == "rule"
-    assert layers[-1]["mark"]["type"] == "text"
-    assert layers[-1]["transform"] == [
-        {"type": "filter", "expr": f"datum.{label_field}"}
+    names = [layer.get("name") for layer in layers]
+    line = next(
+        layer for layer in layers if layer.get("name") == f"{prefix}-callout-lines"
+    )
+    halos = [
+        layer
+        for layer in layers
+        if layer.get("name", "").startswith(f"{prefix}-label-halo-")
     ]
-    assert layers[-1]["encoding"]["text"]["field"] == label_field
+    labels = [
+        layer
+        for layer in layers
+        if layer.get("name") in {f"{prefix}-label-left", f"{prefix}-label-right"}
+    ]
+
+    assert line["mark"]["type"] == "rule"
+    assert line["transform"] == [{"type": "filter", "expr": f"datum.{label_field}"}]
+    assert len(halos) == 8
+    assert len(labels) == 2
+    assert all(layer["mark"]["type"] == "text" for layer in halos + labels)
+    assert all(
+        layer["encoding"]["text"]["field"] == label_field for layer in halos + labels
+    )
+    assert names.index(f"{prefix}-callout-lines") < min(
+        names.index(layer["name"]) for layer in halos
+    )
+    assert max(names.index(layer["name"]) for layer in halos) < min(
+        names.index(layer["name"]) for layer in labels
+    )
 
 
-def test_airway_volcano_callouts_use_pixel_offsets() -> None:
+@pytest.mark.parametrize(
+    ("filename", "prefix", "x_field", "y_field"),
+    [
+        (
+            "airway_volcano_plot.py",
+            "volcano",
+            "log2fc",
+            "neglog10_pvalue_plot",
+        ),
+        ("airway_ma_plot.py", "ma", "log10_base_mean", "log2fc"),
+    ],
+)
+def test_airway_callouts_use_pixel_offsets(
+    filename: str, prefix: str, x_field: str, y_field: str
+) -> None:
     gallery = _load_gallery()
-    example = gallery.collect_example(EXAMPLES_DIR / "airway_volcano_plot.py")
-    rule = example.spec["layer"][-2]
-    labels = example.spec["layer"][-1]
+    example = gallery.collect_example(EXAMPLES_DIR / filename)
+    rule = next(
+        layer
+        for layer in example.spec["layer"]
+        if layer.get("name") == f"{prefix}-callout-lines"
+    )
+    labels = [
+        layer
+        for layer in example.spec["layer"]
+        if layer.get("name") in {f"{prefix}-label-left", f"{prefix}-label-right"}
+    ]
 
     assert rule["mark"]["type"] == "rule"
     assert rule["mark"]["tooltip"] is None
     assert "x2Offset" not in rule["mark"]
     assert "y2Offset" not in rule["mark"]
-    assert rule["transform"] == [{"type": "filter", "expr": "datum.volcano_label"}]
-    assert rule["encoding"]["x2"] == {"field": "log2fc"}
-    assert rule["encoding"]["y2"] == {"field": "neglog10_pvalue_plot"}
+    assert rule["transform"] == [{"type": "filter", "expr": f"datum.{prefix}_label"}]
+    assert rule["encoding"]["x2"] == {"field": x_field}
+    assert rule["encoding"]["y2"] == {"field": y_field}
     assert rule["encoding"]["xOffset"] == {
-        "field": "volcano_x_offset",
+        "field": f"{prefix}_x_offset",
         "type": "quantitative",
         "scale": None,
     }
     assert rule["encoding"]["yOffset"] == {
-        "field": "volcano_y_offset",
+        "field": f"{prefix}_y_offset",
         "type": "quantitative",
         "scale": None,
     }
 
-    assert labels["encoding"]["x"]["field"] == "log2fc"
-    assert labels["encoding"]["y"]["field"] == "neglog10_pvalue_plot"
-    assert labels["encoding"]["xOffset"] == {
-        "field": "volcano_x_offset",
-        "type": "quantitative",
-        "scale": None,
-    }
-    assert labels["encoding"]["yOffset"] == {
-        "field": "volcano_y_offset",
-        "type": "quantitative",
-        "scale": None,
-    }
+    for label in labels:
+        assert label["encoding"]["x"]["field"] == x_field
+        assert label["encoding"]["y"]["field"] == y_field
+        assert label["encoding"]["xOffset"] == {
+            "field": f"{prefix}_x_offset",
+            "type": "quantitative",
+            "scale": None,
+        }
+        assert label["encoding"]["yOffset"] == {
+            "field": f"{prefix}_y_offset",
+            "type": "quantitative",
+            "scale": None,
+        }
+
+
+@pytest.mark.parametrize("prefix", ["volcano", "ma"])
+def test_airway_callout_labels_have_white_halos(prefix: str) -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / f"airway_{prefix}_plot.py")
+    layers = example.spec["layer"]
+    expected_offsets = {(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)}
+
+    for side, base_dx in (("left", -4), ("right", 4)):
+        label = next(
+            layer for layer in layers if layer.get("name") == f"{prefix}-label-{side}"
+        )
+        halos = [
+            layer
+            for layer in layers
+            if layer.get("name", "").startswith(f"{prefix}-label-halo-{side}-")
+        ]
+
+        assert label["mark"]["type"] == "text"
+        assert label["mark"]["color"] == "#20262d"
+        assert label["mark"]["align"] == ("right" if side == "left" else "left")
+        assert label["mark"]["baseline"] == "middle"
+        assert label["mark"]["tooltip"] is None
+        assert {
+            (halo["mark"]["dx"] - base_dx, halo["mark"]["dy"]) for halo in halos
+        } == expected_offsets
+        assert all(halo["mark"]["color"] == "white" for halo in halos)
 
 
 @pytest.mark.parametrize("filename", ["airway_volcano_plot.py", "airway_ma_plot.py"])
@@ -637,6 +773,7 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
     example = gallery.collect_example(EXAMPLES_DIR / "tcga_ov_gistic.py")
 
     assert example.spec["assembly"] == "hg19"
+    assert example.thumbnail_width is None
     assert len(example.spec["vconcat"]) == 3
 
     score_track, lesion_track, gene_track = example.spec["vconcat"]
@@ -666,9 +803,16 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
         "filter",
     ]
     assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
+    assert gene_track["layer"][1]["mark"]["clip"] == "x"
+    assert gene_track["encoding"]["y"]["scale"]["paddingOuter"] == 0.5
+    assert gene_track["padding"] == {"top": 10}
     assert "offset" not in gene_track["transform"][0]
     assert len(gene_track["data"]["values"]) == 29_599
     assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
+    assert example.spec["scales"]["x"]["domain"] == [
+        {"chrom": "chr1"},
+        {"chrom": "chrY"},
+    ]
     assert "https://data.genomespy.app" not in str(example.spec)
 
 
@@ -677,6 +821,7 @@ def test_rainfall_includes_shared_refseq_annotation_track() -> None:
     example = gallery.collect_example(EXAMPLES_DIR / "rainfall_plot.py")
 
     assert example.spec["assembly"] == "hg19"
+    assert example.thumbnail_width == 980
     assert [view["name"] for view in example.spec["vconcat"]] == [
         "rainfall-track",
         "refseq-genes",
@@ -685,16 +830,27 @@ def test_rainfall_includes_shared_refseq_annotation_track() -> None:
         "scale": {"x": "shared", "y": "independent"},
         "axis": {"x": "shared", "y": "independent"},
     }
+    assert (
+        example.spec["vconcat"][0]["layer"][0]["encoding"]["color"]["legend"]["orient"]
+        == "top-right"
+    )
     gene_track = example.spec["vconcat"][1]
     assert gene_track["title"]["offset"] == 8
     assert gene_track["layer"][0]["mark"]["style"] == "arrow-block"
     assert gene_track["layer"][0]["opacity"]["unitsPerPixel"] == [100000, 40000]
     assert gene_track["layer"][1]["transform"][-1]["type"] == "filterScoredLabels"
+    assert gene_track["layer"][1]["mark"]["clip"] == "x"
+    assert gene_track["encoding"]["y"]["scale"]["paddingOuter"] == 0.5
+    assert gene_track["padding"] == {"top": 10}
     assert "offset" not in gene_track["transform"][0]
     assert len(gene_track["data"]["values"]) == 29_599
     assert "offset" not in gene_track["layer"][0]["encoding"]["x"]
     rainfall_layers = example.spec["vconcat"][0]["layer"]
     assert all(layer["encoding"]["x"]["offset"] == 1 for layer in rainfall_layers)
+    assert example.spec["scales"]["x"]["domain"] == [
+        {"chrom": "chr1"},
+        {"chrom": "chrY"},
+    ]
 
 
 def test_bam_example_uses_full_alignment_dataflow() -> None:
@@ -776,6 +932,7 @@ def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
         "bigbed",
         "indexedFasta",
     ]
+    assert tracks[2]["data"]["lazy"]["windowSize"] == 30_000
     assert tracks[3]["data"]["lazy"]["windowSize"] == 30_000
     assert "y" not in tracks[2]["encoding"]
     assert "y" not in tracks[3]["encoding"]
@@ -1001,11 +1158,69 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     assert example.spec["assembly"] == "hg18"
     assert "genomes" not in example.spec
     assert "vconcat" not in example.spec
-    point_data = example.spec["layer"][2]["data"]["values"]
+    point_data = example.spec["data"]["values"]
     assert {row["chrom"] for row in point_data} <= {
         *(f"chr{number}" for number in range(1, 23)),
         "chrX",
     }
+
+    threshold = example.spec["params"][0]
+    assert threshold["name"] == "manhattanSignificanceCutoff"
+    assert threshold["bind"]["input"] == "range"
+    assert example.spec["layer"][0]["transform"] == [
+        {
+            "type": "formula",
+            "expr": "manhattanSignificanceCutoff",
+            "as": "threshold",
+        }
+    ]
+    assert example.spec["layer"][3]["transform"] == [
+        {
+            "type": "filter",
+            "expr": "datum.neglog >= manhattanSignificanceCutoff",
+        }
+    ]
+    assert example.spec["layer"][3]["mark"]["color"] == "#c53b2c"
+
+
+def test_brush_gallery_links_one_overview_to_three_detail_tracks() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "brush_linked_genome_tracks.py")
+    spec = example.spec
+
+    assert spec["params"] == [{"name": "brush"}]
+    detail_group = spec["vconcat"][1]
+    assert detail_group["scales"]["x"]["domain"] == {
+        "param": "brush",
+        "initial": [
+            {"chrom": "chr5", "pos": 0},
+            {"chrom": "chr5", "pos": 180_857_866},
+        ],
+    }
+    assert detail_group["resolve"]["scale"] == {
+        "x": "shared",
+        "y": "independent",
+    }
+
+    overview = spec["vconcat"][0]
+    assert overview["resolve"] == {"scale": {"x": "excluded"}}
+    assert overview["padding"] == {"top": 24}
+    brush = overview["vconcat"][0]["params"][0]
+    assert brush["name"] == "brush"
+    assert brush["push"] == "outer"
+    assert brush["persist"] is False
+    assert brush["select"]["type"] == "interval"
+    assert brush["select"]["encodings"] == ["x"]
+    assert brush["select"]["mark"]["clip"] is False
+
+    detail_tracks = detail_group["vconcat"]
+    assert [track["name"] for track in detail_tracks] == [
+        "association-strength",
+        "effect-size",
+        "z-score",
+    ]
+    assert all("params" not in track for track in detail_tracks)
+    assert all("title" not in track for track in detail_tracks)
 
 
 def test_gallery_index_lists_every_example_in_hidden_navigation(

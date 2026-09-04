@@ -27,6 +27,12 @@ MAX_GENES = 12_000
 # while the cap prevents points from becoming oversized at deep zoom levels.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
+HALO_OFFSETS = [(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)]
+DIRECTION_EXPRESSION = gs.Expression(
+    "datum.neglog10_pvalue >= airwayMaSignificanceCutoff && "
+    "abs(datum.log2fc) >= airwayMaEffectCutoff "
+    "? (datum.log2fc < 0 ? 'down in dex' : 'up in dex') : 'n.s.'"
+)
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -54,7 +60,8 @@ airway_tooltip = [
 ]
 
 ma_points = (
-    gs.Chart(data)
+    gs.Chart()
+    .transform_formula(expr=DIRECTION_EXPRESSION, as_="direction")
     .mark_point(size=POINT_SIZE, filled=True, opacity=0.58)
     .encode(
         x=gs.X("log10_base_mean:Q")
@@ -69,7 +76,8 @@ ma_points = (
 )
 
 ma_fc_rules = (
-    gs.Chart([{"y": -LOG2FC_CUTOFF}, {"y": 0.0}, {"y": LOG2FC_CUTOFF}])
+    gs.Chart([{"side": -1}, {"side": 0}, {"side": 1}])
+    .transform_formula(expr=gs.Expression("datum.side * airwayMaEffectCutoff"), as_="y")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         y=gs.Y("y:Q")
@@ -79,46 +87,114 @@ ma_fc_rules = (
 )
 
 ma_callout_lines = (
-    gs.Chart(data)
+    gs.Chart()
     .transform_filter(gs.datum.ma_label)
-    .mark_rule(color="#3f4750", size=1)
+    .mark_rule(color="#3f4750", size=1, tooltip=None)
     .encode(
         x=gs.X("log10_base_mean:Q")
         .scale(domain=domains["ma_x"], zoom=True)
         .title("log10 mean count"),
-        x2=gs.X2("ma_label_x"),
+        xOffset=gs.XOffset("ma_x_offset:Q").scale(None),
         y=gs.Y("log2fc:Q")
         .scale(reverse=False, domain=domains["ma_y"], zoom=True)
         .title("log2 fold change"),
-        y2=gs.Y2("ma_label_y"),
+        yOffset=gs.YOffset("ma_y_offset:Q").scale(None),
+        x2=gs.X2("log10_base_mean"),
+        y2=gs.Y2("log2fc"),
     )
+    .properties(name="ma-callout-lines")
 )
 
-ma_callout_labels = (
-    gs.Chart(data)
-    .transform_filter(gs.datum.ma_label)
-    .mark_text(
-        align="center",
-        baseline="bottom",
-        yOffset=-3,
-        fontWeight="bold",
+
+def ma_callout_label(
+    *, side: str, color: str, dx: float, dy: float, name: str
+) -> gs.Chart:
+    """Build one edge-anchored label or halo layer."""
+    return (
+        gs.Chart()
+        .transform_filter(gs.datum.ma_label & (gs.datum.ma_label_side == side))
+        .mark_text(
+            align="right" if side == "left" else "left",
+            baseline="middle",
+            dx=dx,
+            dy=dy,
+            fontWeight="bold",
+            color=color,
+            tooltip=None,
+        )
+        .encode(
+            x=gs.X("log10_base_mean:Q")
+            .scale(domain=domains["ma_x"], zoom=True)
+            .title("log10 mean count"),
+            xOffset=gs.XOffset("ma_x_offset:Q").scale(None),
+            y=gs.Y("log2fc:Q")
+            .scale(reverse=False, domain=domains["ma_y"], zoom=True)
+            .title("log2 fold change"),
+            yOffset=gs.YOffset("ma_y_offset:Q").scale(None),
+            text=gs.Text("ma_label:N"),
+        )
+        .properties(name=name)
+    )
+
+
+ma_callout_halos = [
+    ma_callout_label(
+        side=side,
+        color="white",
+        dx=(-4 if side == "left" else 4) + halo_dx,
+        dy=halo_dy,
+        name=f"ma-label-halo-{side}-{index}",
+    )
+    for side in ("left", "right")
+    for index, (halo_dx, halo_dy) in enumerate(HALO_OFFSETS)
+]
+ma_callout_labels = [
+    ma_callout_label(
+        side=side,
         color="#20262d",
+        dx=-4 if side == "left" else 4,
+        dy=0,
+        name=f"ma-label-{side}",
     )
-    .encode(
-        x=gs.X("ma_label_x:Q")
-        .scale(domain=domains["ma_x"], zoom=True)
-        .title("log10 mean count"),
-        y=gs.Y("ma_label_y:Q")
-        .scale(reverse=False, domain=domains["ma_y"], zoom=True)
-        .title("log2 fold change"),
-        text=gs.Text("ma_label:N"),
-    )
-)
+    for side in ("left", "right")
+]
 
-chart = (ma_fc_rules + ma_points + ma_callout_lines + ma_callout_labels).properties(
+chart = gs.layer(
+    ma_fc_rules,
+    ma_points,
+    ma_callout_lines,
+    *ma_callout_halos,
+    *ma_callout_labels,
+).properties(
+    data=data,
     title="Airway dexamethasone response: MA plot",
+    params=[
+        gs.param(
+            "airwayMaEffectCutoff",
+            value=LOG2FC_CUTOFF,
+            bind={
+                "input": "range",
+                "min": 0,
+                "max": 3,
+                "step": 0.1,
+                "name": "Absolute log2 fold-change cutoff: ",
+            },
+        ),
+        gs.param(
+            "airwayMaSignificanceCutoff",
+            value=domains["pvalue_cutoff"][0],
+            bind={
+                "input": "range",
+                "min": 0,
+                "max": domains["volcano_y"][1],
+                "step": 0.25,
+                "name": "−log10 p cutoff: ",
+            },
+        ),
+    ],
     description=(
         "A paired differential-expression MA plot showing mean expression "
-        "against fold change, with selected genes identified by callouts."
+        "against fold change, with interactive thresholds and selected genes "
+        "identified by callouts."
     ),
 )

@@ -84,6 +84,7 @@ class Example:
     max_width: int | None
     source: str
     spec: dict
+    thumbnail_width: int | None = None
 
 
 def _ensure_src_on_path() -> None:
@@ -142,6 +143,11 @@ def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
         ),
         source=path.read_text(encoding="utf-8"),
         spec=spec,
+        thumbnail_width=(
+            int(meta["thumbnail_width"])
+            if meta.get("thumbnail_width") is not None
+            else None
+        ),
     )
 
 

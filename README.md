@@ -43,14 +43,15 @@ cd genome-spy-python
 uv sync
 ```
 
-For efficient dataframe transport:
+For notebook use, install with Arrow support. This includes PyArrow for
+dataframe transport:
 
 ```bash
 pip install "genome-spy-python[arrow]"
 ```
 
-See [Arrow data transport](docs/user-guide/arrow-transport.md) for supported
-tables and live updates.
+See [creating and updating charts in notebooks](docs/user-guide/notebooks.md)
+for supported tables and live updates.
 
 See the [getting-started guide](docs/getting-started.md) for the first example.
 
@@ -128,8 +129,8 @@ view = chart.widget()
 view.set_dataset("table", updated_dataframe)
 ```
 
-See [notebook display and updates](docs/user-guide/notebooks.md) for the Marimo
-pattern.
+See [creating and updating charts in notebooks](docs/user-guide/notebooks.md)
+for the Marimo pattern.
 
 ## Contributing
 

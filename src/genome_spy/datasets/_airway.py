@@ -164,25 +164,23 @@ def airway_differential_expression(
         "pvalue_cutoff": [-float(np.log10(pvalue_cutoff))],
     }
     data["gene_symbol"] = data["ensgene"].map(_AIRWAY_GENE_SYMBOLS)
-    _add_airway_annotation_positions(data, domains)
+    _add_airway_annotation_positions(data)
     return data, domains
 
 
-def _add_airway_annotation_positions(
-    data: pd.DataFrame, domains: dict[str, list[float]]
-) -> None:
+def _add_airway_annotation_positions(data: pd.DataFrame) -> None:
     """Add sparse label endpoints used by the airway gallery examples."""
-    # Volcano offsets are logical pixels so callouts keep their visual spacing
-    # when the reader zooms the chart. MA offsets remain data-domain positions.
+    # Pixel offsets keep annotation spacing stable while the reader zooms. The
+    # side tells the text mark to extend away from the leader endpoint.
     volcano_offsets = {
         "ZBTB16": (-42, -45),
         "PLA2G4A": (-42, -52),
         "TSLP": (-50, 38),
     }
     ma_offsets = {
-        "ZBTB16": (0.35, -0.55),
-        "PLA2G4A": (-0.25, -0.55),
-        "SPARCL1": (0.4, -0.45),
+        "ZBTB16": (64, 22),
+        "PLA2G4A": (-48, 22),
+        "SPARCL1": (64, 20),
     }
 
     data["volcano_label"] = data["gene_symbol"].where(
@@ -205,5 +203,17 @@ def _add_airway_annotation_positions(
 
     data["volcano_x_offset"] = volcano_dx
     data["volcano_y_offset"] = volcano_dy
-    data["ma_label_x"] = (data["log10_base_mean"] + ma_dx).clip(*domains["ma_x"])
-    data["ma_label_y"] = (data["log2fc"] + ma_dy).clip(*domains["ma_y"])
+    data["volcano_label_side"] = data["gene_symbol"].map(
+        {
+            symbol: "left" if offset[0] < 0 else "right"
+            for symbol, offset in volcano_offsets.items()
+        }
+    )
+    data["ma_x_offset"] = ma_dx
+    data["ma_y_offset"] = ma_dy
+    data["ma_label_side"] = data["gene_symbol"].map(
+        {
+            symbol: "left" if offset[0] < 0 else "right"
+            for symbol, offset in ma_offsets.items()
+        }
+    )

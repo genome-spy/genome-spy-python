@@ -68,6 +68,14 @@ def test_thumbnail_spec_removes_transient_zoom_guidance_without_mutating_input()
     assert renderer.thumbnail_spec(nested) == {"layer": []}
 
 
+def test_thumbnail_spec_resolves_container_width_without_mutating_input() -> None:
+    renderer = _load_renderer()
+    spec = {"width": "container", "mark": "point"}
+
+    assert renderer.thumbnail_spec(spec, container_width=980)["width"] == 980
+    assert spec["width"] == "container"
+
+
 def test_select_examples_defaults_to_all_examples() -> None:
     renderer = _load_renderer()
     examples = [
@@ -126,3 +134,19 @@ def test_stable_capture_rejects_a_zero_attempt_budget() -> None:
 
     with pytest.raises(ValueError, match="at least one"):
         renderer.wait_until_stable(lambda: b"", lambda: None, attempts=0)
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "Error: invalid specification",
+        "Loading failed: Error: invalid specification",
+    ],
+)
+def test_runtime_error_detection_handles_delayed_genomespy_failures(
+    message: str,
+) -> None:
+    renderer = _load_renderer()
+
+    assert renderer.has_runtime_error(message)
+    assert not renderer.has_runtime_error("minMapq\n0\nminBaseQuality\n0")

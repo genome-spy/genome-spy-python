@@ -147,4 +147,7 @@ The [stacked genome browser gallery example](../gallery/stacked_genome_browser.m
 extends this pattern with multiple BigWig signals, sequence, and transcript
 annotations. The [composed genome browser](../gallery/composing_genome_browser.md)
 shows how independently authored imported views can use a parent-owned locus
-scale and axis.
+scale and axis. The
+[linked brush example](../gallery/brush_linked_genome_tracks.md) adds an
+always-visible overview whose interval selection navigates several detail
+tracks.

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 import re
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, cast
 
 from genome_spy.datasets import load_dataset
 
@@ -56,6 +56,39 @@ class BrcaRainfallData(TypedDict):
     points: pd.DataFrame
     change_points: pd.DataFrame
     y_max: float
+
+
+class Pik3caLollipopData(TypedDict):
+    """Prepared inputs for the TCGA-BRCA PIK3CA lollipop plot."""
+
+    proteinLength: int
+    mutations: list[dict[str, object]]
+    domains: list[dict[str, object]]
+
+
+def pik3ca_lollipop_data() -> Pik3caLollipopData:
+    """Load prepared TCGA-BRCA PIK3CA mutations and protein domains.
+
+    Description:
+        Returns the chart-ready named datasets extracted from the official
+        GenomeSpy PIK3CA lollipop specification. Statistical aggregation and
+        protein-domain curation are intentionally kept out of the gallery
+        example so it can focus on declarative visualization.
+
+    Returns:
+        Protein length, recurrent mutation rows, and domain rows.
+
+    Raises:
+        DatasetNotFoundError: If the packaged resource is unavailable.
+
+    Example:
+        >>> pik3ca_lollipop_data()["mutations"][0]["mutation"]
+        'E81K'
+    """
+    return cast(
+        Pik3caLollipopData,
+        load_dataset("pik3ca_tcga_brca_lollipop", as_format="json"),
+    )
 
 
 def dnmt3a_lollipop_data() -> Dnmt3aLollipopData:
