@@ -173,14 +173,14 @@ def _add_airway_annotation_positions(data: pd.DataFrame) -> None:
     # Pixel offsets keep annotation spacing stable while the reader zooms. The
     # side tells the text mark to extend away from the leader endpoint.
     volcano_offsets = {
-        "ZBTB16": (-42, -45),
-        "PLA2G4A": (-42, -52),
-        "TSLP": (-50, 38),
+        "ZBTB16": (-30, -32),
+        "PLA2G4A": (-30, -38),
+        "TSLP": (-36, 28),
     }
     ma_offsets = {
-        "ZBTB16": (64, 22),
-        "PLA2G4A": (-48, 22),
-        "SPARCL1": (64, 20),
+        "ZBTB16": (48, 16),
+        "PLA2G4A": (-36, 16),
+        "SPARCL1": (48, 15),
     }
 
     data["volcano_label"] = data["gene_symbol"].where(

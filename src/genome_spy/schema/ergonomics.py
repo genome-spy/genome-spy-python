@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 from collections.abc import Sequence
-from typing import Any, Self, Literal
+from typing import Any, Self, Literal, overload
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from genome_spy.channels import DatumChannel, LocusChannel, ValueChannel
+    from genome_spy._parameters import Parameter
+    from genome_spy._expressions import ExpressionOperand
 
 from genome_spy._expressions import DatumExpression
 from genome_spy.schema._typing import (
@@ -16,15 +18,23 @@ from genome_spy.schema._typing import (
     AxisPlacement_T,
     Baseline_T,
     ChannelWithScale_T,
+    DomEventType_T,
     FieldName_T,
     Field_T,
     FontStyle_T,
     FontWeight_T,
     PrimaryPositionalChannel_T,
+    RulerClear_T,
+    RulerDisplay_T,
+    RulerEventType_T,
+    RulerExtent_T,
+    RulerSnap_T,
+    RulerSource_T,
     ScalarDomain_T,
     Scalar_T,
     ScaleInterpolate_T,
     ScaleType_T,
+    SelectionExtent_T,
     SelectionType_T,
     SortOrder_T,
     TitleAnchor_T,
@@ -38,6 +48,7 @@ from genome_spy.schema._kwds import (
     BindInputKwds,
     BindRadioSelectKwds,
     BindRangeKwds,
+    EventConfigKwds,
     GenomeAxisKwds,
     LegendConfigKwds,
     LinkConfigKwds,
@@ -48,6 +59,8 @@ from genome_spy.schema._kwds import (
     RectConfigKwds,
     RuleConfigKwds,
     RulerConfigKwds,
+    RulerEventConfigKwds,
+    RulerMarkConfigKwds,
     ScaleConfigKwds,
     ScaleInterpolateParamsKwds,
     ScaleKwds,
@@ -1099,6 +1112,402 @@ def value(
     return ValueChannel(defined)
 
 
+_PARAMETER_TYPES = (
+    core.Parameter,
+    core.PlainValueParameter,
+    core.TransitionedValueParameter,
+    core.ExprParameter,
+    core.SelectionParameter,
+    core.RulerParameter,
+)
+_SELECTION_PARAMETER_TYPES = (core.SelectionParameter,)
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    bind: core.BindCheckbox
+    | BindCheckboxKwds
+    | core.BindRadioSelect
+    | BindRadioSelectKwds
+    | core.BindRange
+    | BindRangeKwds
+    | core.BindInput
+    | BindInputKwds
+    | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: Any | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    transition: core.LerpTransition | dict[str, Any],
+    value: float,
+    bind: core.BindCheckbox
+    | BindCheckboxKwds
+    | core.BindRadioSelect
+    | BindRadioSelectKwds
+    | core.BindRange
+    | BindRangeKwds
+    | core.BindInput
+    | BindInputKwds
+    | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    expr: str | ExpressionOperand,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    transition: core.LerpTransition | dict[str, Any] | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    select: SelectionType_T
+    | core.PointSelectionConfig
+    | dict[str, Any]
+    | core.IntervalSelectionConfig,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: core.SelectionInitIntervalMapping
+    | dict[str, Any]
+    | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    ruler: core.RulerConfig | RulerConfigKwds,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: core.RulerInitMapping | dict[str, Any] | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+def param(
+    name: str | None = None,
+    /,
+    *,
+    bind: core.BindCheckbox
+    | BindCheckboxKwds
+    | core.BindRadioSelect
+    | BindRadioSelectKwds
+    | core.BindRange
+    | BindRangeKwds
+    | core.BindInput
+    | BindInputKwds
+    | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    expr: str | ExpressionOperand | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    ruler: core.RulerConfig | RulerConfigKwds | UndefinedType = Undefined,
+    select: SelectionType_T
+    | core.PointSelectionConfig
+    | dict[str, Any]
+    | core.IntervalSelectionConfig
+    | UndefinedType = Undefined,
+    transition: core.LerpTransition | dict[str, Any] | UndefinedType = Undefined,
+    value: Any | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter:
+    """Create a reusable GenomeSpy parameter handle.
+
+    The overloads and accepted properties are generated from the
+    concrete leaves of GenomeSpy's ``Parameter`` union.
+
+    Args:
+        name: Parameter name. A stable name is generated when omitted.
+        bind: Binds the parameter to an external input element such as a slider, selection list or radio button group.
+        description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
+        expr: An expression for the value of the parameter. This expression may include other parameters, in which case the parameter will automatically update in response to upstream parameter changes.
+        persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
+        push: Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
+        ruler: Tracks a domain coordinate and displays it as a ruler in compatible views.
+        select: Determines the default event processing and data query for the selection. GenomeSpy supports two selection types, following the Vega-Lite model: - ``"point"`` -- to select multiple discrete data values; the first value is selected on ``click`` and additional values toggled on shift-click. - ``"interval"`` -- to select a continuous range of data values on ``drag``.
+        transition: Smoothly follows numeric target values.
+        value: The initial value of the parameter. __Default value:__ ``undefined``
+        empty: Whether an empty selection matches as a predicate.
+
+    Returns:
+        A reusable parameter handle.
+
+    Raises:
+        TypeError: If the arguments match no unique parameter branch.
+
+    Example:
+        >>> param("cutoff", value=0.5).param.to_dict()
+        {'name': 'cutoff', 'value': 0.5}
+    """
+    from genome_spy._parameters import _make_parameter
+
+    return _make_parameter(
+        name,
+        bind=bind,
+        description=description,
+        expr=expr,
+        persist=persist,
+        push=push,
+        ruler=ruler,
+        select=select,
+        transition=transition,
+        value=value,
+        _variants=(
+            core.PlainValueParameter,
+            core.TransitionedValueParameter,
+            core.ExprParameter,
+            core.SelectionParameter,
+            core.RulerParameter,
+        ),
+        empty=empty,
+    )
+
+
+def ruler(
+    name: str | None = None,
+    /,
+    *,
+    clear: RulerClear_T | UndefinedType = Undefined,
+    display: RulerDisplay_T | UndefinedType = Undefined,
+    encodings: Sequence[PrimaryPositionalChannel_T] | UndefinedType = Undefined,
+    extent: RulerExtent_T | UndefinedType = Undefined,
+    mark: core.RulerMarkConfig | RulerMarkConfigKwds | UndefinedType = Undefined,
+    on: RulerEventType_T
+    | core.RulerEventConfig
+    | RulerEventConfigKwds
+    | str
+    | UndefinedType = Undefined,
+    snap: RulerSnap_T | UndefinedType = Undefined,
+    source: RulerSource_T | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: core.RulerInitMapping | dict[str, Any] | UndefinedType = Undefined,
+) -> Parameter:
+    """Create a GenomeSpy ``ruler`` parameter.
+
+    Args:
+        name: Parameter name. A stable name is generated when omitted.
+        clear: Event that clears the ruler, or ``false`` to keep the current value. __Default value:__ ``"mouseleave"`` for ``on: "mousemove"``, otherwise ``false``.
+        display: How the ruler is drawn for snapped index or locus coordinates. ``"line"`` draws at the coordinate. ``"center"`` draws at the center of the coordinate band. ``"band"`` draws a rectangle covering the coordinate band. ``"none"`` tracks the ruler value without drawing a guide. __Default value:__ ``"center"`` for snapped index and locus scales, otherwise ``"line"``.
+        encodings: Positional channels whose domain coordinates are tracked by the ruler. __Default value:__ ``["x"]``
+        extent: Visual extent of the ruler. ``"view"`` draws one guide per participating view. ``"container"`` draws one spanning guide when participating projections align. ``"auto"`` chooses a spanning guide only when it is safe. __Default value:__ ``"auto"``
+        mark: Rule or band appearance. Has no effect when ``display`` is ``"none"``.
+        on: Event that updates a pointer-driven ruler. ``"mousemove"`` follows the pointer. ``"mousedown"`` updates on press and continues while dragging. Event filters can require modifier keys. __Default value:__ ``"mousemove"``
+        snap: Quantization applied before writing the ruler value. ``"auto"`` snaps index and locus scales to integer coordinates. ``"integer"`` snaps all numeric coordinates. ``false`` keeps the original coordinate. __Default value:__ ``"auto"`` for index and locus scales, otherwise ``false``.
+        source: Source of the ruler coordinate. ``"pointer"`` uses pointer events configured by ``on``. ``"viewport"`` tracks the center of the current viewport. __Default value:__ ``"pointer"``
+        description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
+        persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
+        push: Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
+        value: Initial ruler value.
+
+    Returns:
+        A reusable parameter handle.
+
+    Raises:
+        TypeError: If the generated parameter definition is invalid.
+
+    Example:
+        >>> ruler().param.to_dict(validate=False)
+        {...}
+    """
+    config = core.RulerConfig(
+        clear=clear,
+        display=display,
+        encodings=encodings,
+        extent=extent,
+        mark=mark,
+        on=on,
+        snap=snap,
+        source=source,
+    )
+    from genome_spy._parameters import _make_parameter
+
+    return _make_parameter(
+        name,
+        ruler=config,
+        description=description,
+        persist=persist,
+        push=push,
+        value=value,
+        _variants=(core.RulerParameter,),
+    )
+
+
+def selection_interval(
+    name: str | None = None,
+    /,
+    *,
+    clear: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | bool
+    | UndefinedType = Undefined,
+    encodings: Sequence[PrimaryPositionalChannel_T] | UndefinedType = Undefined,
+    extent: SelectionExtent_T | UndefinedType = Undefined,
+    mark: core.BrushConfig | dict[str, Any] | UndefinedType = Undefined,
+    on: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | UndefinedType = Undefined,
+    zoom: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | bool
+    | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: core.SelectionInitIntervalMapping
+    | dict[str, Any]
+    | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter:
+    """Create a GenomeSpy ``selection_interval`` parameter.
+
+    Args:
+        name: Parameter name. A stable name is generated when omitted.
+        clear: A string or object that defines the events that should clear the selection. __Default value:__ ``"dblclick"``
+        encodings: An array of encoding channels that define the interval selection.
+        extent: Visual extent of the interval selection rectangle. ``"auto"`` draws one spanning rectangle when the selected channel can span a concat safely. ``"view"`` draws one rectangle per participating view. ``"container"`` requires one spanning rectangle. __Default value:__ ``"auto"``
+        mark: Interval selections display a rectangle mark to show the selected range. Use the ``mark`` property to adjust the appearance of this rectangle.
+        on: A string or object that defines the events to which the selection should listen. __Default value:__ - point selections: ``"click"`` - interval selections: - ``"mousedown[event.shiftKey]"`` when any brushed channel is zoomable - ``"mousedown"`` otherwise
+        zoom: Controls whether an active interval selection can be resized by mouse wheel. The wheel interaction only applies when the cursor is over the interval. Can be: - ``true`` / ``false`` - event type string such as ``"wheel"`` or ``"wheel[event.altKey]"`` - an ``EventConfig`` object Currently, only ``"wheel"`` events are supported. __Default value:__ - ``false`` when any brushed channel uses a zoomable scale - ``true`` otherwise
+        description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
+        persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
+        push: Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
+        value: Initial value for the selection.
+        empty: Whether an empty selection matches as a predicate.
+
+    Returns:
+        A reusable parameter handle.
+
+    Raises:
+        TypeError: If the generated parameter definition is invalid.
+
+    Example:
+        >>> selection_interval().param.to_dict(validate=False)
+        {...}
+    """
+    config = core.IntervalSelectionConfig(
+        type="interval",
+        clear=clear,
+        encodings=encodings,
+        extent=extent,
+        mark=mark,
+        on=on,
+        zoom=zoom,
+    )
+    from genome_spy._parameters import _make_parameter
+
+    return _make_parameter(
+        name,
+        select=config,
+        description=description,
+        persist=persist,
+        push=push,
+        value=value,
+        empty=empty,
+        _variants=(core.SelectionParameter,),
+    )
+
+
+def selection_point(
+    name: str | None = None,
+    /,
+    *,
+    clear: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | bool
+    | UndefinedType = Undefined,
+    on: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | UndefinedType = Undefined,
+    toggle: bool | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: core.SelectionInitIntervalMapping
+    | dict[str, Any]
+    | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter:
+    """Create a GenomeSpy ``selection_point`` parameter.
+
+    Args:
+        name: Parameter name. A stable name is generated when omitted.
+        clear: A string or object that defines the events that should clear the selection. __Default value:__ ``"dblclick"``
+        on: A string or object that defines the events to which the selection should listen. __Default value:__ - point selections: ``"click"`` - interval selections: - ``"mousedown[event.shiftKey]"`` when any brushed channel is zoomable - ``"mousedown"`` otherwise
+        toggle: Controls whether data values should be toggled (inserted or removed from a point selection) when clicking with the shift key pressed. - ``true`` -- additional values can be selected by shift-clicking. - ``false`` -- only a single value can be selected at a time. __Default value:__ ``true``
+        description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
+        persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
+        push: Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
+        value: Initial value for the selection.
+        empty: Whether an empty selection matches as a predicate.
+
+    Returns:
+        A reusable parameter handle.
+
+    Raises:
+        TypeError: If the generated parameter definition is invalid.
+
+    Example:
+        >>> selection_point().param.to_dict(validate=False)
+        {...}
+    """
+    config = core.PointSelectionConfig(type="point", clear=clear, on=on, toggle=toggle)
+    from genome_spy._parameters import _make_parameter
+
+    return _make_parameter(
+        name,
+        select=config,
+        description=description,
+        persist=persist,
+        push=push,
+        value=value,
+        empty=empty,
+        _variants=(core.SelectionParameter,),
+    )
+
+
 def title(
     text: str | core.ExprRef | dict[str, Any],
     /,
@@ -1131,6 +1540,7 @@ def title(
     """Create a chart title object.
 
     Args:
+        text (str | ExprRef | dict[str, Any]): The title text.
         align (Align_T): Horizontal text alignment for title text. One of ``"left"``, ``"center"``, or ``"right"``.
         anchor (TitleAnchor_T): The anchor position for placing the title and subtitle text. One of ``"start"``, ``"middle"``, or ``"end"``. For example, with an orientation of top these anchor positions map to a left-, center-, or right-aligned title.
         angle (float | ExprRef | dict[str, Any]): Angle in degrees of title and subtitle text.
@@ -1154,7 +1564,6 @@ def title(
         subtitleFontStyle (FontStyle_T): Font style for subtitle text.
         subtitleFontWeight (FontWeight_T): Font weight for subtitle text. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
         subtitlePadding (float): Padding in pixels between title and subtitle text. __Default value:__ ``3``
-        text (str | ExprRef | dict[str, Any]): The title text.
         zindex (float): Z-order of the title relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``1``
     """
     properties = {
@@ -1243,64 +1652,6 @@ def data_format(
         key: value for key, value in properties.items() if value is not Undefined
     }
     return core.DataFormat(**defined)
-
-
-def param(
-    name: str,
-    /,
-    *,
-    bind: core.BindCheckbox
-    | BindCheckboxKwds
-    | core.BindRadioSelect
-    | BindRadioSelectKwds
-    | core.BindRange
-    | BindRangeKwds
-    | core.BindInput
-    | BindInputKwds
-    | UndefinedType = Undefined,
-    description: str | UndefinedType = Undefined,
-    expr: str | UndefinedType = Undefined,
-    persist: bool | UndefinedType = Undefined,
-    push: Literal["outer"] | UndefinedType = Undefined,
-    ruler: core.RulerConfig | RulerConfigKwds | UndefinedType = Undefined,
-    select: SelectionType_T
-    | core.PointSelectionConfig
-    | dict[str, Any]
-    | core.IntervalSelectionConfig
-    | UndefinedType = Undefined,
-    transition: core.LerpTransition | dict[str, Any] | UndefinedType = Undefined,
-    value: core.RulerInitMapping | dict[str, Any] | UndefinedType = Undefined,
-) -> core.Parameter:
-    """Create a parameter definition.
-
-    Args:
-        bind (BindCheckbox | BindCheckboxKwds | BindRadioSelect | BindRadioSelectKwds | BindRange | BindRangeKwds | BindInput | BindInputKwds): Binds the parameter to an external input element such as a slider, selection list or radio button group.
-        description (str): A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
-        expr (str): An expression for the value of the parameter. This expression may include other parameters, in which case the parameter will automatically update in response to upstream parameter changes.
-        name (str): A unique name for the variable parameter. Parameter names should be valid JavaScript identifiers: they should contain only alphanumeric characters (or "$", or "_") and may not start with a digit. Reserved keywords that may not be used as parameter names are: "datum".
-        persist (bool): Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
-        push (Literal['outer']): Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
-        ruler (RulerConfig | RulerConfigKwds): Tracks a domain coordinate and displays it as a ruler in compatible views.
-        select (SelectionType_T | PointSelectionConfig | dict[str, Any] | IntervalSelectionConfig): Determines the default event processing and data query for the selection. GenomeSpy supports two selection types, following the Vega-Lite model: - ``"point"`` -- to select multiple discrete data values; the first value is selected on ``click`` and additional values toggled on shift-click. - ``"interval"`` -- to select a continuous range of data values on ``drag``.
-        transition (LerpTransition | dict[str, Any]): Smoothly follows numeric expression output values.
-        value (RulerInitMapping | dict[str, Any]): Initial ruler value.
-    """
-    properties = {
-        "name": name,
-        "bind": bind,
-        "description": description,
-        "expr": expr,
-        "persist": persist,
-        "push": push,
-        "ruler": ruler,
-        "select": select,
-        "transition": transition,
-        "value": value,
-    }
-    defined: dict[str, Any] = {
-        key: value for key, value in properties.items() if value is not Undefined
-    }
-    return core.Parameter(**defined)
 
 
 def view(
@@ -1521,6 +1872,160 @@ def config(
     return core.GenomeSpyConfig(**defined)
 
 
+def binding(
+    *,
+    autocomplete: str | UndefinedType = Undefined,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    input: Literal["text", "number", "color"] | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+    placeholder: str | UndefinedType = Undefined,
+) -> core.BindInput:
+    """Create a generic input binding.
+
+    Args:
+        autocomplete (str): A hint for form autofill. See the HTML autocomplete attribute for additional information.
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        input (Literal['text', 'number', 'color']): The type of input element to use. The valid values are ``"checkbox"``, ``"radio"``, ``"range"``, ``"select"``, ``"text"``, ``"number"``, and ``"color"``.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+        placeholder (str): Text that appears in the form control when it has no value set.
+    """
+    properties = {
+        "autocomplete": autocomplete,
+        "debounce": debounce,
+        "description": description,
+        "input": input,
+        "name": name,
+        "placeholder": placeholder,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindInput(**defined)
+
+
+def binding_checkbox(
+    *,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+) -> core.BindCheckbox:
+    """Create a checkbox input binding.
+
+    Args:
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+    """
+    properties = {
+        "input": "checkbox",
+        "debounce": debounce,
+        "description": description,
+        "name": name,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindCheckbox(**defined)
+
+
+def binding_radio(
+    *,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    labels: Sequence[str] | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+    options: Sequence[Any] | UndefinedType = Undefined,
+) -> core.BindRadioSelect:
+    """Create a radio input binding.
+
+    Args:
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        labels (Sequence[str]): An array of label strings to represent the ``options`` values. If unspecified, the ``options`` value will be coerced to a string and used as the label.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+        options (Sequence[Any]): An array of options to select from.
+    """
+    properties = {
+        "input": "radio",
+        "debounce": debounce,
+        "description": description,
+        "labels": labels,
+        "name": name,
+        "options": options,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindRadioSelect(**defined)
+
+
+def binding_range(
+    *,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    max: float | UndefinedType = Undefined,
+    min: float | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+    step: float | UndefinedType = Undefined,
+) -> core.BindRange:
+    """Create a range input binding.
+
+    Args:
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        max (float): Sets the maximum slider value. Defaults to the larger of the signal value and ``100``.
+        min (float): Sets the minimum slider value. Defaults to the smaller of the signal value and ``0``.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+        step (float): Sets the minimum slider increment. If undefined, the step size will be automatically determined based on the ``min`` and ``max`` values.
+    """
+    properties = {
+        "input": "range",
+        "debounce": debounce,
+        "description": description,
+        "max": max,
+        "min": min,
+        "name": name,
+        "step": step,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindRange(**defined)
+
+
+def binding_select(
+    *,
+    debounce: float | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    labels: Sequence[str] | UndefinedType = Undefined,
+    name: str | UndefinedType = Undefined,
+    options: Sequence[Any] | UndefinedType = Undefined,
+) -> core.BindRadioSelect:
+    """Create a select input binding.
+
+    Args:
+        debounce (float): If defined, delays event handling until the specified milliseconds have elapsed since the last event was fired.
+        description (str): An optional description or help text that is shown below the input element.
+        labels (Sequence[str]): An array of label strings to represent the ``options`` values. If unspecified, the ``options`` value will be coerced to a string and used as the label.
+        name (str): By default, the parameter name is used to label input elements. This ``name`` property can be used instead to specify a custom label for the bound parameter.
+        options (Sequence[Any]): An array of options to select from.
+    """
+    properties = {
+        "input": "select",
+        "debounce": debounce,
+        "description": description,
+        "labels": labels,
+        "name": name,
+        "options": options,
+    }
+    defined: dict[str, Any] = {
+        key: value for key, value in properties.items() if value is not Undefined
+    }
+    return core.BindRadioSelect(**defined)
+
+
 __all__ = [
     "Locus",
     "locus",
@@ -1530,10 +2035,18 @@ __all__ = [
     "title",
     "dynamic_opacity",
     "data_format",
-    "param",
     "view",
     "view_config",
     "config",
+    "binding",
+    "binding_checkbox",
+    "binding_radio",
+    "binding_range",
+    "binding_select",
+    "param",
+    "ruler",
+    "selection_interval",
+    "selection_point",
     "DatumChannelMethodMixin",
     "LocusChannelMethodMixin",
     "ValueChannelMethodMixin",

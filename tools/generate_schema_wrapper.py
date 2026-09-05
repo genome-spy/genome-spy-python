@@ -51,6 +51,7 @@ DEFAULT_SPEC_REFERENCE_DIR = Path(".cache/genome-spy-python/genomespy-core-spec"
 PACKAGE_NAME = "@genome-spy/core"
 SCHEMA_FILENAME = "genome-spy-schema.json"
 CAPABILITIES_FILENAME = "capabilities.json"
+PUBLIC_BLOCK_PREFIX = "GENERATED INTERACTION"
 TRANSFORM_METHOD_OVERRIDES: dict[str, TransformMethodOverride] = {
     "FormulaParams": TransformMethodOverride(
         additional_methods=(
@@ -295,11 +296,89 @@ def write_schema_files(
         json.dumps(generator.capability_manifest(), indent=2) + "\n",
         encoding="utf-8",
     )
+    write_public_interaction_exports(
+        output_dir.parent,
+        interaction_helper_names(generator),
+    )
+
+
+def interaction_helper_names(generator: SchemaWrapperGenerator) -> tuple[str, ...]:
+    """Return schema-derived interaction helpers exposed at package level."""
+    return tuple(
+        sorted(
+            {
+                "param",
+                *(spec.helper_name for spec in generator.binding_factory_specs()),
+                *(
+                    spec.helper_name
+                    for spec in generator.parameter_config_factory_specs()
+                ),
+            }
+        )
+    )
+
+
+def _replace_generated_block(path: Path, block: str, lines: list[str]) -> None:
+    """Replace one explicit generated block in a public Python module."""
+    if not path.exists():
+        return
+    source = path.read_text(encoding="utf-8")
+    start = f"# BEGIN {PUBLIC_BLOCK_PREFIX} {block}"
+    end = f"# END {PUBLIC_BLOCK_PREFIX} {block}"
+    pattern = re.compile(
+        rf"^(?P<indent>[ \t]*){re.escape(start)}\n.*?^(?P=indent){re.escape(end)}$",
+        re.DOTALL | re.MULTILINE,
+    )
+    updated, count = pattern.subn(
+        lambda match: "\n".join(
+            f"{match.group('indent')}{line}" for line in [start, *lines, end]
+        ),
+        source,
+    )
+    if count != 1:
+        raise ValueError(f"Expected one generated interaction block in {path}.")
+    path.write_text(updated, encoding="utf-8")
+
+
+def write_public_interaction_exports(
+    package_dir: Path,
+    helper_names: tuple[str, ...],
+) -> None:
+    """Update explicit imports and exports for generated interaction helpers."""
+    imports = [
+        "from genome_spy.schema.ergonomics import (",
+        *(f"    {name}," for name in helper_names),
+        ")",
+    ]
+    helper_imports = [
+        "from genome_spy.helpers import (",
+        *(f"    {name}," for name in helper_names),
+        ")",
+    ]
+    exports = [f'    "{name}",' for name in helper_names]
+    _replace_generated_block(package_dir / "helpers.py", "IMPORTS", imports)
+    _replace_generated_block(package_dir / "api.py", "IMPORTS", helper_imports)
+    _replace_generated_block(package_dir / "__init__.py", "IMPORTS", helper_imports)
+    for path in (
+        package_dir / "helpers.py",
+        package_dir / "api.py",
+        package_dir / "__init__.py",
+    ):
+        _replace_generated_block(path, "EXPORTS", exports)
 
 
 def format_generated_modules(output_dir: Path) -> None:
     """Format generated Python modules with the project's Ruff installation."""
     modules = sorted(output_dir.glob("*.py"))
+    modules.extend(
+        path
+        for path in (
+            output_dir.parent / "helpers.py",
+            output_dir.parent / "api.py",
+            output_dir.parent / "__init__.py",
+        )
+        if path.exists()
+    )
     if not modules:
         return
     subprocess.run(

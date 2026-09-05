@@ -3,6 +3,8 @@
 from genome_spy.arrow import to_arrow_ipc
 from genome_spy.api import (
     Angle,
+    AxisGenomeData,
+    BrushConfig,
     Color,
     condition,
     Direction,
@@ -31,9 +33,11 @@ from genome_spy.api import (
     Parameter,
     Paddings,
     Parse,
+    RulerMarkConfig,
     Sample,
     Scale,
     Search,
+    SelectionDomainRef,
     SemanticScore,
     Shape,
     Size,
@@ -69,7 +73,6 @@ from genome_spy.api import (
     lazy,
     locus,
     multiscale,
-    param,
     parse,
     scales,
     step,
@@ -78,12 +81,29 @@ from genome_spy.api import (
     view,
     view_config,
     vconcat,
+    when,
 )
+
+# BEGIN GENERATED INTERACTION IMPORTS
+from genome_spy.helpers import (
+    binding,
+    binding_checkbox,
+    binding_radio,
+    binding_range,
+    binding_select,
+    param,
+    ruler,
+    selection_interval,
+    selection_point,
+)
+# END GENERATED INTERACTION IMPORTS
 
 __all__ = [
     "__version__",
     "Angle",
+    "AxisGenomeData",
     "axes",
+    "BrushConfig",
     "Chart",
     "Color",
     "condition",
@@ -117,6 +137,7 @@ __all__ = [
     "Sample",
     "Scale",
     "Search",
+    "SelectionDomainRef",
     "SemanticScore",
     "Shape",
     "Size",
@@ -150,8 +171,8 @@ __all__ = [
     "lazy",
     "locus",
     "multiscale",
-    "param",
     "parse",
+    "RulerMarkConfig",
     "scales",
     "step",
     "title",
@@ -159,6 +180,18 @@ __all__ = [
     "view",
     "view_config",
     "vconcat",
+    "when",
+    # BEGIN GENERATED INTERACTION EXPORTS
+    "binding",
+    "binding_checkbox",
+    "binding_radio",
+    "binding_range",
+    "binding_select",
+    "param",
+    "ruler",
+    "selection_interval",
+    "selection_point",
+    # END GENERATED INTERACTION EXPORTS
 ]
 
 __version__ = "0.1.0"

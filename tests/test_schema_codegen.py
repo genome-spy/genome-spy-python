@@ -8,10 +8,13 @@ import genome_spy as gs
 import pytest
 from tools.generate_schema_wrapper import (
     TRANSFORM_METHOD_OVERRIDES,
+    interaction_helper_names,
+    write_public_interaction_exports,
     write_schema_files,
     write_schema_package,
 )
 from tools.schemapi.codegen import (
+    SchemaAnalyzer,
     SchemaWrapperGenerator,
     TransformMethodOverride,
 )
@@ -215,6 +218,72 @@ def test_schema_wrapper_generator_summarizes_definitions() -> None:
     )
 
 
+def test_union_variants_preserve_nested_alternatives_and_inheritance() -> None:
+    analyzer = SchemaAnalyzer(
+        {
+            "Family": {
+                "anyOf": [
+                    {"$ref": "#/definitions/Nested"},
+                    {"$ref": "#/definitions/Direct"},
+                ]
+            },
+            "Nested": {
+                "oneOf": [
+                    {"$ref": "#/definitions/First"},
+                    {"$ref": "#/definitions/Second"},
+                ]
+            },
+            "Base": {
+                "type": "object",
+                "properties": {"name": {"type": "string"}},
+                "required": ["name"],
+            },
+            "First": {
+                "allOf": [
+                    {"$ref": "#/definitions/Base"},
+                    {
+                        "type": "object",
+                        "properties": {"kind": {"const": "first"}},
+                        "required": ["kind"],
+                    },
+                ],
+                "additionalProperties": False,
+            },
+            "Second": {
+                "type": "object",
+                "properties": {
+                    "kind": {"enum": ["second", "alternate"]},
+                    "value": {"type": "number"},
+                },
+                "required": ["kind", "value"],
+                "additionalProperties": False,
+            },
+            "Direct": {
+                "type": "object",
+                "properties": {"direct": {"type": "boolean"}},
+                "required": ["direct"],
+            },
+        }
+    )
+
+    variants = analyzer.union_variants("Family")
+
+    assert [variant.schema_name for variant in variants] == [
+        "First",
+        "Second",
+        "Direct",
+    ]
+    assert [variant.required for variant in variants] == [
+        frozenset({"name", "kind"}),
+        frozenset({"kind", "value"}),
+        frozenset({"direct"}),
+    ]
+    assert variants[0].discriminators == (("kind", ("first",)),)
+    assert variants[1].discriminators == (("kind", ("second", "alternate")),)
+    assert {prop.name for prop in variants[0].properties} == {"kind", "name"}
+    assert variants[0].additional_properties is False
+
+
 def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     schema = json.loads(
         Path("src/genome_spy/schema/genome-spy-schema.json").read_text(encoding="utf-8")
@@ -222,6 +291,14 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     ergonomics_module = SchemaWrapperGenerator(schema).generate_ergonomics_module()
 
     assert {
+        "binding",
+        "binding_checkbox",
+        "binding_radio",
+        "binding_range",
+        "binding_select",
+        "ruler",
+        "selection_interval",
+        "selection_point",
         "title",
         "dynamic_opacity",
         "data_format",
@@ -231,7 +308,22 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
         "config",
     } <= set(ergonomics_module.exports)
     assert "def title(\n    text:" in ergonomics_module.source
-    assert "def param(\n    name: str," in ergonomics_module.source
+    assert "def binding(\n    *," in ergonomics_module.source
+    assert "input: Literal['text', 'number', 'color']" in ergonomics_module.source
+    assert "def binding_range(\n    *," in ergonomics_module.source
+    assert "'input': 'range'" in ergonomics_module.source
+    assert "input: Literal['range']" not in ergonomics_module.source
+    assert "def selection_interval(" in ergonomics_module.source
+    assert "config = core.IntervalSelectionConfig(" in (ergonomics_module.source)
+    assert "def ruler(" in ergonomics_module.source
+    assert "config = core.RulerConfig(" in ergonomics_module.source
+    assert "def param(\n    name: str | None = None," in ergonomics_module.source
+    assert "transition: core.LerpTransition | dict[str, Any]," in (
+        ergonomics_module.source
+    )
+    assert "expr: str | ExpressionOperand," in ergonomics_module.source
+    assert "value: float," in ergonomics_module.source
+    assert "return _make_parameter(" in ergonomics_module.source
     assert "def config(\n    *," in ergonomics_module.source
     assert "if isinstance(defined.get('view'), core.ViewBackground):" in (
         ergonomics_module.source
@@ -239,6 +331,82 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     assert "def copy(\n        self," in (
         SchemaWrapperGenerator(schema).generate_mark_mixins_module().source
     )
+
+
+def test_parameter_factories_follow_future_schema_variants() -> None:
+    schema = json.loads(
+        Path("src/genome_spy/schema/genome-spy-schema.json").read_text(encoding="utf-8")
+    )
+    definitions = schema["definitions"]
+    definitions["Parameter"]["anyOf"].append({"$ref": "#/definitions/FutureParameter"})
+    definitions["FutureParameter"] = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "name": {"type": "string"},
+            "future": {"type": "boolean"},
+        },
+        "required": ["name", "future"],
+    }
+    definitions["BindInput"]["properties"]["input"]["enum"].append("date")
+    definitions["SelectionParameter"]["properties"]["select"]["anyOf"].append(
+        {"$ref": "#/definitions/LassoSelectionConfig"}
+    )
+    definitions["LassoSelectionConfig"] = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "type": {"const": "lasso", "type": "string"},
+            "on": {"type": "string"},
+        },
+        "required": ["type"],
+    }
+
+    module = SchemaWrapperGenerator(schema).generate_ergonomics_module()
+    generator = SchemaWrapperGenerator(schema)
+
+    assert "future: bool," in module.source
+    assert "core.FutureParameter," in module.source
+    assert "_PARAMETER_TYPES = (" in module.source
+    assert "core.Parameter, core.PlainValueParameter" in module.source
+    parameter_types = module.source.split("_PARAMETER_TYPES =", 1)[1].split(
+        "_SELECTION_PARAMETER_TYPES =", 1
+    )[0]
+    assert "core.FutureParameter" in parameter_types
+    assert "_SELECTION_PARAMETER_TYPES = (core.SelectionParameter,)" in module.source
+    assert "input: Literal['text', 'number', 'color', 'date']" in module.source
+    assert "def selection_lasso(" in module.source
+    assert "config = core.LassoSelectionConfig(" in module.source
+    assert "_variants=(core.SelectionParameter,)" in module.source
+    assert "selection_lasso" in interaction_helper_names(generator)
+
+
+def test_public_interaction_exports_are_replaced_explicitly(tmp_path: Path) -> None:
+    package_dir = tmp_path / "genome_spy"
+    package_dir.mkdir()
+    template = """# BEGIN GENERATED INTERACTION IMPORTS
+old import
+# END GENERATED INTERACTION IMPORTS
+
+items = [
+    # BEGIN GENERATED INTERACTION EXPORTS
+    old export
+    # END GENERATED INTERACTION EXPORTS
+]
+"""
+    for filename in ("helpers.py", "api.py", "__init__.py"):
+        (package_dir / filename).write_text(template, encoding="utf-8")
+
+    write_public_interaction_exports(package_dir, ("param", "selection_lasso"))
+
+    helpers = (package_dir / "helpers.py").read_text(encoding="utf-8")
+    api = (package_dir / "api.py").read_text(encoding="utf-8")
+    assert "from genome_spy.schema.ergonomics import (" in helpers
+    assert "from genome_spy.helpers import (" in api
+    assert "    selection_lasso," in helpers
+    assert '    "selection_lasso",' in api
+    assert "old import" not in api
+    assert "old export" not in api
 
 
 def test_generated_parameter_docs_are_separated_from_method_summaries() -> None:
@@ -349,11 +517,14 @@ def test_generate_transform_method_overrides_from_schema_properties() -> None:
     assert specs["transform_flatten"].positional_properties == ("fields", "as")
     assert specs["transform_sample"].positional_properties == ("size",)
     assert "def transform_calculate(" in source
-    assert "calculate: str | UndefinedType = Undefined" in source
-    assert "transform['expr'] = calculate" in source
+    assert "calculate: str | ExpressionOperand | UndefinedType = Undefined" in source
+    assert (
+        "transform['expr'] = _expression_string("
+        "cast(str | ExpressionOperand, calculate))"
+    ) in source
     assert "for output, value in kwargs.items():" in source
     assert "Add one or more ``formula`` transforms." in source
-    assert "**kwargs (str): Additional output field names" in source
+    assert "**kwargs (str | ExpressionOperand): Additional output field names" in source
     assert "one transform per output in insertion order" in source
     assert "Returns:" in source
     assert "Raises:" in source
@@ -758,6 +929,7 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
         "encoding_channels": ["color", "x"],
         "transforms": [],
         "lazy_data_sources": [],
+        "interaction": {"bindings": [], "parameter_helpers": []},
         "root_spec_variants": [],
     }
     assert "MARK_TYPES = ('point', 'rect')" in (output_dir / "core.py").read_text(

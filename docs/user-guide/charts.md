@@ -1,17 +1,12 @@
 # Charts and marks
 
-A `Chart` combines data, one geometric shape called a **mark**, and encodings
+A {py:class}`~genome_spy.Chart` combines data, one geometric shape called a **mark**, and encodings
 that control where and how those marks are drawn. A chart with one mark type is
 also called a *unit view*.
 
 For most marks, GenomeSpy draws one mark for every data row. Six rows therefore
 produce six points in this example:
 
-```{literalinclude} ../tutorials/charts_and_marks.py
-:language: python
-:start-after: charts-marks-observations-start
-:end-before: charts-marks-observations-end
-```
 
 ```{literalinclude} ../tutorials/charts_and_marks.py
 :language: python
@@ -24,7 +19,7 @@ produce six points in this example:
 :title: A point for each observation
 ```
 
-The call to `mark_point()` chooses the geometry. The calls inside `encode()`
+The call to {py:meth}`~genome_spy.Chart.mark_point` chooses the geometry. The calls inside {py:meth}`~genome_spy.Chart.encode`
 connect data fields to visual channels such as position, color, and size.
 
 ## Static properties and data-driven encodings
@@ -40,7 +35,7 @@ the data:
 
 Put a visual value directly in the mark method when every instance should look
 the same. Put it in `encode()` when the value should represent a field.
-`properties()` is for view-level settings such as `width`, `height`, `title`,
+{py:meth}`~genome_spy.Chart.properties` is for view-level settings such as `width`, `height`, `title`,
 and the accessibility-oriented `description`. The GenomeSpy documentation lists
 the properties shared by all marks in
 [marks](https://genomespy.app/docs/grammar/mark/#properties).
@@ -51,13 +46,13 @@ Different marks emphasize different aspects of the data:
 
 | Mark method | Useful for | GenomeSpy reference |
 | --- | --- | --- |
-| `mark_point()`  | Individual observations and distributions | [Point](https://genomespy.app/docs/grammar/mark/point/) |
-| `mark_rect()` | Bands, intervals, and heatmaps | [Rect](https://genomespy.app/docs/grammar/mark/rect/) |
-| `mark_rule()` | Ranges, boundaries, and reference lines | [Rule](https://genomespy.app/docs/grammar/mark/rule/) |
-| `mark_tick()` | Compact positions along one axis | [Tick](https://genomespy.app/docs/grammar/mark/tick/) |
-| `mark_text()` | Labels or values shown as text | [Text](https://genomespy.app/docs/grammar/mark/text/) |
-| `mark_link()` | Connections between two positions | [Link](https://genomespy.app/docs/grammar/mark/link/) |
-| `mark_arrow()` | Directed connections or events | [Arrow](https://genomespy.app/docs/grammar/mark/arrow/) |
+| {py:meth}`~genome_spy.Chart.mark_point` | Individual observations and distributions | [Point](https://genomespy.app/docs/grammar/mark/point/) |
+| {py:meth}`~genome_spy.Chart.mark_rect` | Bands, intervals, and heatmaps | [Rect](https://genomespy.app/docs/grammar/mark/rect/) |
+| {py:meth}`~genome_spy.Chart.mark_rule` | Ranges, boundaries, and reference lines | [Rule](https://genomespy.app/docs/grammar/mark/rule/) |
+| {py:meth}`~genome_spy.Chart.mark_tick` | Compact positions along one axis | [Tick](https://genomespy.app/docs/grammar/mark/tick/) |
+| {py:meth}`~genome_spy.Chart.mark_text` | Labels or values shown as text | [Text](https://genomespy.app/docs/grammar/mark/text/) |
+| {py:meth}`~genome_spy.Chart.mark_link` | Connections between two positions | [Link](https://genomespy.app/docs/grammar/mark/link/) |
+| {py:meth}`~genome_spy.Chart.mark_arrow` | Directed connections or events | [Arrow](https://genomespy.app/docs/grammar/mark/arrow/) |
 
 Marks can often express related tasks, so choose the one that makes the intended reading
 most direct. Each reference page lists the properties that mark supports.

@@ -5,6 +5,7 @@ five genes in the UpSetR glioblastoma cohort, with linked row highlighting.
 """
 
 import genome_spy as gs
+from genome_spy.schema import RulerMarkConfig
 
 META = {
     "category": "Set intersections",
@@ -12,17 +13,21 @@ META = {
     "height": 390,
     "max_width": 650,
 }
-SET_CURSOR_Y = gs.Expression("setCursor.values.y")
+SET_CURSOR = gs.param("setCursor")
+SET_CURSOR_UPDATE = gs.ruler(
+    "setCursor",
+    push="outer",
+    persist=False,
+    encodings=["y"],
+    on="mousemove",
+    mark=RulerMarkConfig(
+        stroke="#555",
+        strokeDash=[3, 3],
+        opacity=0.7,
+    ),
+)
+SET_CURSOR_Y = SET_CURSOR.values.y
 CURSOR = ~gs.expr.isValid(SET_CURSOR_Y) | (gs.datum.profileContainsHoveredSet == 1)
-RULER = {
-    "encodings": ["y"],
-    "on": "mousemove",
-    "mark": {
-        "stroke": "#555",
-        "strokeDash": [3, 3],
-        "opacity": 0.7,
-    },
-}
 
 intersection_bars = (
     gs.Chart()
@@ -110,15 +115,8 @@ set_sizes = (
                 "domain": [0, 100],
             }
         },
-        params=[
-            gs.param(
-                "setCursor",
-                push="outer",
-                persist=False,
-                ruler=RULER,
-            )
-        ],
     )
+    .add_params(SET_CURSOR_UPDATE)
     .resolve_scale(x="excluded")
     .transform_filter(gs.datum.profileNumber == 1)
 )
@@ -209,15 +207,8 @@ matrix = (
         width=gs.step(20),
         height=gs.step(20),
         padding=gs.Paddings(left=45),
-        params=[
-            gs.param(
-                "setCursor",
-                push="outer",
-                persist=False,
-                ruler=RULER,
-            )
-        ],
     )
+    .add_params(SET_CURSOR_UPDATE)
     .encode(
         color=gs.Color(gs.expr(CURSOR), type="nominal")
         .scale(type="ordinal", domain=[False, True], range=["#ddd", "#3b3b3b"])
@@ -248,7 +239,6 @@ chart = (
             ),
             format=gs.data_format(type="csv"),
         ),
-        params=[gs.param("setCursor")],
         spacing=3,
         scales={
             "x": {
@@ -263,6 +253,7 @@ chart = (
             },
         },
     )
+    .add_params(SET_CURSOR)
     .resolve_scale(x="shared", y="shared")
     .transform_regex_fold(
         columnRegex="^(PTEN|TP53|EGFR|PIK3R1|RB1)$",

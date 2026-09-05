@@ -1,8 +1,7 @@
 """Single-source chart objects used by the Configuration guide."""
 
-# configuration-data-start
+# configuration-levels-start
 import genome_spy as gs
-
 
 measurements = [
     {"sample": "A", "time": 1, "value": 2.1},
@@ -12,10 +11,7 @@ measurements = [
     {"sample": "B", "time": 2, "value": 3.5},
     {"sample": "B", "time": 3, "value": 4.3},
 ]
-# configuration-data-end
 
-
-# configuration-levels-start
 configured_chart = (
     gs.Chart(measurements)
     .mark_point(filled=True, stroke="white", strokeWidth=1)

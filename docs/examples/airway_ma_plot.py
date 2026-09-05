@@ -27,12 +27,6 @@ MAX_GENES = 12_000
 # while the cap prevents points from becoming oversized at deep zoom levels.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
-HALO_OFFSETS = [(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)]
-DIRECTION_EXPRESSION = gs.Expression(
-    "datum.neglog10_pvalue >= airwayMaSignificanceCutoff && "
-    "abs(datum.log2fc) >= airwayMaEffectCutoff "
-    "? (datum.log2fc < 0 ? 'down in dex' : 'up in dex') : 'n.s.'"
-)
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -40,6 +34,34 @@ data, domains = airway_differential_expression(
     log2fc_cutoff=LOG2FC_CUTOFF,
     pvalue_cutoff=PVALUE_CUTOFF,
     padj_alpha=PADJ_CUTOFF,
+)
+# The sliders are named parameters. Their handles drive both the guide lines
+# and the browser-side classification below.
+effect_cutoff = gs.param(
+    "airwayMaEffectCutoff",
+    value=LOG2FC_CUTOFF,
+    bind=gs.binding_range(
+        min=0,
+        max=3,
+        step=0.1,
+        name="Absolute log2 fold-change cutoff: ",
+    ),
+)
+significance_cutoff = gs.param(
+    "airwayMaSignificanceCutoff",
+    value=domains["pvalue_cutoff"][0],
+    bind=gs.binding_range(
+        min=0,
+        max=domains["volcano_y"][1],
+        step=0.25,
+        name="−log10 p cutoff: ",
+    ),
+)
+DIRECTION_EXPRESSION = gs.expr.if_(
+    (gs.datum.neglog10_pvalue >= significance_cutoff)
+    & (gs.expr.abs(gs.datum.log2fc) >= effect_cutoff),
+    gs.expr.if_(gs.datum.log2fc < 0, "down in dex", "up in dex"),
+    "n.s.",
 )
 
 direction_colors = (
@@ -77,7 +99,7 @@ ma_points = (
 
 ma_fc_rules = (
     gs.Chart([{"side": -1}, {"side": 0}, {"side": 1}])
-    .transform_formula(expr=gs.Expression("datum.side * airwayMaEffectCutoff"), as_="y")
+    .transform_formula(expr=gs.datum.side * effect_cutoff, as_="y")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         y=gs.Y("y:Q")
@@ -106,20 +128,18 @@ ma_callout_lines = (
 )
 
 
-def ma_callout_label(
-    *, side: str, color: str, dx: float, dy: float, name: str
-) -> gs.Chart:
-    """Build one edge-anchored label or halo layer."""
+def ma_callout_label(*, side: str, name: str) -> gs.Chart:
+    """Build one label layer just beyond its shortened leader line."""
     return (
         gs.Chart()
         .transform_filter(gs.datum.ma_label & (gs.datum.ma_label_side == side))
         .mark_text(
             align="right" if side == "left" else "left",
             baseline="middle",
-            dx=dx,
-            dy=dy,
+            dx=-4 if side == "left" else 4,
+            dy=0,
             fontWeight="bold",
-            color=color,
+            color="#20262d",
             tooltip=None,
         )
         .encode(
@@ -137,64 +157,29 @@ def ma_callout_label(
     )
 
 
-ma_callout_halos = [
-    ma_callout_label(
-        side=side,
-        color="white",
-        dx=(-4 if side == "left" else 4) + halo_dx,
-        dy=halo_dy,
-        name=f"ma-label-halo-{side}-{index}",
-    )
-    for side in ("left", "right")
-    for index, (halo_dx, halo_dy) in enumerate(HALO_OFFSETS)
-]
 ma_callout_labels = [
     ma_callout_label(
         side=side,
-        color="#20262d",
-        dx=-4 if side == "left" else 4,
-        dy=0,
         name=f"ma-label-{side}",
     )
     for side in ("left", "right")
 ]
 
-chart = gs.layer(
-    ma_fc_rules,
-    ma_points,
-    ma_callout_lines,
-    *ma_callout_halos,
-    *ma_callout_labels,
-).properties(
-    data=data,
-    title="Airway dexamethasone response: MA plot",
-    params=[
-        gs.param(
-            "airwayMaEffectCutoff",
-            value=LOG2FC_CUTOFF,
-            bind={
-                "input": "range",
-                "min": 0,
-                "max": 3,
-                "step": 0.1,
-                "name": "Absolute log2 fold-change cutoff: ",
-            },
+chart = (
+    gs.layer(
+        ma_fc_rules,
+        ma_points,
+        ma_callout_lines,
+        *ma_callout_labels,
+    )
+    .properties(
+        data=data,
+        title="Airway dexamethasone response: MA plot",
+        description=(
+            "A paired differential-expression MA plot showing mean expression "
+            "against fold change, with interactive thresholds and selected genes "
+            "identified by callouts."
         ),
-        gs.param(
-            "airwayMaSignificanceCutoff",
-            value=domains["pvalue_cutoff"][0],
-            bind={
-                "input": "range",
-                "min": 0,
-                "max": domains["volcano_y"][1],
-                "step": 0.25,
-                "name": "−log10 p cutoff: ",
-            },
-        ),
-    ],
-    description=(
-        "A paired differential-expression MA plot showing mean expression "
-        "against fold change, with interactive thresholds and selected genes "
-        "identified by callouts."
-    ),
+    )
+    .add_params(effect_cutoff, significance_cutoff)
 )

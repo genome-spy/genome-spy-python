@@ -1,6 +1,6 @@
 """Single-source chart objects used by the Data user-guide page."""
 
-# data-inputs-records-start
+# data-inputs-inline-chart-start
 import genome_spy as gs
 
 measurements = [
@@ -11,10 +11,7 @@ measurements = [
     {"sample": "B", "time": 1, "value": 2.7},
     {"sample": "B", "time": 2, "value": 3.6},
 ]
-# data-inputs-records-end
 
-
-# data-inputs-inline-chart-start
 inline_chart = (
     gs.Chart(measurements)
     .mark_point(size=90)

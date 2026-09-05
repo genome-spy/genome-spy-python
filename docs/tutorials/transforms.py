@@ -1,8 +1,7 @@
 """Single-source chart objects used by the Transforms guide."""
 
-# transforms-data-start
+# transforms-filter-start
 import genome_spy as gs
-
 
 measurements = [
     {"sample": "C1", "group": "control", "response": 0.42, "quality": 0.92},
@@ -12,10 +11,7 @@ measurements = [
     {"sample": "T2", "group": "treated", "response": 0.72, "quality": 0.88},
     {"sample": "T3", "group": "treated", "response": 0.84, "quality": 0.95},
 ]
-# transforms-data-end
 
-
-# transforms-filter-start
 filtered_chart = (
     gs.Chart(measurements)
     .transform_filter(gs.datum.quality >= 0.7)

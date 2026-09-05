@@ -2,18 +2,12 @@
 
 An encoding says which data field controls a visual channel. A **scale** performs
 the conversion from data values to visible values. **Axes** and **legends** are
-guides that explain the conversion to the reader.
+guides that explain the conversion to the user.
 
 ## Start with automatic defaults
 
 GenomeSpy chooses scales and guides from the channel and data type. This chart
 does not configure any of them explicitly:
-
-```{literalinclude} ../tutorials/scales_and_guides.py
-:language: python
-:start-after: scales-guides-data-start
-:end-before: scales-guides-data-end
-```
 
 ```{literalinclude} ../tutorials/scales_and_guides.py
 :language: python
@@ -152,6 +146,6 @@ disables the scale itself and sends values directly to the visual channel; use
 that only when the data already contains suitable visual values.
 
 Removing a guide also removes its explanation. Keep at least one clear label or
-guide for every visual distinction the reader must interpret. The GenomeSpy
+guide for every visual distinction the user must interpret. The GenomeSpy
 documentation covers the alternatives in
 [disabling legends](https://genomespy.app/docs/grammar/legend/#disabling-legends).

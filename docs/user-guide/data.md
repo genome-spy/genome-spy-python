@@ -9,13 +9,7 @@ position, color, size, or another visual channel.
 A list of dictionaries is the smallest useful input. Each dictionary below is
 one observation with the same three fields:
 
-```{literalinclude} ../tutorials/data_inputs.py
-:language: python
-:start-after: data-inputs-records-start
-:end-before: data-inputs-records-end
-```
-
-Pass the records as the first argument to `Chart`:
+Pass the records as the first argument to {py:class}`~genome_spy.Chart`:
 
 ```{literalinclude} ../tutorials/data_inputs.py
 :language: python
@@ -36,13 +30,13 @@ this and the other eager sources in
 
 ## DataFrames and Arrow tables
 
-`Chart` also accepts these table objects directly:
+{py:class}`~genome_spy.Chart` also accepts these table objects directly:
 
 - pandas `DataFrame`;
 - Polars `DataFrame`;
 - PyArrow `Table` and `RecordBatch`.
 
-Use the same chart construction for any of them: `gs.Chart(frame)`. GenomeSpy
+Use the same chart construction for any of them: {py:class}`gs.Chart <genome_spy.Chart>`. GenomeSpy
 uses column names as fields. A pandas index is not a field, so call
 `frame.reset_index()` first when an index contains values needed by the chart.
 
@@ -69,7 +63,7 @@ gwas = load_dataset("hapmap_gwas")
 
 ## Load a URL in the browser
 
-For a CSV, TSV, JSON, or another eager file source, use `gs.Data` with a URL.
+For a CSV, TSV, JSON, or another eager file source, use {py:class}`~genome_spy.Data` with a URL.
 The format can often be inferred from the filename, but an explicit format
 makes the intended parsing clear:
 

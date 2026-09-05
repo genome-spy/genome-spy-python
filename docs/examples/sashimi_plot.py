@@ -15,7 +15,16 @@ META = {
     "height": 360,
     "max_width": 920,
 }
-MIN_UNIQUELY_MAPPED_READS = gs.Expression("minUniquelyMappedReads")
+min_uniquely_mapped_reads = gs.param(
+    "minUniquelyMappedReads",
+    value=1,
+    bind=gs.binding_range(
+        min=0,
+        max=200,
+        step=1,
+        name="Min uniquely mapped reads",
+    ),
+)
 
 DOMAIN = [
     {"chrom": "chr15", "pos": 92925000},
@@ -87,7 +96,7 @@ splice_junctions = (
             format=gs.data_format(type="bed"),
         ),
     )
-    .transform_filter(gs.datum.score >= MIN_UNIQUELY_MAPPED_READS)
+    .transform_filter(gs.datum.score >= min_uniquely_mapped_reads)
     .transform_formula(expr=gs.datum.chromEnd - gs.datum.chromStart, as_="span")
     .transform_formula(
         expr=gs.datum.span + (gs.datum.span % 10 - 5) / 10 * gs.datum.span,
@@ -105,21 +114,9 @@ chart = (
             "A sashimi-style splice junction view adapted from the GenomeSpy "
             "docs, using lazy BigWig coverage and splice-junction arcs."
         ),
-        params=[
-            gs.param(
-                "minUniquelyMappedReads",
-                value=1,
-                bind={
-                    "input": "range",
-                    "min": 0,
-                    "max": 200,
-                    "step": 1,
-                    "name": "Min uniquely mapped reads",
-                },
-            )
-        ],
         scales=gs.scales(x=gs.Scale(domain=DOMAIN)),
     )
+    .add_params(min_uniquely_mapped_reads)
     .resolve_scale(y="independent")
     .resolve_axis(y="independent")
 )

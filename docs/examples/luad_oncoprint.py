@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import genome_spy as gs
 from genome_spy.datasets._oncoprint import luad_oncoprint_data
-from genome_spy.schema import Scale
+from genome_spy.schema import RulerMarkConfig, Scale
 
 META = {
     "category": "Oncoprints and cohort summaries",
@@ -85,6 +85,14 @@ MICROBIOME_GROUP = "Microbiome Signatures (log RNA Seq CPM)"
 
 
 data = luad_oncoprint_data()
+sample_ruler = gs.ruler(
+    "sampleRuler",
+    persist=False,
+    encodings=["x"],
+    extent="container",
+    snap=False,
+    mark=RulerMarkConfig(opacity=0.3),
+)
 
 sample_domain = data["sample_domain"]
 gene_order = data["gene_order"]
@@ -387,19 +395,8 @@ sample_tracks = (
                 "zoom": True,
             }
         },
-        params=[
-            gs.param(
-                "sampleRuler",
-                persist=False,
-                ruler={
-                    "encodings": ["x"],
-                    "extent": "container",
-                    "snap": False,
-                    "mark": {"opacity": 0.3},
-                },
-            )
-        ],
     )
+    .add_params(sample_ruler)
     .resolve_scale(x="shared", y="independent")
     .resolve_axis(y="independent")
     .properties(width=SAMPLE_TRACK_WIDTH)

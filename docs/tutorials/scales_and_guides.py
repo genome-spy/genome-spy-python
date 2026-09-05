@@ -1,8 +1,7 @@
 """Single-source chart objects used by the Scales and Guides guide."""
 
-# scales-guides-data-start
+# scales-guides-automatic-start
 import genome_spy as gs
-
 
 measurements = [
     {"sample": "control", "time": 1, "value": 2.1},
@@ -12,10 +11,7 @@ measurements = [
     {"sample": "treated", "time": 2, "value": 3.5},
     {"sample": "treated", "time": 3, "value": 4.3},
 ]
-# scales-guides-data-end
 
-
-# scales-guides-automatic-start
 automatic_chart = (
     gs.Chart(measurements)
     .mark_point(filled=True, size=90)

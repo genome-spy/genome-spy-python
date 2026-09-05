@@ -66,5 +66,5 @@ jobs:
       - run: uv sync --locked --dev
       - run: uv run pytest tests/test_schema_codegen.py -x --durations=10
       - run: uv run python tools/generate_schema_wrapper.py
-      - run: uv run ruff format src/genome_spy/schema
-      - run: git diff --exit-code src/genome_spy/schema tools
+      - run: uv run ruff format src/genome_spy/schema src/genome_spy/helpers.py src/genome_spy/api.py src/genome_spy/__init__.py
+      - run: git diff --exit-code src/genome_spy/schema src/genome_spy/helpers.py src/genome_spy/api.py src/genome_spy/__init__.py tools

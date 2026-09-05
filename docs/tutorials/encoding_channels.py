@@ -1,8 +1,7 @@
 """Single-source chart objects used by the Encodings and Channels guide."""
 
-# encoding-channels-data-start
+# encoding-channels-syntax-start
 import genome_spy as gs
-
 
 measurements = [
     {"sample": "A", "stage": "low", "score": 2.1, "amount": 18, "confidence": 0.55},
@@ -12,10 +11,7 @@ measurements = [
     {"sample": "B", "stage": "medium", "score": 2.8, "amount": 15, "confidence": 0.48},
     {"sample": "B", "stage": "high", "score": 3.6, "amount": 36, "confidence": 0.91},
 ]
-# encoding-channels-data-end
 
-
-# encoding-channels-syntax-start
 shorthand_chart = (
     gs.Chart(measurements)
     .mark_point()

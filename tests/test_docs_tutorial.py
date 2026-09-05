@@ -775,7 +775,7 @@ def test_interaction_zoom_and_bound_parameters_serialize() -> None:
                 "name": "Minimum score: ",
             },
         },
-        {"name": "pointSize", "expr": "60 + minScore * 100"},
+        {"name": "pointSize", "expr": "(60 + (minScore * 100))"},
     ]
 
 
@@ -783,11 +783,11 @@ def test_interaction_selection_uses_key_and_conditional_encodings() -> None:
     tutorial = _load_module("_interaction_selection", INTERACTION_TUTORIAL_PATH)
     spec = tutorial.selection_chart.to_dict()
 
-    assert spec["params"] == [{"name": "selectedVariant", "select": "point"}]
+    assert spec["params"] == [{"name": "selectedVariant", "select": {"type": "point"}}]
     assert spec["encoding"]["key"] == {"field": "id"}
     assert spec["encoding"]["opacity"] == {
         "value": 0.25,
-        "condition": {"param": "selectedVariant", "empty": True, "value": 1},
+        "condition": {"param": "selectedVariant", "empty": False, "value": 1},
     }
     assert spec["encoding"]["strokeWidth"]["condition"] == {
         "param": "selectedVariant",
@@ -810,15 +810,13 @@ def test_interaction_brush_links_overview_to_two_detail_tracks() -> None:
         "chr17",
         "chr20",
     }
-    details = spec["vconcat"][1]
-    assert details["scales"]["x"]["domain"] == {
-        "param": "brush",
-        "initial": tutorial.DETAIL_REGION,
-    }
-    assert details["resolve"]["scale"] == {
-        "x": "shared",
-        "y": "independent",
-    }
+    details = spec["vconcat"][1:]
+    assert all(
+        track["encoding"]["x"]["scale"]["domain"]
+        == {"param": "brush", "initial": tutorial.DETAIL_REGION}
+        for track in details
+    )
+    assert spec["resolve"]["scale"] == {"x": "independent", "y": "independent"}
 
     overview = spec["vconcat"][0]
     assert overview["resolve"] == {"scale": {"x": "excluded"}}
@@ -848,13 +846,13 @@ def test_interaction_brush_links_overview_to_two_detail_tracks() -> None:
             },
         }
     ]
-    assert len(details["vconcat"]) == 2
-    assert all("params" not in track for track in details["vconcat"])
-    assert [track["encoding"]["y"]["title"] for track in details["vconcat"]] == [
+    assert len(details) == 2
+    assert all("params" not in track for track in details)
+    assert [track["encoding"]["y"]["title"] for track in details] == [
         None,
         None,
     ]
-    assert [track["title"]["text"] for track in details["vconcat"]] == [
+    assert [track["title"]["text"] for track in details] == [
         "Score",
         "Depth",
     ]

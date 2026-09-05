@@ -2,6 +2,7 @@
 
 from genome_spy.channels import Locus, compare, datum, locus, value
 from genome_spy._expressions import Expression
+from genome_spy._parameters import Parameter
 from genome_spy.arrow import to_arrow_ipc
 from genome_spy.chart import (
     Chart,
@@ -21,14 +22,29 @@ from genome_spy.helpers import (
     data_format,
     dynamic_opacity,
     expr,
-    param,
     parse,
     scales,
     step,
     title,
     view,
     view_config,
+    when,
 )
+
+# BEGIN GENERATED INTERACTION IMPORTS
+from genome_spy.helpers import (
+    binding,
+    binding_checkbox,
+    binding_radio,
+    binding_range,
+    binding_select,
+    param,
+    ruler,
+    selection_interval,
+    selection_point,
+)
+
+# END GENERATED INTERACTION IMPORTS
 from genome_spy.jupyter import JupyterChart
 from genome_spy.schema.channels import (
     Angle,
@@ -60,16 +76,19 @@ from genome_spy.schema.channels import (
     YOffset,
 )
 from genome_spy.schema.core import (
+    AxisGenomeData,
+    BrushConfig,
     DataFormat,
     DynamicOpacity,
     ExprRef,
     GenomeAxis,
     HandledTooltip,
     Legend,
-    Parameter,
     Paddings,
     Parse,
+    RulerMarkConfig,
     Scale,
+    SelectionDomainRef,
     SizeDef,
     Step,
     Title,
@@ -86,6 +105,8 @@ from genome_spy.schema.composition import (
 __all__ = [
     "Angle",
     "axes",
+    "AxisGenomeData",
+    "BrushConfig",
     "Chart",
     "Color",
     "condition",
@@ -118,6 +139,7 @@ __all__ = [
     "Parse",
     "Sample",
     "Scale",
+    "SelectionDomainRef",
     "Search",
     "SemanticScore",
     "Shape",
@@ -152,8 +174,8 @@ __all__ = [
     "lazy",
     "locus",
     "multiscale",
-    "param",
     "parse",
+    "RulerMarkConfig",
     "scales",
     "step",
     "title",
@@ -161,4 +183,16 @@ __all__ = [
     "view",
     "view_config",
     "vconcat",
+    "when",
+    # BEGIN GENERATED INTERACTION EXPORTS
+    "binding",
+    "binding_checkbox",
+    "binding_radio",
+    "binding_range",
+    "binding_select",
+    "param",
+    "ruler",
+    "selection_interval",
+    "selection_point",
+    # END GENERATED INTERACTION EXPORTS
 ]

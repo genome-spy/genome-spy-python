@@ -15,6 +15,7 @@ META = {
 
 SV_URL = "https://data.genomespy.app/sample-data/HCC1954/severus_somatic.vcf.gz"
 CN_URL = "https://data.genomespy.app/sample-data/HCC1954/copy-numbers.tsv"
+sv_hover = gs.selection_point("svHover", on="mouseover", persist=False, empty=False)
 
 # Fold each link's two endpoints into rows so both receive a breakpoint marker.
 endpoint_markers = (
@@ -45,11 +46,9 @@ sv_links = (
             gs.Size("SAMPLES.wakhan_haplotagged.VAF[0]:Q")
             .scale(range=[0.1, 2.5], type="pow")
             .legend(title="Variant allele frequency", orient="top")
-            .condition([gs.condition("svHover", 3, empty=False)])
+            .condition([gs.condition(sv_hover, 3)])
         ),
-        opacity=gs.Opacity(gs.value(0.5)).condition(
-            [gs.condition("svHover", 1, empty=False)]
-        ),
+        opacity=gs.Opacity(gs.value(0.5)).condition([gs.condition(sv_hover, 1)]),
         tooltip=[
             gs.Tooltip(
                 gs.expr(
@@ -114,15 +113,9 @@ sv_links = (
         title=gs.title(
             "Severus somatic structural variants loaded directly from VCF",
             orient="none",
-        ),
-        params=[
-            gs.param(
-                "svHover",
-                select={"type": "point", "on": "mouseover"},
-                persist=False,
-            )
-        ],
+        )
     )
+    .add_params(sv_hover)
 )
 
 sv_track = (

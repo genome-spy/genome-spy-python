@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 from collections.abc import Sequence
-from typing import Any, Self, Literal
+from typing import Any, Self, Literal, cast
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from genome_spy.channels import Channel
+    from genome_spy._parameters import Parameter
 
+from genome_spy._expressions import ExpressionOperand, _expression_string
 from genome_spy.schema._typing import (
     AggregateOp_T,
     Align_T,
@@ -10782,7 +10784,7 @@ class TransformMethodMixin:
         self,
         *,
         as_: str,
-        expr: str,
+        expr: str | ExpressionOperand,
         description: str | UndefinedType = Undefined,
     ) -> Self:
         """Add a ``formula`` transform.
@@ -10794,7 +10796,7 @@ class TransformMethodMixin:
         """
         transform: dict[str, Any] = {"type": "formula"}
         transform["as"] = as_
-        transform["expr"] = expr
+        transform["expr"] = _expression_string(expr)
         if description is not Undefined:
             transform["description"] = description
         return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
@@ -10802,8 +10804,8 @@ class TransformMethodMixin:
     def transform_calculate(
         self,
         as_: str | UndefinedType = Undefined,
-        calculate: str | UndefinedType = Undefined,
-        **kwargs: str,
+        calculate: str | ExpressionOperand | UndefinedType = Undefined,
+        **kwargs: str | ExpressionOperand,
     ) -> Self:
         """Add one or more ``formula`` transforms.
 
@@ -10813,7 +10815,7 @@ class TransformMethodMixin:
         Args:
             as\\_ (str): The (new) field where the computed value is written to
             calculate (str): An expression string
-            **kwargs (str): Additional output field names
+            **kwargs (str | ExpressionOperand): Additional output field names
                 mapped to calculate values.
 
         Returns:
@@ -10836,12 +10838,14 @@ class TransformMethodMixin:
         if has_output and has_value:
             transform: dict[str, Any] = {"type": "formula"}
             transform["as"] = as_
-            transform["expr"] = calculate
+            transform["expr"] = _expression_string(
+                cast(str | ExpressionOperand, calculate)
+            )
             result = result._append_transform(transform)  # type: ignore[attr-defined]
         for output, value in kwargs.items():
             transform = {"type": "formula"}
             transform["as"] = output
-            transform["expr"] = value
+            transform["expr"] = _expression_string(value)
             result = result._append_transform(transform)  # type: ignore[attr-defined]
         return result
 
@@ -10890,11 +10894,11 @@ class TransformMethodMixin:
 
     def transform_filter(
         self,
-        expression: str | UndefinedType = Undefined,
+        expression: str | Parameter | UndefinedType = Undefined,
         *,
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
-        expr: str | UndefinedType = Undefined,
+        expr: str | ExpressionOperand | UndefinedType = Undefined,
         fields: dict[str, Any] | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
     ) -> Self:
@@ -10908,10 +10912,21 @@ class TransformMethodMixin:
             param (str): A selection parameter. The row is removed if it is not part of the selection.
         """
         transform: dict[str, Any] = {"type": "filter"}
+        from genome_spy._parameters import Parameter
+
         if expression is not Undefined:
             if expr is not Undefined or param is not Undefined:
                 raise TypeError("expression cannot be combined with expr or param")
-            expr = expression
+            if isinstance(expression, Parameter):
+                if not expression.is_selection:
+                    raise TypeError(
+                        "Only selection parameters can filter rows directly."
+                    )
+                param = expression.name
+                if empty is Undefined:
+                    empty = expression.empty
+            else:
+                expr = expression
         if expr is Undefined and param is Undefined:
             raise TypeError("filter requires an expression or param")
         if description is not Undefined:
@@ -10919,7 +10934,7 @@ class TransformMethodMixin:
         if empty is not Undefined:
             transform["empty"] = empty
         if expr is not Undefined:
-            transform["expr"] = expr
+            transform["expr"] = _expression_string(cast(str | ExpressionOperand, expr))
         if fields is not Undefined:
             transform["fields"] = fields
         if param is not Undefined:

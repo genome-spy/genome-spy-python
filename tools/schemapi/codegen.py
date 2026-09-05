@@ -254,6 +254,53 @@ class PropertySpec:
 
 
 @dataclass(frozen=True, slots=True)
+class UnionVariantSpec:
+    """One concrete leaf of a recursively expanded schema union."""
+
+    schema_name: str | None
+    properties: tuple[PropertySpec, ...]
+    required: frozenset[str]
+    discriminators: tuple[tuple[str, tuple[Any, ...]], ...]
+    additional_properties: bool | dict[str, Any] | None
+
+
+@dataclass(frozen=True, slots=True)
+class SchemaFactorySpec:
+    """One generated schema-backed convenience factory."""
+
+    helper_name: str
+    class_name: str
+    docstring: str
+    positional_property: str | None = None
+    normalize_view_background: bool = False
+    fixed_properties: tuple[tuple[str, Any], ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class ParameterConfigFactorySpec:
+    """A parameter helper backed by one generated nested configuration."""
+
+    helper_name: str
+    parameter_class_name: str
+    config_class_name: str
+    config_property: str
+    parameter_properties: tuple[PropertySpec, ...]
+    config_properties: tuple[PropertySpec, ...]
+    fixed_properties: tuple[tuple[str, Any], ...] = ()
+    supports_empty: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class _RawUnionVariant:
+    """Internal schema fragments accumulated while expanding a union."""
+
+    schema_name: str | None
+    properties: dict[str, Any]
+    required: frozenset[str]
+    additional_properties: bool | dict[str, Any] | None
+
+
+@dataclass(frozen=True, slots=True)
 class TransformMethodSpec:
     """Schema-derived information for one transform convenience method."""
 
@@ -399,6 +446,138 @@ class SchemaAnalyzer:
                     for choice_variant in choice_variants
                 )
         return variants
+
+    def union_variants(self, definition_name: str) -> tuple[UnionVariantSpec, ...]:
+        """Expand a named union into concrete, branch-preserving leaves."""
+        schema = self.definitions.get(definition_name)
+        if not isinstance(schema, dict):
+            return ()
+        raw_variants = self._union_variants(
+            schema,
+            seen=frozenset({definition_name}),
+            schema_name=definition_name,
+        )
+        variants: list[UnionVariantSpec] = []
+        for variant in raw_variants:
+            discriminators: list[tuple[str, tuple[Any, ...]]] = []
+            for name, property_schema in sorted(variant.properties.items()):
+                if not isinstance(property_schema, dict):
+                    continue
+                if "const" in property_schema:
+                    values = (property_schema["const"],)
+                else:
+                    enum = property_schema.get("enum")
+                    values = tuple(enum) if isinstance(enum, list) else ()
+                if values:
+                    discriminators.append((name, values))
+            variants.append(
+                UnionVariantSpec(
+                    schema_name=variant.schema_name,
+                    properties=self.property_specs_from_properties(variant.properties),
+                    required=variant.required,
+                    discriminators=tuple(discriminators),
+                    additional_properties=variant.additional_properties,
+                )
+            )
+        return tuple(variants)
+
+    def _union_variants(
+        self,
+        schema: dict[str, Any],
+        *,
+        seen: frozenset[str],
+        schema_name: str | None,
+    ) -> tuple[_RawUnionVariant, ...]:
+        ref_name = _ref_name(schema)
+        if ref_name is not None:
+            if ref_name in seen:
+                return ()
+            target = self.definitions.get(ref_name)
+            if not isinstance(target, dict):
+                return ()
+            return self._union_variants(
+                target,
+                seen=seen | {ref_name},
+                schema_name=ref_name,
+            )
+
+        properties = schema.get("properties", {})
+        local_properties = dict(properties) if isinstance(properties, dict) else {}
+        required = schema.get("required", [])
+        local_required = (
+            frozenset(name for name in required if isinstance(name, str))
+            if isinstance(required, list)
+            else frozenset()
+        )
+        additional_properties = schema.get("additionalProperties")
+        if not isinstance(additional_properties, bool | dict):
+            additional_properties = None
+        variants = (
+            _RawUnionVariant(
+                schema_name=schema_name,
+                properties=local_properties,
+                required=local_required,
+                additional_properties=additional_properties,
+            ),
+        )
+
+        all_of = schema.get("allOf", [])
+        if isinstance(all_of, list):
+            for component in all_of:
+                if not isinstance(component, dict):
+                    continue
+                component_variants = self._union_variants(
+                    component,
+                    seen=seen,
+                    schema_name=None,
+                )
+                variants = tuple(
+                    self._merge_union_variants(
+                        base, extension, prefer_extension_name=False
+                    )
+                    for base in variants
+                    for extension in component_variants
+                )
+
+        choices = schema.get("oneOf", schema.get("anyOf", []))
+        if isinstance(choices, list) and choices:
+            choice_variants = tuple(
+                variant
+                for choice in choices
+                if isinstance(choice, dict)
+                for variant in self._union_variants(
+                    choice,
+                    seen=seen,
+                    schema_name=None,
+                )
+            )
+            variants = tuple(
+                self._merge_union_variants(base, choice, prefer_extension_name=True)
+                for base in variants
+                for choice in choice_variants
+            )
+        return variants
+
+    @staticmethod
+    def _merge_union_variants(
+        base: _RawUnionVariant,
+        extension: _RawUnionVariant,
+        *,
+        prefer_extension_name: bool,
+    ) -> _RawUnionVariant:
+        additional_properties = extension.additional_properties
+        if additional_properties is None:
+            additional_properties = base.additional_properties
+        return _RawUnionVariant(
+            schema_name=(
+                extension.schema_name or base.schema_name
+                if prefer_extension_name
+                else base.schema_name or extension.schema_name
+            ),
+            properties={**base.properties, **extension.properties},
+            required=base.required | extension.required,
+            additional_properties=additional_properties,
+        )
 
     def property_specs(self, definition: SchemaDefinition) -> tuple[PropertySpec, ...]:
         resolved_properties = self.resolve_properties(definition.schema)
@@ -777,6 +956,144 @@ class SchemaWrapperGenerator:
             return ()
         return tuple(sorted(name for name in properties if isinstance(name, str)))
 
+    def binding_factory_specs(self) -> tuple[SchemaFactorySpec, ...]:
+        """Return factories discovered from concrete ``Binding`` leaves."""
+        specs: list[SchemaFactorySpec] = []
+        for variant in self._analyzer.union_variants("Binding"):
+            if variant.schema_name is None:
+                continue
+            discriminator = next(
+                (values for name, values in variant.discriminators if name == "input"),
+                (),
+            )
+            if "input" not in variant.required:
+                specs.append(
+                    SchemaFactorySpec(
+                        helper_name="binding",
+                        class_name=variant.schema_name,
+                        docstring="Create a generic input binding.",
+                    )
+                )
+                continue
+            for value in discriminator:
+                if not isinstance(value, str):
+                    continue
+                specs.append(
+                    SchemaFactorySpec(
+                        helper_name=f"binding_{_snake_name(value)}",
+                        class_name=variant.schema_name,
+                        docstring=f"Create a {value} input binding.",
+                        fixed_properties=(("input", value),),
+                    )
+                )
+        names = [spec.helper_name for spec in specs]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError(
+                "Binding helper discovery produced duplicate names: "
+                + ", ".join(duplicates)
+            )
+        return tuple(sorted(specs, key=lambda spec: spec.helper_name))
+
+    def parameter_config_factory_specs(
+        self,
+    ) -> tuple[ParameterConfigFactorySpec, ...]:
+        """Return selection and nested-config parameter helper definitions."""
+        specs: list[ParameterConfigFactorySpec] = []
+        selection_schema = self._definitions_map.get("SelectionParameter", {})
+        selection_properties = self._analyzer.resolve_properties(selection_schema)
+        select_schema = selection_properties.get("select", {})
+        choices = (
+            select_schema.get("anyOf", select_schema.get("oneOf", []))
+            if isinstance(select_schema, dict)
+            else []
+        )
+        if isinstance(choices, list):
+            for choice in choices:
+                if not isinstance(choice, dict):
+                    continue
+                config_name = _ref_name(choice)
+                config_schema = self._definitions_map.get(config_name or "")
+                if (
+                    config_name is None
+                    or not isinstance(config_schema, dict)
+                    or not self._base_analyzer.schema_looks_object_like(config_schema)
+                ):
+                    continue
+                variants = self._analyzer.union_variants(config_name)
+                for variant in variants:
+                    values = next(
+                        (
+                            discriminator_values
+                            for name, discriminator_values in variant.discriminators
+                            if name == "type" and name in variant.required
+                        ),
+                        (),
+                    )
+                    for value in values:
+                        if not isinstance(value, str) or variant.schema_name is None:
+                            continue
+                        specs.append(
+                            ParameterConfigFactorySpec(
+                                helper_name=f"selection_{_snake_name(value)}",
+                                parameter_class_name="SelectionParameter",
+                                config_class_name=variant.schema_name,
+                                config_property="select",
+                                parameter_properties=tuple(
+                                    prop
+                                    for prop in self.schema_property_specs(
+                                        "SelectionParameter"
+                                    )
+                                    if prop.name not in {"name", "select"}
+                                ),
+                                config_properties=variant.properties,
+                                fixed_properties=(("type", value),),
+                                supports_empty=True,
+                            )
+                        )
+
+        for variant in self._analyzer.union_variants("Parameter"):
+            required_config_names = variant.required - {"name"}
+            if len(required_config_names) != 1:
+                continue
+            config_property = next(iter(required_config_names))
+            if config_property == "select":
+                continue
+            property_spec = next(
+                (prop for prop in variant.properties if prop.name == config_property),
+                None,
+            )
+            if (
+                property_spec is None
+                or property_spec.nested_schema_class_name is None
+                or variant.schema_name is None
+            ):
+                continue
+            config_class_name = property_spec.nested_schema_class_name
+            specs.append(
+                ParameterConfigFactorySpec(
+                    helper_name=_snake_name(config_property),
+                    parameter_class_name=variant.schema_name,
+                    config_class_name=config_class_name,
+                    config_property=config_property,
+                    parameter_properties=tuple(
+                        prop
+                        for prop in variant.properties
+                        if prop.name not in {"name", config_property}
+                    ),
+                    config_properties=self.schema_property_specs(config_class_name),
+                )
+            )
+
+        names = [spec.helper_name for spec in specs]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError(
+                "Parameter helper discovery produced duplicate names: "
+                + ", ".join(duplicates)
+            )
+        return tuple(sorted(specs, key=lambda spec: spec.helper_name))
+
     def transform_method_specs(self) -> tuple[TransformMethodSpec, ...]:
         """Return method metadata for every member of ``TransformParams``."""
         transform_union = self._definitions_map.get("TransformParams", {})
@@ -1001,6 +1318,26 @@ class SchemaWrapperGenerator:
                 }
                 for spec in self.lazy_data_method_specs()
             ],
+            "interaction": {
+                "bindings": [
+                    {
+                        "helper": spec.helper_name,
+                        "schema": spec.class_name,
+                        "fixed": dict(spec.fixed_properties),
+                    }
+                    for spec in self.binding_factory_specs()
+                ],
+                "parameter_helpers": [
+                    {
+                        "helper": spec.helper_name,
+                        "parameter_schema": spec.parameter_class_name,
+                        "config_property": spec.config_property,
+                        "config_schema": spec.config_class_name,
+                        "fixed": dict(spec.fixed_properties),
+                    }
+                    for spec in self.parameter_config_factory_specs()
+                ],
+            },
             "root_spec_variants": root_variants,
         }
 
@@ -1567,6 +1904,14 @@ class SchemaWrapperGenerator:
             for kwds_name in _annotation_kwds_names(annotation.annotation)
         }
         transform_method_specs = self.transform_method_specs()
+        has_filter_method = any(
+            spec.transform_type == "filter" for spec in transform_method_specs
+        )
+        has_expression_transform = any(
+            property_spec.name == "expr"
+            for spec in transform_method_specs
+            for property_spec in spec.properties
+        )
         transform_methods = [
             _transform_method_source(spec) for spec in transform_method_specs
         ]
@@ -1621,6 +1966,8 @@ class SchemaWrapperGenerator:
         typing_imports = ["Any", "Self"]
         if needs_literal:
             typing_imports.append("Literal")
+        if has_expression_transform:
+            typing_imports.append("cast")
         source = "\n".join(
             [
                 GENERATED_HEADER,
@@ -1632,7 +1979,17 @@ class SchemaWrapperGenerator:
                 "",
                 "if TYPE_CHECKING:",
                 "    from genome_spy.channels import Channel",
+                *(
+                    ["    from genome_spy._parameters import Parameter"]
+                    if has_filter_method
+                    else []
+                ),
                 "",
+                (
+                    "from genome_spy._expressions import ExpressionOperand, _expression_string"
+                    if has_expression_transform
+                    else ""
+                ),
                 (
                     "from genome_spy.schema._typing import "
                     + ", ".join(sorted(transform_alias_names))
@@ -2275,62 +2632,41 @@ class SchemaWrapperGenerator:
         compare_properties = self.schema_property_specs("CompareParams")
         datum_properties = self.channel_helper_property_specs("datum")
         value_properties = self.channel_helper_property_specs("value")
+        parameter_variants = self._analyzer.union_variants("Parameter")
+        parameter_config_factories = self.parameter_config_factory_specs()
         factory_helpers = (
-            ("title", "Title", "Create a chart title object.", "text", False),
-            (
+            SchemaFactorySpec("title", "Title", "Create a chart title object.", "text"),
+            SchemaFactorySpec(
                 "dynamic_opacity",
                 "DynamicOpacity",
                 "Create a zoom-dependent opacity definition.",
-                None,
-                False,
             ),
-            (
+            SchemaFactorySpec(
                 "data_format",
                 "DataFormat",
                 "Create a data-format wrapper.",
-                None,
-                False,
             ),
-            ("param", "Parameter", "Create a parameter definition.", "name", False),
-            (
-                "view",
-                "ViewBackground",
-                "Create a view background configuration.",
-                None,
-                False,
+            SchemaFactorySpec(
+                "view", "ViewBackground", "Create a view background configuration."
             ),
-            (
-                "view_config",
-                "ViewConfig",
-                "Create a top-level view config object.",
-                None,
-                False,
+            SchemaFactorySpec(
+                "view_config", "ViewConfig", "Create a top-level view config object."
             ),
-            (
+            SchemaFactorySpec(
                 "config",
                 "GenomeSpyConfig",
                 "Create a top-level GenomeSpy config object.",
-                None,
-                True,
+                normalize_view_background=True,
             ),
+            *self.binding_factory_specs(),
         )
         factory_helper_specs = tuple(
             (
-                helper_name,
-                class_name,
-                docstring,
-                positional_property,
-                normalize_view_background,
-                self.schema_property_specs(class_name),
+                spec,
+                self.schema_property_specs(spec.class_name),
             )
-            for (
-                helper_name,
-                class_name,
-                docstring,
-                positional_property,
-                normalize_view_background,
-            ) in factory_helpers
-            if self.schema_property_specs(class_name)
+            for spec in factory_helpers
+            if self.schema_property_specs(spec.class_name)
         )
         has_locus = any(
             property_spec.name == "chrom" for property_spec in locus_properties
@@ -2366,8 +2702,21 @@ class SchemaWrapperGenerator:
             *(p.annotation for p in datum_properties),
             *(p.annotation for p in value_properties),
             *(
+                property_spec.annotation
+                for variant in parameter_variants
+                for property_spec in variant.properties
+            ),
+            *(
+                property_spec.annotation
+                for spec in parameter_config_factories
+                for property_spec in (
+                    *spec.parameter_properties,
+                    *spec.config_properties,
+                )
+            ),
+            *(
                 p.annotation
-                for *_, property_specs in factory_helper_specs
+                for _, property_specs in factory_helper_specs
                 for p in property_specs
             ),
         ]
@@ -2397,12 +2746,23 @@ class SchemaWrapperGenerator:
                     "from __future__ import annotations",
                     ("from collections.abc import Sequence" if needs_sequence else ""),
                     "from typing import Any, Self"
-                    + (", Literal" if needs_literal else ""),
+                    + (", Literal" if needs_literal else "")
+                    + (", overload" if parameter_variants else ""),
                     "",
                     "from typing import TYPE_CHECKING",
                     "",
                     "if TYPE_CHECKING:",
                     "    from genome_spy.channels import DatumChannel, LocusChannel, ValueChannel",
+                    *(
+                        ["    from genome_spy._parameters import Parameter"]
+                        if parameter_variants
+                        else []
+                    ),
+                    *(
+                        ["    from genome_spy._expressions import ExpressionOperand"]
+                        if parameter_variants
+                        else []
+                    ),
                     "",
                     "from genome_spy._expressions import DatumExpression",
                     (
@@ -2471,22 +2831,28 @@ class SchemaWrapperGenerator:
                         else []
                     ),
                     *(
+                        [
+                            _parameter_type_metadata_source(parameter_variants),
+                            _parameter_helper_source(parameter_variants),
+                        ]
+                        if parameter_variants
+                        else []
+                    ),
+                    *(
+                        _parameter_config_helper_source(spec)
+                        for spec in parameter_config_factories
+                    ),
+                    *(
                         _schema_factory_helper_source(
-                            helper_name,
-                            class_name,
+                            spec.helper_name,
+                            spec.class_name,
                             property_specs,
-                            docstring=docstring,
-                            positional_property=positional_property,
-                            normalize_view_background=normalize_view_background,
+                            docstring=spec.docstring,
+                            positional_property=spec.positional_property,
+                            normalize_view_background=spec.normalize_view_background,
+                            fixed_properties=spec.fixed_properties,
                         )
-                        for (
-                            helper_name,
-                            class_name,
-                            docstring,
-                            positional_property,
-                            normalize_view_background,
-                            property_specs,
-                        ) in factory_helper_specs
+                        for spec, property_specs in factory_helper_specs
                     ),
                     "",
                     "__all__ = "
@@ -2496,7 +2862,9 @@ class SchemaWrapperGenerator:
                             *(["compare"] if has_compare else []),
                             *(["datum"] if has_datum else []),
                             *(["value"] if has_value else []),
-                            *(helper_name for helper_name, *_ in factory_helper_specs),
+                            *(spec.helper_name for spec, _ in factory_helper_specs),
+                            *(["param"] if parameter_variants else []),
+                            *(spec.helper_name for spec in parameter_config_factories),
                             "DatumChannelMethodMixin",
                             "LocusChannelMethodMixin",
                             "ValueChannelMethodMixin",
@@ -2511,7 +2879,9 @@ class SchemaWrapperGenerator:
                     *(["compare"] if has_compare else []),
                     *(["datum"] if has_datum else []),
                     *(["value"] if has_value else []),
-                    *(helper_name for helper_name, *_ in factory_helper_specs),
+                    *(spec.helper_name for spec, _ in factory_helper_specs),
+                    *(["param"] if parameter_variants else []),
+                    *(spec.helper_name for spec in parameter_config_factories),
                     "DatumChannelMethodMixin",
                     "LocusChannelMethodMixin",
                     "ValueChannelMethodMixin",
@@ -3223,8 +3593,10 @@ def _schema_factory_helper_source(
     docstring: str,
     positional_property: str | None,
     normalize_view_background: bool,
+    fixed_properties: tuple[tuple[str, Any], ...] = (),
 ) -> str:
     """Render a schema-object factory with explicit generated properties."""
+    fixed_names = {name for name, _ in fixed_properties}
     positional_spec = next(
         (
             property_spec
@@ -3237,6 +3609,7 @@ def _schema_factory_helper_source(
         property_spec
         for property_spec in property_specs
         if property_spec is not positional_spec
+        and property_spec.name not in fixed_names
     )
     parameters = "\n".join(
         f"    {property_spec.python_name}: "
@@ -3259,6 +3632,10 @@ def _schema_factory_helper_source(
         if positional_spec is not None
         else ""
     )
+    documented_properties = (
+        *((positional_spec,) if positional_spec is not None else ()),
+        *options,
+    )
     signature = [f"def {helper_name}("]
     if positional_parameter:
         signature.extend([positional_parameter, "    /,"])
@@ -3274,8 +3651,9 @@ def _schema_factory_helper_source(
     return "\n".join(
         [
             *signature,
-            _method_docstring(docstring, property_specs, indent=4),
+            _method_docstring(docstring, documented_properties, indent=4),
             "    properties = {",
+            *(f"        {name!r}: {value!r}," for name, value in fixed_properties),
             *([positional_value] if positional_value else []),
             *([values] if values else []),
             "    }",
@@ -3284,6 +3662,265 @@ def _schema_factory_helper_source(
             "    }",
             *normalization,
             f"    return core.{class_name}(**defined)",
+            "",
+            "",
+        ]
+    )
+
+
+def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
+    """Render a branch-preserving parameter factory from concrete union leaves."""
+
+    def annotation_for(property_spec: PropertySpec) -> str:
+        annotation = _qualified_transform_annotation(
+            property_spec.annotation.annotation
+        )
+        if property_spec.name == "expr" and "ExpressionOperand" not in annotation:
+            return f"{annotation} | ExpressionOperand"
+        return annotation
+
+    overloads: list[str] = []
+    property_specs_by_name: dict[str, list[PropertySpec]] = {}
+    for variant in variants:
+        for property_spec in variant.properties:
+            property_specs_by_name.setdefault(property_spec.name, []).append(
+                property_spec
+            )
+
+        properties = {
+            property_spec.name: property_spec for property_spec in variant.properties
+        }
+        keyword_specs = [
+            properties[name]
+            for name in sorted(variant.required - {"name"})
+            if name in properties
+        ]
+        keyword_specs.extend(
+            property_spec
+            for property_spec in variant.properties
+            if property_spec.name not in variant.required
+            and property_spec.name != "name"
+        )
+        parameters = []
+        for property_spec in keyword_specs:
+            annotation = annotation_for(property_spec)
+            default = (
+                ""
+                if property_spec.name in variant.required
+                else " | UndefinedType = Undefined"
+            )
+            parameters.append(
+                f"    {property_spec.python_name}: {annotation}{default},"
+            )
+        parameters.append("    empty: bool = True,")
+        overloads.append(
+            "\n".join(
+                [
+                    "@overload",
+                    "def param(",
+                    "    name: str | None = None,",
+                    "    /,",
+                    "    *,",
+                    *parameters,
+                    ") -> Parameter: ...",
+                ]
+            )
+        )
+
+    merged_specs: list[PropertySpec] = []
+    for name, specs in sorted(property_specs_by_name.items()):
+        if name == "name":
+            continue
+        annotations = _dedupe_preserve_order(
+            spec.annotation.annotation for spec in specs
+        )
+        annotation = "Any" if "Any" in annotations else " | ".join(annotations)
+        merged_specs.append(
+            PropertySpec(
+                name=name,
+                annotation=AnnotationSpec(annotation),
+                description=next(
+                    (spec.description for spec in specs if spec.description), ""
+                ),
+            )
+        )
+
+    implementation_parameters = [
+        "    name: str | None = None,",
+        "    /,",
+        "    *,",
+        *(
+            f"    {spec.python_name}: {annotation_for(spec)} "
+            "| UndefinedType = Undefined,"
+            for spec in merged_specs
+        ),
+        "    empty: bool = True,",
+    ]
+    forwarded = ", ".join(
+        f"{spec.python_name}={spec.python_name}" for spec in merged_specs
+    )
+    if forwarded:
+        forwarded += ", "
+    variant_names = tuple(
+        variant.schema_name for variant in variants if variant.schema_name is not None
+    )
+    variant_classes = _core_class_tuple_source(variant_names)
+    return "\n\n".join(
+        [
+            "\n\n".join(overloads),
+            "\n".join(
+                [
+                    "def param(",
+                    *implementation_parameters,
+                    ") -> Parameter:",
+                    '    """Create a reusable GenomeSpy parameter handle.',
+                    "",
+                    "    The overloads and accepted properties are generated from the",
+                    "    concrete leaves of GenomeSpy's ``Parameter`` union.",
+                    "",
+                    "    Args:",
+                    "        name: Parameter name. A stable name is generated when omitted.",
+                    *(
+                        f"        {spec.python_name}: {spec.description or 'Schema-defined parameter property.'}"
+                        for spec in merged_specs
+                    ),
+                    "        empty: Whether an empty selection matches as a predicate.",
+                    "",
+                    "    Returns:",
+                    "        A reusable parameter handle.",
+                    "",
+                    "    Raises:",
+                    "        TypeError: If the arguments match no unique parameter branch.",
+                    "",
+                    "    Example:",
+                    '        >>> param("cutoff", value=0.5).param.to_dict()',
+                    "        {'name': 'cutoff', 'value': 0.5}",
+                    '    """',
+                    "    from genome_spy._parameters import _make_parameter",
+                    "",
+                    "    return _make_parameter(",
+                    "        name,",
+                    f"        {forwarded}",
+                    f"        _variants={variant_classes},",
+                    "        empty=empty,",
+                    "    )",
+                ]
+            ),
+        ]
+    )
+
+
+def _core_class_tuple_source(class_names: tuple[str, ...]) -> str:
+    """Render a tuple of generated ``core`` schema classes."""
+    if not class_names:
+        return "()"
+    return "(" + ", ".join(f"core.{name}" for name in class_names) + ",)"
+
+
+def _parameter_type_metadata_source(
+    variants: tuple[UnionVariantSpec, ...],
+) -> str:
+    """Render private runtime type tuples from the generated parameter union."""
+    variant_names = (
+        "Parameter",
+        *(
+            variant.schema_name
+            for variant in variants
+            if variant.schema_name is not None
+        ),
+    )
+    selection_variant_names = tuple(
+        variant.schema_name
+        for variant in variants
+        if variant.schema_name is not None and "select" in variant.required
+    )
+    return "\n".join(
+        [
+            f"_PARAMETER_TYPES = {_core_class_tuple_source(variant_names)}",
+            "_SELECTION_PARAMETER_TYPES = "
+            + _core_class_tuple_source(selection_variant_names),
+        ]
+    )
+
+
+def _parameter_config_helper_source(spec: ParameterConfigFactorySpec) -> str:
+    """Render a parameter helper around one generated nested config class."""
+    fixed_names = {name for name, _ in spec.fixed_properties}
+    config_properties = tuple(
+        prop for prop in spec.config_properties if prop.name not in fixed_names
+    )
+    parameter_names = {prop.name for prop in spec.parameter_properties}
+    collisions = parameter_names & {prop.name for prop in config_properties}
+    if collisions:
+        names = ", ".join(sorted(collisions))
+        raise ValueError(
+            f"Generated parameter helper {spec.helper_name!r} has ambiguous "
+            f"configuration properties: {names}."
+        )
+    parameters = [
+        "    name: str | None = None,",
+        "    /,",
+        "    *,",
+        *(
+            f"    {prop.python_name}: "
+            f"{_qualified_transform_annotation(prop.annotation.annotation)} "
+            "| UndefinedType = Undefined,"
+            for prop in (*config_properties, *spec.parameter_properties)
+        ),
+        *(["    empty: bool = True,"] if spec.supports_empty else []),
+    ]
+    config_arguments = ", ".join(
+        [
+            *(
+                f"{_python_property_name(name)}={value!r}"
+                for name, value in spec.fixed_properties
+            ),
+            *(f"{prop.python_name}={prop.python_name}" for prop in config_properties),
+        ]
+    )
+    parameter_arguments = ", ".join(
+        f"{prop.python_name}={prop.python_name}" for prop in spec.parameter_properties
+    )
+    if parameter_arguments:
+        parameter_arguments = ", " + parameter_arguments
+    empty_argument = ", empty=empty" if spec.supports_empty else ""
+    return "\n".join(
+        [
+            f"def {spec.helper_name}(",
+            *parameters,
+            ") -> Parameter:",
+            f'    """Create a GenomeSpy ``{spec.helper_name}`` parameter.',
+            "",
+            "    Args:",
+            "        name: Parameter name. A stable name is generated when omitted.",
+            *(
+                f"        {prop.python_name}: {prop.description or 'Schema-defined configuration property.'}"
+                for prop in (*config_properties, *spec.parameter_properties)
+            ),
+            *(
+                ["        empty: Whether an empty selection matches as a predicate."]
+                if spec.supports_empty
+                else []
+            ),
+            "",
+            "    Returns:",
+            "        A reusable parameter handle.",
+            "",
+            "    Raises:",
+            "        TypeError: If the generated parameter definition is invalid.",
+            "",
+            "    Example:",
+            f"        >>> {spec.helper_name}().param.to_dict(validate=False)",
+            "        {...}",
+            '    """',
+            f"    config = core.{spec.config_class_name}({config_arguments})",
+            "    from genome_spy._parameters import _make_parameter",
+            "",
+            "    return _make_parameter(",
+            "        name,",
+            f"        {spec.config_property}=config{parameter_arguments}{empty_argument},",
+            f"        _variants=(core.{spec.parameter_class_name},),",
+            "    )",
             "",
             "",
         ]
@@ -3690,6 +4327,8 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
         annotation = _qualified_transform_annotation(
             property_spec.annotation.annotation
         )
+        if property_spec.name == "expr":
+            annotation = f"{annotation} | ExpressionOperand"
         name = parameter_name(property_spec)
         if property_spec.name in spec.required:
             return f"        {name}: {annotation},"
@@ -3700,14 +4339,23 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
     for property_spec in ordered_properties:
         schema_name = property_spec.name
         python_name = parameter_name(property_spec)
+        value_source = (
+            f"_expression_string({python_name})"
+            if schema_name == "expr"
+            else python_name
+        )
+        if schema_name == "expr" and schema_name not in spec.required:
+            value_source = (
+                f"_expression_string(cast(str | ExpressionOperand, {python_name}))"
+            )
         parameters.append(parameter_source(property_spec))
         if schema_name in spec.required:
-            assignments.append(f"        transform[{schema_name!r}] = {python_name}")
+            assignments.append(f"        transform[{schema_name!r}] = {value_source}")
         else:
             assignments.extend(
                 [
                     f"        if {python_name} is not Undefined:",
-                    f"            transform[{schema_name!r}] = {python_name}",
+                    f"            transform[{schema_name!r}] = {value_source}",
                 ]
             )
 
@@ -3716,7 +4364,7 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             [
                 f"    def {spec.method_name}(",
                 "        self,",
-                "        expression: str | UndefinedType = Undefined,",
+                "        expression: str | Parameter | UndefinedType = Undefined,",
                 "        *,",
                 *parameters,
                 "    ) -> Self:",
@@ -3742,16 +4390,27 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             value_annotation = _qualified_transform_annotation(
                 value_spec.annotation.annotation
             )
+            if value_property == "expr":
+                value_annotation = f"{value_annotation} | ExpressionOperand"
             signature_lines.append(f"        **kwargs: {value_annotation},")
         signature_lines.append("    ) -> Self:")
         signature = "\n".join(signature_lines)
 
     validation_lines = (
         [
+            "        from genome_spy._parameters import Parameter",
+            "",
             "        if expression is not Undefined:",
             "            if expr is not Undefined or param is not Undefined:",
             '                raise TypeError("expression cannot be combined with expr or param")',
-            "            expr = expression",
+            "            if isinstance(expression, Parameter):",
+            "                if not expression.is_selection:",
+            '                    raise TypeError("Only selection parameters can filter rows directly.")',
+            "                param = expression.name",
+            "                if empty is Undefined:",
+            "                    empty = expression.empty",
+            "            else:",
+            "                expr = expression",
             "        if expr is Undefined and param is Undefined:",
             '            raise TypeError("filter requires an expression or param")',
         ]
@@ -3777,7 +4436,10 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             )
         output_name = parameter_name(properties_by_name[output_property])
         value_name = parameter_name(properties_by_name[value_property])
+        expression_values = value_property == "expr"
         value_annotation = properties_by_name[value_property].annotation.annotation
+        if expression_values:
+            value_annotation = f"{value_annotation} | ExpressionOperand"
         missing_pair_message = (
             f"{spec.method_name} requires {output_name!r} and {value_name!r} together."
         )
@@ -3815,13 +4477,19 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             "        if has_output and has_value:",
             f"            transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
             f"            transform[{output_property!r}] = {output_name}",
-            f"            transform[{value_property!r}] = {value_name}",
+            f"            transform[{value_property!r}] = "
+            + (
+                f"_expression_string(cast(str | ExpressionOperand, {value_name}))"
+                if expression_values
+                else value_name
+            ),
             "            result = result._append_transform(transform)  "
             "# type: ignore[attr-defined]",
             "        for output, value in kwargs.items():",
             f"            transform = {{'type': {spec.transform_type!r}}}",
             f"            transform[{output_property!r}] = output",
-            f"            transform[{value_property!r}] = value",
+            f"            transform[{value_property!r}] = "
+            + ("_expression_string(value)" if expression_values else "value"),
             "            result = result._append_transform(transform)  "
             "# type: ignore[attr-defined]",
             "        return result",

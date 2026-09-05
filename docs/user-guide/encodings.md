@@ -5,12 +5,6 @@ is called a **channel**: `x` controls horizontal position, `color` controls
 color, and `size` controls mark size. The field supplies the values, while its
 data type tells GenomeSpy how those values should be interpreted.
 
-```{literalinclude} ../tutorials/encoding_channels.py
-:language: python
-:start-after: encoding-channels-data-start
-:end-before: encoding-channels-data-end
-```
-
 ## Field and type shorthand
 
 The compact string `"score:Q"` contains a field name (`score`) and a type code
@@ -24,7 +18,7 @@ same encodings:
 ```
 
 Use shorthand when a field and type are enough. Use a channel class such as
-`gs.X`, `gs.Color`, or `gs.Tooltip` when adding a title, scale, axis, legend, or
+{py:class}`~genome_spy.X`, {py:class}`~genome_spy.Color`, or {py:class}`~genome_spy.Tooltip` when adding a title, scale, axis, legend, or
 another channel option. Setter methods can be chained:
 
 ```python
@@ -106,7 +100,7 @@ that behavior in detail.
 
 ## Genomic loci
 
-The `L` type places positions on a chromosome-aware axis. `gs.Locus()` is the
+The `L` type places positions on a chromosome-aware axis. {py:func}`~genome_spy.Locus` is the
 clearest form when chromosome and position are stored in separate fields:
 
 ```{literalinclude} ../tutorials/encoding_channels.py
@@ -146,10 +140,10 @@ four ways:
 
 | Definition | Meaning | Example above |
 | --- | --- | --- |
-| Field | Read a value from every row | `gs.X("score:Q")` |
-| Datum | Use a constant in the scale's data domain | `gs.datum(0, type="quantitative")` |
-| Value | Use a constant visual value without a scale | `gs.value("#4c78a8")` |
-| Expression | Calculate a value while the chart runs | `gs.expr(gs.datum.amount * gs.datum.confidence)` |
+| Field | Read a value from every row | {py:class}`gs.X <genome_spy.X>` |
+| Datum | Use a constant in the scale's data domain | {py:func}`gs.datum(...) <genome_spy.datum>` |
+| Value | Use a constant visual value without a scale | {py:func}`gs.value(...) <genome_spy.value>` |
+| Expression | Calculate a value while the chart runs | {py:obj}`gs.expr <genome_spy.expr>` |
 
 A datum goes through the channel's scale, so these points sit mid-axis; a
 positional value of `0` would mean the start of the visual range instead.

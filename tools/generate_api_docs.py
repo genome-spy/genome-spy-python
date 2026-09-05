@@ -135,12 +135,12 @@ def encoding_channels() -> list[str]:
 
 
 def schema_objects() -> list[str]:
-    """Generated schema wrapper classes exposed as public API."""
+    """Schema wrappers and schema-backed authoring value classes."""
     return sorted(
         name
         for name, obj in _public_objects()
         if (inspect.isclass(obj) and obj.__module__ == SCHEMA_MODULE)
-        or obj is gs.Expression
+        or obj in (gs.Expression, gs.Parameter)
     )
 
 

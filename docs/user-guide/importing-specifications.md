@@ -1,6 +1,6 @@
 # Import remote view specifications
 
-`gs.import_view(url=...)` adds a view whose GenomeSpy JSON specification lives
+{py:func}`~genome_spy.import_view` adds a view whose GenomeSpy JSON specification lives
 in another file. This is useful for composing published, reusable tracks or for
 splitting a large visualization into independently maintained specifications.
 The Python package records the import definition; GenomeSpy fetches the remote
@@ -30,7 +30,7 @@ imports require.
 
 An imported specification may contain a single view, layers, or a concatenated
 layout. The returned object composes like any other chart, so it can be passed
-to `gs.layer()`, `gs.hconcat()`, or `gs.vconcat()`. Parent properties can
+to {py:func}`~genome_spy.layer`, {py:func}`~genome_spy.hconcat`, or {py:func}`~genome_spy.vconcat`. Parent properties can
 provide shared context such as the assembly, genomic domain, axis resolution,
 and configuration. The imported view remains responsible for its own marks and
 dataflow.

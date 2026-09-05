@@ -1,8 +1,7 @@
 """Single-source chart objects used by the Charts and Marks guide."""
 
-# charts-marks-observations-start
+# charts-marks-point-start
 import genome_spy as gs
-
 
 observations = [
     {"sample": "A", "time": 1, "value": 2.2, "amount": 18},
@@ -12,10 +11,7 @@ observations = [
     {"sample": "B", "time": 2, "value": 2.5, "amount": 15},
     {"sample": "B", "time": 3, "value": 3.3, "amount": 36},
 ]
-# charts-marks-observations-end
 
-
-# charts-marks-point-start
 point_chart = (
     gs.Chart(observations)
     .mark_point(filled=True, stroke="white", strokeWidth=1)

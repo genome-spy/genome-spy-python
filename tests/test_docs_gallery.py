@@ -542,7 +542,7 @@ def test_ma_and_volcano_thresholds_drive_point_classification(
         if layer["mark"]["type"] == "rule"
         and layer.get("transform", [{}])[0].get("type") == "formula"
     }
-    assert f"datum.side * {effect_param}" in rule_expressions
+    assert f"(datum.side * {effect_param})" in rule_expressions
     if "volcano" in filename:
         assert significance_param in rule_expressions
 
@@ -585,11 +585,6 @@ def test_airway_expression_plots_include_gene_callouts(
     line = next(
         layer for layer in layers if layer.get("name") == f"{prefix}-callout-lines"
     )
-    halos = [
-        layer
-        for layer in layers
-        if layer.get("name", "").startswith(f"{prefix}-label-halo-")
-    ]
     labels = [
         layer
         for layer in layers
@@ -598,16 +593,10 @@ def test_airway_expression_plots_include_gene_callouts(
 
     assert line["mark"]["type"] == "rule"
     assert line["transform"] == [{"type": "filter", "expr": f"datum.{label_field}"}]
-    assert len(halos) == 8
     assert len(labels) == 2
-    assert all(layer["mark"]["type"] == "text" for layer in halos + labels)
-    assert all(
-        layer["encoding"]["text"]["field"] == label_field for layer in halos + labels
-    )
+    assert all(layer["mark"]["type"] == "text" for layer in labels)
+    assert all(layer["encoding"]["text"]["field"] == label_field for layer in labels)
     assert names.index(f"{prefix}-callout-lines") < min(
-        names.index(layer["name"]) for layer in halos
-    )
-    assert max(names.index(layer["name"]) for layer in halos) < min(
         names.index(layer["name"]) for layer in labels
     )
 
@@ -674,31 +663,25 @@ def test_airway_callouts_use_pixel_offsets(
 
 
 @pytest.mark.parametrize("prefix", ["volcano", "ma"])
-def test_airway_callout_labels_have_white_halos(prefix: str) -> None:
+def test_airway_callout_labels_are_single_readable_layers(prefix: str) -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / f"airway_{prefix}_plot.py")
     layers = example.spec["layer"]
-    expected_offsets = {(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)}
-
     for side, base_dx in (("left", -4), ("right", 4)):
         label = next(
             layer for layer in layers if layer.get("name") == f"{prefix}-label-{side}"
         )
-        halos = [
-            layer
-            for layer in layers
-            if layer.get("name", "").startswith(f"{prefix}-label-halo-{side}-")
-        ]
-
         assert label["mark"]["type"] == "text"
         assert label["mark"]["color"] == "#20262d"
         assert label["mark"]["align"] == ("right" if side == "left" else "left")
         assert label["mark"]["baseline"] == "middle"
         assert label["mark"]["tooltip"] is None
-        assert {
-            (halo["mark"]["dx"] - base_dx, halo["mark"]["dy"]) for halo in halos
-        } == expected_offsets
-        assert all(halo["mark"]["color"] == "white" for halo in halos)
+        assert label["mark"]["dx"] == base_dx
+        assert label["mark"]["dy"] == 0
+        assert not any(
+            layer.get("name", "").startswith(f"{prefix}-label-halo-")
+            for layer in layers
+        )
 
 
 @pytest.mark.parametrize("filename", ["airway_volcano_plot.py", "airway_ma_plot.py"])
@@ -1177,7 +1160,7 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     assert example.spec["layer"][3]["transform"] == [
         {
             "type": "filter",
-            "expr": "datum.neglog >= manhattanSignificanceCutoff",
+            "expr": "(datum.neglog >= manhattanSignificanceCutoff)",
         }
     ]
     assert example.spec["layer"][3]["mark"]["color"] == "#c53b2c"

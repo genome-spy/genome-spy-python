@@ -518,6 +518,70 @@
       "method": "vcf"
     }
   ],
+  "interaction": {
+    "bindings": [
+      {
+        "helper": "binding",
+        "schema": "BindInput",
+        "fixed": {}
+      },
+      {
+        "helper": "binding_checkbox",
+        "schema": "BindCheckbox",
+        "fixed": {
+          "input": "checkbox"
+        }
+      },
+      {
+        "helper": "binding_radio",
+        "schema": "BindRadioSelect",
+        "fixed": {
+          "input": "radio"
+        }
+      },
+      {
+        "helper": "binding_range",
+        "schema": "BindRange",
+        "fixed": {
+          "input": "range"
+        }
+      },
+      {
+        "helper": "binding_select",
+        "schema": "BindRadioSelect",
+        "fixed": {
+          "input": "select"
+        }
+      }
+    ],
+    "parameter_helpers": [
+      {
+        "helper": "ruler",
+        "parameter_schema": "RulerParameter",
+        "config_property": "ruler",
+        "config_schema": "RulerConfig",
+        "fixed": {}
+      },
+      {
+        "helper": "selection_interval",
+        "parameter_schema": "SelectionParameter",
+        "config_property": "select",
+        "config_schema": "IntervalSelectionConfig",
+        "fixed": {
+          "type": "interval"
+        }
+      },
+      {
+        "helper": "selection_point",
+        "parameter_schema": "SelectionParameter",
+        "config_property": "select",
+        "config_schema": "PointSelectionConfig",
+        "fixed": {
+          "type": "point"
+        }
+      }
+    ]
+  },
   "root_spec_variants": [
     "mark",
     "layer",
