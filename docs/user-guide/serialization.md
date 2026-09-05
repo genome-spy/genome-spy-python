@@ -6,7 +6,7 @@ chart, passing it to another tool, or inspecting the generated grammar.
 
 ## Inspect the specification
 
-`to_dict()` returns the complete specification as Python dictionaries, lists,
+{py:meth}`~genome_spy.TopLevelSpec.to_dict` returns the complete specification as Python dictionaries, lists,
 strings, and numbers:
 
 ```{literalinclude} ../tutorials/serialization.py
@@ -15,14 +15,14 @@ strings, and numbers:
 :end-before: serialization-dict-end
 ```
 
-The result uses GenomeSpy property names. For example, `gs.X("sample:N")`
+The result uses GenomeSpy property names. For example, {py:class}`gs.X <genome_spy.X>`
 becomes an x-channel definition with `field` and `type`. The root `$schema` URL
 identifies the GenomeSpy schema used to validate the chart. Those property names
 are the ones documented in the
 [GenomeSpy grammar](https://genomespy.app/docs/grammar/), so a serialized chart
 can be read against it directly.
 
-Use `to_json()` when another program expects JSON text:
+Use {py:meth}`~genome_spy.TopLevelSpec.to_json` when another program expects JSON text:
 
 ```{literalinclude} ../tutorials/serialization.py
 :language: python
@@ -54,7 +54,7 @@ chart container and embedding code, but still loads the GenomeSpy JavaScript
 bundle and any remote datasets over the network. Inline data is included in the
 file.
 
-Use `chart.to_html()` when integration code needs the HTML as a string rather
+Use {py:meth}`~genome_spy.TopLevelSpec.to_html` when integration code needs the HTML as a string rather
 than a file. Complete method signatures and validation options are listed in the
 [API reference](../api.md).
 
@@ -62,7 +62,7 @@ The generated HTML calls GenomeSpy's own `embed` function. To adapt it for
 another page or build system, see
 [embedding](https://genomespy.app/docs/api/embedding/) and the available
 [embed options](https://genomespy.app/docs/api/embed-options/), which
-`chart.widget(embed_options=...)` also accepts.
+{py:meth}`~genome_spy.TopLevelSpec.widget` also accepts.
 
 `embed_options` configures the browser embedding step; it does not change the
 chart specification. The optional PNG, SVG, Inspector, and full-window controls

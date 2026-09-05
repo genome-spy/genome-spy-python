@@ -120,7 +120,7 @@ selected points:
 
 `selected_variant = gs.selection_point("selectedVariant", empty=False)`
 
-In the point encoding, `key=gs.Key("id")` uses each point’s `id` value to
+In the point encoding, {py:class}`key=gs.Key("id") <genome_spy.Key>` uses each point’s `id` value to
 identify it. This helps the chart keep the right point selected if its data is
 updated or reordered.
 

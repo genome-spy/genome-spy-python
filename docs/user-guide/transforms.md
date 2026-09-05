@@ -51,7 +51,7 @@ available inside an expression, as well as the
 ## Derive a field with a formula
 
 A formula calculates a value and stores it in a new field.
-`transform_calculate()` accepts the output field as a keyword:
+{py:meth}`~genome_spy.TopLevelSpec.transform_calculate` accepts the output field as a keyword:
 
 ```{literalinclude} ../tutorials/transforms.py
 :language: python
@@ -76,7 +76,7 @@ the GenomeSpy documentation.
 
 ## Summarize groups
 
-An aggregate transform reduces many rows into summary rows. `groupby` chooses
+An aggregate transform reduces many rows into summary rows. {py:meth}`~genome_spy.TopLevelSpec.transform_aggregate` uses `groupby` to choose
 which input rows belong together; `fields`, `ops`, and `as_` are parallel lists
 that specify the input fields, aggregate operations, and output names:
 

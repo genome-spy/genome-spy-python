@@ -9,7 +9,7 @@ uses three concise operators for the most common layouts:
 | `a & b`  | Vertical concatenation   | Place `a` above `b`                     |
 | `a \| b` | Horizontal concatenation | Place `a` to the left of `b`            |
 
-Use `gs.concat(..., columns=n)` when the layout is an explicit wrapping grid.
+Use {py:func}`~genome_spy.concat` when the layout is an explicit wrapping grid.
 Composition is hierarchical, so layers and concatenations can be nested. The
 GenomeSpy documentation introduces the same model in
 [view composition](https://genomespy.app/docs/grammar/composition/).
@@ -102,8 +102,8 @@ or legend:
   resolution from being pulled into an ancestor's shared scale. It is useful
   for aligned grids containing side summaries with different units.
 
-Configure these relationships with `resolve_scale()`, `resolve_axis()`, and
-`resolve_legend()`. An axis can be shared only when its scale is shared. Legend
+Configure these relationships with {py:meth}`~genome_spy.ConcatChart.resolve_scale`, {py:meth}`~genome_spy.ConcatChart.resolve_axis`, and
+{py:meth}`~genome_spy.ConcatChart.resolve_legend`. An axis can be shared only when its scale is shared. Legend
 resolution normally follows the corresponding visual scale. The GenomeSpy
 documentation describes the rules in
 [scale, axis, and legend resolution](https://genomespy.app/docs/grammar/composition/#scale-axis-and-legend-resolution)
@@ -112,7 +112,7 @@ and the aligned-axis case in
 
 [`multiscale`](https://genomespy.app/docs/grammar/composition/multiscale/) has no
 dedicated page in this guide. It provides semantic zoom between detail levels
-through `gs.multiscale(...)`. To reuse a view stored in another JSON file, see
+through {py:func}`~genome_spy.multiscale`. To reuse a view stored in another JSON file, see
 [Import remote view specifications](importing-specifications.md).
 
 ## Advanced grid layouts

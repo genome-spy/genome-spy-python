@@ -60,12 +60,12 @@ Choose the builder that matches the hosted file:
 | Format | Builder | Rows provided to the chart |
 | --- | --- | --- |
 | [BigWig](https://genomespy.app/docs/grammar/data/lazy/#bigwig) | {py:meth}`gs.lazy.bigwig(url) <genome_spy.data.LazyNamespace.bigwig>` | Quantitative genomic intervals |
-| [BigBed](https://genomespy.app/docs/grammar/data/lazy/#bigbed) | `gs.lazy.bigbed(url)` | Annotation intervals |
-| [FASTA](https://genomespy.app/docs/grammar/data/lazy/#indexed-fasta) | `gs.lazy.indexed_fasta(url)` | Sequence chunks |
-| [BAM](https://genomespy.app/docs/grammar/data/lazy/#bam) | `gs.lazy.bam(url)` | Read alignments |
-| [Tabix TSV](https://genomespy.app/docs/grammar/data/lazy/#tabix-tsv) | `gs.lazy.tabix(url)` | Parsed tabular intervals |
-| [GFF3](https://genomespy.app/docs/grammar/data/lazy/#gff3) | `gs.lazy.gff3(url)` | Gene and transcript features |
-| [VCF](https://genomespy.app/docs/grammar/data/lazy/#vcf) | `gs.lazy.vcf(url)` | Variant records |
+| [BigBed](https://genomespy.app/docs/grammar/data/lazy/#bigbed) | {py:meth}`gs.lazy.bigbed(url) <genome_spy.data.LazyNamespace.bigbed>` | Annotation intervals |
+| [FASTA](https://genomespy.app/docs/grammar/data/lazy/#indexed-fasta) | {py:meth}`gs.lazy.indexed_fasta(url) <genome_spy.data.LazyNamespace.indexed_fasta>` | Sequence chunks |
+| [BAM](https://genomespy.app/docs/grammar/data/lazy/#bam) | {py:meth}`gs.lazy.bam(url) <genome_spy.data.LazyNamespace.bam>` | Read alignments |
+| [Tabix TSV](https://genomespy.app/docs/grammar/data/lazy/#tabix-tsv) | {py:meth}`gs.lazy.tabix(url) <genome_spy.data.LazyNamespace.tabix>` | Parsed tabular intervals |
+| [GFF3](https://genomespy.app/docs/grammar/data/lazy/#gff3) | {py:meth}`gs.lazy.gff3(url) <genome_spy.data.LazyNamespace.gff3>` | Gene and transcript features |
+| [VCF](https://genomespy.app/docs/grammar/data/lazy/#vcf) | {py:meth}`gs.lazy.vcf(url) <genome_spy.data.LazyNamespace.vcf>` | Variant records |
 
 Each format links to its section in the GenomeSpy documentation, which lists the
 source's parameters and the fields it returns.

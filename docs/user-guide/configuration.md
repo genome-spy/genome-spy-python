@@ -58,7 +58,7 @@ A string is sufficient for a simple title:
 chart.properties(title="Response by sample")
 ```
 
-Use `gs.title()` for subtitles or placement options:
+Use {py:func}`~genome_spy.title` for subtitles or placement options:
 
 ```python
 chart.properties(
@@ -92,7 +92,7 @@ fixed values make the layout difficult to adapt.
 
 ## Step sizing for discrete positions
 
-For a nominal, ordinal, or index position, `gs.step()` reserves a fixed amount
+For a nominal, ordinal, or index position, {py:func}`~genome_spy.step` reserves a fixed amount
 of space for every scale value:
 
 ```{literalinclude} ../tutorials/configuration.py
@@ -106,7 +106,7 @@ of space for every scale value:
 :title: Width derived from four categorical steps
 ```
 
-The four categories and `gs.step(48)` produce a plot width based on four
+The four categories and {py:func}`~genome_spy.step` produce a plot width based on four
 48-pixel steps. If another category is added, the plot grows automatically.
 Step sizing is useful for matrices, alignments, categorical rows, and compact
 genome-browser tracks. See
@@ -116,7 +116,7 @@ in the GenomeSpy documentation.
 ## Container and flexible sizing
 
 `"container"` allows a view to use available space. Concatenated children can
-combine fixed pixels with flex-like growth through `gs.SizeDef()`:
+combine fixed pixels with flex-like growth through {py:class}`~genome_spy.SizeDef`:
 
 ```{literalinclude} ../tutorials/configuration.py
 :language: python
@@ -131,7 +131,7 @@ combine fixed pixels with flex-like growth through `gs.SizeDef()`:
 
 The left child has a fixed 120-pixel plot width. The right child has `grow=1`,
 so it receives remaining horizontal space, while `minPx=180` prevents it from
-becoming too narrow. `gs.SizeDef` can combine:
+becoming too narrow. {py:class}`~genome_spy.SizeDef` can combine:
 
 - `px` for an absolute component;
 - `grow` for a share of remaining space;
@@ -150,7 +150,7 @@ and
 ## Padding and spacing
 
 `padding` reserves space around one view. Use a number for equal padding or
-`gs.Paddings()` for individual edges:
+{py:class}`~genome_spy.Paddings` for individual edges:
 
 ```python
 chart.properties(

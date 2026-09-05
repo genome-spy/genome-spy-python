@@ -36,7 +36,7 @@ data.
 
 ## Display a dataframe
 
-`Chart` accepts pandas and Polars dataframes, plus PyArrow `Table` and
+{py:class}`~genome_spy.Chart` accepts pandas and Polars dataframes, plus PyArrow `Table` and
 `RecordBatch` objects:
 
 ```python
@@ -50,14 +50,14 @@ chart
 ```
 
 Notebook rendering transfers supported tables with Arrow automatically. This
-changes only how data reaches the widget: `chart.to_dict()` and
-`chart.to_json()` still produce ordinary JSON-compatible specifications. A
+changes only how data reaches the widget: {py:meth}`~genome_spy.TopLevelSpec.to_dict` and
+{py:meth}`~genome_spy.TopLevelSpec.to_json` still produce ordinary JSON-compatible specifications. A
 pandas index is not a chart field, so use `frame.reset_index()` first when the
 index contains values the chart needs.
 
 ## Keep a widget for updates
 
-Call `.widget()` when the displayed chart must receive new data:
+Call {py:meth}`~genome_spy.TopLevelSpec.widget` when the displayed chart must receive new data:
 
 ```{literalinclude} ../tutorials/notebooks.py
 :language: python
@@ -82,7 +82,7 @@ documentation describes this indirection in
 
 ## Replace the named dataset
 
-Use `set_dataset()` to replace its records:
+Use {py:meth}`~genome_spy.api.JupyterChart.set_dataset` to replace its records:
 
 ```{literalinclude} ../tutorials/notebooks.py
 :language: python
@@ -102,7 +102,7 @@ view.set_dataset("measurements", updated_frame)
 
 Arrow is the default transport for these updates. Keep column names and value
 types compatible with the chart fields. Most users do not need to call
-`to_arrow_ipc()` directly.
+{py:func}`~genome_spy.to_arrow_ipc` directly.
 
 In a reactive notebook, create and display the widget in a stable cell. Let
 dependent cells prepare new rows and call `set_dataset()` on that same object.

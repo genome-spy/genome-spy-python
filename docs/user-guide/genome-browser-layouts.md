@@ -92,7 +92,7 @@ The concatenated parent owns `spacing`, because spacing describes the gaps
 between its children. In this example, structured titles use `orient="left"`
 to label the tracks consistently without consuming a separate header row.
 
-Fixed heights work well for continuous signal tracks. Use `gs.step(...)` for
+Fixed heights work well for continuous signal tracks. Use {py:func}`~genome_spy.step` for
 categorical or packed lanes whose content height depends on a row count.
 
 ## Scroll a tall track
