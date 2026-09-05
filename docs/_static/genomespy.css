@@ -18,6 +18,28 @@ body[data-theme="dark"] {
   --font-stack: "Lato", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
+/* Furo expands the desktop left drawer to centre the main content, then
+   right-aligns the navigation within it. Centre the navigation instead, so
+   the remaining gutter is shared equally on both sides. */
+@media (min-width: 82em) {
+  .sidebar-drawer {
+    justify-content: center;
+  }
+}
+
+/* Give documentation pages more room for charts and code. The matching drawer
+   width keeps the expanded content column centred between equal outer margins. */
+@media (min-width: 90em) {
+  .content {
+    width: 56em;
+    padding-inline: 2em;
+  }
+
+  .sidebar-drawer {
+    width: calc((100% - 90em) / 2 + 15em);
+  }
+}
+
 /* ---------- Landing hero ---------- */
 .gs-hero {
   text-align: center;
