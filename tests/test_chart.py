@@ -1442,6 +1442,22 @@ def test_transform_formula_serializes() -> None:
     ]
 
 
+def test_transform_formula_accepts_parameter_expression_handle() -> None:
+    cutoff = gs.param("cutoff", value=2)
+    chart = (
+        gs.Chart(data=[{"x": 1}])
+        .transform_formula(expr=cutoff, as_="threshold")
+        .transform_calculate(double=2 * cutoff)
+        .mark_point()
+        .add_params(cutoff)
+    )
+
+    assert chart.to_dict()["transform"] == [
+        {"type": "formula", "expr": "cutoff", "as": "threshold"},
+        {"type": "formula", "expr": "(2 * cutoff)", "as": "double"},
+    ]
+
+
 def test_layer_operator_serializes_without_nested_schema() -> None:
     points = gs.Chart(data=[{"x": 1, "y": 2}]).mark_point().encode(x="x:Q", y="y:Q")
     labels = points.mark_text(dx=6).encode(text=gs.Text("y:Q"))

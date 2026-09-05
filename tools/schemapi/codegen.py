@@ -1907,6 +1907,11 @@ class SchemaWrapperGenerator:
         has_filter_method = any(
             spec.transform_type == "filter" for spec in transform_method_specs
         )
+        has_expression_transform = any(
+            property_spec.name == "expr"
+            for spec in transform_method_specs
+            for property_spec in spec.properties
+        )
         transform_methods = [
             _transform_method_source(spec) for spec in transform_method_specs
         ]
@@ -1978,6 +1983,11 @@ class SchemaWrapperGenerator:
                     else []
                 ),
                 "",
+                (
+                    "from genome_spy._expressions import ExpressionOperand, _expression_string"
+                    if has_expression_transform
+                    else ""
+                ),
                 (
                     "from genome_spy.schema._typing import "
                     + ", ".join(sorted(transform_alias_names))
@@ -4297,6 +4307,8 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
         annotation = _qualified_transform_annotation(
             property_spec.annotation.annotation
         )
+        if property_spec.name == "expr":
+            annotation = f"{annotation} | ExpressionOperand"
         name = parameter_name(property_spec)
         if property_spec.name in spec.required:
             return f"        {name}: {annotation},"
@@ -4307,14 +4319,19 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
     for property_spec in ordered_properties:
         schema_name = property_spec.name
         python_name = parameter_name(property_spec)
+        value_source = (
+            f"_expression_string({python_name})"
+            if schema_name == "expr"
+            else python_name
+        )
         parameters.append(parameter_source(property_spec))
         if schema_name in spec.required:
-            assignments.append(f"        transform[{schema_name!r}] = {python_name}")
+            assignments.append(f"        transform[{schema_name!r}] = {value_source}")
         else:
             assignments.extend(
                 [
                     f"        if {python_name} is not Undefined:",
-                    f"            transform[{schema_name!r}] = {python_name}",
+                    f"            transform[{schema_name!r}] = {value_source}",
                 ]
             )
 
@@ -4349,6 +4366,8 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             value_annotation = _qualified_transform_annotation(
                 value_spec.annotation.annotation
             )
+            if value_property == "expr":
+                value_annotation = f"{value_annotation} | ExpressionOperand"
             signature_lines.append(f"        **kwargs: {value_annotation},")
         signature_lines.append("    ) -> Self:")
         signature = "\n".join(signature_lines)
@@ -4393,7 +4412,10 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             )
         output_name = parameter_name(properties_by_name[output_property])
         value_name = parameter_name(properties_by_name[value_property])
+        expression_values = value_property == "expr"
         value_annotation = properties_by_name[value_property].annotation.annotation
+        if expression_values:
+            value_annotation = f"{value_annotation} | ExpressionOperand"
         missing_pair_message = (
             f"{spec.method_name} requires {output_name!r} and {value_name!r} together."
         )
@@ -4431,13 +4453,17 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             "        if has_output and has_value:",
             f"            transform: dict[str, Any] = {{'type': {spec.transform_type!r}}}",
             f"            transform[{output_property!r}] = {output_name}",
-            f"            transform[{value_property!r}] = {value_name}",
+            f"            transform[{value_property!r}] = "
+            + (
+                f"_expression_string({value_name})" if expression_values else value_name
+            ),
             "            result = result._append_transform(transform)  "
             "# type: ignore[attr-defined]",
             "        for output, value in kwargs.items():",
             f"            transform = {{'type': {spec.transform_type!r}}}",
             f"            transform[{output_property!r}] = output",
-            f"            transform[{value_property!r}] = value",
+            f"            transform[{value_property!r}] = "
+            + ("_expression_string(value)" if expression_values else "value"),
             "            result = result._append_transform(transform)  "
             "# type: ignore[attr-defined]",
             "        return result",

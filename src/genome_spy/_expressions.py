@@ -52,6 +52,13 @@ def _js_repr(value: Any) -> str:
     return repr(value)
 
 
+def _expression_string(value: str | ExpressionOperand) -> str:
+    """Return the string accepted by an upstream expression property."""
+    if isinstance(value, ExpressionOperand):
+        return str(value._to_expr())
+    return value
+
+
 def _function_expression(name: str, *arguments: Any) -> Expression:
     """Build a function-call expression."""
     rendered = ",".join(_js_repr(argument) for argument in arguments)

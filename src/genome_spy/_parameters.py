@@ -8,8 +8,8 @@ from typing import Any, cast
 
 from genome_spy._expressions import (
     Expression,
-    ExpressionOperand,
     ExpressionOperatorMixin,
+    _expression_string,
 )
 from genome_spy.schema import core
 from genome_spy.schemapi import (
@@ -115,12 +115,6 @@ def _stable_parameter_name(properties: dict[str, Any]) -> str:
     )
     digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:10]
     return f"param_{digest}"
-
-
-def _expression_string(value: str | ExpressionOperand) -> str:
-    if isinstance(value, ExpressionOperand):
-        return str(value._to_expr())
-    return value
 
 
 def _defined_properties(properties: dict[str, Any]) -> dict[str, Any]:
