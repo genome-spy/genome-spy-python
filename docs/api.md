@@ -88,6 +88,11 @@ schema objects.
    :nosignatures:
 
    axes
+   binding
+   binding_checkbox
+   binding_radio
+   binding_range
+   binding_select
    compare
    concat
    condition
@@ -103,7 +108,10 @@ schema objects.
    multiscale
    param
    parse
+   ruler
    scales
+   selection_interval
+   selection_point
    step
    title
    to_arrow_ipc
@@ -111,6 +119,7 @@ schema objects.
    vconcat
    view
    view_config
+   when
 ```
 
 ## Schema objects
@@ -124,6 +133,7 @@ Schema-backed configuration objects accepted by charts, channels, and helpers.
    :toctree: generated/schema/
    :nosignatures:
 
+   BrushConfig
    Data
    DataFormat
    DynamicOpacity
@@ -135,6 +145,7 @@ Schema-backed configuration objects accepted by charts, channels, and helpers.
    Paddings
    Parameter
    Parse
+   RulerMarkConfig
    Scale
    SizeDef
    Step

@@ -4,7 +4,7 @@ import genome_spy as gs
 from genome_spy.schema import (
     AxisGenomeData,
     BrushConfig,
-    IntervalSelectionConfig,
+    RulerMarkConfig,
     SelectionDomainRef,
 )
 
@@ -50,7 +50,6 @@ REGION = [
 ]
 
 VARIANT_DOMAIN = ["v1", "v2", "v3", "v4"]
-MIN_SCORE = gs.Expression("minScore")
 DETAIL_REGION = [
     {"chrom": "chr6", "pos": 20_000_000},
     {"chrom": "chr11", "pos": 40_000_000},
@@ -81,40 +80,39 @@ zoom_chart = (
 
 
 # interaction-binding-start
+min_score = gs.param(
+    "minScore",
+    value=0.4,
+    bind=gs.binding_range(
+        min=0,
+        max=1,
+        step=0.05,
+        name="Minimum score: ",
+    ),
+)
+point_size = gs.param("pointSize", expr=60 + min_score * 100)
+
 bound_chart = (
     gs.Chart(VARIANTS)
-    .transform_filter(gs.datum.score >= MIN_SCORE)
+    .transform_filter(gs.datum.score >= min_score)
     .mark_point(
         filled=True,
         color="#4c78a8",
-        size=gs.expr("pointSize"),
+        size=point_size,
     )
     .encode(
         x=gs.X("id:N").scale(domain=VARIANT_DOMAIN).title("Variant"),
         y=gs.Y("score:Q").scale(domain=[0, 1]).title("Score"),
     )
-    .properties(
-        title="Filter with a bound parameter",
-        params=[
-            gs.param(
-                "minScore",
-                value=0.4,
-                bind={
-                    "input": "range",
-                    "min": 0,
-                    "max": 1,
-                    "step": 0.05,
-                    "name": "Minimum score: ",
-                },
-            ),
-            gs.param("pointSize", expr="60 + minScore * 100"),
-        ],
-    )
+    .properties(title="Filter with a bound parameter")
+    .add_params(min_score, point_size)
 )
 # interaction-binding-end
 
 
 # interaction-selection-start
+selected_variant = gs.selection_point("selectedVariant", empty=False)
+
 selection_chart = (
     gs.Chart(VARIANTS)
     .mark_point(filled=True, size=140, stroke="black")
@@ -123,24 +121,33 @@ selection_chart = (
         y=gs.Y("score:Q").scale(domain=[0, 1]),
         color=gs.Color("impact:N"),
         key=gs.Key("id"),
-        opacity=gs.Opacity(gs.value(0.25)).condition(
-            gs.condition("selectedVariant", 1)
-        ),
-        strokeWidth=gs.StrokeWidth(gs.value(0)).condition(
-            gs.condition("selectedVariant", 2, empty=False)
-        ),
+        opacity=gs.when(selected_variant).then(gs.value(1)).otherwise(gs.value(0.25)),
+        strokeWidth=gs.when(selected_variant).then(gs.value(2)).otherwise(gs.value(0)),
         tooltip=["id:N", "impact:N", "score:Q"],
     )
-    .properties(
-        assembly="hg38",
-        title="Click a variant to select it",
-        params=[gs.param("selectedVariant", select="point")],
-    )
+    .properties(assembly="hg38", title="Click a variant to select it")
+    .add_params(selected_variant)
 )
 # interaction-selection-end
 
 
 # interaction-brush-start
+brush = gs.param("brush")
+brush_update = gs.selection_interval(
+    "brush",
+    encodings=["x"],
+    mark=BrushConfig(
+        clip=False,
+        fill="#4c78a8",
+        fillOpacity=0.18,
+        stroke="#4c78a8",
+        measure="outside",
+        zindex=11,
+    ),
+    push="outer",
+    persist=False,
+)
+
 chromosome_rects = (
     gs.Chart()
     .mark_rect(tooltip=None)
@@ -166,26 +173,8 @@ overview_track = (
     .properties(
         data=gs.Data(lazy=AxisGenomeData(type="axisGenome", channel="x")),
         height=26,
-        params=[
-            gs.param(
-                "brush",
-                select=IntervalSelectionConfig(
-                    type="interval",
-                    encodings=["x"],
-                    mark=BrushConfig(
-                        clip=False,
-                        fill="#4c78a8",
-                        fillOpacity=0.18,
-                        stroke="#4c78a8",
-                        measure="outside",
-                        zindex=11,
-                    ),
-                ),
-                push="outer",
-                persist=False,
-            )
-        ],
     )
+    .add_params(brush_update)
 )
 
 # The overview needs its own x scale while the detail tracks share another.
@@ -196,7 +185,7 @@ brush_score_track = (
     .mark_point(filled=True, size=100, color="#4c78a8")
     .encode(
         x=gs.Locus("chrom", "pos")
-        .scale(domain=SelectionDomainRef(param="brush", initial=DETAIL_REGION))
+        .scale(domain=SelectionDomainRef(param=brush.name, initial=DETAIL_REGION))
         .axis(None),
         y=gs.Y("score:Q").scale(domain=[0, 1]).title(None),
         tooltip=["id:N", "score:Q"],
@@ -209,7 +198,7 @@ brush_depth_track = (
     .mark_point(filled=True, size=100, color="#f58518", shape="square")
     .encode(
         x=gs.Locus("chrom", "pos").scale(
-            domain=SelectionDomainRef(param="brush", initial=DETAIL_REGION)
+            domain=SelectionDomainRef(param=brush.name, initial=DETAIL_REGION)
         ),
         y=gs.Y("depth:Q").scale(domain=[0, 80]).title(None),
         tooltip=["id:N", "depth:Q"],
@@ -223,9 +212,9 @@ brush_chart = (
         data=BRUSH_VARIANTS,
         assembly="hg38",
         padding=gs.Paddings(top=20),
-        params=[gs.param("brush")],
         spacing=8,
     )
+    .add_params(brush)
     .resolve_scale(x="independent", y="independent")
     .resolve_axis(x="independent", y="independent")
 )
@@ -233,6 +222,15 @@ brush_chart = (
 
 
 # interaction-ruler-start
+cursor = gs.ruler(
+    "cursor",
+    persist=False,
+    encodings=["x"],
+    extent="container",
+    display="line",
+    mark=RulerMarkConfig(stroke="#d62728", strokeWidth=1),
+)
+
 score_track = (
     gs.Chart()
     .mark_point(filled=True, size=90, color="#4c78a8")
@@ -254,20 +252,9 @@ ruler_chart = (
         assembly="hg38",
         scales=gs.scales(x=gs.Scale(domain=REGION)),
         axes=gs.axes(x=gs.GenomeAxis(title="Genomic position")),
-        params=[
-            gs.param(
-                "cursor",
-                persist=False,
-                ruler={
-                    "encodings": ["x"],
-                    "extent": "container",
-                    "display": "line",
-                    "mark": {"stroke": "#d62728", "strokeWidth": 1},
-                },
-            )
-        ],
         spacing=8,
     )
+    .add_params(cursor)
     .encode(x=gs.Locus("chrom", "pos"))
     .resolve_scale(x="shared", y="independent")
     .resolve_axis(x="shared", y="independent")

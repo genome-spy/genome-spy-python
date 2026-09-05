@@ -32,8 +32,8 @@ follows it.
 
 ## Bind a parameter to an input
 
-`gs.param(name, value=..., bind=...)` declares a named value and an HTML input
-that changes it. This slider controls a filter threshold:
+`gs.param()` declares a value. `gs.binding_range()` makes a slider, and
+`.add_params()` attaches both parameters to the chart:
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -46,33 +46,27 @@ that changes it. This slider controls a filter threshold:
 :title: A slider controls filtering and point size
 ```
 
-The nominal variant axis uses an explicit domain. Filtering changes which rows
-reach the marks, and the current GenomeSpy runtime does not handle changing
-data-driven categorical domains reliably; listing all variant ids keeps the
-axis stable as the slider moves.
-
-The parameter name `minScore` becomes available to expressions in the same view
-and its descendants. Runtime parameter references are currently written as raw
-expression strings, so the filter reads it directly:
+Parameters can be used directly in Python expressions. Here, `min_score`
+controls the filter:
 
 ```python
-"datum.score >= minScore"
+gs.datum.score >= min_score
 ```
 
-`datum` means the current data row. Moving the slider re-evaluates the filter in
-the browser; Python does not receive the value or rebuild the chart.
+`datum` means the current data row. Moving the slider makes GenomeSpy run the
+filter again in the browser.
 
 The second parameter demonstrates a reactive expression:
 
 ```python
-gs.param("pointSize", expr="60 + minScore * 100")
+point_size = gs.param("pointSize", expr=60 + min_score * 100)
 ```
 
-Because `pointSize` depends on `minScore`, GenomeSpy recalculates it whenever the
-slider changes. `gs.expr("pointSize")` then supplies the current result to the
-mark's size. Datum-only expressions can use the Python authoring syntax such as
-`gs.datum.score >= 0.5`; raw strings remain the escape hatch for free runtime
-variables such as `minScore` and `pointSize`.
+GenomeSpy recalculates `point_size` when `min_score` changes. Passing the handle
+to `mark_point(size=...)` uses its current value.
+
+The explicit variant domain keeps every category on the x-axis while the filter
+hides and shows points.
 
 The GenomeSpy documentation covers the available input widgets in
 [input bindings](https://genomespy.app/docs/grammar/parameters/#using-input-bindings)
@@ -84,8 +78,9 @@ common parent of every view that needs to read it.
 
 ## Select marks and style them conditionally
 
-A **selection parameter** stores data items or intervals chosen through pointer
-gestures. A point selection can drive conditional encodings:
+A **selection parameter** stores what the reader picks. The
+`gs.when(...).then(...).otherwise(...)` helper uses that selection in an
+encoding:
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -98,20 +93,14 @@ gestures. A point selection can drive conditional encodings:
 :title: Click a point; Shift-click to toggle additional points
 ```
 
-The base opacity is `0.25`. Its condition changes opacity to `1` when a row is
-in `selectedVariant`. An empty point selection matches every row by default, so
-all points begin fully visible.
-
-The stroke condition uses `empty=False`. It therefore applies only to actual
-selected rows and does not outline every point before the first click. The
+Selected points are opaque and outlined; other points are faint. Setting
+`empty=False` means the condition matches nothing until the first click. The
 GenomeSpy documentation explains this behavior in
 [empty selections](https://genomespy.app/docs/grammar/conditional-encoding/#empty-selections)
 and the surrounding rules in
 [conditional encoding](https://genomespy.app/docs/grammar/conditional-encoding/).
 
-`key=gs.Key("id")` gives each row a stable identity. A key should be unique and
-remain unchanged when data updates. It prevents a selection from depending on
-the accidental order of rows.
+`key=gs.Key("id")` gives each point a stable identity.
 
 Use `select="point"` for discrete rows. An interval selection instead describes
 a continuous brushed range. See
@@ -135,9 +124,8 @@ the genome appears below. Both detail tracks move together.
 :title: Drag across the chromosome map to navigate both tracks
 ```
 
-`brush` stores the highlighted region. `initial` chooses what is visible when
-the chart first opens. Both detail tracks use the highlighted region as their
-horizontal range, so they always show the same place.
+`brush` stores the highlighted region. `initial` chooses the first visible
+region. Both detail tracks use the brush as their x-axis range.
 
 The chromosome row always shows the whole genome. Drag its brush, or zoom one
 of the detail tracks, and the other views follow automatically.
@@ -152,8 +140,7 @@ the same pattern to three genome-wide association tracks.
 
 ## Add one ruler across linked tracks
 
-A **ruler parameter** follows a domain coordinate and draws a cursor guide. It
-is not a selection: it tracks a coordinate rather than a set of rows.
+A **ruler parameter** follows a coordinate and draws a guide across tracks.
 
 Define one ruler at the common parent of the tracks it should span:
 
@@ -168,10 +155,8 @@ Define one ruler at the common parent of the tracks it should span:
 :title: One pointer ruler spanning two linked tracks
 ```
 
-`encodings=["x"]` says which domain coordinate to track. The parent has one
-shared x scale and both descendants inherit an x locus encoding, so the ruler
-has one unambiguous target. `extent="container"` draws one line across the
-aligned vertical container instead of a separate guide inside each track.
+`encodings=["x"]` tracks the x coordinate. `extent="container"` draws one line
+across both tracks.
 
 Pointer rulers follow mouse movement and clear on mouse leave by default. Set
 `source="viewport"` when the ruler should track the center of the visible domain
@@ -181,15 +166,12 @@ styling in
 
 ## Keep interaction state close to its consumers
 
-Parameter scope follows the view hierarchy:
+Put a parameter on the nearest chart that contains everything using it:
 
 - define a track-local control on that track;
 - define shared controls, selections, and rulers on the nearest common parent;
 - let descendant transforms and encodings read the parameter by name;
 - define the parameter only once at that scope.
-
-This placement mirrors data and scale ownership. It reduces repeated
-definitions and makes it clear which views participate in an interaction.
 
 The [ASCAT fitting](../gallery/ascat_fitting.md) example drives a whole
 visualization from bound parameters.
