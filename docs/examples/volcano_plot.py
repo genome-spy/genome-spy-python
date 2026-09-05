@@ -23,6 +23,7 @@ NEGLOG_P_CUTOFF = domains["neglog_pvalue_cutoff"]
 # while the cap prevents points from becoming oversized at deep zoom levels.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(16 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
+# These named sliders update both the dashed guides and each point's category.
 effect_cutoff = gs.param(
     "hapmapEffectCutoff",
     value=EFFECT_CUTOFF,

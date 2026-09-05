@@ -1,8 +1,7 @@
 """Single-source chart objects used by the Composition guide."""
 
-# composition-data-start
+# composition-layer-start
 import genome_spy as gs
-
 
 measurements = [
     {"position": 1, "signal": 2.1, "quality": 0.72, "group": "control", "label": "C1"},
@@ -12,10 +11,7 @@ measurements = [
     {"position": 2, "signal": 3.5, "quality": 0.91, "group": "treated", "label": "T2"},
     {"position": 3, "signal": 4.3, "quality": 0.88, "group": "treated", "label": "T3"},
 ]
-# composition-data-end
 
-
-# composition-layer-start
 points = gs.Chart().mark_point(filled=True, size=100)
 labels = gs.Chart().mark_text(dy=-12).encode(text="label:N")
 

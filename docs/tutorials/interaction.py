@@ -1,5 +1,7 @@
 """Single-source chart objects used by the interaction guide."""
 
+# interaction-zoom-start
+# Each datum is one genomic variant with a score, sequencing depth, and impact.
 import genome_spy as gs
 from genome_spy.schema import (
     AxisGenomeData,
@@ -7,7 +9,6 @@ from genome_spy.schema import (
     RulerMarkConfig,
     SelectionDomainRef,
 )
-
 
 VARIANTS = [
     {
@@ -49,22 +50,11 @@ REGION = [
     {"chrom": "chr17", "pos": 43_090_000},
 ]
 
+# Keep the categories stable when the slider filters rows out.
 VARIANT_DOMAIN = ["v1", "v2", "v3", "v4"]
-DETAIL_REGION = [
-    {"chrom": "chr6", "pos": 20_000_000},
-    {"chrom": "chr11", "pos": 40_000_000},
-]
-BRUSH_VARIANTS = [
-    {"id": "g1", "chrom": "chr1", "pos": 45_000_000, "score": 0.42, "depth": 38},
-    {"id": "g2", "chrom": "chr7", "pos": 35_000_000, "score": 0.91, "depth": 72},
-    {"id": "g3", "chrom": "chr9", "pos": 60_000_000, "score": 0.27, "depth": 51},
-    {"id": "g4", "chrom": "chr11", "pos": 20_000_000, "score": 0.73, "depth": 64},
-    {"id": "g5", "chrom": "chr17", "pos": 43_000_000, "score": 0.58, "depth": 46},
-    {"id": "g6", "chrom": "chr20", "pos": 30_000_000, "score": 0.36, "depth": 57},
-]
 
 
-# interaction-zoom-start
+# A plain locus scale already supports zooming and panning.
 zoom_chart = (
     gs.Chart(VARIANTS)
     .mark_point(filled=True, size=110)
@@ -80,6 +70,8 @@ zoom_chart = (
 
 
 # interaction-binding-start
+# A value parameter and its slider binding. The handle is reused below instead
+# of repeating the parameter name as an expression string.
 min_score = gs.param(
     "minScore",
     value=0.4,
@@ -111,6 +103,8 @@ bound_chart = (
 
 
 # interaction-selection-start
+# Clicking a point updates this named selection. Until a click, `empty=False`
+# makes the selected style apply to no points.
 selected_variant = gs.selection_point("selectedVariant", empty=False)
 
 selection_chart = (
@@ -132,6 +126,21 @@ selection_chart = (
 
 
 # interaction-brush-start
+# The parent owns the selected genomic interval. The overview below updates it;
+# the detail tracks read it as their x-scale domain.
+DETAIL_REGION = [
+    {"chrom": "chr6", "pos": 20_000_000},
+    {"chrom": "chr11", "pos": 40_000_000},
+]
+BRUSH_VARIANTS = [
+    {"id": "g1", "chrom": "chr1", "pos": 45_000_000, "score": 0.42, "depth": 38},
+    {"id": "g2", "chrom": "chr7", "pos": 35_000_000, "score": 0.91, "depth": 72},
+    {"id": "g3", "chrom": "chr9", "pos": 60_000_000, "score": 0.27, "depth": 51},
+    {"id": "g4", "chrom": "chr11", "pos": 20_000_000, "score": 0.73, "depth": 64},
+    {"id": "g5", "chrom": "chr17", "pos": 43_000_000, "score": 0.58, "depth": 46},
+    {"id": "g6", "chrom": "chr20", "pos": 30_000_000, "score": 0.36, "depth": 57},
+]
+
 brush = gs.param("brush")
 brush_update = gs.selection_interval(
     "brush",
@@ -222,6 +231,7 @@ brush_chart = (
 
 
 # interaction-ruler-start
+# A ruler is a shared pointer-following guide rather than a data selection.
 cursor = gs.ruler(
     "cursor",
     persist=False,

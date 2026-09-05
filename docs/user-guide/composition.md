@@ -14,11 +14,6 @@ Composition is hierarchical, so layers and concatenations can be nested. The
 GenomeSpy documentation introduces the same model in
 [view composition](https://genomespy.app/docs/grammar/composition/).
 
-```{literalinclude} ../tutorials/composition.py
-:language: python
-:start-after: composition-data-start
-:end-before: composition-data-end
-```
 
 ## Layer complementary marks
 

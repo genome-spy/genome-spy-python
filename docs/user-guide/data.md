@@ -9,12 +9,6 @@ position, color, size, or another visual channel.
 A list of dictionaries is the smallest useful input. Each dictionary below is
 one observation with the same three fields:
 
-```{literalinclude} ../tutorials/data_inputs.py
-:language: python
-:start-after: data-inputs-records-start
-:end-before: data-inputs-records-end
-```
-
 Pass the records as the first argument to `Chart`:
 
 ```{literalinclude} ../tutorials/data_inputs.py

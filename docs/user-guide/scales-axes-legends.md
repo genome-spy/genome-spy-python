@@ -11,12 +11,6 @@ does not configure any of them explicitly:
 
 ```{literalinclude} ../tutorials/scales_and_guides.py
 :language: python
-:start-after: scales-guides-data-start
-:end-before: scales-guides-data-end
-```
-
-```{literalinclude} ../tutorials/scales_and_guides.py
-:language: python
 :start-after: scales-guides-automatic-start
 :end-before: scales-guides-automatic-end
 ```

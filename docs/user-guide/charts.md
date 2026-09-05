@@ -7,11 +7,6 @@ also called a *unit view*.
 For most marks, GenomeSpy draws one mark for every data row. Six rows therefore
 produce six points in this example:
 
-```{literalinclude} ../tutorials/charts_and_marks.py
-:language: python
-:start-after: charts-marks-observations-start
-:end-before: charts-marks-observations-end
-```
 
 ```{literalinclude} ../tutorials/charts_and_marks.py
 :language: python

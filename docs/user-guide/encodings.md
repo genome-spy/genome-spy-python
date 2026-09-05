@@ -5,12 +5,6 @@ is called a **channel**: `x` controls horizontal position, `color` controls
 color, and `size` controls mark size. The field supplies the values, while its
 data type tells GenomeSpy how those values should be interpreted.
 
-```{literalinclude} ../tutorials/encoding_channels.py
-:language: python
-:start-after: encoding-channels-data-start
-:end-before: encoding-channels-data-end
-```
-
 ## Field and type shorthand
 
 The compact string `"score:Q"` contains a field name (`score`) and a type code

@@ -23,12 +23,6 @@ body[data-theme="dark"] {
   text-align: center;
   padding: 2.5rem 1rem 1rem;
 }
-.gs-hero__logo {
-  display: block;
-  width: clamp(6.5rem, 15vw, 8.5rem);
-  height: auto;
-  margin: 0 auto 0.8rem;
-}
 .gs-hero__mark {
   font-family: "Special Elite", "Lato", cursive;
   font-weight: 400;
@@ -257,6 +251,12 @@ p.lead {
   background: var(--color-background-primary);
   color: var(--color-foreground-muted);
   cursor: pointer;
+}
+
+/* Autosummary tables otherwise shrink to the width of their longest entry,
+   which makes adjacent API sections look unrelated. */
+table.autosummary {
+  width: 100%;
 }
 
 .gs-embed-copy:hover {

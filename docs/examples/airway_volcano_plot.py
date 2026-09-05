@@ -27,7 +27,6 @@ MAX_GENES = 12_000
 # while the cap prevents points from becoming oversized at deep zoom levels.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
-HALO_OFFSETS = [(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)]
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -36,6 +35,8 @@ data, domains = airway_differential_expression(
     pvalue_cutoff=PVALUE_CUTOFF,
     padj_alpha=PADJ_CUTOFF,
 )
+# The sliders are named parameters. Their handles drive both the guide lines
+# and the browser-side classification below.
 effect_cutoff = gs.param(
     "airwayVolcanoEffectCutoff",
     value=LOG2FC_CUTOFF,
@@ -140,10 +141,8 @@ volcano_callout_lines = (
 )
 
 
-def volcano_callout_label(
-    *, side: str, color: str, dx: float, dy: float, name: str
-) -> gs.Chart:
-    """Build one edge-anchored label or halo layer."""
+def volcano_callout_label(*, side: str, name: str) -> gs.Chart:
+    """Build one label layer just beyond its shortened leader line."""
     return (
         gs.Chart()
         .transform_filter(
@@ -152,10 +151,10 @@ def volcano_callout_label(
         .mark_text(
             align="right" if side == "left" else "left",
             baseline="middle",
-            dx=dx,
-            dy=dy,
+            dx=-4 if side == "left" else 4,
+            dy=0,
             fontWeight="bold",
-            color=color,
+            color="#20262d",
             tooltip=None,
         )
         .encode(
@@ -173,23 +172,9 @@ def volcano_callout_label(
     )
 
 
-volcano_callout_halos = [
-    volcano_callout_label(
-        side=side,
-        color="white",
-        dx=(-4 if side == "left" else 4) + halo_dx,
-        dy=halo_dy,
-        name=f"volcano-label-halo-{side}-{index}",
-    )
-    for side in ("left", "right")
-    for index, (halo_dx, halo_dy) in enumerate(HALO_OFFSETS)
-]
 volcano_callout_labels = [
     volcano_callout_label(
         side=side,
-        color="#20262d",
-        dx=-4 if side == "left" else 4,
-        dy=0,
         name=f"volcano-label-{side}",
     )
     for side in ("left", "right")
@@ -201,7 +186,6 @@ chart = (
         volcano_padj_rule,
         volcano_points,
         volcano_callout_lines,
-        *volcano_callout_halos,
         *volcano_callout_labels,
     )
     .properties(

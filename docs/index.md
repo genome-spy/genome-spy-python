@@ -4,7 +4,6 @@ sd_hide_title: true
 
 ```{raw} html
 <div class="gs-hero">
-  <img class="gs-hero__logo" src="_static/snaketie.svg" alt="">
   <h1 class="gs-hero__mark">GenomeSpy <span class="gs-py">for Python</span></h1>
   <p class="gs-hero__tag">Interactive genomic visualization in Python.</p>
 </div>

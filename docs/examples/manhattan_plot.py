@@ -24,6 +24,7 @@ data, _top_hits, domains = hapmap_manhattan_data(
     genome_wide_p=GENOME_WIDE_P,
     suggestive_p=SUGGESTIVE_P,
 )
+# Moving this slider redraws the red guide and outlines the hits above it.
 significance_cutoff = gs.param(
     "manhattanSignificanceCutoff",
     value=round(domains["genome_wide_y"], 1),

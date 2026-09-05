@@ -18,12 +18,6 @@ applies in [config scopes](https://genomespy.app/docs/grammar/config/#config-sco
 and how competing defaults are settled in
 [resolution order](https://genomespy.app/docs/grammar/config/#resolution-order).
 
-```{literalinclude} ../tutorials/configuration.py
-:language: python
-:start-after: configuration-data-start
-:end-before: configuration-data-end
-```
-
 ## Configure one chart
 
 This example uses all three non-data appearance levels deliberately:

@@ -1,14 +1,32 @@
 # Parameters and interaction
 
-Interaction lets a reader change a visualization without rebuilding its Python
-object. GenomeSpy represents interactive state with named **parameters**.
-Scales, transforms, encodings, and expressions can read those names and update
-when their values change.
+Interaction lets a reader change and manipulate a visualization without rebuilding it from scratch. This API follows closely to the parameter ergonomics of
+[Altair](https://altair-viz.github.io/user_guide/interactions/parameters.html):
+create a handle, attach it to a chart, then reuse that handle in an
+encoding, expression, or filter.
 
-Start with the interaction already built into a scale. Add a parameter only
-when the chart needs another named piece of state. The GenomeSpy documentation
-describes the complete parameter model in
-[parameters](https://genomespy.app/docs/grammar/parameters/).
+In practice, GenomeSpy represents interactive state with named **parameters**. Scales,
+transforms, encodings, and expressions can read those names and update when
+their values change. The GenomeSpy documentation describes the complete parameter model in [parameters](https://genomespy.app/docs/grammar/parameters/).
+
+## The four interaction building blocks
+
+- A {py:func}`~genome_spy.param` is a named value, such as a cutoff.
+- A {py:func}`~genome_spy.binding_range` is the input widget used to change
+  that value.
+- A {py:func}`~genome_spy.selection_point` stores marks a reader clicks;
+  {py:func}`~genome_spy.selection_interval` stores a range they drag over.
+- {py:meth}`~genome_spy.TopLevelSpec.add_params` puts the parameter on the
+  chart that owns it.
+
+A **brush** is simply an interval selection: the translucent rectangle that a
+reader drags to choose a range. The selected range can then color marks, filter
+rows, or set a genomic scale domain.
+
+`gs.when(...).then(...).otherwise(...)`
+uses a selection in an encoding; `then()` and `otherwise()` are methods on the
+builder returned by {py:func}`~genome_spy.when`, not separate
+top-level functions.
 
 ## Zoom and pan
 
@@ -32,8 +50,10 @@ follows it.
 
 ## Bind a parameter to an input
 
-`gs.param()` declares a value. `gs.binding_range()` makes a slider, and
-`.add_params()` attaches both parameters to the chart:
+{py:func}`~genome_spy.param` declares a value,
+{py:func}`~genome_spy.binding_range` makes a slider, and
+{py:meth}`~genome_spy.TopLevelSpec.add_params` attaches
+the parameters to the chart:
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -78,9 +98,11 @@ common parent of every view that needs to read it.
 
 ## Select marks and style them conditionally
 
-A **selection parameter** stores what the reader picks. The
-`gs.when(...).then(...).otherwise(...)` helper uses that selection in an
-encoding:
+A **selection parameter** stores what the reader picks. Use
+{py:func}`~genome_spy.selection_point` for discrete marks or
+{py:func}`~genome_spy.selection_interval` for a dragged range. The
+{py:func}`~genome_spy.when` helper uses
+that selection in an encoding:
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -111,7 +133,9 @@ for their configuration options.
 ## Brush an overview to navigate linked tracks
 
 The top row is a map of the chromosomes. Drag across it to choose which part of
-the genome appears below. Both detail tracks move together.
+the genome appears below. That dragged rectangle is the **brush**. It stores
+the selected genomic range under the name `brush`, and both detail tracks read
+that same range, so they move together.
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -125,7 +149,9 @@ the genome appears below. Both detail tracks move together.
 ```
 
 `brush` stores the highlighted region. `initial` chooses the first visible
-region. Both detail tracks use the brush as their x-axis range.
+region. Both detail tracks use the brush as their x-axis range. Think of it as
+using the overview to move a shared viewport: drag a different region above,
+and the tracks below show that region.
 
 The chromosome row always shows the whole genome. Drag its brush, or zoom one
 of the detail tracks, and the other views follow automatically.
@@ -141,6 +167,8 @@ the same pattern to three genome-wide association tracks.
 ## Add one ruler across linked tracks
 
 A **ruler parameter** follows a coordinate and draws a guide across tracks.
+{py:func}`~genome_spy.ruler` is GenomeSpy-specific, but it uses
+the same create, attach, and reuse pattern as value and selection parameters.
 
 Define one ruler at the common parent of the tracks it should span:
 

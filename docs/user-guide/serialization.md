@@ -63,3 +63,13 @@ another page or build system, see
 [embedding](https://genomespy.app/docs/api/embedding/) and the available
 [embed options](https://genomespy.app/docs/api/embed-options/), which
 `chart.widget(embed_options=...)` also accepts.
+
+`embed_options` configures the browser embedding step; it does not change the
+chart specification. The optional PNG, SVG, Inspector, and full-window controls
+provided by GenomeSpy are attached after embedding and are not currently exposed
+by a Python chart method. They therefore cannot be generated from the
+visualization schema; see GenomeSpy's
+[controls documentation](https://genomespy.app/docs/api/embedding/#optional-controls)
+for the current browser-level contract. In that contract, authors choose an
+ordered control list and may set placement, visibility, and error handling;
+PNG and SVG exports also accept a filename and export settings.

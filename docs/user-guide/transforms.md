@@ -13,12 +13,6 @@ specification. They do not process data in Python: the browser-side GenomeSpy
 runtime executes them when it renders or interacts with the visualization.
 ::::
 
-```{literalinclude} ../tutorials/transforms.py
-:language: python
-:start-after: transforms-data-start
-:end-before: transforms-data-end
-```
-
 The original Python data remains unchanged. Each chart below starts with these
 six rows and builds a transformation pipeline in its GenomeSpy specification.
 
