@@ -1112,6 +1112,17 @@ def value(
     return ValueChannel(defined)
 
 
+_PARAMETER_TYPES = (
+    core.Parameter,
+    core.PlainValueParameter,
+    core.TransitionedValueParameter,
+    core.ExprParameter,
+    core.SelectionParameter,
+    core.RulerParameter,
+)
+_SELECTION_PARAMETER_TYPES = (core.SelectionParameter,)
+
+
 @overload
 def param(
     name: str | None = None,
@@ -1279,7 +1290,6 @@ def param(
             core.SelectionParameter,
             core.RulerParameter,
         ),
-        _selection_variants=(core.SelectionParameter,),
         empty=empty,
     )
 
@@ -1352,7 +1362,6 @@ def ruler(
         push=push,
         value=value,
         _variants=(core.RulerParameter,),
-        _selection_variants=(),
     )
 
 
@@ -1434,7 +1443,6 @@ def selection_interval(
         value=value,
         empty=empty,
         _variants=(core.SelectionParameter,),
-        _selection_variants=(core.SelectionParameter,),
     )
 
 
@@ -1497,7 +1505,6 @@ def selection_point(
         value=value,
         empty=empty,
         _variants=(core.SelectionParameter,),
-        _selection_variants=(core.SelectionParameter,),
     )
 
 

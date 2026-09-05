@@ -11,6 +11,7 @@ import pytest
 
 from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
 from genome_spy import api as public_api
+from genome_spy._parameters import _select_parameter_class
 from genome_spy.schema import (
     CompareParams,
     ConcatSpec,
@@ -24,6 +25,7 @@ from genome_spy.schema import (
     LayerSpec,
     Legend,
     MultiscaleSpec,
+    Parameter as GeneratedParameter,
     ExprParameter,
     PlainValueParameter,
     RulerParameter,
@@ -41,7 +43,7 @@ from genome_spy.schema import (
 from genome_spy.schema import ergonomics as generated_ergonomics
 from genome_spy.schema.channels import X as GeneratedX
 from genome_spy.channels import LocusChannel
-from genome_spy.schemapi import SchemaValidationError
+from genome_spy.schemapi import SchemaBase, SchemaValidationError
 
 
 def test_package_exposes_version() -> None:
@@ -600,6 +602,74 @@ def test_parameter_factory_selects_exact_schema_leaf() -> None:
         selection.to_dict()
 
 
+def test_public_parameter_handle_derives_selection_semantics() -> None:
+    selection = gs.Parameter(
+        SelectionParameter(name="brush", select="interval"), empty=False
+    )
+
+    assert selection.is_selection is True
+    assert gs.when(selection).then(gs.value("red")).to_dict() == {
+        "condition": {
+            "param": "brush",
+            "empty": False,
+            "value": "red",
+        }
+    }
+    with pytest.raises(TypeError, match="Selection parameters cannot"):
+        _ = selection + 1
+
+
+def test_public_parameter_handle_copy_preserves_metadata() -> None:
+    selection = gs.selection_interval("brush", encodings=["x"], empty=False)
+
+    copied = selection.copy()
+
+    assert copied is not selection
+    assert copied.param is not selection.param
+    assert copied.param.to_dict() == selection.param.to_dict()
+    assert copied.name == selection.name
+    assert copied.empty is False
+    assert copied.is_selection is True
+    assert copied.name_is_explicit is True
+
+    unnamed = gs.param(value=0.5)
+    updated = unnamed.copy(value=0.75)
+    assert updated.param.to_dict()["value"] == 0.75
+    assert updated.name != unnamed.name
+    assert updated.name_is_explicit is False
+
+
+def test_parameter_dispatch_uses_schema_discriminators() -> None:
+    class FirstParameter(SchemaBase):
+        _schema = {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "kind": {"const": "first"},
+            },
+            "required": ["name", "kind"],
+            "additionalProperties": False,
+        }
+
+    class SecondParameter(SchemaBase):
+        _schema = {
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "kind": {"const": "second"},
+            },
+            "required": ["name", "kind"],
+            "additionalProperties": False,
+        }
+
+    selected = _select_parameter_class(
+        {"name": "choice", "kind": "first"},
+        (FirstParameter, SecondParameter),
+    )
+
+    assert selected is FirstParameter
+
+
 def test_unnamed_parameters_are_stable_and_deduplicate() -> None:
     first = gs.param(value=0.5)
     second = gs.param(value=0.5)
@@ -614,6 +684,14 @@ def test_add_params_rejects_duplicate_explicit_names_and_non_parameters() -> Non
         gs.Chart().add_params(gs.param("cutoff"), gs.param("cutoff"))
     with pytest.raises(TypeError, match="parameter definition"):
         gs.Chart().add_params(gs.Scale())
+
+
+def test_add_params_accepts_generated_parameter_union_wrapper() -> None:
+    parameter = GeneratedParameter(name="cutoff", value=0.5)
+
+    assert gs.Chart().add_params(parameter).to_dict(validate=False)["params"] == [
+        {"name": "cutoff", "value": 0.5}
+    ]
 
 
 def test_generated_selection_helpers_feed_selection_filters() -> None:

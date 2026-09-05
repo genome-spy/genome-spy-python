@@ -367,6 +367,13 @@ def test_parameter_factories_follow_future_schema_variants() -> None:
 
     assert "future: bool," in module.source
     assert "core.FutureParameter," in module.source
+    assert "_PARAMETER_TYPES = (" in module.source
+    assert "core.Parameter, core.PlainValueParameter" in module.source
+    parameter_types = module.source.split("_PARAMETER_TYPES =", 1)[1].split(
+        "_SELECTION_PARAMETER_TYPES =", 1
+    )[0]
+    assert "core.FutureParameter" in parameter_types
+    assert "_SELECTION_PARAMETER_TYPES = (core.SelectionParameter,)" in module.source
     assert "input: Literal['text', 'number', 'color', 'date']" in module.source
     assert "def selection_lasso(" in module.source
     assert "config = core.LassoSelectionConfig(" in module.source

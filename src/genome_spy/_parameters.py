@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any, cast
+from typing import Any, Self, cast
 
 from genome_spy._expressions import (
     Expression,
@@ -14,6 +14,7 @@ from genome_spy._expressions import (
 from genome_spy.schema import core
 from genome_spy.schemapi import (
     SchemaBase,
+    SchemaValidationError,
     Undefined,
     normalize_schema_value,
 )
@@ -47,9 +48,17 @@ class Parameter(ExpressionOperatorMixin, core.ExprRef):
         param: SchemaBase,
         *,
         empty: bool = True,
-        _is_selection: bool = False,
         _name_is_explicit: bool = True,
     ) -> None:
+        from genome_spy.schema.ergonomics import (
+            _PARAMETER_TYPES,
+            _SELECTION_PARAMETER_TYPES,
+        )
+
+        if not isinstance(param, _PARAMETER_TYPES):
+            raise TypeError(
+                "Parameter requires a generated GenomeSpy parameter declaration."
+            )
         values = param.to_dict(validate=False)
         name = values.get("name")
         if not isinstance(name, str):
@@ -57,7 +66,9 @@ class Parameter(ExpressionOperatorMixin, core.ExprRef):
         self.param = param
         self.empty = empty
         self._name_is_explicit = _name_is_explicit
-        self._is_selection = _is_selection
+        self._is_selection = isinstance(
+            param, _SELECTION_PARAMETER_TYPES
+        ) or _matches_parameter_type(values, _SELECTION_PARAMETER_TYPES)
         core.ExprRef.__init__(self, expr=name)
 
     @property
@@ -79,6 +90,37 @@ class Parameter(ExpressionOperatorMixin, core.ExprRef):
         if self.is_selection:
             raise TypeError("Selection parameters cannot be used as expressions.")
         return Expression(self.name)
+
+    def copy(self, *, deep: bool = True, **kwds: Any) -> Self:
+        """Return an equivalent parameter handle.
+
+        Args:
+            deep: Copy nested values in the generated declaration.
+            **kwds: Updates for the generated declaration.
+
+        Returns:
+            A parameter handle with the same declaration and authoring metadata.
+
+        Raises:
+            TypeError: If the copied declaration is not a generated parameter.
+
+        Example:
+            >>> threshold = param("threshold", value=0.5)
+            >>> threshold.copy().param.to_dict()
+            {'name': 'threshold', 'value': 0.5}
+        """
+        definition = self.param.copy(deep=deep, **kwds)
+        name_is_explicit = self.name_is_explicit or "name" in kwds
+        if not name_is_explicit and kwds:
+            values = definition.to_dict(validate=False)
+            values.pop("name", None)
+            values["name"] = _stable_parameter_name(values)
+            definition = type(definition)(**values)
+        return type(self)(
+            definition,
+            empty=self.empty,
+            _name_is_explicit=name_is_explicit,
+        )
 
     def to_dict(self, *, validate: bool = True) -> dict[str, Any]:
         """Return an expression reference for expression-capable parameters.
@@ -121,6 +163,19 @@ def _defined_properties(properties: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in properties.items() if value is not Undefined}
 
 
+def _matches_parameter_type(
+    properties: dict[str, Any],
+    variants: tuple[type[SchemaBase], ...],
+) -> bool:
+    for variant in variants:
+        try:
+            variant(**properties).to_dict(validate=True)
+        except SchemaValidationError:
+            continue
+        return True
+    return False
+
+
 def _select_parameter_class(
     properties: dict[str, Any],
     variants: tuple[type[SchemaBase], ...],
@@ -133,6 +188,15 @@ def _select_parameter_class(
         required = set(schema.get("required", ()))
         if required <= supplied <= allowed:
             matches.append(variant)
+    if len(matches) > 1:
+        validated: list[type[SchemaBase]] = []
+        for variant in matches:
+            try:
+                variant(**properties).to_dict(validate=True)
+            except SchemaValidationError:
+                continue
+            validated.append(variant)
+        matches = validated
     if len(matches) != 1:
         names = ", ".join(sorted(supplied)) or "no arguments"
         if not matches:
@@ -149,7 +213,6 @@ def _make_parameter(
     /,
     *,
     _variants: tuple[type[SchemaBase], ...],
-    _selection_variants: tuple[type[SchemaBase], ...] = (),
     empty: bool = True,
     **properties: Any,
 ) -> Parameter:
@@ -193,7 +256,6 @@ def _make_parameter(
     return Parameter(
         definition,
         empty=empty,
-        _is_selection=parameter_class in _selection_variants,
         _name_is_explicit=name_is_explicit,
     )
 

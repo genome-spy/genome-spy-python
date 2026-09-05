@@ -2831,7 +2831,10 @@ class SchemaWrapperGenerator:
                         else []
                     ),
                     *(
-                        [_parameter_helper_source(parameter_variants)]
+                        [
+                            _parameter_type_metadata_source(parameter_variants),
+                            _parameter_helper_source(parameter_variants),
+                        ]
                         if parameter_variants
                         else []
                     ),
@@ -3761,13 +3764,7 @@ def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
     variant_names = tuple(
         variant.schema_name for variant in variants if variant.schema_name is not None
     )
-    selection_variant_names = tuple(
-        variant.schema_name
-        for variant in variants
-        if variant.schema_name is not None and "select" in variant.required
-    )
     variant_classes = _core_class_tuple_source(variant_names)
-    selection_variant_classes = _core_class_tuple_source(selection_variant_names)
     return "\n\n".join(
         [
             "\n\n".join(overloads),
@@ -3805,7 +3802,6 @@ def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
                     "        name,",
                     f"        {forwarded}",
                     f"        _variants={variant_classes},",
-                    f"        _selection_variants={selection_variant_classes},",
                     "        empty=empty,",
                     "    )",
                 ]
@@ -3819,6 +3815,32 @@ def _core_class_tuple_source(class_names: tuple[str, ...]) -> str:
     if not class_names:
         return "()"
     return "(" + ", ".join(f"core.{name}" for name in class_names) + ",)"
+
+
+def _parameter_type_metadata_source(
+    variants: tuple[UnionVariantSpec, ...],
+) -> str:
+    """Render private runtime type tuples from the generated parameter union."""
+    variant_names = (
+        "Parameter",
+        *(
+            variant.schema_name
+            for variant in variants
+            if variant.schema_name is not None
+        ),
+    )
+    selection_variant_names = tuple(
+        variant.schema_name
+        for variant in variants
+        if variant.schema_name is not None and "select" in variant.required
+    )
+    return "\n".join(
+        [
+            f"_PARAMETER_TYPES = {_core_class_tuple_source(variant_names)}",
+            "_SELECTION_PARAMETER_TYPES = "
+            + _core_class_tuple_source(selection_variant_names),
+        ]
+    )
 
 
 def _parameter_config_helper_source(spec: ParameterConfigFactorySpec) -> str:
@@ -3862,9 +3884,6 @@ def _parameter_config_helper_source(spec: ParameterConfigFactorySpec) -> str:
     if parameter_arguments:
         parameter_arguments = ", " + parameter_arguments
     empty_argument = ", empty=empty" if spec.supports_empty else ""
-    selection_variants = (
-        f"(core.{spec.parameter_class_name},)" if spec.supports_empty else "()"
-    )
     return "\n".join(
         [
             f"def {spec.helper_name}(",
@@ -3901,7 +3920,6 @@ def _parameter_config_helper_source(spec: ParameterConfigFactorySpec) -> str:
             "        name,",
             f"        {spec.config_property}=config{parameter_arguments}{empty_argument},",
             f"        _variants=(core.{spec.parameter_class_name},),",
-            f"        _selection_variants={selection_variants},",
             "    )",
             "",
             "",

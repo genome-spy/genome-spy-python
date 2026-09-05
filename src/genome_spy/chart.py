@@ -145,19 +145,11 @@ def _merge_encoding_definitions(
 def _parameter_declaration_identity(value: Parameter | SchemaBase) -> tuple[str, bool]:
     """Return a parameter declaration's name and explicit-name status."""
     from genome_spy._parameters import Parameter
-    from genome_spy.schema import core
+    from genome_spy.schema.ergonomics import _PARAMETER_TYPES
 
     if isinstance(value, Parameter):
         return value.name, value.name_is_explicit
-    parameter_types = (
-        core.PlainValueParameter,
-        core.TransitionedValueParameter,
-        core.ExprParameter,
-        core.SelectionParameter,
-        core.RulerParameter,
-        core.Parameter,
-    )
-    if not isinstance(value, parameter_types):
+    if not isinstance(value, _PARAMETER_TYPES):
         raise TypeError(
             f"Expected a generated GenomeSpy parameter definition, got {type(value)!r}."
         )
