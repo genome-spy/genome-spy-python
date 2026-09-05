@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import genome_spy as gs
 from genome_spy.datasets._oncoprint import laml_oncoplot_data
-from genome_spy.schema import Legend, Scale
+from genome_spy.schema import Legend, RulerMarkConfig, Scale
 
 META = {
     "category": "Oncoprints and cohort summaries",
@@ -29,6 +29,13 @@ CLASS_ORDER = [
 ]
 
 data = laml_oncoplot_data()
+sample_ruler = gs.ruler(
+    "sampleRuler",
+    persist=False,
+    encodings=["x"],
+    snap=False,
+    mark=RulerMarkConfig(opacity=0.3),
+)
 
 class_colors = (
     Scale()
@@ -105,21 +112,14 @@ matrix = (
     )
 )
 
-matrix_panel = (grid + matrix).properties(
-    width=matrix_width,
-    height=matrix_height,
-    scales={"y": gene_scale},
-    params=[
-        gs.param(
-            "sampleRuler",
-            persist=False,
-            ruler={
-                "encodings": ["x"],
-                "snap": False,
-                "mark": {"opacity": 0.3},
-            },
-        )
-    ],
+matrix_panel = (
+    (grid + matrix)
+    .properties(
+        width=matrix_width,
+        height=matrix_height,
+        scales={"y": gene_scale},
+    )
+    .add_params(sample_ruler)
 )
 
 percent_panel = (

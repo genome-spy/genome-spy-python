@@ -28,11 +28,6 @@ MAX_GENES = 12_000
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
 HALO_OFFSETS = [(-1.25, -1.25), (1.25, -1.25), (-1.25, 1.25), (1.25, 1.25)]
-DIRECTION_EXPRESSION = gs.Expression(
-    "datum.neglog10_pvalue >= airwayVolcanoSignificanceCutoff && "
-    "abs(datum.log2fc) >= airwayVolcanoEffectCutoff "
-    "? (datum.log2fc < 0 ? 'down in dex' : 'up in dex') : 'n.s.'"
-)
 
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
@@ -40,6 +35,32 @@ data, domains = airway_differential_expression(
     log2fc_cutoff=LOG2FC_CUTOFF,
     pvalue_cutoff=PVALUE_CUTOFF,
     padj_alpha=PADJ_CUTOFF,
+)
+effect_cutoff = gs.param(
+    "airwayVolcanoEffectCutoff",
+    value=LOG2FC_CUTOFF,
+    bind=gs.binding_range(
+        min=0,
+        max=3,
+        step=0.1,
+        name="Absolute log2 fold-change cutoff: ",
+    ),
+)
+significance_cutoff = gs.param(
+    "airwayVolcanoSignificanceCutoff",
+    value=domains["pvalue_cutoff"][0],
+    bind=gs.binding_range(
+        min=0,
+        max=domains["volcano_y"][1],
+        step=0.25,
+        name="−log10 p cutoff: ",
+    ),
+)
+DIRECTION_EXPRESSION = gs.expr.if_(
+    (gs.datum.neglog10_pvalue >= significance_cutoff)
+    & (gs.expr.abs(gs.datum.log2fc) >= effect_cutoff),
+    gs.expr.if_(gs.datum.log2fc < 0, "down in dex", "up in dex"),
+    "n.s.",
 )
 
 direction_colors = (
@@ -77,9 +98,7 @@ volcano_points = (
 
 volcano_fc_rules = (
     gs.Chart([{"side": -1}, {"side": 1}])
-    .transform_formula(
-        expr=gs.Expression("datum.side * airwayVolcanoEffectCutoff"), as_="x"
-    )
+    .transform_formula(expr=gs.datum.side * effect_cutoff, as_="x")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         x=gs.X("x:Q")
@@ -90,7 +109,7 @@ volcano_fc_rules = (
 
 volcano_padj_rule = (
     gs.Chart([{}])
-    .transform_formula(expr=gs.Expression("airwayVolcanoSignificanceCutoff"), as_="y")
+    .transform_formula(expr=significance_cutoff, as_="y")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         y=gs.Y("y:Q")
@@ -176,43 +195,23 @@ volcano_callout_labels = [
     for side in ("left", "right")
 ]
 
-chart = gs.layer(
-    volcano_fc_rules,
-    volcano_padj_rule,
-    volcano_points,
-    volcano_callout_lines,
-    *volcano_callout_halos,
-    *volcano_callout_labels,
-).properties(
-    data=data,
-    title="Airway dexamethasone response: volcano plot",
-    params=[
-        gs.param(
-            "airwayVolcanoEffectCutoff",
-            value=LOG2FC_CUTOFF,
-            bind={
-                "input": "range",
-                "min": 0,
-                "max": 3,
-                "step": 0.1,
-                "name": "Absolute log2 fold-change cutoff: ",
-            },
+chart = (
+    gs.layer(
+        volcano_fc_rules,
+        volcano_padj_rule,
+        volcano_points,
+        volcano_callout_lines,
+        *volcano_callout_halos,
+        *volcano_callout_labels,
+    )
+    .properties(
+        data=data,
+        title="Airway dexamethasone response: volcano plot",
+        description=(
+            "A paired differential-expression volcano plot showing fold change "
+            "against significance, with interactive thresholds and selected "
+            "genes identified by callouts."
         ),
-        gs.param(
-            "airwayVolcanoSignificanceCutoff",
-            value=domains["pvalue_cutoff"][0],
-            bind={
-                "input": "range",
-                "min": 0,
-                "max": domains["volcano_y"][1],
-                "step": 0.25,
-                "name": "−log10 p cutoff: ",
-            },
-        ),
-    ],
-    description=(
-        "A paired differential-expression volcano plot showing fold change "
-        "against significance, with interactive thresholds and selected "
-        "genes identified by callouts."
-    ),
+    )
+    .add_params(effect_cutoff, significance_cutoff)
 )

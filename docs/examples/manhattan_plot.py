@@ -24,6 +24,16 @@ data, _top_hits, domains = hapmap_manhattan_data(
     genome_wide_p=GENOME_WIDE_P,
     suggestive_p=SUGGESTIVE_P,
 )
+significance_cutoff = gs.param(
+    "manhattanSignificanceCutoff",
+    value=round(domains["genome_wide_y"], 1),
+    bind=gs.binding_range(
+        min=3,
+        max=domains["y_domain"][1],
+        step=0.1,
+        name="−log10 p cutoff: ",
+    ),
+)
 
 # --- Visualization -------------------------------------------------------------
 
@@ -60,9 +70,7 @@ points = (
 
 genome_wide_rule = (
     gs.Chart([{}])
-    .transform_formula(
-        expr=gs.Expression("manhattanSignificanceCutoff"), as_="threshold"
-    )
+    .transform_formula(expr=significance_cutoff, as_="threshold")
     .mark_rule(strokeDash=[6, 4], size=1.4, color="#c53b2c")
     .encode(
         y=gs.Y("threshold:Q")
@@ -83,7 +91,7 @@ suggestive_rule = (
 
 highlight_points = (
     gs.Chart()
-    .transform_filter(gs.Expression("datum.neglog >= manhattanSignificanceCutoff"))
+    .transform_filter(gs.datum.neglog >= significance_cutoff)
     .mark_point(
         size=48,
         filled=True,
@@ -105,21 +113,8 @@ chart = association_track.properties(
     assembly="hg18",
     title="HapMap genome-wide association scan",
     data=data,
-    params=[
-        gs.param(
-            "manhattanSignificanceCutoff",
-            value=round(domains["genome_wide_y"], 1),
-            bind={
-                "input": "range",
-                "min": 3,
-                "max": domains["y_domain"][1],
-                "step": 0.1,
-                "name": "−log10 p cutoff: ",
-            },
-        )
-    ],
     description=(
         "A Manhattan plot with a locus-aware chromosome axis and an "
         "interactive significance threshold."
     ),
-)
+).add_params(significance_cutoff)

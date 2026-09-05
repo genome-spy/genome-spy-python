@@ -22,6 +22,11 @@ DISPLACEMENT_LENGTH = 18
 # Mutations, sample counts, and protein domains are prepared packaged data.
 # GenomeSpy performs only the declarative sorting and collision displacement.
 data = pik3ca_lollipop_data()
+protein_length = gs.param("proteinLength", value=data["proteinLength"])
+line_width = gs.param("lineWidth", value=1)
+pixels_per_residue = gs.param(
+    "pixelsPerResidue", expr="width * (scale('x', 1) - scale('x', 0))"
+)
 
 # Labels, stems, points, and counts use separate layers because each needs its
 # own sizing and alignment.
@@ -41,12 +46,12 @@ mutation_labels = (
 )
 stems = (
     gs.Chart()
-    .mark_rule(size=gs.expr("lineWidth"), color="#707070", tooltip=None)
+    .mark_rule(size=line_width, color="#707070", tooltip=None)
     .encode(y2=gs.value(0))
 )
 upper_guides = (
     gs.Chart()
-    .mark_rule(size=gs.expr("lineWidth"), color="#bbb", strokeDash=[3, 3], tooltip=None)
+    .mark_rule(size=line_width, color="#bbb", strokeDash=[3, 3], tooltip=None)
     .encode(y2=gs.value(1))
 )
 lollipops = (
@@ -82,7 +87,7 @@ connectors = (
         linkShape="diagonal",
         orient="vertical",
         x2Offset=0,
-        size=gs.expr("lineWidth"),
+        size=line_width,
         color="#707070",
         tooltip=None,
     )
@@ -91,7 +96,7 @@ connectors = (
 )
 anchors = (
     gs.Chart()
-    .mark_rule(size=gs.expr("lineWidth"), color="#707070", tooltip=None, y2Offset=20)
+    .mark_rule(size=line_width, color="#707070", tooltip=None, y2Offset=20)
     .encode(xOffset=gs.XOffset(gs.value(0)), y=gs.value(0), y2=gs.value(0))
     .properties(name="true-position-anchors")
 )
@@ -121,7 +126,7 @@ mutation_view = (
         pos="position",
         length=DISPLACEMENT_LENGTH,
         as_="xDisplacement",
-        positionFactor=gs.expr("pixelsPerResidue"),
+        positionFactor=pixels_per_residue,
         extent=gs.expr("[0.5, proteinLength + 0.5 - 25 / max(1, pixelsPerResidue)]"),
     )
 )
@@ -129,7 +134,7 @@ mutation_view = (
 # The protein backbone and domains share the mutation view's x scale.
 backbone = (
     gs.Chart([{"start": 1}])
-    .transform_formula(expr=gs.Expression("proteinLength"), as_="end")
+    .transform_formula(expr=protein_length, as_="end")
     .mark_rect(y=0.36, y2=0.64, color="#b9bdb8", tooltip=None)
     .properties(name="protein-backbone")
 )
@@ -195,14 +200,8 @@ chart = (
         ),
         datasets={"mutations": data["mutations"], "domains": data["domains"]},
         scales={"x": {"domainMin": 1, "nice": False}},
-        params=[
-            gs.param("proteinLength", value=data["proteinLength"]),
-            gs.param("lineWidth", value=1),
-            gs.param(
-                "pixelsPerResidue", expr="width * (scale('x', 1) - scale('x', 0))"
-            ),
-        ],
     )
+    .add_params(protein_length, line_width, pixels_per_residue)
     .resolve_scale(x="shared", color="independent")
     .resolve_legend(color="collected")
 )

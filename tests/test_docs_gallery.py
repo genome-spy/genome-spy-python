@@ -542,7 +542,7 @@ def test_ma_and_volcano_thresholds_drive_point_classification(
         if layer["mark"]["type"] == "rule"
         and layer.get("transform", [{}])[0].get("type") == "formula"
     }
-    assert f"datum.side * {effect_param}" in rule_expressions
+    assert f"(datum.side * {effect_param})" in rule_expressions
     if "volcano" in filename:
         assert significance_param in rule_expressions
 
@@ -1177,7 +1177,7 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     assert example.spec["layer"][3]["transform"] == [
         {
             "type": "filter",
-            "expr": "datum.neglog >= manhattanSignificanceCutoff",
+            "expr": "(datum.neglog >= manhattanSignificanceCutoff)",
         }
     ]
     assert example.spec["layer"][3]["mark"]["color"] == "#c53b2c"

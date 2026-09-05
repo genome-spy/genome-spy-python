@@ -12,7 +12,7 @@ META = {
     "height": 300,
     "max_width": 980,
 }
-ALLELE = gs.Expression("allele")
+allele = gs.param("allele", value="ref")
 REF_BIGWIG_URL = (
     "https://raw.githubusercontent.com/kundajelab/dynseq-paper/"
     "febc9180d72e92302d35c549002e0d56c79c536e/SPI1_bQTL/"
@@ -70,11 +70,10 @@ allele_track = (
         .properties(name="dynseq"),
     )
     .properties(
-        params=[gs.param("allele", value="ref")],
         title=gs.Title(
             text=gs.expr(
                 gs.expr.if_(
-                    ALLELE == "ref",
+                    allele == "ref",
                     "Reference allele (C)",
                     "Alternate allele (G)",
                 )
@@ -83,10 +82,11 @@ allele_track = (
         ),
         height=120,
     )
+    .add_params(allele)
     .transform_coordinate_lookup(
         from_={
             "data": gs.lazy.bigwig(
-                gs.expr(gs.expr.if_(ALLELE == "ref", REF_BIGWIG_URL, ALT_BIGWIG_URL)),
+                gs.expr(gs.expr.if_(allele == "ref", REF_BIGWIG_URL, ALT_BIGWIG_URL)),
                 pixelsPerBin=1,
             ),
             "transform": [
@@ -105,7 +105,7 @@ allele_track = (
     # tracks retain the same reference coordinate rows and shared x scale.
     .transform_formula(
         expr=gs.expr.if_(
-            (ALLELE == "alt") & (gs.datum.pos == 43720929),
+            (allele == "alt") & (gs.datum.pos == 43720929),
             "G",
             gs.datum.base,
         ),

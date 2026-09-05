@@ -6,6 +6,7 @@ rounded allele-specific solution.
 """
 
 import genome_spy as gs
+from genome_spy.schema import RulerMarkConfig
 
 META = {
     "category": "Copy-number plots",
@@ -27,14 +28,47 @@ ASCAT_SOLUTIONS = [
     {"sample": "S100", "rho": 0.65, "psi": 3.4},
 ]
 
-SAMPLE = gs.Expression("sample")
+MIN_LENGTH = gs.param("minLength", value=1)
+SAMPLE = gs.param(
+    "sample",
+    value="S96",
+    bind=gs.binding_select(options=SAMPLES, name="Sample"),
+)
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 WIDTH = gs.Expression("width")
 HEIGHT = gs.Expression("height")
-GAMMA = gs.Expression("gamma")
-SELECTED_FIT = gs.Expression("selectedFit")
-FIT_BOTH_ALLELES = gs.Expression("fitBothAlleles")
-DOWNWEIGHT_BALANCED = gs.Expression("downweightBalanced")
+GAMMA = gs.param(
+    "gamma",
+    value=0.55,
+    bind=gs.binding_range(
+        min=0.2,
+        max=1.2,
+        step=0.05,
+        name="LogR decompaction (gamma)",
+        debounce=100,
+    ),
+)
+SELECTED_FIT = gs.param("selectedFit")
+SELECTED_FIT_UPDATE = gs.ruler(
+    "selectedFit",
+    push="outer",
+    value={"x": 2.75, "y": 0.56},
+    encodings=["x", "y"],
+    on="mousedown",
+    clear=False,
+    snap=False,
+    mark=RulerMarkConfig(strokeDash=[5, 3]),
+)
+FIT_BOTH_ALLELES = gs.param(
+    "fitBothAlleles",
+    value=False,
+    bind=gs.binding_checkbox(name="Include both alleles in fit"),
+)
+DOWNWEIGHT_BALANCED = gs.param(
+    "downweightBalanced",
+    value=True,
+    bind=gs.binding_checkbox(name="Downweight balanced segments"),
+)
 
 SEGMENT_URL = gs.expr(
     "https://data.genomespy.app/sample-data/ASCAT/ascat_fit_segments_"
@@ -91,20 +125,6 @@ sunrise = (
             style="overlay-title",
         ),
         height=240,
-        params=[
-            gs.param(
-                "selectedFit",
-                push="outer",
-                value={"x": 2.75, "y": 0.56},
-                ruler={
-                    "encodings": ["x", "y"],
-                    "on": "mousedown",
-                    "clear": False,
-                    "snap": False,
-                    "mark": {"strokeDash": [5, 3]},
-                },
-            )
-        ],
         data={
             "sequence": {
                 "start": 0.1,
@@ -114,6 +134,7 @@ sunrise = (
             }
         },
     )
+    .add_params(SELECTED_FIT_UPDATE)
     .resolve_scale(x="excluded")
     .resolve_axis(x="excluded")
     .transform_cross(
@@ -301,7 +322,7 @@ selected_fit = (
 minor_error = (
     gs.Chart()
     .mark_rect(
-        minWidth=gs.expr("minLength"),
+        minWidth=MIN_LENGTH,
         fillOpacity=0.15,
         strokeOpacity=1,
         strokeWidth=1,
@@ -319,7 +340,7 @@ minor_error = (
 major_error = (
     gs.Chart()
     .mark_rect(
-        minWidth=gs.expr("minLength"),
+        minWidth=MIN_LENGTH,
         fillOpacity=0.15,
         strokeOpacity=1,
         strokeWidth=1,
@@ -336,7 +357,7 @@ major_error = (
 )
 minor_rounded = (
     gs.Chart()
-    .mark_rule(minLength=gs.expr("minLength"), yOffset=-3)
+    .mark_rule(minLength=MIN_LENGTH, yOffset=-3)
     .encode(
         y=gs.Y("nMinor:Q")
         .scale(domain=[0, 6], padding=0.04, clamp=True)
@@ -347,7 +368,7 @@ minor_rounded = (
 )
 major_rounded = (
     gs.Chart()
-    .mark_rule(minLength=gs.expr("minLength"), yOffset=3)
+    .mark_rule(minLength=MIN_LENGTH, yOffset=3)
     .encode(
         y=gs.Y("nMajor:Q").scale(domain=[0, 6]),
         size=gs.value(5),
@@ -396,12 +417,12 @@ def raw_probe_track(field: str) -> gs.Chart:
 logr_track = (
     raw_probe_track("logR")
     + gs.Chart()
-    .mark_rule(minLength=gs.expr("minLength"))
+    .mark_rule(minLength=MIN_LENGTH)
     .encode(
         y=gs.Y("logRMean:Q").title("LogR"), size=gs.value(3), color=gs.value("black")
     )
     + gs.Chart()
-    .mark_rule(minLength=gs.expr("minLength"))
+    .mark_rule(minLength=MIN_LENGTH)
     .encode(
         y=gs.Y("logRMean_ASCAT:Q").title(None),
         size=gs.value(2),
@@ -415,7 +436,7 @@ logr_track = (
 baf_track = (
     raw_probe_track("baf")
     + gs.Chart()
-    .mark_rule(minLength=gs.expr("minLength"))
+    .mark_rule(minLength=MIN_LENGTH)
     .encode(
         y=gs.Y("bafMean:Q").scale(domain=[0, 1]).title("BAF"),
         size=gs.value(3),
@@ -429,14 +450,14 @@ baf_track = (
         color=gs.value("black"),
     )
     + gs.Chart()
-    .mark_rule(minLength=gs.expr("minLength"))
+    .mark_rule(minLength=MIN_LENGTH)
     .encode(
         y=gs.Y("bafMean_ASCAT:Q").title(None),
         size=gs.value(2),
         color=gs.value("#88d27a"),
     )
     + gs.Chart()
-    .mark_rule(minLength=gs.expr("minLength"))
+    .mark_rule(minLength=MIN_LENGTH)
     .encode(
         y=gs.Y(gs.expr(1 - gs.datum.bafMean_ASCAT), type="quantitative").title(None),
         size=gs.value(2),
@@ -454,43 +475,20 @@ chart = (
     .properties(
         assembly="hg19",
         datasets={"ascat-solutions": ASCAT_SOLUTIONS},
-        params=[
-            gs.param("minLength", value=1),
-            gs.param("selectedFit"),
-            gs.param(
-                "sample",
-                value="S96",
-                bind={"input": "select", "options": SAMPLES, "name": "Sample"},
-            ),
-            gs.param(
-                "gamma",
-                value=0.55,
-                bind={
-                    "input": "range",
-                    "min": 0.2,
-                    "max": 1.2,
-                    "step": 0.05,
-                    "name": "LogR decompaction (gamma)",
-                    "debounce": 100,
-                },
-            ),
-            gs.param(
-                "downweightBalanced",
-                value=True,
-                bind={"input": "checkbox", "name": "Downweight balanced segments"},
-            ),
-            gs.param(
-                "fitBothAlleles",
-                value=False,
-                bind={"input": "checkbox", "name": "Include both alleles in fit"},
-            ),
-        ],
         data=gs.Data(url=SEGMENT_URL),
         background="#fafafa",
         description=(
             "Interactive ASCAT-like purity/ploidy fitting with linked rounded "
             "copy-number, LogR, and BAF tracks."
         ),
+    )
+    .add_params(
+        MIN_LENGTH,
+        SELECTED_FIT,
+        SAMPLE,
+        GAMMA,
+        DOWNWEIGHT_BALANCED,
+        FIT_BOTH_ALLELES,
     )
     .encode(
         x=gs.Locus("chr", "startpos").scale(type="locus").axis(title=None),

@@ -23,10 +23,31 @@ NEGLOG_P_CUTOFF = domains["neglog_pvalue_cutoff"]
 # while the cap prevents points from becoming oversized at deep zoom levels.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(16 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
-ASSOCIATION_EXPRESSION = gs.Expression(
-    "datum.neglog >= hapmapSignificanceCutoff && "
-    "abs(datum.EFFECTSIZE) >= hapmapEffectCutoff "
-    "? (datum.EFFECTSIZE < 0 ? 'protective' : 'risk') : 'n.s.'"
+effect_cutoff = gs.param(
+    "hapmapEffectCutoff",
+    value=EFFECT_CUTOFF,
+    bind=gs.binding_range(
+        min=0,
+        max=X_DOMAIN[1],
+        step=0.1,
+        name="Absolute effect cutoff: ",
+    ),
+)
+significance_cutoff = gs.param(
+    "hapmapSignificanceCutoff",
+    value=NEGLOG_P_CUTOFF,
+    bind=gs.binding_range(
+        min=0,
+        max=Y_DOMAIN[1],
+        step=0.25,
+        name="−log10 p cutoff: ",
+    ),
+)
+ASSOCIATION_EXPRESSION = gs.expr.if_(
+    (gs.datum.neglog >= significance_cutoff)
+    & (gs.expr.abs(gs.datum.EFFECTSIZE) >= effect_cutoff),
+    gs.expr.if_(gs.datum.EFFECTSIZE < 0, "protective", "risk"),
+    "n.s.",
 )
 
 # --- Visualization -------------------------------------------------------------
@@ -55,49 +76,29 @@ points = (
 
 effect_cutoffs = (
     gs.Chart([{"side": -1}, {"side": 1}])
-    .transform_formula(expr=gs.Expression("datum.side * hapmapEffectCutoff"), as_="x")
+    .transform_formula(expr=gs.datum.side * effect_cutoff, as_="x")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(x=gs.X("x:Q").scale(domain=X_DOMAIN, zoom=True).title("Effect size (beta)"))
 )
 
-significance_cutoff = (
+significance_rule = (
     gs.Chart([{}])
-    .transform_formula(expr=gs.Expression("hapmapSignificanceCutoff"), as_="y")
+    .transform_formula(expr=significance_cutoff, as_="y")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
         y=gs.Y("y:Q").scale(reverse=False, domain=Y_DOMAIN, zoom=True).title("−log10 p")
     )
 )
 
-chart = (effect_cutoffs + significance_cutoff + points).properties(
-    title="HapMap association volcano",
-    data=data,
-    params=[
-        gs.param(
-            "hapmapEffectCutoff",
-            value=EFFECT_CUTOFF,
-            bind={
-                "input": "range",
-                "min": 0,
-                "max": X_DOMAIN[1],
-                "step": 0.1,
-                "name": "Absolute effect cutoff: ",
-            },
+chart = (
+    (effect_cutoffs + significance_rule + points)
+    .properties(
+        title="HapMap association volcano",
+        data=data,
+        description=(
+            "Effect size versus significance, with interactive effect-size and "
+            "p-value cutoffs controlling the guide lines and point colors."
         ),
-        gs.param(
-            "hapmapSignificanceCutoff",
-            value=NEGLOG_P_CUTOFF,
-            bind={
-                "input": "range",
-                "min": 0,
-                "max": Y_DOMAIN[1],
-                "step": 0.25,
-                "name": "−log10 p cutoff: ",
-            },
-        ),
-    ],
-    description=(
-        "Effect size versus significance, with interactive effect-size and "
-        "p-value cutoffs controlling the guide lines and point colors."
-    ),
+    )
+    .add_params(effect_cutoff, significance_cutoff)
 )

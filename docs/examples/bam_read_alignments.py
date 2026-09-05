@@ -31,10 +31,32 @@ base_colors = gs.Scale(
     domain=["A", "C", "T", "G", "N"],
     range=["#4FBF45", "#4D96E8", "#E85F78", "#E8B322", "#BDBDBD"],
 )
-LANE_HEIGHT = gs.Expression("laneHeight")
-MIN_MAPQ = gs.Expression("minMapq")
-MIN_BASE_QUALITY = gs.Expression("minBaseQuality")
-WINDOW_SIZE = gs.Expression("windowSize")
+LANE_HEIGHT = gs.param(
+    "laneHeight",
+    value=12,
+    bind=gs.binding_range(min=1, max=30, step=1),
+    transition={"type": "lerp", "halfLife": 30, "epsilon": 0.02},
+)
+MIN_MAPQ = gs.param(
+    "minMapq",
+    value=0,
+    bind=gs.binding_range(min=0, max=60, step=1, debounce=100),
+)
+MIN_BASE_QUALITY = gs.param(
+    "minBaseQuality",
+    value=0,
+    bind=gs.binding_range(min=0, max=40, step=1, debounce=100),
+)
+WINDOW_SIZE = gs.param("windowSize", value=15_000)
+ZOOM_MESSAGE_STATE = gs.param(
+    "zoomMessageState",
+    expr=gs.expr.if_(
+        gs.expr.abs(gs.expr.span(gs.expr.domain("x"))) > WINDOW_SIZE,
+        1,
+        0,
+    ),
+    transition={"type": "lerp", "halfLife": 60},
+)
 
 # Coverage and mismatch summaries are derived from the same reads as the pileup
 # instead of loading separate summary files.
@@ -274,36 +296,18 @@ zoom_message = gs.layer(
     .encode(x=gs.value(0.5), y=gs.value(1)),
     data=[{}],
     name="zoom-message",
-    params=[
-        gs.param(
-            "zoomMessageState",
-            expr=gs.expr.if_(
-                gs.expr.abs(gs.expr.span(gs.expr.domain("x"))) > WINDOW_SIZE,
-                1,
-                0,
-            ),
-            transition={"type": "lerp", "halfLife": 60},
-        )
-    ],
-    opacity=gs.expr("zoomMessageState"),
-)
+    opacity=ZOOM_MESSAGE_STATE,
+).add_params(ZOOM_MESSAGE_STATE)
 
 read_alignments = (
     gs.layer(read_layers, zoom_message)
     .properties(
         name="read-alignments",
         title=gs.Title(text="Read alignments", orient="none"),
-        height=gs.Step(step=gs.expr(LANE_HEIGHT)),
+        height=gs.Step(step=LANE_HEIGHT),
         viewportHeight="container",
-        params=[
-            gs.param(
-                "laneHeight",
-                value=12,
-                bind={"input": "range", "min": 1, "max": 30, "step": 1},
-                transition={"type": "lerp", "halfLife": 30, "epsilon": 0.02},
-            )
-        ],
     )
+    .add_params(LANE_HEIGHT)
     .resolve_scale(color="independent", opacity="independent")
 )
 
@@ -316,33 +320,8 @@ chart = (
         data=gs.lazy.bam(
             "https://data.genomespy.app/sample-data/NIST-HG002/"
             "HG002.GRCh38.chr20_9950000_10100000.downsample33pct.bam",
-            windowSize=gs.expr("windowSize"),
+            windowSize=WINDOW_SIZE,
         ),
-        params=[
-            gs.param(
-                "minMapq",
-                value=0,
-                bind={
-                    "input": "range",
-                    "min": 0,
-                    "max": 60,
-                    "step": 1,
-                    "debounce": 100,
-                },
-            ),
-            gs.param(
-                "minBaseQuality",
-                value=0,
-                bind={
-                    "input": "range",
-                    "min": 0,
-                    "max": 40,
-                    "step": 1,
-                    "debounce": 100,
-                },
-            ),
-            gs.param("windowSize", value=15_000),
-        ],
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
@@ -354,6 +333,7 @@ chart = (
         spacing=5,
         description="BAM depth, alignments, CIGAR operations, and mismatches.",
     )
+    .add_params(MIN_MAPQ, MIN_BASE_QUALITY, WINDOW_SIZE)
     .transform_filter((gs.datum.mapq == None) | (gs.datum.mapq >= MIN_MAPQ))  # noqa: E711
     .transform_formula(
         expr=gs.expr.if_(gs.datum.mapq == None, 0, gs.datum.mapq),  # noqa: E711
