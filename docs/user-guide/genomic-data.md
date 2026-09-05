@@ -14,7 +14,7 @@ The GenomeSpy documentation covers every source type in
 ## A lazy quantitative signal
 
 BigWig stores dense quantitative signal such as coverage, conservation, or GC
-content. `gs.lazy.bigwig(...)` produces rows with `chrom`, `start`, `end`, and
+content. {py:meth}`gs.lazy.bigwig(...) <genome_spy.data.LazyNamespace.bigwig>` produces rows with `chrom`, `start`, `end`, and
 `score` fields:
 
 ```{literalinclude} ../tutorials/genomic_data.py
@@ -59,7 +59,7 @@ Choose the builder that matches the hosted file:
 
 | Format | Builder | Rows provided to the chart |
 | --- | --- | --- |
-| [BigWig](https://genomespy.app/docs/grammar/data/lazy/#bigwig) | `gs.lazy.bigwig(url)` | Quantitative genomic intervals |
+| [BigWig](https://genomespy.app/docs/grammar/data/lazy/#bigwig) | {py:meth}`gs.lazy.bigwig(url) <genome_spy.data.LazyNamespace.bigwig>` | Quantitative genomic intervals |
 | [BigBed](https://genomespy.app/docs/grammar/data/lazy/#bigbed) | `gs.lazy.bigbed(url)` | Annotation intervals |
 | [FASTA](https://genomespy.app/docs/grammar/data/lazy/#indexed-fasta) | `gs.lazy.indexed_fasta(url)` | Sequence chunks |
 | [BAM](https://genomespy.app/docs/grammar/data/lazy/#bam) | `gs.lazy.bam(url)` | Read alignments |

@@ -4,7 +4,7 @@ A genomic position has two parts: a chromosome or other **contig**, and a
 position within that contig. GenomeSpy uses an assembly's contig sizes and order
 to concatenate those coordinates into one continuous visual axis.
 
-Use `gs.Locus(chrom_field, position_field)` for this chromosome-aware encoding.
+Use {py:func}`~genome_spy.Locus` for this chromosome-aware encoding.
 The resulting channel has the `locus` data type and automatically uses a locus
 scale.
 
@@ -43,7 +43,7 @@ Single nucleotide variants and other point features need one locus:
 The root `assembly="hg38"` supplies chromosome sizes and order. The scale domain
 focuses the initial view on a region of chromosome 17.
 
-`GenomeAxis` options are available through `.axis(...)`. In the example,
+{py:class}`~genome_spy.GenomeAxis` options are available through `.axis(...)`. In the example,
 `chromGrid=True` enables chromosome-aware grid styling and the title identifies
 the coordinate channel. The remaining options are listed in
 [genome axis for loci](https://genomespy.app/docs/grammar/axis/#genome-axis-for-loci).
@@ -72,7 +72,7 @@ pattern works with rules, links, and arrows.
 
 The assembly lists contigs in their preferred order and gives each contig's
 length. GenomeSpy places the first contig at the start of a continuous axis,
-then places the next contig after it, and so on. `gs.Locus("chrom", "pos")`
+then places the next contig after it, and so on. {py:func}`~genome_spy.Locus`
 inserts the required coordinate-linearization step automatically.
 
 Usually, keep chromosome and position in separate fields and let GenomeSpy
