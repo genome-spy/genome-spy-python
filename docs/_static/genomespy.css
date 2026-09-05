@@ -22,6 +22,10 @@ body[data-theme="dark"] {
    right-aligns the navigation within it. Centre the navigation instead, so
    the remaining gutter is shared equally on both sides. */
 @media (min-width: 82em) {
+  .sidebar-container {
+    width: 15em;
+  }
+
   .sidebar-drawer {
     justify-content: center;
   }
@@ -29,9 +33,9 @@ body[data-theme="dark"] {
 
 /* Give documentation pages more room for charts and code. The matching drawer
    width keeps the expanded content column centred between equal outer margins. */
-@media (min-width: 90em) {
+@media (min-width: 95em) {
   .content {
-    width: 56em;
+    width: 58em;
     padding-inline: 2em;
   }
 
