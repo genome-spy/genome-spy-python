@@ -22,6 +22,45 @@ export function setLoading(el, loading) {
   }
 }
 
+export async function mountControls({
+  container,
+  api,
+  names,
+  definitions,
+  moduleUrls,
+}) {
+  if (!names.length) {
+    return null;
+  }
+
+  const controlsModule = await import(moduleUrls.core);
+  const modules = { core: controlsModule };
+  const controls = [];
+  for (const name of names) {
+    const definition = definitions[name];
+    if (!definition) {
+      throw new Error(`Control ${name} has no definition.`);
+    }
+    if (!modules[definition.module]) {
+      const moduleUrl = moduleUrls[definition.module];
+      if (!moduleUrl) {
+        throw new Error(`Control module ${definition.module} has no URL.`);
+      }
+      modules[definition.module] = await import(moduleUrl);
+    }
+    const factory = modules[definition.module][definition.export];
+    if (typeof factory !== "function") {
+      throw new Error(`Control ${name} is unavailable.`);
+    }
+    controls.push(factory());
+  }
+
+  if (typeof controlsModule.attachControls !== "function") {
+    throw new Error("GenomeSpy attachControls export was not found.");
+  }
+  return controlsModule.attachControls(container, api, { controls });
+}
+
 export async function renderChart({ model, el, signal }) {
   if (!model.get("spec")) {
     el.textContent = "No GenomeSpy specification provided.";
@@ -29,20 +68,52 @@ export async function renderChart({ model, el, signal }) {
   }
 
   let api = null;
+  let mountedControls = null;
   let parameterSubscriptions = [];
   let renderRevision = 0;
   let syncingParameterValues = false;
   const datasetListeners = [];
+  const activeErrors = new Map();
 
-  const setError = (error) => {
-    model.set("error", String(error));
+  const publishErrors = () => {
+    model.set("error", [...activeErrors.values()].join("\n"));
     model.save_changes();
   };
 
-  const clearError = () => {
-    if (model.get("error")) {
-      model.set("error", "");
-      model.save_changes();
+  const setError = (error, source = "runtime") => {
+    activeErrors.delete(source);
+    activeErrors.set(source, String(error));
+    publishErrors();
+  };
+
+  const clearError = (source) => {
+    if (activeErrors.delete(source)) {
+      publishErrors();
+    }
+  };
+
+  const disposeCurrent = ({ reportErrors = true } = {}) => {
+    const controls = mountedControls;
+    const currentApi = api;
+    mountedControls = null;
+    api = null;
+    const errors = [];
+    try {
+      controls?.dispose?.();
+    } catch (error) {
+      errors.push(error);
+    }
+    try {
+      currentApi?.finalize?.();
+    } catch (error) {
+      errors.push(error);
+    }
+    if (errors.length && reportErrors) {
+      setError(errors.map(String).join("\n"), "cleanup");
+    } else if (!errors.length) {
+      clearError("cleanup");
+    } else {
+      console.error("GenomeSpy cleanup failed", ...errors);
     }
   };
 
@@ -117,6 +188,7 @@ export async function renderChart({ model, el, signal }) {
   };
 
   const applyDataset = async (descriptor) => {
+    const errorSource = `dataset:${descriptor.revision_trait}`;
     const revision = model.get(descriptor.revision_trait) || 0;
     const currentApi = api;
     const currentRender = renderRevision;
@@ -143,7 +215,7 @@ export async function renderChart({ model, el, signal }) {
       ) {
         return;
       }
-      clearError();
+      clearError(errorSource);
     } catch (error) {
       if (
         !signal.aborted &&
@@ -151,7 +223,7 @@ export async function renderChart({ model, el, signal }) {
         renderRevision === currentRender &&
         model.get(descriptor.revision_trait) === revision
       ) {
-        setError(error);
+        setError(error, errorSource);
       }
     }
   };
@@ -160,15 +232,13 @@ export async function renderChart({ model, el, signal }) {
     const revision = ++renderRevision;
     const moduleUrl = model.get("bundle_url");
     const options = model.get("embed_options") || {};
+    const controlNames = model.get("controls") || [];
     const datasets = model.get("dataset_manifest") || [];
     const hasInitialData = datasets.some(
       (descriptor) => (model.get(descriptor.revision_trait) || 0) > 0
     );
 
-    if (api?.finalize) {
-      api.finalize();
-      api = null;
-    }
+    disposeCurrent();
     setLoading(el, hasInitialData);
     el.replaceChildren();
 
@@ -184,6 +254,36 @@ export async function renderChart({ model, el, signal }) {
         return;
       }
       api = nextApi;
+      clearError("render");
+      try {
+        const nextControls = await mountControls({
+          container: el,
+          api: nextApi,
+          names: controlNames,
+          definitions: model.get("_control_definitions") || {},
+          moduleUrls: {
+            core: model.get("controls_module_url"),
+            inspector: model.get("inspector_module_url"),
+          },
+        });
+        if (revision !== renderRevision || signal.aborted || api !== nextApi) {
+          try {
+            nextControls?.dispose?.();
+          } catch (error) {
+            console.error("GenomeSpy controls cleanup failed", error);
+          }
+          return;
+        }
+        mountedControls = nextControls;
+        clearError("controls");
+      } catch (error) {
+        if (revision === renderRevision && !signal.aborted && api === nextApi) {
+          setError(
+            `GenomeSpy controls failed to load: ${String(error)}`,
+            "controls"
+          );
+        }
+      }
       attachInteractions();
       await Promise.all(datasets.map((descriptor) => applyDataset(descriptor)));
       if (revision === renderRevision && !signal.aborted) {
@@ -194,7 +294,7 @@ export async function renderChart({ model, el, signal }) {
         return;
       }
       setLoading(el, false);
-      setError(error);
+      setError(error, "render");
       throw error;
     }
   };
@@ -204,6 +304,9 @@ export async function renderChart({ model, el, signal }) {
   model.on("change:spec", onSpecChange);
   model.on("change:bundle_url", onSpecChange);
   model.on("change:embed_options", onSpecChange);
+  model.on("change:controls", onSpecChange);
+  model.on("change:controls_module_url", onSpecChange);
+  model.on("change:inspector_module_url", onSpecChange);
   model.on("change:parameter_values", onParameterValuesChange);
   model.on("change:parameter_names", attachInteractions);
   model.on("change:enable_click_events", attachInteractions);
@@ -219,16 +322,21 @@ export async function renderChart({ model, el, signal }) {
     model.off("change:spec", onSpecChange);
     model.off("change:bundle_url", onSpecChange);
     model.off("change:embed_options", onSpecChange);
+    model.off("change:controls", onSpecChange);
+    model.off("change:controls_module_url", onSpecChange);
+    model.off("change:inspector_module_url", onSpecChange);
     model.off("change:parameter_values", onParameterValuesChange);
     model.off("change:parameter_names", attachInteractions);
     model.off("change:enable_click_events", attachInteractions);
     for (const [event, listener] of datasetListeners) {
       model.off(event, listener);
     }
-    clearInteractions();
-    api?.finalize?.();
-    api = null;
-    setLoading(el, false);
+    try {
+      clearInteractions();
+    } finally {
+      disposeCurrent({ reportErrors: false });
+      setLoading(el, false);
+    }
   });
 
   await renderSpec();

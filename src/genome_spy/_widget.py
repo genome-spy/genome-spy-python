@@ -9,10 +9,19 @@ from typing import Any, Literal, cast
 import anywidget
 import traitlets
 
+from genome_spy._embed import (
+    DEFAULT_CONTROLS,
+    DEFAULT_CONTROLS_MODULE_URL,
+    DEFAULT_EMBED_URL,
+    DEFAULT_INSPECTOR_MODULE_URL,
+    Controls,
+    control_definitions,
+    normalize_controls,
+)
 from genome_spy._chart_authoring import json_safe, records_from_data
 from genome_spy._render import _PreparedSpec, prepare_widget_spec
 from genome_spy.arrow import to_arrow_ipc
-from genome_spy.chart import DEFAULT_EMBED_URL
+from genome_spy.schemapi import Undefined, UndefinedType
 
 _ESM_PATH = Path(__file__).with_name("static") / "widget.js"
 _DatasetFormat = Literal["arrow", "records"]
@@ -26,6 +35,16 @@ class JupyterChart(anywidget.AnyWidget):
     spec = traitlets.Dict().tag(sync=True)
     bundle_url = traitlets.Unicode(DEFAULT_EMBED_URL).tag(sync=True)
     embed_options = traitlets.Dict(default_value={}).tag(sync=True)
+    controls = traitlets.List(
+        trait=traitlets.Unicode(), default_value=list[str](DEFAULT_CONTROLS)
+    ).tag(sync=True)
+    _control_definitions = traitlets.Dict(default_value=control_definitions()).tag(
+        sync=True
+    )
+    controls_module_url = traitlets.Unicode(DEFAULT_CONTROLS_MODULE_URL).tag(sync=True)
+    inspector_module_url = traitlets.Unicode(DEFAULT_INSPECTOR_MODULE_URL).tag(
+        sync=True
+    )
     dataset_manifest = traitlets.List(trait=traitlets.Dict(), default_value=[]).tag(
         sync=True
     )
@@ -44,6 +63,9 @@ class JupyterChart(anywidget.AnyWidget):
         *,
         bundle_url: str = DEFAULT_EMBED_URL,
         embed_options: dict[str, Any] | None = None,
+        controls: Controls | UndefinedType = Undefined,
+        controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
+        inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
         parameter_names: Sequence[str] = (),
         parameter_values: Mapping[str, Any] | None = None,
         enable_click_events: bool = False,
@@ -74,6 +96,9 @@ class JupyterChart(anywidget.AnyWidget):
             spec=prepared.spec,
             bundle_url=bundle_url,
             embed_options=embed_options or {},
+            controls=list(normalize_controls(controls)),
+            controls_module_url=controls_module_url,
+            inspector_module_url=inspector_module_url,
             dataset_manifest=[self._manifest_entry(entry) for entry in manifest],
             parameter_names=list(parameter_names),
             parameter_values=dict(parameter_values or {}),

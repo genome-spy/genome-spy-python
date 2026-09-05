@@ -198,10 +198,39 @@ def _tutorial_embed_html(
     height: int,
     title: str,
     identity: str,
+    controls: tuple[str, ...] = (),
+    control_definitions: dict[str, dict[str, str]] | None = None,
+    control_module_urls: dict[str, str] | None = None,
 ) -> str:
     """Return a direct, wrapper-free GenomeSpy embed for a prose page."""
     token = sha256(f"{target}:{identity}".encode()).hexdigest()[:12]
     container_id = f"gs-tutorial-{token}"
+    controls_script = ""
+    if controls:
+        definitions = control_definitions or {}
+        module_urls = control_module_urls or {}
+        controls_script = (
+            "if (c && api) {\n"
+            "  try {\n"
+            f"    const controlNames = {json.dumps(controls)};\n"
+            f"    const controlDefinitions = {json.dumps(definitions)};\n"
+            f"    const moduleUrls = {json.dumps(module_urls)};\n"
+            "    const controlsModule = await import(moduleUrls.core);\n"
+            "    const modules = { core: controlsModule };\n"
+            "    const mounted = [];\n"
+            "    for (const name of controlNames) {\n"
+            "      const definition = controlDefinitions[name];\n"
+            "      if (!modules[definition.module]) {\n"
+            "        modules[definition.module] = await import(moduleUrls[definition.module]);\n"
+            "      }\n"
+            "      mounted.push(modules[definition.module][definition.export]());\n"
+            "    }\n"
+            "    controlsModule.attachControls(c, api, { controls: mounted });\n"
+            "  } catch (error) {\n"
+            "    console.error('GenomeSpy controls failed to load', error);\n"
+            "  }\n"
+            "}\n"
+        )
     return (
         f'<div id="{container_id}" class="gs-doc-embed" '
         f'style="height:{height}px" role="img" '
@@ -210,7 +239,8 @@ def _tutorial_embed_html(
         f"import {{ embed }} from {json.dumps(bundle_url)};\n"
         f"const c = document.getElementById({json.dumps(container_id)});\n"
         f"const spec = {json.dumps(spec, separators=(',', ':'))};\n"
-        "if (c) await embed(c, spec, { bare: true });\n"
+        "const api = c ? await embed(c, spec, { bare: true }) : null;\n"
+        f"{controls_script}"
         "</script>"
     )
 
@@ -505,6 +535,7 @@ class GenomeSpyChart(Directive):
     option_spec = {
         "height": directives.nonnegative_int,
         "title": directives.unchanged_required,
+        "controls": directives.unchanged_required,
     }
 
     def run(self) -> list[nodes.Node]:
@@ -519,6 +550,14 @@ class GenomeSpyChart(Directive):
 
         env = self.state.document.settings.env
         identity = f"{env.docname}:{self.lineno}"
+        controls: tuple[str, ...] = ()
+        if value := self.options.get("controls"):
+            from genome_spy._embed import normalize_controls
+
+            controls = normalize_controls(
+                tuple(name.strip() for name in value.split(",") if name.strip())
+            )
+        control_definitions, control_module_urls = core.default_control_config()
         markup = _tutorial_embed_html(
             target,
             spec,
@@ -526,6 +565,9 @@ class GenomeSpyChart(Directive):
             height=self.options.get("height", 280),
             title=self.options.get("title", target),
             identity=identity,
+            controls=controls,
+            control_definitions=control_definitions,
+            control_module_urls=control_module_urls,
         )
         return [nodes.raw("", markup, format="html")]
 

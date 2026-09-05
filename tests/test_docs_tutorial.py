@@ -50,6 +50,10 @@ NOTEBOOKS_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "notebooks.py"
 NOTEBOOKS_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "notebooks.md"
 SERIALIZATION_TUTORIAL_PATH = REPO_ROOT / "docs" / "tutorials" / "serialization.py"
 SERIALIZATION_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "serialization.md"
+DISPLAY_CONTROLS_TUTORIAL_PATH = (
+    REPO_ROOT / "docs" / "tutorials" / "display_controls.py"
+)
+DISPLAY_CONTROLS_GUIDE_PATH = REPO_ROOT / "docs" / "user-guide" / "display-controls.md"
 GALLERY_EXTENSION_PATH = REPO_ROOT / "docs" / "_ext" / "genomespy_gallery.py"
 TUTORIALS_DIR = REPO_ROOT / "docs" / "tutorials"
 
@@ -993,10 +997,64 @@ def test_tutorial_directive_uses_direct_static_bundle_embed() -> None:
 
     assert 'import { embed } from "https://example.test/bundle.js"' in markup
     assert "await embed(c, spec, { bare: true })" in markup
+    assert "attachControls" not in markup
     assert "height:190px" in markup
     assert "iframe" not in markup
     assert "ResizeObserver" not in markup
     assert "attachShadow" not in markup
+
+
+def test_tutorial_directive_can_opt_in_to_controls() -> None:
+    extension = _load_module("_controls_gallery_extension", GALLERY_EXTENSION_PATH)
+    chart = extension._load_tutorial_chart("display_controls:chart")
+    markup = extension._tutorial_embed_html(
+        "display_controls:chart",
+        chart.to_dict(),
+        bundle_url="https://example.test/bundle.js",
+        height=230,
+        title="Display controls",
+        identity="display-controls:1",
+        controls=("svg", "png", "inspector"),
+        control_definitions={
+            "svg": {"module": "core", "export": "svgButton"},
+            "png": {"module": "core", "export": "pngButton"},
+            "inspector": {
+                "module": "inspector",
+                "export": "inspectorButton",
+            },
+        },
+        control_module_urls={
+            "core": "https://example.test/controls.js",
+            "inspector": "https://example.test/inspector.js",
+        },
+    )
+
+    assert 'const controlNames = ["svg", "png", "inspector"]' in markup
+    assert '"core": "https://example.test/controls.js"' in markup
+    assert '"inspector": "https://example.test/inspector.js"' in markup
+    assert '"export": "inspectorButton"' in markup
+    assert "await import(moduleUrls[definition.module])" in markup
+    assert "controlsModule.attachControls" in markup
+
+
+def test_display_controls_guide_uses_executable_tutorial_sections() -> None:
+    tutorial = _load_module(
+        "_display_controls_tutorial", DISPLAY_CONTROLS_TUTORIAL_PATH
+    )
+    source = DISPLAY_CONTROLS_GUIDE_PATH.read_text(encoding="utf-8")
+
+    assert tutorial.chart.to_dict()["assembly"] == "hg38"
+    for marker in (
+        "display-controls-basic-start",
+        "display-controls-override-start",
+        "display-controls-widget-start",
+        "display-controls-embed-options-start",
+        "display-controls-output-start",
+    ):
+        assert f":start-after: {marker}" in source
+
+    assert ":controls: svg,png,inspector" in source
+    assert ":controls: png" in source
 
 
 def test_tutorial_chart_target_rejects_paths() -> None:

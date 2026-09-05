@@ -101,6 +101,21 @@ def default_bundle_url() -> str:
     return DEFAULT_EMBED_URL
 
 
+def default_control_config() -> tuple[dict[str, dict[str, str]], dict[str, str]]:
+    """Return control definitions and pinned browser module URLs."""
+    _ensure_src_on_path()
+    from genome_spy._embed import (
+        DEFAULT_CONTROLS_MODULE_URL,
+        DEFAULT_INSPECTOR_MODULE_URL,
+        control_definitions,
+    )
+
+    return control_definitions(), {
+        "core": DEFAULT_CONTROLS_MODULE_URL,
+        "inspector": DEFAULT_INSPECTOR_MODULE_URL,
+    }
+
+
 def _load_module(path: Path) -> ModuleType:
     module_name = f"_gs_gallery_{path.stem}"
     spec = importlib.util.spec_from_file_location(module_name, path)

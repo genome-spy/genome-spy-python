@@ -1,6 +1,6 @@
 # Parameters and interaction
 
-Interaction lets a users to change and manipulate a visualization without rebuilding it from scratch. The `genome-spy-python`API follows closely to the parameter ergonomics of
+Interaction lets a users to change and manipulate a visualization without rebuilding it from scratch. The `genome-spy-python`API follows closely the parameter ergonomics of
 [Altair](https://altair-viz.github.io/user_guide/interactions/parameters.html):
 create a handle, attach it to a chart, then reuse that handle in an
 encoding, expression, or filter.

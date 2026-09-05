@@ -6,9 +6,13 @@ const source = await readFile(
   new URL("../src/genome_spy/static/widget.js", import.meta.url),
   "utf8"
 );
-const { datasetApi, renderChart } = await import(
+const { datasetApi, mountControls, renderChart } = await import(
   `data:text/javascript,${encodeURIComponent(source)}`
 );
+
+function moduleUrl(source) {
+  return `data:text/javascript,${encodeURIComponent(source)}`;
+}
 
 class MockModel {
   constructor(values) {
@@ -83,6 +87,15 @@ function fixture(datasets = []) {
     bundle_url:
       "data:text/javascript,export const embed=(...args)=>globalThis.__widgetEmbed(...args)",
     embed_options: {},
+    controls: [],
+    _control_definitions: {
+      svg: { module: "core", export: "svgButton" },
+      png: { module: "core", export: "pngButton" },
+      inspector: { module: "inspector", export: "inspectorButton" },
+      "full-window": { module: "core", export: "fullWindowButton" },
+    },
+    controls_module_url: moduleUrl("export const attachControls=()=>null"),
+    inspector_module_url: moduleUrl("export const inspectorButton=()=>({})"),
     dataset_manifest: datasets,
     parameter_names: [],
     parameter_values: {},
@@ -179,6 +192,52 @@ test("datasetApi uses the top-level dataset API by default", () => {
   const api = { datasets: { load() {} } };
 
   assert.equal(datasetApi(api, descriptor("table", 0)), api.datasets);
+});
+
+test("mountControls maps requested names in display order", async () => {
+  let mounted;
+  globalThis.__widgetAttachControls = (_container, _api, options) => {
+    mounted = options.controls;
+    return { dispose() {} };
+  };
+  const controlsModuleUrl = moduleUrl(`
+    export const attachControls = (...args) => globalThis.__widgetAttachControls(...args);
+    export const svgButton = () => ({ name: "svg" });
+    export const pngButton = () => ({ name: "png" });
+    export const fullWindowButton = () => ({ name: "full-window" });
+  `);
+  const inspectorModuleUrl = moduleUrl(
+    'export const inspectorButton = () => ({ name: "inspector" });'
+  );
+
+  await mountControls({
+    container: {},
+    api: {},
+    names: ["png", "inspector", "svg", "full-window"],
+    definitions: fixture().model.get("_control_definitions"),
+    moduleUrls: {
+      core: controlsModuleUrl,
+      inspector: inspectorModuleUrl,
+    },
+  });
+
+  assert.deepEqual(
+    mounted.map((control) => control.name),
+    ["png", "inspector", "svg", "full-window"]
+  );
+  delete globalThis.__widgetAttachControls;
+});
+
+test("mountControls does not import modules when controls are disabled", async () => {
+  const mounted = await mountControls({
+    container: {},
+    api: {},
+    names: [],
+    definitions: {},
+    moduleUrls: { core: "invalid:controls" },
+  });
+
+  assert.equal(mounted, null);
 });
 
 test("datasetApi addresses a scoped declaration through its owner", () => {
@@ -421,6 +480,170 @@ test("structural rerender finalizes the old embed and reapplies current data", a
   assert.equal(second.loads.length, 1);
   testFixture.controller.abort();
   delete globalThis.__widgetEmbed;
+});
+
+test("control changes dispose controls before finalizing the old embed", async () => {
+  const testFixture = fixture();
+  testFixture.model.set("controls", ["png"]);
+  const events = [];
+  globalThis.__widgetAttachControls = () => {
+    events.push("attach");
+    return { dispose: () => events.push("dispose") };
+  };
+  testFixture.model.set(
+    "controls_module_url",
+    moduleUrl(`
+      export const attachControls = (...args) => globalThis.__widgetAttachControls(...args);
+      export const pngButton = () => ({ name: "png" });
+    `)
+  );
+  const first = apiFixture();
+  const second = apiFixture();
+  first.api.finalize = () => events.push("finalize-first");
+  second.api.finalize = () => events.push("finalize-second");
+  let calls = 0;
+  globalThis.__widgetEmbed = async () => [first.api, second.api][calls++];
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.model.set("controls", []);
+  testFixture.model.emit("change:controls");
+  await waitFor(() => calls === 2);
+
+  assert.deepEqual(events.slice(0, 3), ["attach", "dispose", "finalize-first"]);
+  testFixture.controller.abort();
+  assert.equal(events.at(-1), "finalize-second");
+  delete globalThis.__widgetAttachControls;
+  delete globalThis.__widgetEmbed;
+});
+
+test("a control module failure preserves the current embed", async () => {
+  const testFixture = fixture();
+  testFixture.model.set("controls", ["png"]);
+  testFixture.model.set("controls_module_url", "invalid:controls");
+  const rendered = apiFixture();
+  globalThis.__widgetEmbed = async () => rendered.api;
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+
+  assert.match(testFixture.model.get("error"), /controls failed to load/i);
+  assert.equal(rendered.finalized, 0);
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
+});
+
+test("successful initial data does not clear a control error", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
+  testFixture.model.set(entry.revision_trait, 1);
+  testFixture.model.set("controls", ["png"]);
+  testFixture.model.set("controls_module_url", "invalid:controls");
+  const rendered = apiFixture();
+  globalThis.__widgetEmbed = async () => rendered.api;
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+
+  assert.equal(rendered.loads.length, 1);
+  assert.match(testFixture.model.get("error"), /controls failed to load/i);
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
+});
+
+test("dataset recovery clears only its own error", async () => {
+  const entry = descriptor("table", 0);
+  const testFixture = fixture([entry]);
+  testFixture.model.set("controls", ["png"]);
+  testFixture.model.set("controls_module_url", "invalid:controls");
+  let attempts = 0;
+  const rendered = apiFixture({
+    load: async () => {
+      attempts += 1;
+      if (attempts === 1) {
+        throw new Error("decode failed");
+      }
+    },
+  });
+  globalThis.__widgetEmbed = async () => rendered.api;
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.model.set(entry.payload_trait, new Uint8Array([1]));
+  testFixture.model.set(entry.revision_trait, 1);
+  testFixture.model.emit(`change:${entry.payload_trait}`);
+  await waitFor(() => /decode failed/.test(testFixture.model.get("error")));
+  testFixture.model.set(entry.payload_trait, new Uint8Array([2]));
+  testFixture.model.set(entry.revision_trait, 2);
+  testFixture.model.emit(`change:${entry.payload_trait}`);
+  await waitFor(
+    () => attempts === 2 && !/decode failed/.test(testFixture.model.get("error"))
+  );
+
+  assert.doesNotMatch(testFixture.model.get("error"), /decode failed/);
+  assert.match(testFixture.model.get("error"), /controls failed to load/i);
+  testFixture.controller.abort();
+  delete globalThis.__widgetEmbed;
+});
+
+test("a throwing control disposer cannot block rerender finalization", async () => {
+  const testFixture = fixture();
+  testFixture.model.set("controls", ["png"]);
+  globalThis.__widgetAttachControls = () => ({
+    dispose() {
+      throw new Error("dispose failed");
+    },
+  });
+  testFixture.model.set(
+    "controls_module_url",
+    moduleUrl(`
+      export const attachControls = (...args) => globalThis.__widgetAttachControls(...args);
+      export const pngButton = () => ({ name: "png" });
+    `)
+  );
+  const first = apiFixture();
+  const second = apiFixture();
+  let calls = 0;
+  globalThis.__widgetEmbed = async () => [first.api, second.api][calls++];
+
+  await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+  testFixture.model.set("controls", []);
+  testFixture.model.emit("change:controls");
+  await waitFor(() => calls === 2);
+
+  assert.equal(first.finalized, 1);
+  assert.match(testFixture.model.get("error"), /dispose failed/);
+  testFixture.controller.abort();
+  delete globalThis.__widgetAttachControls;
+  delete globalThis.__widgetEmbed;
+});
+
+test("a throwing control disposer cannot block abort finalization", async () => {
+  const testFixture = fixture();
+  testFixture.model.set("controls", ["png"]);
+  globalThis.__widgetAttachControls = () => ({
+    dispose() {
+      throw new Error("dispose failed");
+    },
+  });
+  testFixture.model.set(
+    "controls_module_url",
+    moduleUrl(`
+      export const attachControls = (...args) => globalThis.__widgetAttachControls(...args);
+      export const pngButton = () => ({ name: "png" });
+    `)
+  );
+  const rendered = apiFixture();
+  globalThis.__widgetEmbed = async () => rendered.api;
+  const originalConsoleError = console.error;
+  console.error = () => {};
+
+  try {
+    await renderChart({ ...testFixture, signal: testFixture.controller.signal });
+    testFixture.controller.abort();
+    assert.equal(rendered.finalized, 1);
+  } finally {
+    console.error = originalConsoleError;
+    delete globalThis.__widgetAttachControls;
+    delete globalThis.__widgetEmbed;
+  }
 });
 
 test("disposal removes dataset listeners and finalizes the current embed", async () => {

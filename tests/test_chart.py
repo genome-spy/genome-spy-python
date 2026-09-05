@@ -9,6 +9,14 @@ import genome_spy as gs
 import polars as pl
 import pytest
 
+from genome_spy._embed import (
+    DEFAULT_CONTROLS,
+    DEFAULT_CONTROLS_MODULE_URL,
+    DEFAULT_INSPECTOR_MODULE_URL,
+    SUPPORTED_CONTROLS,
+    control_definitions,
+    normalize_controls,
+)
 from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
 from genome_spy import api as public_api
 from genome_spy._parameters import _select_parameter_class
@@ -1498,6 +1506,81 @@ def test_to_html_embeds_genomespy_runtime() -> None:
     assert "dist/bundle/index.es.js" in html
     assert '"mark":"point"' in html
     assert json.dumps("x") in html
+    assert json.dumps(list(DEFAULT_CONTROLS), separators=(",", ":")) in html
+    assert DEFAULT_CONTROLS_MODULE_URL in html
+    assert DEFAULT_INSPECTOR_MODULE_URL in html
+    assert "import(controlOptions.moduleUrls.core)" in html
+    assert "controlOptions.controlsModuleUrl" not in html
+
+
+def test_to_html_accepts_embed_options_and_disables_controls() -> None:
+    html = (
+        gs.Chart(data=[{"x": 1}])
+        .mark_point()
+        .to_html(embed_options={"renderer": "canvas"}, controls=False)
+    )
+
+    assert "const api = await embed(outputDiv, spec, embedOptions)" in html
+    assert '{"renderer":"canvas"}' in html
+    assert '"names":[]' in html
+
+
+@pytest.mark.parametrize(
+    ("controls", "expected"),
+    [
+        (True, DEFAULT_CONTROLS),
+        (False, ()),
+        ([], ()),
+        ("png", ("png",)),
+        (["png", "svg", "full-window"], ("png", "svg", "full-window")),
+    ],
+)
+def test_control_normalization(controls: object, expected: tuple[str, ...]) -> None:
+    assert normalize_controls(controls) == expected  # type: ignore[arg-type]
+
+
+def test_control_normalization_rejects_unknown_and_duplicate_names() -> None:
+    with pytest.raises(ValueError, match="Unknown GenomeSpy control 'pdf'"):
+        normalize_controls(["pdf"])  # type: ignore[list-item]
+    with pytest.raises(ValueError, match="'png' was specified twice"):
+        normalize_controls(["png", "png"])
+
+
+def test_control_definitions_cover_every_supported_name() -> None:
+    definitions = control_definitions()
+
+    assert tuple(definitions) == SUPPORTED_CONTROLS
+    assert definitions["png"] == {"module": "core", "export": "pngButton"}
+    assert definitions["inspector"] == {
+        "module": "inspector",
+        "export": "inspectorButton",
+    }
+
+
+def test_json_save_rejects_rendering_options(tmp_path: object) -> None:
+    from pathlib import Path
+
+    output = Path(str(tmp_path)) / "chart.json"
+    with pytest.raises(ValueError, match="apply only to HTML"):
+        gs.Chart().mark_point().save(output, controls=False)
+
+
+@pytest.mark.parametrize(
+    ("option", "value"),
+    [
+        ("bundle_url", "https://example.test/core.js"),
+        ("controls_module_url", "https://example.test/controls.js"),
+        ("inspector_module_url", "https://example.test/inspector.js"),
+    ],
+)
+def test_json_save_rejects_custom_browser_modules(
+    tmp_path: object, option: str, value: str
+) -> None:
+    from pathlib import Path
+
+    output = Path(str(tmp_path)) / "chart.json"
+    with pytest.raises(ValueError, match=option):
+        gs.Chart().mark_point().save(output, **{option: value})  # type: ignore[arg-type]
 
 
 def test_runtime_urls_match_generated_schema_version() -> None:
@@ -1505,6 +1588,8 @@ def test_runtime_urls_match_generated_schema_version() -> None:
 
     assert versioned_package in DEFAULT_SCHEMA_URL
     assert versioned_package in DEFAULT_EMBED_URL
+    assert versioned_package in DEFAULT_CONTROLS_MODULE_URL
+    assert f"@genome-spy/inspector@{SCHEMA_VERSION}" in DEFAULT_INSPECTOR_MODULE_URL
 
 
 def test_default_repr_uses_widget_bundle_when_available() -> None:
@@ -1512,6 +1597,19 @@ def test_default_repr_uses_widget_bundle_when_available() -> None:
 
     assert isinstance(bundle, tuple)
     assert "application/vnd.jupyter.widget-view+json" in bundle[0]
+
+
+def test_display_uses_temporary_control_configuration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    displayed: list[object] = []
+    monkeypatch.setattr("IPython.display.display", displayed.append)
+
+    gs.Chart().mark_point().display(controls=False)
+
+    assert len(displayed) == 1
+    assert isinstance(displayed[0], gs.JupyterChart)
+    assert displayed[0].controls == []
 
 
 def test_transform_formula_serializes() -> None:
