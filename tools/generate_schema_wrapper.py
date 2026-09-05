@@ -370,6 +370,15 @@ def write_public_interaction_exports(
 def format_generated_modules(output_dir: Path) -> None:
     """Format generated Python modules with the project's Ruff installation."""
     modules = sorted(output_dir.glob("*.py"))
+    modules.extend(
+        path
+        for path in (
+            output_dir.parent / "helpers.py",
+            output_dir.parent / "api.py",
+            output_dir.parent / "__init__.py",
+        )
+        if path.exists()
+    )
     if not modules:
         return
     subprocess.run(

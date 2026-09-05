@@ -115,7 +115,7 @@ After regeneration, run:
 
 ```bash
 uv run pytest tests/test_schema_codegen.py -x
-uv run ruff format src/genome_spy/schema
+uv run ruff format src/genome_spy/schema src/genome_spy/helpers.py src/genome_spy/api.py src/genome_spy/__init__.py
 git diff --check
 ```
 
