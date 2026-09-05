@@ -511,7 +511,10 @@ def test_generate_transform_method_overrides_from_schema_properties() -> None:
     assert specs["transform_sample"].positional_properties == ("size",)
     assert "def transform_calculate(" in source
     assert "calculate: str | ExpressionOperand | UndefinedType = Undefined" in source
-    assert "transform['expr'] = _expression_string(calculate)" in source
+    assert (
+        "transform['expr'] = _expression_string("
+        "cast(str | ExpressionOperand, calculate))"
+    ) in source
     assert "for output, value in kwargs.items():" in source
     assert "Add one or more ``formula`` transforms." in source
     assert "**kwargs (str | ExpressionOperand): Additional output field names" in source

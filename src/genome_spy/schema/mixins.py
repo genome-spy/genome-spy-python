@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 from collections.abc import Sequence
-from typing import Any, Self, Literal
+from typing import Any, Self, Literal, cast
 
 from typing import TYPE_CHECKING
 
@@ -10838,7 +10838,9 @@ class TransformMethodMixin:
         if has_output and has_value:
             transform: dict[str, Any] = {"type": "formula"}
             transform["as"] = as_
-            transform["expr"] = _expression_string(calculate)
+            transform["expr"] = _expression_string(
+                cast(str | ExpressionOperand, calculate)
+            )
             result = result._append_transform(transform)  # type: ignore[attr-defined]
         for output, value in kwargs.items():
             transform = {"type": "formula"}
@@ -10932,7 +10934,7 @@ class TransformMethodMixin:
         if empty is not Undefined:
             transform["empty"] = empty
         if expr is not Undefined:
-            transform["expr"] = _expression_string(expr)
+            transform["expr"] = _expression_string(cast(str | ExpressionOperand, expr))
         if fields is not Undefined:
             transform["fields"] = fields
         if param is not Undefined:

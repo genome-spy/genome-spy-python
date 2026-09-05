@@ -1966,6 +1966,8 @@ class SchemaWrapperGenerator:
         typing_imports = ["Any", "Self"]
         if needs_literal:
             typing_imports.append("Literal")
+        if has_expression_transform:
+            typing_imports.append("cast")
         source = "\n".join(
             [
                 GENERATED_HEADER,
@@ -4324,6 +4326,10 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             if schema_name == "expr"
             else python_name
         )
+        if schema_name == "expr" and schema_name not in spec.required:
+            value_source = (
+                f"_expression_string(cast(str | ExpressionOperand, {python_name}))"
+            )
         parameters.append(parameter_source(property_spec))
         if schema_name in spec.required:
             assignments.append(f"        transform[{schema_name!r}] = {value_source}")
@@ -4455,7 +4461,9 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             f"            transform[{output_property!r}] = {output_name}",
             f"            transform[{value_property!r}] = "
             + (
-                f"_expression_string({value_name})" if expression_values else value_name
+                f"_expression_string(cast(str | ExpressionOperand, {value_name}))"
+                if expression_values
+                else value_name
             ),
             "            result = result._append_transform(transform)  "
             "# type: ignore[attr-defined]",
