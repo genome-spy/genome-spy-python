@@ -3,6 +3,7 @@
 from genome_spy.arrow import to_arrow_ipc
 from genome_spy.api import (
     Angle,
+    AxisGenomeData,
     BrushConfig,
     Color,
     condition,
@@ -36,6 +37,7 @@ from genome_spy.api import (
     Sample,
     Scale,
     Search,
+    SelectionDomainRef,
     SemanticScore,
     Shape,
     Size,
@@ -99,6 +101,7 @@ from genome_spy.helpers import (
 __all__ = [
     "__version__",
     "Angle",
+    "AxisGenomeData",
     "axes",
     "BrushConfig",
     "Chart",
@@ -134,6 +137,7 @@ __all__ = [
     "Sample",
     "Scale",
     "Search",
+    "SelectionDomainRef",
     "SemanticScore",
     "Shape",
     "Size",

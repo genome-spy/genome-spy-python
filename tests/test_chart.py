@@ -13,6 +13,7 @@ from genome_spy.chart import DEFAULT_EMBED_URL, DEFAULT_SCHEMA_URL
 from genome_spy import api as public_api
 from genome_spy._parameters import _select_parameter_class
 from genome_spy.schema import (
+    AxisGenomeData,
     CompareParams,
     ConcatSpec,
     DynamicOpacity,
@@ -35,6 +36,7 @@ from genome_spy.schema import (
     Title,
     TransitionedValueParameter,
     Scale,
+    SelectionDomainRef,
     UnitSpec,
     VConcatSpec,
     ViewBackground,
@@ -53,6 +55,11 @@ def test_package_exposes_version() -> None:
 def test_public_api_exports_are_unique() -> None:
     assert len(public_api.__all__) == len(set(public_api.__all__))
     assert len(gs.__all__) == len(set(gs.__all__))
+
+
+def test_public_api_exports_brush_configuration_types() -> None:
+    assert gs.AxisGenomeData is AxisGenomeData
+    assert gs.SelectionDomainRef is SelectionDomainRef
 
 
 def test_chart_directly_inherits_generated_unit_spec() -> None:

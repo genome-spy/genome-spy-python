@@ -76,6 +76,7 @@ from genome_spy.schema.channels import (
     YOffset,
 )
 from genome_spy.schema.core import (
+    AxisGenomeData,
     BrushConfig,
     DataFormat,
     DynamicOpacity,
@@ -87,6 +88,7 @@ from genome_spy.schema.core import (
     Parse,
     RulerMarkConfig,
     Scale,
+    SelectionDomainRef,
     SizeDef,
     Step,
     Title,
@@ -103,6 +105,7 @@ from genome_spy.schema.composition import (
 __all__ = [
     "Angle",
     "axes",
+    "AxisGenomeData",
     "BrushConfig",
     "Chart",
     "Color",
@@ -136,6 +139,7 @@ __all__ = [
     "Parse",
     "Sample",
     "Scale",
+    "SelectionDomainRef",
     "Search",
     "SemanticScore",
     "Shape",

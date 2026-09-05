@@ -25,8 +25,6 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
 - [Composition](composition.md) layers charts and arranges linked panels.
 - [Import remote view specifications](importing-specifications.md) reuses
   published JSON views by URL.
-- [Annotations](annotations.md) adds selected point callouts and scored gene
-  tracks.
 - [Configuration](configuration.md) sets dimensions, titles, and shared visual
   defaults.
 - [Chromosomes and locus scales](genomic-axes.md) introduces assemblies and
@@ -35,6 +33,8 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
   of an indexed file.
 - [Linked genome tracks](genome-browser-layouts.md) combines tracks on one
   zoomable genomic axis.
+- [Label points and genomic coordinates](annotations.md) adds selected point callouts
+  and scored gene tracks.
 
 ## Interaction and output
 
@@ -64,7 +64,6 @@ transforms
 
 composition
 importing-specifications
-annotations
 configuration
 ```
 
@@ -76,6 +75,7 @@ configuration
 genomic-axes
 genomic-data
 genome-browser-layouts
+annotations
 ```
 
 ```{toctree}

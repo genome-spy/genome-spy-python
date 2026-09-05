@@ -133,6 +133,7 @@ Schema-backed configuration objects accepted by charts, channels, and helpers.
    :toctree: generated/schema/
    :nosignatures:
 
+   AxisGenomeData
    BrushConfig
    Data
    DataFormat
@@ -147,6 +148,7 @@ Schema-backed configuration objects accepted by charts, channels, and helpers.
    Parse
    RulerMarkConfig
    Scale
+   SelectionDomainRef
    SizeDef
    Step
    Title
