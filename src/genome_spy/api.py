@@ -17,28 +17,34 @@ from genome_spy.chart import (
 from genome_spy.data import Data, lazy
 from genome_spy.helpers import (
     axes,
-    binding,
-    binding_checkbox,
-    binding_radio,
-    binding_range,
-    binding_select,
     config,
     condition,
     data_format,
     dynamic_opacity,
     expr,
-    param,
     parse,
-    ruler,
     scales,
-    selection_interval,
-    selection_point,
     step,
     title,
     view,
     view_config,
     when,
 )
+
+# BEGIN GENERATED INTERACTION IMPORTS
+from genome_spy.helpers import (
+    binding,
+    binding_checkbox,
+    binding_radio,
+    binding_range,
+    binding_select,
+    param,
+    ruler,
+    selection_interval,
+    selection_point,
+)
+
+# END GENERATED INTERACTION IMPORTS
 from genome_spy.jupyter import JupyterChart
 from genome_spy.schema.channels import (
     Angle,
@@ -97,11 +103,6 @@ from genome_spy.schema.composition import (
 __all__ = [
     "Angle",
     "axes",
-    "binding",
-    "binding_checkbox",
-    "binding_radio",
-    "binding_range",
-    "binding_select",
     "BrushConfig",
     "Chart",
     "Color",
@@ -169,13 +170,9 @@ __all__ = [
     "lazy",
     "locus",
     "multiscale",
-    "param",
     "parse",
-    "ruler",
     "RulerMarkConfig",
     "scales",
-    "selection_interval",
-    "selection_point",
     "step",
     "title",
     "value",
@@ -183,4 +180,15 @@ __all__ = [
     "view_config",
     "vconcat",
     "when",
+    # BEGIN GENERATED INTERACTION EXPORTS
+    "binding",
+    "binding_checkbox",
+    "binding_radio",
+    "binding_range",
+    "binding_select",
+    "param",
+    "ruler",
+    "selection_interval",
+    "selection_point",
+    # END GENERATED INTERACTION EXPORTS
 ]

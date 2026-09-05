@@ -8,6 +8,8 @@ import genome_spy as gs
 import pytest
 from tools.generate_schema_wrapper import (
     TRANSFORM_METHOD_OVERRIDES,
+    interaction_helper_names,
+    write_public_interaction_exports,
     write_schema_files,
     write_schema_package,
 )
@@ -361,6 +363,7 @@ def test_parameter_factories_follow_future_schema_variants() -> None:
     }
 
     module = SchemaWrapperGenerator(schema).generate_ergonomics_module()
+    generator = SchemaWrapperGenerator(schema)
 
     assert "future: bool," in module.source
     assert "core.FutureParameter," in module.source
@@ -368,6 +371,35 @@ def test_parameter_factories_follow_future_schema_variants() -> None:
     assert "def selection_lasso(" in module.source
     assert "config = core.LassoSelectionConfig(" in module.source
     assert "_variants=(core.SelectionParameter,)" in module.source
+    assert "selection_lasso" in interaction_helper_names(generator)
+
+
+def test_public_interaction_exports_are_replaced_explicitly(tmp_path: Path) -> None:
+    package_dir = tmp_path / "genome_spy"
+    package_dir.mkdir()
+    template = """# BEGIN GENERATED INTERACTION IMPORTS
+old import
+# END GENERATED INTERACTION IMPORTS
+
+items = [
+    # BEGIN GENERATED INTERACTION EXPORTS
+    old export
+    # END GENERATED INTERACTION EXPORTS
+]
+"""
+    for filename in ("helpers.py", "api.py", "__init__.py"):
+        (package_dir / filename).write_text(template, encoding="utf-8")
+
+    write_public_interaction_exports(package_dir, ("param", "selection_lasso"))
+
+    helpers = (package_dir / "helpers.py").read_text(encoding="utf-8")
+    api = (package_dir / "api.py").read_text(encoding="utf-8")
+    assert "from genome_spy.schema.ergonomics import (" in helpers
+    assert "from genome_spy.helpers import (" in api
+    assert "    selection_lasso," in helpers
+    assert '    "selection_lasso",' in api
+    assert "old import" not in api
+    assert "old export" not in api
 
 
 def test_generated_parameter_docs_are_separated_from_method_summaries() -> None:
