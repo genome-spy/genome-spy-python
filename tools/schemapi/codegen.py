@@ -277,6 +277,20 @@ class SchemaFactorySpec:
 
 
 @dataclass(frozen=True, slots=True)
+class ParameterConfigFactorySpec:
+    """A parameter helper backed by one generated nested configuration."""
+
+    helper_name: str
+    parameter_class_name: str
+    config_class_name: str
+    config_property: str
+    parameter_properties: tuple[PropertySpec, ...]
+    config_properties: tuple[PropertySpec, ...]
+    fixed_properties: tuple[tuple[str, Any], ...] = ()
+    supports_empty: bool = False
+
+
+@dataclass(frozen=True, slots=True)
 class _RawUnionVariant:
     """Internal schema fragments accumulated while expanding a union."""
 
@@ -981,6 +995,105 @@ class SchemaWrapperGenerator:
             )
         return tuple(sorted(specs, key=lambda spec: spec.helper_name))
 
+    def parameter_config_factory_specs(
+        self,
+    ) -> tuple[ParameterConfigFactorySpec, ...]:
+        """Return selection and nested-config parameter helper definitions."""
+        specs: list[ParameterConfigFactorySpec] = []
+        selection_schema = self._definitions_map.get("SelectionParameter", {})
+        selection_properties = self._analyzer.resolve_properties(selection_schema)
+        select_schema = selection_properties.get("select", {})
+        choices = (
+            select_schema.get("anyOf", select_schema.get("oneOf", []))
+            if isinstance(select_schema, dict)
+            else []
+        )
+        if isinstance(choices, list):
+            for choice in choices:
+                if not isinstance(choice, dict):
+                    continue
+                config_name = _ref_name(choice)
+                config_schema = self._definitions_map.get(config_name or "")
+                if (
+                    config_name is None
+                    or not isinstance(config_schema, dict)
+                    or not self._base_analyzer.schema_looks_object_like(config_schema)
+                ):
+                    continue
+                variants = self._analyzer.union_variants(config_name)
+                for variant in variants:
+                    values = next(
+                        (
+                            discriminator_values
+                            for name, discriminator_values in variant.discriminators
+                            if name == "type" and name in variant.required
+                        ),
+                        (),
+                    )
+                    for value in values:
+                        if not isinstance(value, str) or variant.schema_name is None:
+                            continue
+                        specs.append(
+                            ParameterConfigFactorySpec(
+                                helper_name=f"selection_{_snake_name(value)}",
+                                parameter_class_name="SelectionParameter",
+                                config_class_name=variant.schema_name,
+                                config_property="select",
+                                parameter_properties=tuple(
+                                    prop
+                                    for prop in self.schema_property_specs(
+                                        "SelectionParameter"
+                                    )
+                                    if prop.name not in {"name", "select"}
+                                ),
+                                config_properties=variant.properties,
+                                fixed_properties=(("type", value),),
+                                supports_empty=True,
+                            )
+                        )
+
+        for variant in self._analyzer.union_variants("Parameter"):
+            required_config_names = variant.required - {"name"}
+            if len(required_config_names) != 1:
+                continue
+            config_property = next(iter(required_config_names))
+            if config_property == "select":
+                continue
+            property_spec = next(
+                (prop for prop in variant.properties if prop.name == config_property),
+                None,
+            )
+            if (
+                property_spec is None
+                or property_spec.nested_schema_class_name is None
+                or variant.schema_name is None
+            ):
+                continue
+            config_class_name = property_spec.nested_schema_class_name
+            specs.append(
+                ParameterConfigFactorySpec(
+                    helper_name=_snake_name(config_property),
+                    parameter_class_name=variant.schema_name,
+                    config_class_name=config_class_name,
+                    config_property=config_property,
+                    parameter_properties=tuple(
+                        prop
+                        for prop in variant.properties
+                        if prop.name not in {"name", config_property}
+                    ),
+                    config_properties=self.schema_property_specs(config_class_name),
+                )
+            )
+
+        names = [spec.helper_name for spec in specs]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError(
+                "Parameter helper discovery produced duplicate names: "
+                + ", ".join(duplicates)
+            )
+        return tuple(sorted(specs, key=lambda spec: spec.helper_name))
+
     def transform_method_specs(self) -> tuple[TransformMethodSpec, ...]:
         """Return method metadata for every member of ``TransformParams``."""
         transform_union = self._definitions_map.get("TransformParams", {})
@@ -1213,7 +1326,17 @@ class SchemaWrapperGenerator:
                         "fixed": dict(spec.fixed_properties),
                     }
                     for spec in self.binding_factory_specs()
-                ]
+                ],
+                "parameter_helpers": [
+                    {
+                        "helper": spec.helper_name,
+                        "parameter_schema": spec.parameter_class_name,
+                        "config_property": spec.config_property,
+                        "config_schema": spec.config_class_name,
+                        "fixed": dict(spec.fixed_properties),
+                    }
+                    for spec in self.parameter_config_factory_specs()
+                ],
             },
             "root_spec_variants": root_variants,
         }
@@ -1781,6 +1904,9 @@ class SchemaWrapperGenerator:
             for kwds_name in _annotation_kwds_names(annotation.annotation)
         }
         transform_method_specs = self.transform_method_specs()
+        has_filter_method = any(
+            spec.transform_type == "filter" for spec in transform_method_specs
+        )
         transform_methods = [
             _transform_method_source(spec) for spec in transform_method_specs
         ]
@@ -1846,6 +1972,11 @@ class SchemaWrapperGenerator:
                 "",
                 "if TYPE_CHECKING:",
                 "    from genome_spy.channels import Channel",
+                *(
+                    ["    from genome_spy._parameters import Parameter"]
+                    if has_filter_method
+                    else []
+                ),
                 "",
                 (
                     "from genome_spy.schema._typing import "
@@ -2490,6 +2621,7 @@ class SchemaWrapperGenerator:
         datum_properties = self.channel_helper_property_specs("datum")
         value_properties = self.channel_helper_property_specs("value")
         parameter_variants = self._analyzer.union_variants("Parameter")
+        parameter_config_factories = self.parameter_config_factory_specs()
         factory_helpers = (
             SchemaFactorySpec("title", "Title", "Create a chart title object.", "text"),
             SchemaFactorySpec(
@@ -2561,6 +2693,14 @@ class SchemaWrapperGenerator:
                 property_spec.annotation
                 for variant in parameter_variants
                 for property_spec in variant.properties
+            ),
+            *(
+                property_spec.annotation
+                for spec in parameter_config_factories
+                for property_spec in (
+                    *spec.parameter_properties,
+                    *spec.config_properties,
+                )
             ),
             *(
                 p.annotation
@@ -2679,6 +2819,10 @@ class SchemaWrapperGenerator:
                         else []
                     ),
                     *(
+                        _parameter_config_helper_source(spec)
+                        for spec in parameter_config_factories
+                    ),
+                    *(
                         _schema_factory_helper_source(
                             spec.helper_name,
                             spec.class_name,
@@ -2700,6 +2844,7 @@ class SchemaWrapperGenerator:
                             *(["value"] if has_value else []),
                             *(spec.helper_name for spec, _ in factory_helper_specs),
                             *(["param"] if parameter_variants else []),
+                            *(spec.helper_name for spec in parameter_config_factories),
                             "DatumChannelMethodMixin",
                             "LocusChannelMethodMixin",
                             "ValueChannelMethodMixin",
@@ -2716,6 +2861,7 @@ class SchemaWrapperGenerator:
                     *(["value"] if has_value else []),
                     *(spec.helper_name for spec, _ in factory_helper_specs),
                     *(["param"] if parameter_variants else []),
+                    *(spec.helper_name for spec in parameter_config_factories),
                     "DatumChannelMethodMixin",
                     "LocusChannelMethodMixin",
                     "ValueChannelMethodMixin",
@@ -3629,6 +3775,86 @@ def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
     )
 
 
+def _parameter_config_helper_source(spec: ParameterConfigFactorySpec) -> str:
+    """Render a parameter helper around one generated nested config class."""
+    fixed_names = {name for name, _ in spec.fixed_properties}
+    config_properties = tuple(
+        prop for prop in spec.config_properties if prop.name not in fixed_names
+    )
+    parameter_names = {prop.name for prop in spec.parameter_properties}
+    collisions = parameter_names & {prop.name for prop in config_properties}
+    if collisions:
+        names = ", ".join(sorted(collisions))
+        raise ValueError(
+            f"Generated parameter helper {spec.helper_name!r} has ambiguous "
+            f"configuration properties: {names}."
+        )
+    parameters = [
+        "    name: str | None = None,",
+        "    /,",
+        "    *,",
+        *(
+            f"    {prop.python_name}: "
+            f"{_qualified_transform_annotation(prop.annotation.annotation)} "
+            "| UndefinedType = Undefined,"
+            for prop in (*config_properties, *spec.parameter_properties)
+        ),
+        *(["    empty: bool = True,"] if spec.supports_empty else []),
+    ]
+    config_arguments = ", ".join(
+        [
+            *(
+                f"{_python_property_name(name)}={value!r}"
+                for name, value in spec.fixed_properties
+            ),
+            *(f"{prop.python_name}={prop.python_name}" for prop in config_properties),
+        ]
+    )
+    parameter_arguments = ", ".join(
+        f"{prop.python_name}={prop.python_name}" for prop in spec.parameter_properties
+    )
+    if parameter_arguments:
+        parameter_arguments = ", " + parameter_arguments
+    empty_argument = ", empty=empty" if spec.supports_empty else ""
+    return "\n".join(
+        [
+            f"def {spec.helper_name}(",
+            *parameters,
+            ") -> Parameter:",
+            f'    """Create a GenomeSpy ``{spec.helper_name}`` parameter.',
+            "",
+            "    Args:",
+            "        name: Parameter name. A stable name is generated when omitted.",
+            *(
+                f"        {prop.python_name}: {prop.description or 'Schema-defined configuration property.'}"
+                for prop in (*config_properties, *spec.parameter_properties)
+            ),
+            *(
+                ["        empty: Whether an empty selection matches as a predicate."]
+                if spec.supports_empty
+                else []
+            ),
+            "",
+            "    Returns:",
+            "        A reusable parameter handle.",
+            "",
+            "    Raises:",
+            "        TypeError: If the generated parameter definition is invalid.",
+            "",
+            "    Example:",
+            f"        >>> {spec.helper_name}().param.to_dict(validate=False)",
+            "        {...}",
+            '    """',
+            f"    config = core.{spec.config_class_name}({config_arguments})",
+            "    from genome_spy._parameters import _make_parameter",
+            "",
+            f"    return _make_parameter(name, {spec.config_property}=config{parameter_arguments}{empty_argument})",
+            "",
+            "",
+        ]
+    )
+
+
 def _encoding_method_source(property_specs: tuple[PropertySpec, ...]) -> str:
     """Render the schema-derived fluent ``encode`` method."""
     parameters = "\n".join(
@@ -4055,7 +4281,7 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
             [
                 f"    def {spec.method_name}(",
                 "        self,",
-                "        expression: str | UndefinedType = Undefined,",
+                "        expression: str | Parameter | UndefinedType = Undefined,",
                 "        *,",
                 *parameters,
                 "    ) -> Self:",
@@ -4087,10 +4313,19 @@ def _transform_method_source(spec: TransformMethodSpec) -> str:
 
     validation_lines = (
         [
+            "        from genome_spy._parameters import Parameter",
+            "",
             "        if expression is not Undefined:",
             "            if expr is not Undefined or param is not Undefined:",
             '                raise TypeError("expression cannot be combined with expr or param")',
-            "            expr = expression",
+            "            if isinstance(expression, Parameter):",
+            "                if not expression.is_selection:",
+            '                    raise TypeError("Only selection parameters can filter rows directly.")',
+            "                param = expression.name",
+            "                if empty is Undefined:",
+            "                    empty = expression.empty",
+            "            else:",
+            "                expr = expression",
             "        if expr is Undefined and param is Undefined:",
             '            raise TypeError("filter requires an expression or param")',
         ]

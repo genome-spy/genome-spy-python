@@ -15,6 +15,8 @@ from __future__ import annotations
 
 from typing import Any, Unpack, cast, overload
 
+from genome_spy._conditions import when
+from genome_spy._parameters import Parameter
 from genome_spy.schema._kwds import AxesKwds, ScalesKwds
 from genome_spy.schema._typing import ParseValue_T
 from genome_spy.schema.core import (
@@ -35,11 +37,14 @@ from genome_spy.schema.ergonomics import (
     data_format,
     dynamic_opacity,
     param,
+    ruler,
+    selection_interval,
+    selection_point,
     title,
     view,
     view_config,
 )
-from genome_spy.schemapi import normalize_schema_value
+from genome_spy.schemapi import Undefined, UndefinedType, normalize_schema_value
 
 
 def _normalized_mapping_payload(**kwargs: Any) -> dict[str, Any]:
@@ -64,11 +69,15 @@ __all__ = [
     "expr",
     "param",
     "parse",
+    "ruler",
     "scales",
+    "selection_interval",
+    "selection_point",
     "step",
     "title",
     "view",
     "view_config",
+    "when",
 ]
 
 
@@ -90,18 +99,30 @@ def axes(**kwargs: Unpack[AxesKwds]) -> AxesKwds:
 
 @overload
 def condition(
-    param: str, value: float | ExprRef, /, *, empty: bool = True
+    param: str | Parameter,
+    value: float | ExprRef,
+    /,
+    *,
+    empty: bool | UndefinedType = Undefined,
 ) -> ConditionalParameterValueDefNumberExprRef: ...
 
 
 @overload
 def condition(
-    param: str, value: str | None, /, *, empty: bool = True
+    param: str | Parameter,
+    value: str | None,
+    /,
+    *,
+    empty: bool | UndefinedType = Undefined,
 ) -> ConditionalParameterValueDefStringNullExprRef: ...
 
 
 def condition(
-    param: str, value: float | str | None | ExprRef, /, *, empty: bool = True
+    param: str | Parameter,
+    value: float | str | None | ExprRef,
+    /,
+    *,
+    empty: bool | UndefinedType = Undefined,
 ) -> (
     ConditionalParameterValueDefNumberExprRef
     | ConditionalParameterValueDefStringNullExprRef
@@ -120,12 +141,20 @@ def condition(
         >>> condition("hover", 1, empty=False).to_dict()
         {'empty': False, 'param': 'hover', 'value': 1}
     """
+    if isinstance(param, Parameter):
+        if not param.is_selection:
+            raise TypeError("condition() requires a selection parameter.")
+        parameter_name = param.name
+        resolved_empty = param.empty if empty is Undefined else empty
+    else:
+        parameter_name = param
+        resolved_empty = True if empty is Undefined else empty
     if isinstance(value, str) or value is None:
         return ConditionalParameterValueDefStringNullExprRef(
-            param=param, empty=empty, value=value
+            param=parameter_name, empty=resolved_empty, value=value
         )
     return ConditionalParameterValueDefNumberExprRef(
-        param=param, empty=empty, value=value
+        param=parameter_name, empty=resolved_empty, value=value
     )
 
 

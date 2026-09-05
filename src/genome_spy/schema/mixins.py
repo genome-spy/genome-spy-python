@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from genome_spy.channels import Channel
+    from genome_spy._parameters import Parameter
 
 from genome_spy.schema._typing import (
     AggregateOp_T,
@@ -10890,7 +10891,7 @@ class TransformMethodMixin:
 
     def transform_filter(
         self,
-        expression: str | UndefinedType = Undefined,
+        expression: str | Parameter | UndefinedType = Undefined,
         *,
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
@@ -10908,10 +10909,21 @@ class TransformMethodMixin:
             param (str): A selection parameter. The row is removed if it is not part of the selection.
         """
         transform: dict[str, Any] = {"type": "filter"}
+        from genome_spy._parameters import Parameter
+
         if expression is not Undefined:
             if expr is not Undefined or param is not Undefined:
                 raise TypeError("expression cannot be combined with expr or param")
-            expr = expression
+            if isinstance(expression, Parameter):
+                if not expression.is_selection:
+                    raise TypeError(
+                        "Only selection parameters can filter rows directly."
+                    )
+                param = expression.name
+                if empty is Undefined:
+                    empty = expression.empty
+            else:
+                expr = expression
         if expr is Undefined and param is Undefined:
             raise TypeError("filter requires an expression or param")
         if description is not Undefined:

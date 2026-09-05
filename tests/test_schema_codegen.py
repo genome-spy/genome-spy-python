@@ -294,6 +294,9 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
         "binding_radio",
         "binding_range",
         "binding_select",
+        "ruler",
+        "selection_interval",
+        "selection_point",
         "title",
         "dynamic_opacity",
         "data_format",
@@ -308,6 +311,10 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     assert "def binding_range(\n    *," in ergonomics_module.source
     assert "'input': 'range'" in ergonomics_module.source
     assert "input: Literal['range']" not in ergonomics_module.source
+    assert "def selection_interval(" in ergonomics_module.source
+    assert "config = core.IntervalSelectionConfig(" in (ergonomics_module.source)
+    assert "def ruler(" in ergonomics_module.source
+    assert "config = core.RulerConfig(" in ergonomics_module.source
     assert "def param(\n    name: str | None = None," in ergonomics_module.source
     assert "transition: core.LerpTransition | dict[str, Any]," in (
         ergonomics_module.source
@@ -840,7 +847,7 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
         "encoding_channels": ["color", "x"],
         "transforms": [],
         "lazy_data_sources": [],
-        "interaction": {"bindings": []},
+        "interaction": {"bindings": [], "parameter_helpers": []},
         "root_spec_variants": [],
     }
     assert "MARK_TYPES = ('point', 'rect')" in (output_dir / "core.py").read_text(

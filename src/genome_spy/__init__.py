@@ -3,6 +3,7 @@
 from genome_spy.arrow import to_arrow_ipc
 from genome_spy.api import (
     Angle,
+    BrushConfig,
     Color,
     condition,
     Direction,
@@ -31,6 +32,8 @@ from genome_spy.api import (
     Parameter,
     Paddings,
     Parse,
+    ruler,
+    RulerMarkConfig,
     Sample,
     Scale,
     Search,
@@ -77,12 +80,15 @@ from genome_spy.api import (
     param,
     parse,
     scales,
+    selection_interval,
+    selection_point,
     step,
     title,
     value,
     view,
     view_config,
     vconcat,
+    when,
 )
 
 __all__ = [
@@ -94,6 +100,7 @@ __all__ = [
     "binding_radio",
     "binding_range",
     "binding_select",
+    "BrushConfig",
     "Chart",
     "Color",
     "condition",
@@ -162,13 +169,18 @@ __all__ = [
     "multiscale",
     "param",
     "parse",
+    "ruler",
+    "RulerMarkConfig",
     "scales",
+    "selection_interval",
+    "selection_point",
     "step",
     "title",
     "value",
     "view",
     "view_config",
     "vconcat",
+    "when",
 ]
 
 __version__ = "0.1.0"

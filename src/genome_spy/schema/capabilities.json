@@ -553,6 +553,33 @@
           "input": "select"
         }
       }
+    ],
+    "parameter_helpers": [
+      {
+        "helper": "ruler",
+        "parameter_schema": "RulerParameter",
+        "config_property": "ruler",
+        "config_schema": "RulerConfig",
+        "fixed": {}
+      },
+      {
+        "helper": "selection_interval",
+        "parameter_schema": "SelectionParameter",
+        "config_property": "select",
+        "config_schema": "IntervalSelectionConfig",
+        "fixed": {
+          "type": "interval"
+        }
+      },
+      {
+        "helper": "selection_point",
+        "parameter_schema": "SelectionParameter",
+        "config_property": "select",
+        "config_schema": "PointSelectionConfig",
+        "fixed": {
+          "type": "point"
+        }
+      }
     ]
   },
   "root_spec_variants": [

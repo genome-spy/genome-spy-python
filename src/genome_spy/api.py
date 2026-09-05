@@ -29,11 +29,15 @@ from genome_spy.helpers import (
     expr,
     param,
     parse,
+    ruler,
     scales,
+    selection_interval,
+    selection_point,
     step,
     title,
     view,
     view_config,
+    when,
 )
 from genome_spy.jupyter import JupyterChart
 from genome_spy.schema.channels import (
@@ -66,6 +70,7 @@ from genome_spy.schema.channels import (
     YOffset,
 )
 from genome_spy.schema.core import (
+    BrushConfig,
     DataFormat,
     DynamicOpacity,
     ExprRef,
@@ -74,6 +79,7 @@ from genome_spy.schema.core import (
     Legend,
     Paddings,
     Parse,
+    RulerMarkConfig,
     Scale,
     SizeDef,
     Step,
@@ -96,6 +102,7 @@ __all__ = [
     "binding_radio",
     "binding_range",
     "binding_select",
+    "BrushConfig",
     "Chart",
     "Color",
     "condition",
@@ -164,11 +171,16 @@ __all__ = [
     "multiscale",
     "param",
     "parse",
+    "ruler",
+    "RulerMarkConfig",
     "scales",
+    "selection_interval",
+    "selection_point",
     "step",
     "title",
     "value",
     "view",
     "view_config",
     "vconcat",
+    "when",
 ]

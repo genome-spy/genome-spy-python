@@ -17,15 +17,23 @@ from genome_spy.schema._typing import (
     AxisPlacement_T,
     Baseline_T,
     ChannelWithScale_T,
+    DomEventType_T,
     FieldName_T,
     Field_T,
     FontStyle_T,
     FontWeight_T,
     PrimaryPositionalChannel_T,
+    RulerClear_T,
+    RulerDisplay_T,
+    RulerEventType_T,
+    RulerExtent_T,
+    RulerSnap_T,
+    RulerSource_T,
     ScalarDomain_T,
     Scalar_T,
     ScaleInterpolate_T,
     ScaleType_T,
+    SelectionExtent_T,
     SelectionType_T,
     SortOrder_T,
     TitleAnchor_T,
@@ -39,6 +47,7 @@ from genome_spy.schema._kwds import (
     BindInputKwds,
     BindRadioSelectKwds,
     BindRangeKwds,
+    EventConfigKwds,
     GenomeAxisKwds,
     LegendConfigKwds,
     LinkConfigKwds,
@@ -49,6 +58,8 @@ from genome_spy.schema._kwds import (
     RectConfigKwds,
     RuleConfigKwds,
     RulerConfigKwds,
+    RulerEventConfigKwds,
+    RulerMarkConfigKwds,
     ScaleConfigKwds,
     ScaleInterpolateParamsKwds,
     ScaleKwds,
@@ -1264,6 +1275,217 @@ def param(
     )
 
 
+def ruler(
+    name: str | None = None,
+    /,
+    *,
+    clear: RulerClear_T | UndefinedType = Undefined,
+    display: RulerDisplay_T | UndefinedType = Undefined,
+    encodings: Sequence[PrimaryPositionalChannel_T] | UndefinedType = Undefined,
+    extent: RulerExtent_T | UndefinedType = Undefined,
+    mark: core.RulerMarkConfig | RulerMarkConfigKwds | UndefinedType = Undefined,
+    on: RulerEventType_T
+    | core.RulerEventConfig
+    | RulerEventConfigKwds
+    | str
+    | UndefinedType = Undefined,
+    snap: RulerSnap_T | UndefinedType = Undefined,
+    source: RulerSource_T | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: core.RulerInitMapping | dict[str, Any] | UndefinedType = Undefined,
+) -> Parameter:
+    """Create a GenomeSpy ``ruler`` parameter.
+
+    Args:
+        name: Parameter name. A stable name is generated when omitted.
+        clear: Event that clears the ruler, or ``false`` to keep the current value. __Default value:__ ``"mouseleave"`` for ``on: "mousemove"``, otherwise ``false``.
+        display: How the ruler is drawn for snapped index or locus coordinates. ``"line"`` draws at the coordinate. ``"center"`` draws at the center of the coordinate band. ``"band"`` draws a rectangle covering the coordinate band. ``"none"`` tracks the ruler value without drawing a guide. __Default value:__ ``"center"`` for snapped index and locus scales, otherwise ``"line"``.
+        encodings: Positional channels whose domain coordinates are tracked by the ruler. __Default value:__ ``["x"]``
+        extent: Visual extent of the ruler. ``"view"`` draws one guide per participating view. ``"container"`` draws one spanning guide when participating projections align. ``"auto"`` chooses a spanning guide only when it is safe. __Default value:__ ``"auto"``
+        mark: Rule or band appearance. Has no effect when ``display`` is ``"none"``.
+        on: Event that updates a pointer-driven ruler. ``"mousemove"`` follows the pointer. ``"mousedown"`` updates on press and continues while dragging. Event filters can require modifier keys. __Default value:__ ``"mousemove"``
+        snap: Quantization applied before writing the ruler value. ``"auto"`` snaps index and locus scales to integer coordinates. ``"integer"`` snaps all numeric coordinates. ``false`` keeps the original coordinate. __Default value:__ ``"auto"`` for index and locus scales, otherwise ``false``.
+        source: Source of the ruler coordinate. ``"pointer"`` uses pointer events configured by ``on``. ``"viewport"`` tracks the center of the current viewport. __Default value:__ ``"pointer"``
+        description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
+        persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
+        push: Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
+        value: Initial ruler value.
+
+    Returns:
+        A reusable parameter handle.
+
+    Raises:
+        TypeError: If the generated parameter definition is invalid.
+
+    Example:
+        >>> ruler().param.to_dict(validate=False)
+        {...}
+    """
+    config = core.RulerConfig(
+        clear=clear,
+        display=display,
+        encodings=encodings,
+        extent=extent,
+        mark=mark,
+        on=on,
+        snap=snap,
+        source=source,
+    )
+    from genome_spy._parameters import _make_parameter
+
+    return _make_parameter(
+        name,
+        ruler=config,
+        description=description,
+        persist=persist,
+        push=push,
+        value=value,
+    )
+
+
+def selection_interval(
+    name: str | None = None,
+    /,
+    *,
+    clear: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | bool
+    | UndefinedType = Undefined,
+    encodings: Sequence[PrimaryPositionalChannel_T] | UndefinedType = Undefined,
+    extent: SelectionExtent_T | UndefinedType = Undefined,
+    mark: core.BrushConfig | dict[str, Any] | UndefinedType = Undefined,
+    on: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | UndefinedType = Undefined,
+    zoom: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | bool
+    | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: core.SelectionInitIntervalMapping
+    | dict[str, Any]
+    | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter:
+    """Create a GenomeSpy ``selection_interval`` parameter.
+
+    Args:
+        name: Parameter name. A stable name is generated when omitted.
+        clear: A string or object that defines the events that should clear the selection. __Default value:__ ``"dblclick"``
+        encodings: An array of encoding channels that define the interval selection.
+        extent: Visual extent of the interval selection rectangle. ``"auto"`` draws one spanning rectangle when the selected channel can span a concat safely. ``"view"`` draws one rectangle per participating view. ``"container"`` requires one spanning rectangle. __Default value:__ ``"auto"``
+        mark: Interval selections display a rectangle mark to show the selected range. Use the ``mark`` property to adjust the appearance of this rectangle.
+        on: A string or object that defines the events to which the selection should listen. __Default value:__ - point selections: ``"click"`` - interval selections: - ``"mousedown[event.shiftKey]"`` when any brushed channel is zoomable - ``"mousedown"`` otherwise
+        zoom: Controls whether an active interval selection can be resized by mouse wheel. The wheel interaction only applies when the cursor is over the interval. Can be: - ``true`` / ``false`` - event type string such as ``"wheel"`` or ``"wheel[event.altKey]"`` - an ``EventConfig`` object Currently, only ``"wheel"`` events are supported. __Default value:__ - ``false`` when any brushed channel uses a zoomable scale - ``true`` otherwise
+        description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
+        persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
+        push: Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
+        value: Initial value for the selection.
+        empty: Whether an empty selection matches as a predicate.
+
+    Returns:
+        A reusable parameter handle.
+
+    Raises:
+        TypeError: If the generated parameter definition is invalid.
+
+    Example:
+        >>> selection_interval().param.to_dict(validate=False)
+        {...}
+    """
+    config = core.IntervalSelectionConfig(
+        type="interval",
+        clear=clear,
+        encodings=encodings,
+        extent=extent,
+        mark=mark,
+        on=on,
+        zoom=zoom,
+    )
+    from genome_spy._parameters import _make_parameter
+
+    return _make_parameter(
+        name,
+        select=config,
+        description=description,
+        persist=persist,
+        push=push,
+        value=value,
+        empty=empty,
+    )
+
+
+def selection_point(
+    name: str | None = None,
+    /,
+    *,
+    clear: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | bool
+    | UndefinedType = Undefined,
+    on: DomEventType_T
+    | core.EventConfig
+    | EventConfigKwds
+    | str
+    | UndefinedType = Undefined,
+    toggle: bool | UndefinedType = Undefined,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    value: core.SelectionInitIntervalMapping
+    | dict[str, Any]
+    | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter:
+    """Create a GenomeSpy ``selection_point`` parameter.
+
+    Args:
+        name: Parameter name. A stable name is generated when omitted.
+        clear: A string or object that defines the events that should clear the selection. __Default value:__ ``"dblclick"``
+        on: A string or object that defines the events to which the selection should listen. __Default value:__ - point selections: ``"click"`` - interval selections: - ``"mousedown[event.shiftKey]"`` when any brushed channel is zoomable - ``"mousedown"`` otherwise
+        toggle: Controls whether data values should be toggled (inserted or removed from a point selection) when clicking with the shift key pressed. - ``true`` -- additional values can be selected by shift-clicking. - ``false`` -- only a single value can be selected at a time. __Default value:__ ``true``
+        description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
+        persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
+        push: Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first. This is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.
+        value: Initial value for the selection.
+        empty: Whether an empty selection matches as a predicate.
+
+    Returns:
+        A reusable parameter handle.
+
+    Raises:
+        TypeError: If the generated parameter definition is invalid.
+
+    Example:
+        >>> selection_point().param.to_dict(validate=False)
+        {...}
+    """
+    config = core.PointSelectionConfig(type="point", clear=clear, on=on, toggle=toggle)
+    from genome_spy._parameters import _make_parameter
+
+    return _make_parameter(
+        name,
+        select=config,
+        description=description,
+        persist=persist,
+        push=push,
+        value=value,
+        empty=empty,
+    )
+
+
 def title(
     text: str | core.ExprRef | dict[str, Any],
     /,
@@ -1800,6 +2022,9 @@ __all__ = [
     "binding_range",
     "binding_select",
     "param",
+    "ruler",
+    "selection_interval",
+    "selection_point",
     "DatumChannelMethodMixin",
     "LocusChannelMethodMixin",
     "ValueChannelMethodMixin",

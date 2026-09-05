@@ -616,6 +616,95 @@ def test_add_params_rejects_duplicate_explicit_names_and_non_parameters() -> Non
         gs.Chart().add_params(gs.Scale())
 
 
+def test_generated_selection_helpers_feed_selection_filters() -> None:
+    brush = gs.selection_interval(
+        "brush",
+        encodings=["x"],
+        mark=gs.BrushConfig(fill="steelblue", measure="outside"),
+        empty=False,
+    )
+    points = gs.selection_point("picked", toggle=False)
+    chart = gs.Chart().transform_filter(brush).add_params(brush, points)
+
+    spec = chart.to_dict(validate=False)
+
+    assert spec["params"] == [
+        {
+            "name": "brush",
+            "select": {
+                "type": "interval",
+                "encodings": ["x"],
+                "mark": {"fill": "steelblue", "measure": "outside"},
+            },
+        },
+        {"name": "picked", "select": {"type": "point", "toggle": False}},
+    ]
+    assert spec["transform"] == [{"type": "filter", "param": "brush", "empty": False}]
+
+
+def test_selection_filter_rejects_value_parameter() -> None:
+    with pytest.raises(TypeError, match="Only selection parameters"):
+        gs.Chart().transform_filter(gs.param("cutoff", value=1))
+
+
+def test_when_then_otherwise_builds_selection_condition() -> None:
+    brush = gs.selection_interval("brush", encodings=["x"], empty=False)
+    chart = (
+        gs.Chart([{"position": 1, "score": 2, "group": "A"}])
+        .mark_point()
+        .encode(
+            x="position:Q",
+            y="score:Q",
+            color=(gs.when(brush).then("group:N").otherwise(gs.value("lightgray"))),
+        )
+        .add_params(brush)
+    )
+
+    assert chart.to_dict()["encoding"]["color"] == {
+        "value": "lightgray",
+        "condition": {
+            "param": "brush",
+            "empty": False,
+            "field": "group",
+            "type": "nominal",
+        },
+    }
+    assert gs.condition(brush, 1).to_dict() == {
+        "param": "brush",
+        "empty": False,
+        "value": 1,
+    }
+
+
+def test_when_rejects_non_selection_parameters() -> None:
+    with pytest.raises(TypeError, match="selection parameter"):
+        gs.when(gs.param("cutoff", value=1))
+
+
+def test_generated_ruler_helper_uses_typed_nested_config() -> None:
+    cursor = gs.ruler(
+        "cursor",
+        persist=False,
+        encodings=["x"],
+        extent="container",
+        display="line",
+        mark=gs.RulerMarkConfig(stroke="#d62728", strokeWidth=1),
+    )
+
+    assert gs.Chart().add_params(cursor).to_dict(validate=False)["params"] == [
+        {
+            "name": "cursor",
+            "persist": False,
+            "ruler": {
+                "encodings": ["x"],
+                "extent": "container",
+                "display": "line",
+                "mark": {"stroke": "#d62728", "strokeWidth": 1},
+            },
+        }
+    ]
+
+
 def test_generated_configure_methods_merge_top_level_config() -> None:
     chart = (
         gs.Chart([{"x": 1}])
