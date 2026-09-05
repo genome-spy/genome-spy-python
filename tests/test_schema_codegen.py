@@ -319,6 +319,7 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     assert "transition: core.LerpTransition | dict[str, Any]," in (
         ergonomics_module.source
     )
+    assert "expr: str | ExpressionOperand," in ergonomics_module.source
     assert "value: float," in ergonomics_module.source
     assert "return _make_parameter(" in ergonomics_module.source
     assert "def config(\n    *," in ergonomics_module.source
@@ -328,6 +329,45 @@ def test_generate_ergonomics_module_emits_schema_factory_helpers() -> None:
     assert "def copy(\n        self," in (
         SchemaWrapperGenerator(schema).generate_mark_mixins_module().source
     )
+
+
+def test_parameter_factories_follow_future_schema_variants() -> None:
+    schema = json.loads(
+        Path("src/genome_spy/schema/genome-spy-schema.json").read_text(encoding="utf-8")
+    )
+    definitions = schema["definitions"]
+    definitions["Parameter"]["anyOf"].append({"$ref": "#/definitions/FutureParameter"})
+    definitions["FutureParameter"] = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "name": {"type": "string"},
+            "future": {"type": "boolean"},
+        },
+        "required": ["name", "future"],
+    }
+    definitions["BindInput"]["properties"]["input"]["enum"].append("date")
+    definitions["SelectionParameter"]["properties"]["select"]["anyOf"].append(
+        {"$ref": "#/definitions/LassoSelectionConfig"}
+    )
+    definitions["LassoSelectionConfig"] = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "type": {"const": "lasso", "type": "string"},
+            "on": {"type": "string"},
+        },
+        "required": ["type"],
+    }
+
+    module = SchemaWrapperGenerator(schema).generate_ergonomics_module()
+
+    assert "future: bool," in module.source
+    assert "core.FutureParameter," in module.source
+    assert "input: Literal['text', 'number', 'color', 'date']" in module.source
+    assert "def selection_lasso(" in module.source
+    assert "config = core.LassoSelectionConfig(" in module.source
+    assert "_variants=(core.SelectionParameter,)" in module.source
 
 
 def test_generated_parameter_docs_are_separated_from_method_summaries() -> None:

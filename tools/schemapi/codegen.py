@@ -2746,6 +2746,11 @@ class SchemaWrapperGenerator:
                         if parameter_variants
                         else []
                     ),
+                    *(
+                        ["    from genome_spy._expressions import ExpressionOperand"]
+                        if parameter_variants
+                        else []
+                    ),
                     "",
                     "from genome_spy._expressions import DatumExpression",
                     (
@@ -3650,6 +3655,15 @@ def _schema_factory_helper_source(
 
 def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
     """Render a branch-preserving parameter factory from concrete union leaves."""
+
+    def annotation_for(property_spec: PropertySpec) -> str:
+        annotation = _qualified_transform_annotation(
+            property_spec.annotation.annotation
+        )
+        if property_spec.name == "expr" and "ExpressionOperand" not in annotation:
+            return f"{annotation} | ExpressionOperand"
+        return annotation
+
     overloads: list[str] = []
     property_specs_by_name: dict[str, list[PropertySpec]] = {}
     for variant in variants:
@@ -3674,9 +3688,7 @@ def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
         )
         parameters = []
         for property_spec in keyword_specs:
-            annotation = _qualified_transform_annotation(
-                property_spec.annotation.annotation
-            )
+            annotation = annotation_for(property_spec)
             default = (
                 ""
                 if property_spec.name in variant.required
@@ -3723,8 +3735,7 @@ def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
         "    /,",
         "    *,",
         *(
-            f"    {spec.python_name}: "
-            f"{_qualified_transform_annotation(spec.annotation.annotation)} "
+            f"    {spec.python_name}: {annotation_for(spec)} "
             "| UndefinedType = Undefined,"
             for spec in merged_specs
         ),
@@ -3735,6 +3746,16 @@ def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
     )
     if forwarded:
         forwarded += ", "
+    variant_names = tuple(
+        variant.schema_name for variant in variants if variant.schema_name is not None
+    )
+    selection_variant_names = tuple(
+        variant.schema_name
+        for variant in variants
+        if variant.schema_name is not None and "select" in variant.required
+    )
+    variant_classes = _core_class_tuple_source(variant_names)
+    selection_variant_classes = _core_class_tuple_source(selection_variant_names)
     return "\n\n".join(
         [
             "\n\n".join(overloads),
@@ -3768,11 +3789,24 @@ def _parameter_helper_source(variants: tuple[UnionVariantSpec, ...]) -> str:
                     '    """',
                     "    from genome_spy._parameters import _make_parameter",
                     "",
-                    f"    return _make_parameter(name, {forwarded}empty=empty)",
+                    "    return _make_parameter(",
+                    "        name,",
+                    f"        {forwarded}",
+                    f"        _variants={variant_classes},",
+                    f"        _selection_variants={selection_variant_classes},",
+                    "        empty=empty,",
+                    "    )",
                 ]
             ),
         ]
     )
+
+
+def _core_class_tuple_source(class_names: tuple[str, ...]) -> str:
+    """Render a tuple of generated ``core`` schema classes."""
+    if not class_names:
+        return "()"
+    return "(" + ", ".join(f"core.{name}" for name in class_names) + ",)"
 
 
 def _parameter_config_helper_source(spec: ParameterConfigFactorySpec) -> str:
@@ -3816,6 +3850,9 @@ def _parameter_config_helper_source(spec: ParameterConfigFactorySpec) -> str:
     if parameter_arguments:
         parameter_arguments = ", " + parameter_arguments
     empty_argument = ", empty=empty" if spec.supports_empty else ""
+    selection_variants = (
+        f"(core.{spec.parameter_class_name},)" if spec.supports_empty else "()"
+    )
     return "\n".join(
         [
             f"def {spec.helper_name}(",
@@ -3848,7 +3885,12 @@ def _parameter_config_helper_source(spec: ParameterConfigFactorySpec) -> str:
             f"    config = core.{spec.config_class_name}({config_arguments})",
             "    from genome_spy._parameters import _make_parameter",
             "",
-            f"    return _make_parameter(name, {spec.config_property}=config{parameter_arguments}{empty_argument})",
+            "    return _make_parameter(",
+            "        name,",
+            f"        {spec.config_property}=config{parameter_arguments}{empty_argument},",
+            f"        _variants=(core.{spec.parameter_class_name},),",
+            f"        _selection_variants={selection_variants},",
+            "    )",
             "",
             "",
         ]

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from genome_spy.channels import DatumChannel, LocusChannel, ValueChannel
     from genome_spy._parameters import Parameter
+    from genome_spy._expressions import ExpressionOperand
 
 from genome_spy._expressions import DatumExpression
 from genome_spy.schema._typing import (
@@ -1161,7 +1162,7 @@ def param(
     name: str | None = None,
     /,
     *,
-    expr: str,
+    expr: str | ExpressionOperand,
     description: str | UndefinedType = Undefined,
     persist: bool | UndefinedType = Undefined,
     push: Literal["outer"] | UndefinedType = Undefined,
@@ -1217,7 +1218,7 @@ def param(
     | BindInputKwds
     | UndefinedType = Undefined,
     description: str | UndefinedType = Undefined,
-    expr: str | UndefinedType = Undefined,
+    expr: str | ExpressionOperand | UndefinedType = Undefined,
     persist: bool | UndefinedType = Undefined,
     push: Literal["outer"] | UndefinedType = Undefined,
     ruler: core.RulerConfig | RulerConfigKwds | UndefinedType = Undefined,
@@ -1271,6 +1272,14 @@ def param(
         select=select,
         transition=transition,
         value=value,
+        _variants=(
+            core.PlainValueParameter,
+            core.TransitionedValueParameter,
+            core.ExprParameter,
+            core.SelectionParameter,
+            core.RulerParameter,
+        ),
+        _selection_variants=(core.SelectionParameter,),
         empty=empty,
     )
 
@@ -1342,6 +1351,8 @@ def ruler(
         persist=persist,
         push=push,
         value=value,
+        _variants=(core.RulerParameter,),
+        _selection_variants=(),
     )
 
 
@@ -1422,6 +1433,8 @@ def selection_interval(
         push=push,
         value=value,
         empty=empty,
+        _variants=(core.SelectionParameter,),
+        _selection_variants=(core.SelectionParameter,),
     )
 
 
@@ -1483,6 +1496,8 @@ def selection_point(
         push=push,
         value=value,
         empty=empty,
+        _variants=(core.SelectionParameter,),
+        _selection_variants=(core.SelectionParameter,),
     )
 
 

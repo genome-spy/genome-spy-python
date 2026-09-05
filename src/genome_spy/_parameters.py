@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import Any, Literal, cast
+from typing import Any, cast
 
 from genome_spy._expressions import (
     Expression,
@@ -12,27 +12,10 @@ from genome_spy._expressions import (
     ExpressionOperatorMixin,
 )
 from genome_spy.schema import core
-from genome_spy.schema._kwds import (
-    BindCheckboxKwds,
-    BindInputKwds,
-    BindRadioSelectKwds,
-    BindRangeKwds,
-    RulerConfigKwds,
-)
-from genome_spy.schema._typing import SelectionType_T
 from genome_spy.schemapi import (
     SchemaBase,
     Undefined,
-    UndefinedType,
     normalize_schema_value,
-)
-
-ParameterDefinition = (
-    core.PlainValueParameter
-    | core.TransitionedValueParameter
-    | core.ExprParameter
-    | core.SelectionParameter
-    | core.RulerParameter
 )
 
 
@@ -61,9 +44,10 @@ class Parameter(ExpressionOperatorMixin, core.ExprRef):
 
     def __init__(
         self,
-        param: ParameterDefinition,
+        param: SchemaBase,
         *,
         empty: bool = True,
+        _is_selection: bool = False,
         _name_is_explicit: bool = True,
     ) -> None:
         values = param.to_dict(validate=False)
@@ -73,7 +57,7 @@ class Parameter(ExpressionOperatorMixin, core.ExprRef):
         self.param = param
         self.empty = empty
         self._name_is_explicit = _name_is_explicit
-        self._is_selection = isinstance(param, core.SelectionParameter)
+        self._is_selection = _is_selection
         core.ExprRef.__init__(self, expr=name)
 
     @property
@@ -143,16 +127,12 @@ def _defined_properties(properties: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in properties.items() if value is not Undefined}
 
 
-def _select_parameter_class(properties: dict[str, Any]) -> type[ParameterDefinition]:
-    variants: tuple[type[ParameterDefinition], ...] = (
-        core.PlainValueParameter,
-        core.TransitionedValueParameter,
-        core.ExprParameter,
-        core.SelectionParameter,
-        core.RulerParameter,
-    )
+def _select_parameter_class(
+    properties: dict[str, Any],
+    variants: tuple[type[SchemaBase], ...],
+) -> type[SchemaBase]:
     supplied = set(properties)
-    matches: list[type[ParameterDefinition]] = []
+    matches: list[type[SchemaBase]] = []
     for variant in variants:
         schema = variant.resolve_references()
         allowed = set(schema.get("properties", {}))
@@ -174,28 +154,10 @@ def _make_parameter(
     name: str | None = None,
     /,
     *,
-    bind: core.BindCheckbox
-    | BindCheckboxKwds
-    | core.BindRadioSelect
-    | BindRadioSelectKwds
-    | core.BindRange
-    | BindRangeKwds
-    | core.BindInput
-    | BindInputKwds
-    | UndefinedType = Undefined,
-    description: str | UndefinedType = Undefined,
-    expr: str | ExpressionOperand | UndefinedType = Undefined,
-    persist: bool | UndefinedType = Undefined,
-    push: Literal["outer"] | UndefinedType = Undefined,
-    ruler: core.RulerConfig | RulerConfigKwds | UndefinedType = Undefined,
-    select: SelectionType_T
-    | core.PointSelectionConfig
-    | dict[str, Any]
-    | core.IntervalSelectionConfig
-    | UndefinedType = Undefined,
-    transition: core.LerpTransition | dict[str, Any] | UndefinedType = Undefined,
-    value: Any | UndefinedType = Undefined,
+    _variants: tuple[type[SchemaBase], ...],
+    _selection_variants: tuple[type[SchemaBase], ...] = (),
     empty: bool = True,
+    **properties: Any,
 ) -> Parameter:
     """Create a reusable GenomeSpy parameter handle.
 
@@ -227,28 +189,17 @@ def _make_parameter(
         >>> cutoff.param.to_dict()
         {'name': 'cutoff', 'value': 0.5}
     """
-    properties = _defined_properties(
-        {
-            "bind": bind,
-            "description": description,
-            "expr": expr,
-            "persist": persist,
-            "push": push,
-            "ruler": ruler,
-            "select": select,
-            "transition": transition,
-            "value": value,
-        }
-    )
+    properties = _defined_properties(properties)
     if "expr" in properties:
         properties["expr"] = _expression_string(properties["expr"])
     name_is_explicit = name is not None
     properties["name"] = name or _stable_parameter_name(properties)
-    parameter_class = _select_parameter_class(properties)
+    parameter_class = _select_parameter_class(properties, _variants)
     definition = parameter_class(**properties)
     return Parameter(
         definition,
         empty=empty,
+        _is_selection=parameter_class in _selection_variants,
         _name_is_explicit=name_is_explicit,
     )
 
