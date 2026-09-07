@@ -13,11 +13,14 @@ lets both reuse it.
 
 from __future__ import annotations
 
+import ast
+import base64
 import hashlib
+import importlib.metadata
 import importlib.util
 import json
 import sys
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from types import ModuleType
 from typing import Iterator
@@ -184,11 +187,102 @@ def collect_example(path: Path) -> Example:
     return _collect_example(path, module, chart.to_dict())  # type: ignore[attr-defined]
 
 
-def iter_prepared_examples() -> Iterator[tuple[Example, dict[str, bytes]]]:
-    """Prepare gallery examples one at a time for binary-capable renderers."""
+def _local_dependencies(path: Path, seen: set[Path] | None = None) -> set[Path]:
+    """Follow local Python imports, including imports between examples."""
+    seen = set() if seen is None else seen
+    if path in seen or not path.is_file():
+        return seen
+    seen.add(path)
+    if path.suffix != ".py":
+        return seen
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
+        names: list[str] = []
+        if isinstance(node, ast.Import):
+            names = [alias.name for alias in node.names]
+        elif isinstance(node, ast.ImportFrom):
+            module = node.module or ""
+            if node.level:
+                package = ".".join(path.parent.relative_to(REPO_ROOT).parts)
+                module = importlib.util.resolve_name("." * node.level + module, package)
+            names = [module, *(f"{module}.{alias.name}" for alias in node.names)]
+        for name in names:
+            parts = name.split(".")
+            candidates = [REPO_ROOT.joinpath(*parts).with_suffix(".py")]
+            candidates.extend(
+                REPO_ROOT.joinpath(*parts[:i], "__init__.py")
+                for i in range(1, len(parts) + 1)
+            )
+            for candidate in candidates:
+                _local_dependencies(candidate, seen)
+    return seen
+
+
+def _fingerprint(paths: set[Path]) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(paths):
+        digest.update(str(path).encode())
+        digest.update(path.read_bytes() if path.is_file() else b"missing")
+    return digest.hexdigest()
+
+
+def iter_prepared_examples(
+    cache_dir: Path | None = None,
+) -> Iterator[tuple[Example, dict[str, bytes]]]:
+    """Prepare examples, optionally reusing locally cached specs and Arrow buffers.
+
+    Shared library, packaged data, tooling, configuration, and lockfile changes
+    invalidate all entries. Example source, prose, and local imports invalidate
+    their dependent entries. Remote resources are not fetched or monitored.
+    """
+    shared = ""
+    if cache_dir is not None:
+        dependencies = {
+            REPO_ROOT / "pyproject.toml",
+            REPO_ROOT / "uv.lock",
+            DOCS_DIR / "conf.py",
+        }
+        for directory in (REPO_ROOT / "src", REPO_ROOT / "tools", DOCS_DIR / "_ext"):
+            dependencies.update(
+                path
+                for path in directory.rglob("*")
+                if path.is_file() and "__pycache__" not in path.parts
+            )
+        packages = sorted(
+            (dist.metadata.get("Name", ""), dist.version)
+            for dist in importlib.metadata.distributions()
+        )
+        shared = hashlib.sha256(
+            (
+                _fingerprint(dependencies) + sys.version + sys.prefix + repr(packages)
+            ).encode()
+        ).hexdigest()
+        cache_dir.mkdir(parents=True, exist_ok=True)
     for path in sorted(EXAMPLES_DIR.glob("*.py")):
         if path.name.startswith("_"):
             continue
+        cache_path = cache_dir / f"{path.stem}.json" if cache_dir else None
+        fingerprint = ""
+        if cache_path is not None:
+            fingerprint = shared + _fingerprint(
+                _local_dependencies(path) | {path.with_suffix(".md")}
+            )
+            try:
+                cached = json.loads(cache_path.read_text(encoding="utf-8"))
+                if cached["fingerprint"] == fingerprint:
+                    example = Example(**cached["example"])
+                    buffers = {
+                        key: base64.b64decode(value, validate=True)
+                        for key, value in cached["buffers"].items()
+                    }
+                    if all(
+                        hashlib.sha256(value).hexdigest() == key
+                        for key, value in buffers.items()
+                    ):
+                        yield example, buffers
+                        continue
+            except (OSError, ValueError, KeyError, TypeError, AttributeError):
+                # A missing or interrupted cache write is safe to regenerate.
+                pass
         module, chart = _chart_from_example(path)
         if hasattr(chart, "_prepare_render"):
             prepared = chart._prepare_render()  # type: ignore[attr-defined]
@@ -197,7 +291,22 @@ def iter_prepared_examples() -> Iterator[tuple[Example, dict[str, bytes]]]:
         else:
             spec = chart.to_dict()  # type: ignore[attr-defined]
             buffers = {}
-        yield _collect_example(path, module, spec), buffers
+        example = _collect_example(path, module, spec)
+        if cache_path is not None:
+            cache_path.write_text(
+                json.dumps(
+                    {
+                        "fingerprint": fingerprint,
+                        "example": asdict(example),
+                        "buffers": {
+                            key: base64.b64encode(value).decode("ascii")
+                            for key, value in buffers.items()
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+        yield example, buffers
 
 
 def collect_examples() -> list[Example]:

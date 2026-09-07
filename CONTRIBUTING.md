@@ -150,6 +150,17 @@ Build the documentation with warnings treated as errors:
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
+Run the same command again for an incremental build. Keep `docs/_build/` and
+avoid `-E` and `-a` during normal editing. Unchanged gallery examples reuse
+cached specifications and Arrow data; generated pages are only rewritten when
+their contents change. Changes to shared library code, packaged data, build
+tools, or the lockfile regenerate all examples.
+
+The gallery cache lives in the Sphinx doctree directory (normally
+`docs/_build/html/.doctrees/genomespy-gallery`). Delete that cache directory to
+force example regeneration. Remote resources and arbitrary files outside the
+repository's tracked example dependencies are not monitored.
+
 To preview it locally:
 
 ```bash

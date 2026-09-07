@@ -11,6 +11,7 @@ import re
 import sys
 from hashlib import sha256
 from pathlib import Path
+from types import SimpleNamespace
 from urllib.parse import urljoin
 
 import pytest
@@ -1288,6 +1289,169 @@ def test_gallery_generation_runs_during_sphinx_config_phase() -> None:
     assert "builder-inited" not in events
 
 
+@pytest.fixture
+def cached_gallery(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    gallery = _load_gallery()
+    examples = tmp_path / "docs" / "examples"
+    examples.mkdir(parents=True)
+    source = "class Chart:\n    def to_dict(self):\n        return {'mark': 'point'}\nchart = Chart()\n"
+    for name in ("first", "second"):
+        (examples / f"{name}.py").write_text(source, encoding="utf-8")
+    monkeypatch.setattr(gallery, "REPO_ROOT", tmp_path)
+    monkeypatch.setattr(gallery, "DOCS_DIR", tmp_path / "docs")
+    monkeypatch.setattr(gallery, "EXAMPLES_DIR", examples)
+    calls = []
+    original = gallery._chart_from_example
+
+    def tracked(path):
+        calls.append(path.stem)
+        return original(path)
+
+    monkeypatch.setattr(gallery, "_chart_from_example", tracked)
+    return gallery, tmp_path / "cache", calls
+
+
+def test_gallery_cache_skips_unchanged_examples(cached_gallery) -> None:
+    gallery, cache, calls = cached_gallery
+    first = list(gallery.iter_prepared_examples(cache))
+    assert calls == ["first", "second"]
+    calls.clear()
+    assert list(gallery.iter_prepared_examples(cache)) == first
+    assert calls == []
+
+
+@pytest.mark.parametrize("suffix", [".py", ".md"])
+def test_gallery_cache_rebuilds_only_changed_example(cached_gallery, suffix) -> None:
+    gallery, cache, calls = cached_gallery
+    list(gallery.iter_prepared_examples(cache))
+    path = gallery.EXAMPLES_DIR / f"first{suffix}"
+    existing = path.read_text() if path.exists() else ""
+    path.write_text(existing + "\n# Changed\n", encoding="utf-8")
+    if suffix == ".py":
+        path.write_text(path.read_text().replace("'point'", "'rect'"), encoding="utf-8")
+    calls.clear()
+    result = list(gallery.iter_prepared_examples(cache))
+    assert calls == ["first"]
+    assert "# Changed" in (
+        result[0][0].source if suffix == ".py" else result[0][0].prose
+    )
+    if suffix == ".py":
+        assert result[0][0].spec == {"mark": "rect"}
+
+
+@pytest.mark.parametrize(
+    "dependency",
+    [
+        "src/genome_spy/api.py",
+        "src/genome_spy/datasets/data/table.csv",
+        "uv.lock",
+        "tools/docs_gallery.py",
+    ],
+)
+def test_gallery_cache_invalidates_shared_dependencies(
+    cached_gallery, dependency
+) -> None:
+    gallery, cache, calls = cached_gallery
+    path = gallery.REPO_ROOT / dependency
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("# Original\n", encoding="utf-8")
+    list(gallery.iter_prepared_examples(cache))
+    path.write_text("# Changed\n", encoding="utf-8")
+    calls.clear()
+    list(gallery.iter_prepared_examples(cache))
+    assert calls == ["first", "second"]
+
+
+def test_gallery_cache_tracks_local_imports(cached_gallery) -> None:
+    gallery, cache, calls = cached_gallery
+    path = gallery.EXAMPLES_DIR / "first.py"
+    path.write_text(
+        path.read_text() + "\nif False:\n    from docs.examples import _helper\n",
+        encoding="utf-8",
+    )
+    helper = gallery.EXAMPLES_DIR / "_helper.py"
+    helper.write_text("# Original\n", encoding="utf-8")
+    list(gallery.iter_prepared_examples(cache))
+    helper.write_text("# Changed\n", encoding="utf-8")
+    calls.clear()
+    list(gallery.iter_prepared_examples(cache))
+    assert calls == ["first"]
+
+
+def test_gallery_cache_recovers_from_corrupt_entry(cached_gallery) -> None:
+    gallery, cache, calls = cached_gallery
+    list(gallery.iter_prepared_examples(cache))
+    (cache / "first.json").write_text("{", encoding="utf-8")
+    calls.clear()
+    assert len(list(gallery.iter_prepared_examples(cache))) == 2
+    assert calls == ["first"]
+
+
+def test_gallery_cache_preserves_arrow_buffers(cached_gallery, monkeypatch) -> None:
+    gallery, cache, calls = cached_gallery
+    payload = b"ARROW1-test"
+    identifier = sha256(payload).hexdigest()
+    original = gallery._chart_from_example
+
+    def prepared(path):
+        module, _ = original(path)
+        return module, SimpleNamespace(
+            _prepare_render=lambda: SimpleNamespace(
+                spec={"data": {"url": f"arrow://{identifier}"}},
+                buffers={identifier: payload},
+            )
+        )
+
+    monkeypatch.setattr(gallery, "_chart_from_example", prepared)
+    first = list(gallery.iter_prepared_examples(cache))
+    calls.clear()
+    second = list(gallery.iter_prepared_examples(cache))
+    assert second == first
+    assert calls == []
+    assert second[0][1] == {identifier: payload}
+
+
+def test_gallery_cache_handles_added_and_removed_examples(cached_gallery) -> None:
+    gallery, cache, calls = cached_gallery
+    list(gallery.iter_prepared_examples(cache))
+    first = gallery.EXAMPLES_DIR / "first.py"
+    (gallery.EXAMPLES_DIR / "third.py").write_text(first.read_text(), encoding="utf-8")
+    first.unlink()
+    calls.clear()
+    examples = list(gallery.iter_prepared_examples(cache))
+    assert calls == ["third"]
+    assert [example.name for example, _ in examples] == ["second", "third"]
+
+
+def test_gallery_writes_only_changed_content(tmp_path: Path, monkeypatch) -> None:
+    extension = _load_gallery_extension()
+    path = tmp_path / "page.md"
+    extension._write(path, "Original")
+    modified = path.stat().st_mtime_ns
+    with monkeypatch.context() as patch:
+
+        def unexpected_write(*args, **kwargs):
+            pytest.fail("Unchanged content must not be written")
+
+        patch.setattr(Path, "write_text", unexpected_write)
+        extension._write(path, "Original")
+    assert path.stat().st_mtime_ns == modified
+    extension._write(path, "Changed")
+    assert path.read_text() == "Changed"
+
+
+def test_landing_page_refresh_reuses_prepared_examples() -> None:
+    extension = _load_gallery_extension()
+    app = type("App", (), {"_genomespy_examples": []})()
+    env = type("Env", (), {"found_docs": {"index"}})()
+    docnames = []
+    extension._refresh_landing_page(app, env, docnames)
+    assert docnames == ["index"]
+    docnames.clear()
+    extension._refresh_landing_page(app, env, docnames)
+    assert docnames == []
+
+
 def test_gallery_generation_removes_stale_build_outputs(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -1312,7 +1476,7 @@ def test_gallery_generation_removes_stale_build_outputs(
 
     monkeypatch.setattr(extension.core, "GALLERY_PAGES_DIR", pages)
     monkeypatch.setattr(extension.core, "SPECS_DIR", specs)
-    monkeypatch.setattr(extension.core, "iter_prepared_examples", lambda: iter(()))
+    monkeypatch.setattr(extension.core, "iter_prepared_examples", lambda **_: iter(()))
     app = type(
         "App",
         (),

@@ -1,6 +1,6 @@
 """Sphinx extension that builds the GenomeSpy example gallery.
 
-On ``builder-inited`` it turns every ``docs/examples/<name>.py`` module into:
+On ``config-inited`` it turns changed ``docs/examples/<name>.py`` modules into:
 
 * a spec JSON under ``_static/specs/`` that the browser hydrates,
 * a checked-in PNG thumbnail under ``_static/gallery/``,
@@ -45,6 +45,8 @@ _TUTORIAL_TARGET = re.compile(
 
 
 def _write(path: Path, content: str) -> None:
+    if path.is_file() and path.read_text(encoding="utf-8") == content:
+        return
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
 
@@ -57,7 +59,8 @@ def _write_arrow_assets(buffers: dict[str, bytes]) -> set[str]:
             raise ValueError("Arrow asset identifier does not match its payload.")
         path = core.ARROW_DIR / f"{identifier}.arrow"
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(payload)
+        if not path.is_file() or path.read_bytes() != payload:
+            path.write_bytes(payload)
     return identifiers
 
 
@@ -470,7 +473,13 @@ def _generate(app: Any) -> None:
     referenced_arrow_assets: set[str] = set()
     bundle_url = core.default_bundle_url()
 
-    for example, buffers in core.iter_prepared_examples():
+    doctreedir = getattr(app, "doctreedir", None)
+    prepared = (
+        core.iter_prepared_examples(cache_dir=Path(doctreedir) / "genomespy-gallery")
+        if doctreedir is not None
+        else core.iter_prepared_examples()
+    )
+    for example, buffers in prepared:
         referenced_arrow_assets.update(_write_arrow_assets(buffers))
         example = replace(
             example,
@@ -488,6 +497,7 @@ def _generate(app: Any) -> None:
 
     _write(core.GALLERY_PAGES_DIR / "index.md", _gallery_index_md(examples))
     _remove_stale_arrow_assets(referenced_arrow_assets)
+    app._genomespy_examples = examples
     if hasattr(app, "env"):
         app.env.genomespy_examples = examples  # type: ignore[attr-defined]
 
@@ -496,10 +506,13 @@ def _generate_on_config(app: Any, _config: Any) -> None:
     _generate(app)
 
 
-def _refresh_landing_page(_app: Any, env: Any, docnames: list[str]) -> None:
+def _refresh_landing_page(app: Any, env: Any, docnames: list[str]) -> None:
     """Re-read the mini-gallery directive after the example inventory changes."""
-    env.genomespy_examples = core.collect_examples()
-    if "index" in env.found_docs and "index" not in docnames:
+    env.genomespy_examples = app._genomespy_examples
+    token = core.build_token(env.genomespy_examples)
+    changed = token != getattr(env, "genomespy_gallery_token", None)
+    env.genomespy_gallery_token = token
+    if changed and "index" in env.found_docs and "index" not in docnames:
         docnames.append("index")
 
 
