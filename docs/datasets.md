@@ -1,5 +1,12 @@
 # Example datasets
 
+The combined LAML oncoplot uses `load_dataset("tcga_laml_combined_oncoplot")`;
+the p53 sequence comparison uses `load_dataset("p53_sequence_comparison")`.
+Both return mappings of prepared chart tables, display domains, and source
+provenance. Their MIT-licensed sources, processing, and interpretation limits
+are described in the [combined oncoplot](gallery/combined_laml_oncoplot.md) and
+[p53 comparison](gallery/p53_sequence_comparison.md) gallery pages.
+
 The package ships the tables that the [gallery](gallery/index.md) examples use,
 so you can try the API on real data without downloading anything.
 
@@ -22,6 +29,8 @@ for JSON files. Pass `as_format="text"` to get the raw file contents instead.
 | `pik3ca_tcga_brca_lollipop` | Prepared recurrent PIK3CA mutations and protein domains |
 | `tcga_laml_maf` | Somatic mutation calls for TCGA acute myeloid leukemia |
 | `tcga_laml_annotations` | Clinical annotations for those leukemia samples |
+| `tcga_laml_combined_oncoplot` | Prepared mutation, copy-number, clinical, pathway, VAF, and MutSig tables |
+| `p53_sequence_comparison` | 34 unaligned p53 sequences, padded residue tiles, consensus, identity, and coverage |
 | `pyoncoprint_tcga` | Alteration matrix for TCGA lung adenocarcinoma samples |
 | `tcga_ov_gistic_scores` | GISTIC2 copy-number scores for TCGA ovarian tumors |
 | `tcga_ov_gistic_lesions` | GISTIC2 peak regions for the same cohort |

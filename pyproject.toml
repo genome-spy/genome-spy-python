@@ -8,6 +8,7 @@ license = "MIT AND BSD-3-Clause"
 license-files = [
     "LICENSE",
     "LICENSES/ALTAIR-BSD-3-Clause.txt",
+    "LICENSES/GALLERY-DATA-MIT.txt",
     "THIRD_PARTY_NOTICES.md",
 ]
 authors = [{ name = "Oskari Lehtonen", email = "oskarilehtonen4@gmail.com" }]
