@@ -16,6 +16,7 @@ META = {
     "order": 35,
     "height": 720,
     "max_width": 1680,
+    "thumbnail_width": 1100,
 }
 
 CLASS_ORDER = [

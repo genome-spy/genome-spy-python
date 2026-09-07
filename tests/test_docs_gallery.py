@@ -218,6 +218,7 @@ def test_luad_oncoprint_uses_sample_index_scale_and_categorical_genes() -> None:
 
     assert example.spec["viewportHeight"] == "container"
     assert example.height == 720
+    assert example.thumbnail_width == 1100
     center_column, summary_column = example.spec["concat"]
     sample_tracks = center_column["vconcat"][0]
     matrix_panel = sample_tracks["vconcat"][4]
@@ -910,16 +911,58 @@ def test_stacked_genome_browser_uses_shared_hg38_locus() -> None:
     ]
     assert tracks[0]["encoding"]["y"]["axis"]["title"] is None
     assert tracks[1]["encoding"]["y"]["axis"]["title"] is None
-    assert [track["data"]["lazy"]["type"] for track in tracks[:4]] == [
+    assert [track["data"]["lazy"]["type"] for track in tracks[:2]] == [
         "bigwig",
         "bigwig",
-        "bigbed",
-        "indexedFasta",
     ]
-    assert tracks[2]["data"]["lazy"]["windowSize"] == 30_000
+    assert tracks[2]["stops"] == [{"expr": "(1000000 / max(width,1))"}]
+    assert tracks[2]["multiscale"][0]["mark"]["text"] == "Zoom in to see cCREs"
+    ccre_marks = tracks[2]["multiscale"][1]
+    assert ccre_marks["data"]["lazy"] == {
+        "type": "bigbed",
+        "url": "https://data.genomespy.app/sample-data/encodeCcreCombined.hg38.bb",
+        "windowSize": 1_000_000,
+    }
     assert tracks[3]["data"]["lazy"]["windowSize"] == 30_000
-    assert "y" not in tracks[2]["encoding"]
+    assert "y" not in ccre_marks["encoding"]
     assert "y" not in tracks[3]["encoding"]
+    assert ccre_marks["encoding"]["color"]["legend"] == {
+        "columns": 2,
+        "title": "cCRE type",
+    }
+    assert tracks[3]["encoding"]["color"] == {
+        "field": "base",
+        "type": "nominal",
+        "scale": {
+            "domain": ["A", "C", "T", "G", "N"],
+            "range": ["#7BD56C", "#FF9B9B", "#86BBF1", "#FFC56C", "#E0E0E0"],
+        },
+        "legend": {"columns": 2, "title": "DNA base"},
+    }
+    assert tracks[3]["transform"][1] == {
+        "type": "formula",
+        "as": "base",
+        "expr": "upper(datum.base)",
+    }
+    assert [field["field"] for field in tracks[0]["encoding"]["tooltip"]] == [
+        "chrom",
+        "start",
+        "end",
+        "score",
+    ]
+    assert [field["field"] for field in ccre_marks["encoding"]["tooltip"]] == [
+        "name",
+        "ucscLabel",
+        "chrom",
+        "chromStart",
+        "chromEnd",
+    ]
+    assert [field["field"] for field in tracks[3]["encoding"]["tooltip"]] == [
+        "chrom",
+        "pos",
+        "base",
+    ]
+    assert "tooltip" not in tracks[3]["layer"][1]["mark"]
     assert tracks[4]["data"]["url"].endswith("refSeqGenes-hg38-release232.tsv.gz")
     assert tracks[4]["transform"][-1] == {
         "type": "filter",

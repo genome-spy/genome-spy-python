@@ -20,18 +20,27 @@ DOMAIN = [
     {"chrom": "chr7", "pos": 55100000},
     {"chrom": "chr7", "pos": 55120000},
 ]
+CCRE_WINDOW_SIZE = 1_000_000
+
+signal_tooltip = [
+    gs.Tooltip("chrom:N").title("Chromosome"),
+    gs.Tooltip("start:Q").title("Start").format(",d"),
+    gs.Tooltip("end:Q").title("End").format(",d"),
+    gs.Tooltip("score:Q").title("Value"),
+]
 
 
 # Show GC content, loading just the region being viewed.
 gc_track = (
     gs.Chart(gs.lazy.bigwig("https://data.genomespy.app/genomes/hg38/hg38.gc5Base.bw"))
-    .mark_rect(color="#6c8ebf", minWidth=0.5, minOpacity=1, tooltip=None)
+    .mark_rect(color="#6c8ebf", minWidth=0.5, minOpacity=1)
     .encode(
         x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("score:Q")
         .scale(domain=[0, 100])
         .axis(title=None, grid=True, gridDash=[2, 2]),
+        tooltip=signal_tooltip,
     )
     .properties(
         name="gc-content", title=gs.title("GC (%)", style="track-title"), height=80
@@ -47,13 +56,14 @@ conservation_track = (
             "hg38.phyloP100way.bw"
         )
     )
-    .mark_rect(color="#c77c8a", opacity=0.75, minWidth=0.5, tooltip=None)
+    .mark_rect(color="#c77c8a", opacity=0.75, minWidth=0.5)
     .encode(
         x=gs.Locus("chrom", "start"),
         x2=gs.Locus("chrom", "end"),
         y=gs.Y("score:Q")
         .scale(domain=[-5, 5])
         .axis(title=None, grid=True, gridDash=[2, 2]),
+        tooltip=signal_tooltip,
     )
     .properties(
         name="phylop-100way",
@@ -63,30 +73,50 @@ conservation_track = (
 )
 
 
-# Color candidate regulatory regions by type. The loading window is large
-# enough to cover the starting region when the reader zooms back out.
-ccre_track = (
+# Color candidate regulatory regions by type.
+ccre_marks = (
     gs.Chart(
         gs.lazy.bigbed(
             "https://data.genomespy.app/sample-data/encodeCcreCombined.hg38.bb",
-            windowSize=30_000,
+            windowSize=CCRE_WINDOW_SIZE,
         )
     )
-    .mark_rect(minWidth=0.5, tooltip=None)
+    .mark_rect(minWidth=0.5)
     .encode(
         x=gs.Locus("chrom", "chromStart"),
         x2=gs.Locus("chrom", "chromEnd"),
-        color=gs.Color("ucscLabel:N").scale(
+        color=gs.Color("ucscLabel:N")
+        .scale(
             domain=["prom", "enhP", "enhD", "K4m3", "CTCF"],
             range=["#e45756", "#f2a541", "#f6cf65", "#d99ac5", "#4f9fc4"],
-        ),
+        )
+        .legend(title="cCRE type", columns=2),
+        tooltip=[
+            gs.Tooltip("name:N").title("cCRE"),
+            gs.Tooltip("ucscLabel:N").title("Type"),
+            gs.Tooltip("chrom:N").title("Chromosome"),
+            gs.Tooltip("chromStart:Q").title("Start").format(",d"),
+            gs.Tooltip("chromEnd:Q").title("End").format(",d"),
+        ],
     )
-    .properties(name="ccre", title=gs.title("cCRE", style="track-title"), height=32)
+)
+ccre_zoom_message = (
+    gs.Chart([{}])
+    .mark_text(text="Zoom in to see cCREs", color="#555", size=12, tooltip=None)
+    .encode(x=gs.value(0.5), y=gs.value(0.5))
+)
+ccre_track = gs.multiscale(
+    ccre_zoom_message,
+    ccre_marks,
+    stops=[gs.expr(CCRE_WINDOW_SIZE / gs.expr.max(gs.Expression("width"), 1))],
+    name="ccre",
+    title=gs.title("cCRE", style="track-title"),
+    height=32,
 )
 
 
 # Draw each DNA base as a colored tile with its letter on top.
-sequence_rects = gs.Chart().mark_rect(tooltip=None)
+sequence_rects = gs.Chart().mark_rect()
 sequence_labels = (
     gs.Chart()
     .mark_text(
@@ -96,7 +126,6 @@ sequence_labels = (
         paddingY=1,
         opacity=0.7,
         flushX=False,
-        tooltip=None,
     )
     .encode(color=gs.value("black"), text=gs.Text("base:N"))
 )
@@ -115,23 +144,27 @@ sequence_track = (
     )
     .encode(
         x=gs.Locus("chrom", "pos"),
-        color=gs.Color("base:N").scale(
-            domain=["A", "C", "T", "G", "a", "c", "t", "g", "N"],
+        color=gs.Color("base:N")
+        .scale(
+            domain=["A", "C", "T", "G", "N"],
             range=[
-                "#7BD56C",
-                "#FF9B9B",
-                "#86BBF1",
-                "#FFC56C",
                 "#7BD56C",
                 "#FF9B9B",
                 "#86BBF1",
                 "#FFC56C",
                 "#E0E0E0",
             ],
-        ),
+        )
+        .legend(title="DNA base", columns=2),
+        tooltip=[
+            gs.Tooltip("chrom:N").title("Chromosome"),
+            gs.Tooltip("pos:Q").title("Position").format(",d"),
+            gs.Tooltip("base:N").title("Base"),
+        ],
     )
     # Give each base its own row and genomic position.
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
+    .transform_formula(expr=gs.expr.upper(gs.datum.base), as_="base")
     .transform_formula(expr=gs.datum.rawPos + gs.datum.start, as_="pos")
 )
 
@@ -139,9 +172,17 @@ sequence_track = (
 # Draw exon blocks along each transcript.
 exons = (
     gs.Chart()
-    .mark_rect(minOpacity=0.2, minWidth=0.5, tooltip=None)
-    .encode(x=gs.X("exonStart:L"), x2=gs.X2("exonEnd"))
-    .transform_project(fields=["_lane", "_start", "exons"])
+    .mark_rect(minOpacity=0.2, minWidth=0.5)
+    .encode(
+        x=gs.X("exonStart:L"),
+        x2=gs.X2("exonEnd"),
+        tooltip=[
+            gs.Tooltip("symbol:N").title("Gene"),
+            gs.Tooltip("exonStart:Q").title("Exon start").format(",d"),
+            gs.Tooltip("exonEnd:Q").title("Exon end").format(",d"),
+        ],
+    )
+    .transform_project(fields=["symbol", "_lane", "_start", "exons"])
     .transform_flatten_compressed_exons(start="_start")
     .properties(name="exons")
 )
@@ -149,11 +190,17 @@ exons = (
 # Connect the exons with a thin line spanning the transcript.
 bodies = (
     gs.Chart()
-    .mark_rule(minLength=0.5, size=1, tooltip=None)
+    .mark_rule(minLength=0.5, size=1)
     .encode(
         x=gs.X("_start:L"),
         x2=gs.X2("_end"),
         search=gs.Search("symbol"),
+        tooltip=[
+            gs.Tooltip("symbol:N").title("Gene"),
+            gs.Tooltip("chrom:N").title("Chromosome"),
+            gs.Tooltip("start:Q").title("Start").format(",d"),
+            gs.Tooltip("strand:N").title("Strand"),
+        ],
     )
     .properties(name="bodies", title="Gene annotations")
 )
