@@ -74,10 +74,9 @@ points = (
 # Move the red significance line with the slider.
 genome_wide_rule = (
     gs.Chart([{}])
-    .transform_formula(expr=significance_cutoff, as_="threshold")
     .mark_rule(strokeDash=[6, 4], size=1.4, color="#c53b2c")
     .encode(
-        y=gs.Y("threshold:Q")
+        y=gs.Y(gs.datum(significance_cutoff), type="quantitative")
         .scale(reverse=False, domain=domains["y_domain"])
         .title("−log10 p")
     )
@@ -97,6 +96,7 @@ suggestive_rule = (
 # Highlight variants above the slider's current threshold.
 highlight_points = (
     gs.Chart()
+    .transform_collect()
     .transform_filter(gs.datum.neglog >= significance_cutoff)
     .mark_point(
         size=48,

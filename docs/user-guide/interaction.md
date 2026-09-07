@@ -67,6 +67,9 @@ gs.datum.score >= min_score
 `datum` means the current data row. Moving the slider makes GenomeSpy run the
 filter again in the browser.
 
+Use {ref}`transform_collect() before a parameter-dependent transform <cache-rows-for-interactive-transforms>`
+to replay cached rows instead of returning to the data source when a slider changes.
+
 The second parameter demonstrates a reactive expression:
 
 ```python

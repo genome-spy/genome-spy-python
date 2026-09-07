@@ -86,6 +86,7 @@ airway_tooltip = [
 # Plot each gene's mean expression against its fold change.
 ma_points = (
     gs.Chart()
+    .transform_collect()
     .transform_formula(expr=DIRECTION_EXPRESSION, as_="direction")
     .mark_point(size=POINT_SIZE, filled=True, opacity=0.58)
     .encode(
@@ -103,6 +104,7 @@ ma_points = (
 # Draw the two fold-change cutoffs and a line at zero for no change.
 ma_fc_rules = (
     gs.Chart([{"side": -1}, {"side": 0}, {"side": 1}])
+    .transform_collect()
     .transform_formula(expr=gs.datum.side * effect_cutoff, as_="y")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(
@@ -115,6 +117,7 @@ ma_fc_rules = (
 # Connect the selected gene labels to their points.
 ma_callout_lines = (
     gs.Chart()
+    .transform_collect()
     .transform_filter(gs.datum.ma_label)
     .mark_rule(color="#3f4750", size=1, tooltip=None)
     .encode(
@@ -137,6 +140,7 @@ def ma_callout_label(*, side: str, name: str) -> gs.Chart:
     """Build one label layer just beyond its shortened leader line."""
     return (
         gs.Chart()
+        .transform_collect()
         .transform_filter(gs.datum.ma_label & (gs.datum.ma_label_side == side))
         .mark_text(
             align="right" if side == "left" else "left",

@@ -62,6 +62,7 @@ association_colors = Scale(
 # Plot effect size against significance, coloring points by the current cutoffs.
 points = (
     gs.Chart()
+    .transform_collect()
     .transform_formula(expr=ASSOCIATION_EXPRESSION, as_="association")
     .mark_point(size=POINT_SIZE, filled=True, opacity=0.6)
     .encode(
@@ -80,6 +81,7 @@ points = (
 # Mark the effect-size cutoff on both sides of zero.
 effect_cutoffs = (
     gs.Chart([{"side": -1}, {"side": 1}])
+    .transform_collect()
     .transform_formula(expr=gs.datum.side * effect_cutoff, as_="x")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(x=gs.X("x:Q").scale(domain=X_DOMAIN, zoom=True).title("Effect size (beta)"))
@@ -88,6 +90,7 @@ effect_cutoffs = (
 # Move the horizontal significance line with its slider.
 significance_rule = (
     gs.Chart([{}])
+    .transform_collect()
     .transform_formula(expr=significance_cutoff, as_="y")
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(

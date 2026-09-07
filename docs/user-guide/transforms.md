@@ -74,6 +74,8 @@ deriving a category used only by the chart. See the
 [formula transform](https://genomespy.app/docs/grammar/transform/formula/) in
 the GenomeSpy documentation.
 
+(cache-rows-for-interactive-transforms)=
+
 ## Summarize groups
 
 An aggregate transform reduces many rows into summary rows. {py:meth}`~genome_spy.TopLevelSpec.transform_aggregate` uses `groupby` to choose
@@ -146,6 +148,23 @@ preserves the same order as the method chain.
 Filtering before an aggregate changes which rows contribute to the summary;
 filtering afterward tests the summary rows instead. Choose the order from the
 question the visualization should answer.
+
+## Cache rows for interactive transforms
+
+Place {py:meth}`~genome_spy.TopLevelSpec.transform_collect` before a formula or
+filter that depends on an interactive parameter. It stores incoming rows in
+the browser so GenomeSpy can replay them when the parameter changes, avoiding
+a return to the data source's loading path and a possible loading spinner.
+For example, with a slider parameter `cutoff` attached to the chart:
+
+```python
+chart = chart.transform_collect().transform_filter(gs.datum.score >= cutoff)
+```
+
+Order matters: collect the rows **before** the parameter-dependent transform,
+so it can recalculate from those rows. You do not need a collector before every
+transform; filters that only read fixed data fields do not rerun in response to
+slider changes. Collecting retains rows in browser memory.
 
 ## Transform in Python or in GenomeSpy?
 
