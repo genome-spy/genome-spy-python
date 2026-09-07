@@ -14,7 +14,7 @@ from genome_spy.schema import BrushConfig, SelectionDomainRef
 META = {
     "category": "Association plots",
     "order": 12,
-    "height": 500,
+    "height": 530,
     "max_width": 980,
 }
 

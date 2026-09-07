@@ -81,7 +81,7 @@ ccre_track = (
             range=["#e45756", "#f2a541", "#f6cf65", "#d99ac5", "#4f9fc4"],
         ),
     )
-    .properties(name="ccre", title=gs.title("cCRE", style="track-title"), height=42)
+    .properties(name="ccre", title=gs.title("cCRE", style="track-title"), height=32)
 )
 
 
@@ -107,7 +107,7 @@ sequence_track = (
     .properties(
         name="sequence",
         title=gs.title("Sequence", style="track-title"),
-        height=52,
+        height=32,
         data=gs.lazy.indexed_fasta(
             "https://data.genomespy.app/genomes/hg38/hg38.fa", windowSize=30_000
         ),

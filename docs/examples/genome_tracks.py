@@ -17,8 +17,8 @@ META = {
 }
 
 DOMAIN = [
-    {"chrom": "chr5", "pos": 177482500},
-    {"chrom": "chr5", "pos": 177518000},
+    {"chrom": "chr5", "pos": 177500000},
+    {"chrom": "chr5", "pos": 179500000},
 ]
 
 # Show GC content, loading just the region being viewed.
