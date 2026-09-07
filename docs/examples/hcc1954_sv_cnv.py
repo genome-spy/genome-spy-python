@@ -15,9 +15,10 @@ META = {
 
 SV_URL = "https://data.genomespy.app/sample-data/HCC1954/severus_somatic.vcf.gz"
 CN_URL = "https://data.genomespy.app/sample-data/HCC1954/copy-numbers.tsv"
+# Highlight the structural variant under the mouse.
 sv_hover = gs.selection_point("svHover", on="mouseover", persist=False, empty=False)
 
-# Fold each link's two endpoints into rows so both receive a breakpoint marker.
+# Mark both ends of each structural variant with short vertical lines.
 endpoint_markers = (
     gs.Chart()
     .transform_regex_fold(
@@ -36,6 +37,7 @@ endpoint_markers = (
     )
 )
 
+# Connect the breakpoints with arcs, making the hovered arc thicker and darker.
 sv_links = (
     gs.Chart()
     .mark_link(arcFadingDistance=gs.expr("[height - 20, height + 20]"), segments=200)
@@ -49,6 +51,7 @@ sv_links = (
             .condition([gs.condition(sv_hover, 3)])
         ),
         opacity=gs.Opacity(gs.value(0.5)).condition([gs.condition(sv_hover, 1)]),
+        # Show the variant ID, type, and supporting evidence on hover.
         tooltip=[
             gs.Tooltip(
                 gs.expr(
@@ -118,6 +121,7 @@ sv_links = (
     .add_params(sv_hover)
 )
 
+# Load the variant calls and color the arcs and endpoints by variant type.
 sv_track = (
     (endpoint_markers + sv_links)
     .properties(
@@ -132,6 +136,7 @@ sv_track = (
         )
         .legend(title="Severus SV type", orient="top")
     )
+    # Keep passing deletion, duplication, and breakend calls on 1–22, X, and Y.
     .transform_filter(
         (gs.datum.FILTER == "PASS")
         & gs.expr.test(
@@ -148,8 +153,7 @@ sv_track = (
         as_=["_source_order"],
         description="Record VCF order so one BND mate is retained.",
     )
-    # BND records describe each link twice. Look up the mate and keep the first
-    # record so the arc is drawn only once.
+    # Paired breakend (BND) records describe the same link; draw it only once.
     .transform_formula(
         expr=gs.expr.if_(
             gs.datum.INFO.SVTYPE[0] == "BND",
@@ -169,6 +173,7 @@ sv_track = (
         (gs.datum.INFO.SVTYPE[0] != "BND")
         | (gs.datum._source_order < gs.datum.mateOrder)
     )
+    # Find the chromosome and position at each end of the link.
     .transform_formula(expr=gs.datum.CHROM, as_="chrom1")
     .transform_formula(expr=gs.datum.POS, as_="breakpoint1")
     .transform_formula(
@@ -192,6 +197,7 @@ sv_track = (
     .transform_identifier()
 )
 
+# Show copy number relative to ploidy in a colored strip below the arcs.
 copy_numbers = (
     gs.Chart(gs.Data(url=CN_URL))
     .mark_rect()
@@ -214,8 +220,7 @@ copy_numbers = (
     )
 )
 
-# A shared locus scale keeps the SV endpoints aligned with their copy-number
-# segments while panning and zooming.
+# Keep the variant arcs and copy-number strip aligned when zooming or panning.
 chart = (
     (sv_track & copy_numbers)
     .properties(

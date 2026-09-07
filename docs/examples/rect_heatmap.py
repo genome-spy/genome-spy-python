@@ -14,8 +14,10 @@ META = {
     "height": 360,
 }
 
+# Load a small grid of example values.
 data = heatmap_data()
 
+# Draw one colored tile per cell, with color showing its value.
 chart = (
     gs.Chart(data)
     .mark_rect()

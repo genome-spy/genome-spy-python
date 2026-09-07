@@ -21,7 +21,7 @@ DOMAIN = [
     {"chrom": "chr5", "pos": 177518000},
 ]
 
-# The top track is a compact GC-content signal rendered directly from a lazy BigWig.
+# Show GC content, loading just the region being viewed.
 gc_track = (
     gs.Chart(
         data=gs.lazy.bigwig("https://data.genomespy.app/genomes/hg38/hg38.gc5Base.bw")
@@ -42,8 +42,7 @@ gc_track = (
     .configure_view(stroke="lightgray")
 )
 
-# The lower track mirrors GenomeSpy's scored RefSeq gene view: exon blocks,
-# transcript bodies, text labels, and strand arrows all share the same locus axis.
+# Draw exon blocks for the gene track below.
 exons = (
     gs.Chart()
     .mark_rect(minOpacity=0.2, minWidth=0.5, tooltip=None)
@@ -53,6 +52,7 @@ exons = (
     .properties(name="exons")
 )
 
+# Connect the exons with a thin line spanning each transcript.
 bodies = (
     gs.Chart()
     .mark_rule(minLength=0.5, size=1, tooltip=None)
@@ -64,6 +64,7 @@ bodies = (
     .properties(name="bodies", title="Gene annotations")
 )
 
+# Reveal the gene shapes as the reader zooms in.
 transcripts = (
     gs.layer(exons, bodies)
     .properties(
@@ -75,6 +76,7 @@ transcripts = (
     )
 )
 
+# Label genes and show more details on hover.
 labels = (
     gs.Chart()
     .mark_text(size=11, yOffset=7, tooltip=gs.HandledTooltip(handler="refseqgene"))
@@ -82,6 +84,7 @@ labels = (
     .properties(name="labels")
 )
 
+# Put a reading-direction arrow just beside each gene name.
 arrows = (
     gs.Chart()
     .mark_point(yOffset=7, size=50, tooltip=None)
@@ -105,6 +108,7 @@ arrows = (
     )
 )
 
+# Hide overlapping names, using the supplied scores to choose which to keep.
 symbols = (
     gs.layer(labels, arrows)
     .properties(
@@ -124,7 +128,7 @@ symbols = (
     )
 )
 
-# Parse the hosted RefSeq table into a browser-style packed transcript layout.
+# Load one RefSeq table for the gene shapes and labels.
 refseq_track = (
     gs.layer(transcripts, symbols)
     .properties(
@@ -159,6 +163,7 @@ refseq_track = (
         )
         .axis(None),
     )
+    # Find each transcript's start, end, and label position.
     .transform_linearize_genomic_coordinate(
         chrom="chrom",
         pos="start",
@@ -172,6 +177,7 @@ refseq_track = (
         expr=gs.datum._start + gs.datum.length / 2,
         as_="_centroid",
     )
+    # Put overlapping transcripts on separate rows, showing up to three rows.
     .transform_collect(sort=gs.compare(["_start"]))
     .transform_pileup(
         start="_start",
@@ -183,7 +189,7 @@ refseq_track = (
     .transform_filter(gs.datum._lane < 3)
 )
 
-# Stack the quantitative signal above the packed gene model and share the x domain.
+# Put GC content above the genes so both tracks move together when zooming.
 chart = (
     gs.vconcat(gc_track, refseq_track, spacing=10)
     .properties(

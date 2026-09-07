@@ -21,13 +21,14 @@ DOMAIN = [
     {"chrom": "chr5", "pos": 177518000},
 ]
 
-# A transparent but wide rule layer makes transcript tooltips easier to hit.
+# Add an invisible, wider line to make each transcript easier to hover over.
 transcript_tooltip_trap = (
     gs.Chart()
     .mark_rule(color="#b0b0b0", opacity=0, size=7)
     .properties(name="gencode-tooltip-trap", title="GENCODE transcript")
 )
 
+# Draw a thin line spanning each transcript.
 transcript_body = (
     gs.Chart()
     .mark_rule(color="#b0b0b0", tooltip=None)
@@ -38,8 +39,7 @@ transcript_layer = gs.layer(transcript_tooltip_trap, transcript_body).properties
     name="gencode-transcript"
 )
 
-# Flatten the nested GFF3 child features once so exons, CDS blocks, and UTRs can
-# be drawn with ordinary encodings.
+# Give each exon and its parts a separate row of data for drawing.
 exon_base = (
     gs.Chart()
     .transform_flatten(fields=["_child_features"])
@@ -68,6 +68,7 @@ exon_base = (
     )
 )
 
+# Outline each exon.
 exon_rects = (
     exon_base.mark_rect(
         minWidth=0.5,
@@ -80,6 +81,7 @@ exon_rects = (
     .properties(title="GENCODE exon")
 )
 
+# Color coding regions (CDS) and untranslated regions (UTRs) differently.
 utr_cds_rects = (
     exon_base.mark_rect(
         minWidth=0.5,
@@ -102,6 +104,7 @@ utr_cds_rects = (
     .properties(title="GENCODE exon")
 )
 
+# Label the untranslated regions as 5' or 3'.
 utr_labels = (
     exon_base.mark_text(
         color="black",
@@ -125,7 +128,7 @@ exon_layer = gs.layer(exon_rects, utr_cds_rects, utr_labels).properties(
     name="gencode-exons"
 )
 
-# Transcript names are derived from attributes and annotated with strand direction.
+# Label each transcript with its name, ID, and reading direction.
 transcript_labels = (
     gs.Chart()
     .mark_text(size=10, yOffset=12, tooltip=None, color="#505050")
@@ -141,8 +144,7 @@ transcript_labels = (
     .properties(name="gencode-transcript-labels")
 )
 
-# Load the lazy GFF3 source and project transcript-level records into a packed
-# browser track with exon structure preserved.
+# Load gene annotations for the visible region and combine their shapes and labels.
 chart = (
     gs.layer(transcript_layer, exon_layer, transcript_labels)
     .properties(
@@ -168,6 +170,7 @@ chart = (
         .scale(zoom=False, reverse=True, domain=[0, 40], padding=0.5)
         .axis(None),
     )
+    # Extract the transcript names, positions, and exon details from the GFF3 data.
     .transform_flatten()
     .transform_formula(expr=gs.datum.attributes.gene_name, as_="gene_name")
     .transform_flatten(fields=["child_features"])
@@ -206,6 +209,7 @@ chart = (
             "_child_features",
         ],
     )
+    # Put overlapping transcripts on separate rows.
     .transform_collect(sort=gs.compare(["seq_id", "start", "transcript_id"]))
     .transform_pileup(start="start", end="end", as_="_lane")
     .configure_view(stroke="lightgray")

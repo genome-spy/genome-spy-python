@@ -12,16 +12,17 @@ META = {
     "height": 170,
     "max_width": 980,
 }
+# Choose the reading direction for each translation track.
 strand = gs.param("strand", value="forward")
 WIDTH = gs.Expression("width")
 
+# Match each DNA base to its partner on the opposite strand.
 COMPLEMENTS = [
     {"base": base, "complement": complement}
     for base, complement in zip("ACGTN", "TGCAN", strict=True)
 ]
 
-# Standard genetic code, arranged in T/C/A/G order to match the upstream
-# lookup table. Start and stop codons get their own visual classes.
+# Translate each three-letter codon using the standard genetic code.
 AMINO_ACIDS = {
     "TTT": "F",
     "TTC": "F",
@@ -88,6 +89,7 @@ AMINO_ACIDS = {
     "GGA": "G",
     "GGG": "G",
 }
+# Give start and stop codons their own colors.
 GENETIC_CODE = [
     {
         "codon": codon,
@@ -114,8 +116,7 @@ base_colors = gs.Scale(
     ],
 )
 
-# Reference bases and translations share the same locus scale, so each codon
-# stays aligned with its three source bases.
+# Draw the reference DNA as colored tiles with letters on top.
 reference_background = (
     gs.Chart().mark_rect(tooltip=None).properties(name="reference-base-background")
 )
@@ -142,6 +143,7 @@ reference = (
     )
 )
 
+# Draw one arrow per codon, pointing in its reading direction.
 amino_acids = (
     gs.Chart()
     .mark_arrow(
@@ -170,6 +172,7 @@ amino_acids = (
     .properties(name="amino-acids")
 )
 
+# Label each codon with its translated amino acid.
 amino_acid_labels = (
     gs.Chart()
     .mark_text(size=12, paddingX=1.5, tooltip=None)
@@ -177,8 +180,7 @@ amino_acid_labels = (
     .properties(name="amino-acid-labels")
 )
 
-# One template handles both strands. Imported views only change the strand
-# parameter, avoiding two copies of the translation logic.
+# Build one translation track that works in either reading direction.
 translation_template = (
     (amino_acids + amino_acid_labels)
     .add_params(strand)
@@ -194,6 +196,7 @@ translation_template = (
     .transform_formula(expr=strand + " " + (gs.datum.pos % 3), as_="lane")
 )
 
+# Reuse the track for both strands, with three reading frames on each.
 translation = (
     (
         gs.import_view(
@@ -236,7 +239,7 @@ translation = (
         values=["complement"],
         default="N",
     )
-    # Lead windows collect the next two bases needed to form each codon.
+    # Gather the next two bases to form each three-letter codon.
     .transform_window(
         sort=gs.compare("pos"),
         ops=["lead", "lead", "lead", "lead"],
@@ -250,8 +253,7 @@ translation = (
     .transform_formula(expr=gs.datum.pos + 3, as_="end")
 )
 
-# Indexed FASTA loads the visible sequence only. Flattening turns that sequence
-# into one row per base for the reference and all six reading frames.
+# Load the visible DNA and put its six translations directly below it.
 chart = (
     (reference & translation)
     .properties(
@@ -276,6 +278,7 @@ chart = (
         data=gs.lazy.indexed_fasta("https://data.genomespy.app/genomes/hg38/hg38.fa"),
         spacing=5,
     )
+    # Give each base its own row and genomic position.
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
     .transform_formula(expr=gs.datum.start + gs.datum.rawPos, as_="pos")
     .resolve_axis(x="shared")

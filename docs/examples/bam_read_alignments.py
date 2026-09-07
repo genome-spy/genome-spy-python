@@ -14,6 +14,7 @@ META = {
     "max_width": 980,
 }
 
+# Choose the read details to show on hover.
 read_tooltips = [
     gs.Tooltip("name").title("Read"),
     gs.Tooltip("strand").title("Strand"),
@@ -27,10 +28,12 @@ read_tooltips = [
     gs.Tooltip("cigar").title("CIGAR"),
 ]
 
+# Use the same base colors in the summary and individual reads.
 base_colors = gs.Scale(
     domain=["A", "C", "T", "G", "N"],
     range=["#4FBF45", "#4D96E8", "#E85F78", "#E8B322", "#BDBDBD"],
 )
+# Let the reader adjust row height and filter out lower-quality reads or bases.
 LANE_HEIGHT = gs.param(
     "laneHeight",
     value=12,
@@ -47,6 +50,7 @@ MIN_BASE_QUALITY = gs.param(
     value=0,
     bind=gs.binding_range(min=0, max=40, step=1, debounce=100),
 )
+# Load reads only when viewing a small enough region.
 WINDOW_SIZE = gs.param("windowSize", value=15_000)
 ZOOM_MESSAGE_STATE = gs.param(
     "zoomMessageState",
@@ -58,8 +62,7 @@ ZOOM_MESSAGE_STATE = gs.param(
     transition={"type": "lerp", "halfLife": 60},
 )
 
-# Coverage and mismatch summaries are derived from the same reads as the pileup
-# instead of loading separate summary files.
+# Count how many reads cover each position, using the reads shown below.
 depth = (
     gs.Chart()
     .transform_flatten_cigar(copyFields=["chrom"])
@@ -83,6 +86,7 @@ depth = (
     .properties(name="depth", title="Depth")
 )
 
+# Add colored counts for bases that differ from the reference sequence.
 mismatch_summary = (
     gs.Chart()
     .transform_filter(gs.datum.md != None)  # noqa: E711
@@ -110,6 +114,7 @@ mismatch_summary = (
     .properties(name="mismatch-summary", title="Mismatch support")
 )
 
+# Mark positions where reads contain inserted bases.
 insertion_summary = (
     gs.Chart()
     .transform_flatten_cigar(copyFields=["chrom"])
@@ -124,6 +129,7 @@ insertion_summary = (
     .properties(name="insertion-summary", title="Insertion support")
 )
 
+# Combine the depth and variant counts into a compact summary track.
 coverage = (
     (depth + mismatch_summary + insertion_summary)
     .properties(
@@ -138,8 +144,7 @@ coverage = (
     .resolve_scale(color="independent")
 )
 
-# Draw the unmodified read interval first. CIGAR operations and mismatches are
-# flattened into separate overlay rows below.
+# Draw each read as a grey arrow; fade reads with lower mapping quality.
 read_backbone = (
     gs.Chart()
     .mark_arrow(
@@ -166,6 +171,7 @@ read_backbone = (
     .properties(name="read-backbone", title="Read alignment")
 )
 
+# Show deletions as white gaps crossed by a thin line.
 deletions = gs.layer(
     gs.Chart()
     .transform_filter(gs.datum.cigarType == "deletion")
@@ -180,6 +186,7 @@ deletions = deletions.properties(name="deletions", title="Deletion").encode(
     x2=gs.Locus("chrom", "cigarEnd", band=0),
 )
 
+# Use dashed lines for regions skipped by the alignment.
 skips = (
     gs.Chart()
     .transform_filter(gs.datum.cigarType == "skip")
@@ -191,6 +198,7 @@ skips = (
     .properties(name="skips", title="Skipped region")
 )
 
+# Label insertions with "I" and show the inserted sequence on hover.
 insertions = (
     gs.Chart()
     .transform_filter(gs.datum.cigarType == "insertion")
@@ -218,6 +226,7 @@ insertions = (
     .properties(name="insertions", title="Insertion")
 )
 
+# Label unaligned read ends with "S" for soft clipping.
 soft_clips = (
     gs.Chart()
     .transform_filter(gs.datum.cigarType == "softClip")
@@ -231,7 +240,7 @@ soft_clips = (
     .properties(name="soft-clips", title="Soft-clipped bases")
 )
 
-# Flatten CIGAR only once for all operation-specific overlays.
+# Read the alignment instructions (CIGAR) to place these details on each read.
 cigar_overlays = (
     gs.layer(deletions, skips, insertions, soft_clips)
     .transform_formula(expr=gs.datum.seq, as_="_seq")
@@ -239,6 +248,7 @@ cigar_overlays = (
     .properties(name="cigar-overlays", title="CIGAR operation")
 )
 
+# Color mismatched bases, fading those with lower base quality.
 mismatch_rects = (
     gs.Chart()
     .mark_rect(minWidth=1)
@@ -251,6 +261,7 @@ mismatch_rects = (
     .properties(name="mismatch-rects", title="Mismatch")
 )
 
+# Draw the base letters over their colored blocks.
 mismatch_labels = (
     gs.Chart()
     .mark_text(color="black", size=gs.expr(LANE_HEIGHT * 0.75), tooltip=None)
@@ -258,8 +269,7 @@ mismatch_labels = (
     .properties(name="mismatch-labels", title="Mismatch base")
 )
 
-# MD tags provide mismatch positions; base quality controls both filtering and
-# the opacity of retained bases.
+# Find mismatches from the read's MD tag and apply the base-quality slider.
 mismatches = (
     (mismatch_rects + mismatch_labels)
     .transform_filter(gs.datum.md != None)  # noqa: E711
@@ -281,6 +291,7 @@ mismatches = (
     )
 )
 
+# Put the read arrows, alignment details, and mismatches on the same rows.
 read_layers = (
     gs.layer(read_backbone, cigar_overlays, mismatches)
     .properties(name="read-layers", title="Read alignments")
@@ -288,7 +299,7 @@ read_layers = (
     .resolve_scale(opacity="independent")
 )
 
-# This singleton overlay avoids creating one zoom message for every BAM read.
+# Ask the reader to zoom in when the region is too wide to load reads.
 zoom_message = gs.layer(
     gs.Chart().mark_rect(fill="white", opacity=0.7),
     gs.Chart()
@@ -299,6 +310,7 @@ zoom_message = gs.layer(
     opacity=ZOOM_MESSAGE_STATE,
 ).add_params(ZOOM_MESSAGE_STATE)
 
+# Make the read rows scrollable and connect their height to the slider.
 read_alignments = (
     gs.layer(read_layers, zoom_message)
     .properties(
@@ -311,8 +323,7 @@ read_alignments = (
     .resolve_scale(color="independent", opacity="independent")
 )
 
-# The lazy BAM source requests only the visible window. Both tracks inherit it
-# and therefore stay synchronized while zooming.
+# Load the visible reads and place the summary above the scrollable read track.
 chart = (
     (coverage & read_alignments)
     .properties(
@@ -334,11 +345,13 @@ chart = (
         description="BAM depth, alignments, CIGAR operations, and mismatches.",
     )
     .add_params(MIN_MAPQ, MIN_BASE_QUALITY, WINDOW_SIZE)
+    # Apply the mapping-quality cutoff, keeping reads with unknown quality.
     .transform_filter((gs.datum.mapq == None) | (gs.datum.mapq >= MIN_MAPQ))  # noqa: E711
     .transform_formula(
         expr=gs.expr.if_(gs.datum.mapq == None, 0, gs.datum.mapq),  # noqa: E711
         as_="_mapqOrZero",
     )
+    # Put overlapping reads on separate rows.
     .transform_pileup(start="start", end="end", as_="_lane")
     .resolve_axis(x="shared")
     .configure_view(stroke="lightgray")

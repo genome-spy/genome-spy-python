@@ -13,8 +13,10 @@ META = {
     "height": 260,
 }
 
+# Load example positions, one for each row.
 data = sincos_data()
 
+# Plot a sine value on each row.
 chart = (
     gs.Chart(data)
     .transform_formula(expr=gs.expr.sin(gs.datum.x / 4), as_="value")
@@ -23,6 +25,7 @@ chart = (
         x=gs.X("value:Q").scale(zoom=True).title("Value"),
         y=gs.Y("x:O").title("Row"),
     )
+    # Keep rows 20 pixels tall and scroll when they do not all fit.
     .properties(
         height=gs.step(20),
         viewportHeight="container",

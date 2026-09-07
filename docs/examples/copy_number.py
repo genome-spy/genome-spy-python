@@ -14,12 +14,13 @@ META = {
     "height": 300,
 }
 
-# Real ASCAT copy-number calls for sample S96, hosted by GenomeSpy.
+# Use the hosted ASCAT segment estimates for sample S96.
 SEGMENTS = {
     "url": "https://data.genomespy.app/sample-data/ASCAT/segments_S96.tsv",
     "format": {"type": "tsv"},
 }
 
+# Label chromosomes and separate them with alternating backgrounds.
 axis = (
     GenomeAxis()
     .title("Genomic position")
@@ -33,12 +34,14 @@ axis = (
     .grid(False)
 )
 
+# Mark two copies as a reference line.
 diploid_baseline = (
     gs.Chart([{"cn": 2}])
     .mark_rule(strokeDash=[4, 4], size=1, color="#8f98a3")
     .encode(y=gs.Y("cn:Q").scale(reverse=False))
 )
 
+# Add both allele counts and highlight segments where the minor count is zero.
 segments = (
     gs.Chart(SEGMENTS)
     .transform_formula(expr=gs.datum.nMajor + gs.datum.nMinor, as_="totalCN")
@@ -57,6 +60,7 @@ segments = (
     )
 )
 
+# Combine the copy-number segments and the reference line.
 chart = (diploid_baseline + segments).properties(
     title="Allele-specific copy number (ASCAT, sample S96)",
     description="A whole-genome copy-number profile with total copy number and LOH status.",

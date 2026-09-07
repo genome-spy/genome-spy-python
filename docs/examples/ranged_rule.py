@@ -13,8 +13,10 @@ META = {
     "height": 280,
 }
 
+# Load start and end positions for a few example intervals.
 data = ranged_rule_data()
 
+# Draw a thick line from x to x2, with each interval on its own row.
 chart = (
     gs.Chart(data)
     .mark_rule(size=10, strokeCap="round")

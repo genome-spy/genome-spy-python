@@ -13,6 +13,7 @@ META = {
     "max_width": 980,
 }
 
+# Draw exon blocks along each transcript.
 exons = (
     gs.Chart()
     .transform_project(fields=["_lane", "_start", "exons"])
@@ -22,6 +23,7 @@ exons = (
     .properties(name="exons")
 )
 
+# Connect the exons with a thin line spanning the transcript.
 bodies = (
     gs.Chart()
     .mark_rule(minLength=0.5, size=1, tooltip=None)
@@ -33,6 +35,7 @@ bodies = (
     .properties(name="bodies", title="Gene annotations")
 )
 
+# Reveal the gene shapes as the reader zooms in.
 transcripts = (
     (exons + bodies)
     .encode(color=gs.value("#909090"))
@@ -42,6 +45,7 @@ transcripts = (
     )
 )
 
+# Label each gene and show more details on hover.
 labels = (
     gs.Chart()
     .mark_text(size=11, yOffset=7, tooltip=gs.HandledTooltip(handler="refseqgene"))
@@ -49,8 +53,7 @@ labels = (
     .properties(name="labels")
 )
 
-# ``dx`` shifts the strand arrow in screen pixels so it remains just beyond the
-# measured label edge at every genomic zoom level.
+# Put a direction arrow just beside each name, leaving room for the text.
 arrows = (
     gs.Chart()
     .mark_point(yOffset=7, size=50, tooltip=None)
@@ -74,6 +77,7 @@ arrows = (
     )
 )
 
+# Hide overlapping names, using the supplied scores to choose which to keep.
 symbols = (
     (labels + arrows)
     .properties(name="symbols")
@@ -87,6 +91,7 @@ symbols = (
     )
 )
 
+# Load one RefSeq table for both the gene shapes and labels.
 chart = (
     gs.layer(transcripts, symbols)
     .properties(
@@ -127,12 +132,14 @@ chart = (
         )
         .axis(None)
     )
+    # Find each transcript's start, end, and label position.
     .transform_linearize_genomic_coordinate(chrom="chrom", pos="start", as_="_start")
     .transform_formula(expr=gs.datum._start + gs.datum.length, as_="_end")
     .transform_formula(
         expr=gs.datum._start + gs.datum.length / 2,
         as_="_centroid",
     )
+    # Put overlapping transcripts on separate rows, showing up to three rows.
     .transform_collect(sort=gs.compare(field=["_start"]))
     .transform_pileup(
         start="_start",

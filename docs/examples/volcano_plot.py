@@ -14,16 +14,17 @@ META = {
     "height": 440,
 }
 
+# Load association results and starting axis limits and cutoffs.
 data, domains = hapmap_volcano_data()
 X_DOMAIN = domains["x_domain"]
 Y_DOMAIN = domains["y_domain"]
 EFFECT_CUTOFF = domains["effect_cutoff"]
 NEGLOG_P_CUTOFF = domains["neglog_pvalue_cutoff"]
-# zoomLevel is 1 at the initial domain. The exponent makes growth gradual,
-# while the cap prevents points from becoming oversized at deep zoom levels.
+# Grow points gently when zooming in, without letting them become too large.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(16 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
-# These named sliders update both the dashed guides and each point's category.
+
+# Add sliders that update the guide lines and point colors together.
 effect_cutoff = gs.param(
     "hapmapEffectCutoff",
     value=EFFECT_CUTOFF,
@@ -44,6 +45,7 @@ significance_cutoff = gs.param(
         name="−log10 p cutoff: ",
     ),
 )
+# Classify points as protective or risk only when they pass both cutoffs.
 ASSOCIATION_EXPRESSION = gs.expr.if_(
     (gs.datum.neglog >= significance_cutoff)
     & (gs.expr.abs(gs.datum.EFFECTSIZE) >= effect_cutoff),
@@ -51,13 +53,13 @@ ASSOCIATION_EXPRESSION = gs.expr.if_(
     "n.s.",
 )
 
-# --- Visualization -------------------------------------------------------------
-
+# Use blue for protective effects, red for risk, and grey for the rest.
 association_colors = Scale(
     domain=["protective", "n.s.", "risk"],
     range=["#3e8cb6", "#c9d1d9", "#c53b2c"],
 )
 
+# Plot effect size against significance, coloring points by the current cutoffs.
 points = (
     gs.Chart()
     .transform_formula(expr=ASSOCIATION_EXPRESSION, as_="association")
@@ -75,6 +77,7 @@ points = (
     )
 )
 
+# Mark the effect-size cutoff on both sides of zero.
 effect_cutoffs = (
     gs.Chart([{"side": -1}, {"side": 1}])
     .transform_formula(expr=gs.datum.side * effect_cutoff, as_="x")
@@ -82,6 +85,7 @@ effect_cutoffs = (
     .encode(x=gs.X("x:Q").scale(domain=X_DOMAIN, zoom=True).title("Effect size (beta)"))
 )
 
+# Move the horizontal significance line with its slider.
 significance_rule = (
     gs.Chart([{}])
     .transform_formula(expr=significance_cutoff, as_="y")
@@ -91,6 +95,7 @@ significance_rule = (
     )
 )
 
+# Combine the guide lines and points, then attach the sliders.
 chart = (
     (effect_cutoffs + significance_rule + points)
     .properties(

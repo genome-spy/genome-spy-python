@@ -30,11 +30,13 @@ CLASS_COLORS = (
 )
 
 
+# Load mutation counts and the protein's named regions.
 data = dnmt3a_lollipop_data()
 features = data["features"].copy()
 domains = data["domains"].copy()
 backbone = data["backbone"].copy()
 
+# Place the protein blocks below zero and leave room for labels above the points.
 domains["y0"] = -5.3
 domains["y1"] = -1.7
 domains["mid"] = (domains["y0"] + domains["y1"]) / 2
@@ -52,6 +54,7 @@ max_count = int(features["count"].max())
 x_domain = [0, protein_length]
 y_domain = [-6.2, max_count + 4]
 
+# Arrange the mutation-class legend in two columns below the chart.
 mutation_legend = (
     Legend()
     .title("Mutation class")
@@ -61,10 +64,7 @@ mutation_legend = (
     .symbolSize(72)
 )
 
-# --- Visualization -------------------------------------------------------------
-
-# The protein backbone and annotated domains form the baseline geometry for the
-# lollipop marks.
+# Draw a grey band spanning the protein.
 backbone_band = (
     gs.Chart(backbone)
     .mark_rect(color="#a8b5b6", stroke="#111111", strokeWidth=1)
@@ -81,6 +81,7 @@ backbone_band = (
     )
 )
 
+# Add a colored block for each named protein region.
 domain_layers = []
 for domain in domains.to_dict(orient="records"):
     domain_layers.append(
@@ -100,6 +101,7 @@ domain_blocks = domain_layers[0]
 for layer in domain_layers[1:]:
     domain_blocks = domain_blocks + layer
 
+# Write each region's name inside its block.
 domain_labels = (
     gs.Chart(domains)
     .mark_text(size=8, color="#111111")
@@ -110,8 +112,7 @@ domain_labels = (
     )
 )
 
-# Stems carry counts from the protein backbone to each hotspot; points encode
-# the dominant mutation class at that amino-acid position.
+# Draw a stem from the protein to the mutation count at each position.
 stems = (
     gs.Chart(features)
     .mark_rule(color="#c0c0c0", size=1)
@@ -122,6 +123,7 @@ stems = (
     )
 )
 
+# Top each stem with a point colored by the most common mutation class there.
 heads = (
     gs.Chart(features)
     .mark_point(size=88, filled=True, opacity=0.9)
@@ -132,7 +134,7 @@ heads = (
     )
 )
 
-# The canonical R882 hotspot gets an explicit text label, echoing maftools.
+# Label the frequently mutated R882 position.
 hotspot_labels = (
     gs.Chart(features[features["is_hotspot"]].copy())
     .mark_text(dy=-12, size=11, color="#111111")
@@ -143,7 +145,7 @@ hotspot_labels = (
     )
 )
 
-# Compose the protein model and mutation marks into a single lollipop view.
+# Combine the protein blocks, lollipops, and labels in one chart.
 chart = (
     backbone_band + domain_blocks + domain_labels + stems + heads + hotspot_labels
 ).properties(

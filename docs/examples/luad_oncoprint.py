@@ -84,7 +84,9 @@ METHYLATION_GROUP = "Methylation (HM27 and HM450 merge)"
 MICROBIOME_GROUP = "Microbiome Signatures (log RNA Seq CPM)"
 
 
+# Load the prepared mutation matrix, clinical data, and measurement tables.
 data = luad_oncoprint_data()
+# Follow the mouse with a line through the same sample in every track.
 sample_ruler = gs.ruler(
     "sampleRuler",
     persist=False,
@@ -122,6 +124,7 @@ def heatmap_panel(
     colors: list[str],
 ) -> gs.Chart:
     """Render one grouped quantitative heatmap block."""
+    # Pick the requested measurement group and keep its rows in the supplied order.
     panel_data = data["heatmap_cells"][data["heatmap_cells"]["group"] == group_name]
     rows = data["heatmap_rows"][data["heatmap_rows"]["group"] == group_name]
     track_order = rows.sort_values("track_order")["track"].tolist()
@@ -143,8 +146,7 @@ def heatmap_panel(
     )
 
 
-# --- top sample-aligned tracks -------------------------------------------------
-
+# Show each sample's mutation burden, stacked by mutation class.
 burden_track = (
     gs.Chart(data["sample_burden"])
     .transform_stack(
@@ -169,6 +171,7 @@ burden_track = (
     )
 )
 
+# Compare the proportions of the six substitution types in each sample.
 mutation_spectrum_track = (
     gs.Chart(data["mutation_spectrum"])
     .transform_stack(
@@ -194,6 +197,7 @@ mutation_spectrum_track = (
     )
 )
 
+# Add each sample's microsatellite-instability score.
 msi_track = (
     gs.Chart(data["msi"])
     .mark_rect(color="#15803d")
@@ -212,6 +216,7 @@ msi_track = (
     )
 )
 
+# Color a thin strip by each sample's stage category.
 stage_track = (
     gs.Chart(data["stage"])
     .mark_rect()
@@ -230,10 +235,7 @@ stage_track = (
     )
 )
 
-# --- main matrix ---------------------------------------------------------------
-# Keep one event table in the data helper. Each layer selects the classes that
-# need its visual mark, so the same normalized events remain easy to inspect.
-
+# Start with a pale cell for every sample–gene pair.
 matrix_grid = (
     gs.Chart(data["grid"])
     .mark_rect(color="#ebebeb", stroke="white", strokeWidth=0.35)
@@ -243,6 +245,7 @@ matrix_grid = (
     )
 )
 
+# Fill the whole cell for amplifications and deep deletions.
 full_rect_layer = (
     gs.Chart(data["events"])
     .transform_filter(
@@ -256,6 +259,7 @@ full_rect_layer = (
     )
 )
 
+# Use narrower bands for sequence mutations so copy-number colors stay visible.
 putative_rect_layer = (
     gs.Chart(data["events"])
     .transform_filter(
@@ -272,6 +276,7 @@ putative_rect_layer = (
     )
 )
 
+# Mark structural variants with crosses.
 star_layer = (
     gs.Chart(data["events"])
     .transform_filter(
@@ -286,6 +291,7 @@ star_layer = (
     )
 )
 
+# Combine the alteration types in one matrix, keeping the supplied gene order.
 matrix_panel = (
     matrix_grid + full_rect_layer + putative_rect_layer + star_layer
 ).properties(
@@ -294,6 +300,7 @@ matrix_panel = (
     scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.03}},
 )
 
+# Show the percentage of affected samples beside each gene.
 percent_panel = (
     gs.Chart(data["genes"])
     .mark_text(align="right", dx=-3, size=10, color="#4b5563", clip="never")
@@ -305,6 +312,7 @@ percent_panel = (
     .properties(width=PERCENT_WIDTH, height=MATRIX_HEIGHT)
 )
 
+# Add pale backgrounds behind the gene-count bars.
 count_grid = (
     gs.Chart(data["genes"][["gene"]])
     .mark_rect(color="#ebebeb", stroke="white", strokeWidth=0.35)
@@ -313,6 +321,7 @@ count_grid = (
     )
 )
 
+# Stack affected-sample counts by alteration class for each gene.
 count_bars = (
     gs.Chart(data["gene_counts"])
     .transform_stack(field="count", groupby=["gene"], as_=["_x0", "_x1"])
@@ -333,14 +342,14 @@ gene_count_panel = (
     .resolve_scale(x="excluded")
 )
 
+# Keep the percentages and count bars on the same gene rows.
 matrix_summary = (
     gs.concat(percent_panel, gene_count_panel, columns=2, spacing=2)
     .properties(scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.03}})
     .resolve_scale(x="excluded", y="shared")
 )
 
-# --- lower grouped heatmaps ----------------------------------------------------
-
+# Add expression measurements below the matrix: blue for low, red for high.
 mrna_panel = heatmap_panel(
     MRNA_GROUP,
     panel_height=MRNA_HEIGHT,
@@ -348,6 +357,7 @@ mrna_panel = heatmap_panel(
     colors=["#2166ac", "#f7f7f7", "#b2182b"],
 )
 
+# Show methylation levels in shades of blue.
 methylation_panel = heatmap_panel(
     METHYLATION_GROUP,
     panel_height=METHYLATION_HEIGHT,
@@ -355,6 +365,7 @@ methylation_panel = heatmap_panel(
     colors=["#eff6ff", "#60a5fa", "#1d4ed8"],
 )
 
+# Show microbiome measurements in shades of brown.
 microbiome_panel = heatmap_panel(
     MICROBIOME_GROUP,
     panel_height=MICROBIOME_HEIGHT,
@@ -362,6 +373,7 @@ microbiome_panel = heatmap_panel(
     colors=["#f6e3c4", "#c08457", "#7c3f00"],
 )
 
+# Rotate sample names to fit beneath their columns.
 sample_label_track = (
     gs.Chart(data["samples"])
     .mark_text(align="center", baseline="top", angle=90, size=9, paddingX=1)
@@ -374,6 +386,7 @@ sample_label_track = (
     .properties(width=SAMPLE_TRACK_WIDTH, height=SAMPLE_LABEL_HEIGHT)
 )
 
+# Stack the sample tracks so their columns stay aligned while zooming.
 sample_tracks = (
     gs.vconcat(
         burden_track,
@@ -406,6 +419,7 @@ center_column = gs.vconcat(sample_tracks, sample_label_track, spacing=4).resolve
     x="shared", y="independent"
 )
 
+# Leave room above the gene summaries to align them with the matrix.
 summary_column = gs.concat(
     empty_panel(height=TOP_TRACKS_HEIGHT),
     matrix_summary,
@@ -413,6 +427,7 @@ summary_column = gs.concat(
     spacing=4,
 )
 
+# Place the gene summaries beside the sample tracks in a scrollable chart.
 chart = (
     gs.concat(center_column, summary_column, columns=2, spacing=2)
     .resolve_scale(x="shared", y="independent")

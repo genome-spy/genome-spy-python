@@ -13,8 +13,10 @@ META = {
     "height": 300,
 }
 
+# Load pairs of positions and a height for each link.
 data = link_data()
 
+# Connect each pair with an arc, using y to set its height.
 chart = (
     gs.Chart(data)
     .mark_link(linkShape="dome", size=2)

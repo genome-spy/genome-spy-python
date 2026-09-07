@@ -15,8 +15,7 @@ META = {
     "max_width": 920,
 }
 
-# This is the minimal lazy-annotation pattern: load a BigBed source and color
-# intervals by their regulatory label over a fixed locus.
+# Load candidate regulatory regions as needed and color them by type.
 chart = (
     gs.Chart(
         gs.lazy.bigbed(

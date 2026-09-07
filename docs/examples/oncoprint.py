@@ -28,7 +28,9 @@ CLASS_ORDER = [
     "Multi_Hit",
 ]
 
+# Load the prepared mutation matrix and sample and gene summaries.
 data = laml_oncoplot_data()
+# Follow the mouse with a line to help identify the current sample column.
 sample_ruler = gs.ruler(
     "sampleRuler",
     persist=False,
@@ -54,6 +56,7 @@ class_colors = (
     )
 )
 
+# Set the space reserved for the matrix and its surrounding summaries.
 matrix_width = 400
 percent_width = 52
 counts_width = 120
@@ -74,8 +77,7 @@ mutation_legend = (
     .symbolSize(90)
 )
 
-# --- Visualization -------------------------------------------------------------
-
+# Stack mutation counts by class above each sample.
 tmb = (
     gs.Chart(data["sample_tmb"])
     .transform_stack(
@@ -93,6 +95,7 @@ tmb = (
     .properties(width=matrix_width, height=tmb_height)
 )
 
+# Give every sample–gene cell a pale background.
 grid = (
     gs.Chart(data["grid"])
     .mark_rect(color="#f1f3f5", stroke="white", strokeWidth=0.5)
@@ -102,6 +105,7 @@ grid = (
     )
 )
 
+# Fill altered cells with their mutation-class colors.
 matrix = (
     gs.Chart(data["events"])
     .mark_rect(stroke="white", strokeWidth=0.5)
@@ -112,6 +116,7 @@ matrix = (
     )
 )
 
+# Combine the background and mutations, then add the hover line.
 matrix_panel = (
     (grid + matrix)
     .properties(
@@ -122,6 +127,7 @@ matrix_panel = (
     .add_params(sample_ruler)
 )
 
+# Show the percentage of samples with an alteration in each gene.
 percent_panel = (
     gs.Chart(data["genes"])
     .mark_text(align="right", dx=-2, size=11)
@@ -133,12 +139,14 @@ percent_panel = (
     .properties(width=percent_width, height=matrix_height, scales={"y": gene_scale})
 )
 
+# Leave space above the percentages to line them up with the matrix rows.
 percent_header = (
     gs.Chart([{}])
     .mark_text(opacity=0)
     .properties(width=percent_width, height=tmb_height)
 )
 
+# Label the gene-count bars on the right.
 count_title = (
     gs.Chart([{"label": "No. of samples"}])
     .mark_text(size=11)
@@ -149,6 +157,7 @@ count_title = (
     .properties(width=counts_width, height=tmb_height)
 )
 
+# Stack the number of affected samples by mutation class for each gene.
 count_bars = (
     gs.Chart(data["gene_counts"])
     .transform_stack(field="count", groupby=["gene"], as_=["_x0", "_x1"])
@@ -164,6 +173,7 @@ count_bars = (
     .properties(width=counts_width, height=matrix_height)
 )
 
+# Add pale row backgrounds behind the gene-count bars.
 count_grid = (
     gs.Chart(data["genes"][["gene"]])
     .mark_rect(color="#f1f3f5", stroke="white", strokeWidth=0.5)
@@ -177,6 +187,7 @@ counts_panel = (count_grid + count_bars).properties(
     width=counts_width, height=matrix_height, scales={"y": gene_scale}
 )
 
+# Keep the top bars and matrix columns aligned while zooming through samples.
 sample_column = (
     gs.concat(tmb, matrix_panel, columns=1, spacing=4)
     .properties(
@@ -196,6 +207,7 @@ counts_column = gs.concat(count_title, counts_panel, columns=1, spacing=4)
 
 summary = f"Altered in {data['altered_samples']} ({data['altered_samples'] / data['total_samples']:.2%}) of {data['total_samples']} samples."
 
+# Place the matrix beside its percentages and counts, and add the cohort total.
 chart = (
     gs.concat(sample_column, percent_column, counts_column, columns=3, spacing=4)
     .resolve_scale(x="independent", y="independent")

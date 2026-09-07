@@ -27,7 +27,7 @@ stain_domain = [
     "gvar",
 ]
 
-# The ideogram itself is just a whole-genome interval track colored by cytoband stain.
+# Draw chromosome bands in colors matching their stain type.
 band_layer = (
     gs.Chart()
     .mark_rect()
@@ -51,6 +51,7 @@ band_layer = (
     .properties(title="Cytoband")
 )
 
+# Label bands, using white text on the darkest backgrounds.
 label_layer = (
     gs.Chart()
     .mark_text(
@@ -79,7 +80,7 @@ label_layer = (
     )
 )
 
-# Add dashed separators at chromosome starts to make whole-genome navigation easier.
+# Separate neighboring chromosomes with dashed lines.
 separator_layer = (
     gs.Chart()
     .encode(x2=None)
@@ -87,8 +88,7 @@ separator_layer = (
     .transform_filter((gs.datum.chromStart == 0) & (gs.datum.chrom != "chr1"))
 )
 
-# The shared encoding lives on the layered root so each sublayer inherits the
-# same genome-wide interval coordinates.
+# Load band positions and combine the colored bands, names, and separators.
 chart = (
     gs.layer(band_layer, label_layer, separator_layer)
     .properties(

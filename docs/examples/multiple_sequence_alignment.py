@@ -14,11 +14,13 @@ META = {
     "max_width": 980,
 }
 
+# Use the same base colors in the summary and sequence rows; gaps are pale grey.
 BASE_COLORS = Scale(
     domain=["A", "C", "T", "G", "N", "-"],
     range=["#4FBF45", "#4D96E8", "#E85F78", "#E8B322", "#BDBDBD", "#f5f5f5"],
 )
 
+# Summarize each position with stacked letters; taller stacks mean more agreement.
 logo = (
     gs.Chart()
     .transform_aggregate(groupby=["pos", "sequence"])
@@ -54,6 +56,7 @@ logo = (
     .properties(height=70, title="Sequence logo")
 )
 
+# Show each sequence as colored tiles with letters, in a scrollable list.
 alignment = (
     gs.layer(
         gs.Chart().mark_rect(),
@@ -69,6 +72,7 @@ alignment = (
     .properties(height=gs.step(14), viewportHeight="container", title="Alignment")
 )
 
+# Load the aligned sequences and put the summary above them.
 chart = (
     gs.vconcat(logo, alignment, spacing=8)
     .properties(
@@ -80,6 +84,7 @@ chart = (
         scales=gs.scales(x=gs.Scale(domain=[190, 230], zoom={"extent": "data"})),
         description="A multiple sequence alignment with a sequence-logo overview.",
     )
+    # Split each sequence into individual letters at numbered positions.
     .transform_flatten_sequence()
     .resolve_scale(x="shared")
     .resolve_axis(x="independent")

@@ -25,14 +25,17 @@ CONVERSION_COLORS = ["#f64b3c", "#4f63c9", "#2891e8", "#f6b617", "#4caf50", "#f7
 GENOME_DOMAIN = [{"chrom": "chr1"}, {"chrom": "chrY"}]
 
 
+# Load mutation distances and cluster annotations for one tumor sample.
 data = brca_rainfall_data()
 points = data["points"]
 change_points = data["change_points"]
 y_domain = [0.0, data["y_max"]]
 sample_name = data["sample"]
 assembly = data["reference_build"]
+# Load gene annotations for the same genome version.
 genes = refseq_gene_bodies(assembly)
 
+# Label chromosomes and give neighboring chromosomes alternating backgrounds.
 axis = (
     GenomeAxis()
     .title("Genomic position")
@@ -56,10 +59,8 @@ mutation_legend = (
     .title("Substitution class")
 )
 
-# --- Visualization -------------------------------------------------------------
-
-# MAF positions are one-based. The offset aligns them with the zero-based RefSeq
-# intervals used by the lower track.
+# Plot the distance from each mutation to the previous one; low points are close
+# together. offset=1 accounts for mutation positions being numbered from one.
 rainfall_points = (
     gs.Chart(points)
     .mark_point(size=18, filled=True, opacity=0.95)
@@ -72,7 +73,7 @@ rainfall_points = (
     )
 )
 
-# Rules provide the callout stems; separate triangle marks provide arrowheads.
+# Draw pointers to the annotated mutation clusters.
 change_point_stems = (
     gs.Chart(change_points)
     .mark_rule(color="#111111", size=1.2)
@@ -85,6 +86,7 @@ change_point_stems = (
     )
 )
 
+# Add an arrowhead at the tip of each pointer.
 change_point_heads = (
     gs.Chart(change_points)
     .mark_point(shape="triangle-up", size=60, filled=True, color="#111111")
@@ -94,12 +96,14 @@ change_point_heads = (
     )
 )
 
+# Combine the mutation points and cluster pointers.
 rainfall_track = (rainfall_points + change_point_stems + change_point_heads).properties(
     name="rainfall-track",
     title=sample_name,
     height=300,
 )
 
+# Choose the gene details to show on hover.
 gene_tooltip = [
     gs.Tooltip("symbol:N").title("Gene"),
     gs.Tooltip("identifier:N").title("RefSeq locus"),
@@ -109,6 +113,7 @@ gene_tooltip = [
     gs.Tooltip("strand:N").title("Strand"),
 ]
 
+# Draw genes as arrows showing their reading direction; reveal them on zoom.
 gene_bodies = (
     gs.Chart()
     .mark_arrow(
@@ -133,7 +138,7 @@ gene_bodies = (
     )
 )
 
-# Keep every gene body but show only the best-scoring non-overlapping labels.
+# Hide overlapping names, using the supplied scores to choose which to keep.
 gene_labels = (
     gs.Chart()
     .transform_measure_text(field="symbol", as_="label_width", fontSize=11)
@@ -149,8 +154,7 @@ gene_labels = (
     .mark_text(
         baseline="middle",
         align="center",
-        # Clip labels at the genomic window while keeping the vertical offset
-        # free to extend above the gene body.
+        # Keep names inside the left and right edges of the track.
         clip="x",
         yOffset=-2,
         size=11,
@@ -164,6 +168,7 @@ gene_labels = (
     )
 )
 
+# Combine gene shapes and names, leaving room above each row for the text.
 gene_track = (
     (gene_bodies + gene_labels)
     .properties(
@@ -191,6 +196,7 @@ gene_track = (
         pos=["start", "end"],
         as_=["linear_start", "linear_end"],
     )
+    # Put overlapping genes on separate rows, showing up to three rows.
     .transform_collect(sort=gs.compare(field=["linear_start", "linear_end"]))
     .transform_pileup(
         start="linear_start",
@@ -202,8 +208,7 @@ gene_track = (
     .transform_filter(gs.datum.lane < 3)
 )
 
-# Sharing x keeps mutation points and genes aligned during zooming. Their y
-# scales remain unrelated.
+# Put genes below the mutation plot so both tracks move together when zooming.
 chart = (
     (rainfall_track & gene_track)
     .properties(

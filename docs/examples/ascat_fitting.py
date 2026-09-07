@@ -15,6 +15,7 @@ META = {
     "max_width": 980,
 }
 
+# Offer nine samples and mark ASCAT's selected purity and ploidy for comparison.
 SAMPLES = ["S17", "S36", "S54", "S64", "S77", "S84", "S96", "S97", "S100"]
 ASCAT_SOLUTIONS = [
     {"sample": "S17", "rho": 0.25, "psi": 3.15},
@@ -29,6 +30,7 @@ ASCAT_SOLUTIONS = [
 ]
 
 MIN_LENGTH = gs.param("minLength", value=1)
+# Let the reader switch samples from a dropdown.
 SAMPLE = gs.param(
     "sample",
     value="S96",
@@ -37,6 +39,7 @@ SAMPLE = gs.param(
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 WIDTH = gs.Expression("width")
 HEIGHT = gs.Expression("height")
+# Add a slider for the LogR adjustment used in the fit.
 GAMMA = gs.param(
     "gamma",
     value=0.55,
@@ -48,6 +51,7 @@ GAMMA = gs.param(
         debounce=100,
     ),
 )
+# Click the upper plot to choose a purity and ploidy for all tracks below.
 SELECTED_FIT = gs.param("selectedFit")
 SELECTED_FIT_UPDATE = gs.ruler(
     "selectedFit",
@@ -59,6 +63,7 @@ SELECTED_FIT_UPDATE = gs.ruler(
     snap=False,
     mark=RulerMarkConfig(strokeDash=[5, 3]),
 )
+# Add checkboxes to control how the fit is scored.
 FIT_BOTH_ALLELES = gs.param(
     "fitBothAlleles",
     value=False,
@@ -70,6 +75,7 @@ DOWNWEIGHT_BALANCED = gs.param(
     bind=gs.binding_checkbox(name="Downweight balanced segments"),
 )
 
+# Load the segment and probe files for the selected sample.
 SEGMENT_URL = gs.expr(
     "https://data.genomespy.app/sample-data/ASCAT/ascat_fit_segments_"
     + SAMPLE
@@ -79,8 +85,7 @@ RAW_URL = gs.expr(
     "https://data.genomespy.app/sample-data/ASCAT/ascat_raw_" + SAMPLE + ".tsv.gz"
 )
 
-# The sunrise panel builds the purity/ploidy candidate grid in GenomeSpy. Its
-# ruler writes the selectedFit parameter used by every panel below.
+# Color each purity/ploidy pair by how close its copy counts are to whole numbers.
 sunrise_rects = (
     gs.Chart()
     .mark_rect(tooltip=None)
@@ -100,6 +105,7 @@ sunrise_rects = (
     .properties(name="sunrise-rects")
 )
 
+# Mark ASCAT's selected solution with a green cross.
 published_solution = (
     gs.Chart(gs.Data(name="ascat-solutions"))
     .transform_filter(gs.datum.sample == SAMPLE)
@@ -116,6 +122,7 @@ published_solution = (
     .properties(title="ascat-solution")
 )
 
+# Build the clickable overview by testing a grid of purity and ploidy values.
 sunrise = (
     (sunrise_rects + published_solution)
     .properties(
@@ -173,6 +180,7 @@ sunrise = (
     )
 )
 
+# Calculate both allele counts for each candidate fit and measure rounding error.
 for field, expression in [
     (
         "bRawCandidate",
@@ -219,6 +227,7 @@ for field, expression in [
 ]:
     sunrise = sunrise.transform_formula(expr=expression, as_=field)
 
+# Combine the segment errors into one score per purity/ploidy pair.
 sunrise = sunrise.transform_aggregate(
     groupby=["rhoCandidate", "psiCandidate"],
     fields=["fitWeight", "errorSquaredWeighted"],
@@ -226,6 +235,7 @@ sunrise = sunrise.transform_aggregate(
     as_=["totalWeight", "distanceSum"],
 )
 
+# Turn each candidate score into a colored tile with a fixed position and size.
 for field, expression in [
     (
         "meanRoundingError",
@@ -239,8 +249,7 @@ for field, expression in [
 ]:
     sunrise = sunrise.transform_formula(expr=expression, as_=field)
 
-# Recalculate one fit score from all visible segments whenever selectedFit or a
-# fitting option changes.
+# Show the selected fit's score as a horizontal bar.
 fit_bar = (
     gs.Chart()
     .mark_rect(color="#a0e7e5", tooltip=None)
@@ -250,6 +259,7 @@ fit_bar = (
     )
     .properties(name="bar")
 )
+# Write the selected purity, ploidy, adjustment, and score over the bar.
 fit_text = (
     gs.Chart()
     .mark_text(size=12, tooltip=None)
@@ -271,6 +281,7 @@ fit_text = (
     )
     .properties(name="text")
 )
+# Recalculate the score when the selected fit or scoring options change.
 selected_fit = (
     (fit_bar + fit_text)
     .properties(
@@ -317,8 +328,7 @@ selected_fit = (
     )
 )
 
-# These layers show the gap between continuous copy-number estimates and the
-# integer states selected for the current purity/ploidy solution.
+# Show the difference between estimated and rounded minor-allele copy counts.
 minor_error = (
     gs.Chart()
     .mark_rect(
@@ -337,6 +347,7 @@ minor_error = (
         ),
     )
 )
+# Show the same rounding difference for the major allele.
 major_error = (
     gs.Chart()
     .mark_rect(
@@ -355,6 +366,7 @@ major_error = (
         ),
     )
 )
+# Draw rounded minor-allele counts in green.
 minor_rounded = (
     gs.Chart()
     .mark_rule(minLength=MIN_LENGTH, yOffset=-3)
@@ -366,6 +378,7 @@ minor_rounded = (
         color=gs.value("#88d27a"),
     )
 )
+# Draw rounded major-allele counts in red, offset slightly to keep both visible.
 major_rounded = (
     gs.Chart()
     .mark_rule(minLength=MIN_LENGTH, yOffset=3)
@@ -377,6 +390,7 @@ major_rounded = (
         ),
     )
 )
+# Combine the rounded copy counts and their differences in one track.
 rounded_copy_number = (
     minor_error + major_error + minor_rounded + major_rounded
 ).properties(
@@ -392,6 +406,7 @@ selected_solution = (selected_fit & rounded_copy_number).resolve_axis(x="shared"
 
 def raw_probe_track(field: str) -> gs.Chart:
     """Build one dynamically sized raw ASCAT probe layer."""
+    # Draw individual measurements as faint points that grow when zooming in.
     chart = (
         gs.Chart(gs.Data(url=RAW_URL))
         .mark_point(
@@ -414,6 +429,7 @@ def raw_probe_track(field: str) -> gs.Chart:
     )
 
 
+# Compare measured LogR points with segment means and the selected fit.
 logr_track = (
     raw_probe_track("logR")
     + gs.Chart()
@@ -433,6 +449,7 @@ logr_track = (
     title=gs.title("Observed and fitted LogR", style="overlay-title"),
 )
 
+# Compare measured and fitted allele frequencies on both sides of 0.5.
 baf_track = (
     raw_probe_track("baf")
     + gs.Chart()
@@ -468,8 +485,7 @@ baf_track = (
     title=gs.title("Observed and fitted B-allele frequency", style="overlay-title"),
 )
 
-# The parent owns the segment table and controls. Child tracks inherit both the
-# data and the shared genomic x scale.
+# Stack the fit overview and measurement tracks, giving them the same controls.
 chart = (
     (sunrise & selected_solution & logr_track & baf_track)
     .properties(
@@ -497,8 +513,7 @@ chart = (
     .transform_collect()
 )
 
-# Derive the fitted allele counts, residuals, LogR, and BAF in the browser so
-# dragging the sunrise ruler updates all tracks immediately.
+# Update the copy counts and predicted measurements whenever a new fit is chosen.
 for field, expression in [
     (
         "aRaw",
@@ -559,6 +574,7 @@ for field, expression in [
 ]:
     chart = chart.transform_formula(expr=expression, as_=field)
 
+# Add chromosome guides and light borders to the finished tracks.
 chart = (
     chart.transform_identifier()
     .resolve_axis(x="shared")

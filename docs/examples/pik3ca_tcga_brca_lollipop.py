@@ -19,17 +19,16 @@ CONNECTOR_HEIGHT = 20
 PROTEIN_HEIGHT = 50
 DISPLACEMENT_LENGTH = 18
 
-# Mutations, sample counts, and protein domains are prepared packaged data.
-# GenomeSpy performs only the declarative sorting and collision displacement.
+# Load prepared mutation counts and protein regions.
 data = pik3ca_lollipop_data()
 protein_length = gs.param("proteinLength", value=data["proteinLength"])
 line_width = gs.param("lineWidth", value=1)
+# Track the space available per protein position to keep nearby points apart.
 pixels_per_residue = gs.param(
     "pixelsPerResidue", expr="width * (scale('x', 1) - scale('x', 0))"
 )
 
-# Labels, stems, points, and counts use separate layers because each needs its
-# own sizing and alignment.
+# Tilt mutation names so neighboring labels take up less horizontal space.
 mutation_labels = (
     gs.Chart()
     .mark_text(
@@ -44,16 +43,19 @@ mutation_labels = (
     .encode(y=gs.value(0), text=gs.Text("mutation"))
     .properties(name="mutation-labels", height=LABEL_HEIGHT)
 )
+# Draw a stem below each mutation point.
 stems = (
     gs.Chart()
     .mark_rule(size=line_width, color="#707070", tooltip=None)
     .encode(y2=gs.value(0))
 )
+# Connect each point to its name with a faint dashed line.
 upper_guides = (
     gs.Chart()
     .mark_rule(size=line_width, color="#bbb", strokeDash=[3, 3], tooltip=None)
     .encode(y2=gs.value(1))
 )
+# Color mutation points by class and show details on hover.
 lollipops = (
     gs.Chart()
     .mark_point(size=260, filled=True, stroke="white", strokeWidth=1.5)
@@ -69,6 +71,7 @@ lollipops = (
     )
     .properties(name="lollipops")
 )
+# Write the number of affected samples inside each point.
 sample_counts = (
     gs.Chart()
     .mark_text(size=8, align="center", baseline="middle", color="white", tooltip=None)
@@ -79,8 +82,7 @@ mutation_marks = gs.layer(stems, upper_guides, lollipops, sample_counts).propert
     name="mutations"
 )
 
-# Dense hotspots are displaced for readability. These connectors still point
-# back to each mutation's true residue position.
+# Connect shifted points back to their true positions on the protein.
 connectors = (
     gs.Chart()
     .mark_link(
@@ -94,6 +96,7 @@ connectors = (
     .encode(x2=gs.X2("position"), y=gs.value(1), y2=gs.value(0))
     .properties(name="lower-connectors")
 )
+# Extend each connector down to the protein track.
 anchors = (
     gs.Chart()
     .mark_rule(size=line_width, color="#707070", tooltip=None, y2Offset=20)
@@ -101,9 +104,7 @@ anchors = (
     .properties(name="true-position-anchors")
 )
 
-# displace1d changes only the screen offset; the shared x value remains the real
-# protein coordinate used by the domain track. The Python API serializes this
-# transform and GenomeSpy executes it reactively in the browser.
+# Stack the names, lollipops, and connectors with no gaps between them.
 mutation_view = (
     gs.vconcat(
         mutation_labels,
@@ -122,6 +123,7 @@ mutation_view = (
         .axis(title="Distinct tumor samples", grid=False),
     )
     .transform_collect(sort=gs.compare("position", order="ascending"))
+    # Spread nearby mutations apart just enough to keep their points readable.
     .transform_displace1d(
         pos="position",
         length=DISPLACEMENT_LENGTH,
@@ -131,13 +133,14 @@ mutation_view = (
     )
 )
 
-# The protein backbone and domains share the mutation view's x scale.
+# Draw a grey band spanning the protein.
 backbone = (
     gs.Chart([{"start": 1}])
     .transform_formula(expr=protein_length, as_="end")
     .mark_rect(y=0.36, y2=0.64, color="#b9bdb8", tooltip=None)
     .properties(name="protein-backbone")
 )
+# Add colored blocks for the protein's named regions.
 domain_blocks = (
     gs.Chart()
     .mark_rect(
@@ -165,12 +168,14 @@ domain_blocks = (
     )
     .properties(name="domains")
 )
+# Write the region names inside their blocks.
 domain_labels = (
     gs.Chart()
     .mark_text(color="white", paddingX=3, tooltip=None)
     .encode(text=gs.Text("label"))
     .properties(name="domain-labels")
 )
+# Combine the protein band, blocks, and labels below the mutations.
 protein = (
     gs.layer(backbone, domain_blocks, domain_labels)
     .properties(
@@ -187,8 +192,7 @@ protein = (
     )
 )
 
-# pixelsPerResidue lets the browser-side displacement adapt when the chart
-# width changes.
+# Join the mutation and protein tracks, keeping their positions aligned.
 chart = (
     gs.vconcat(mutation_view, protein, spacing=0)
     .properties(

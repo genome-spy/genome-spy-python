@@ -13,6 +13,7 @@ META = {
     "height": 390,
     "max_width": 650,
 }
+# Remember which gene row the reader is hovering over.
 SET_CURSOR = gs.param("setCursor")
 SET_CURSOR_UPDATE = gs.ruler(
     "setCursor",
@@ -27,8 +28,10 @@ SET_CURSOR_UPDATE = gs.ruler(
     ),
 )
 SET_CURSOR_Y = SET_CURSOR.values.y
+# Keep all combinations visible until hover, then emphasize those with that gene.
 CURSOR = ~gs.expr.isValid(SET_CURSOR_Y) | (gs.datum.profileContainsHoveredSet == 1)
 
+# Show how many samples have each exact combination of mutated genes.
 intersection_bars = (
     gs.Chart()
     .mark_rect(color="#3b3b3b")
@@ -39,6 +42,7 @@ intersection_bars = (
     .properties(name="intersection-bars")
 )
 
+# Put the sample count above each bar.
 intersection_labels = (
     gs.Chart()
     .mark_text(size=11, fontWeight="bold", baseline="bottom", dy=-5)
@@ -51,8 +55,7 @@ intersection_labels = (
     .properties(name="intersection-labels")
 )
 
-# Set-intersection output repeats each profile once per set. One representative
-# row is enough for each intersection bar.
+# Combine bars and counts, drawing each combination only once.
 intersection_sizes = (
     gs.layer(intersection_bars, intersection_labels)
     .properties(
@@ -77,6 +80,7 @@ intersection_sizes = (
     .transform_filter(gs.datum.setIndex == 0)
 )
 
+# Show how many samples have a mutation in each gene, regardless of combination.
 set_bars = (
     gs.Chart()
     .mark_rect(color="#6f6f6f")
@@ -87,6 +91,7 @@ set_bars = (
     .properties(name="set-bars")
 )
 
+# Write the total inside each gene's bar.
 set_labels = (
     gs.Chart()
     .mark_text(size=11, fontWeight="bold", align="left", dx=5)
@@ -99,7 +104,7 @@ set_labels = (
     .properties(name="set-labels")
 )
 
-# Likewise, one profile column is enough when calculating and drawing set sizes.
+# Draw each gene's total once and let hovering here highlight its combinations.
 set_sizes = (
     gs.layer(set_bars, set_labels)
     .properties(
@@ -121,6 +126,7 @@ set_sizes = (
     .transform_filter(gs.datum.profileNumber == 1)
 )
 
+# Label the matrix rows with gene names.
 set_names = (
     gs.Chart()
     .transform_filter(gs.datum.profileNumber == 1)
@@ -134,6 +140,7 @@ set_names = (
     .properties(name="set-names")
 )
 
+# Shade alternating rows to make the matrix easier to read.
 row_backgrounds = (
     gs.Chart()
     .transform_filter((gs.datum.setIndex % 2 == 0) & (gs.datum.profileNumber == 1))
@@ -142,6 +149,7 @@ row_backgrounds = (
     .properties(name="row-backgrounds")
 )
 
+# Use pale dots for genes absent from a combination.
 background_points = (
     gs.Chart()
     .mark_point(
@@ -158,6 +166,7 @@ background_points = (
     .properties(name="background-points")
 )
 
+# Join the genes belonging to the same combination with a vertical line.
 connectors = (
     gs.Chart()
     .transform_filter(gs.datum.member)
@@ -176,6 +185,7 @@ connectors = (
     .properties(name="connectors")
 )
 
+# Draw dark dots for the genes present in each combination.
 members = (
     gs.Chart()
     .transform_filter(gs.datum.member)
@@ -192,8 +202,7 @@ members = (
     .properties(name="members")
 )
 
-# The matrix layers share setCursor so hovering a row fades unrelated profiles
-# in both the matrix and the bars above it.
+# Combine the matrix pieces and highlight combinations when hovering a gene row.
 matrix = (
     gs.layer(
         set_names,
@@ -216,8 +225,7 @@ matrix = (
     )
 )
 
-# Fold the five gene columns into rows before calculating exact intersections.
-# The remaining transforms derive set sizes, hover membership, and bar order.
+# Load the mutation table and arrange the bars above and beside the matrix.
 chart = (
     gs.concat(
         gs.Chart([]).mark_point().properties(name="empty-space", width=0, height=0),
@@ -255,11 +263,13 @@ chart = (
     )
     .add_params(SET_CURSOR)
     .resolve_scale(x="shared", y="shared")
+    # Gather the five genes' mutation indicators into one column.
     .transform_regex_fold(
         columnRegex="^(PTEN|TP53|EGFR|PIK3R1|RB1)$",
         asKey="set",
         asValue="membership",
     )
+    # Count the samples with each exact combination of mutated genes.
     .transform_set_intersection(
         element="Identifier",
         set="set",
@@ -270,6 +280,7 @@ chart = (
         expr=gs.expr.if_(gs.datum.member, gs.datum.profileSize, 0),
         as_="memberSize",
     )
+    # Add up the samples containing each gene.
     .transform_window(
         groupby=["set"],
         frame=[None, None],
@@ -277,6 +288,7 @@ chart = (
         fields=["memberSize"],
         as_=["setSize"],
     )
+    # Check which combinations contain the hovered gene.
     .transform_collect()
     .transform_formula(
         expr=gs.expr.if_(
@@ -295,6 +307,7 @@ chart = (
         fields=["hoveredSetMember"],
         as_=["profileContainsHoveredSet"],
     )
+    # Put the most common combinations first.
     .transform_window(
         sort=gs.compare(
             ["profileSize", "profileKey"],

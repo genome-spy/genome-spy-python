@@ -15,12 +15,11 @@ META = {
 
 SEGMENTS_URL = "https://data.genomespy.app/sample-data/ASCAT/segments_S96.tsv"
 RAW_URL = "https://data.genomespy.app/sample-data/ASCAT/raw_S96.tsv"
+# Make individual measurements easier to see when zoomed in.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(10 * gs.expr.pow(ZOOM_LEVEL, 1.5), 200))
 
-# Segment-derived rules inherit the root segment table. The raw point layers
-# override it with the probe table, so the example performs no Python data
-# joining or statistical processing.
+# Draw the minor-allele copy count in green.
 minor_copy_number = (
     gs.Chart()
     .mark_rule(minLength=2, yOffset=-3)
@@ -34,6 +33,7 @@ minor_copy_number = (
     .properties(title="nMinor")
 )
 
+# Draw the major-allele copy count in red, offset slightly to keep both visible.
 major_copy_number = (
     gs.Chart()
     .mark_rule(minLength=2, yOffset=3)
@@ -47,11 +47,13 @@ major_copy_number = (
     .properties(title="nMajor")
 )
 
+# Combine both allele counts in the top track.
 copy_number = (minor_copy_number + major_copy_number).properties(
     name="copyNumberTrack",
     title=gs.title("Allele-specific copy numbers", style="overlay"),
 )
 
+# Load individual LogR measurements and draw them as faint points.
 raw_logr = (
     gs.Chart(gs.Data(url=RAW_URL))
     .mark_point(size=POINT_SIZE)
@@ -65,6 +67,7 @@ raw_logr = (
     .properties(title="Single probe")
 )
 
+# Add a black line for each segment's mean LogR.
 mean_logr = (
     gs.Chart()
     .mark_rule(minLength=3)
@@ -78,6 +81,7 @@ mean_logr = (
 
 logr = (raw_logr + mean_logr).properties(name="logRTrack")
 
+# Show individual B-allele frequencies, skipping missing measurements.
 raw_baf = (
     gs.Chart(gs.Data(url=RAW_URL))
     .transform_filter(gs.datum.baf != None)  # noqa: E711
@@ -92,6 +96,7 @@ raw_baf = (
     .properties(title="Single probe")
 )
 
+# Add the segment's mean B-allele frequency.
 mean_baf = (
     gs.Chart()
     .mark_rule(minLength=3)
@@ -103,6 +108,7 @@ mean_baf = (
     .properties(title="Mean BAF")
 )
 
+# Mirror the mean around 0.5 to show the complementary allele frequency.
 mirrored_baf = (
     gs.Chart()
     .mark_rule(minLength=3)
@@ -116,9 +122,7 @@ mirrored_baf = (
 
 baf = (raw_baf + mean_baf + mirrored_baf).properties(name="bafTrack")
 
-# The three panels share genomic x while retaining independent quantitative y
-# scales. GenomeSpy evaluates the mirrored-BAF and zoom-responsive-size
-# expressions in the browser.
+# Load the segment estimates and stack the three tracks so they zoom together.
 chart = (
     (copy_number & logr & baf)
     .properties(

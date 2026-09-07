@@ -14,6 +14,7 @@ META = {
     "height": 300,
 }
 
+# Load example base counts at each position.
 data = sequence_logo_data()
 
 base_colors = Scale(
@@ -21,6 +22,7 @@ base_colors = Scale(
     range=["#7bd56c", "#ff9b9b", "#86bbf1", "#ffc56c"],
 )
 
+# Stack the base letters: taller stacks indicate more consistent positions.
 chart = (
     gs.Chart(data)
     .transform_stack(
@@ -31,6 +33,7 @@ chart = (
         baseField="base",
         sort=gs.compare("count", order="ascending"),
     )
+    # Stretch each letter to fill its share of the stack.
     .mark_text(
         font="Source Sans Pro",
         fontWeight=700,

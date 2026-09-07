@@ -15,14 +15,14 @@ META = {
     "max_width": 980,
 }
 
+# Start with a 20 kb region on chromosome 7.
 DOMAIN = [
     {"chrom": "chr7", "pos": 55100000},
     {"chrom": "chr7", "pos": 55120000},
 ]
 
 
-# BigWig sources stream quantitative intervals for the shared visible locus;
-# each signal track keeps its own y scale.
+# Show GC content, loading just the region being viewed.
 gc_track = (
     gs.Chart(gs.lazy.bigwig("https://data.genomespy.app/genomes/hg38/hg38.gc5Base.bw"))
     .mark_rect(color="#6c8ebf", minWidth=0.5, minOpacity=1, tooltip=None)
@@ -39,6 +39,7 @@ gc_track = (
 )
 
 
+# Add conservation scores to compare with the GC-content track.
 conservation_track = (
     gs.Chart(
         gs.lazy.bigwig(
@@ -62,9 +63,8 @@ conservation_track = (
 )
 
 
-# Match the lazy BigBed window to the 20 kb initial locus. GenomeSpy fetches a
-# complete quantized window, so returning from a deeper zoom restores coverage
-# across the initial domain instead of retaining only the narrow request.
+# Color candidate regulatory regions by type. The loading window is large
+# enough to cover the starting region when the reader zooms back out.
 ccre_track = (
     gs.Chart(
         gs.lazy.bigbed(
@@ -85,8 +85,7 @@ ccre_track = (
 )
 
 
-# Indexed FASTA data becomes visible only at sequence-level zoom. Both layers
-# inherit the lazy source and genomic x encoding from sequence_track.
+# Draw each DNA base as a colored tile with its letter on top.
 sequence_rects = gs.Chart().mark_rect(tooltip=None)
 sequence_labels = (
     gs.Chart()
@@ -102,6 +101,7 @@ sequence_labels = (
     .encode(color=gs.value("black"), text=gs.Text("base:N"))
 )
 
+# Load the DNA sequence and reveal it gradually as the reader zooms in.
 sequence_track = (
     (sequence_rects + sequence_labels)
     .properties(
@@ -130,11 +130,13 @@ sequence_track = (
             ],
         ),
     )
+    # Give each base its own row and genomic position.
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
     .transform_formula(expr=gs.datum.rawPos + gs.datum.start, as_="pos")
 )
 
 
+# Draw exon blocks along each transcript.
 exons = (
     gs.Chart()
     .mark_rect(minOpacity=0.2, minWidth=0.5, tooltip=None)
@@ -144,6 +146,7 @@ exons = (
     .properties(name="exons")
 )
 
+# Connect the exons with a thin line spanning the transcript.
 bodies = (
     gs.Chart()
     .mark_rule(minLength=0.5, size=1, tooltip=None)
@@ -155,6 +158,7 @@ bodies = (
     .properties(name="bodies", title="Gene annotations")
 )
 
+# Show more gene detail as the reader zooms in.
 transcripts = (
     (exons + bodies)
     .properties(
@@ -164,6 +168,7 @@ transcripts = (
     .encode(color=gs.value("#909090"))
 )
 
+# Add gene names with more information available on hover.
 labels = (
     gs.Chart()
     .mark_text(size=11, yOffset=7, tooltip=gs.HandledTooltip(handler="refseqgene"))
@@ -171,6 +176,7 @@ labels = (
     .properties(name="labels")
 )
 
+# Put a direction arrow just beside each gene name.
 arrows = (
     gs.Chart()
     .mark_point(yOffset=7, size=50, tooltip=None)
@@ -194,6 +200,7 @@ arrows = (
     )
 )
 
+# Hide overlapping names, using the supplied scores to choose which to keep.
 symbols = (
     (labels + arrows)
     .properties(name="symbols")
@@ -207,8 +214,7 @@ symbols = (
     )
 )
 
-# RefSeq is loaded once, then GenomeSpy linearizes, sorts, and piles up the
-# visible transcripts in its browser-side dataflow.
+# Load the RefSeq table for the gene shapes and labels.
 refseq_track = (
     gs.layer(transcripts, symbols)
     .properties(
@@ -243,12 +249,14 @@ refseq_track = (
         )
         .axis(None),
     )
+    # Find each transcript's start, end, and label position.
     .transform_linearize_genomic_coordinate(chrom="chrom", pos="start", as_="_start")
     .transform_formula(expr=gs.datum._start + gs.datum.length, as_="_end")
     .transform_formula(
         expr=gs.datum._start + gs.datum.length / 2,
         as_="_centroid",
     )
+    # Put overlapping transcripts on separate rows, showing up to three rows.
     .transform_collect(sort=gs.compare(["_start"]))
     .transform_pileup(
         start="_start",
@@ -261,6 +269,7 @@ refseq_track = (
 )
 
 
+# Stack the five tracks so they move together when zooming or panning.
 chart = (
     (gc_track & conservation_track & ccre_track & sequence_track & refseq_track)
     .properties(

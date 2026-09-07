@@ -22,11 +22,11 @@ event_colors = gs.Scale(
     range=["#e45756", "#4c78a8"],
 )
 
+# Load the prepared GISTIC results and matching gene annotations.
 data = tcga_ov_gistic_data()
 genes = refseq_gene_bodies("hg19")
 
-# Negating deletion scores places amplifications and deletions on opposite sides
-# of the shared zero line.
+# Draw a zero line between amplifications and deletions.
 zero_line = (
     gs.Chart([{"value": 0}])
     .mark_rule(color="black", opacity=0.3)
@@ -34,6 +34,7 @@ zero_line = (
     .properties(name="zero-line")
 )
 
+# Show amplification scores above zero and deletion scores below it.
 q_values = (
     gs.Chart(data["scores"])
     .transform_formula(
@@ -50,6 +51,7 @@ q_values = (
     .properties(name="q-value-rects")
 )
 
+# Mark the significance threshold on both sides of zero.
 thresholds = (
     gs.Chart([{"value": 0.602}, {"value": -0.602}])
     .mark_rule(strokeDash=[3, 1], color="black", opacity=0.3)
@@ -57,6 +59,7 @@ thresholds = (
     .properties(name="q-value-thresholds")
 )
 
+# Combine the scores and reference lines in the top track.
 score_track = gs.layer(zero_line, q_values, thresholds).properties(
     name="gistic-q-value",
     title=gs.Title(
@@ -65,8 +68,7 @@ score_track = gs.layer(zero_line, q_values, thresholds).properties(
     ),
 )
 
-# GISTIC stores wide peak, peak, and region limits in separate columns. Fold
-# them into rows so one rule layer can draw all three interval types.
+# Show where each peak lies within its wider affected region.
 lesion_track = (
     gs.Chart(data["lesions"])
     .transform_regex_extract(
@@ -76,6 +78,7 @@ lesion_track = (
         skipInvalidInput=True,
     )
     .transform_filter(gs.datum.Type)
+    # Read the wide peak, peak, and region positions from their separate columns.
     .transform_regex_fold(
         columnRegex=[r"^(.*) Limits$"],
         asValue=["limits"],
@@ -126,6 +129,7 @@ lesion_track = (
     )
 )
 
+# Choose the gene details to show on hover.
 gene_tooltip = [
     gs.Tooltip("symbol:N").title("Gene"),
     gs.Tooltip("identifier:N").title("RefSeq locus"),
@@ -135,6 +139,7 @@ gene_tooltip = [
     gs.Tooltip("strand:N").title("Strand"),
 ]
 
+# Draw genes as arrows showing their reading direction; reveal them on zoom.
 gene_bodies = (
     gs.Chart()
     .mark_arrow(
@@ -159,8 +164,8 @@ gene_bodies = (
     )
 )
 
-# Label scores only decide which colliding names survive; they do not filter the
-# gene bodies themselves.
+# Hide overlapping names without removing the gene shapes beneath them.
+# The supplied scores decide which names to keep.
 gene_labels = (
     gs.Chart()
     .transform_measure_text(field="symbol", as_="label_width", fontSize=11)
@@ -176,8 +181,7 @@ gene_labels = (
     .mark_text(
         baseline="middle",
         align="center",
-        # Clip labels at the genomic window while keeping the vertical offset
-        # free to extend above the gene body.
+        # Keep names inside the left and right edges of the track.
         clip="x",
         yOffset=-2,
         size=11,
@@ -191,6 +195,7 @@ gene_labels = (
     )
 )
 
+# Combine gene shapes and names, leaving room above each row for the text.
 gene_track = (
     (gene_bodies + gene_labels)
     .properties(
@@ -218,6 +223,7 @@ gene_track = (
         pos=["start", "end"],
         as_=["linear_start", "linear_end"],
     )
+    # Put overlapping genes on separate rows, showing up to three rows.
     .transform_collect(sort=gs.compare(field=["linear_start", "linear_end"]))
     .transform_pileup(
         start="linear_start",
@@ -229,7 +235,7 @@ gene_track = (
     .transform_filter(gs.datum.lane < 3)
 )
 
-# All three tracks share genomic zooming but keep independent vertical scales.
+# Stack the scores, affected regions, and genes so they zoom together.
 chart = (
     gs.vconcat(score_track, lesion_track, gene_track)
     .properties(

@@ -23,8 +23,11 @@ INITIAL_REGION = [
     {"chrom": "chr5", "pos": 180_857_866},
 ]
 
+# Load association results and the axis limits for the example.
 data, _, domains = hapmap_manhattan_data()
+# Store the selected range so all three detail tracks can use it.
 brush = gs.param("brush")
+# Let the reader drag a rectangle across the overview to choose that range.
 brush_update = gs.selection_interval(
     "brush",
     encodings=["x"],
@@ -41,8 +44,7 @@ brush_update = gs.selection_interval(
 )
 
 
-# This subtree keeps the overview on a whole-genome scale. Its interval
-# selection updates the parameter declared on the outer composition.
+# Keep the whole genome visible above the zoomed-in tracks.
 overview_track = (
     gs.Chart()
     .mark_point(filled=True, size=13, opacity=0.68, color="#7f8c8d")
@@ -58,6 +60,7 @@ overview_track = (
     .properties(height=105)
     .add_params(brush_update)
 )
+# Leave room above the overview for the selected range's length label.
 overview = (
     gs.vconcat(overview_track)
     .properties(padding=gs.Paddings(top=24))
@@ -65,6 +68,7 @@ overview = (
 )
 
 
+# Show association strength within the selected range, starting on chromosome 5.
 association_track = (
     gs.Chart()
     .mark_point(filled=True, size=24, opacity=0.78, color="#4c78a8")
@@ -81,6 +85,7 @@ association_track = (
     )
 )
 
+# Show effect sizes for the same range.
 effect_track = (
     gs.Chart()
     .mark_point(filled=True, size=24, opacity=0.78, color="#f58518")
@@ -97,6 +102,7 @@ effect_track = (
     )
 )
 
+# Add Z-scores as the third view of the selected range.
 zscore_track = (
     gs.Chart()
     .mark_point(filled=True, size=24, opacity=0.78, color="#54a24b")
@@ -114,6 +120,7 @@ zscore_track = (
 )
 
 
+# Stack the overview and detail tracks, and give them the same selection.
 chart = (
     gs.vconcat(overview, association_track, effect_track, zscore_track)
     .properties(

@@ -13,14 +13,13 @@ META = {
     "max_width": 980,
 }
 
-# Pin imported views to the same upstream release as the wrapper's schema and
-# browser bundle. Absolute URLs also make imports work in docs, notebooks, and
-# the standalone thumbnail renderer without depending on a deployment base URL.
+# Use a fixed version of the hosted examples so their contents stay the same.
 EXAMPLE_ROOT = (
     "https://raw.githubusercontent.com/genome-spy/genome-spy/"
     "d2e9bd71/examples/docs/examples/genomic-data"
 )
 
+# Load four ready-made charts from JSON files and stack them vertically.
 chart = (
     gs.vconcat(
         gs.import_view(url=f"{EXAMPLE_ROOT}/cytobands.json"),
@@ -34,6 +33,7 @@ chart = (
             "Imported cytoband, six-frame translation, BAM alignment, and "
             "RefSeq views composed into a shared-locus genome browser."
         ),
+        # Start all four tracks at the same region on chromosome 20.
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
@@ -44,6 +44,7 @@ chart = (
         ),
         axes=gs.axes(x=gs.GenomeAxis(orient="top", title=None)),
     )
+    # Show one position axis for the whole browser.
     .resolve_axis(x="shared")
     .configure_legend(disable=True)
 )

@@ -23,11 +23,11 @@ PVALUE_CUTOFF = 0.01
 PADJ_CUTOFF = 0.1
 MIN_BASE_MEAN = 10.0
 MAX_GENES = 12_000
-# zoomLevel is 1 at the initial domain. The exponent makes growth gradual,
-# while the cap prevents points from becoming oversized at deep zoom levels.
+# Grow points gently when zooming in, without letting them become too large.
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
 
+# Load gene results with fold changes, p-values, and label positions ready to use.
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
     max_genes=MAX_GENES,
@@ -35,8 +35,7 @@ data, domains = airway_differential_expression(
     pvalue_cutoff=PVALUE_CUTOFF,
     padj_alpha=PADJ_CUTOFF,
 )
-# The sliders are named parameters. Their handles drive both the guide lines
-# and the browser-side classification below.
+# Add sliders to change the cutoffs and see point colors update immediately.
 effect_cutoff = gs.param(
     "airwayVolcanoEffectCutoff",
     value=LOG2FC_CUTOFF,
@@ -57,6 +56,7 @@ significance_cutoff = gs.param(
         name="−log10 p cutoff: ",
     ),
 )
+# Label genes as up or down only when they pass both cutoffs.
 DIRECTION_EXPRESSION = gs.expr.if_(
     (gs.datum.neglog10_pvalue >= significance_cutoff)
     & (gs.expr.abs(gs.datum.log2fc) >= effect_cutoff),
@@ -64,12 +64,14 @@ DIRECTION_EXPRESSION = gs.expr.if_(
     "n.s.",
 )
 
+# Use blue for decreases, red for increases, and grey for the remaining genes.
 direction_colors = (
     Scale()
     .domain(["down in dex", "n.s.", "up in dex"])
     .range(["#3e8cb6", "#c9d1d9", "#c53b2c"])
 )
 
+# Choose the gene details to show on hover.
 airway_tooltip = [
     gs.Tooltip("ensgene:N"),
     gs.Tooltip("base_mean:Q"),
@@ -81,6 +83,7 @@ airway_tooltip = [
     gs.Tooltip("direction:N"),
 ]
 
+# Plot each gene's fold change against its significance.
 volcano_points = (
     gs.Chart()
     .transform_formula(expr=DIRECTION_EXPRESSION, as_="direction")
@@ -97,6 +100,7 @@ volcano_points = (
     )
 )
 
+# Mark the fold-change cutoff on both sides of zero.
 volcano_fc_rules = (
     gs.Chart([{"side": -1}, {"side": 1}])
     .transform_formula(expr=gs.datum.side * effect_cutoff, as_="x")
@@ -108,6 +112,7 @@ volcano_fc_rules = (
     )
 )
 
+# Move the horizontal significance line with its slider.
 volcano_padj_rule = (
     gs.Chart([{}])
     .transform_formula(expr=significance_cutoff, as_="y")
@@ -119,8 +124,7 @@ volcano_padj_rule = (
     )
 )
 
-# Offsets are logical pixels, so zooming the data scales does not move labels.
-# The shifted label endpoint uses the primary channels; the point is x2/y2.
+# Connect the selected gene labels to their points.
 volcano_callout_lines = (
     gs.Chart()
     .transform_filter(gs.datum.volcano_label)
@@ -172,6 +176,7 @@ def volcano_callout_label(*, side: str, name: str) -> gs.Chart:
     )
 
 
+# Place labels on either side, leaving a small gap after each line.
 volcano_callout_labels = [
     volcano_callout_label(
         side=side,
@@ -180,6 +185,7 @@ volcano_callout_labels = [
     for side in ("left", "right")
 ]
 
+# Put the points, guides, and labels together, then attach the sliders.
 chart = (
     gs.layer(
         volcano_fc_rules,

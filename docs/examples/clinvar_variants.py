@@ -15,6 +15,7 @@ META = {
     "max_width": 920,
 }
 
+# Keep classifications in this order on the vertical axis.
 classification_domain = [
     "Pathogenic",
     "Likely pathogenic",
@@ -24,7 +25,7 @@ classification_domain = [
     "Conflicting",
 ]
 
-# A faint baseline makes it easier to compare classes with sparse variant counts.
+# Draw a reference line at "Uncertain significance".
 baseline = (
     gs.Chart([{}])
     .mark_rule(color="lightgray")
@@ -32,8 +33,7 @@ baseline = (
     .properties(name="baseline")
 )
 
-# Split each variant into a stem and a point so pathogenicity reads like a lollipop
-# track instead of a bare scatter plot.
+# Connect each variant point to the reference line with a thin stem.
 sticks = (
     gs.Chart()
     .mark_rule(tooltip=False)
@@ -41,10 +41,10 @@ sticks = (
     .properties(name="sticks")
 )
 
+# Let variant points grow as the reader zooms in.
 balls = gs.Chart().mark_point(size=80, geometricZoomBound=13).properties(name="balls")
 
-# Load ClinVar lazily from bgzip-compressed VCF and keep the locus domain focused
-# on a small BRCA2 region so the categorical classes stay readable.
+# Load variants for the region being viewed, starting on chromosome 18.
 variants = (
     gs.layer(sticks, balls)
     .properties(
@@ -79,8 +79,7 @@ variants = (
             ],
         ),
     )
-    # ClinVar stores classification strings in INFO fields; normalize them into a
-    # compact set of labels that works well for color and y-axis ordering.
+    # Shorten the ClinVar classifications to match the labels above.
     .transform_formula(
         expr=gs.expr.replace(
             gs.datum.INFO["CLNSIG"],
@@ -112,6 +111,7 @@ variants = (
     )
 )
 
+# Combine the reference line and variants on a pale background.
 chart = (
     gs.layer(baseline, variants)
     .properties(

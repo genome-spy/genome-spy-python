@@ -15,6 +15,7 @@ META = {
     "height": 360,
     "max_width": 920,
 }
+# Add a slider to hide junctions supported by fewer reads.
 min_uniquely_mapped_reads = gs.param(
     "minUniquelyMappedReads",
     value=1,
@@ -31,8 +32,7 @@ DOMAIN = [
     {"chrom": "chr15", "pos": 92949000},
 ]
 
-# Coverage is a standard signal track; the BigWig stays lazy so the same pattern
-# works for larger loci too.
+# Show read coverage in grey, loading only the region being viewed.
 coverage = (
     gs.Chart(
         gs.lazy.bigwig(
@@ -50,8 +50,8 @@ coverage = (
     .properties(name="coverage")
 )
 
-# Junction arcs and their count labels share a derived span metric so the arc
-# height reflects intron length while stroke width reflects read support.
+# Connect splice junctions with arcs: longer spans rise higher, and more reads
+# make the lines thicker.
 arc_layer = (
     gs.Chart()
     .mark_link(linkShape="dome", maxChordLength=100000000)
@@ -70,6 +70,7 @@ arc_layer = (
     .properties(name="arcs")
 )
 
+# Label each arc with its supporting read count.
 label_layer = (
     gs.Chart()
     .mark_text(dy=-8, tooltip=False)
@@ -85,8 +86,7 @@ label_layer = (
     .properties(name="labels")
 )
 
-# The BED-based splice junctions are filtered by a bound parameter so the reader
-# can interactively remove low-support junctions.
+# Load junction positions and apply the slider's minimum read count.
 splice_junctions = (
     gs.layer(arc_layer, label_layer)
     .properties(
@@ -98,13 +98,14 @@ splice_junctions = (
     )
     .transform_filter(gs.datum.score >= min_uniquely_mapped_reads)
     .transform_formula(expr=gs.datum.chromEnd - gs.datum.chromStart, as_="span")
+    # Vary arc heights slightly to help separate nearby junctions.
     .transform_formula(
         expr=gs.datum.span + (gs.datum.span % 10 - 5) / 10 * gs.datum.span,
         as_="span",
     )
 )
 
-# Overlay the coverage signal with splice-junction arcs on the same locus window.
+# Draw the arcs over the coverage and attach the slider.
 chart = (
     gs.layer(coverage, splice_junctions)
     .properties(

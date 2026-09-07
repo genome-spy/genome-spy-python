@@ -13,14 +13,17 @@ META = {
     "height": 300,
 }
 
+# Load example positions along the horizontal axis.
 data = sincos_data()
 
+# Calculate a sine wave for point height and a cosine wave for color.
 chart = (
     gs.Chart(data)
     .transform_calculate(
         sin=gs.expr.sin(gs.datum.x / 4),
         cos=gs.expr.cos(gs.datum.x / 5),
     )
+    # Use partly transparent circles so overlapping points remain visible.
     .mark_point(size=60, filled=True, opacity=0.75)
     .encode(
         x=gs.X("x:Q").scale(zoom=True).title("Position"),

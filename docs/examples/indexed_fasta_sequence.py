@@ -15,7 +15,7 @@ META = {
     "max_width": 920,
 }
 
-# Draw each base twice: once as a colored tile and once as a fitted text label.
+# Draw each DNA base as a colored tile with its letter on top.
 base_rects = gs.Chart().mark_rect()
 base_labels = (
     gs.Chart()
@@ -34,8 +34,7 @@ base_labels = (
     )
 )
 
-# Flatten the fetched sequence string into per-base rows, then compute absolute
-# genomic positions for the locus axis.
+# Load the visible DNA sequence and start with a short region on chromosome 7.
 chart = (
     gs.layer(base_rects, base_labels)
     .properties(
@@ -72,6 +71,7 @@ chart = (
             ],
         ),
     )
+    # Give each base its own row and genomic position.
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
     .transform_formula(expr=gs.datum.rawPos + gs.datum.start, as_="pos")
 )

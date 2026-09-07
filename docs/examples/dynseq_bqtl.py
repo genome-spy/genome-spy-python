@@ -12,6 +12,7 @@ META = {
     "height": 300,
     "max_width": 980,
 }
+# Choose which allele's scores and title to use for a track.
 allele = gs.param("allele", value="ref")
 REF_BIGWIG_URL = (
     "https://raw.githubusercontent.com/kundajelab/dynseq-paper/"
@@ -24,11 +25,10 @@ ALT_BIGWIG_URL = (
     "bigwigs/chip_imp_alt.bw"
 )
 
-# The root FASTA dataflow emits one row per reference base. For each template
-# instance, coordinateLookup joins the allele-specific BigWig score onto those
-# rows by chromosome and position; missing score positions are then filtered.
+# Build a reusable track: each letter's height shows its contribution score.
 allele_track = (
     gs.layer(
+        # Draw a line at zero to separate positive and negative scores.
         gs.Chart(
             [{}],
         )
@@ -38,6 +38,7 @@ allele_track = (
             color=gs.value("gray"),
         )
         .properties(name="baseline"),
+        # Stretch each colored DNA letter from zero to its score.
         gs.Chart()
         .mark_text(
             font="Source Sans Pro",
@@ -83,6 +84,7 @@ allele_track = (
         height=120,
     )
     .add_params(allele)
+    # Match each base to its score in the chosen allele's BigWig file.
     .transform_coordinate_lookup(
         from_={
             "data": gs.lazy.bigwig(
@@ -100,9 +102,9 @@ allele_track = (
         key=["chrom", "pos"],
         values=["score"],
     )
+    # Skip bases without scores.
     .transform_filter(gs.expr.isValid(gs.datum.score))
-    # The alternate track changes only the displayed base at rs5764238. Both
-    # tracks retain the same reference coordinate rows and shared x scale.
+    # Show G instead of C at rs5764238 in the alternate-allele track.
     .transform_formula(
         expr=gs.expr.if_(
             (allele == "alt") & (gs.datum.pos == 43720929),
@@ -117,8 +119,7 @@ allele_track = (
     )
 )
 
-# Two local template instances reuse the complete browser-side lookup and logo
-# dataflow while binding only the allele parameter differently.
+# Use the same track twice to compare the reference and alternate alleles.
 chart = (
     gs.vconcat(
         gs.import_view(template="allele-track", params={"allele": "ref"}),
@@ -147,8 +148,7 @@ chart = (
             "Data source: https://github.com/kundajelab/dynseq-paper"
         ),
     )
-    # These transforms are serialized by Python and run in GenomeSpy whenever
-    # the lazy FASTA window changes.
+    # Split the loaded sequence into uppercase letters with genomic positions.
     .transform_flatten_sequence(field="sequence", as_=["rawPos", "base"])
     .transform_formula(expr=gs.expr.upper(gs.datum.base), as_="base")
     .transform_formula(expr=gs.datum.start + gs.datum.rawPos, as_="pos")

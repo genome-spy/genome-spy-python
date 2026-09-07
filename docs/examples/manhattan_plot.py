@@ -20,6 +20,7 @@ GENOME_WIDE_P = 5e-8
 SUGGESTIVE_P = 1e-5
 
 
+# Load association results and the starting significance thresholds.
 data, _top_hits, domains = hapmap_manhattan_data(
     genome_wide_p=GENOME_WIDE_P,
     suggestive_p=SUGGESTIVE_P,
@@ -36,10 +37,10 @@ significance_cutoff = gs.param(
     ),
 )
 
-# --- Visualization -------------------------------------------------------------
-
+# Alternate colors to make neighboring chromosomes easier to distinguish.
 chrom_colors = Scale().range(["#5b8fd6", "#8f98a3"])
 
+# Label chromosomes and add faint backgrounds to separate them.
 axis = (
     GenomeAxis()
     .title("Genomic position")
@@ -55,6 +56,7 @@ axis = (
     .grid(False)
 )
 
+# Draw one point per variant at its genomic position.
 points = (
     gs.Chart()
     .mark_point(size=20, filled=True, opacity=0.82)
@@ -69,6 +71,7 @@ points = (
     )
 )
 
+# Move the red significance line with the slider.
 genome_wide_rule = (
     gs.Chart([{}])
     .transform_formula(expr=significance_cutoff, as_="threshold")
@@ -80,6 +83,7 @@ genome_wide_rule = (
     )
 )
 
+# Keep a second, less strict threshold visible for comparison.
 suggestive_rule = (
     gs.Chart([{"threshold": domains["suggestive_y"]}])
     .mark_rule(strokeDash=[2, 4], size=1.2, color="#d48b31")
@@ -90,6 +94,7 @@ suggestive_rule = (
     )
 )
 
+# Highlight variants above the slider's current threshold.
 highlight_points = (
     gs.Chart()
     .transform_filter(gs.datum.neglog >= significance_cutoff)
@@ -108,6 +113,7 @@ highlight_points = (
     )
 )
 
+# Combine the points and guide lines, then attach the slider.
 association_track = genome_wide_rule + suggestive_rule + points + highlight_points
 
 chart = association_track.properties(
