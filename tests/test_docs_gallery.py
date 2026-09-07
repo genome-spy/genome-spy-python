@@ -1126,6 +1126,64 @@ def test_multiple_sequence_alignment_configures_shared_x_scale_once() -> None:
     assert spec["vconcat"][1]["layer"][1]["encoding"]["color"] == {"value": "black"}
 
 
+def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "p53_sequence_comparison.py")
+    spec = example.spec
+
+    assert spec["width"] == "container"
+    assert example.height == 940
+    assert spec["spacing"] == 2
+    assert spec["resolve"]["legend"] == {"color": "collected"}
+    assert spec["config"]["legend"]["orient"] == "bottom"
+    assert spec["config"]["legend"]["layout"] == {"anchor": "middle"}
+    details, overview_group = spec["vconcat"]
+    assert details["params"] == [
+        {
+            "name": "positionRuler",
+            "persist": False,
+            "ruler": {
+                "encodings": ["x"],
+                "extent": "container",
+                "snap": False,
+                "mark": {
+                    "opacity": 0.4,
+                    "stroke": "#30343b",
+                    "strokeWidth": 1,
+                },
+            },
+        }
+    ]
+    gap_free, conservation, consensus, logo, sequences = details["vconcat"]
+    assert [gap_free["title"]["text"], conservation["title"]["text"]] == [
+        "Gap-free",
+        "Conservation",
+    ]
+    assert gap_free["padding"]["bottom"] == 8
+    assert conservation["encoding"]["color"]["scale"] == {
+        "domain": [0, 1],
+        "scheme": "viridis",
+    }
+    assert conservation["encoding"]["color"]["legend"]["title"] == "Conservation"
+    assert consensus["height"] == 20
+    assert consensus["layer"][0]["encoding"]["y"]["field"] == "identifier"
+    assert "title" not in logo
+    assert logo["transform"][-1]["offset"] == "normalize"
+    assert logo["mark"]["logoLetters"] is True
+    assert sequences["viewportHeight"] == 420
+    assert sequences["layer"][0]["encoding"]["color"]["legend"] == {
+        "columns": 11,
+        "title": "Amino acid",
+    }
+
+    overview = overview_group["vconcat"][0]
+    assert "title" not in overview
+    brush_mark = overview["params"][0]["select"]["mark"]
+    assert brush_mark["fillOpacity"] == 0.28
+    assert brush_mark["strokeWidth"] == 1.5
+    assert overview["params"][0]["push"] == "outer"
+
+
 def test_cytobands_suppresses_legends_to_preserve_the_ideogram() -> None:
     gallery = _load_gallery()
     spec = gallery.collect_example(EXAMPLES_DIR / "cytobands.py").spec
