@@ -369,6 +369,11 @@ class SchemaAnalyzer:
         *,
         seen: frozenset[str] = frozenset(),
     ) -> dict[str, Any]:
+        """Collect available authoring properties across schema alternatives.
+
+        This merged view is for discovering names, not validating unions.
+        Use property_variants/union_variants when branch constraints matter.
+        """
         ref_name = _ref_name(schema)
         if ref_name is not None:
             target = self.definitions.get(ref_name)
