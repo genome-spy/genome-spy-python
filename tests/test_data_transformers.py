@@ -33,6 +33,21 @@ def test_equal_tables_are_stored_once_without_mutating_charts() -> None:
     assert gs.Chart.from_dict(spec).to_dict() == spec
 
 
+def test_annotation_charts_share_data_and_render_transport() -> None:
+    rows = pd.DataFrame({"x": [1, 2]})
+    track = gs.Chart(rows).mark_point().encode(x="x:Q")
+    annotation = gs.Chart(rows).mark_rule().encode(x="x:Q")
+    chart = gs.vconcat(track, annotate=[annotation])
+    spec = chart.to_dict()
+    assert len(spec["datasets"]) == 1
+    assert spec["vconcat"][0]["data"] == spec["annotate"][0]["data"]
+    assert "$schema" not in spec["annotate"][0]
+    prepared = chart._prepare_render()
+    assert len(prepared.buffers) == 1
+    assert prepared.spec["vconcat"][0]["data"] == prepared.spec["annotate"][0]["data"]
+    assert prepared.spec["annotate"][0]["data"]["format"] == {"type": "arrow"}
+
+
 @pytest.mark.parametrize(
     "table", [list, pd.DataFrame, pl.DataFrame, pa.Table.from_pylist]
 )

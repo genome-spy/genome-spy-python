@@ -234,6 +234,8 @@ def layer(
 
 def hconcat(
     *charts: TopLevelSpec | ImportedView,
+    annotate: Sequence[core.UnitSpec | dict[str, Any] | core.LayerSpec]
+    | UndefinedType = Undefined,
     assembly: str | UndefinedType = Undefined,
     axes: AxesKwds | UndefinedType = Undefined,
     background: str | UndefinedType = Undefined,
@@ -350,6 +352,7 @@ def hconcat(
     """Return a hconcat composition of the given charts.
 
     Args:
+        annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
         assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
         axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
         background (str): Background color of the canvas.
@@ -384,6 +387,7 @@ def hconcat(
         zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
     """
     properties = {
+        "annotate": annotate,
         "assembly": assembly,
         "axes": axes,
         "background": background,
@@ -427,6 +431,8 @@ def hconcat(
 
 def vconcat(
     *charts: TopLevelSpec | ImportedView,
+    annotate: Sequence[core.UnitSpec | dict[str, Any] | core.LayerSpec]
+    | UndefinedType = Undefined,
     assembly: str | UndefinedType = Undefined,
     axes: AxesKwds | UndefinedType = Undefined,
     background: str | UndefinedType = Undefined,
@@ -543,6 +549,7 @@ def vconcat(
     """Return a vconcat composition of the given charts.
 
     Args:
+        annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
         assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
         axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
         background (str): Background color of the canvas.
@@ -577,6 +584,7 @@ def vconcat(
         zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
     """
     properties = {
+        "annotate": annotate,
         "assembly": assembly,
         "axes": axes,
         "background": background,

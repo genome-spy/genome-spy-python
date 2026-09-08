@@ -1299,6 +1299,7 @@ def ruler(
     /,
     *,
     clear: RulerClear_T | UndefinedType = Undefined,
+    disabled: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     display: RulerDisplay_T | UndefinedType = Undefined,
     encodings: Sequence[PrimaryPositionalChannel_T] | UndefinedType = Undefined,
     extent: RulerExtent_T | UndefinedType = Undefined,
@@ -1320,10 +1321,11 @@ def ruler(
     Args:
         name: Parameter name. A stable name is generated when omitted.
         clear: Event that clears the ruler, or ``false`` to keep the current value. __Default value:__ ``"mouseleave"`` for ``on: "mousemove"``, otherwise ``false``.
+        disabled: Clears the coordinate and ignores tracking events while true. Expressions resolve where the ruler is declared. Re-enabling waits for the next pointer or viewport event; it does not restore the initial value. With ``push: "outer"``, other enabled bindings can still update the shared coordinate. __Default value:__ ``false``
         display: How the ruler is drawn for snapped index or locus coordinates. ``"line"`` draws at the coordinate. ``"center"`` draws at the center of the coordinate band. ``"band"`` draws a rectangle covering the coordinate band. ``"none"`` tracks the ruler value without drawing a guide. __Default value:__ ``"center"`` for snapped index and locus scales, otherwise ``"line"``.
         encodings: Positional channels whose domain coordinates are tracked by the ruler. __Default value:__ ``["x"]``
         extent: Visual extent of the ruler. ``"view"`` draws one guide per participating view. ``"container"`` draws one spanning guide when participating projections align. ``"auto"`` chooses a spanning guide only when it is safe. __Default value:__ ``"auto"``
-        mark: Rule or band appearance. Has no effect when ``display`` is ``"none"``.
+        mark: Rule or band appearance. Expressions resolve in the scope where this ruler is declared, including when it uses ``push: "outer"``. Has no effect when ``display`` is ``"none"``.
         on: Event that updates a pointer-driven ruler. ``"mousemove"`` follows the pointer. ``"mousedown"`` updates on press and continues while dragging. Event filters can require modifier keys. __Default value:__ ``"mousemove"``
         snap: Quantization applied before writing the ruler value. ``"auto"`` snaps index and locus scales to integer coordinates. ``"integer"`` snaps all numeric coordinates. ``false`` keeps the original coordinate. __Default value:__ ``"auto"`` for index and locus scales, otherwise ``false``.
         source: Source of the ruler coordinate. ``"pointer"`` uses pointer events configured by ``on``. ``"viewport"`` tracks the center of the current viewport. __Default value:__ ``"pointer"``
@@ -1344,6 +1346,7 @@ def ruler(
     """
     config = core.RulerConfig(
         clear=clear,
+        disabled=disabled,
         display=display,
         encodings=encodings,
         extent=extent,

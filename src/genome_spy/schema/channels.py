@@ -257,7 +257,11 @@ class Angle(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -284,8 +288,12 @@ class Angle(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -309,7 +317,11 @@ class Angle(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -633,7 +645,11 @@ class Color(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -660,8 +676,12 @@ class Color(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -685,7 +705,11 @@ class Color(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -1264,7 +1288,11 @@ class Dx(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -1291,8 +1319,12 @@ class Dx(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -1316,7 +1348,11 @@ class Dx(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -1640,7 +1676,11 @@ class Dy(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -1667,8 +1707,12 @@ class Dy(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -1692,7 +1736,11 @@ class Dy(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -2091,7 +2139,11 @@ class Fill(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -2118,8 +2170,12 @@ class Fill(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -2143,7 +2199,11 @@ class Fill(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -2467,7 +2527,11 @@ class FillOpacity(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -2494,8 +2558,12 @@ class FillOpacity(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -2519,7 +2587,11 @@ class FillOpacity(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -2918,7 +2990,11 @@ class Opacity(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -2945,8 +3021,12 @@ class Opacity(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -2970,7 +3050,11 @@ class Opacity(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -3529,7 +3613,11 @@ class Shape(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -3556,8 +3644,12 @@ class Shape(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -3581,7 +3673,11 @@ class Shape(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -3905,7 +4001,11 @@ class Size(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -3932,8 +4032,12 @@ class Size(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -3957,7 +4061,11 @@ class Size(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -4281,7 +4389,11 @@ class Stroke(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -4308,8 +4420,12 @@ class Stroke(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -4333,7 +4449,11 @@ class Stroke(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -4657,7 +4777,11 @@ class StrokeOpacity(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -4684,8 +4808,12 @@ class StrokeOpacity(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -4709,7 +4837,11 @@ class StrokeOpacity(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -5033,7 +5165,11 @@ class StrokeWidth(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -5060,8 +5196,12 @@ class StrokeWidth(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -5085,7 +5225,11 @@ class StrokeWidth(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -7110,7 +7254,11 @@ class XOffset(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -7137,8 +7285,12 @@ class XOffset(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -7162,7 +7314,11 @@ class XOffset(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -8572,7 +8728,11 @@ class YOffset(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -8599,8 +8759,12 @@ class YOffset(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -8624,7 +8788,11 @@ class YOffset(Channel):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,

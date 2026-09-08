@@ -813,7 +813,7 @@ class MarkMethodMixin:
         """Set the chart mark to ``link``.
 
         Args:
-            arcFadingDistance (Sequence[float] | Literal[False] | ExprRef | dict[str, Any]): The range of the ``"arc"`` shape's fading distance in pixels. This property allows for making the arc's opacity fade out as it extends away from the chord. The fading distance is interpolated from one to zero between the interval defined by this property. Both ``false`` and ``[0, 0]`` disable fading. **Default value:** ``false``
+            arcFadingDistance (Sequence[float] | Literal[False] | ExprRef | dict[str, Any]): The fading distance range for ``"arc"`` and ``"dome"`` shapes, in logical screen pixels. Opacity fades smoothly from one to zero between these perpendicular distances from the line joining the rendered endpoints. For domes, this is the baseline rather than the apex position, regardless of orientation, direction, or the scale used for height. Both ``false`` and ``[0, 0]`` disable fading. **Default value:** ``false``
             arcHeightFactor (float | ExprRef | dict[str, Any]): Scaling factor for the ``"arc``" shape's height. The default value ``1.0`` produces roughly circular arcs. **Default value:** ``1.0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
             clampApex (bool | ExprRef | dict[str, Any]): Whether the apex of the ``"dome"`` shape is clamped to the viewport edge. When over a half of the dome is located outside the viewport, clamping allows for more accurate reading of the value encoded by the apex' position. **Default value:** ``false``
@@ -825,7 +825,7 @@ class MarkMethodMixin:
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
-            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading of the link when an mark instance is subject to any point selection. As the fading distance is unavailable as a visual channel, this property allows for enhancing the visibility of the selected links. **Default value:** ``true``
+            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading for selected links. Tests selections referenced by conditional encodings, excluding empty selections. Despite the property name, interval selections also bypass fading when either link endpoint is inside each selected interval. Only marks that participate in picking use this bypass. **Default value:** ``true``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Only applies to diagonal links. **Default value:** ``"vertical"``
             segments (float | ExprRef | dict[str, Any]): The number of segments in the bézier curve. Affects the rendering quality and performance. Use a higher value for a smoother curve. **Default value:** ``101``
@@ -3179,6 +3179,8 @@ class HConcatPropertiesMixin:
         ]
         | UndefinedType = Undefined,
         *,
+        annotate: Sequence[core.UnitSpec | dict[str, Any] | core.LayerSpec]
+        | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         background: str | UndefinedType = Undefined,
@@ -3296,6 +3298,7 @@ class HConcatPropertiesMixin:
         """Initialize a schema-derived top-level specification.
 
         Args:
+            annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
             background (str): Background color of the canvas.
@@ -3332,6 +3335,7 @@ class HConcatPropertiesMixin:
             schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
         """
         properties = {
+            "annotate": annotate,
             "assembly": assembly,
             "axes": axes,
             "background": background,
@@ -3374,6 +3378,8 @@ class HConcatPropertiesMixin:
     def properties(
         self,
         *,
+        annotate: Sequence[core.UnitSpec | dict[str, Any] | core.LayerSpec]
+        | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         background: str | UndefinedType = Undefined,
@@ -3501,6 +3507,7 @@ class HConcatPropertiesMixin:
         """Return a new specification with updated top-level properties.
 
         Args:
+            annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
             background (str): Background color of the canvas.
@@ -3536,6 +3543,7 @@ class HConcatPropertiesMixin:
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
+            "annotate": annotate,
             "assembly": assembly,
             "axes": axes,
             "background": background,
@@ -3579,6 +3587,8 @@ class HConcatPropertiesMixin:
         self,
         *,
         deep: bool = True,
+        annotate: Sequence[core.UnitSpec | dict[str, Any] | core.LayerSpec]
+        | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         background: str | UndefinedType = Undefined,
@@ -3706,6 +3716,7 @@ class HConcatPropertiesMixin:
         """Return a copy with updated top-level properties.
 
         Args:
+            annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
             background (str): Background color of the canvas.
@@ -3741,6 +3752,7 @@ class HConcatPropertiesMixin:
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
+            "annotate": annotate,
             "assembly": assembly,
             "axes": axes,
             "background": background,
@@ -3798,6 +3810,8 @@ class VConcatPropertiesMixin:
         ]
         | UndefinedType = Undefined,
         *,
+        annotate: Sequence[core.UnitSpec | dict[str, Any] | core.LayerSpec]
+        | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         background: str | UndefinedType = Undefined,
@@ -3915,6 +3929,7 @@ class VConcatPropertiesMixin:
         """Initialize a schema-derived top-level specification.
 
         Args:
+            annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
             background (str): Background color of the canvas.
@@ -3951,6 +3966,7 @@ class VConcatPropertiesMixin:
             schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
         """
         properties = {
+            "annotate": annotate,
             "assembly": assembly,
             "axes": axes,
             "background": background,
@@ -3993,6 +4009,8 @@ class VConcatPropertiesMixin:
     def properties(
         self,
         *,
+        annotate: Sequence[core.UnitSpec | dict[str, Any] | core.LayerSpec]
+        | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         background: str | UndefinedType = Undefined,
@@ -4120,6 +4138,7 @@ class VConcatPropertiesMixin:
         """Return a new specification with updated top-level properties.
 
         Args:
+            annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
             background (str): Background color of the canvas.
@@ -4155,6 +4174,7 @@ class VConcatPropertiesMixin:
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
+            "annotate": annotate,
             "assembly": assembly,
             "axes": axes,
             "background": background,
@@ -4198,6 +4218,8 @@ class VConcatPropertiesMixin:
         self,
         *,
         deep: bool = True,
+        annotate: Sequence[core.UnitSpec | dict[str, Any] | core.LayerSpec]
+        | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         background: str | UndefinedType = Undefined,
@@ -4325,6 +4347,7 @@ class VConcatPropertiesMixin:
         """Return a copy with updated top-level properties.
 
         Args:
+            annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
             background (str): Background color of the canvas.
@@ -4360,6 +4383,7 @@ class VConcatPropertiesMixin:
             zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
         """
         properties = {
+            "annotate": annotate,
             "assembly": assembly,
             "axes": axes,
             "background": background,
@@ -9021,8 +9045,11 @@ class ConfigMethodMixin:
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolBaseFillColor: str | UndefinedType = Undefined,
         symbolBaseStrokeColor: str | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
         symbolOffset: float | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -9072,10 +9099,13 @@ class ConfigMethodMixin:
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolBaseFillColor (str): Base fill color for legend symbols when the legend does not encode fill.
             symbolBaseStrokeColor (str): Base stroke color for legend symbols when the legend does not encode stroke.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOffset (float): Offset applied to legend symbols in pixels.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolStrokeWidth (float): Legend symbol stroke width in pixels.
-            symbolType (str): Symbol shape.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleColor (str): Legend title color.
@@ -9121,8 +9151,11 @@ class ConfigMethodMixin:
             "style": style,
             "symbolBaseFillColor": symbolBaseFillColor,
             "symbolBaseStrokeColor": symbolBaseStrokeColor,
+            "symbolFillColor": symbolFillColor,
             "symbolOffset": symbolOffset,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
             "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
@@ -9180,8 +9213,11 @@ class ConfigMethodMixin:
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolBaseFillColor: str | UndefinedType = Undefined,
         symbolBaseStrokeColor: str | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
         symbolOffset: float | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -9231,10 +9267,13 @@ class ConfigMethodMixin:
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolBaseFillColor (str): Base fill color for legend symbols when the legend does not encode fill.
             symbolBaseStrokeColor (str): Base stroke color for legend symbols when the legend does not encode stroke.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOffset (float): Offset applied to legend symbols in pixels.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolStrokeWidth (float): Legend symbol stroke width in pixels.
-            symbolType (str): Symbol shape.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleColor (str): Legend title color.
@@ -9280,8 +9319,11 @@ class ConfigMethodMixin:
             "style": style,
             "symbolBaseFillColor": symbolBaseFillColor,
             "symbolBaseStrokeColor": symbolBaseStrokeColor,
+            "symbolFillColor": symbolFillColor,
             "symbolOffset": symbolOffset,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
             "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
@@ -9372,7 +9414,7 @@ class ConfigMethodMixin:
         """Return a chart with ``link`` config updated.
 
         Args:
-            arcFadingDistance (Sequence[float] | Literal[False] | ExprRef | dict[str, Any]): The range of the ``"arc"`` shape's fading distance in pixels. This property allows for making the arc's opacity fade out as it extends away from the chord. The fading distance is interpolated from one to zero between the interval defined by this property. Both ``false`` and ``[0, 0]`` disable fading. **Default value:** ``false``
+            arcFadingDistance (Sequence[float] | Literal[False] | ExprRef | dict[str, Any]): The fading distance range for ``"arc"`` and ``"dome"`` shapes, in logical screen pixels. Opacity fades smoothly from one to zero between these perpendicular distances from the line joining the rendered endpoints. For domes, this is the baseline rather than the apex position, regardless of orientation, direction, or the scale used for height. Both ``false`` and ``[0, 0]`` disable fading. **Default value:** ``false``
             arcHeightFactor (float | ExprRef | dict[str, Any]): Scaling factor for the ``"arc``" shape's height. The default value ``1.0`` produces roughly circular arcs. **Default value:** ``1.0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
             clampApex (bool | ExprRef | dict[str, Any]): Whether the apex of the ``"dome"`` shape is clamped to the viewport edge. When over a half of the dome is located outside the viewport, clamping allows for more accurate reading of the value encoded by the apex' position. **Default value:** ``false``
@@ -9384,7 +9426,7 @@ class ConfigMethodMixin:
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
-            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading of the link when an mark instance is subject to any point selection. As the fading distance is unavailable as a visual channel, this property allows for enhancing the visibility of the selected links. **Default value:** ``true``
+            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading for selected links. Tests selections referenced by conditional encodings, excluding empty selections. Despite the property name, interval selections also bypass fading when either link endpoint is inside each selected interval. Only marks that participate in picking use this bypass. **Default value:** ``true``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Only applies to diagonal links. **Default value:** ``"vertical"``
             segments (float | ExprRef | dict[str, Any]): The number of segments in the bézier curve. Affects the rendering quality and performance. Use a higher value for a smoother curve. **Default value:** ``101``

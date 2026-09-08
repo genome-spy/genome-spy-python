@@ -38,6 +38,56 @@ from genome_spy.schema.mixins import TransformMethodMixin
 from genome_spy.schemapi import SchemaValidationError
 
 
+@pytest.mark.parametrize("compose", [gs.hconcat, gs.vconcat])
+def test_track_annotations_are_generated_composition_properties(compose) -> None:
+    track = gs.Chart([{"x": 1}]).mark_point().encode(x="x:Q")
+    annotation = gs.Chart().mark_rule(color="red").encode(x=gs.value(0))
+    spec = compose(track, annotate=[annotation]).to_dict()
+    assert spec["annotate"][0]["mark"] == {"type": "rule", "color": "red"}
+    assert spec["annotate"][0]["encoding"]["x"] == {"value": 0}
+
+
+def test_reactive_ruler_properties_are_generated() -> None:
+    ruler = gs.ruler(
+        encodings=["x"],
+        disabled=gs.expr("paused"),
+        mark=gs.RulerMarkConfig(
+            stroke=gs.expr("rulerColor"),
+            strokeWidth=gs.expr("rulerWidth"),
+            opacity=gs.expr("rulerOpacity"),
+        ),
+    )
+    ruler = gs.Chart().mark_point().add_params(ruler).to_dict()["params"][0]["ruler"]
+    assert ruler["disabled"] == {"expr": "paused"}
+    assert ruler["mark"] == {
+        "stroke": {"expr": "rulerColor"},
+        "strokeWidth": {"expr": "rulerWidth"},
+        "opacity": {"expr": "rulerOpacity"},
+    }
+
+
+def test_independent_legend_symbol_styling_is_generated() -> None:
+    spec = (
+        gs.Chart([{"group": "a"}])
+        .mark_point()
+        .encode(
+            color=gs.Color("group:N").legend(
+                symbolFillColor="white",
+                symbolStrokeColor="black",
+                symbolStrokeWidth=2,
+                symbolOpacity=1,
+            )
+        )
+        .to_dict()
+    )
+    assert spec["encoding"]["color"]["legend"] == {
+        "symbolFillColor": "white",
+        "symbolStrokeColor": "black",
+        "symbolStrokeWidth": 2,
+        "symbolOpacity": 1,
+    }
+
+
 def _configured_core_version() -> str:
     """Read the pinned `@genome-spy/core` version from pyproject.toml."""
     pyproject = Path(__file__).resolve().parents[1] / "pyproject.toml"

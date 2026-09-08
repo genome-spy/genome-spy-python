@@ -8033,6 +8033,19 @@
             "$schema": {
               "type": "string"
             },
+            "annotate": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/UnitSpec"
+                  },
+                  {
+                    "$ref": "#/definitions/LayerSpec"
+                  }
+                ]
+              },
+              "type": "array"
+            },
             "assembly": {
               "description": "Default assembly for locus scales that do not define `scale.assembly`.\n\nCan reference either a key in `genomes` or a built-in assembly name.",
               "type": "string"
@@ -9251,6 +9264,19 @@
           "properties": {
             "$schema": {
               "type": "string"
+            },
+            "annotate": {
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/UnitSpec"
+                  },
+                  {
+                    "$ref": "#/definitions/LayerSpec"
+                  }
+                ]
+              },
+              "type": "array"
             },
             "assembly": {
               "description": "Default assembly for locus scales that do not define `scale.assembly`.\n\nCan reference either a key in `genomes` or a built-in assembly name.",
@@ -14251,6 +14277,19 @@
     "HConcatSpec": {
       "additionalProperties": false,
       "properties": {
+        "annotate": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/UnitSpec"
+              },
+              {
+                "$ref": "#/definitions/LayerSpec"
+              }
+            ]
+          },
+          "type": "array"
+        },
         "axes": {
           "additionalProperties": false,
           "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
@@ -17272,12 +17311,31 @@
           ],
           "description": "Named style reference or references resolved from `config.style`. If an array is provided, later styles override earlier ones. Set to `null` to reset inherited legend styles."
         },
+        "symbolFillColor": {
+          "description": "Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.",
+          "type": "string"
+        },
+        "symbolOpacity": {
+          "description": "Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.",
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number"
+        },
         "symbolSize": {
-          "description": "Symbol size in pixels squared.",
+          "description": "Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.",
+          "type": "number"
+        },
+        "symbolStrokeColor": {
+          "description": "Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.",
+          "type": "string"
+        },
+        "symbolStrokeWidth": {
+          "description": "Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.",
+          "minimum": 0,
           "type": "number"
         },
         "symbolType": {
-          "description": "Symbol shape.",
+          "description": "Symbol shape. Overrides inherited styling, except when the legend encodes shape.",
           "type": "string"
         },
         "tickCount": {
@@ -17474,20 +17532,35 @@
           "description": "Base stroke color for legend symbols when the legend does not encode stroke.",
           "type": "string"
         },
+        "symbolFillColor": {
+          "description": "Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.",
+          "type": "string"
+        },
         "symbolOffset": {
           "description": "Offset applied to legend symbols in pixels.",
           "type": "number"
         },
-        "symbolSize": {
-          "description": "Symbol size in pixels squared.",
+        "symbolOpacity": {
+          "description": "Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.",
+          "maximum": 1,
+          "minimum": 0,
           "type": "number"
         },
+        "symbolSize": {
+          "description": "Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.",
+          "type": "number"
+        },
+        "symbolStrokeColor": {
+          "description": "Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.",
+          "type": "string"
+        },
         "symbolStrokeWidth": {
-          "description": "Legend symbol stroke width in pixels.",
+          "description": "Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.",
+          "minimum": 0,
           "type": "number"
         },
         "symbolType": {
-          "description": "Symbol shape.",
+          "description": "Symbol shape. Overrides inherited styling, except when the legend encodes shape.",
           "type": "string"
         },
         "tickCount": {
@@ -17775,7 +17848,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "The range of the `\"arc\"` shape's fading distance in pixels. This property allows for making the arc's opacity fade out as it extends away from the chord. The fading distance is interpolated from one to zero between the interval defined by this property. Both `false` and `[0, 0]` disable fading.\n\n**Default value:** `false`"
+          "description": "The fading distance range for `\"arc\"` and `\"dome\"` shapes, in logical screen pixels. Opacity fades smoothly from one to zero between these perpendicular distances from the line joining the rendered endpoints. For domes, this is the baseline rather than the apex position, regardless of orientation, direction, or the scale used for height. Both `false` and `[0, 0]` disable fading.\n\n**Default value:** `false`"
         },
         "arcHeightFactor": {
           "anyOf": [
@@ -17927,7 +18000,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Disables fading of the link when an mark instance is subject to any point selection. As the fading distance is unavailable as a visual channel, this property allows for enhancing the visibility of the selected links.\n\n**Default value:** `true`"
+          "description": "Disables fading for selected links. Tests selections referenced by conditional encodings, excluding empty selections. Despite the property name, interval selections also bypass fading when either link endpoint is inside each selected interval. Only marks that participate in picking use this bypass.\n\n**Default value:** `true`"
         },
         "opacity": {
           "anyOf": [
@@ -18108,7 +18181,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "The range of the `\"arc\"` shape's fading distance in pixels. This property allows for making the arc's opacity fade out as it extends away from the chord. The fading distance is interpolated from one to zero between the interval defined by this property. Both `false` and `[0, 0]` disable fading.\n\n**Default value:** `false`"
+          "description": "The fading distance range for `\"arc\"` and `\"dome\"` shapes, in logical screen pixels. Opacity fades smoothly from one to zero between these perpendicular distances from the line joining the rendered endpoints. For domes, this is the baseline rather than the apex position, regardless of orientation, direction, or the scale used for height. Both `false` and `[0, 0]` disable fading.\n\n**Default value:** `false`"
         },
         "arcHeightFactor": {
           "anyOf": [
@@ -18260,7 +18333,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Disables fading of the link when an mark instance is subject to any point selection. As the fading distance is unavailable as a visual channel, this property allows for enhancing the visibility of the selected links.\n\n**Default value:** `true`"
+          "description": "Disables fading for selected links. Tests selections referenced by conditional encodings, excluding empty selections. Despite the property name, interval selections also bypass fading when either link endpoint is inside each selected interval. Only marks that participate in picking use this bypass.\n\n**Default value:** `true`"
         },
         "opacity": {
           "anyOf": [
@@ -23484,6 +23557,17 @@
           "$ref": "#/definitions/RulerClear",
           "description": "Event that clears the ruler, or `false` to keep the current value.\n\n__Default value:__ `\"mouseleave\"` for `on: \"mousemove\"`, otherwise `false`."
         },
+        "disabled": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Clears the coordinate and ignores tracking events while true. Expressions resolve where the ruler is declared. Re-enabling waits for the next pointer or viewport event; it does not restore the initial value. With `push: \"outer\"`, other enabled bindings can still update the shared coordinate.\n\n__Default value:__ `false`"
+        },
         "display": {
           "$ref": "#/definitions/RulerDisplay",
           "description": "How the ruler is drawn for snapped index or locus coordinates.\n\n`\"line\"` draws at the coordinate. `\"center\"` draws at the center of the coordinate band. `\"band\"` draws a rectangle covering the coordinate band. `\"none\"` tracks the ruler value without drawing a guide.\n\n__Default value:__ `\"center\"` for snapped index and locus scales, otherwise `\"line\"`."
@@ -23501,7 +23585,7 @@
         },
         "mark": {
           "$ref": "#/definitions/RulerMarkConfig",
-          "description": "Rule or band appearance. Has no effect when `display` is `\"none\"`."
+          "description": "Rule or band appearance. Expressions resolve in the scope where this ruler is declared, including when it uses `push: \"outer\"`. Has no effect when `display` is `\"none\"`."
         },
         "on": {
           "anyOf": [
@@ -23585,16 +23669,37 @@
       "additionalProperties": false,
       "properties": {
         "fill": {
-          "description": "Fill color for `display: \"band\"`.",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Fill color for `display: \"band\"`."
         },
         "fillOpacity": {
-          "description": "Fill opacity for `display: \"band\"`.",
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Fill opacity for `display: \"band\"`."
         },
         "opacity": {
-          "description": "Opacity of ruler lines and bands.",
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Overall opacity of the guide, including band fill, outline, and shadow. Setting opacity to zero hides the guide without stopping coordinate tracking or changing its clear behavior."
         },
         "shadowBlur": {
           "anyOf": [
@@ -23652,19 +23757,33 @@
           "description": "The opacity of the drop shadow. Value between `0` (fully transparent) and `1` (fully opaque).\n\n**Default value:** `0` (disabled)"
         },
         "stroke": {
-          "description": "Stroke color of ruler lines and band outlines.",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Stroke color of ruler lines and band outlines."
         },
         "strokeDash": {
-          "description": "Alternating stroke and gap lengths for dashed ruler lines and band outlines.",
+          "description": "Alternating stroke and gap lengths for dashed ruler lines. Does not affect band outlines.",
           "items": {
             "type": "number"
           },
           "type": "array"
         },
         "strokeWidth": {
-          "description": "Stroke width of ruler lines and band outlines, in pixels.",
-          "type": "number"
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Stroke width of ruler lines and band outlines, in pixels."
         },
         "zindex": {
           "description": "Z-order relative to the view content.\n\nValues greater than `0` render after the view marks. Values less than or equal to `0` render before the marks. The default value depends on the element type.",
@@ -26240,7 +26359,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "The range of the `\"arc\"` shape's fading distance in pixels. This property allows for making the arc's opacity fade out as it extends away from the chord. The fading distance is interpolated from one to zero between the interval defined by this property. Both `false` and `[0, 0]` disable fading.\n\n**Default value:** `false`"
+          "description": "The fading distance range for `\"arc\"` and `\"dome\"` shapes, in logical screen pixels. Opacity fades smoothly from one to zero between these perpendicular distances from the line joining the rendered endpoints. For domes, this is the baseline rather than the apex position, regardless of orientation, direction, or the scale used for height. Both `false` and `[0, 0]` disable fading.\n\n**Default value:** `false`"
         },
         "arcHeightFactor": {
           "anyOf": [
@@ -27296,7 +27415,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Disables fading of the link when an mark instance is subject to any point selection. As the fading distance is unavailable as a visual channel, this property allows for enhancing the visibility of the selected links.\n\n**Default value:** `true`"
+          "description": "Disables fading for selected links. Tests selections referenced by conditional encodings, excluding empty selections. Despite the property name, interval selections also bypass fading when either link endpoint is inside each selected interval. Only marks that participate in picking use this bypass.\n\n**Default value:** `true`"
         },
         "offset": {
           "anyOf": [
@@ -27768,20 +27887,35 @@
           "description": "Base stroke color for legend symbols when the legend does not encode stroke.",
           "type": "string"
         },
+        "symbolFillColor": {
+          "description": "Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.",
+          "type": "string"
+        },
         "symbolOffset": {
           "description": "Offset applied to legend symbols in pixels.",
           "type": "number"
         },
-        "symbolSize": {
-          "description": "Symbol size in pixels squared.",
+        "symbolOpacity": {
+          "description": "Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.",
+          "maximum": 1,
+          "minimum": 0,
           "type": "number"
         },
+        "symbolSize": {
+          "description": "Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.",
+          "type": "number"
+        },
+        "symbolStrokeColor": {
+          "description": "Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.",
+          "type": "string"
+        },
         "symbolStrokeWidth": {
-          "description": "Legend symbol stroke width in pixels.",
+          "description": "Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.",
+          "minimum": 0,
           "type": "number"
         },
         "symbolType": {
-          "description": "Symbol shape.",
+          "description": "Symbol shape. Overrides inherited styling, except when the legend encodes shape.",
           "type": "string"
         },
         "text": {
@@ -31510,6 +31644,19 @@
     "VConcatSpec": {
       "additionalProperties": false,
       "properties": {
+        "annotate": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/UnitSpec"
+              },
+              {
+                "$ref": "#/definitions/LayerSpec"
+              }
+            ]
+          },
+          "type": "array"
+        },
         "axes": {
           "additionalProperties": false,
           "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",

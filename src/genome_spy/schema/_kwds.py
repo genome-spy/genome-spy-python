@@ -614,7 +614,11 @@ class LegendKwds(TypedDict, total=False):
     orient: LegendOrient_T | ExprRef | dict[str, Any]
     padding: float
     style: str | Sequence[str] | None
+    symbolFillColor: str
+    symbolOpacity: float
     symbolSize: float
+    symbolStrokeColor: str
+    symbolStrokeWidth: float
     symbolType: str
     tickCount: float
     title: str | None
@@ -657,8 +661,11 @@ class LegendConfigKwds(TypedDict, total=False):
     style: str | Sequence[str] | None
     symbolBaseFillColor: str
     symbolBaseStrokeColor: str
+    symbolFillColor: str
     symbolOffset: float
+    symbolOpacity: float
     symbolSize: float
+    symbolStrokeColor: str
     symbolStrokeWidth: float
     symbolType: str
     tickCount: float
@@ -914,6 +921,7 @@ class RulerConfigKwds(TypedDict, total=False):
     """TypedDict helper for raw ``RulerConfig`` mappings."""
 
     clear: RulerClear_T
+    disabled: bool | ExprRef | dict[str, Any]
     display: RulerDisplay_T
     encodings: Sequence[PrimaryPositionalChannel_T]
     extent: RulerExtent_T
@@ -933,17 +941,17 @@ class RulerEventConfigKwds(TypedDict, total=False):
 class RulerMarkConfigKwds(TypedDict, total=False):
     """TypedDict helper for raw ``RulerMarkConfig`` mappings."""
 
-    fill: str
-    fillOpacity: float
-    opacity: float
+    fill: str | ExprRef | dict[str, Any]
+    fillOpacity: float | ExprRef | dict[str, Any]
+    opacity: float | ExprRef | dict[str, Any]
     shadowBlur: float | ExprRef | dict[str, Any]
     shadowColor: str | ExprRef | dict[str, Any]
     shadowOffsetX: float | ExprRef | dict[str, Any]
     shadowOffsetY: float | ExprRef | dict[str, Any]
     shadowOpacity: float | ExprRef | dict[str, Any]
-    stroke: str
+    stroke: str | ExprRef | dict[str, Any]
     strokeDash: Sequence[float]
-    strokeWidth: float
+    strokeWidth: float | ExprRef | dict[str, Any]
     zindex: float
 
 

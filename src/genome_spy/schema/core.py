@@ -4410,7 +4410,11 @@ class ColorDef(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -4437,8 +4441,12 @@ class ColorDef(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -4462,7 +4470,11 @@ class ColorDef(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -5737,7 +5749,11 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -5764,8 +5780,12 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -5789,7 +5809,11 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -6007,7 +6031,11 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -6034,8 +6062,12 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -6059,7 +6091,11 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -6277,7 +6313,11 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -6304,8 +6344,12 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -6329,7 +6373,11 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -6547,7 +6595,11 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -6574,8 +6626,12 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -6599,7 +6655,11 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -7113,7 +7173,11 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -7140,8 +7204,12 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -7165,7 +7233,11 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -7387,7 +7459,11 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -7414,8 +7490,12 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -7439,7 +7519,11 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -7659,7 +7743,11 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -7686,8 +7774,12 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -7711,7 +7803,11 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -7933,7 +8029,11 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -7960,8 +8060,12 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -7985,7 +8089,11 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -8693,6 +8801,8 @@ class CoreRootSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        annotate: Sequence[UnitSpec | dict[str, Any] | LayerSpec]
+        | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         background: str | UndefinedType = Undefined,
@@ -8879,6 +8989,7 @@ class CoreRootSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            annotate=annotate,
             assembly=assembly,
             axes=axes,
             background=background,
@@ -8924,6 +9035,12 @@ class CoreRootSpec(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def annotate(
+        self, value: Sequence[UnitSpec | dict[str, Any] | LayerSpec]
+    ) -> CoreRootSpec:
+        """Return a copy with ``annotate`` updated."""
+        return self._with_property("annotate", value)
 
     def assembly(self, value: str) -> CoreRootSpec:
         """Return a copy with ``assembly`` updated."""
@@ -12143,7 +12260,11 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -12170,8 +12291,12 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -12195,7 +12320,11 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -12427,7 +12556,11 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -12454,8 +12587,12 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -12479,7 +12616,11 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -12713,7 +12854,11 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -12740,8 +12885,12 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -12765,7 +12914,11 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -17630,8 +17783,11 @@ class GenomeSpyConfig(GenomeSpySchema):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolBaseFillColor: str | UndefinedType = Undefined,
         symbolBaseStrokeColor: str | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
         symbolOffset: float | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -17681,10 +17837,13 @@ class GenomeSpyConfig(GenomeSpySchema):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolBaseFillColor (str): Base fill color for legend symbols when the legend does not encode fill.
             symbolBaseStrokeColor (str): Base stroke color for legend symbols when the legend does not encode stroke.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOffset (float): Offset applied to legend symbols in pixels.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolStrokeWidth (float): Legend symbol stroke width in pixels.
-            symbolType (str): Symbol shape.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleColor (str): Legend title color.
@@ -17730,8 +17889,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             "style": style,
             "symbolBaseFillColor": symbolBaseFillColor,
             "symbolBaseStrokeColor": symbolBaseStrokeColor,
+            "symbolFillColor": symbolFillColor,
             "symbolOffset": symbolOffset,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
             "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
@@ -17786,8 +17948,11 @@ class GenomeSpyConfig(GenomeSpySchema):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolBaseFillColor: str | UndefinedType = Undefined,
         symbolBaseStrokeColor: str | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
         symbolOffset: float | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -17837,10 +18002,13 @@ class GenomeSpyConfig(GenomeSpySchema):
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
             symbolBaseFillColor (str): Base fill color for legend symbols when the legend does not encode fill.
             symbolBaseStrokeColor (str): Base stroke color for legend symbols when the legend does not encode stroke.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOffset (float): Offset applied to legend symbols in pixels.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolStrokeWidth (float): Legend symbol stroke width in pixels.
-            symbolType (str): Symbol shape.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleColor (str): Legend title color.
@@ -17886,8 +18054,11 @@ class GenomeSpyConfig(GenomeSpySchema):
             "style": style,
             "symbolBaseFillColor": symbolBaseFillColor,
             "symbolBaseStrokeColor": symbolBaseStrokeColor,
+            "symbolFillColor": symbolFillColor,
             "symbolOffset": symbolOffset,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
             "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
@@ -17969,7 +18140,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         """Return a copy with a ``LinkConfig`` link.
 
         Args:
-            arcFadingDistance (Sequence[float] | Literal[False] | ExprRef | dict[str, Any]): The range of the ``"arc"`` shape's fading distance in pixels. This property allows for making the arc's opacity fade out as it extends away from the chord. The fading distance is interpolated from one to zero between the interval defined by this property. Both ``false`` and ``[0, 0]`` disable fading. **Default value:** ``false``
+            arcFadingDistance (Sequence[float] | Literal[False] | ExprRef | dict[str, Any]): The fading distance range for ``"arc"`` and ``"dome"`` shapes, in logical screen pixels. Opacity fades smoothly from one to zero between these perpendicular distances from the line joining the rendered endpoints. For domes, this is the baseline rather than the apex position, regardless of orientation, direction, or the scale used for height. Both ``false`` and ``[0, 0]`` disable fading. **Default value:** ``false``
             arcHeightFactor (float | ExprRef | dict[str, Any]): Scaling factor for the ``"arc``" shape's height. The default value ``1.0`` produces roughly circular arcs. **Default value:** ``1.0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
             clampApex (bool | ExprRef | dict[str, Any]): Whether the apex of the ``"dome"`` shape is clamped to the viewport edge. When over a half of the dome is located outside the viewport, clamping allows for more accurate reading of the value encoded by the apex' position. **Default value:** ``false``
@@ -17981,7 +18152,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
-            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading of the link when an mark instance is subject to any point selection. As the fading distance is unavailable as a visual channel, this property allows for enhancing the visibility of the selected links. **Default value:** ``true``
+            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading for selected links. Tests selections referenced by conditional encodings, excluding empty selections. Despite the property name, interval selections also bypass fading when either link endpoint is inside each selected interval. Only marks that participate in picking use this bypass. **Default value:** ``true``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Only applies to diagonal links. **Default value:** ``"vertical"``
             segments (float | ExprRef | dict[str, Any]): The number of segments in the bézier curve. Affects the rendering quality and performance. Use a higher value for a smoother curve. **Default value:** ``101``
@@ -19194,6 +19365,8 @@ class HConcatSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        annotate: Sequence[UnitSpec | dict[str, Any] | LayerSpec]
+        | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
@@ -19316,6 +19489,7 @@ class HConcatSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            annotate=annotate,
             axes=axes,
             baseUrl=baseUrl,
             config=config,
@@ -19347,6 +19521,12 @@ class HConcatSpec(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def annotate(
+        self, value: Sequence[UnitSpec | dict[str, Any] | LayerSpec]
+    ) -> HConcatSpec:
+        """Return a copy with ``annotate`` updated."""
+        return self._with_property("annotate", value)
 
     def axes(self, value: AxesKwds) -> HConcatSpec:
         """Return a copy with ``axes`` updated."""
@@ -22293,7 +22473,11 @@ class Legend(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -22319,7 +22503,11 @@ class Legend(GenomeSpySchema):
             orient=orient,
             padding=padding,
             style=style,
+            symbolFillColor=symbolFillColor,
+            symbolOpacity=symbolOpacity,
             symbolSize=symbolSize,
+            symbolStrokeColor=symbolStrokeColor,
+            symbolStrokeWidth=symbolStrokeWidth,
             symbolType=symbolType,
             tickCount=tickCount,
             title=title,
@@ -22397,9 +22585,25 @@ class Legend(GenomeSpySchema):
         """Return a copy with ``style`` updated."""
         return self._with_property("style", value)
 
+    def symbolFillColor(self, value: str) -> Legend:
+        """Return a copy with ``symbolFillColor`` updated."""
+        return self._with_property("symbolFillColor", value)
+
+    def symbolOpacity(self, value: float) -> Legend:
+        """Return a copy with ``symbolOpacity`` updated."""
+        return self._with_property("symbolOpacity", value)
+
     def symbolSize(self, value: float) -> Legend:
         """Return a copy with ``symbolSize`` updated."""
         return self._with_property("symbolSize", value)
+
+    def symbolStrokeColor(self, value: str) -> Legend:
+        """Return a copy with ``symbolStrokeColor`` updated."""
+        return self._with_property("symbolStrokeColor", value)
+
+    def symbolStrokeWidth(self, value: float) -> Legend:
+        """Return a copy with ``symbolStrokeWidth`` updated."""
+        return self._with_property("symbolStrokeWidth", value)
 
     def symbolType(self, value: str) -> Legend:
         """Return a copy with ``symbolType`` updated."""
@@ -22461,8 +22665,11 @@ class LegendConfig(GenomeSpySchema):
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         symbolBaseFillColor: str | UndefinedType = Undefined,
         symbolBaseStrokeColor: str | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
         symbolOffset: float | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -22511,8 +22718,11 @@ class LegendConfig(GenomeSpySchema):
             style=style,
             symbolBaseFillColor=symbolBaseFillColor,
             symbolBaseStrokeColor=symbolBaseStrokeColor,
+            symbolFillColor=symbolFillColor,
             symbolOffset=symbolOffset,
+            symbolOpacity=symbolOpacity,
             symbolSize=symbolSize,
+            symbolStrokeColor=symbolStrokeColor,
             symbolStrokeWidth=symbolStrokeWidth,
             symbolType=symbolType,
             tickCount=tickCount,
@@ -22704,13 +22914,25 @@ class LegendConfig(GenomeSpySchema):
         """Return a copy with ``symbolBaseStrokeColor`` updated."""
         return self._with_property("symbolBaseStrokeColor", value)
 
+    def symbolFillColor(self, value: str) -> LegendConfig:
+        """Return a copy with ``symbolFillColor`` updated."""
+        return self._with_property("symbolFillColor", value)
+
     def symbolOffset(self, value: float) -> LegendConfig:
         """Return a copy with ``symbolOffset`` updated."""
         return self._with_property("symbolOffset", value)
 
+    def symbolOpacity(self, value: float) -> LegendConfig:
+        """Return a copy with ``symbolOpacity`` updated."""
+        return self._with_property("symbolOpacity", value)
+
     def symbolSize(self, value: float) -> LegendConfig:
         """Return a copy with ``symbolSize`` updated."""
         return self._with_property("symbolSize", value)
+
+    def symbolStrokeColor(self, value: str) -> LegendConfig:
+        """Return a copy with ``symbolStrokeColor`` updated."""
+        return self._with_property("symbolStrokeColor", value)
 
     def symbolStrokeWidth(self, value: float) -> LegendConfig:
         """Return a copy with ``symbolStrokeWidth`` updated."""
@@ -24609,7 +24831,11 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -24636,8 +24862,12 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -24661,7 +24891,11 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -24925,7 +25159,11 @@ class MarkPropDefStringNull(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -24952,8 +25190,12 @@ class MarkPropDefStringNull(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -24977,7 +25219,11 @@ class MarkPropDefStringNull(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -25237,7 +25483,11 @@ class MarkPropDefNumber(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -25264,8 +25514,12 @@ class MarkPropDefNumber(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -25289,7 +25543,11 @@ class MarkPropDefNumber(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -25509,7 +25767,11 @@ class MarkPropExprDef(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -25536,8 +25798,12 @@ class MarkPropExprDef(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -25561,7 +25827,11 @@ class MarkPropExprDef(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -25763,7 +26033,11 @@ class MarkPropExprDefType(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -25790,8 +26064,12 @@ class MarkPropExprDefType(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -25815,7 +26093,11 @@ class MarkPropExprDefType(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -26019,7 +26301,11 @@ class MarkPropExprDefTypeForShape(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -26046,8 +26332,12 @@ class MarkPropExprDefTypeForShape(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -26071,7 +26361,11 @@ class MarkPropExprDefTypeForShape(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -29439,7 +29733,11 @@ class NumericMarkPropDef(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -29466,8 +29764,12 @@ class NumericMarkPropDef(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -29491,7 +29793,11 @@ class NumericMarkPropDef(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -29820,7 +30126,11 @@ class OffsetDef(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -29847,8 +30157,12 @@ class OffsetDef(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -29872,7 +30186,11 @@ class OffsetDef(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -30389,6 +30707,7 @@ class Parameter(GenomeSpySchema):
         /,
         *,
         clear: RulerClear_T | UndefinedType = Undefined,
+        disabled: bool | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         display: RulerDisplay_T | UndefinedType = Undefined,
         encodings: Sequence[PrimaryPositionalChannel_T] | UndefinedType = Undefined,
         extent: RulerExtent_T | UndefinedType = Undefined,
@@ -30405,16 +30724,18 @@ class Parameter(GenomeSpySchema):
 
         Args:
             clear (RulerClear_T): Event that clears the ruler, or ``false`` to keep the current value. __Default value:__ ``"mouseleave"`` for ``on: "mousemove"``, otherwise ``false``.
+            disabled (bool | ExprRef | dict[str, Any]): Clears the coordinate and ignores tracking events while true. Expressions resolve where the ruler is declared. Re-enabling waits for the next pointer or viewport event; it does not restore the initial value. With ``push: "outer"``, other enabled bindings can still update the shared coordinate. __Default value:__ ``false``
             display (RulerDisplay_T): How the ruler is drawn for snapped index or locus coordinates. ``"line"`` draws at the coordinate. ``"center"`` draws at the center of the coordinate band. ``"band"`` draws a rectangle covering the coordinate band. ``"none"`` tracks the ruler value without drawing a guide. __Default value:__ ``"center"`` for snapped index and locus scales, otherwise ``"line"``.
             encodings (Sequence[PrimaryPositionalChannel_T]): Positional channels whose domain coordinates are tracked by the ruler. __Default value:__ ``["x"]``
             extent (RulerExtent_T): Visual extent of the ruler. ``"view"`` draws one guide per participating view. ``"container"`` draws one spanning guide when participating projections align. ``"auto"`` chooses a spanning guide only when it is safe. __Default value:__ ``"auto"``
-            mark (RulerMarkConfig | RulerMarkConfigKwds): Rule or band appearance. Has no effect when ``display`` is ``"none"``.
+            mark (RulerMarkConfig | RulerMarkConfigKwds): Rule or band appearance. Expressions resolve in the scope where this ruler is declared, including when it uses ``push: "outer"``. Has no effect when ``display`` is ``"none"``.
             on (RulerEventType_T | RulerEventConfig | RulerEventConfigKwds | str): Event that updates a pointer-driven ruler. ``"mousemove"`` follows the pointer. ``"mousedown"`` updates on press and continues while dragging. Event filters can require modifier keys. __Default value:__ ``"mousemove"``
             snap (RulerSnap_T): Quantization applied before writing the ruler value. ``"auto"`` snaps index and locus scales to integer coordinates. ``"integer"`` snaps all numeric coordinates. ``false`` keeps the original coordinate. __Default value:__ ``"auto"`` for index and locus scales, otherwise ``false``.
             source (RulerSource_T): Source of the ruler coordinate. ``"pointer"`` uses pointer events configured by ``on``. ``"viewport"`` tracks the center of the current viewport. __Default value:__ ``"pointer"``
         """
         defined = {
             "clear": clear,
+            "disabled": disabled,
             "display": display,
             "encodings": encodings,
             "extent": extent,
@@ -36818,6 +37139,7 @@ class RulerConfig(GenomeSpySchema):
     def __init__(
         self,
         clear: RulerClear_T | UndefinedType = Undefined,
+        disabled: bool | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         display: RulerDisplay_T | UndefinedType = Undefined,
         encodings: Sequence[PrimaryPositionalChannel_T] | UndefinedType = Undefined,
         extent: RulerExtent_T | UndefinedType = Undefined,
@@ -36833,6 +37155,7 @@ class RulerConfig(GenomeSpySchema):
     ) -> None:
         super().__init__(
             clear=clear,
+            disabled=disabled,
             display=display,
             encodings=encodings,
             extent=extent,
@@ -36847,6 +37170,24 @@ class RulerConfig(GenomeSpySchema):
     def clear(self, value: RulerClear_T) -> RulerConfig:
         """Return a copy with ``clear`` updated."""
         return self._with_property("clear", value)
+
+    def disabled(
+        self,
+        value: bool | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RulerConfig:
+        """Return a copy with a ``ExprRef`` disabled.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("disabled", value, **defined)
 
     def display(self, value: RulerDisplay_T) -> RulerConfig:
         """Return a copy with ``display`` updated."""
@@ -36865,33 +37206,33 @@ class RulerConfig(GenomeSpySchema):
         value: RulerMarkConfig | RulerMarkConfigKwds | None | object = Undefined,
         /,
         *,
-        fill: str | UndefinedType = Undefined,
-        fillOpacity: float | UndefinedType = Undefined,
-        opacity: float | UndefinedType = Undefined,
+        fill: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        fillOpacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        opacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowBlur: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowColor: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowOffsetX: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowOffsetY: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowOpacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        stroke: str | UndefinedType = Undefined,
+        stroke: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         strokeDash: Sequence[float] | UndefinedType = Undefined,
-        strokeWidth: float | UndefinedType = Undefined,
+        strokeWidth: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         zindex: float | UndefinedType = Undefined,
     ) -> RulerConfig:
         """Return a copy with a ``RulerMarkConfig`` mark.
 
         Args:
-            fill (str): Fill color for ``display: "band"``.
-            fillOpacity (float): Fill opacity for ``display: "band"``.
-            opacity (float): Opacity of ruler lines and bands.
+            fill (str | ExprRef | dict[str, Any]): Fill color for ``display: "band"``.
+            fillOpacity (float | ExprRef | dict[str, Any]): Fill opacity for ``display: "band"``.
+            opacity (float | ExprRef | dict[str, Any]): Overall opacity of the guide, including band fill, outline, and shadow. Setting opacity to zero hides the guide without stopping coordinate tracking or changing its clear behavior.
             shadowBlur (float | ExprRef | dict[str, Any]): The blur radius of the drop shadow in pixels. Higher values produce a more diffuse shadow. **Default value:** ``0``
             shadowColor (str | ExprRef | dict[str, Any]): The color of the drop shadow. Any valid CSS color string is allowed. **Default value:** ``"black"``
             shadowOffsetX (float | ExprRef | dict[str, Any]): The horizontal offset of the drop shadow in pixels. Positive values move the shadow to the right. **Default value:** ``0``
             shadowOffsetY (float | ExprRef | dict[str, Any]): The vertical offset of the drop shadow in pixels. Positive values move the shadow downward. **Default value:** ``0``
             shadowOpacity (float | ExprRef | dict[str, Any]): The opacity of the drop shadow. Value between ``0`` (fully transparent) and ``1`` (fully opaque). **Default value:** ``0`` (disabled)
-            stroke (str): Stroke color of ruler lines and band outlines.
-            strokeDash (Sequence[float]): Alternating stroke and gap lengths for dashed ruler lines and band outlines.
-            strokeWidth (float): Stroke width of ruler lines and band outlines, in pixels.
+            stroke (str | ExprRef | dict[str, Any]): Stroke color of ruler lines and band outlines.
+            strokeDash (Sequence[float]): Alternating stroke and gap lengths for dashed ruler lines. Does not affect band outlines.
+            strokeWidth (float | ExprRef | dict[str, Any]): Stroke width of ruler lines and band outlines, in pixels.
             zindex (float): Z-order relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. The default value depends on the element type.
         """
         defined = {
@@ -37026,17 +37367,17 @@ class RulerMarkConfig(GenomeSpySchema):
 
     def __init__(
         self,
-        fill: str | UndefinedType = Undefined,
-        fillOpacity: float | UndefinedType = Undefined,
-        opacity: float | UndefinedType = Undefined,
+        fill: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        fillOpacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        opacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowBlur: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowColor: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowOffsetX: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowOffsetY: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowOpacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        stroke: str | UndefinedType = Undefined,
+        stroke: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         strokeDash: Sequence[float] | UndefinedType = Undefined,
-        strokeWidth: float | UndefinedType = Undefined,
+        strokeWidth: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         zindex: float | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
@@ -37057,17 +37398,59 @@ class RulerMarkConfig(GenomeSpySchema):
         if kwds:
             self._kwds.update(kwds)
 
-    def fill(self, value: str) -> RulerMarkConfig:
-        """Return a copy with ``fill`` updated."""
-        return self._with_property("fill", value)
+    def fill(
+        self,
+        value: str | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` fill.
 
-    def fillOpacity(self, value: float) -> RulerMarkConfig:
-        """Return a copy with ``fillOpacity`` updated."""
-        return self._with_property("fillOpacity", value)
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("fill", value, **defined)
 
-    def opacity(self, value: float) -> RulerMarkConfig:
-        """Return a copy with ``opacity`` updated."""
-        return self._with_property("opacity", value)
+    def fillOpacity(
+        self,
+        value: float | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` fillOpacity.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("fillOpacity", value, **defined)
+
+    def opacity(
+        self,
+        value: float | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` opacity.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("opacity", value, **defined)
 
     def shadowBlur(
         self,
@@ -37159,17 +37542,45 @@ class RulerMarkConfig(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("shadowOpacity", value, **defined)
 
-    def stroke(self, value: str) -> RulerMarkConfig:
-        """Return a copy with ``stroke`` updated."""
-        return self._with_property("stroke", value)
+    def stroke(
+        self,
+        value: str | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` stroke.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("stroke", value, **defined)
 
     def strokeDash(self, value: Sequence[float]) -> RulerMarkConfig:
         """Return a copy with ``strokeDash`` updated."""
         return self._with_property("strokeDash", value)
 
-    def strokeWidth(self, value: float) -> RulerMarkConfig:
-        """Return a copy with ``strokeWidth`` updated."""
-        return self._with_property("strokeWidth", value)
+    def strokeWidth(
+        self,
+        value: float | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> RulerMarkConfig:
+        """Return a copy with a ``ExprRef`` strokeWidth.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("strokeWidth", value, **defined)
 
     def zindex(self, value: float) -> RulerMarkConfig:
         """Return a copy with ``zindex`` updated."""
@@ -37224,6 +37635,7 @@ class RulerParameter(GenomeSpySchema):
         /,
         *,
         clear: RulerClear_T | UndefinedType = Undefined,
+        disabled: bool | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         display: RulerDisplay_T | UndefinedType = Undefined,
         encodings: Sequence[PrimaryPositionalChannel_T] | UndefinedType = Undefined,
         extent: RulerExtent_T | UndefinedType = Undefined,
@@ -37240,16 +37652,18 @@ class RulerParameter(GenomeSpySchema):
 
         Args:
             clear (RulerClear_T): Event that clears the ruler, or ``false`` to keep the current value. __Default value:__ ``"mouseleave"`` for ``on: "mousemove"``, otherwise ``false``.
+            disabled (bool | ExprRef | dict[str, Any]): Clears the coordinate and ignores tracking events while true. Expressions resolve where the ruler is declared. Re-enabling waits for the next pointer or viewport event; it does not restore the initial value. With ``push: "outer"``, other enabled bindings can still update the shared coordinate. __Default value:__ ``false``
             display (RulerDisplay_T): How the ruler is drawn for snapped index or locus coordinates. ``"line"`` draws at the coordinate. ``"center"`` draws at the center of the coordinate band. ``"band"`` draws a rectangle covering the coordinate band. ``"none"`` tracks the ruler value without drawing a guide. __Default value:__ ``"center"`` for snapped index and locus scales, otherwise ``"line"``.
             encodings (Sequence[PrimaryPositionalChannel_T]): Positional channels whose domain coordinates are tracked by the ruler. __Default value:__ ``["x"]``
             extent (RulerExtent_T): Visual extent of the ruler. ``"view"`` draws one guide per participating view. ``"container"`` draws one spanning guide when participating projections align. ``"auto"`` chooses a spanning guide only when it is safe. __Default value:__ ``"auto"``
-            mark (RulerMarkConfig | RulerMarkConfigKwds): Rule or band appearance. Has no effect when ``display`` is ``"none"``.
+            mark (RulerMarkConfig | RulerMarkConfigKwds): Rule or band appearance. Expressions resolve in the scope where this ruler is declared, including when it uses ``push: "outer"``. Has no effect when ``display`` is ``"none"``.
             on (RulerEventType_T | RulerEventConfig | RulerEventConfigKwds | str): Event that updates a pointer-driven ruler. ``"mousemove"`` follows the pointer. ``"mousedown"`` updates on press and continues while dragging. Event filters can require modifier keys. __Default value:__ ``"mousemove"``
             snap (RulerSnap_T): Quantization applied before writing the ruler value. ``"auto"`` snaps index and locus scales to integer coordinates. ``"integer"`` snaps all numeric coordinates. ``false`` keeps the original coordinate. __Default value:__ ``"auto"`` for index and locus scales, otherwise ``false``.
             source (RulerSource_T): Source of the ruler coordinate. ``"pointer"`` uses pointer events configured by ``on``. ``"viewport"`` tracks the center of the current viewport. __Default value:__ ``"pointer"``
         """
         defined = {
             "clear": clear,
+            "disabled": disabled,
             "display": display,
             "encodings": encodings,
             "extent": extent,
@@ -39211,7 +39625,11 @@ class ShapeDef(GenomeSpySchema):
         orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -39238,8 +39656,12 @@ class ShapeDef(GenomeSpySchema):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolSize (float): Symbol size in pixels squared.
-            symbolType (str): Symbol shape.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
             titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
@@ -39263,7 +39685,11 @@ class ShapeDef(GenomeSpySchema):
             "orient": orient,
             "padding": padding,
             "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
             "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
             "symbolType": symbolType,
             "tickCount": tickCount,
             "title": title,
@@ -40139,8 +40565,11 @@ class StyleConfig(GenomeSpySchema):
         subtitlePadding: float | UndefinedType = Undefined,
         symbolBaseFillColor: str | UndefinedType = Undefined,
         symbolBaseStrokeColor: str | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
         symbolOffset: float | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         text: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -40380,8 +40809,11 @@ class StyleConfig(GenomeSpySchema):
             subtitlePadding=subtitlePadding,
             symbolBaseFillColor=symbolBaseFillColor,
             symbolBaseStrokeColor=symbolBaseStrokeColor,
+            symbolFillColor=symbolFillColor,
             symbolOffset=symbolOffset,
+            symbolOpacity=symbolOpacity,
             symbolSize=symbolSize,
+            symbolStrokeColor=symbolStrokeColor,
             symbolStrokeWidth=symbolStrokeWidth,
             symbolType=symbolType,
             text=text,
@@ -42005,13 +42437,25 @@ class StyleConfig(GenomeSpySchema):
         """Return a copy with ``symbolBaseStrokeColor`` updated."""
         return self._with_property("symbolBaseStrokeColor", value)
 
+    def symbolFillColor(self, value: str) -> StyleConfig:
+        """Return a copy with ``symbolFillColor`` updated."""
+        return self._with_property("symbolFillColor", value)
+
     def symbolOffset(self, value: float) -> StyleConfig:
         """Return a copy with ``symbolOffset`` updated."""
         return self._with_property("symbolOffset", value)
 
+    def symbolOpacity(self, value: float) -> StyleConfig:
+        """Return a copy with ``symbolOpacity`` updated."""
+        return self._with_property("symbolOpacity", value)
+
     def symbolSize(self, value: float) -> StyleConfig:
         """Return a copy with ``symbolSize`` updated."""
         return self._with_property("symbolSize", value)
+
+    def symbolStrokeColor(self, value: str) -> StyleConfig:
+        """Return a copy with ``symbolStrokeColor`` updated."""
+        return self._with_property("symbolStrokeColor", value)
 
     def symbolStrokeWidth(self, value: float) -> StyleConfig:
         """Return a copy with ``symbolStrokeWidth`` updated."""
@@ -47677,6 +48121,8 @@ class VConcatSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        annotate: Sequence[UnitSpec | dict[str, Any] | LayerSpec]
+        | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
@@ -47799,6 +48245,7 @@ class VConcatSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            annotate=annotate,
             axes=axes,
             baseUrl=baseUrl,
             config=config,
@@ -47830,6 +48277,12 @@ class VConcatSpec(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def annotate(
+        self, value: Sequence[UnitSpec | dict[str, Any] | LayerSpec]
+    ) -> VConcatSpec:
+        """Return a copy with ``annotate`` updated."""
+        return self._with_property("annotate", value)
 
     def axes(self, value: AxesKwds) -> VConcatSpec:
         """Return a copy with ``axes`` updated."""
@@ -49706,6 +50159,8 @@ class ViewSpec(GenomeSpySchema):
 
     def __init__(
         self,
+        annotate: Sequence[UnitSpec | dict[str, Any] | LayerSpec]
+        | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
@@ -49881,6 +50336,7 @@ class ViewSpec(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            annotate=annotate,
             axes=axes,
             baseUrl=baseUrl,
             columns=columns,
@@ -49921,6 +50377,12 @@ class ViewSpec(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def annotate(
+        self, value: Sequence[UnitSpec | dict[str, Any] | LayerSpec]
+    ) -> ViewSpec:
+        """Return a copy with ``annotate`` updated."""
+        return self._with_property("annotate", value)
 
     def axes(self, value: AxesKwds) -> ViewSpec:
         """Return a copy with ``axes`` updated."""

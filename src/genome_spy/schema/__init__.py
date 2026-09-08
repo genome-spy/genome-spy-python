@@ -392,7 +392,7 @@ from genome_spy.schema._kwds import (
     ScalesKwds,
 )
 
-SCHEMA_VERSION = "0.86.0"
+SCHEMA_VERSION = "0.87.0"
 
 __all__ = [
     "GenomeSpySchema",

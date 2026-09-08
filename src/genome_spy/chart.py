@@ -473,6 +473,33 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
     ) -> dict[str, Any]:
         """Return copied top-level state with authoring-edge values normalized."""
         values = dict(self._kwds)  # type: ignore[attr-defined]
+
+        def nested_view(value: Any) -> Any:
+            if isinstance(value, TopLevelSpec):
+                return value._to_dict(
+                    include_schema=False,
+                    validate=False,
+                    normalize_chart_data=normalize_chart_data,
+                )
+            if isinstance(value, (list, tuple)):
+                return [nested_view(child) for child in value]
+            if isinstance(value, dict):
+                return {key: nested_view(child) for key, child in value.items()}
+            return value
+
+        # Additional view-bearing properties use the same serialization context
+        # as composition children. Data rows are opaque; templates keep their
+        # independent import scope and the primary children are handled below.
+        excluded = {
+            "data",
+            "datasets",
+            "templates",
+            getattr(self, "_children_key", None),
+        }
+        values = {
+            key: value if key in excluded else nested_view(value)
+            for key, value in values.items()
+        }
         data = values.get("data", Undefined)
         if data is not Undefined:
             normalized_data = normalize_chart_data(data)
