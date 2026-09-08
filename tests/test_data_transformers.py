@@ -144,13 +144,14 @@ def test_raw_widget_spec_shares_records() -> None:
     chart = {
         "layer": [
             {"mark": "point", "data": {"values": [{"x": 1}]}},
-            {"mark": "line", "data": {"values": [{"x": 1}]}},
+            {"mark": "rect", "data": {"values": [{"x": 1}]}},
         ]
     }
     original = deepcopy(chart)
     widget = gs.JupyterChart(chart)
     assert len(widget.dataset_names) == 1
     assert chart == original
+    gs.Chart.from_dict(widget.spec)  # The consolidated raw spec is valid GenomeSpy.
 
 
 def test_explicit_equal_widget_datasets_update_independently() -> None:
