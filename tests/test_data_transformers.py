@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from datetime import date
 import json
 
 import genome_spy as gs
@@ -55,6 +56,8 @@ def test_configuration_restores_after_nested_blocks_and_errors() -> None:
     with pytest.raises(RuntimeError), settings.enable(consolidate_datasets=False):
         assert settings.consolidate_datasets is False
         with settings.enable():
+            assert settings.consolidate_datasets is False
+        with settings.enable(consolidate_datasets=True):
             assert settings.consolidate_datasets is True
         assert settings.consolidate_datasets is False
         raise RuntimeError
@@ -66,6 +69,91 @@ def test_configuration_restores_after_nested_blocks_and_errors() -> None:
     assert settings.consolidate_datasets is True
     with pytest.raises(TypeError):
         settings.enable(consolidate_datasets="false")
+
+
+@pytest.mark.parametrize("wrapper", [gs.Data, InlineData])
+def test_schema_wrapped_records_use_same_normalization(wrapper) -> None:
+    rows = [{"x": float("nan"), "day": date(2026, 9, 8)}]
+    chart = gs.Chart(wrapper(values=rows)).mark_point() + gs.Chart(rows).mark_point()
+    spec = chart.to_dict()
+    assert list(spec["datasets"].values()) == [[{"x": None, "day": "2026-09-08"}]]
+    json.dumps(spec, allow_nan=False)
+
+
+def test_templates_keep_local_data_and_reserve_references() -> None:
+    rows = [{"x": 1}]
+    reserved = gs.Chart(rows).mark_point().to_dict()["data"]["name"]
+    template = {
+        "layer": [
+            {"mark": "point", "data": {"values": rows}},
+            {"mark": "point", "data": {"name": reserved}},
+        ]
+    }
+    chart = gs.vconcat(
+        gs.Chart(rows).mark_point(),
+        gs.import_view(template="t"),
+        gs.import_view(template="t"),
+        templates={"t": template},
+    )
+    spec = chart.to_dict()
+    assert reserved not in spec["datasets"]
+    local = spec["templates"]["t"]
+    assert reserved not in local["datasets"]
+    local_name = local["layer"][0]["data"]["name"]
+    assert local["datasets"][local_name] == rows
+    assert local["layer"][1]["data"] == {"name": reserved}
+    assert "datasets" not in template
+
+
+def test_typed_mapping_sources_are_discovered() -> None:
+    source = {"values": [{"x": 1}]}
+    schema = {"additionalProperties": {"$ref": "#/definitions/Data"}}
+    assert list(_data_slots({"future": source}, schema)) == [
+        ("data", source, None, False)
+    ]
+
+
+@pytest.mark.parametrize("enabled", [True, False])
+def test_widget_does_not_register_template_definitions_as_live_views(enabled) -> None:
+    from genome_spy._render import _PreparedSpec, prepare_widget_spec
+
+    reserved = "__genome_spy_python_data_0"
+    template = {
+        "mark": "point",
+        "data": {"name": reserved},
+        "datasets": {"local": [{"x": 2}]},
+    }
+    spec = {
+        "vconcat": [
+            {"mark": "point", "data": {"values": [{"x": 1}]}},
+            {"import": {"template": "t"}},
+        ],
+        "templates": {"t": template},
+    }
+    prepared = prepare_widget_spec(_PreparedSpec(spec, {}, enabled))
+    assert prepared.spec["templates"]["t"] == template
+    assert reserved not in prepared.spec["datasets"]
+    assert len(prepared.datasets) == 1
+    assert prepared.datasets[0].name != "local"
+
+
+def test_secondary_source_records_are_normalized() -> None:
+    spec = {
+        "mark": "point",
+        "transform": [
+            {
+                "type": "cross",
+                "from": {
+                    "data": {
+                        "values": [{"x": float("nan"), "day": date(2026, 9, 8)}],
+                    }
+                },
+            }
+        ],
+    }
+    _consolidate(spec)
+    assert list(spec["datasets"].values()) == [[{"x": None, "day": "2026-09-08"}]]
+    json.dumps(spec, allow_nan=False)
 
 
 def test_authored_names_and_nested_shadowing_are_preserved() -> None:

@@ -23,7 +23,7 @@ def normalize_data(data: Any) -> Any:
     if data is None:
         return None
     if isinstance(data, SchemaBase):
-        return data.to_dict(validate=False)
+        return json_safe(data.to_dict(validate=False))
     if is_mapping(data):
         return cast(
             dict[str, Any], json_safe(normalize_schema_value(data, validate=False))

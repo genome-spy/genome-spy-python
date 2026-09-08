@@ -128,12 +128,15 @@ def prepare_widget_spec(prepared: _PreparedSpec) -> _PreparedWidget:
     slots = [
         (kind, dict(value) if kind == "datasets" else value, owner, scoped)
         for kind, value, owner, scoped in _data_slots(spec)
+        if kind != "template"
     ]
     used_names: set[str] = set()
-    for kind, value, _, _ in slots:
+    # Template references also reserve names, but their declarations belong to
+    # future import instances and must not be registered as live root datasets.
+    for kind, value, _, _ in _data_slots(spec, include_templates=True):
         if kind == "datasets":
             used_names.update(value)
-        elif isinstance(value.get("name"), str):
+        elif kind == "data" and isinstance(value.get("name"), str):
             used_names.add(value["name"])
     generated_names: dict[str, str] = {}
     datasets: list[_LiveDataset] = []
