@@ -5,7 +5,7 @@ position agreement, sequence coverage, and a linked overview.
 """
 
 import genome_spy as gs
-from genome_spy.datasets import load_dataset
+from genome_spy.datasets import _load_table_bundle as load_data
 
 META = {
     "category": "Reference annotation tracks",
@@ -15,9 +15,8 @@ META = {
 }
 
 # Load prepared sequence rows and per-position summaries.
-data = load_dataset("p53_sequence_comparison")
-# Store each table once; the child charts below refer to these names.
-named_datasets = {"cells": data["cells"], "columns": data["columns"]}
+data = load_data("p53_sequence_comparison", ("cells", "columns"))
+# DataFrames let the gallery store shared tables in separate Arrow files.
 # Use soft amino-acid colors; grey fills the ends of shorter sequences.
 residue_colors = gs.Scale(
     domain=list("ACDEFGHIKLMNPQRSTVWY-"),
@@ -80,7 +79,7 @@ detail_ruler = gs.ruler(
 
 # Keep all positions visible here; drag to choose the range shown below.
 overview = (
-    gs.Chart(gs.Data(name="cells"))
+    gs.Chart(data["cells"])
     .mark_rect()
     .encode(
         x=gs.X("position:I")
@@ -104,7 +103,7 @@ overview_group = (
 
 # Show the fraction matching the most common amino acid at each position.
 conservation = (
-    gs.Chart(gs.Data(name="columns"))
+    gs.Chart(data["columns"])
     .mark_rect()
     .encode(
         x=gs.X("position:I").title(None),
@@ -118,7 +117,7 @@ conservation = (
 )
 # Show the fraction of sequences without a gap at each position.
 gap_free = (
-    gs.Chart(gs.Data(name="columns"))
+    gs.Chart(data["columns"])
     .mark_rect(color="#b4bbc2")
     .encode(
         x=gs.X("position:I").title(None),
@@ -134,7 +133,7 @@ gap_free = (
 
 # Show the most common amino acid as a compact consensus row.
 consensus_tiles = (
-    gs.Chart(gs.Data(name="columns"))
+    gs.Chart(data["columns"])
     .mark_rect()
     .encode(
         x=gs.X("position:I").title(None),
@@ -150,7 +149,7 @@ consensus = (consensus_tiles + consensus_letters).properties(height=15)
 
 # Summarize the residue mixture at each position as a sequence logo.
 consensus_logo = (
-    gs.Chart(gs.Data(name="cells"))
+    gs.Chart(data["cells"])
     .transform_filter(gs.datum.residue != "-")
     .transform_aggregate(groupby=["position", "residue"])
     .transform_stack(
@@ -183,7 +182,7 @@ consensus_logo = (
 
 # Draw one colored tile per amino acid, with sequence details on hover.
 tiles = (
-    gs.Chart(gs.Data(name="cells"))
+    gs.Chart(data["cells"])
     .mark_rect()
     .encode(
         x=gs.X("position:I").title(None),
@@ -232,7 +231,6 @@ chart = (
         width="container",
         title="P53 sequences: overview and residue detail",
         description="34 original, ungapped p53 sequences from the Dash Bio example. Drag the overview or zoom the detail tracks to compare positions; grey cells pad shorter sequences.",
-        datasets=named_datasets,
     )
     .resolve_scale(x="independent", y="independent")
     .resolve_legend(color="collected")

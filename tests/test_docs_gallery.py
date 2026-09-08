@@ -1189,7 +1189,7 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
     assert spec["resolve"]["legend"] == {"color": "collected"}
     assert spec["config"]["legend"]["orient"] == "bottom"
     assert spec["config"]["legend"]["layout"] == {"anchor": "middle"}
-    assert set(spec["datasets"]) == {"cells", "columns"}
+    assert len(spec["datasets"]) == 2
     details, overview_group = spec["vconcat"]
     assert details["params"] == [
         {
@@ -1208,11 +1208,13 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
         }
     ]
     gap_free, conservation, consensus, logo, sequences = details["vconcat"]
-    assert gap_free["data"] == {"name": "columns"}
-    assert conservation["data"] == {"name": "columns"}
-    assert consensus["layer"][0]["data"] == {"name": "columns"}
-    assert logo["data"] == {"name": "cells"}
-    assert sequences["layer"][0]["data"] == {"name": "cells"}
+    columns = gap_free["data"]
+    cells = logo["data"]
+    assert len(spec["datasets"][columns["name"]]) == 396
+    assert len(spec["datasets"][cells["name"]]) == 13464
+    assert conservation["data"] == columns
+    assert consensus["layer"][0]["data"] == columns
+    assert sequences["layer"][0]["data"] == cells
     assert [gap_free["title"]["text"], conservation["title"]["text"]] == [
         "Gap-free",
         "Conservation",
@@ -1245,7 +1247,7 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
     )
 
     overview = overview_group["vconcat"][0]
-    assert overview["data"] == {"name": "cells"}
+    assert overview["data"] == cells
     assert "title" not in overview
     assert overview["encoding"]["x"]["title"] is None
     brush_mark = overview["params"][0]["select"]["mark"]
@@ -1618,6 +1620,68 @@ def test_gallery_generation_removes_stale_build_outputs(
     extension._generate(app)
 
     assert all(not path.exists() for path in stale_paths)
+
+
+@pytest.mark.parametrize(
+    ("name", "expected_rows"),
+    [
+        ("p53_sequence_comparison", [396, 13464]),
+        ("combined_laml_oncoplot", [5, 18, 23, 46, 200, 262, 265, 572, 645]),
+    ],
+)
+def test_large_gallery_tables_are_external_arrow_assets(
+    name, expected_rows, monkeypatch, tmp_path
+) -> None:
+    import json
+
+    import pyarrow as pa
+
+    from genome_spy.data_transformers import _data_slots
+
+    gallery = _load_gallery()
+    # Exercise the same preparation path as the docs build without its cache.
+    monkeypatch.setattr(gallery, "EXAMPLES_DIR", tmp_path)
+    (tmp_path / f"{name}.py").write_text(
+        (EXAMPLES_DIR / f"{name}.py").read_text(), encoding="utf-8"
+    )
+    [(example, buffers)] = list(gallery.iter_prepared_examples())
+    from genome_spy.datasets import load_dataset
+
+    original = load_dataset(
+        "tcga_laml_combined_oncoplot" if name == "combined_laml_oncoplot" else name
+    )
+    for payload in buffers.values():
+        rows = pa.ipc.open_file(pa.BufferReader(payload)).read_all().to_pylist()
+        [expected] = [
+            table
+            for table in original.values()
+            if isinstance(table, list)
+            and len(table) == len(rows)
+            and isinstance(table[0], dict)
+        ]
+        # Arrow fills absent fields with null; supplied values must survive.
+        for actual, row in zip(rows, expected, strict=True):
+            assert all(actual[key] == value for key, value in row.items())
+    assert (
+        sorted(
+            pa.ipc.open_file(pa.BufferReader(payload)).read_all().num_rows
+            for payload in buffers.values()
+        )
+        == expected_rows
+    )
+    assert len(json.dumps(example.spec).encode()) < 50_000
+
+    referenced = []
+    for kind, value, _, _ in _data_slots(example.spec):
+        if kind == "datasets":
+            assert all(len(json.dumps(rows).encode()) < 1000 for rows in value.values())
+        elif kind == "data":
+            assert "values" not in value
+            if "url" in value:
+                assert value["format"] == {"type": "arrow"}
+                referenced.append(value["url"].removeprefix("arrow://"))
+    assert set(referenced) == set(buffers)
+    assert len(referenced) > len(buffers)  # Repeated tracks reuse the same files.
 
 
 def test_gallery_arrow_assets_are_rewritten_deduplicated_and_cleaned(

@@ -77,6 +77,18 @@ def _resource_for(name: str) -> Traversable:
     return _DATA_DIR.joinpath(filename)
 
 
+def _load_table_bundle(name: str, tables: tuple[str, ...]) -> dict[str, Any]:
+    """Load selected prepared JSON tables as DataFrames, preserving metadata."""
+    import pandas as pd
+
+    data = load_dataset(name, as_format="json")
+    if not isinstance(data, dict):
+        raise ValueError(f"Dataset {name!r} must contain a mapping of tables.")
+    for table in tables:
+        data[table] = pd.DataFrame.from_records(data[table])
+    return data
+
+
 def _load_dataframe(name: str) -> Any:
     try:
         import pandas as pd
