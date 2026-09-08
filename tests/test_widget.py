@@ -26,9 +26,9 @@ def test_widget_rewrites_eager_records_as_a_named_dataset() -> None:
 
     widget = chart.widget()
 
-    assert widget.spec["data"] == {"name": "__genome_spy_python_data_0"}
-    assert widget.spec["datasets"] == {"__genome_spy_python_data_0": [{"x": 1, "y": 2}]}
-    assert widget.dataset_names == ("__genome_spy_python_data_0",)
+    name = widget.spec["data"]["name"]
+    assert widget.spec["datasets"] == {name: [{"x": 1, "y": 2}]}
+    assert widget.dataset_names == (name,)
     assert "import(moduleUrl)" in widget._esm
     assert widget.controls == ["svg", "png", "inspector"]
     assert widget._control_definitions["png"] == {
@@ -57,8 +57,8 @@ def test_jupyter_chart_rewrites_raw_eager_spec_dict() -> None:
 
     widget = gs.JupyterChart(spec)
 
-    assert widget.spec["data"] == {"name": "__genome_spy_python_data_0"}
-    assert widget.spec["datasets"] == {"__genome_spy_python_data_0": [{"x": 1}]}
+    name = widget.spec["data"]["name"]
+    assert widget.spec["datasets"] == {name: [{"x": 1}]}
 
 
 def test_widget_generated_dataset_names_skip_existing_declarations() -> None:
@@ -68,7 +68,8 @@ def test_widget_generated_dataset_names_skip_existing_declarations() -> None:
         .encode(x="x:Q")
     )
 
-    widget = chart.widget()
+    with gs.data_transformers.enable(consolidate_datasets=False):
+        widget = chart.widget()
 
     assert widget.spec["data"] == {"name": "__genome_spy_python_data_1"}
     assert set(widget.spec["datasets"]) == {

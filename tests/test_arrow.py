@@ -85,7 +85,8 @@ def test_prepare_render_supports_pyarrow_and_pandas(table: object) -> None:
 
     assert len(prepared.buffers) == 1
     assert prepared.spec["data"]["format"] == {"type": "arrow"}
-    assert chart.to_dict()["data"]["values"] == [{"x": 1}, {"x": 2}]
+    spec = chart.to_dict()
+    assert spec["datasets"][spec["data"]["name"]] == [{"x": 1}, {"x": 2}]
 
 
 def test_pandas_falls_back_to_json_when_pyarrow_is_unavailable(
@@ -97,7 +98,10 @@ def test_pandas_falls_back_to_json_when_pyarrow_is_unavailable(
     prepared = gs.Chart(frame).mark_point().encode(x="x")._prepare_render()
 
     assert prepared.buffers == {}
-    assert prepared.spec["data"] == {"values": [{"x": 1}, {"x": 2}]}
+    assert prepared.spec["datasets"][prepared.spec["data"]["name"]] == [
+        {"x": 1},
+        {"x": 2},
+    ]
     with pytest.raises(TypeError, match="requires PyArrow"):
         gs.to_arrow_ipc(frame)
 

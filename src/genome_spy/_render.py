@@ -9,6 +9,13 @@ from typing import Any, Callable, Literal, Protocol
 
 from genome_spy._chart_authoring import normalize_data
 from genome_spy.arrow import _try_to_arrow_ipc
+from genome_spy.data_transformers import (
+    _consolidate,
+    _data_slots,
+    _DatasetConsolidation,
+    data_transformers,
+)
+from genome_spy.schema import Root
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,6 +24,7 @@ class _PreparedSpec:
 
     spec: dict[str, Any]
     buffers: dict[str, bytes]
+    consolidate_datasets: bool | None = None
 
 
 _DatasetFormat = Literal["arrow", "records"]
@@ -79,13 +87,25 @@ class _RenderContext:
 
 def prepare_render(chart: _RenderSerializable) -> _PreparedSpec:
     """Prepare one chart through its shared render-time serialization path."""
+    enabled = data_transformers.consolidate_datasets
     context = _RenderContext()
+    collector = _DatasetConsolidation(chart) if enabled else None
     spec = chart._to_dict(
         include_schema=True,
-        validate=True,
-        normalize_chart_data=context.normalize_data,
+        validate=False,
+        normalize_chart_data=(
+            (lambda data: collector.source(context.normalize_data(data)))
+            if collector is not None
+            else context.normalize_data
+        ),
     )
-    return _PreparedSpec(spec=spec, buffers=context.buffers)
+    if collector is not None:
+        collector.finish(spec)
+    return _PreparedSpec(
+        spec=Root(**spec).to_dict(),
+        buffers=context.buffers,
+        consolidate_datasets=enabled,
+    )
 
 
 def prepare_widget(chart: _RenderSerializable) -> _PreparedWidget:
@@ -96,11 +116,25 @@ def prepare_widget(chart: _RenderSerializable) -> _PreparedWidget:
 def prepare_widget_spec(prepared: _PreparedSpec) -> _PreparedWidget:
     """Rewrite known eager sources in a prepared spec as named datasets."""
     spec = deepcopy(prepared.spec)
+    enabled = prepared.consolidate_datasets
+    if enabled is None:
+        enabled = data_transformers.consolidate_datasets
+    if enabled:
+        _consolidate(spec)
     root_datasets = spec.setdefault("datasets", {})
     if not isinstance(root_datasets, dict):
         raise TypeError("GenomeSpy root datasets must be a mapping.")
 
-    used_names = _declared_dataset_names(spec)
+    slots = [
+        (kind, dict(value) if kind == "datasets" else value, owner, scoped)
+        for kind, value, owner, scoped in _data_slots(spec)
+    ]
+    used_names: set[str] = set()
+    for kind, value, _, _ in slots:
+        if kind == "datasets":
+            used_names.update(value)
+        elif isinstance(value.get("name"), str):
+            used_names.add(value["name"])
     generated_names: dict[str, str] = {}
     datasets: list[_LiveDataset] = []
 
@@ -135,36 +169,21 @@ def prepare_widget_spec(prepared: _PreparedSpec) -> _PreparedWidget:
         generated_names[token] = candidate
         return candidate
 
-    def visit(value: Any, *, owner: str | None, scoped: bool) -> None:
-        if isinstance(value, list):
-            for item in value:
-                visit(item, owner=owner, scoped=scoped)
-            return
-        if not isinstance(value, dict):
-            return
-
-        current_owner = owner
-        current_scoped = scoped
-        if value is not spec and "datasets" in value:
-            current_scoped = True
-            name = value.get("name")
-            current_owner = name if isinstance(name, str) and name else None
-
-        declared = value.get("datasets")
-        if isinstance(declared, dict):
-            for name in declared:
+    for kind, data, owner, scoped in slots:
+        if kind == "datasets":
+            for name in data:
                 if isinstance(name, str) and name:
-                    register(name, owner=current_owner, scoped=current_scoped)
-
-        data = value.get("data")
-        if isinstance(data, dict):
+                    register(name, owner=owner, scoped=scoped)
+        else:
             url = data.get("url")
             if isinstance(url, str) and url.startswith("arrow://"):
                 token = url.removeprefix("arrow://")
                 payload = prepared.buffers.get(token)
                 if payload is None:
                     raise ValueError(f"No Arrow IPC payload provided for {token}.")
-                name = generated_name(token)
+                name = generated_name(
+                    token if enabled else f"{token}:{len(generated_names)}"
+                )
                 if name not in root_datasets:
                     root_datasets[name] = []
                     register(
@@ -174,31 +193,12 @@ def prepare_widget_spec(prepared: _PreparedSpec) -> _PreparedWidget:
                         initial_payload=payload,
                         initial_format="arrow",
                     )
-                value["data"] = {"name": name}
+                data.clear()
+                data["name"] = name
             elif set(data) == {"values"} and isinstance(data["values"], list):
                 name = generated_name(f"records:{len(generated_names)}")
                 root_datasets[name] = data["values"]
                 register(name, owner=None, scoped=False)
-                value["data"] = {"name": name}
-
-        for key, child in value.items():
-            if key not in {"data", "datasets"}:
-                visit(child, owner=current_owner, scoped=current_scoped)
-
-    visit(spec, owner=None, scoped=False)
+                data.clear()
+                data["name"] = name
     return _PreparedWidget(spec=spec, datasets=tuple(datasets))
-
-
-def _declared_dataset_names(value: Any) -> set[str]:
-    """Return all existing named-dataset keys in a serialized spec."""
-    names: set[str] = set()
-    if isinstance(value, list):
-        for item in value:
-            names.update(_declared_dataset_names(item))
-    elif isinstance(value, dict):
-        datasets = value.get("datasets")
-        if isinstance(datasets, dict):
-            names.update(name for name in datasets if isinstance(name, str))
-        for child in value.values():
-            names.update(_declared_dataset_names(child))
-    return names

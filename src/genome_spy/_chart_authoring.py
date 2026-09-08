@@ -24,11 +24,13 @@ def normalize_data(data: Any) -> Any:
         return None
     if isinstance(data, SchemaBase):
         return data.to_dict(validate=False)
+    if is_mapping(data):
+        return cast(
+            dict[str, Any], json_safe(normalize_schema_value(data, validate=False))
+        )
     records = records_from_data(data)
     if records is not None:
         return records_data(records)
-    if is_mapping(data):
-        return cast(dict[str, Any], normalize_schema_value(data, validate=False))
     raise TypeError(f"Unsupported data value: {type(data)!r}")
 
 

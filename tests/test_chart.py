@@ -474,12 +474,15 @@ def test_chart_serializes_core_spec() -> None:
         .properties(width=320, height=180, description="Simple point plot")
     )
 
-    assert chart.to_dict() == {
+    spec = chart.to_dict()
+    name = spec["data"]["name"]
+    assert spec == {
         "$schema": DEFAULT_SCHEMA_URL,
         "description": "Simple point plot",
         "width": 320,
         "height": 180,
-        "data": {"values": [{"x": 1, "y": 2, "label": "A"}]},
+        "data": {"name": name},
+        "datasets": {name: [{"x": 1, "y": 2, "label": "A"}]},
         "mark": {"type": "point", "size": 64},
         "encoding": {
             "x": {"field": "x", "type": "quantitative"},
@@ -520,7 +523,7 @@ def test_altair_style_penguins_snippet_serializes() -> None:
 
     spec = chart.to_dict()
 
-    assert spec["data"]["values"][0]["Species"] == "Adelie"
+    assert spec["datasets"][spec["data"]["name"]][0]["Species"] == "Adelie"
     assert spec["mark"] == "point"
     assert spec["encoding"]["x"] == {
         "field": "Flipper Length (mm)",
@@ -1398,7 +1401,8 @@ def test_plain_mapping_data_is_preserved() -> None:
 def test_dataframe_like_nan_values_are_serialized_as_null() -> None:
     chart = gs.Chart([{"x": math.nan, "y": 2}]).mark_point().encode(x="x:Q", y="y:Q")
 
-    assert chart.to_dict()["data"]["values"] == [{"x": None, "y": 2}]
+    spec = chart.to_dict()
+    assert spec["datasets"][spec["data"]["name"]] == [{"x": None, "y": 2}]
 
 
 def test_dataframe_like_datetime_values_are_json_safe() -> None:
@@ -1408,7 +1412,9 @@ def test_dataframe_like_datetime_values_are_json_safe() -> None:
 
     spec = chart.to_dict()
 
-    assert spec["data"]["values"] == [{"x": 1, "when": "1970-01-01T00:00:00"}]
+    assert spec["datasets"][spec["data"]["name"]] == [
+        {"x": 1, "when": "1970-01-01T00:00:00"}
+    ]
     json.dumps(spec)
 
 
@@ -1424,9 +1430,11 @@ def test_prepare_render_uses_arrow_without_changing_json_serialization() -> None
         "format": {"type": "arrow"},
     }
     assert prepared.buffers[identifier] == gs.to_arrow_ipc(frame)
-    assert chart.to_dict()["data"] == {
-        "values": [{"x": 1, "label": "A"}, {"x": 2, "label": "B"}]
-    }
+    spec = chart.to_dict()
+    assert spec["datasets"][spec["data"]["name"]] == [
+        {"x": 1, "label": "A"},
+        {"x": 2, "label": "B"},
+    ]
 
 
 def test_prepare_render_encodes_a_shared_table_once_in_a_composition() -> None:

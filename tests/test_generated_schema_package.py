@@ -318,10 +318,13 @@ def test_generated_transform_methods_normalize_python_keywords() -> None:
 
     assert "from_" in signature.parameters
     assert "type" not in signature.parameters
-    assert chart.to_dict(validate=False)["transform"] == [
+    spec = chart.to_dict(validate=False)
+    name = spec["transform"][0]["from"]["data"]["name"]
+    assert spec["datasets"][name] == [{"id": 1}]
+    assert spec["transform"] == [
         {
             "type": "lookup",
-            "from": {"data": {"values": [{"id": 1}]}},
+            "from": {"data": {"name": name}},
             "key": "id",
             "fields": ["id"],
         },

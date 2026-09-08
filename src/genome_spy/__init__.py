@@ -1,6 +1,7 @@
 """Public package interface for genome_spy."""
 
 from genome_spy.arrow import to_arrow_ipc
+from genome_spy.data_transformers import data_transformers
 from genome_spy.api import (
     Angle,
     AxisGenomeData,
@@ -99,6 +100,7 @@ from genome_spy.helpers import (
 # END GENERATED INTERACTION IMPORTS
 
 __all__ = [
+    "data_transformers",
     "__version__",
     "Angle",
     "AxisGenomeData",

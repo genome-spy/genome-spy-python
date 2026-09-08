@@ -24,6 +24,7 @@ from genome_spy._chart_authoring import (
     normalize_transform,
 )
 from genome_spy.channels import Channel
+from genome_spy.data_transformers import _DatasetConsolidation, data_transformers
 from genome_spy.schema import (
     ConcatSpec,
     GenomeSpyConfig,
@@ -611,6 +612,22 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
 
         return prepare_render(self)
 
+    def _serialize(self, *, include_schema: bool, validate: bool) -> dict[str, Any]:
+        enabled = data_transformers.consolidate_datasets
+        collector = _DatasetConsolidation(self) if enabled else None
+        spec = self._to_dict(
+            include_schema=include_schema,
+            validate=False,
+            normalize_chart_data=(
+                (lambda data: collector.source(normalize_data(data)))
+                if collector is not None
+                else normalize_data
+            ),
+        )
+        if collector is not None:
+            collector.finish(spec)
+        return Root(**spec).to_dict(validate=validate)
+
     def _prepare_widget(self) -> Any:
         """Prepare this chart for live named-dataset widget updates."""
         from genome_spy._render import prepare_widget
@@ -911,10 +928,9 @@ class Chart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy upd
         self, *, include_schema: bool = True, validate: bool = True
     ) -> dict[str, Any]:
         """Serialize and optionally validate the complete chart specification."""
-        return self._to_dict(
+        return self._serialize(
             include_schema=include_schema,
             validate=validate,
-            normalize_chart_data=normalize_data,
         )
 
     def _to_dict(
@@ -972,10 +988,9 @@ class _CompositionSpec(TopLevelSpec, ConfigMethodMixin, ResolutionMethodMixin):
     def to_dict(
         self, *, include_schema: bool = True, validate: bool = True
     ) -> dict[str, Any]:
-        return self._to_dict(
+        return self._serialize(
             include_schema=include_schema,
             validate=validate,
-            normalize_chart_data=normalize_data,
         )
 
     def _to_dict(
