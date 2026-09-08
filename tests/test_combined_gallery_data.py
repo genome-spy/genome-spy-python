@@ -121,6 +121,33 @@ def test_laml_layout_keeps_rows_fixed_and_sample_column_responsive() -> None:
     assert example["qvalues"].to_dict()["encoding"]["x"]["field"] == "neglog_q"
 
 
+def test_laml_declares_large_tables_once_as_named_datasets() -> None:
+    example = runpy.run_path(
+        str(
+            Path(__file__).resolve().parents[1]
+            / "docs/examples/combined_laml_oncoplot.py"
+        )
+    )
+    spec = example["chart"].to_dict()
+
+    assert set(spec["datasets"]) == {
+        "burden",
+        "copy_number",
+        "events",
+        "genes",
+        "matrix_rows",
+        "pathway_bounds",
+        "pathway_events",
+        "samples",
+        "spectrum",
+    }
+    assert example["mutations"].to_dict()["data"] == {"name": "events"}
+    assert example["alt_c"].to_dict()["data"] == {"name": "events"}
+    assert example["grid"].to_dict()["data"] == {"name": "samples"}
+    assert example["fab"].to_dict()["data"] == {"name": "samples"}
+    assert example["followup"].to_dict()["data"] == {"name": "samples"}
+
+
 def test_laml_uses_collected_native_legends_with_local_snv_legend() -> None:
     example = runpy.run_path(
         str(

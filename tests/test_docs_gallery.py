@@ -1175,11 +1175,12 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
     spec = example.spec
 
     assert spec["width"] == "container"
-    assert example.height == 940
+    assert example.height == 870
     assert spec["spacing"] == 2
     assert spec["resolve"]["legend"] == {"color": "collected"}
     assert spec["config"]["legend"]["orient"] == "bottom"
     assert spec["config"]["legend"]["layout"] == {"anchor": "middle"}
+    assert set(spec["datasets"]) == {"cells", "columns"}
     details, overview_group = spec["vconcat"]
     assert details["params"] == [
         {
@@ -1198,6 +1199,11 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
         }
     ]
     gap_free, conservation, consensus, logo, sequences = details["vconcat"]
+    assert gap_free["data"] == {"name": "columns"}
+    assert conservation["data"] == {"name": "columns"}
+    assert consensus["layer"][0]["data"] == {"name": "columns"}
+    assert logo["data"] == {"name": "cells"}
+    assert sequences["layer"][0]["data"] == {"name": "cells"}
     assert [gap_free["title"]["text"], conservation["title"]["text"]] == [
         "Gap-free",
         "Conservation",
@@ -1208,19 +1214,31 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
         "scheme": "viridis",
     }
     assert conservation["encoding"]["color"]["legend"]["title"] == "Conservation"
-    assert consensus["height"] == 20
+    assert consensus["height"] == 15
     assert consensus["layer"][0]["encoding"]["y"]["field"] == "identifier"
     assert "title" not in logo
     assert logo["transform"][-1]["offset"] == "normalize"
     assert logo["mark"]["logoLetters"] is True
-    assert sequences["viewportHeight"] == 420
+    assert sequences["viewportHeight"] == 380
     assert sequences["layer"][0]["encoding"]["color"]["legend"] == {
         "columns": 11,
         "title": "Amino acid",
     }
+    assert all(
+        encoding["x"]["title"] is None
+        for encoding in (
+            gap_free["encoding"],
+            conservation["encoding"],
+            consensus["layer"][0]["encoding"],
+            logo["encoding"],
+            sequences["layer"][0]["encoding"],
+        )
+    )
 
     overview = overview_group["vconcat"][0]
+    assert overview["data"] == {"name": "cells"}
     assert "title" not in overview
+    assert overview["encoding"]["x"]["title"] is None
     brush_mark = overview["params"][0]["select"]["mark"]
     assert brush_mark["fillOpacity"] == 0.28
     assert brush_mark["strokeWidth"] == 1.5

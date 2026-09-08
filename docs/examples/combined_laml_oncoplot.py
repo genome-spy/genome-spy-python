@@ -22,6 +22,21 @@ SNV_PANEL_HEIGHT = 130
 
 # Load the prepared patient data and gene summaries.
 data = load_dataset("tcga_laml_combined_oncoplot")
+# Store each table once; the child charts below refer to these names.
+named_datasets = {
+    name: data[name]
+    for name in (
+        "burden",
+        "copy_number",
+        "events",
+        "genes",
+        "matrix_rows",
+        "pathway_bounds",
+        "pathway_events",
+        "samples",
+        "spectrum",
+    )
+}
 # Keep gene rows in the same order across the matrix and side bars.
 row_scale = gs.Scale(
     name="genes",
@@ -90,7 +105,7 @@ spectrum_colors = gs.Scale(
 # Count alterations per patient, including copy-number changes.
 # These are counts, not mutations per megabase.
 burden = (
-    gs.Chart(data["burden"])
+    gs.Chart(gs.Data(name="burden"))
     .transform_stack(field="count", groupby=["sample_order"], as_=["low", "high"])
     .mark_rect()
     .encode(
@@ -108,13 +123,13 @@ burden = (
 
 # Give empty cells a pale background; leave hover details to the colored cells.
 background = (
-    gs.Chart(data["matrix_rows"])
+    gs.Chart(gs.Data(name="matrix_rows"))
     .mark_rect(color="#edf0f2", tooltip=None)
     .encode(y=row_y)
 )
 # Show copy-number changes behind the sequence mutations.
 copy_number = (
-    gs.Chart(data["copy_number"])
+    gs.Chart(gs.Data(name="copy_number"))
     .mark_rect()
     .encode(
         x=sample_x,
@@ -126,7 +141,7 @@ copy_number = (
 
 # Color each mutation by its class.
 mutations = (
-    gs.Chart(data["events"])
+    gs.Chart(gs.Data(name="events"))
     .mark_rect(yOffset=2, y2Offset=-2)
     .encode(
         x=sample_x,
@@ -138,7 +153,7 @@ mutations = (
 
 # Fill the summary cell if any gene in the group is altered.
 pathway_cells = (
-    gs.Chart(data["pathway_events"])
+    gs.Chart(gs.Data(name="pathway_events"))
     .mark_rect(yOffset=1, y2Offset=-1)
     .encode(
         x=sample_x,
@@ -150,14 +165,14 @@ pathway_cells = (
 
 # Separate neighboring patients with thin white lines.
 grid = (
-    gs.Chart(data["samples"])
+    gs.Chart(gs.Data(name="samples"))
     .mark_rule(color="white", size=0.3, tooltip=None)
     .encode(x=gs.X("sample_order:I", band=0).axis(None).title(None))
 )
 
 # Add a grey dot to variants with alternate allele C.
 alt_c = (
-    gs.Chart(data["events"])
+    gs.Chart(gs.Data(name="events"))
     .transform_filter(gs.datum.alt_c)
     # Make dots easier to see when zoomed in, up to 8 pixels across.
     .mark_point(
@@ -177,7 +192,7 @@ alt_c = (
 
 # Outline each gene group, keeping both borders inside the chart.
 outlines = (
-    gs.Chart(data["pathway_bounds"])
+    gs.Chart(gs.Data(name="pathway_bounds"))
     .mark_rect(
         fillOpacity=0,
         stroke="#535c68",
@@ -197,7 +212,7 @@ matrix = (
 
 # Add each patient's FAB classification below the matrix.
 fab = (
-    gs.Chart(data["samples"])
+    gs.Chart(gs.Data(name="samples"))
     .mark_rect()
     .encode(
         x=sample_x,
@@ -211,7 +226,7 @@ fab = (
 
 # Show follow-up time with darker colors for longer follow-up.
 followup = (
-    gs.Chart(data["samples"])
+    gs.Chart(gs.Data(name="samples"))
     .transform_filter(gs.expr.isValid(gs.datum.days_to_last_followup))
     .mark_rect()
     .encode(
@@ -226,7 +241,7 @@ followup = (
 
 # Stack the six substitution types to show their proportions per patient.
 spectrum = (
-    gs.Chart(data["spectrum"])
+    gs.Chart(gs.Data(name="spectrum"))
     .transform_stack(field="percent", groupby=["sample_order"], as_=["low", "high"])
     .mark_rect()
     .encode(
@@ -274,7 +289,7 @@ sample_column = (
 
 # Show mean variant allele frequency to the left of each gene.
 vaf = (
-    gs.Chart(data["genes"])
+    gs.Chart(gs.Data(name="genes"))
     .mark_rect(color="#535c68", yOffset=1, y2Offset=-1)
     .encode(
         x=gs.X("vaf:Q").scale(domain=[0, 100], reverse=True).axis(None),
@@ -286,7 +301,7 @@ vaf = (
 )
 # Label the genes and pathway summaries.
 row_labels = (
-    gs.Chart(data["matrix_rows"])
+    gs.Chart(gs.Data(name="matrix_rows"))
     .mark_text(align="right", size=11, fontStyle="italic")
     .encode(
         x=gs.value(1),
@@ -298,7 +313,7 @@ row_labels = (
 
 # Show the percentage of patients affected in each row.
 percentages = (
-    gs.Chart(data["matrix_rows"])
+    gs.Chart(gs.Data(name="matrix_rows"))
     .mark_text(align="left", size=10)
     .encode(
         x=gs.value(0),
@@ -311,7 +326,7 @@ percentages = (
 
 # Show each gene's MutSig result on the right; leave missing values blank.
 qvalues = (
-    gs.Chart(data["genes"])
+    gs.Chart(gs.Data(name="genes"))
     .transform_filter(gs.expr.isValid(gs.datum.neglog_q))
     .mark_rect(color="#535c68", yOffset=1, y2Offset=-1)
     .encode(
@@ -401,5 +416,6 @@ chart = (
     .properties(
         title=f"Altered in {data['altered_samples']} ({100 * data['altered_samples'] / len(data['samples']):.1f}%) of {len(data['samples'])} samples",
         description="TCGA LAML: 18 genes, five pathway summary rows, all 200 patients, and maftools-style clinical and burden tracks.",
+        datasets=named_datasets,
     )
 )

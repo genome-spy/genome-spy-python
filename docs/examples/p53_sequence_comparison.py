@@ -16,6 +16,8 @@ META = {
 
 # Load prepared sequence rows and per-position summaries.
 data = load_dataset("p53_sequence_comparison")
+# Store each table once; the child charts below refer to these names.
+named_datasets = {"cells": data["cells"], "columns": data["columns"]}
 # Use soft amino-acid colors; grey fills the ends of shorter sequences.
 residue_colors = gs.Scale(
     domain=list("ACDEFGHIKLMNPQRSTVWY-"),
@@ -78,12 +80,12 @@ detail_ruler = gs.ruler(
 
 # Keep all positions visible here; drag to choose the range shown below.
 overview = (
-    gs.Chart(data["cells"])
+    gs.Chart(gs.Data(name="cells"))
     .mark_rect()
     .encode(
         x=gs.X("position:I")
         .scale(domain=[1, data["length"] + 1], zoom=False)
-        .title("Sequence position"),
+        .title(None),
         y=gs.Y("identifier:N")
         .scale(domain=data["sequence_order"], reverse=True)
         .axis(None),
@@ -102,10 +104,10 @@ overview_group = (
 
 # Show the fraction matching the most common amino acid at each position.
 conservation = (
-    gs.Chart(data["columns"])
+    gs.Chart(gs.Data(name="columns"))
     .mark_rect()
     .encode(
-        x=gs.X("position:I").axis(None),
+        x=gs.X("position:I").title(None),
         y=gs.Y("identity:Q").scale(domain=[0, 1]).axis(tickCount=3, title=None),
         color=gs.Color("identity:Q")
         .scale(domain=[0, 1], scheme="viridis")
@@ -116,10 +118,10 @@ conservation = (
 )
 # Show the fraction of sequences without a gap at each position.
 gap_free = (
-    gs.Chart(data["columns"])
+    gs.Chart(gs.Data(name="columns"))
     .mark_rect(color="#b4bbc2")
     .encode(
-        x=gs.X("position:I").axis(None),
+        x=gs.X("position:I").title(None),
         y=gs.Y("coverage:Q").scale(domain=[0, 1]).axis(tickCount=3, title=None),
         tooltip=["position:Q", "coverage:Q"],
     )
@@ -132,10 +134,10 @@ gap_free = (
 
 # Show the most common amino acid as a compact consensus row.
 consensus_tiles = (
-    gs.Chart(data["columns"])
+    gs.Chart(gs.Data(name="columns"))
     .mark_rect()
     .encode(
-        x=gs.X("position:I").axis(None),
+        x=gs.X("position:I").title(None),
         y=gs.Y("identifier:N").title(None),
         color=color,
         tooltip=["position:Q", "residue:N", "identity:Q"],
@@ -148,7 +150,7 @@ consensus = (consensus_tiles + consensus_letters).properties(height=15)
 
 # Summarize the residue mixture at each position as a sequence logo.
 consensus_logo = (
-    gs.Chart(data["cells"])
+    gs.Chart(gs.Data(name="cells"))
     .transform_filter(gs.datum.residue != "-")
     .transform_aggregate(groupby=["position", "residue"])
     .transform_stack(
@@ -169,7 +171,7 @@ consensus_logo = (
         paddingY=0,
     )
     .encode(
-        x=gs.X("position:I").axis(None),
+        x=gs.X("position:I").title(None),
         y=gs.Y("_y0:Q").scale(domain=[0, 1]).title("Share"),
         y2=gs.Y2("_y1"),
         text=gs.Text("residue:N"),
@@ -181,10 +183,10 @@ consensus_logo = (
 
 # Draw one colored tile per amino acid, with sequence details on hover.
 tiles = (
-    gs.Chart(data["cells"])
+    gs.Chart(gs.Data(name="cells"))
     .mark_rect()
     .encode(
-        x=gs.X("position:I").axis(None),
+        x=gs.X("position:I").title(None),
         y=gs.Y("identifier:N")
         .scale(domain=data["sequence_order"], reverse=True)
         .title(None),
@@ -219,7 +221,7 @@ details = (
         )
     )
     .resolve_scale(x="shared", y="independent")
-    .resolve_axis(x="independent", y="independent")
+    .resolve_axis(x="shared", y="independent")
     .add_params(detail_ruler)
 )
 # Place the full overview below the linked detail tracks.
@@ -230,6 +232,7 @@ chart = (
         width="container",
         title="P53 sequences: overview and residue detail",
         description="34 original, ungapped p53 sequences from the Dash Bio example. Drag the overview or zoom the detail tracks to compare positions; grey cells pad shorter sequences.",
+        datasets=named_datasets,
     )
     .resolve_scale(x="independent", y="independent")
     .resolve_legend(color="collected")
