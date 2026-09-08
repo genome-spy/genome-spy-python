@@ -10,7 +10,7 @@ from genome_spy.datasets import load_dataset
 META = {
     "category": "Reference annotation tracks",
     "order": 29,
-    "height": 940,
+    "height": 870,
     "max_width": 1000,
 }
 
@@ -144,7 +144,7 @@ consensus_tiles = (
 consensus_letters = consensus_tiles.mark_text(size=11, fitToBand=True).encode(
     text="residue:N", color=gs.value("#202020")
 )
-consensus = (consensus_tiles + consensus_letters).properties(height=20)
+consensus = (consensus_tiles + consensus_letters).properties(height=15)
 
 # Summarize the residue mixture at each position as a sequence logo.
 consensus_logo = (
@@ -196,7 +196,7 @@ tiles = (
 letters = tiles.mark_text(size=11, fitToBand=True).encode(
     text="residue:N", color=gs.value("#202020")
 )
-sequences = (tiles + letters).properties(height=gs.step(17), viewportHeight=420)
+sequences = (tiles + letters).properties(height=gs.step(15), viewportHeight=380)
 
 # Make all detail tracks follow the selected range, starting at the first 50 positions.
 details = (

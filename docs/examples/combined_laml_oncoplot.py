@@ -11,9 +11,14 @@ from genome_spy.schema import OverhangConfig
 META = {
     "category": "Oncoprints and cohort summaries",
     "order": 26,
-    "height": 920,
+    "height": 750,
     "max_width": 1100,
 }
+
+MATRIX_HEIGHT = 360
+TMB_HEIGHT = 70
+SNV_TRACK_HEIGHT = 60
+SNV_PANEL_HEIGHT = 130
 
 # Load the prepared patient data and gene summaries.
 data = load_dataset("tcga_laml_combined_oncoplot")
@@ -98,7 +103,7 @@ burden = (
         color=mutation_color,
         tooltip=["sample:N", "class:N", "count:Q"],
     )
-    .properties(height=100)
+    .properties(height=TMB_HEIGHT)
 )
 
 # Give empty cells a pale background; leave hover details to the colored cells.
@@ -180,6 +185,7 @@ outlines = (
         xOffset=0.5,
         x2Offset=-0.5,
         tooltip=None,
+        clip=False,
     )
     .encode(y=gs.Y("start:I").scale(row_scale).axis(None), y2="end:I")
 )
@@ -187,7 +193,7 @@ outlines = (
 # Combine the cells, dots, and outlines into the gene matrix.
 matrix = (
     background + copy_number + mutations + pathway_cells + grid + alt_c + outlines
-).properties(height=460)
+).properties(height=MATRIX_HEIGHT)
 
 # Add each patient's FAB classification below the matrix.
 fab = (
@@ -234,13 +240,13 @@ spectrum = (
         ),
         tooltip=["sample:N", "substitution:N", "percent:Q"],
     )
-    .properties(height=120)
+    .properties(height=SNV_TRACK_HEIGHT)
 )
 
 # Stack the patient tracks so their columns line up while zooming.
 sample_column = (
     gs.vconcat(
-        gs.layer(burden).resolve_scale(y="excluded").properties(height=100),
+        gs.layer(burden).resolve_scale(y="excluded").properties(height=TMB_HEIGHT),
         matrix,
         gs.layer(fab).resolve_scale(color="excluded").properties(height=18),
         gs.layer(followup).resolve_scale(color="excluded").properties(height=18),
@@ -248,7 +254,10 @@ sample_column = (
         gs.layer(spectrum)
         .resolve_scale(y="excluded", color="excluded")
         .resolve_legend(default="excluded")
-        .properties(height=150, overhang=OverhangConfig(left=False, right=False)),
+        .properties(
+            height=SNV_PANEL_HEIGHT,
+            overhang=OverhangConfig(left=False, right=False),
+        ),
         spacing=8,
     )
     .properties(
@@ -273,7 +282,7 @@ vaf = (
         y=row_y,
         tooltip=["gene:N", "vaf:Q"],
     )
-    .properties(width=85, height=460)
+    .properties(width=85, height=MATRIX_HEIGHT)
 )
 # Label the genes and pathway summaries.
 row_labels = (
@@ -284,7 +293,7 @@ row_labels = (
         y=row_y,
         text="gene:N",
     )
-    .properties(width=60, height=460)
+    .properties(width=60, height=MATRIX_HEIGHT)
 )
 
 # Show the percentage of patients affected in each row.
@@ -297,7 +306,7 @@ percentages = (
         text="percent_label:N",
         tooltip=["gene:N", "altered_percent:Q"],
     )
-    .properties(width=32, height=460)
+    .properties(width=32, height=MATRIX_HEIGHT)
 )
 
 # Show each gene's MutSig result on the right; leave missing values blank.
@@ -311,7 +320,7 @@ qvalues = (
         y=row_y,
         tooltip=["gene:N", "neglog_q:Q"],
     )
-    .properties(width=100, height=460)
+    .properties(width=100, height=MATRIX_HEIGHT)
 )
 blank = gs.Chart([{}]).mark_point(opacity=0).properties(width=0, height=100)
 
@@ -335,7 +344,9 @@ def bar_header(title: str, left: str, right: str, width: int) -> gs.LayerChart:
     )
     line = gs.Chart([{}]).mark_rule(color="#535c68", size=1).encode(y=gs.value(0))
     return (
-        (line + labels).properties(width=width, height=100).resolve_scale(y="excluded")
+        (line + labels)
+        .properties(width=width, height=TMB_HEIGHT)
+        .resolve_scale(y="excluded")
     )
 
 
@@ -357,13 +368,14 @@ left_column = gs.vconcat(
     bar_header("VAF (%)", "100", "0", 85)
     | blank.mark_text(angle=-90, size=11)
     .encode(text=gs.value("TMB"), x=gs.value(0.8), y=gs.value(0.5))
-    .properties(width=60),
+    .properties(width=60, height=TMB_HEIGHT),
     (vaf | row_labels).resolve_scale(x="independent"),
     spacing=8,
 ).resolve_scale(x="independent", y="shared")
 
 right_column = gs.vconcat(
-    blank.properties(width=32) | bar_header("−log10 q", "0", "12.64", 100),
+    blank.properties(width=32, height=TMB_HEIGHT)
+    | bar_header("−log10 q", "0", "12.64", 100),
     (percentages | qvalues).resolve_scale(x="independent"),
     track_label("FAB classification"),
     track_label("Follow-up (days)"),
@@ -384,6 +396,7 @@ chart = (
         titleOrient="top",
         labelFontSize=10,
         symbolSize=65,
+        layout={"right": {"anchor": "end"}},
     )
     .properties(
         title=f"Altered in {data['altered_samples']} ({100 * data['altered_samples'] / len(data['samples']):.1f}%) of {len(data['samples'])} samples",

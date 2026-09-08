@@ -111,9 +111,13 @@ def test_laml_layout_keeps_rows_fixed_and_sample_column_responsive() -> None:
         child["resolve"]["scale"]["y"] == "shared" for child in panels["hconcat"]
     )
     assert column["vconcat"][0]["resolve"]["scale"]["y"] == "excluded"
-    assert column["vconcat"][0]["height"] == 100
+    assert column["vconcat"][0]["height"] == 70
     assert column["vconcat"][-1]["resolve"]["scale"]["y"] == "excluded"
-    assert column["vconcat"][-1]["height"] == 150
+    assert column["vconcat"][-1]["height"] == 130
+    left_header = spec["hconcat"][0]["vconcat"][0]["hconcat"]
+    right_header = spec["hconcat"][2]["vconcat"][0]["hconcat"]
+    assert [child["height"] for child in left_header] == [70, 70]
+    assert [child["height"] for child in right_header] == [70, 70]
     assert example["qvalues"].to_dict()["encoding"]["x"]["field"] == "neglog_q"
 
 
@@ -127,6 +131,7 @@ def test_laml_uses_collected_native_legends_with_local_snv_legend() -> None:
     spec = example["chart"].to_dict()
     assert spec["resolve"]["legend"] == {"default": "collected"}
     assert spec["config"]["legend"]["orient"] == "bottom"
+    assert spec["config"]["legend"]["layout"] == {"right": {"anchor": "end"}}
     column = spec["hconcat"][1]
     assert column["resolve"]["scale"]["color"] == "shared"
     spectrum = column["vconcat"][-1]
