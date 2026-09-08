@@ -130,7 +130,7 @@ def test_laml_declares_large_tables_once_as_named_datasets() -> None:
     )
     spec = example["chart"].to_dict()
 
-    assert set(spec["datasets"]) == {
+    assert set(spec["datasets"]) >= {
         "burden",
         "copy_number",
         "events",

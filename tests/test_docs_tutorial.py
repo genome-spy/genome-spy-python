@@ -129,7 +129,7 @@ def test_data_guide_charts_serialize_with_expected_data_ownership() -> None:
         assert chart.to_dict()["$schema"].endswith("/dist/schema.json")
 
     inline_spec = tutorial.inline_chart.to_dict()
-    assert inline_spec["data"]["values"] == tutorial.measurements
+    assert inline_spec["datasets"][inline_spec["data"]["name"]] == tutorial.measurements
 
     url_spec = tutorial.url_chart.to_dict()
     assert url_spec["data"] == {
@@ -138,7 +138,10 @@ def test_data_guide_charts_serialize_with_expected_data_ownership() -> None:
     }
 
     inherited_spec = tutorial.inherited_chart.to_dict()
-    assert inherited_spec["data"]["values"] == tutorial.measurements
+    assert (
+        inherited_spec["datasets"][inherited_spec["data"]["name"]]
+        == tutorial.measurements
+    )
     assert all("data" not in layer for layer in inherited_spec["layer"])
     # The title reserves the space the dy=-12 labels need above the top point.
     assert inherited_spec["title"] == "Measurements over time"
@@ -328,7 +331,7 @@ def test_transform_guide_examples_serialize_in_pipeline_order() -> None:
     assert filtered_spec["transform"] == [
         {"type": "filter", "expr": "(datum.quality >= 0.7)"}
     ]
-    assert len(filtered_spec["data"]["values"]) == 6
+    assert len(filtered_spec["datasets"][filtered_spec["data"]["name"]]) == 6
 
     formula_spec = tutorial.formula_chart.to_dict()
     assert formula_spec["transform"] == [
@@ -408,7 +411,7 @@ def test_composition_grid_uses_placeholder_and_excluded_summaries() -> None:
 
     assert spec["columns"] == 2
     assert len(spec["concat"]) == 4
-    assert spec["concat"][0]["data"] == {"values": []}
+    assert spec["datasets"][spec["concat"][0]["data"]["name"]] == []
     assert spec["concat"][1]["resolve"]["scale"] == {"y": "excluded"}
     assert spec["concat"][2]["resolve"]["scale"] == {"x": "excluded"}
     assert spec["resolve"]["scale"] == {"x": "shared", "y": "shared"}
@@ -805,7 +808,7 @@ def test_interaction_brush_links_overview_to_two_detail_tracks() -> None:
     spec = tutorial.brush_chart.to_dict()
 
     assert spec["params"] == [{"name": "brush"}]
-    assert spec["data"]["values"] == tutorial.BRUSH_VARIANTS
+    assert spec["datasets"][spec["data"]["name"]] == tutorial.BRUSH_VARIANTS
     assert {row["chrom"] for row in tutorial.BRUSH_VARIANTS} == {
         "chr1",
         "chr7",

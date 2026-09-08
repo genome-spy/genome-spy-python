@@ -80,6 +80,11 @@ provides its initial rows and gives later updates a stable target. The GenomeSpy
 documentation describes this indirection in
 [named data](https://genomespy.app/docs/grammar/data/eager/#named-data).
 
+Equal unnamed tables are shared automatically. Updating a shared dataset changes
+all charts that read it. Use different explicit names when charts need independent
+updates, even if they start with the same rows. See
+{ref}`reuse-chart-data`.
+
 ## Replace the named dataset
 
 Use {py:meth}`~genome_spy.api.JupyterChart.set_dataset` to replace its records:

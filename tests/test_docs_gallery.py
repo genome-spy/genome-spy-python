@@ -130,7 +130,9 @@ def test_link_example_encodes_dome_heights() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "link_mark.py")
 
-    assert [row["y"] for row in example.spec["data"]["values"]] == [
+    assert [
+        row["y"] for row in example.spec["datasets"][example.spec["data"]["name"]]
+    ] == [
         2,
         4,
         6,
@@ -332,7 +334,10 @@ def test_luad_oncoprint_uses_sample_index_scale_and_categorical_genes() -> None:
     assert "scale" not in percent_panel["encoding"]["y"]
     count_layers = gene_count_panel["layer"]
     assert all("scale" not in layer["encoding"]["y"] for layer in count_layers)
-    assert all(panel["data"]["values"] for panel in sample_tracks["vconcat"][5:])
+    assert all(
+        example.spec["datasets"][panel["data"]["name"]]
+        for panel in sample_tracks["vconcat"][5:]
+    )
     assert len(sample_tracks["vconcat"]) == 8
     assert placeholder["name"] == "summary-placeholder"
     assert placeholder["height"] == 162
@@ -419,7 +424,9 @@ def test_laml_oncoprint_uses_shared_sample_index_scale() -> None:
     assert percent_panel["encoding"]["x"] == {"value": 1}
     assert "scale" not in percent_panel["encoding"]["y"]
     assert all("scale" not in layer["encoding"]["y"] for layer in counts_panel["layer"])
-    assert [row["label"] for row in percent_panel["data"]["values"]] == [
+    assert [
+        row["label"] for row in example.spec["datasets"][percent_panel["data"]["name"]]
+    ] == [
         "27%",
         "25%",
         "17%",
@@ -767,9 +774,11 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
         "q-value-rects",
         "q-value-thresholds",
     ]
-    assert len(score_track["layer"][1]["data"]["values"]) == 90_240
+    assert (
+        len(example.spec["datasets"][score_track["layer"][1]["data"]["name"]]) == 90_240
+    )
     assert lesion_track["name"] == "gistic-all-lesions"
-    assert len(lesion_track["data"]["values"]) == 146
+    assert len(example.spec["datasets"][lesion_track["data"]["name"]]) == 146
     assert [transform["type"] for transform in lesion_track["transform"]] == [
         "regexExtract",
         "filter",
@@ -792,7 +801,7 @@ def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
     assert gene_track["encoding"]["y"]["scale"]["paddingOuter"] == 0.5
     assert gene_track["padding"] == {"top": 10}
     assert "offset" not in gene_track["transform"][0]
-    assert len(gene_track["data"]["values"]) == 29_599
+    assert len(example.spec["datasets"][gene_track["data"]["name"]]) == 29_599
     assert example.spec["resolve"]["scale"] == {"x": "shared", "y": "independent"}
     assert example.spec["scales"]["x"]["domain"] == [
         {"chrom": "chr1"},
@@ -828,7 +837,7 @@ def test_rainfall_includes_shared_refseq_annotation_track() -> None:
     assert gene_track["encoding"]["y"]["scale"]["paddingOuter"] == 0.5
     assert gene_track["padding"] == {"top": 10}
     assert "offset" not in gene_track["transform"][0]
-    assert len(gene_track["data"]["values"]) == 29_599
+    assert len(example.spec["datasets"][gene_track["data"]["name"]]) == 29_599
     assert "offset" not in gene_track["layer"][0]["encoding"]["x"]
     rainfall_layers = example.spec["vconcat"][0]["layer"]
     assert all(layer["encoding"]["x"]["offset"] == 1 for layer in rainfall_layers)
@@ -864,7 +873,7 @@ def test_bam_example_uses_full_alignment_dataflow() -> None:
     assert read_spec["layer"][0]["layer"][0]["mark"]["type"] == "arrow"
     zoom_message = read_spec["layer"][1]
     assert zoom_message["name"] == "zoom-message"
-    assert zoom_message["data"] == {"values": [{}]}
+    assert example.spec["datasets"][zoom_message["data"]["name"]] == [{}]
     assert all("data" not in layer for layer in zoom_message["layer"])
     assert [transform["type"] for transform in example.spec["transform"]] == [
         "filter",
@@ -1261,7 +1270,7 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     assert example.spec["assembly"] == "hg18"
     assert "genomes" not in example.spec
     assert "vconcat" not in example.spec
-    point_data = example.spec["data"]["values"]
+    point_data = example.spec["datasets"][example.spec["data"]["name"]]
     assert {row["chrom"] for row in point_data} <= {
         *(f"chr{number}" for number in range(1, 23)),
         "chrX",

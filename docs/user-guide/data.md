@@ -22,8 +22,8 @@ Pass the records as the first argument to {py:class}`~genome_spy.Chart`:
 :title: Six measurements provided as inline Python records
 ```
 
-The chart stores these rows as inline `data.values` in the generated GenomeSpy
-specification. Inline data is a good fit for examples and small tables because
+The chart includes these rows in the generated GenomeSpy specification, normally
+as a named dataset. Inline data is a good fit for examples and small tables because
 the specification remains self-contained. The GenomeSpy documentation describes
 this and the other eager sources in
 [inline data](https://genomespy.app/docs/grammar/data/eager/#inline-data).
@@ -106,6 +106,49 @@ repeating the same source when several layers use the same rows:
 
 Here, neither child chart declares data. The layered parent owns one copy of
 `measurements`, and both the point and text marks read it.
+
+(reuse-chart-data)=
+## Reuse a table across charts
+
+You can pass the same table to several charts. Like Altair, the wrapper stores
+equal record tables once in the exported specification and lets each chart
+refer to that copy:
+
+```python
+rows = [{"x": 1, "y": 2}, {"x": 2, "y": 4}]
+points = gs.Chart(rows).mark_point().encode(x="x:Q", y="y:Q")
+bars = gs.Chart(rows).mark_bar().encode(x="x:Q", y="y:Q")
+inline_chart = points | bars
+```
+
+This happens automatically for ordinary records and tables exported as records.
+It reduces repeated data in JSON, HTML, and gallery charts. Notebook displays
+keep using Arrow for supported tables. URLs and sources that need special
+parsing retain their existing data definitions.
+
+For a stable name you can use in [notebook updates](notebooks.md), declare the
+table yourself and reference it with {py:class}`~genome_spy.Data`:
+
+```python
+points = gs.Chart(gs.Data(name="measurements")).mark_point().encode(x="x:Q", y="y:Q")
+bars = gs.Chart(gs.Data(name="measurements")).mark_bar().encode(x="x:Q", y="y:Q")
+chart = (points | bars).properties(datasets={"measurements": rows})
+```
+
+Different explicit names remain independent, even when their initial rows are
+equal. Avoid relying on automatically generated names for updates.
+
+To export each inline table separately, temporarily disable consolidation with
+{py:meth}`gs.data_transformers.enable <genome_spy.data_transformers.DataTransformerSettings.enable>`:
+
+```python
+with gs.data_transformers.enable(consolidate_datasets=False):
+    spec = inline_chart.to_dict()
+```
+
+This affects automatic sharing; explicitly named datasets stay named. A large
+unique table still takes space, so consider URL data or Arrow notebook transport
+when removing repeated copies is not enough.
 
 ## Prepare in Python or transform in the chart?
 

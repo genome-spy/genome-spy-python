@@ -76,6 +76,14 @@ constructing the namespace.
 
 {data}
 
+## Data preparation settings
+
+`gs.data_transformers` controls automatic sharing of inline tables during
+serialization. It supports `consolidate_datasets` and temporary overrides with
+`enable()`. It does not provide a transformer plugin registry.
+
+{data_transformers}
+
 ## Example datasets
 
 Packaged tables used by the gallery examples. See
@@ -184,6 +192,11 @@ def render_api_page() -> str:
         functions=_section(api_functions(), group="functions"),
         schema=_section(schema_objects(), group="schema"),
         data=_section(["LazyNamespace"], group="data", module="genome_spy.data"),
+        data_transformers=_section(
+            ["DataTransformerSettings"],
+            group="data",
+            module="genome_spy.data_transformers",
+        ),
         datasets=_section(
             ["available_datasets", "load_dataset", "DatasetNotFoundError"],
             group="datasets",

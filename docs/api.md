@@ -170,6 +170,22 @@ constructing the namespace.
    LazyNamespace
 ```
 
+## Data preparation settings
+
+`gs.data_transformers` controls automatic sharing of inline tables during
+serialization. It supports `consolidate_datasets` and temporary overrides with
+`enable()`. It does not provide a transformer plugin registry.
+
+```{eval-rst}
+.. currentmodule:: genome_spy.data_transformers
+
+.. autosummary::
+   :toctree: generated/data/
+   :nosignatures:
+
+   DataTransformerSettings
+```
+
 ## Example datasets
 
 Packaged tables used by the gallery examples. See
