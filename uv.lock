@@ -574,7 +574,7 @@ wheels = [
 
 [[package]]
 name = "genome-spy-python"
-version = "0.1.0"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "anywidget" },
@@ -624,7 +624,7 @@ docs = [
 
 [package.metadata]
 requires-dist = [
-    { name = "anywidget", specifier = ">=0.9.18" },
+    { name = "anywidget", specifier = ">=0.11.0" },
     { name = "jsonschema", specifier = ">=4.26.0" },
     { name = "pyarrow", marker = "extra == 'arrow'", specifier = ">=18.0.0" },
     { name = "traitlets", specifier = ">=5.14.3" },
