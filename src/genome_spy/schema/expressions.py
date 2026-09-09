@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from genome_spy._expressions import Expression, _function_expression
+from genome_spy._expressions import Expression, _function_expression, _js_repr
 from genome_spy.schema import core
 from genome_spy.schemapi import Undefined, UndefinedType
 
@@ -72,10 +72,23 @@ class _ExprMeta(type):
 
 
 class expr(core.ExprRef, metaclass=_ExprMeta):
-    """Build expression references, constants, and function calls."""
+    """Build expression references, constants, and function calls.
 
-    def __new__(cls, expression: str | Expression) -> core.ExprRef:  # type: ignore[misc]
-        return core.ExprRef(expr=str(expression))
+    Pass expression source as a string, or a Python list or tuple to build
+    an array expression. Array items may include parameters and expressions;
+    ordinary strings inside arrays are treated as literal values.
+    """
+
+    def __new__(  # type: ignore[misc]
+        cls,
+        expression: str | Expression | list[Any] | tuple[IntoExpression, ...],
+    ) -> core.ExprRef:
+        source = (
+            _js_repr(expression)
+            if isinstance(expression, (list, tuple))
+            else str(expression)
+        )
+        return core.ExprRef(expr=source)
 
     @classmethod
     def if_(

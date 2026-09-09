@@ -79,6 +79,40 @@ def test_generated_expression_parameters_follow_upstream_names() -> None:
 
 def test_expr_call_still_builds_expression_reference() -> None:
     assert gs.expr(gs.datum.amount * 2).to_dict() == {"expr": "(datum.amount * 2)"}
+    assert gs.expr("datum.amount * 2").to_dict() == {"expr": "datum.amount * 2"}
+
+
+@pytest.mark.parametrize("container", [list, tuple])
+def test_expr_arrays_preserve_parameters_and_literal_values(container: type) -> None:
+    limit = gs.param("limit", value=10)
+    values = container([limit, gs.datum.x + 1, "limit", True, None, [False, "a'b"]])
+
+    assert gs.expr(values).to_dict() == {
+        "expr": "[limit,(datum.x + 1),'limit',true,null,[false,\"a'b\"]]"
+    }
+
+
+def test_expr_empty_array() -> None:
+    assert gs.expr([]).to_dict() == {"expr": "[]"}
+
+
+def test_displacement_extent_accepts_python_array_expression() -> None:
+    length = gs.param("proteinLength", value=1049)
+    pixels = gs.param("pixelsPerResidue", value=1)
+    chart = (
+        gs.Chart([{"position": 1}])
+        .mark_point()
+        .add_params(length, pixels)
+        .transform_displace1d(
+            pos="position",
+            length=18,
+            extent=gs.expr([0.5, length + 0.5 - 25 / gs.expr.max(1, pixels)]),
+        )
+    )
+
+    assert chart.to_dict()["transform"][0]["extent"] == {
+        "expr": "[0.5,((proteinLength + 0.5) - (25 / max(1,pixelsPerResidue)))]"
+    }
 
 
 def test_generated_transforms_accept_and_normalize_expressions() -> None:

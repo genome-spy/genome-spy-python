@@ -918,6 +918,8 @@ def test_write_schema_package_uses_unpacked_npm_package(tmp_path: Path) -> None:
     assert (output_dir / "ergonomics.py").exists()
     expressions = (output_dir / "expressions.py").read_text(encoding="utf-8")
     assert "class expr(core.ExprRef" in expressions
+    assert "list[Any] | tuple[IntoExpression, ...]" in expressions
+    assert "_js_repr(expression)" in expressions
     assert "def if_(" in expressions
     assert "return _function_expression('sin', value)" in expressions
     assert json.loads(

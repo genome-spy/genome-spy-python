@@ -126,6 +126,35 @@ def test_external_type_checker_sees_generated_public_signatures(tmp_path) -> Non
     assert 'Unexpected keyword argument "layer"' in completed.stdout
 
 
+def test_expression_arrays_accept_stored_typed_lists(tmp_path: Path) -> None:
+    consumer = tmp_path / "expression_arrays.py"
+    consumer.write_text(
+        "\n".join(
+            [
+                "import genome_spy as gs",
+                "bounds: list[float] = [0.5, 10.0]",
+                "positions: list[int] = [1, 2]",
+                "parameters = [gs.param('limit', value=10)]",
+                "mixed = [0.5, parameters[0], gs.datum.x + 1]",
+                "gs.expr(bounds)",
+                "gs.expr(positions)",
+                "gs.expr(parameters)",
+                "gs.expr(mixed)",
+                "gs.expr((0.5, parameters[0]))",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    completed = subprocess.run(
+        [sys.executable, "-m", "mypy", "--no-error-summary", str(consumer)],
+        check=False,
+        capture_output=True,
+        encoding="utf-8",
+    )
+
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+
+
 def test_generated_schema_package_loads_real_genomespy_schema() -> None:
     schema = load_schema()
 
