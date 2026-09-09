@@ -109,7 +109,12 @@ def main() -> None:
                         page.evaluate(
                             "window.jupyterapp.commands.execute('notebook:run-all-cells')"
                         )
-                        canvas = page.locator(".jp-OutputArea canvas").first
+                        # Check the completed chart, not an earlier tutorial preview.
+                        canvas = (
+                            page.locator(".jp-CodeCell")
+                            .last.locator(".jp-OutputArea canvas")
+                            .first
+                        )
                         canvas.wait_for(state="visible", timeout=120_000)
                         page.wait_for_timeout(2000)
                         if page.locator(".jp-OutputArea-error").count() or errors:
