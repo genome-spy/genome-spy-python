@@ -65,6 +65,15 @@ def test_pik3ca_lollipop_uses_reactive_collision_displacement() -> None:
     assert example.spec["datasets"]["mutations"][-1]["mutation"] == "G1049R"
     assert example.spec["scales"]["x"] == {"domainMin": 1, "nice": False}
     mutation_view = example.spec["vconcat"][0]
+    # Upstream clips only horizontally so anchor extensions reach the protein.
+    assert mutation_view["config"]["mark"]["clip"] == "x"
+    connectors = mutation_view["vconcat"][2]
+    assert connectors["height"] == 20
+    assert connectors["layer"][1]["mark"]["y2Offset"] == 20
+    assert connectors["layer"][1]["encoding"]["y"] == {"value": 0}
+    assert connectors["layer"][1]["encoding"]["y2"] == {"value": 0}
+    assert example.spec["spacing"] == mutation_view["spacing"] == 0
+    assert example.spec["vconcat"][1]["padding"] == {"top": -5}
     assert mutation_view["transform"][1] == {
         "type": "displace1d",
         "pos": "position",
@@ -72,7 +81,7 @@ def test_pik3ca_lollipop_uses_reactive_collision_displacement() -> None:
         "as": "xDisplacement",
         "positionFactor": {"expr": "pixelsPerResidue"},
         "extent": {
-            "expr": "[0.5, proteinLength + 0.5 - 25 / max(1, pixelsPerResidue)]"
+            "expr": "[0.5,((proteinLength + 0.5) - (25 / max(1,pixelsPerResidue)))]"
         },
     }
     assert mutation_view["encoding"]["xOffset"] == {

@@ -115,6 +115,8 @@ mutation_view = (
     .properties(
         data=gs.Data(name="mutations"),
     )
+    # Let the anchors extend below their track to meet the protein.
+    .configure_mark(clip="x")
     .encode(
         x=gs.X("position:I").axis(None),
         xOffset=gs.XOffset("xDisplacement:Q").scale(None),
@@ -129,7 +131,9 @@ mutation_view = (
         length=DISPLACEMENT_LENGTH,
         as_="xDisplacement",
         positionFactor=pixels_per_residue,
-        extent=gs.expr("[0.5, proteinLength + 0.5 - 25 / max(1, pixelsPerResidue)]"),
+        extent=gs.expr(
+            [0.5, protein_length + 0.5 - 25 / gs.expr.max(1, pixels_per_residue)]
+        ),
     )
 )
 
