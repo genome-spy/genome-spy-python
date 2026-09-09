@@ -4,12 +4,11 @@
 
 `tcga_laml_combined_oncoplot.json.gz` contains prepared TCGA LAML tables from
 maftools revision `015a4cf8c69ba89a55a3fdcea911421509e9a198` (Anand Mayakonda,
-MIT). `p53_sequence_comparison.json.gz` contains p53 sequences and derived
-display tables from Plotly's datasets revision
-`0c447c47b757ad74edecab31f0d72f849d2e67c2` (Plotly Technologies Inc., MIT).
-Source file hashes are retained in the packaged data. The corresponding gallery
-pages describe processing. Copyright notices and terms are included in
-`LICENSES/GALLERY-DATA-MIT.txt`.
+MIT). `p53_sequence_comparison_aligned.fasta.gz` contains p53 sequences from
+Plotly's datasets revision `0c447c47b757ad74edecab31f0d72f849d2e67c2`
+(Plotly Technologies Inc., MIT), aligned with MAFFT v7.526 using L-INS-i. The
+corresponding gallery pages describe processing. Copyright notices and terms
+are included in `LICENSES/GALLERY-DATA-MIT.txt`.
 
 ## Code adapted from Vega-Altair
 

@@ -1,8 +1,8 @@
-"""Prepare the combined LAML oncoplot and Plotly p53 gallery tables.
+"""Prepare the combined LAML oncoplot gallery tables.
 
 Run with ``uv run python tools/prepare_combined_gallery_data.py`` after placing
-the Plotly FASTA in tmp/alignment_viewer_p53.fasta. No network access is used.
-Source revisions and input hashes are retained in each output's provenance.
+the maftools reference files under ``tmp/maftools``. No network access is used.
+Source revisions and input hashes are retained in the output provenance.
 """
 
 from __future__ import annotations
@@ -251,63 +251,5 @@ def _laml() -> dict:
     }
 
 
-def _p53() -> dict:
-    source = ROOT / "tmp/alignment_viewer_p53.fasta"
-    sequences = []
-    for record in source.read_text().split(">")[1:]:
-        header, *lines = record.splitlines()
-        identifier = header.split()[0]
-        sequences.append(
-            {
-                "identifier": identifier.split("|")[-1],
-                "accession": identifier.split("|")[1],
-                "header": header,
-                "sequence": "".join(lines).upper(),
-            }
-        )
-    width = max(len(row["sequence"]) for row in sequences)
-    cells = [
-        {
-            "identifier": row["identifier"],
-            "accession": row["accession"],
-            "position": pos + 1,
-            "residue": aa,
-        }
-        for row in sequences
-        for pos, aa in enumerate(row["sequence"].ljust(width, "-"))
-    ]
-    columns = []
-    for pos in range(width):
-        counts = Counter(
-            row["sequence"][pos] for row in sequences if pos < len(row["sequence"])
-        )
-        total = sum(counts.values())
-        consensus = sorted(counts, key=lambda aa: (-counts[aa], aa))[0]
-        columns.append(
-            {
-                "position": pos + 1,
-                "residue": consensus,
-                "identifier": "Consensus",
-                "identity": counts[consensus] / len(sequences),
-                "coverage": total / len(sequences),
-            }
-        )
-    return {
-        "sequences": sequences,
-        "cells": cells,
-        "columns": columns,
-        "length": width,
-        "sequence_order": [row["identifier"] for row in sequences],
-        "provenance": {
-            "repository": "plotly/datasets",
-            "revision": "0c447c47b757ad74edecab31f0d72f849d2e67c2",
-            "path": "Dash_Bio/Genetic/alignment_viewer_p53.fasta",
-            "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
-            "processing": "Original ungapped sequences; right padding only, no sequence alignment.",
-        },
-    }
-
-
 if __name__ == "__main__":
     _write("tcga_laml_combined_oncoplot", _laml())
-    _write("p53_sequence_comparison", _p53())

@@ -1,23 +1,52 @@
-"""P53 sequence comparison with an overview brush.
+"""P53 multiple-sequence alignment with an overview brush.
 
-Explore the p53 FASTA used by Dash Bio, with residue tiles, a consensus logo,
-position agreement, sequence coverage, and a linked overview.
+Explore a MAFFT alignment of the p53 proteins used by Dash Bio, with residue
+tiles, a sequence logo, position agreement, gap prevalence, and a linked
+overview.
 """
 
 import genome_spy as gs
-from genome_spy.datasets import _load_table_bundle as load_data
+from genome_spy.datasets import load_dataset
 
 META = {
     "category": "Reference annotation tracks",
     "order": 29,
-    "height": 870,
+    "height": 850,
     "max_width": 1000,
 }
 
-# Load prepared sequence rows and per-position summaries.
-data = load_data("p53_sequence_comparison", ("cells", "columns"))
-# DataFrames let the gallery store shared tables in separate Arrow files.
-# Use soft amino-acid colors; grey fills the ends of shorter sequences.
+
+def _parse_fasta(text: str) -> list[dict[str, str]]:
+    records = []
+    for block in text.strip().split(">")[1:]:
+        header, *lines = block.splitlines()
+        source_id = header.split(maxsplit=1)[0]
+        parts = source_id.split("|")
+        records.append(
+            {
+                "identifier": parts[-1],
+                "accession": parts[1] if len(parts) >= 3 else source_id,
+                "header": header,
+                "sequence": "".join("".join(lines).split()).upper(),
+            }
+        )
+    if not records:
+        raise ValueError("The FASTA alignment contains no sequences.")
+    lengths = {len(record["sequence"]) for record in records}
+    if len(lengths) != 1:
+        raise ValueError(f"The FASTA sequences are not aligned: lengths={lengths}.")
+    return records
+
+
+# Python handles packaged-file access and the small amount of header parsing.
+alignment_records = _parse_fasta(
+    load_dataset("p53_sequence_comparison", as_format="text")
+)
+alignment_length = len(alignment_records[0]["sequence"])
+sequence_order = [record["identifier"] for record in alignment_records]
+
+# GenomeSpy flattens the sequences and calculates all column-level summaries.
+# Use soft amino-acid colors; alignment gaps are pale grey.
 residue_colors = gs.Scale(
     domain=list("ACDEFGHIKLMNPQRSTVWY-"),
     range=[
@@ -79,17 +108,21 @@ detail_ruler = gs.ruler(
 
 # Keep all positions visible here; drag to choose the range shown below.
 overview = (
-    gs.Chart(data["cells"])
+    gs.Chart()
     .mark_rect()
     .encode(
         x=gs.X("position:I")
-        .scale(domain=[1, data["length"] + 1], zoom=False)
+        .scale(domain=[1, alignment_length + 1], zoom=False)
         .title(None),
-        y=gs.Y("identifier:N")
-        .scale(domain=data["sequence_order"], reverse=True)
-        .axis(None),
+        y=gs.Y("identifier:N").scale(domain=sequence_order, reverse=True).axis(None),
         color=color,
-        tooltip=["identifier:N", "accession:N", "position:Q", "residue:N"],
+        tooltip=[
+            "identifier:N",
+            "accession:N",
+            "position:Q",
+            "residue:N",
+            "header:N",
+        ],
     )
     .properties(height=100)
     .add_params(selection)
@@ -101,28 +134,60 @@ overview_group = (
     .properties(padding=gs.Paddings(top=6))
 )
 
-# Show the fraction matching the most common amino acid at each position.
+# Calculate the most common non-gap residue and its share at each alignment column.
+column_consensus = (
+    gs.Chart()
+    .transform_filter(gs.datum.residue != "-")
+    .transform_aggregate(groupby=["position", "residue"])
+    .transform_window(
+        ops=["sum", "row_number"],
+        fields=["count", None],
+        as_=["nonGapCount", "rank"],
+        frame=[None, None],
+        groupby=["position"],
+        sort=gs.compare(
+            field=["count", "residue"],
+            order=["descending", "ascending"],
+        ),
+    )
+    .transform_filter(gs.datum.rank == 1)
+    .transform_formula(
+        expr=gs.datum.count / gs.datum.nonGapCount,
+        as_="conservation",
+    )
+)
+
+# Show agreement among the non-gap amino acids at each position.
 conservation = (
-    gs.Chart(data["columns"])
-    .mark_rect()
+    column_consensus.mark_rect()
     .encode(
         x=gs.X("position:I").title(None),
-        y=gs.Y("identity:Q").scale(domain=[0, 1]).axis(tickCount=3, title=None),
-        color=gs.Color("identity:Q")
+        y=gs.Y("conservation:Q").scale(domain=[0, 1]).axis(tickCount=3, title=None),
+        color=gs.Color("conservation:Q")
         .scale(domain=[0, 1], scheme="viridis")
         .legend(title="Conservation", gradientLength=140, tickCount=3),
-        tooltip=["position:Q", "identity:Q", "residue:N"],
+        tooltip=["position:Q", "conservation:Q", "residue:N", "nonGapCount:Q"],
     )
     .properties(height=60, title=gs.title("Conservation", style="track-title"))
 )
-# Show the fraction of sequences without a gap at each position.
+# Show the fraction of sequences without a gap at each alignment column.
 gap_free = (
-    gs.Chart(data["columns"])
+    gs.Chart()
+    .transform_formula(
+        expr=gs.expr.if_(gs.datum.residue == "-", 0, 1),
+        as_="hasResidue",
+    )
+    .transform_aggregate(
+        groupby=["position"],
+        fields=["hasResidue"],
+        ops=["mean"],
+        as_=["gapFree"],
+    )
     .mark_rect(color="#b4bbc2")
     .encode(
         x=gs.X("position:I").title(None),
-        y=gs.Y("coverage:Q").scale(domain=[0, 1]).axis(tickCount=3, title=None),
-        tooltip=["position:Q", "coverage:Q"],
+        y=gs.Y("gapFree:Q").scale(domain=[0, 1]).axis(tickCount=3, title=None),
+        tooltip=["position:Q", "gapFree:Q"],
     )
     .properties(
         height=30,
@@ -131,25 +196,9 @@ gap_free = (
     )
 )
 
-# Show the most common amino acid as a compact consensus row.
-consensus_tiles = (
-    gs.Chart(data["columns"])
-    .mark_rect()
-    .encode(
-        x=gs.X("position:I").title(None),
-        y=gs.Y("identifier:N").title(None),
-        color=color,
-        tooltip=["position:Q", "residue:N", "identity:Q"],
-    )
-)
-consensus_letters = consensus_tiles.mark_text(size=11, fitToBand=True).encode(
-    text="residue:N", color=gs.value("#202020")
-)
-consensus = (consensus_tiles + consensus_letters).properties(height=15)
-
 # Summarize the residue mixture at each position as a sequence logo.
-consensus_logo = (
-    gs.Chart(data["cells"])
+sequence_logo = (
+    gs.Chart()
     .transform_filter(gs.datum.residue != "-")
     .transform_aggregate(groupby=["position", "residue"])
     .transform_stack(
@@ -182,15 +231,19 @@ consensus_logo = (
 
 # Draw one colored tile per amino acid, with sequence details on hover.
 tiles = (
-    gs.Chart(data["cells"])
+    gs.Chart()
     .mark_rect()
     .encode(
         x=gs.X("position:I").title(None),
-        y=gs.Y("identifier:N")
-        .scale(domain=data["sequence_order"], reverse=True)
-        .title(None),
+        y=gs.Y("identifier:N").scale(domain=sequence_order, reverse=True).title(None),
         color=legend_color,
-        tooltip=["identifier:N", "accession:N", "position:Q", "residue:N"],
+        tooltip=[
+            "identifier:N",
+            "accession:N",
+            "position:Q",
+            "residue:N",
+            "header:N",
+        ],
     )
 )
 # Add letters when there is enough room to read them.
@@ -204,8 +257,7 @@ details = (
     gs.vconcat(
         gap_free,
         conservation,
-        consensus,
-        consensus_logo,
+        sequence_logo,
         sequences,
         spacing=6,
     )
@@ -228,10 +280,13 @@ chart = (
     gs.vconcat(details, overview_group, spacing=2)
     .add_params(brush)
     .properties(
+        data=alignment_records,
         width="container",
-        title="P53 sequences: overview and residue detail",
-        description="34 original, ungapped p53 sequences from the Dash Bio example. Drag the overview or zoom the detail tracks to compare positions; grey cells pad shorter sequences.",
+        title="P53 protein alignment: overview and residue detail",
+        description="A 34-sequence p53 protein alignment generated with MAFFT L-INS-i. Drag the overview or zoom the detail tracks to compare alignment columns; grey cells are alignment gaps.",
     )
+    .transform_flatten_sequence(as_=["position", "residue"])
+    .transform_formula(expr=gs.datum.position + 1, as_="position")
     .resolve_scale(x="independent", y="independent")
     .resolve_legend(color="collected")
     .configure_legend(
