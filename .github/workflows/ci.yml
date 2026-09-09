@@ -68,3 +68,32 @@ jobs:
       - run: uv run python tools/generate_schema_wrapper.py
       - run: uv run ruff format src/genome_spy/schema src/genome_spy/helpers.py src/genome_spy/api.py src/genome_spy/__init__.py
       - run: git diff --exit-code src/genome_spy/schema src/genome_spy/helpers.py src/genome_spy/api.py src/genome_spy/__init__.py tools
+
+  notebook-rendering:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: "3.11"
+      - run: uv build --wheel
+      - name: Install the wheel and notebook frontend together
+        run: |
+          uv venv --python 3.11 "$RUNNER_TEMP/notebook-env"
+          for wheel in "$GITHUB_WORKSPACE"/dist/*.whl; do
+            uv pip install --python "$RUNNER_TEMP/notebook-env/bin/python" \
+              "$wheel[arrow]" jupyterlab pandas numpy playwright pillow
+          done
+          "$RUNNER_TEMP/notebook-env/bin/python" -m playwright install --with-deps chromium
+      - name: Render the brush notebook in JupyterLab
+        run: |
+          "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
+            notebooks/brush_linked_genome_tracks.ipynb \
+            --screenshot "$RUNNER_TEMP/notebook-rendering.png"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: notebook-rendering
+          path: ${{ runner.temp }}/notebook-rendering.png
+          if-no-files-found: ignore
