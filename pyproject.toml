@@ -1,6 +1,6 @@
 [project]
 name = "genome-spy-python"
-version = "0.2.0"
+version = "0.3.0"
 description = "genome-spy-python is a declarative genomics visualization library for Python, built on top of the genome-spy JSON specification."
 readme = "README.md"
 requires-python = ">=3.11"

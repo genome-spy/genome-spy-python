@@ -57,7 +57,7 @@ from genome_spy.schemapi import SchemaBase, SchemaValidationError
 
 
 def test_package_exposes_version() -> None:
-    assert gs.__version__ == "0.2.0"
+    assert gs.__version__ == "0.3.0"
 
 
 def test_public_api_exports_are_unique() -> None:
