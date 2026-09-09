@@ -80,8 +80,7 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
     """
 
     def __new__(  # type: ignore[misc]
-        cls,
-        expression: str | Expression | list[Any] | tuple[IntoExpression, ...],
+        cls, expression: str | Expression | list[Any] | tuple[IntoExpression, ...]
     ) -> core.ExprRef:
         source = (
             _js_repr(expression)
