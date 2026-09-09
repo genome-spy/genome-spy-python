@@ -86,7 +86,7 @@ association_track = (
 )
 
 # Show effect sizes for the same range.
-effect_track = (
+effect_points = (
     gs.Chart()
     .mark_point(filled=True, size=24, opacity=0.78, color="#f58518")
     .encode(
@@ -96,10 +96,16 @@ effect_track = (
         y=gs.Y("EFFECTSIZE:Q").scale(domain=[-3, 3]).title("Effect size"),
         tooltip=["SNP:N", "GENE:N", "EFFECTSIZE:Q"],
     )
-    .properties(
-        name="effect-size",
-        height=95,
-    )
+)
+
+# Put a zero line behind the points to separate positive and negative effects.
+effect_baseline = (
+    gs.Chart([{"EFFECTSIZE": 0}])
+    .mark_rule(color="#888888", size=1, tooltip=None)
+    .encode(y=gs.Y("EFFECTSIZE:Q").scale(domain=[-3, 3]).title("Effect size"))
+)
+effect_track = (effect_baseline + effect_points).properties(
+    name="effect-size", height=95
 )
 
 # Add Z-scores as the third view of the selected range.

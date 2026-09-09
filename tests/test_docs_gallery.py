@@ -1341,9 +1341,15 @@ def test_brush_gallery_links_one_overview_to_three_detail_tracks() -> None:
             {"chrom": "chr5", "pos": 180_857_866},
         ],
     }
+    effect_baseline, effect_points = detail_tracks[1]["layer"]
+    assert effect_baseline["mark"]["type"] == "rule"
+    assert effect_baseline["encoding"]["y"]["field"] == "EFFECTSIZE"
+    assert effect_baseline["encoding"]["y"]["scale"]["domain"] == [-3, 3]
+    assert spec["datasets"][effect_baseline["data"]["name"]] == [{"EFFECTSIZE": 0}]
+    assert effect_points["mark"]["type"] == "point"
     assert all(
         track["encoding"]["x"]["scale"]["domain"] == expected_domain
-        for track in detail_tracks
+        for track in [detail_tracks[0], effect_points, detail_tracks[2]]
     )
     assert all("params" not in track for track in detail_tracks)
     assert all("title" not in track for track in detail_tracks)
