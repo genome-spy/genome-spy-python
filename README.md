@@ -4,6 +4,12 @@
 
 <h1 align="center">genome-spy-python</h1>
 
+<p align="center">
+  <a href="https://github.com/genome-spy/genome-spy-python/actions/workflows/ci.yml"><img src="https://github.com/genome-spy/genome-spy-python/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI status"></a>
+  <a href="https://pypi.org/project/genome-spy-python/"><img src="https://img.shields.io/pypi/v/genome-spy-python" alt="PyPI version"></a>
+  <a href="https://colab.research.google.com/github/genome-spy/genome-spy-python/blob/main/notebooks/brush_linked_genome_tracks.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open brush example in Colab"></a>
+</p>
+
 `genome-spy-python` is a Python interface for
 <a href="https://genomespy.app/" target="_blank" rel="noopener noreferrer">GenomeSpy</a>,
 a grammar for interactive and scalable genomic visualization. It lets Python
