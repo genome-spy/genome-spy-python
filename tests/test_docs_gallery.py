@@ -1193,12 +1193,26 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
     spec = example.spec
 
     assert spec["width"] == "container"
-    assert example.height == 870
+    assert example.height == 850
     assert spec["spacing"] == 2
     assert spec["resolve"]["legend"] == {"color": "collected"}
     assert spec["config"]["legend"]["orient"] == "bottom"
     assert spec["config"]["legend"]["layout"] == {"anchor": "middle"}
-    assert len(spec["datasets"]) == 2
+    assert len(spec["datasets"]) == 1
+    assert spec["transform"] == [
+        {
+            "type": "flattenSequence",
+            "as": ["position", "residue"],
+        },
+        {
+            "type": "formula",
+            "as": "position",
+            "expr": "(datum.position + 1)",
+        },
+    ]
+    records = spec["datasets"][spec["data"]["name"]]
+    assert len(records) == 34
+    assert {len(record["sequence"]) for record in records} == {438}
     details, overview_group = spec["vconcat"]
     assert details["params"] == [
         {
@@ -1216,17 +1230,25 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
             },
         }
     ]
-    gap_free, conservation, consensus, logo, sequences = details["vconcat"]
-    columns = gap_free["data"]
-    cells = logo["data"]
-    assert len(spec["datasets"][columns["name"]]) == 396
-    assert len(spec["datasets"][cells["name"]]) == 13464
-    assert conservation["data"] == columns
-    assert consensus["layer"][0]["data"] == columns
-    assert sequences["layer"][0]["data"] == cells
+    gap_free, conservation, logo, sequences = details["vconcat"]
+    assert all("data" not in view for view in details["vconcat"])
     assert [gap_free["title"]["text"], conservation["title"]["text"]] == [
         "Gap-free",
         "Conservation",
+    ]
+    assert gap_free["transform"] == [
+        {
+            "type": "formula",
+            "as": "hasResidue",
+            "expr": "if((datum.residue === '-'),0,1)",
+        },
+        {
+            "type": "aggregate",
+            "as": ["gapFree"],
+            "fields": ["hasResidue"],
+            "groupby": ["position"],
+            "ops": ["mean"],
+        },
     ]
     assert gap_free["padding"]["bottom"] == 8
     assert conservation["encoding"]["color"]["scale"] == {
@@ -1234,8 +1256,31 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
         "scheme": "viridis",
     }
     assert conservation["encoding"]["color"]["legend"]["title"] == "Conservation"
-    assert consensus["height"] == 15
-    assert consensus["layer"][0]["encoding"]["y"]["field"] == "identifier"
+    assert conservation["transform"][0] == {
+        "type": "filter",
+        "expr": "(datum.residue !== '-')",
+    }
+    assert conservation["transform"][1] == {
+        "type": "aggregate",
+        "groupby": ["position", "residue"],
+    }
+    assert conservation["transform"][2] == {
+        "type": "window",
+        "ops": ["sum", "row_number"],
+        "as": ["nonGapCount", "rank"],
+        "fields": ["count", None],
+        "frame": [None, None],
+        "groupby": ["position"],
+        "sort": {
+            "field": ["count", "residue"],
+            "order": ["descending", "ascending"],
+        },
+    }
+    assert conservation["transform"][-1] == {
+        "type": "formula",
+        "as": "conservation",
+        "expr": "(datum.count / datum.nonGapCount)",
+    }
     assert "title" not in logo
     assert logo["transform"][-1]["offset"] == "normalize"
     assert logo["mark"]["logoLetters"] is True
@@ -1249,16 +1294,15 @@ def test_p53_sequence_comparison_uses_linked_summary_and_overview() -> None:
         for encoding in (
             gap_free["encoding"],
             conservation["encoding"],
-            consensus["layer"][0]["encoding"],
             logo["encoding"],
             sequences["layer"][0]["encoding"],
         )
     )
 
     overview = overview_group["vconcat"][0]
-    assert overview["data"] == cells
     assert "title" not in overview
     assert overview["encoding"]["x"]["title"] is None
+    assert overview["encoding"]["x"]["scale"]["domain"] == [1, 439]
     brush_mark = overview["params"][0]["select"]["mark"]
     assert brush_mark["fillOpacity"] == 0.28
     assert brush_mark["strokeWidth"] == 1.5
@@ -1640,7 +1684,6 @@ def test_gallery_generation_removes_stale_build_outputs(
 @pytest.mark.parametrize(
     ("name", "expected_rows"),
     [
-        ("p53_sequence_comparison", [396, 13464]),
         ("combined_laml_oncoplot", [5, 18, 23, 46, 200, 262, 265, 572, 645]),
     ],
 )

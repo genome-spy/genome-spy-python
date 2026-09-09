@@ -204,30 +204,25 @@ def test_laml_additional_feature_size_tracks_zoom() -> None:
     assert mark["size"] == {"expr": "min((8 * pow(zoomLevel,1.5)),64)"}
 
 
-def test_p53_residues_padding_and_column_statistics() -> None:
-    data = load_dataset("p53_sequence_comparison")
-    assert len(data["sequences"]) == 34
-    assert data["length"] == 396
-    assert len(data["cells"]) == 34 * 396
-    assert len(data["columns"]) == 396
-    for sequence in data["sequences"]:
-        cells = [
-            row for row in data["cells"] if row["identifier"] == sequence["identifier"]
-        ]
-        assert (
-            "".join(row["residue"] for row in cells).rstrip("-") == sequence["sequence"]
+def test_p53_fasta_is_an_actual_alignment() -> None:
+    source = load_dataset("p53_sequence_comparison", as_format="text")
+    example = runpy.run_path(
+        str(
+            Path(__file__).resolve().parents[1]
+            / "docs/examples/p53_sequence_comparison.py"
         )
-        assert [row["position"] for row in cells] == list(range(1, 397))
-    for column in data["columns"]:
-        position = column["position"] - 1
-        counts = Counter(
-            row["sequence"][position]
-            for row in data["sequences"]
-            if len(row["sequence"]) > position
-        )
-        assert column["coverage"] == pytest.approx(sum(counts.values()) / 34)
-        assert column["identity"] == pytest.approx(max(counts.values()) / 34)
-        assert counts[column["residue"]] == max(counts.values())
-    # The incomplete sequences must not be mistaken for biological gap calls.
-    assert data["columns"][-1]["coverage"] == pytest.approx(2 / 34)
-    assert all("-" not in row["sequence"] for row in data["sequences"])
+    )
+    records = example["alignment_records"]
+
+    assert source.startswith(">sp|Q9W678|P53_BARBU ")
+    assert len(records) == 34
+    assert example["alignment_length"] == 438
+    assert {len(record["sequence"]) for record in records} == {438}
+    assert all("-" in record["sequence"] for record in records)
+    assert records[13]["identifier"] == "P53_HUMAN"
+    assert records[13]["accession"] == "P04637"
+    assert records[13]["header"].endswith("OS=Homo sapiens GN=TP53 PE=1 SV=4")
+
+    parse_fasta = example["_parse_fasta"]
+    with pytest.raises(ValueError, match="not aligned"):
+        parse_fasta(">first\nAC-\n>second\nAC")

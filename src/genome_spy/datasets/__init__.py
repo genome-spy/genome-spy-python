@@ -21,7 +21,7 @@ _DATASETS = {
     "brca_maf": "brca.maf.gz",
     "hapmap_gwas": "hapmap_gwas.csv",
     "mutation_impact_reference": "mutation_impact_reference.json",
-    "p53_sequence_comparison": "p53_sequence_comparison.json.gz",
+    "p53_sequence_comparison": "p53_sequence_comparison_aligned.fasta.gz",
     "pik3ca_mutations": "pik3ca_mutations.json",
     "pik3ca_tcga_brca_lollipop": "pik3ca_tcga_brca_lollipop.json",
     "tal1_alphagenome_reference": "tal1_alphagenome_reference.json.gz",
