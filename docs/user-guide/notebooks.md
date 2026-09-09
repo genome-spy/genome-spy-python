@@ -138,3 +138,11 @@ Marimo control changes.
 
 See the {py:class}`genome_spy.api.JupyterChart` reference for multiple datasets,
 transport options, and method signatures.
+
+## If a chart does not appear
+
+Make sure the package is installed in the Python environment your notebook
+uses. After installing or upgrading it, restart the notebook's Python session
+and rerun the cells. The chart also needs internet access to load its display
+code. As an alternative, use {py:meth}`~genome_spy.TopLevelSpec.save` to save an
+HTML file and open it in a browser.

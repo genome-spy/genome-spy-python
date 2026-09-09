@@ -1,36 +1,32 @@
 # Contributing to genome-spy-python
 
-Thank you for considering a contribution to `genome-spy-python`. Bug reports,
-documentation improvements, examples, tests, and code contributions are all
-welcome.
+Bug reports, documentation, examples, tests, and code contributions are welcome.
 
 ## How to contribute
 
-Use a GitHub issue to report a bug or propose a substantial change before
-starting work. Small, well-scoped fixes can go directly to a pull request.
+Open an issue before starting a large change. Small fixes can go straight to a
+pull request.
 
-Pull requests should explain the motivation and user-visible effect of the
-change. Keep unrelated changes separate and update tests and documentation when
-behavior or the public API changes.
+Explain what your pull request changes and why. Keep unrelated changes separate,
+and update tests and docs when behavior or the public API changes.
 
 ## Development setup
 
-The project requires Python 3.11 or newer and uses
-[`uv`](https://docs.astral.sh/uv/) for its development environment. From the
-repository root, install the development and documentation dependencies:
+Use Python 3.11 or newer and [`uv`](https://docs.astral.sh/uv/). Install the
+development and docs dependencies from the repository root:
 
 ```bash
 uv sync --group dev --group docs
 ```
 
-The main project directories are:
+Main directories:
 
-- `src/genome_spy/` — installable library code;
-- `tests/` — the pytest suite;
-- `docs/examples/` — source files for the documentation gallery;
-- `tools/` — schema, API-reference, and gallery tooling;
+- `src/genome_spy/` — library code
+- `tests/` — tests
+- `docs/examples/` — gallery examples
+- `tools/` — code and documentation generators
 
-You can install the repository's pre-commit hooks with:
+Install pre-commit hooks to check changes before committing:
 
 ```bash
 uv run pre-commit install
@@ -40,27 +36,23 @@ uv run pre-commit install
 
 ### Python and typing
 
-Public APIs must have type hints. Prefer modern annotations such as `list[T]`,
-`dict[K, V]`, and `X | Y`. Keep the core implementation in pure Python where
-possible and isolate file, network, and notebook integration at the edges.
-Document public APIs with Google-style docstrings, including a summary,
-description, arguments, return value, raised exceptions, and an example.
+Use type hints such as `list[T]`, `dict[K, V]`, and `X | Y` for public APIs.
+Add Google-style docstrings covering purpose, arguments, results, exceptions,
+and an example. Keep file, network, and notebook code separate from core logic.
 
-The package is a schema-backed public API. Favor small, predictable changes and
-avoid adding parallel representations or runtime adapters when the behavior can
-be expressed through the schema generator.
+Keep changes small. Prefer generating APIs from the GenomeSpy schema over
+adding handwritten alternatives.
 
 ### Formatting and linting
 
-[Ruff](https://docs.astral.sh/ruff/) is the source of truth for formatting and
-linting:
+Format and lint with [Ruff](https://docs.astral.sh/ruff/):
 
 ```bash
 uv run ruff format .
 uv run ruff check .
 ```
 
-Run the type checker when Python library code changes:
+Check types after changing library code:
 
 ```bash
 uv run mypy src/
@@ -68,50 +60,43 @@ uv run mypy src/
 
 ### Testing
 
-Use pytest for Python tests and add focused coverage for behavior changes. Run
-the complete suite with:
+Add a focused test for each behavior change. Run the Python tests with:
 
 ```bash
 uv run pytest tests/ -x
 ```
 
-The notebook widget also has Node-based tests:
+Run the widget's JavaScript tests with:
 
 ```bash
 node --test tests/widget.test.mjs
 ```
 
-Before submitting a pull request, run the checks relevant to the files you
-changed. CI runs formatting, linting, typing, package tests, code-generation
-checks, documentation tests, and wheel smoke tests.
+Run the checks relevant to your changes before submitting a pull request.
+CI also checks generated code, docs, and the installed package.
 
 ### Performance
 
-GenomeSpy is designed for scalable visualization. Consider serialization size,
-data copying, and browser transfer when changing data or rendering paths. Use
-measurements to justify optimization work; readability is preferable to
-speculative performance complexity.
+Avoid unnecessary data copies and large chart specifications. Measure performance
+before adding complexity to make code faster.
 
 ## Generated schema and expression APIs
 
-Generated files under `src/genome_spy/schema/` are committed but should not be
-edited by hand. The generator reads the pinned `@genome-spy/core` version from
-`pyproject.toml`, fetches its schema, and generates the Python wrappers. The
-expression namespace is generated from that GenomeSpy release's expression
-documentation and the corresponding `vega-expression` documentation.
+Do not edit generated files in `src/genome_spy/schema/` by hand. The generator
+uses the GenomeSpy version in `pyproject.toml`, its schema, and the matching
+GenomeSpy and Vega expression documentation.
 
-Regenerate after changing the Core pin or the generator:
+Regenerate after changing that version or the generator:
 
 ```bash
 uv run python tools/generate_schema_wrapper.py
 ```
 
-Schema generation requires `npm` on `PATH` and network access. For local
-upstream auditing, the command also accepts an unpacked package with
-`--package-dir`. Local expression documentation can be supplied together with
-`--genome-spy-expression-docs` and `--vega-expression-docs`.
+This requires `npm` and internet access. Use `--package-dir` for a local package,
+or both `--genome-spy-expression-docs` and `--vega-expression-docs` for local
+expression docs.
 
-After regeneration, run:
+Then check the results:
 
 ```bash
 uv run pytest tests/test_schema_codegen.py -x
@@ -119,85 +104,84 @@ uv run ruff format src/genome_spy/schema src/genome_spy/helpers.py src/genome_sp
 git diff --check
 ```
 
-Inspect and commit the generated artifacts with the generator changes. CI reruns
-the generator and rejects any uncommitted drift in `src/genome_spy/schema/` or
-`tools/`.
+Review and commit the generated files alongside your changes. CI checks that
+regenerating them produces no differences.
 
-If an upstream transform follows the existing schema structure, its public
-`transform_*()` method should be generated. Keep the small override registry in
-`tools/generate_schema_wrapper.py` limited to intentional Python authoring
-conventions that cannot be inferred from the schema alone.
+New transforms should be generated from the schema. Add overrides in
+`tools/generate_schema_wrapper.py` only for Python conventions the schema
+cannot describe.
 
 ## Documentation
 
 ### API reference
 
-`docs/api.md` is generated from `genome_spy.__all__`. Regenerate it after
-changing the public API:
+After changing the public API, regenerate `docs/api.md` from `genome_spy.__all__`:
 
 ```bash
 uv run python tools/generate_api_docs.py
 ```
 
-Sphinx creates the individual API pages in the ignored `docs/generated/`
-directory.
+Sphinx creates the individual pages in `docs/generated/`; do not commit them.
 
 ### Build and preview
 
-Build the documentation with warnings treated as errors:
+Build the docs and check for warnings:
 
 ```bash
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
-Run the same command again for an incremental build. Keep `docs/_build/` and
-avoid `-E` and `-a` during normal editing. Unchanged gallery examples reuse
-cached specifications and Arrow data; generated pages are only rewritten when
-their contents change. Changes to shared library code, packaged data, build
+Rerun the same command to rebuild changed pages and examples. Keep `docs/_build/`
+and avoid `-E` and `-a` for faster builds. Changes to shared code, data, build
 tools, or the lockfile regenerate all examples.
 
-The gallery cache lives in the Sphinx doctree directory (normally
-`docs/_build/html/.doctrees/genomespy-gallery`). Delete that cache directory to
-force example regeneration. Remote resources and arbitrary files outside the
-repository's tracked example dependencies are not monitored.
+To force example regeneration, delete the gallery cache (normally
+`docs/_build/html/.doctrees/genomespy-gallery`). Changes to remote data or files
+outside the tracked dependencies are not detected automatically.
 
-To preview it locally:
+Preview locally:
 
 ```bash
 cd docs/_build/html
 python3 -m http.server
 ```
 
-Then open <http://localhost:8000>. Interactive examples load the pinned
-GenomeSpy JavaScript bundle from a CDN, so they require an internet connection.
+Open <http://localhost:8000>. Interactive examples need internet access to load
+GenomeSpy.
 
 ### Gallery examples
 
-Python files under `docs/examples/` are the source of truth for the generated
-gallery. An example can have a same-stem Markdown companion for interpretation,
-provenance, disclaimers, and links to the corresponding official GenomeSpy
-example.
+Write examples in `docs/examples/`. Put explanations, data sources, any
+necessary disclaimers, and upstream links in an optional Markdown file with
+the same name.
 
-Keep examples focused on visualization. Prefer prepared packaged datasets over
-embedding general-purpose analysis, and use Python-authored expressions such as
-`gs.datum.score > 0` and `gs.expr.isValid(gs.datum.value)` where possible.
-Remember that `.transform_*()` methods only author the specification;
-GenomeSpy executes the transforms in the browser.
+Focus on plotting, not data preparation: load prepared packaged datasets and
+prefer Python expressions such as `gs.datum.score > 0`. Remember that
+`.transform_*()` defines work that GenomeSpy runs in the browser, not Python.
 
-After changing an example, run:
+After editing an example, run:
 
 ```bash
 uv run pytest tests/test_docs_gallery.py -q
 uv run sphinx-build -b html -W --keep-going docs docs/_build/html
 ```
 
-Gallery thumbnails are checked in and should be updated only after visually
-reviewing the rendered chart.
+Check the chart visually before updating its committed thumbnail.
+
+### Notebook rendering
+
+CI checks that the brush notebook renders in a fresh environment. Follow
+[the workflow](.github/workflows/ci.yml) for setup, then run with that
+environment's Python:
+
+```bash
+python -m playwright install chromium
+python tools/check_notebook_rendering.py notebooks/brush_linked_genome_tracks.ipynb --screenshot /tmp/notebook-rendering.png
+```
 
 ## Commit guidelines
 
-Keep commits atomic: each commit should contain one logical change that can be
-reviewed independently. Use
+Keep each commit focused on one change. Use
 [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/):
 
 ```text
@@ -206,13 +190,12 @@ fix(widget): preserve zoom during data updates
 docs(gallery): add a sequence example
 ```
 
-Do not rewrite shared history unless the reviewers explicitly request it.
+Do not rewrite shared history unless reviewers ask you to.
 
 ## Community and communication
 
-Use the
-[`genome-spy-python` issue tracker](https://github.com/genome-spy/genome-spy-python/issues)
-for package-specific bugs and feature requests. Questions about the underlying
-GenomeSpy grammar or JavaScript renderer belong in the upstream
-[GenomeSpy discussions](https://github.com/genome-spy/genome-spy/discussions)
-or [issue tracker](https://github.com/genome-spy/genome-spy/issues).
+Report wrapper bugs and request features in the
+[Python package issue tracker](https://github.com/genome-spy/genome-spy-python/issues).
+For GenomeSpy's grammar or renderer, use the upstream
+[discussions](https://github.com/genome-spy/genome-spy/discussions) or
+[issues](https://github.com/genome-spy/genome-spy/issues).
