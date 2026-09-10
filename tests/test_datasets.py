@@ -390,22 +390,11 @@ def test_unknown_dataset_raises_contextual_error() -> None:
         load_dataset("not_a_dataset")
 
 
-def test_every_packaged_dataset_is_documented_or_explicitly_excluded() -> None:
-    """A dataset reaches the docs only once its source and license are stated."""
-    # These ship with the package but no documented example uses them, so they
-    # carry no attribution in the docs.
-    undocumented = {
-        "mutation_impact_reference",
-        "pik3ca_mutations",
-        "tal1_alphagenome_reference",
-        "tcga_oncoprint",
-    }
+def test_every_packaged_dataset_is_documented() -> None:
+    """Even unused bundled data need a discoverable documentation entry."""
     page = (Path(__file__).resolve().parents[1] / "docs" / "datasets.md").read_text(
         encoding="utf-8"
     )
 
     for name in available_datasets():
-        if name in undocumented:
-            assert f"`{name}`" not in page, f"{name} is documented but excluded"
-            continue
         assert f"`{name}`" in page, f"{name} has no entry in docs/datasets.md"

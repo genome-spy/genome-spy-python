@@ -458,11 +458,14 @@ def test_oncoprint_examples_include_data_provenance() -> None:
     for example in (laml, luad):
         prose = " ".join(example.prose.split())
         assert ":::{admonition} Data use and provenance" in prose
-        assert "TCGA data are open-access" in prose
+        assert "TCGA" in prose
         assert "During data loading" in prose
         assert "GenomeSpy then renders" in prose
     assert "maftools" in laml.prose
     assert "pyoncoprint" in luad.prose
+    assert "default ODbL" in luad.prose
+    assert "Broad GDAC notice" in luad.prose
+    assert "retracted in 2024" in luad.prose
 
 
 @pytest.mark.parametrize(
@@ -485,6 +488,10 @@ def test_association_and_expression_plots_include_data_provenance(
     assert source in prose
     assert "During data loading" in prose
     assert "GenomeSpy then renders" in prose
+    if filename.startswith("airway_"):
+        assert "Bioconnector workshops" in prose
+        assert "lengthScaledTPM" in prose
+        assert "CC BY-NC-SA 4.0" in prose
 
 
 @pytest.mark.parametrize(

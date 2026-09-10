@@ -1,7 +1,7 @@
 :::{admonition} Data use and provenance
 :class: note
 
-The mutation calls are the TCGA BRCA sample distributed with the MIT-licensed
+The mutation calls are the TCGA BRCA sample distributed with the
 [`maftools`](https://github.com/PoisonAlien/maftools) rainfall example. During
 data loading, the package selects the most mutated sample, calculates
 inter-event distances, and detects compact six-mutation windows. The trimmed

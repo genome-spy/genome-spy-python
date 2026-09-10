@@ -22,10 +22,14 @@ with GenomeSpy rectangles, text, bars, a sequence logo, and a shared brush.
 
 The 34 UniProt-labelled p53 protein sequences come from the
 [Plotly FASTA](https://github.com/plotly/datasets/blob/0c447c47b757ad74edecab31f0d72f849d2e67c2/Dash_Bio/Genetic/alignment_viewer_p53.fasta)
-in Plotly's MIT-licensed datasets repository. They were aligned with MAFFT
+in Plotly's datasets repository. They were aligned with MAFFT
 v7.526 using the L-INS-i strategy:
 `mafft-linsi p53.unaligned.fasta > p53.aligned.fasta`. The resulting alignment
 is packaged as `p53_sequence_comparison_aligned.fasta.gz`.
+Credit the UniProt Consortium: its copyrightable database content is
+[CC BY 4.0](https://www.uniprot.org/help/license/). Sequence accessions and
+versions are retained in the FASTA headers, including historical mouse P02340
+sequence version 3. The alignment and compression are local modifications.
 :::
 
 ## Python and GenomeSpy processing

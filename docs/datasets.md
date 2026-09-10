@@ -3,12 +3,17 @@
 The combined LAML oncoplot uses `load_dataset("tcga_laml_combined_oncoplot")`;
 the p53 sequence comparison loads aligned FASTA text with
 `load_dataset("p53_sequence_comparison", as_format="text")`. Their
-MIT-licensed sources and processing are described in the
+sources and processing are described in the
 [combined oncoplot](gallery/combined_laml_oncoplot.md) and
 [p53 comparison](gallery/p53_sequence_comparison.md) gallery pages.
 
 The package ships the tables that the [gallery](gallery/index.md) examples use,
 so you can try the API on real data without downloading anything.
+
+Data retain their own terms, independently of the source packages' software
+licenses. See the
+<a href="THIRD_PARTY_NOTICES.md">third-party notices</a> for file-level status, attribution,
+and terms.
 
 ```python
 from genome_spy.datasets import available_datasets, load_dataset
@@ -23,9 +28,13 @@ for JSON files. Pass `as_format="text"` to get the raw file contents instead.
 | Dataset | Contents |
 | --- | --- |
 | `airway_metadata` | Sample table for the airway RNA-seq experiment |
-| `airway_scaledcounts` | Gene-level counts for the same eight samples |
-| `hapmap_gwas` | Genome-wide association results with p-values and effect sizes |
-| `brca_maf` | Somatic mutation calls for TCGA breast tumors |
+| `airway_scaledcounts` | Rounded, length-scaled gene counts for the same eight samples |
+| `hapmap_gwas` | HapMap coordinates with simulated p-values and effect sizes |
+| `brca_maf` | Somatic mutation calls for one TCGA breast-tumor sample |
+| `pik3ca_mutations` | Historical UniProt feature counts and Pfam protein domains |
+| `tcga_oncoprint` | Plotly Dash Bio alteration fixture |
+| `mutation_impact_reference` | Project-authored synthetic reference window |
+| `tal1_alphagenome_reference` | UCSC hg38 reference sequence with interval metadata |
 | `pik3ca_tcga_brca_lollipop` | Prepared recurrent PIK3CA mutations and protein domains |
 | `tcga_laml_maf` | Somatic mutation calls for TCGA acute myeloid leukemia |
 | `tcga_laml_annotations` | Clinical annotations for those leukemia samples |
@@ -42,20 +51,27 @@ for JSON files. Pass `as_format="text"` to get the raw file contents instead.
 - `airway_metadata` and `airway_scaledcounts` describe the airway smooth muscle
   RNA-seq experiment of Himes et al., *PLoS One* 2014
   ([GEO GSE52778](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE52778)),
-  distributed through the Bioconductor
-  [airway](https://bioconductor.org/packages/airway/) package (LGPL).
+  independently reprocessed by Stephen Turner for the
+  [Bioconnector workshops](https://github.com/bioconnector/workshops/blob/0785f9ffbab87f451f35d52bf48f2fa228e8327a/_dev/airway_kallisto/airway_kallisto_tximport.R)
+  with kallisto and tximport `lengthScaledTPM`. The bundled CSVs exactly match
+  those workshop files; the workshop declares CC BY-NC-SA 4.0.
 - `hapmap_gwas` is the `HapMap` example table from the
-  [manhattanly](https://cran.r-project.org/package=manhattanly) R package (MIT).
-  Its genotypes come from NCBI HapMap phase III.
+  [manhattanly](https://cran.r-project.org/package=manhattanly) R package.
+  HapMap supplied the build-36 map coordinates and rs identifiers; UCSC hg18
+  supplied gene annotations. The association statistics are simulated or
+  derived from simulated p-values. The table contains no individual genotypes.
 - `brca_maf`, `tcga_laml_maf`, and `tcga_laml_annotations` are the example
   files bundled with [maftools](https://bioconductor.org/packages/maftools/)
-  (MIT) and contain open-access TCGA mutation calls.
+  and contain TCGA mutation calls or clinical annotations.
 - `pik3ca_tcga_brca_lollipop` contains the chart-ready named datasets from
   GenomeSpy's official TCGA-BRCA PIK3CA lollipop example. Mutation counts come
   from GDC masked somatic MAFs and protein domains from UniProt P42336; see the
   gallery example for full provenance.
 - `pyoncoprint_tcga` is the example alteration table from
-  [pyoncoprint](https://github.com/pnucolab/pyoncoprint) (BSD 2-Clause).
+  [pyoncoprint](https://github.com/pnucolab/pyoncoprint) as a cBioPortal TCGA LUAD export. See the
+  [cBioPortal data policy](https://docs.cbioportal.org/user-guide/faq/) and the
+  study-specific notice linked in our third-party notices. Its microbiome
+  track comes from a study retracted in 2024 and is not a validated finding.
 - `tcga_ov_gistic_scores` and `tcga_ov_gistic_lesions` are the complete
   `scores.gistic` and `all_lesions.conf_99.txt` tables used by the official
   GenomeSpy example. They are open-access TCGA OV-TP GISTIC2 output produced
