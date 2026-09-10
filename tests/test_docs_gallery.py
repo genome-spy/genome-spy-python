@@ -1428,8 +1428,15 @@ def test_gallery_index_lists_every_example_in_hidden_navigation(
     )
     assert "[user guide](../user-guide/index.md)" in markdown
     assert 'class="gs-card__tags"' not in markdown
+    assert markdown.count('class="gs-card__subtitle"') == len(examples)
+    assert "RNA-seq volcano plot" in markdown
+    assert "Variant association volcano plot" in markdown
+    assert "Brush-linked Manhattan plot" in markdown
     for example in examples:
         assert f"\n{example.name}\n" in markdown
+        title, subtitle = extension.GALLERY_CARD_LABELS[example.name]
+        assert f'<span class="gs-card__title">{title}</span>' in markdown
+        assert f'<span class="gs-card__subtitle">{subtitle}</span>' in markdown
 
 
 def test_gallery_build_token_changes_with_example_content() -> None:
@@ -1826,8 +1833,8 @@ def test_gallery_detail_embed_uses_direct_container_sizing() -> None:
     assert "await embed(c, spec, { bare: true });" in markdown
     assert f"airway_volcano_plot.json?v={expected}" in markdown
     assert "const spec = '../_static/specs/airway_volcano_plot.json" in markdown
-    assert "Show specification</button>" in markdown
-    assert "Hide specification" in markdown
+    assert "Show generated specification</button>" in markdown
+    assert "Hide generated specification" in markdown
     assert "loadedSpec = fetch(spec).then((response) =>" in markdown
     assert "JSON.stringify(await loadSpec(), null, 2)" in markdown
     assert "await copyText(text)" in markdown
@@ -1839,7 +1846,9 @@ def test_gallery_detail_embed_uses_direct_container_sizing() -> None:
     assert 'aria-label="Copy specification"' in markdown
     assert 'class="gs-embed-spec-wrapper" hidden' in markdown
     assert "Playground" not in markdown
-    assert markdown.index("```python") < markdown.index("Show specification</button>")
+    assert markdown.index("```python") < markdown.index(
+        "Show generated specification</button>"
+    )
     assert "View the generated render spec" not in markdown
     assert "references assets hosted with these docs" not in markdown
     assert "Download the generated GenomeSpy spec" not in markdown
@@ -1924,6 +1933,91 @@ def test_minigallery_links_include_cache_busting_query(
     assert len(nodes) == 1
     assert f"gallery/manhattan_plot.html?v={expected}" in nodes[0].astext()
     assert f"_static/gallery/manhattan_plot.png?v={expected}" in nodes[0].astext()
+    markup = nodes[0].astext()
+    assert markup.count('class="preview"') == len(examples)
+    assert markup.count('class="gs-showcase-track"') == (len(examples) + 5) // 6
+    assert 'class="gs-showcase-controls" aria-label="Gallery pages" hidden' in markup
+    assert 'class="gs-showcase-status" aria-live="polite"' in markup
+    assert 'aria-label="Next examples"' not in markup
+    for example in examples:
+        assert markup.count(f'href="gallery/{example.name}.html?') == 1
+        assert markup.count(f'data-example="{example.name}"') == 1
+    first_group = markup.split('class="gs-showcase-track"')[1]
+    featured = [
+        "gff3_gene_annotations",
+        "tcga_ov_gistic",
+        "manhattan_plot",
+        "airway_volcano_plot",
+        "pik3ca_tcga_brca_lollipop",
+        "multiple_sequence_alignment",
+    ]
+    positions = [first_group.index(f'data-example="{name}"') for name in featured]
+    assert positions == sorted(positions)
+    second_group = markup.split('class="gs-showcase-track"')[2]
+    second_page = [
+        "ascat_fitting",
+        "rect_heatmap",
+        "airway_ma_plot",
+        "bigbed_ccre_track",
+        "bam_read_alignments",
+        "brush_linked_genome_tracks",
+    ]
+    positions = [second_group.index(f'data-example="{name}"') for name in second_page]
+    assert positions == sorted(positions)
+    third_group = markup.split('class="gs-showcase-track"')[3]
+    third_page = [
+        "combined_laml_oncoplot",
+        "clinvar_variants",
+        "dynseq_bqtl",
+        "cytobands",
+        "copy_number",
+        "composing_genome_browser",
+    ]
+    positions = [third_group.index(f'data-example="{name}"') for name in third_page]
+    assert positions == sorted(positions)
+    for page, names in enumerate(
+        [
+            [
+                "luad_oncoprint",
+                "hcc1954_sv_cnv",
+                "indexed_fasta_sequence",
+                "link_mark",
+                "genome_tracks",
+                "needle_plot",
+            ],
+            [
+                "p53_sequence_comparison",
+                "oncoprint",
+                "point_mark",
+                "rainfall_plot",
+                "ranged_rule",
+                "ascat_copy_number",
+            ],
+            [
+                "stacked_genome_browser",
+                "sashimi_plot",
+                "scrollable_viewport",
+                "sequence_logo",
+                "six_frame_translation",
+                "refseq_scored_genes",
+            ],
+        ],
+        start=4,
+    ):
+        group = markup.split('class="gs-showcase-track"')[page]
+        positions = [group.index(f'data-example="{name}"') for name in names]
+        assert positions == sorted(positions)
+    assert 'href="gallery/index.html"' in markup
+    assert 'aria-label="Featured examples"' in markup
+    assert markup.count('class="preview__caption"') == len(examples)
+    assert 'alt=""' in markup  # The caption already names each linked image.
+    assert "Brush-linked Manhattan plot" in markup
+    assert "Variant association volcano plot" in markup
+    for example in examples:
+        title, _subtitle = extension.GALLERY_CARD_LABELS[example.name]
+        assert f'<span class="preview__title">{title}</span>' in markup
+    assert 'class="gs-card__subtitle"' not in markup
+    assert "HapMap · simulated association statistics" not in markup
 
 
 class FakeSphinxApp:

@@ -60,7 +60,7 @@ html_logo = "_static/snaketie.svg"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_css_files = ["genomespy.css"]
-html_js_files = ["external-links.js"]
+html_js_files = ["external-links.js", "showcase.js"]
 html_show_sourcelink = False
 html_meta = {
     "Cache-Control": "no-cache, no-store, must-revalidate",

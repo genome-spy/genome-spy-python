@@ -102,17 +102,113 @@ def _remove_stale_arrow_assets(referenced: set[str]) -> None:
             path.unlink()
 
 
+# Cards share titles, but only the gallery index shows data subtitles.
+# Example headings stay unchanged; new examples fall back to their source title.
+GALLERY_CARD_LABELS = {
+    "gff3_gene_annotations": ("GFF3 gene annotations", "GENCODE · hg38"),
+    "tcga_ov_gistic": ("Ovarian cancer GISTIC landscape", "TCGA ovarian cancer"),
+    "manhattan_plot": ("Manhattan plot", "HapMap · simulated association statistics"),
+    "airway_volcano_plot": ("RNA-seq volcano plot", "Airway dexamethasone experiment"),
+    "pik3ca_tcga_brca_lollipop": (
+        "PIK3CA mutation lollipop plot",
+        "TCGA breast cancer",
+    ),
+    "multiple_sequence_alignment": (
+        "Multiple sequence alignment",
+        "16S rRNA sequences",
+    ),
+    "ascat_fitting": (
+        "Interactive purity and ploidy fitting",
+        "ASCAT · simulated samples",
+    ),
+    "rect_heatmap": ("Heatmap", "Synthetic example data"),
+    "airway_ma_plot": ("RNA-seq MA plot", "Airway dexamethasone experiment"),
+    "bigbed_ccre_track": ("Candidate regulatory elements", "ENCODE cCREs · hg38"),
+    "bam_read_alignments": ("BAM read alignments", "GIAB HG002 · chromosome 20"),
+    "brush_linked_genome_tracks": (
+        "Brush-linked Manhattan plot",
+        "HapMap · simulated association statistics",
+    ),
+    "combined_laml_oncoplot": (
+        "Oncoplot with pathways and clinical tracks",
+        "TCGA acute myeloid leukemia",
+    ),
+    "clinvar_variants": ("Variant classifications", "ClinVar · hg38"),
+    "dynseq_bqtl": (
+        "Reference and alternate allele contributions",
+        "SPI1 binding-QTL data",
+    ),
+    "cytobands": ("Chromosome ideogram", "Human cytobands · hg38"),
+    "copy_number": (
+        "Allele-specific copy-number profile",
+        "ASCAT · simulated sample S96",
+    ),
+    "composing_genome_browser": (
+        "Genome browser from imported charts",
+        "Human reference and read tracks · hg38",
+    ),
+    "luad_oncoprint": ("Lung cancer oncoprint", "TCGA lung adenocarcinoma"),
+    "hcc1954_sv_cnv": (
+        "Structural variants and copy number",
+        "HCC1954 breast cancer cell line",
+    ),
+    "indexed_fasta_sequence": ("DNA sequence track", "Human reference genome · hg38"),
+    "link_mark": ("Connecting intervals", "Synthetic interval pairs"),
+    "genome_tracks": (
+        "GC content with gene annotations",
+        "Human reference and RefSeq · hg38",
+    ),
+    "needle_plot": ("DNMT3A mutation lollipop plot", "TCGA acute myeloid leukemia"),
+    "p53_sequence_comparison": (
+        "Brush-linked protein alignment",
+        "34 P53 protein sequences",
+    ),
+    "oncoprint": ("Mutation oncoplot", "TCGA acute myeloid leukemia"),
+    "point_mark": ("Scatter plot", "Sine and cosine example"),
+    "rainfall_plot": ("Mutation rainfall plot", "TCGA breast cancer"),
+    "ranged_rule": ("Drawing intervals with rules", "Synthetic interval data"),
+    "ascat_copy_number": ("Copy-number segmentation", "ASCAT · simulated sample S96"),
+    "stacked_genome_browser": (
+        "Linked genome browser tracks",
+        "Human reference, ENCODE and RefSeq · hg38",
+    ),
+    "sashimi_plot": (
+        "Splice junctions with a sashimi plot",
+        "IGV RNA-seq example data",
+    ),
+    "scrollable_viewport": ("Scrollable plot", "Sine and cosine example"),
+    "sequence_logo": ("DNA sequence logo", "Example nucleotide counts"),
+    "six_frame_translation": ("Six-frame translation", "Human reference genome · hg38"),
+    "refseq_scored_genes": (
+        "Gene annotations with prioritized labels",
+        "RefSeq · hg38",
+    ),
+    "upset_mutations": (
+        "Mutation intersections with an UpSet plot",
+        "UpSetR glioblastoma cohort",
+    ),
+    "vertical_concat": ("Vertically stacked plots", "Sine and cosine example"),
+    "volcano_plot": (
+        "Variant association volcano plot",
+        "HapMap · simulated association statistics",
+    ),
+}
+
+
 def _card_html(
     example: core.Example, *, link_prefix: str, thumb_prefix: str, build_token: str
 ) -> str:
     thumb = f"{thumb_prefix}/{core.thumb_filename(example)}?v={build_token}"
     href = f"{link_prefix}{example.name}.html?v={build_token}"
+    title, subtitle = GALLERY_CARD_LABELS.get(example.name, (example.title, ""))
+    label = html.escape(f"{title} — {subtitle}" if subtitle else title)
     return (
-        f'<a class="gs-card" href="{href}">'
+        f'<a class="gs-card" href="{href}" aria-label="{label}" title="{label}">'
         f'<span class="gs-card__shot" style="background-image:url({thumb})" '
-        f'role="img" aria-label="{html.escape(example.title)}"></span>'
+        'aria-hidden="true"></span>'
         f'<span class="gs-card__body"><span class="gs-card__title">'
-        f"{html.escape(example.title)}</span></span></a>"
+        f'{html.escape(title)}</span><span class="gs-card__subtitle">'
+        f"{html.escape(subtitle)}</span></span></a>"
     )
 
 
@@ -291,7 +387,7 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         '<div class="gs-embed-actions">\n'
         f'<button id="{spec_toggle_id}" class="gs-embed-action" type="button" '
         f'aria-controls="{spec_wrapper_id}" aria-expanded="false">'
-        "Show specification</button>\n"
+        "Show generated specification</button>\n"
         "</div>\n"
         f'<div id="{spec_wrapper_id}" class="gs-embed-spec-wrapper" hidden>\n'
         f'<button id="{spec_copy_id}" class="gs-embed-copy" type="button" '
@@ -366,8 +462,8 @@ def _detail_md(example: core.Example, bundle_url: str) -> str:
         "  specToggle.addEventListener('click', async () => {\n"
         "    const show = specWrapper.hidden;\n"
         "    specWrapper.hidden = !show;\n"
-        "    specToggle.textContent = show ? 'Hide specification' : "
-        "'Show specification';\n"
+        "    specToggle.textContent = show ? 'Hide generated specification' : "
+        "'Show generated specification';\n"
         "    specToggle.setAttribute('aria-expanded', String(show));\n"
         "    if (show && !specOutput.dataset.loaded) {\n"
         "      specOutput.textContent = 'Loading specification…';\n"
@@ -528,14 +624,82 @@ class GenomeSpyMiniGallery(Directive):
         if not examples:
             examples = core.collect_examples()
         token = core.build_token(examples)
-        tiles = "\n".join(
+        # Pair tall and wide charts deliberately; the full gallery lists everything.
+        featured_names = (
+            # First page.
+            "gff3_gene_annotations",
+            "tcga_ov_gistic",
+            "manhattan_plot",
+            "airway_volcano_plot",
+            "pik3ca_tcga_brca_lollipop",
+            "multiple_sequence_alignment",
+            # Second page.
+            "ascat_fitting",
+            "rect_heatmap",
+            "airway_ma_plot",
+            "bigbed_ccre_track",
+            "bam_read_alignments",
+            "brush_linked_genome_tracks",
+            # Third page.
+            "combined_laml_oncoplot",
+            "clinvar_variants",
+            "dynseq_bqtl",
+            "cytobands",
+            "copy_number",
+            "composing_genome_browser",
+            # Fourth page.
+            "luad_oncoprint",
+            "hcc1954_sv_cnv",
+            "indexed_fasta_sequence",
+            "link_mark",
+            "genome_tracks",
+            "needle_plot",
+            # Fifth page.
+            "p53_sequence_comparison",
+            "oncoprint",
+            "point_mark",
+            "rainfall_plot",
+            "ranged_rule",
+            "ascat_copy_number",
+            # Sixth page.
+            "stacked_genome_browser",
+            "sashimi_plot",
+            "scrollable_viewport",
+            "sequence_logo",
+            "six_frame_translation",
+            "refseq_scored_genes",
+        )
+        by_name = {example.name: example for example in examples}
+        featured = [by_name[name] for name in featured_names if name in by_name]
+        ordered = featured + [e for e in examples if e.name not in featured_names]
+        tiles = [
             f'<a class="preview" href="gallery/{e.name}.html?v={token}" '
-            f'title="{html.escape(e.title)}" '
-            f'style="background-image:url(_static/gallery/{core.thumb_filename(e)}?v={token})"></a>'
-            for e in examples
+            f'data-example="{html.escape(e.name)}" '
+            f'aria-label="{html.escape(title)}" title="{html.escape(title)}">'
+            f'<span class="preview__image"><img '
+            f'src="_static/gallery/{core.thumb_filename(e)}?v={token}" '
+            f'alt="" loading="lazy" decoding="async"></span>'
+            f'<span class="preview__caption"><span class="preview__title">{html.escape(title)}</span>'
+            f'<span aria-hidden="true">↗</span></span></a>'
+            for e in ordered
+            for title, _subtitle in [GALLERY_CARD_LABELS.get(e.name, (e.title, ""))]
+        ]
+        pages = "".join(
+            '<div class="gs-showcase-track" role="group" '
+            f'aria-label="Examples {start + 1}–{min(start + 6, len(tiles))}">'
+            + "".join(tiles[start : start + 6])
+            + "</div>"
+            for start in range(0, len(tiles), 6)
         )
         markup = (
-            f'<div id="gs-showcase"><div class="gs-showcase-track">{tiles}</div></div>'
+            '<section id="gs-showcase" aria-label="Featured examples">'
+            '<div class="gs-showcase-heading"><span>Made with genome-spy-python</span>'
+            '<a href="gallery/index.html">Explore the gallery <span aria-hidden="true">→</span></a>'
+            '</div><div id="gs-showcase-pages" class="gs-showcase-pages" '
+            'tabindex="0" aria-label="Example groups; use left and right arrow keys">'
+            f'{pages}</div><nav class="gs-showcase-controls" aria-label="Gallery pages" hidden>'
+            '<span class="gs-showcase-status" aria-live="polite" aria-atomic="true"></span>'
+            "</nav></section>"
         )
         return [nodes.raw("", markup, format="html")]
 
