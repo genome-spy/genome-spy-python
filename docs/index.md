@@ -5,7 +5,7 @@ sd_hide_title: true
 ```{raw} html
 <div class="gs-hero">
   <h1 class="gs-hero__mark">GenomeSpy <span class="gs-py">for Python</span></h1>
-  <p class="gs-hero__tag">Interactive genomic visualization in Python.</p>
+  <p class="gs-hero__tag">Interactive genomic visualization with <a href="https://genomespy.app/">GenomeSpy</a>, using <a href="https://altair-viz.github.io/">Altair</a>-style Python syntax.</p>
 </div>
 ```
 
