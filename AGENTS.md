@@ -20,9 +20,6 @@ Constraints:
   integration.
 - Keep reference material in `material/` and external code in `tmp/`.
 - Prefer pure Python logic in the core; isolate I/O and integration edges.
-- Use upstream projects for design guidance:
-  `tmp/altair`, `tmp/gos`, `tmp/vega-lite`, `tmp/gosling.js`,
-  `tmp/genome-spy`, and `tmp/anywidget`.
 
 ## General LLM Instructions
 ### 1. Think Before Coding
