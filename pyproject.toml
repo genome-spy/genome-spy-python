@@ -4,11 +4,18 @@ version = "0.3.0"
 description = "genome-spy-python is a declarative genomics visualization library for Python, built on top of the genome-spy JSON specification."
 readme = "README.md"
 requires-python = ">=3.11"
-license = "MIT AND BSD-3-Clause"
+# Distribution contents, including separate data; the Python implementation is MIT.
+license = "MIT AND BSD-3-Clause AND CC-BY-4.0 AND CC0-1.0 AND CC-BY-NC-SA-4.0"
 license-files = [
     "LICENSE",
     "LICENSES/ALTAIR-BSD-3-Clause.txt",
-    "LICENSES/GALLERY-DATA-MIT.txt",
+    "LICENSES/CC-BY-4.0.txt",
+    "LICENSES/CC0-1.0.txt",
+    "LICENSES/CC-BY-NC-SA-4.0.txt",
+    "LICENSES/DATA-SOURCE-REPOSITORIES-MIT.txt",
+    "LICENSES/GENOMESPY-MIT.txt",
+    "LICENSES/VEGA-LITE-BSD-3-Clause.txt",
+    "LICENSES/VEGA-BSD-3-Clause.txt",
     "THIRD_PARTY_NOTICES.md",
 ]
 authors = [{ name = "Oskari Lehtonen", email = "oskarilehtonen4@gmail.com" }]

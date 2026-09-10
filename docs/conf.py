@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import sys
+import shutil
+import tomllib
 from pathlib import Path
 
 from pygments.lexers.python import PythonLexer
@@ -97,8 +99,20 @@ linkcode_url = "https://github.com/genome-spy/genome-spy-python"
 linkcode_blob = "main"
 
 
+def _copy_license_files(app: Sphinx, exception: Exception | None) -> None:
+    """Keep the published data's notices alongside the HTML documentation."""
+    if exception is not None or app.builder.format != "html":
+        return
+    project_metadata = tomllib.loads((_ROOT / "pyproject.toml").read_text())
+    for relative_path in project_metadata["project"]["license-files"]:
+        destination = Path(app.outdir) / relative_path
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(_ROOT / relative_path, destination)
+
+
 def setup(app: Sphinx) -> None:
     """Register documentation build hooks."""
     # sphinx-github-style also installs a high-contrast palette and custom Python
     # lexer. Keep only its source links and preserve Furo's original code styling.
     app.add_lexer("python", PythonLexer)
+    app.connect("build-finished", _copy_license_files)

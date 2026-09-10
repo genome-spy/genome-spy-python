@@ -46,7 +46,18 @@ jobs:
           fi
       - run: uv build
       - name: Check source distribution license files
-        run: uv run python -c "import glob, tarfile; archive = tarfile.open(glob.glob('dist/*.tar.gz')[0]); names = archive.getnames(); assert any(name.endswith('/LICENSE') for name in names), names; assert any(name.endswith('/LICENSES/ALTAIR-BSD-3-Clause.txt') for name in names), names; assert any(name.endswith('/THIRD_PARTY_NOTICES.md') for name in names), names"
+        run: |
+          uv run python - <<'PY'
+          from pathlib import Path
+          import tarfile
+          import tomllib
+
+          project = tomllib.loads(Path('pyproject.toml').read_text())['project']
+          with tarfile.open(next(Path('dist').glob('*.tar.gz'))) as archive:
+              prefix = archive.getnames()[0].split('/')[0] + '/'
+              for name in project['license-files']:
+                  assert archive.extractfile(prefix + name).read() == Path(name).read_bytes(), name
+          PY
       - run: uvx twine check --strict dist/*
       - uses: actions/upload-artifact@v7
         with:

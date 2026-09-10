@@ -39,11 +39,27 @@ jobs:
           --durations=10
       - run: node --test tests/widget.test.mjs
       - run: uv build --wheel
-      # Portable across the shells the matrix runs: bash on Linux, PowerShell
-      # on Windows.
+      # Use Bash on both runners for the embedded Python script.
       - name: Check wheel contents and license metadata
-        run: >-
-          uv run python -c "import glob, zipfile; wheel = zipfile.ZipFile(glob.glob('dist/*.whl')[0]); names = wheel.namelist(); metadata = wheel.read(next(name for name in names if name.endswith('.dist-info/METADATA'))).decode(); metadata_lines = set(metadata.splitlines()); assert 'genome_spy/static/widget.js' in names, names; assert any(name.endswith('.dist-info/licenses/LICENSE') for name in names), names; assert any(name.endswith('.dist-info/licenses/LICENSES/ALTAIR-BSD-3-Clause.txt') for name in names), names; assert any(name.endswith('.dist-info/licenses/THIRD_PARTY_NOTICES.md') for name in names), names; assert {'License-Expression: MIT AND BSD-3-Clause', 'License-File: LICENSE', 'License-File: LICENSES/ALTAIR-BSD-3-Clause.txt', 'License-File: THIRD_PARTY_NOTICES.md'} <= metadata_lines, metadata"
+        shell: bash
+        run: |
+          uv run python - <<'PY'
+          from pathlib import Path
+          import tomllib
+          import zipfile
+
+          project = tomllib.loads(Path('pyproject.toml').read_text())['project']
+          with zipfile.ZipFile(next(Path('dist').glob('*.whl'))) as wheel:
+              names = wheel.namelist()
+              metadata_path = next(n for n in names if n.endswith('.dist-info/METADATA'))
+              metadata = set(wheel.read(metadata_path).decode().splitlines())
+              prefix = metadata_path.removesuffix('METADATA') + 'licenses/'
+              assert 'genome_spy/static/widget.js' in names
+              assert 'License-Expression: ' + project['license'] in metadata
+              for name in project['license-files']:
+                  assert 'License-File: ' + name in metadata
+                  assert wheel.read(prefix + name) == Path(name).read_bytes(), name
+          PY
       - if: runner.os == 'Linux'
         name: Smoke-test installed wheel
         working-directory: /tmp

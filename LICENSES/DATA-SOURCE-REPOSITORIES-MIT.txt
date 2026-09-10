@@ -1,5 +1,9 @@
+Source-repository MIT notices for selection, formatting and example contributions.
+See THIRD_PARTY_NOTICES.md for dataset sources and applicable terms.
+
 maftools: Copyright (c) 2018 Anand Mayakonda
 Plotly datasets: Copyright (c) 2019-2024 Plotly Technologies Inc.
+manhattanly: Copyright (c) 2016 Sahir Bhatnagar
 
 MIT License
 
