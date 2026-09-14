@@ -16,6 +16,9 @@ benchmark reference materials. *Scientific Data* 3, 160025 (2016).
 
 ## What to notice
 
+For a shorter introduction to lazy BAM loading, see
+[BAM coverage and read pileup](bam_read_pileup.md).
+
 The top track summarizes read depth from aligned CIGAR blocks and stacks
 MD-derived mismatch support by alternate base. Insertions use vertical rules
 because they are anchored between reference bases and have zero reference

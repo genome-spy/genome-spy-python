@@ -50,6 +50,28 @@ def test_gallery_has_examples() -> None:
     assert _example_paths(), "no gallery examples found under docs/examples/"
 
 
+def test_bam_read_pileup_shares_lazy_data_and_keeps_rows_scrollable() -> None:
+    from docs.examples.bam_read_pileup import chart
+
+    spec = chart.to_dict()
+    assert "height" not in spec
+    assert spec["assembly"] == "hg18"
+    assert spec["data"]["lazy"] == {
+        "type": "bam",
+        "url": "https://data.genomespy.app/sample-data/bamExample.bam",
+        "windowSize": 30000,
+    }
+    assert spec["resolve"]["axis"]["x"] == "shared"
+    coverage, reads = spec["vconcat"]
+    assert "data" not in coverage and "data" not in reads
+    assert coverage["transform"][0]["type"] == "coverage"
+    assert reads["transform"][0]["type"] == "pileup"
+    assert reads["height"] == {"step": {"expr": "laneHeight"}}
+    assert reads["viewportHeight"] == "container"
+    assert reads["encoding"]["y"]["scale"]["zoom"] is False
+    assert reads["encoding"]["color"]["scale"]["range"] == ["crimson", "orange"]
+
+
 def test_heatmap_with_text_generates_grid_and_separates_text_colors() -> None:
     from docs.examples.heatmap_with_text import chart, grid
 
