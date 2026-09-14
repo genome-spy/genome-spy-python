@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import sys
 import shutil
 import tomllib
@@ -32,6 +33,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
+    "sphinx_sitemap",
     "genomespy_gallery",
 ]
 
@@ -58,17 +60,26 @@ pygments_style = "a11y-light"
 # -- HTML output ------------------------------------------------------------
 html_theme = "furo"
 html_title = "genome-spy-python"
+html_baseurl = "https://genomespy.app/genome-spy-python/"
 html_logo = "_static/snaketie.svg"
 html_static_path = ["_static"]
 templates_path = ["_templates"]
 html_css_files = ["genomespy.css"]
 html_js_files = ["external-links.js", "showcase.js"]
 html_show_sourcelink = False
+html_context = {
+    "google_analytics_id": os.environ.get("GOOGLE_ANALYTICS_ID", "").strip(),
+    "google_site_verification": os.environ.get("GOOGLE_SITE_VERIFICATION", "").strip(),
+}
 html_meta = {
     "Cache-Control": "no-cache, no-store, must-revalidate",
     "Pragma": "no-cache",
     "Expires": "0",
 }
+
+sitemap_locales = [None]
+sitemap_url_scheme = "{link}"
+sitemap_excludes = ["genindex.html", "search.html"]
 
 html_theme_options = {
     # The view-button component is overridden with a repository link.

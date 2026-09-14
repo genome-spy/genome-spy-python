@@ -55,6 +55,7 @@ docs = [
     "sphinx-design>=0.6",
     "sphinx-copybutton>=0.5",
     "sphinx-github-style>=1.2.2",
+    "sphinx-sitemap>=2.9.0",
     "statsmodels>=0.14.2",
     "pyarrow>=18.0.0",
 ]
