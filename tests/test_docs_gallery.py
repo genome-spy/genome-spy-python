@@ -50,6 +50,50 @@ def test_gallery_has_examples() -> None:
     assert _example_paths(), "no gallery examples found under docs/examples/"
 
 
+def test_heatmap_with_text_generates_grid_and_separates_text_colors() -> None:
+    from docs.examples.heatmap_with_text import chart, grid
+
+    spec = chart.to_dict()
+    assert len(grid) == 40000
+    assert grid["i"].tolist() == list(range(40000))
+    # The gallery supplies the total height; a fixed plot height clips its guides.
+    assert "height" not in spec
+    assert [t["type"] for t in spec["transform"]] == [
+        "formula",
+        "formula",
+        "project",
+        "formula",
+    ]
+    assert spec["encoding"]["x"]["type"] == "index"
+    assert spec["encoding"]["y"]["type"] == "index"
+    assert spec["resolve"]["scale"]["color"] == "independent"
+    tiles, values, hint = spec["layer"]
+    assert tiles["encoding"]["color"]["scale"]["scheme"] == "viridis"
+    assert values["mark"]["fitToBand"] is True
+    assert values["encoding"]["color"]["scale"]["range"] == ["white", "black"]
+    assert hint["opacity"] == {"unitsPerPixel": [0.1, 0.05], "values": [1, 0]}
+
+
+def test_tsne_keeps_remote_data_and_zoom_dependent_point_size() -> None:
+    from docs.examples.tsne import chart
+
+    spec = chart.to_dict()
+    # The gallery supplies the total height, including room for the guides.
+    assert "height" not in spec
+    assert spec["data"] == {
+        "url": "https://genomespy.app/examples/tSNE/tsne.parquet",
+        "format": {"type": "parquet"},
+    }
+    for channel in ("x", "y"):
+        assert spec["encoding"][channel]["scale"] == {"domain": [-10, 10], "zoom": True}
+    points, notes = spec["layer"]
+    assert "data" not in points
+    assert points["encoding"]["color"]["field"] == "sample"
+    size = points["mark"]["size"]["expr"]
+    assert all(name in size for name in ("zoomLevel", "sqrt", "width", "height"))
+    assert notes["encoding"]["text"]["field"] == "text"
+
+
 def test_gallery_root_pixel_sizes_are_owned_by_the_embedder() -> None:
     gallery = _load_gallery()
 

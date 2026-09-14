@@ -105,6 +105,8 @@ def _remove_stale_arrow_assets(referenced: set[str]) -> None:
 # Cards share titles, but only the gallery index shows data subtitles.
 # Example headings stay unchanged; new examples fall back to their source title.
 GALLERY_CARD_LABELS = {
+    "heatmap_with_text": ("Heatmap with zoomable values", "Synthetic wave pattern"),
+    "tsne": ("Zoomable t-SNE scatter plot", "GenomeSpy example embedding"),
     "gff3_gene_annotations": ("GFF3 gene annotations", "GENCODE · hg38"),
     "tcga_ov_gistic": ("Ovarian cancer GISTIC landscape", "TCGA ovarian cancer"),
     "manhattan_plot": ("Manhattan plot", "HapMap · simulated association statistics"),
