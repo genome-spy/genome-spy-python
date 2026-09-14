@@ -50,6 +50,123 @@ def test_gallery_has_examples() -> None:
     assert _example_paths(), "no gallery examples found under docs/examples/"
 
 
+@pytest.mark.parametrize(
+    "name",
+    [
+        "stacked_bar",
+        "layered_lollipop",
+        "independent_scales",
+        "point_styles",
+        "diverging_bars",
+        "coverage_pileup",
+        "geometric_zoom",
+        "penguin_brush",
+    ],
+)
+def test_basic_playground_examples_fit_the_embedder(name: str) -> None:
+    from importlib import import_module
+
+    module = import_module(f"docs.examples.{name}")
+    spec = module.chart._prepare_render().spec
+    assert "height" not in spec and "width" not in spec
+    assert len(str(spec)) < 5000
+    assert (EXAMPLES_DIR / f"{name}.md").is_file()
+
+
+@pytest.mark.parametrize(
+    ("name", "rows"),
+    [
+        ("layered_lollipop", 17),
+        ("point_styles", 160),
+        ("diverging_bars", 60),
+        ("coverage_pileup", 99),
+        ("geometric_zoom", 200000),
+        ("heatmap_with_text", 40000),
+    ],
+)
+def test_synthetic_gallery_tables_use_external_arrow(name: str, rows: int) -> None:
+    from importlib import import_module
+
+    import pandas as pd
+    import pyarrow as pa
+
+    module = import_module(f"docs.examples.{name}")
+    table = module.grid if name == "heatmap_with_text" else module.data
+    assert isinstance(table, pd.DataFrame)
+    assert len(table) == rows
+    prepared = module.chart._prepare_render()
+    assert len(str(prepared.spec)) < 5000
+    assert "sequence" not in str(prepared.spec)
+    assert "arrow://" in str(prepared.spec)
+    assert any(
+        pa.ipc.open_file(pa.BufferReader(payload)).read_all().num_rows == rows
+        for payload in prepared.buffers.values()
+    )
+
+
+def test_basic_playground_examples_keep_their_key_encodings() -> None:
+    from docs.examples import (
+        coverage_pileup,
+        diverging_bars,
+        geometric_zoom,
+        independent_scales,
+        layered_lollipop,
+        point_styles,
+        stacked_bar,
+    )
+
+    stacked = stacked_bar.chart.to_dict()
+    assert [t["type"] for t in stacked["transform"]] == ["aggregate", "stack"]
+    assert stacked["encoding"]["x2"]["field"] == "yieldEnd"
+    assert stacked["config"]["legend"]["direction"] == "horizontal"
+    arrows = layered_lollipop.chart.to_dict()["layer"][1]
+    assert arrows["layer"][1]["encoding"]["shape"]["scale"]["range"] == [
+        "triangle-down",
+        "diamond",
+        "triangle-up",
+    ]
+    independent = independent_scales.chart.to_dict()
+    assert independent["resolve"] == {
+        "scale": {"y": "independent"},
+        "axis": {"y": "independent"},
+    }
+    styles = point_styles.chart.to_dict()
+    assert {"shape", "fill", "size", "strokeWidth", "angle"} <= styles[
+        "encoding"
+    ].keys()
+    bars = diverging_bars.chart.to_dict()
+    assert bars["encoding"]["y2"] == {"datum": 0}
+    assert bars["encoding"]["color"]["scale"]["domain"] == [0]
+    coverage = coverage_pileup.chart.to_dict()
+    assert coverage["resolve"]["scale"]["x"] == "shared"
+    assert [child["transform"][0]["type"] for child in coverage["vconcat"]] == [
+        "coverage",
+        "pileup",
+    ]
+    zoom = geometric_zoom.chart.to_dict()
+    assert len(geometric_zoom.data) == 200000
+    assert "zoomLevel" in zoom["mark"]["size"]["expr"]
+    assert zoom["encoding"]["x"]["scale"]["zoom"] is True
+
+
+def test_penguin_brush_links_scatter_and_filtered_summaries() -> None:
+    from docs.examples.penguin_brush import chart
+
+    spec = chart.to_dict()
+    assert spec["params"] == [{"name": "brush"}]
+    scatter, summaries = spec["hconcat"]
+    assert scatter["params"][0]["push"] == "outer"
+    assert scatter["params"][0]["select"]["encodings"] == ["x", "y"]
+    assert scatter["encoding"]["color"]["condition"]["param"] == "brush"
+    assert summaries["transform"][0] == {
+        "type": "filter",
+        "param": "brush",
+        "empty": True,
+        "fields": {"x": "Beak Length (mm)", "y": "Beak Depth (mm)"},
+    }
+    assert spec["resolve"]["scale"]["color"] == "shared"
+
+
 def test_bam_read_pileup_shares_lazy_data_and_keeps_rows_scrollable() -> None:
     from docs.examples.bam_read_pileup import chart
 

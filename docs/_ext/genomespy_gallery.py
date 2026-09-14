@@ -105,6 +105,17 @@ def _remove_stale_arrow_assets(referenced: set[str]) -> None:
 # Cards share titles, but only the gallery index shows data subtitles.
 # Example headings stay unchanged; new examples fall back to their source title.
 GALLERY_CARD_LABELS = {
+    "stacked_bar": ("Horizontal stacked bars", "Barley yields · Vega datasets"),
+    "layered_lollipop": ("Layered lollipop plot", "Synthetic sine wave"),
+    "independent_scales": (
+        "Layered charts with independent scales",
+        "GenomeSpy chromosome 19 example",
+    ),
+    "point_styles": ("Point shapes and styles", "Synthetic grid"),
+    "diverging_bars": ("Positive and negative bars", "Synthetic wave"),
+    "coverage_pileup": ("Coverage and interval pileup", "Synthetic intervals"),
+    "geometric_zoom": ("Points that grow when zooming", "200,000 generated points"),
+    "penguin_brush": ("Brush-linked penguin summaries", "Palmer Penguins"),
     "bam_read_pileup": ("BAM coverage and read pileup", "1000 Genomes NA12878 · hg18"),
     "heatmap_with_text": ("Heatmap with zoomable values", "Synthetic wave pattern"),
     "tsne": ("Zoomable t-SNE scatter plot", "GenomeSpy example embedding"),
