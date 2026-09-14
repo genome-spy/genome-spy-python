@@ -15,3 +15,5 @@ repos:
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
+        # Preserve generated JavaScript strings and the verbatim upstream license.
+        exclude: '^(src/genome_spy/static/(genome-spy|controls|inspector)\.js|LICENSES/LATO-OFL-1\.1\.txt)$'

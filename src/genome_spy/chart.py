@@ -14,8 +14,10 @@ from genome_spy._embed import (
     DEFAULT_EMBED_URL,
     DEFAULT_INSPECTOR_MODULE_URL,
     Controls,
+    bundled_module_url,
     control_definitions,
     normalize_controls,
+    validate_inline_options,
 )
 from genome_spy._utils import JsonSpec, compact_json, pretty_json
 from genome_spy._chart_authoring import (
@@ -684,6 +686,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         controls: Controls | UndefinedType = Undefined,
         controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
         inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
+        inline: bool = False,
         container_id: str | None = None,
     ) -> str:
         """Render the chart as an HTML snippet.
@@ -700,6 +703,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
                 disable them.
             controls_module_url: Browser module containing Core controls.
             inspector_module_url: Browser module containing the Inspector control.
+            inline: Whether to embed version-matched browser modules for offline use.
             container_id: Optional HTML id for the chart container.
 
         Returns:
@@ -712,17 +716,29 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         Example:
             >>> chart.to_html(controls=["svg", "png"])
         """
+        validate_inline_options(
+            inline,
+            bundle_url=bundle_url,
+            controls_module_url=controls_module_url,
+            inspector_module_url=inspector_module_url,
+        )
         container_id = container_id or f"genome-spy-{uuid4().hex}"
         spec_json = compact_json(self.to_dict())
-        module_url_json = compact_json(bundle_url)
+        module_url_json = compact_json(
+            bundled_module_url("embed") if inline else bundle_url
+        )
         embed_options_json = compact_json(dict(embed_options or {}))
         control_options_json = compact_json(
             {
                 "names": normalize_controls(controls),
                 "definitions": control_definitions(),
                 "moduleUrls": {
-                    "core": controls_module_url,
-                    "inspector": inspector_module_url,
+                    "core": bundled_module_url("core")
+                    if inline
+                    else controls_module_url,
+                    "inspector": bundled_module_url("inspector")
+                    if inline
+                    else inspector_module_url,
                 },
             }
         )
@@ -744,6 +760,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         controls: Controls | UndefinedType = Undefined,
         controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
         inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
+        inline: bool = False,
     ) -> None:
         """Save the chart as JSON or HTML.
 
@@ -760,6 +777,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
                 disable them.
             controls_module_url: Browser module containing Core controls.
             inspector_module_url: Browser module containing the Inspector control.
+            inline: Whether to embed browser modules for offline HTML output.
 
         Returns:
             None.
@@ -788,6 +806,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
                         "inspector_module_url",
                         inspector_module_url != DEFAULT_INSPECTOR_MODULE_URL,
                     ),
+                    ("inline", inline),
                 )
                 if supplied
             ]
@@ -806,6 +825,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
                     controls=controls,
                     controls_module_url=controls_module_url,
                     inspector_module_url=inspector_module_url,
+                    inline=inline,
                 )
                 + "\n",
                 encoding="utf-8",
@@ -821,6 +841,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         controls: Controls | UndefinedType = Undefined,
         controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
         inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
+        inline: bool = False,
         parameter_names: Sequence[str] = (),
         parameter_values: Mapping[str, Any] | None = None,
         enable_click_events: bool = False,
@@ -833,6 +854,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
             controls: Display controls, or ``False`` to disable them.
             controls_module_url: Browser module containing Core controls.
             inspector_module_url: Browser module containing the Inspector control.
+            inline: Whether to send packaged browser modules to the widget.
             parameter_names: Named GenomeSpy parameters synchronized with the
                 widget's ``parameter_values`` trait.
             parameter_values: Initial values for the synchronized parameters.
@@ -858,6 +880,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
             controls=controls,
             controls_module_url=controls_module_url,
             inspector_module_url=inspector_module_url,
+            inline=inline,
             parameter_names=parameter_names,
             parameter_values=parameter_values,
             enable_click_events=enable_click_events,
@@ -871,6 +894,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
         controls: Controls | UndefinedType = Undefined,
         controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
         inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
+        inline: bool = False,
     ) -> None:
         """Display this chart once with temporary rendering options.
 
@@ -885,6 +909,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
                 disable them.
             controls_module_url: Browser module containing Core controls.
             inspector_module_url: Browser module containing the Inspector control.
+            inline: Whether to send packaged browser modules to the widget.
 
         Returns:
             None.
@@ -913,6 +938,7 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
                 controls=controls,
                 controls_module_url=controls_module_url,
                 inspector_module_url=inspector_module_url,
+                inline=inline,
             )
         )
 

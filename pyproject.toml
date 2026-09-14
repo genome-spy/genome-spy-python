@@ -5,7 +5,7 @@ description = "genome-spy-python is a declarative genomics visualization library
 readme = "README.md"
 requires-python = ">=3.11"
 # Distribution contents, including separate data; the Python implementation is MIT.
-license = "MIT AND BSD-3-Clause AND CC-BY-4.0 AND CC0-1.0 AND CC-BY-NC-SA-4.0"
+license = "MIT AND BSD-3-Clause AND CC-BY-4.0 AND CC0-1.0 AND CC-BY-NC-SA-4.0 AND OFL-1.1"
 license-files = [
     "LICENSE",
     "LICENSES/ALTAIR-BSD-3-Clause.txt",
@@ -14,6 +14,7 @@ license-files = [
     "LICENSES/CC-BY-NC-SA-4.0.txt",
     "LICENSES/DATA-SOURCE-REPOSITORIES-MIT.txt",
     "LICENSES/GENOMESPY-MIT.txt",
+    "LICENSES/LATO-OFL-1.1.txt",
     "LICENSES/VEGA-LITE-BSD-3-Clause.txt",
     "LICENSES/VEGA-BSD-3-Clause.txt",
     "THIRD_PARTY_NOTICES.md",
@@ -93,6 +94,9 @@ artifacts = [
     "src/genome_spy/datasets/data/*.json",
     "src/genome_spy/datasets/data/*.tsv",
     "src/genome_spy/static/widget.js",
+    "src/genome_spy/static/genome-spy.js",
+    "src/genome_spy/static/controls.js",
+    "src/genome_spy/static/inspector.js",
 ]
 
 [tool.genome-spy]

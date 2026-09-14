@@ -42,6 +42,7 @@ def test_license_metadata_includes_borrowed_materials() -> None:
         "CC-BY-4.0",
         "CC0-1.0",
         "CC-BY-NC-SA-4.0",
+        "OFL-1.1",
     }
 
 

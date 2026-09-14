@@ -14,6 +14,7 @@ from genome_spy._embed import (
     DEFAULT_CONTROLS_MODULE_URL,
     DEFAULT_INSPECTOR_MODULE_URL,
     SUPPORTED_CONTROLS,
+    bundled_module_url,
     control_definitions,
     normalize_controls,
 )
@@ -1519,6 +1520,7 @@ def test_to_html_embeds_genomespy_runtime() -> None:
     assert DEFAULT_INSPECTOR_MODULE_URL in html
     assert "import(controlOptions.moduleUrls.core)" in html
     assert "controlOptions.controlsModuleUrl" not in html
+    assert "data:text/javascript;base64," not in html
 
 
 def test_to_html_accepts_embed_options_and_disables_controls() -> None:
@@ -1531,6 +1533,25 @@ def test_to_html_accepts_embed_options_and_disables_controls() -> None:
     assert "const api = await embed(outputDiv, spec, embedOptions)" in html
     assert '{"renderer":"canvas"}' in html
     assert '"names":[]' in html
+
+
+def test_to_html_can_inline_version_matched_browser_modules() -> None:
+    html = gs.Chart(data=[{"x": 1}]).mark_point().to_html(inline=True)
+    assert "await import(moduleUrl)" in html
+    for name in ("embed", "core", "inspector"):
+        assert bundled_module_url(name) in html
+
+
+def test_inline_mode_rejects_custom_browser_modules() -> None:
+    with pytest.raises(ValueError, match="custom bundle_url"):
+        gs.Chart().mark_point().to_html(
+            inline=True, bundle_url="https://example.test/core.js"
+        )
+
+
+def test_inline_must_be_boolean() -> None:
+    with pytest.raises(TypeError, match="inline must be a boolean"):
+        gs.Chart().mark_point().to_html(inline="yes")  # type: ignore[arg-type]
 
 
 @pytest.mark.parametrize(
@@ -1571,6 +1592,9 @@ def test_json_save_rejects_rendering_options(tmp_path: object) -> None:
     output = Path(str(tmp_path)) / "chart.json"
     with pytest.raises(ValueError, match="apply only to HTML"):
         gs.Chart().mark_point().save(output, controls=False)
+
+    with pytest.raises(ValueError, match="inline"):
+        gs.Chart().mark_point().save(output, inline=True)
 
 
 @pytest.mark.parametrize(

@@ -55,6 +55,9 @@ jobs:
               metadata = set(wheel.read(metadata_path).decode().splitlines())
               prefix = metadata_path.removesuffix('METADATA') + 'licenses/'
               assert 'genome_spy/static/widget.js' in names
+              assert 'genome_spy/static/genome-spy.js' in names
+              assert 'genome_spy/static/controls.js' in names
+              assert 'genome_spy/static/inspector.js' in names
               assert 'License-Expression: ' + project['license'] in metadata
               for name in project['license-files']:
                   assert 'License-File: ' + name in metadata
@@ -66,7 +69,7 @@ jobs:
         run: >-
           uv run --isolated --no-project
           --with "$GITHUB_WORKSPACE"/dist/*.whl
-          python -c "from importlib.resources import files; import genome_spy as gs; package = files('genome_spy'); assert package.joinpath('schema/genome-spy-schema.json').is_file(); assert package.joinpath('schema/capabilities.json').is_file(); assert package.joinpath('static/widget.js').is_file(); chart = gs.Chart([{'x': 1}]).mark_point().encode(x='x:Q'); spec = chart.to_dict(); assert spec['mark'] == 'point'; assert spec['encoding']['x']['field'] == 'x'; assert spec[chr(36) + 'schema'].endswith('/schema.json')"
+          python -c "from importlib.resources import files; import genome_spy as gs; package = files('genome_spy'); assert package.joinpath('schema/genome-spy-schema.json').is_file(); assert package.joinpath('schema/capabilities.json').is_file(); assert package.joinpath('static/widget.js').is_file(); assert package.joinpath('static/genome-spy.js').is_file(); assert package.joinpath('static/controls.js').is_file(); assert package.joinpath('static/inspector.js').is_file(); chart = gs.Chart([{'x': 1}]).mark_point().encode(x='x:Q'); spec = chart.to_dict(); assert spec['mark'] == 'point'; assert spec['encoding']['x']['field'] == 'x'; assert spec[chr(36) + 'schema'].endswith('/schema.json')"
 
   codegen:
     runs-on: ubuntu-latest
@@ -82,8 +85,9 @@ jobs:
       - run: uv sync --locked --dev
       - run: uv run pytest tests/test_schema_codegen.py -x --durations=10
       - run: uv run python tools/generate_schema_wrapper.py
+      - run: uv run python tools/vendor_javascript.py
       - run: uv run ruff format src/genome_spy/schema src/genome_spy/helpers.py src/genome_spy/api.py src/genome_spy/__init__.py
-      - run: git diff --exit-code src/genome_spy/schema src/genome_spy/helpers.py src/genome_spy/api.py src/genome_spy/__init__.py tools
+      - run: git diff --exit-code src/genome_spy/schema src/genome_spy/static src/genome_spy/helpers.py src/genome_spy/api.py src/genome_spy/__init__.py tools LICENSES
 
   notebook-rendering:
     runs-on: ubuntu-latest
@@ -99,9 +103,12 @@ jobs:
           uv venv --seed --python 3.11 "$RUNNER_TEMP/notebook-env"
           for wheel in "$GITHUB_WORKSPACE"/dist/*.whl; do
             uv pip install --python "$RUNNER_TEMP/notebook-env/bin/python" \
-              "$wheel[arrow]" "anywidget==0.11.0" jupyterlab pandas numpy playwright pillow
+              "$wheel[arrow]" "anywidget==0.11.0" jupyterlab pandas numpy playwright pillow pytest
           done
           "$RUNNER_TEMP/notebook-env/bin/python" -m playwright install --with-deps chromium
+      - name: Verify offline HTML from the installed wheel
+        run: |
+          "$RUNNER_TEMP/notebook-env/bin/python" -m pytest tests/browser/test_offline_rendering.py -q
       - name: Render the brush notebook in JupyterLab
         run: |
           "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \

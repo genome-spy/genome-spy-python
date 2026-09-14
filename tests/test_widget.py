@@ -47,6 +47,20 @@ def test_widget_accepts_selected_or_disabled_controls() -> None:
     assert disabled.controls == []
 
 
+def test_widget_can_use_packaged_modules_for_offline_rendering() -> None:
+    widget = gs.Chart().mark_point().widget(inline=True)
+
+    assert widget.bundle_url.startswith("data:text/javascript;base64,")
+    assert widget.controls_module_url.startswith("data:text/javascript;base64,")
+    assert widget.inspector_module_url.startswith("data:text/javascript;base64,")
+
+
+def test_widget_cdn_mode_does_not_sync_packaged_modules() -> None:
+    from genome_spy._embed import DEFAULT_EMBED_URL
+
+    assert gs.Chart().mark_point().widget().bundle_url == DEFAULT_EMBED_URL
+
+
 def test_jupyter_chart_rewrites_raw_eager_spec_dict() -> None:
     spec = {
         "$schema": "https://cdn.jsdelivr.net/npm/@genome-spy/core/dist/schema.json",

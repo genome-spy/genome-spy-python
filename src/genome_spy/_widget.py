@@ -15,8 +15,10 @@ from genome_spy._embed import (
     DEFAULT_EMBED_URL,
     DEFAULT_INSPECTOR_MODULE_URL,
     Controls,
+    bundled_module_url,
     control_definitions,
     normalize_controls,
+    validate_inline_options,
 )
 from genome_spy._chart_authoring import json_safe, records_from_data
 from genome_spy._render import _PreparedSpec, prepare_widget_spec
@@ -66,11 +68,18 @@ class JupyterChart(anywidget.AnyWidget):
         controls: Controls | UndefinedType = Undefined,
         controls_module_url: str = DEFAULT_CONTROLS_MODULE_URL,
         inspector_module_url: str = DEFAULT_INSPECTOR_MODULE_URL,
+        inline: bool = False,
         parameter_names: Sequence[str] = (),
         parameter_values: Mapping[str, Any] | None = None,
         enable_click_events: bool = False,
         **kwargs: Any,
     ) -> None:
+        validate_inline_options(
+            inline,
+            bundle_url=bundle_url,
+            controls_module_url=controls_module_url,
+            inspector_module_url=inspector_module_url,
+        )
         if hasattr(chart, "_prepare_widget"):
             prepared = chart._prepare_widget()
         else:
@@ -94,11 +103,15 @@ class JupyterChart(anywidget.AnyWidget):
 
         super().__init__(
             spec=prepared.spec,
-            bundle_url=bundle_url,
+            bundle_url=bundled_module_url("embed") if inline else bundle_url,
             embed_options=embed_options or {},
             controls=list(normalize_controls(controls)),
-            controls_module_url=controls_module_url,
-            inspector_module_url=inspector_module_url,
+            controls_module_url=bundled_module_url("core")
+            if inline
+            else controls_module_url,
+            inspector_module_url=bundled_module_url("inspector")
+            if inline
+            else inspector_module_url,
             dataset_manifest=[self._manifest_entry(entry) for entry in manifest],
             parameter_names=list(parameter_names),
             parameter_values=dict(parameter_values or {}),

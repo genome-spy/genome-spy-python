@@ -3,13 +3,22 @@
 The project's original code is MIT-licensed. Third-party code and data retain
 their own terms; the project license does not relicense those materials.
 
-## GenomeSpy schema and examples
+## GenomeSpy schema, browser runtime, and examples
 
 The bundled `src/genome_spy/schema/genome-spy-schema.json`, generated schema
-bindings and descriptions, and adapted official visualization examples come
-from [GenomeSpy](https://github.com/genome-spy/genome-spy), copyright
-2018–2026 Kari Lavikka, under MIT. The full license is in
-`LICENSES/GENOMESPY-MIT.txt`.
+bindings and descriptions, browser runtime modules, and adapted official
+visualization examples come from
+[GenomeSpy](https://github.com/genome-spy/genome-spy), copyright 2018–2026 Kari
+Lavikka, under MIT. The full license is in `LICENSES/GENOMESPY-MIT.txt`. The
+browser files are generated from the pinned `@genome-spy/core` and
+`@genome-spy/inspector` npm releases and include their bundled open-source
+runtime dependencies.
+
+The Core browser bundle embeds the Lato font bitmap and metrics, copyright
+2010–2014 tyPoland Lukasz Dziedzic, with Reserved Font Name "Lato", under the
+SIL Open Font License 1.1. Its full upstream notice is retained in
+`LICENSES/LATO-OFL-1.1.txt` and in the Core module, including when that module
+is embedded in exported HTML.
 
 GenomeSpy's schema types include material adapted from Vega-Lite (axis, scale,
 data, title, channel, and selection definitions) and Vega (input bindings).
