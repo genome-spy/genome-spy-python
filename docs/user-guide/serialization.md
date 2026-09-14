@@ -49,10 +49,12 @@ from pathlib import Path
 json_path, html_path = save_examples(Path("output"))
 ```
 
-The JSON file contains the validated specification. The HTML file contains the
-chart container and embedding code, but still loads the GenomeSpy JavaScript
-bundle and any remote datasets over the network. Inline data is included in the
-file.
+The JSON file contains the validated specification. By default, the HTML file
+contains the chart container and embedding code but loads the GenomeSpy
+JavaScript modules from a CDN. Use `chart.save("chart.html", inline=True)` to
+embed the version-matched modules for offline use. This makes the HTML file
+larger. Remote datasets in the chart specification still require network access;
+inline tables are included in the file.
 
 Use {py:meth}`~genome_spy.TopLevelSpec.to_html` when integration code needs the HTML as a string rather
 than a file. Complete method signatures and validation options are listed in the

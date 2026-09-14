@@ -97,7 +97,14 @@ output.
 ## Custom browser modules
 
 By default, the widget and generated HTML load version-matched GenomeSpy
-modules from jsDelivr. Self-hosted and offline setups can override
-`bundle_url`, `controls_module_url`, and `inspector_module_url`. GenomeSpy's
-[embedding guide](https://genomespy.app/docs/api/embedding/) lists the browser
-entry points.
+modules from jsDelivr. Pass `inline=True` to `display()`, `widget()`,
+`to_html()`, or HTML `save()` to use the modules packaged with GenomeSpy Python
+instead. This supports network-restricted environments at the cost of a larger
+widget payload or HTML file.
+
+Self-hosted setups can instead override `bundle_url`, `controls_module_url`,
+and `inspector_module_url`. Custom module URLs and `inline=True` are mutually
+exclusive because inline mode always uses the packaged, version-matched
+modules. GenomeSpy's [embedding
+guide](https://genomespy.app/docs/api/embedding/) lists the browser entry
+points.

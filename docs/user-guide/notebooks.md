@@ -1,8 +1,19 @@
 # Create and update charts in notebooks
 
 GenomeSpy charts display through a notebook widget in JupyterLab, Jupyter
-Notebook, VS Code notebooks, and Marimo. The browser needs network access when
-it first loads the pinned GenomeSpy JavaScript bundle.
+Notebook, VS Code notebooks, and Marimo. By default, the browser loads the
+pinned GenomeSpy JavaScript bundle from a CDN.
+
+For an offline or network-restricted notebook, explicitly display the packaged
+runtime:
+
+```python
+chart.display(inline=True)
+```
+
+Use `chart.widget(inline=True)` when retaining the widget for updates. Inline
+mode increases the widget payload because it includes GenomeSpy Core and the
+modules used by the display controls.
 
 ## Install for notebooks
 

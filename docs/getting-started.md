@@ -43,8 +43,9 @@ cd genome-spy-python
 uv sync
 ```
 
-Notebook rendering loads the pinned GenomeSpy JavaScript bundle from a CDN, so
-the browser needs network access when a chart first appears.
+Notebook rendering loads the pinned GenomeSpy JavaScript bundle from a CDN by
+default. In a network-restricted environment, use `chart.display(inline=True)`
+or retain `chart.widget(inline=True)` to send the packaged runtime instead.
 
 Start a notebook and import the package:
 
