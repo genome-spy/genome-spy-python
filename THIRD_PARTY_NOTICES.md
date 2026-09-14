@@ -148,16 +148,3 @@ The adapted areas are:
   `tools/generate_schema_wrapper.py`;
 - the multifeature penguins and cars strip-plot cases in `tests/test_chart.py`,
   adapted from Altair's example suite and mark documentation.
-
-Each adapted source location identifies its corresponding upstream source.
-
-## Design references
-
-Altair also informed the separation between generated schema bindings and the
-handwritten chart API, composition operators, channel shorthand, and API
-reference organization. Those areas use project-specific implementations and
-are acknowledged as design references rather than adapted Altair code.
-
-MutGlyph informed the generic scored gene-annotation track used by the
-rainfall and GISTIC examples. The implementation and UCSC-derived data are
-maintained independently in this repository.
