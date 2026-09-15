@@ -14,6 +14,7 @@ from genome_spy.datasets._airway import (
     airway_paired_logcounts,
 )
 from genome_spy.datasets._annotations import refseq_gene_bodies
+from genome_spy.datasets._direct_rna import rnf7_direct_rna_data
 from genome_spy.datasets._hapmap import (
     hapmap_manhattan_data,
     hapmap_qq_data,
@@ -37,6 +38,7 @@ def test_available_datasets_are_stable() -> None:
         "pik3ca_tcga_brca_lollipop",
         "pyoncoprint_tcga",
         "refseq_gene_bodies",
+        "rnf7_direct_rna",
         "tal1_alphagenome_reference",
         "tcga_laml_annotations",
         "tcga_laml_combined_oncoplot",
@@ -159,6 +161,7 @@ def test_packaged_dataset_files_are_byte_stable() -> None:
         "pik3ca_mutations.json": "4f36df9ad960c1429827522bbd4fce0cb47520d14a5c642abe8a55969f177aec",
         "pik3ca_tcga_brca_lollipop.json": "3d13291134b4bd3af801848a8be384b08936fb99d2371b34fbe49df00e42e685",
         "refseq_gene_bodies.csv.gz": "6ecb8f12d120cc10724a816d4dc6f8ebdf5e468f725950809de5082f8db17785",
+        "rnf7_direct_rna.json.gz": "2aee7e31edd025341ed453110fa2e2358e369c61b784779b407102028293b54a",
         "tal1_alphagenome_reference.json.gz": "10702eaaee63d2a4f600bf23ea4fac913db720aba56d33868b0f32590fc7b77e",
         "tcga.tsv": "39a90fc1f50ebcd113c37fd03894fb41b17dca4d6014f7efcf0e3f234c957742",
         "tcga_laml.maf.gz": "d102b071a052265b6f8ad7947bad1d58d3e3036fd17d6b274f7ea09a376cd6a0",
@@ -170,6 +173,38 @@ def test_packaged_dataset_files_are_byte_stable() -> None:
     for filename, expected_hash in expected_hashes.items():
         digest = hashlib.sha256(data_dir.joinpath(filename).read_bytes()).hexdigest()
         assert digest == expected_hash
+
+
+def test_rnf7_direct_rna_tables_match_the_recipe_contract() -> None:
+    data = rnf7_direct_rna_data()
+
+    assert data["metadata"] == {
+        "displayEnd": 920,
+        "displayStart": 0,
+        "gene": "RNF7",
+        "geneId": "ENSG00000114125",
+        "readCounts": {"KO": 151, "WT": 77},
+        "transcriptId": "ENST00000273480.3",
+    }
+    assert data["coverage"].shape == (1840, 5)
+    assert data["reads"].shape == (228, 10)
+    assert data["events"].shape == (18702, 12)
+    assert data["sequence"].shape == (920, 2)
+    assert set(data["events"]["eventType"]) == {
+        "deletion",
+        "insertion",
+        "mismatch",
+        "skip",
+        "softClip",
+    }
+    assert "".join(data["sequence"]["base"][:10]) == "GGGCAGCCGG"
+    assert data["sites"].shape == (24, 9)
+    assert data["exons"].shape == (3, 8)
+    prominent = data["sites"].loc[data["sites"]["position"].eq(614)]
+    assert dict(zip(prominent["condition"], prominent["probability"], strict=True)) == {
+        "KO": pytest.approx(0.3039894700050354),
+        "WT": pytest.approx(0.9885296821594238),
+    }
 
 
 def test_mutation_helpers_return_chart_ready_data() -> None:

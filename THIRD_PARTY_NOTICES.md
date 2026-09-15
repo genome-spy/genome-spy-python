@@ -84,6 +84,18 @@ GenomeSpy and Vega expression documentation.
   Credit the TCGA Research Network and Broad Institute TCGA Genome Data
   Analysis Center (2016), retain the source archive citation and respect
   TCGA responsible-use and no-reidentification requirements.
+- **`rnf7_direct_rna.json.gz`:** a reduced RNF7 transcript-window derivative
+  of the [xPore demo archive](https://doi.org/10.5281/zenodo.4587661) and
+  Supplementary Table 6 from Hendra et al.,
+  [*Nature Methods* 2022](https://doi.org/10.1038/s41592-022-01666-1).
+  Both sources are CC BY 4.0. GenomeSpy selected one transcript and replicate
+  per condition, retained mapped primary alignment geometry and alignment
+  events, pseudonymized read labels, calculated coverage, and
+  selected/reformatted published m6Anet site probabilities. The displayed
+  GRCh38 RNF7-201 reference sequence was reconstructed from three exon regions
+  returned by Ensembl, whose data are available without restriction. Credit
+  Pratanwanich et al. for xPore, Hendra et al. for m6Anet, and Ensembl for the
+  sequence service; link CC BY 4.0 and retain this modification notice.
 
 The full CC BY 4.0 and CC0 texts are in `LICENSES/CC-BY-4.0.txt` and
 `LICENSES/CC0-1.0.txt`. The source-repository MIT notices in

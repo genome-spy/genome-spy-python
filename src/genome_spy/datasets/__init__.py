@@ -27,6 +27,7 @@ _DATASETS = {
     "tal1_alphagenome_reference": "tal1_alphagenome_reference.json.gz",
     "pyoncoprint_tcga": "tcga.tsv",
     "refseq_gene_bodies": "refseq_gene_bodies.csv.gz",
+    "rnf7_direct_rna": "rnf7_direct_rna.json.gz",
     "tcga_laml_annotations": "tcga_laml_annot.tsv",
     "tcga_laml_combined_oncoplot": "tcga_laml_combined_oncoplot.json.gz",
     "tcga_laml_maf": "tcga_laml.maf.gz",

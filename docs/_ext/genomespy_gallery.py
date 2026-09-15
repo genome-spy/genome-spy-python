@@ -190,6 +190,10 @@ GALLERY_CARD_LABELS = {
         "Splice junctions with a sashimi plot",
         "IGV RNA-seq example data",
     ),
+    "rnf7_direct_rna": (
+        "ONT direct-RNA coverage and alignments",
+        "RNF7 · HEK293T WT vs METTL3 knockout",
+    ),
     "scrollable_viewport": ("Scrollable plot", "Sine and cosine example"),
     "sequence_logo": ("DNA sequence logo", "Example nucleotide counts"),
     "six_frame_translation": ("Six-frame translation", "Human reference genome · hg38"),
@@ -598,7 +602,7 @@ def _generate(app: Any) -> None:
         examples.append(example)
         _write(
             core.SPECS_DIR / f"{example.name}.json",
-            json.dumps(example.spec, indent=2),
+            json.dumps(example.spec, indent=2, allow_nan=False),
         )
         _write(
             core.GALLERY_PAGES_DIR / f"{example.name}.md",
