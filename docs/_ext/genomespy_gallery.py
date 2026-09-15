@@ -152,6 +152,10 @@ GALLERY_CARD_LABELS = {
         "Reference and alternate allele contributions",
         "SPI1 binding-QTL data",
     ),
+    "dynseq_adaptive_bqtl": (
+        "Zoom-adaptive allele contributions",
+        "SPI1 binding-QTL data",
+    ),
     "cytobands": ("Chromosome ideogram", "Human cytobands · hg38"),
     "copy_number": (
         "Allele-specific copy-number profile",

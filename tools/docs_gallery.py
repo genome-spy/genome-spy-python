@@ -88,6 +88,9 @@ class Example:
     source: str
     spec: dict
     thumbnail_width: int | None = None
+    thumbnail_stage_width: int | None = None
+    thumbnail_fit: bool = True
+    thumbnail_x_domain: list[dict[str, object]] | None = None
 
 
 def _ensure_src_on_path() -> None:
@@ -166,6 +169,13 @@ def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
             if meta.get("thumbnail_width") is not None
             else None
         ),
+        thumbnail_stage_width=(
+            int(meta["thumbnail_stage_width"])
+            if meta.get("thumbnail_stage_width") is not None
+            else None
+        ),
+        thumbnail_fit=bool(meta.get("thumbnail_fit", True)),
+        thumbnail_x_domain=meta.get("thumbnail_x_domain"),
     )
 
 

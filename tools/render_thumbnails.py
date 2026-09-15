@@ -125,10 +125,13 @@ def center_translation(
 
 def thumbnail_layout(example: object) -> ThumbnailLayout:
     """Return the natural render size for an example before card scaling."""
+    thumbnail_stage_width = getattr(example, "thumbnail_stage_width", None)
     max_width = getattr(example, "max_width", None)
     height = getattr(example, "height", CARD_HEIGHT)
-    stage_width = CARD_WIDTH
-    if max_width is not None:
+    stage_width = (
+        int(thumbnail_stage_width) if thumbnail_stage_width is not None else CARD_WIDTH
+    )
+    if thumbnail_stage_width is None and max_width is not None:
         stage_width = int(max_width)
         if stage_width <= 1200:
             stage_width += STAGE_WIDTH_BUFFER
@@ -139,12 +142,21 @@ def thumbnail_layout(example: object) -> ThumbnailLayout:
 
 
 def thumbnail_spec(
-    spec: dict[str, object], *, container_width: int | None = None
+    spec: dict[str, object],
+    *,
+    container_width: int | None = None,
+    x_domain: list[dict[str, object]] | None = None,
 ) -> dict[str, object]:
     """Return a stable copy of a specification for thumbnail rendering."""
     result = copy.deepcopy(spec)
     if result.get("width") == "container" and container_width is not None:
         result["width"] = container_width
+    if x_domain is not None:
+        scales = result.setdefault("scales", {})
+        assert isinstance(scales, dict)
+        x_scale = scales.setdefault("x", {})
+        assert isinstance(x_scale, dict)
+        x_scale["domain"] = copy.deepcopy(x_domain)
 
     drop = object()
 
@@ -358,7 +370,9 @@ def main() -> int:
                 bundle=bundle_url,
                 spec=json.dumps(
                     thumbnail_spec(
-                        example.spec, container_width=example.thumbnail_width
+                        example.spec,
+                        container_width=example.thumbnail_width,
+                        x_domain=example.thumbnail_x_domain,
                     )
                 ),
             )
@@ -394,6 +408,11 @@ def main() -> int:
                     f"[thumb] {example.name}: render failed ({runtime_error})",
                     file=sys.stderr,
                 )
+                continue
+            if not example.thumbnail_fit:
+                page.screenshot(path=str(gallery.THUMBS_DIR / f"{example.name}.png"))
+                print(f"[thumb] {example.name}")
+                rendered += 1
                 continue
             page.evaluate(
                 """

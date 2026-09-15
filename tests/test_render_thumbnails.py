@@ -41,6 +41,20 @@ def test_thumbnail_layout_defaults_to_card_width() -> None:
     assert layout.min_stage_height == 320
 
 
+def test_thumbnail_layout_honors_thumbnail_stage_width() -> None:
+    renderer = _load_renderer()
+    example = type(
+        "Example",
+        (),
+        {"height": 300, "max_width": 980, "thumbnail_stage_width": 696},
+    )()
+
+    layout = renderer.thumbnail_layout(example)
+
+    assert layout.stage_width == 696
+    assert layout.min_stage_height == 300
+
+
 def test_center_translation_centers_ink_bounds() -> None:
     renderer = _load_renderer()
     bounds = renderer.PaintBounds(left=40, top=80, right=1240, bottom=720)
@@ -74,6 +88,18 @@ def test_thumbnail_spec_resolves_container_width_without_mutating_input() -> Non
 
     assert renderer.thumbnail_spec(spec, container_width=980)["width"] == 980
     assert spec["width"] == "container"
+
+
+def test_thumbnail_spec_overrides_x_domain_without_mutating_input() -> None:
+    renderer = _load_renderer()
+    spec = {"scales": {"x": {"domain": [0, 100], "zoom": True}}}
+    domain = [{"chrom": "chr1", "pos": 10}, {"chrom": "chr1", "pos": 20}]
+
+    result = renderer.thumbnail_spec(spec, x_domain=domain)
+
+    assert result["scales"]["x"]["domain"] == domain
+    assert result["scales"]["x"]["zoom"] is True
+    assert spec["scales"]["x"]["domain"] == [0, 100]
 
 
 def test_select_examples_defaults_to_all_examples() -> None:

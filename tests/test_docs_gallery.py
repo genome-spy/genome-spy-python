@@ -959,6 +959,48 @@ def test_dynseq_uses_fasta_coordinate_lookup_and_sequence_logos() -> None:
     ]
 
 
+def test_adaptive_dynseq_crossfades_bars_and_sequence_logos() -> None:
+    gallery = _load_gallery()
+    example = gallery.collect_example(EXAMPLES_DIR / "dynseq_adaptive_bqtl.py")
+
+    assert example.thumbnail_x_domain == [
+        {"chrom": "chr22", "pos": 43720912},
+        {"chrom": "chr22", "pos": 43720947},
+    ]
+    assert example.thumbnail_stage_width == 696
+    assert example.thumbnail_fit is False
+    assert example.thumbnail_width is None
+    assert len(example.spec["vconcat"]) == 2
+
+    reference, alternate = example.spec["vconcat"]
+    assert reference["title"]["text"] == "Reference allele (C)"
+    assert alternate["title"]["text"] == "Alternate allele (G)"
+
+    bars = reference["layer"][1]
+    assert bars["opacity"] == {
+        "unitsPerPixel": [0.09, 0.055],
+        "values": [0, 1],
+    }
+    assert bars["layer"][0]["mark"] == "rect"
+    assert bars["layer"][0]["encoding"]["y2"]["field"] == "score"
+    assert bars["layer"][1]["mark"]["type"] == "text"
+    assert "logoLetters" not in bars["layer"][1]["mark"]
+    assert bars["layer"][1]["mark"]["fitToBand"] is True
+    assert bars["layer"][1]["encoding"]["text"]["field"] == "base"
+
+    logo = reference["layer"][2]
+    assert logo["opacity"] == {
+        "unitsPerPixel": [0.09, 0.055],
+        "values": [1, 0],
+    }
+    assert logo["mark"]["logoLetters"] is True
+    assert logo["encoding"]["y2"]["field"] == "score"
+    assert all(
+        track["data"]["lazy"]["type"] == "indexedFasta"
+        for track in (reference, alternate)
+    )
+
+
 def test_gistic_includes_scores_thresholds_and_lesion_regions() -> None:
     gallery = _load_gallery()
     example = gallery.collect_example(EXAMPLES_DIR / "tcga_ov_gistic.py")
