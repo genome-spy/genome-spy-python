@@ -94,6 +94,7 @@ artifacts = [
     "src/genome_spy/datasets/data/*.json",
     "src/genome_spy/datasets/data/*.tsv",
     "src/genome_spy/static/widget.js",
+    "src/genome_spy/static/embed-bridge.js",
     "src/genome_spy/static/genome-spy.js",
     "src/genome_spy/static/controls.js",
     "src/genome_spy/static/inspector.js",
