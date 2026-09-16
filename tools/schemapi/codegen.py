@@ -4705,12 +4705,35 @@ def _channel_class_source(
         for property_spec in constructor_property_specs
         if property_spec.name in constructor_property_names
     )
+    value_property = next(
+        (
+            property_spec
+            for property_spec in constructor_property_specs
+            if property_spec.name == "value"
+        ),
+        None,
+    )
+    direct_value_channel = encoding_name == "order" and value_property is not None
+    value_annotation = (
+        value_property.annotation.annotation
+        if direct_value_channel and value_property is not None
+        else "Channel | SchemaBase | str | dict[str, Any]"
+    )
+    constructor_body = (
+        "        definition = {'value': value, **defined}\n"
+        f"        super().__init__(definition, encoding_name={encoding_name!r})\n"
+        if direct_value_channel
+        else (
+            f"        wrapped = channel(value, encoding_name={encoding_name!r}, **defined)\n"
+            f"        super().__init__(wrapped.definition, encoding_name={encoding_name!r})\n"
+        )
+    )
     return (
         f"class {class_name}(Channel):\n"
         f'    """Generated wrapper for the ``{encoding_name}`` encoding channel."""\n\n'
         "    def __init__(\n"
         "        self,\n"
-        "        value: Channel | SchemaBase | str | dict[str, Any],\n"
+        f"        value: {value_annotation},\n"
         "        /,\n"
         "        *,\n"
         f"{constructor_parameters}\n"
@@ -4725,8 +4748,7 @@ def _channel_class_source(
         f"{constructor_values}\n"
         "        }\n"
         "        defined = {key: item for key, item in properties.items() if item is not _MISSING}\n"
-        f"        wrapped = channel(value, encoding_name={encoding_name!r}, **defined)\n"
-        f"        super().__init__(wrapped.definition, encoding_name={encoding_name!r})\n"
+        f"{constructor_body}"
         f"{simple_methods}"
         f"{methods}"
     )

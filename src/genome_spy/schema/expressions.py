@@ -456,6 +456,18 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("bandwidth", channel)
 
     @classmethod
+    def zoomLevel(
+        cls, channel: IntoExpression | UndefinedType = Undefined, /
+    ) -> Expression:
+        """Build a GenomeSpy ``zoomLevel`` expression."""
+        arguments = [channel]
+        while arguments and arguments[-1] is Undefined:
+            arguments.pop()
+        if any(argument is Undefined for argument in arguments):
+            raise ValueError("zoomLevel optional arguments cannot contain gaps")
+        return _function_expression("zoomLevel", *arguments)
+
+    @classmethod
     def mapHasKey(cls, map: IntoExpression, key: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``mapHasKey`` expression."""
         return _function_expression("mapHasKey", map, key)

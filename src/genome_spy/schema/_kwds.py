@@ -66,6 +66,7 @@ if TYPE_CHECKING:
         MarkPropExprDef,
         MarkPropExprDefType,
         MarkPropExprDefTypeForShape,
+        OrderDef,
         Parse,
         PointConfig,
         PointSelectionConfig,
@@ -377,6 +378,7 @@ class EncodingKwds(TypedDict, total=False):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
     )
+    order: OrderDef | dict[str, Any]
     sample: FieldDefWithoutScale | dict[str, Any]
     search: (
         FieldDefWithoutScale
@@ -704,6 +706,7 @@ class LinkConfigKwds(TypedDict, total=False):
     minArcHeight: float | ExprRef | dict[str, Any]
     minPickingSize: float | ExprRef | dict[str, Any]
     noFadingOnPointSelection: bool | ExprRef | dict[str, Any]
+    noFadingOnSecondPass: bool | ExprRef | dict[str, Any]
     opacity: float | ExprRef | dict[str, Any]
     orient: Literal["vertical"] | Literal["horizontal"] | ExprRef | dict[str, Any]
     segments: float | ExprRef | dict[str, Any]

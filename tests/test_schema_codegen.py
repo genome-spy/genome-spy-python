@@ -38,6 +38,10 @@ And an equivalent `if` construct:
 ### Scale Functions
 <a name="scale" href="#scale">#</a>
 <b>scale</b>(<i>channel</i>, <i>value</i>)<br/>
+<a name="zoomLevel" href="#zoomLevel">#</a>
+<b>zoomLevel</b>()<br/>
+<a name="zoomLevel-channel" href="#zoomLevel-channel">#</a>
+<b>zoomLevel</b>(<i>channel</i>)<br/>
 ### Other Functions
 <a name="mapHasKey" href="#mapHasKey">#</a>
 <b>mapHasKey</b>(<i>map</i>, <i>key</i>)<br/>
@@ -70,6 +74,7 @@ def test_parse_expression_catalog_uses_upstream_surface_and_signatures() -> None
         "sin",
         "slice",
         "scale",
+        "zoomLevel",
         "mapHasKey",
     ]
     assert catalog.functions[0].python_name == "if_"
@@ -77,6 +82,10 @@ def test_parse_expression_catalog_uses_upstream_surface_and_signatures() -> None
     assert catalog.functions[2].parameters[-1].variadic is True
     assert catalog.functions[2].parameters[-1].name == "args"
     assert catalog.functions[4].parameters[-1].optional is True
+    zoom_level = next(item for item in catalog.functions if item.name == "zoomLevel")
+    assert len(zoom_level.parameters) == 1
+    assert zoom_level.parameters[0].name == "channel"
+    assert zoom_level.parameters[0].optional is True
 
 
 def test_parse_expression_catalog_rejects_unparsed_custom_signatures() -> None:
