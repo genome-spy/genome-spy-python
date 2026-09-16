@@ -26,6 +26,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("notebook", type=Path)
     parser.add_argument("--screenshot", type=Path, required=True)
+    parser.add_argument("--check-embed-interactions", action="store_true")
     args = parser.parse_args()
     notebook = json.loads(args.notebook.read_text())
     # Test fresh execution, not saved outputs or widget state from another kernel.
@@ -34,6 +35,15 @@ def main() -> None:
         if cell["cell_type"] == "code":
             cell["outputs"] = []
             cell["execution_count"] = None
+            if args.check_embed_interactions:
+                # Exercise attachment before the frontend has installed listeners.
+                source = "".join(cell["source"]).replace(
+                    "widget = chart.widget(inline=True, controls=False)",
+                    "from genome_spy._widget import JupyterChart\n"
+                    "widget = JupyterChart(chart, inline=True, controls=False, "
+                    '_esm="await new Promise(r => setTimeout(r, 1500));\\n" + str(JupyterChart._esm))',
+                )
+                cell["source"] = source.splitlines(keepends=True)
 
     with tempfile.TemporaryDirectory(prefix="genomespy-notebook-") as directory:
         root = Path(directory)
@@ -112,13 +122,124 @@ def main() -> None:
                         # Check the completed chart, not an earlier tutorial preview.
                         canvas = (
                             page.locator(".jp-CodeCell")
+                            .filter(has=page.locator(".jp-OutputArea canvas"))
                             .last.locator(".jp-OutputArea canvas")
                             .first
                         )
+                        if args.check_embed_interactions:
+                            canvas = (
+                                page.locator(".jp-CodeCell")
+                                .filter(has=page.locator(".jp-OutputArea canvas"))
+                                .first.locator(".jp-OutputArea canvas")
+                                .first
+                            )
                         canvas.wait_for(state="visible", timeout=120_000)
                         page.wait_for_timeout(2000)
                         if page.locator(".jp-OutputArea-error").count() or errors:
                             raise AssertionError(f"Notebook rendering errors: {errors}")
+                        if args.check_embed_interactions:
+                            page.get_by_text(
+                                "Saved selections: 0", exact=True
+                            ).wait_for()
+                            page.locator(".jp-OutputArea").get_by_text(
+                                "No active selection", exact=False
+                            ).wait_for()
+                            canvas.scroll_into_view_if_needed()
+                            bounds = canvas.bounding_box()
+                            assert bounds is not None
+                            for count, (start, end) in enumerate(
+                                [(0.2, 0.5), (0.6, 0.85)], start=1
+                            ):
+                                x, y = bounds["x"], bounds["y"]
+                                width, height = bounds["width"], bounds["height"]
+                                page.mouse.move(x + width * start, y + height * 0.4)
+                                page.mouse.down()
+                                page.mouse.move(
+                                    x + width * end, y + height * 0.65, steps=8
+                                )
+                                # Changes arrive before release; no commit is saved yet.
+                                page.get_by_text(
+                                    "Saved selections: " + str(count - 1), exact=True
+                                ).wait_for()
+                                page.wait_for_function("""() => {
+                                    const outputs = document.querySelectorAll('.jp-OutputArea');
+                                    return [...outputs].some(el =>
+                                        el.textContent.includes('Current x range:') &&
+                                        !el.textContent.includes('No active selection'));
+                                }""")
+                                page.mouse.up()
+                                page.get_by_text(
+                                    f"Saved selections: {count}", exact=True
+                                ).wait_for()
+                            # Verify actual Python state, not only rendered text.
+                            status = page.evaluate("""async () => {
+                                const kernel = window.jupyterapp.shell.currentWidget.sessionContext.session.kernel;
+                                const result = await kernel.requestExecute({code:
+                                    'assert len(regions) == 2\\n' +
+                                    'assert regions[0]["intervals"] != regions[1]["intervals"]\\n' +
+                                    'assert latest_selection["active"] and selected_rows\\n' +
+                                    'clear_task = asyncio.create_task(selection.clear())', store_history: false
+                                }).done;
+                                return result.content.status;
+                            }""")
+                            assert status == "ok", (
+                                "Python selection state did not update"
+                            )
+                            page.get_by_text(
+                                "Saved selections: 3", exact=True
+                            ).wait_for()
+                            page.locator(".jp-OutputArea").get_by_text(
+                                "No active selection", exact=False
+                            ).wait_for()
+                            # Save a named annotation through the notebook form.
+                            canvas = (
+                                page.locator(".jp-CodeCell")
+                                .filter(has=page.locator(".jp-OutputArea canvas"))
+                                .last.locator(".jp-OutputArea canvas")
+                                .first
+                            )
+                            page.get_by_text(
+                                "Ready — brush the chart directly above this form.",
+                                exact=True,
+                            ).wait_for()
+                            canvas.scroll_into_view_if_needed()
+                            bounds = canvas.bounding_box()
+                            assert bounds is not None
+                            page.mouse.move(
+                                bounds["x"] + bounds["width"] * 0.3,
+                                bounds["y"] + bounds["height"] * 0.4,
+                            )
+                            page.mouse.down()
+                            page.mouse.move(
+                                bounds["x"] + bounds["width"] * 0.6,
+                                bounds["y"] + bounds["height"] * 0.6,
+                                steps=8,
+                            )
+                            page.mouse.up()
+                            page.get_by_role("textbox", name="Name:", exact=True).fill(
+                                "Example region"
+                            )
+                            page.get_by_role("textbox", name="Description:").fill(
+                                "Saved from the brush"
+                            )
+                            page.get_by_role("button", name="Save annotation").click()
+                            page.get_by_text(
+                                "Saved 1 annotation(s) in Python memory.", exact=True
+                            ).wait_for()
+                            page.get_by_role("cell", name="Example region").wait_for()
+                            status = page.evaluate("""async () => {
+                                const kernel = window.jupyterapp.shell.currentWidget.sessionContext.session.kernel;
+                                const result = await kernel.requestExecute({code:
+                                    'assert len(annotations) == 1\\n' +
+                                    'assert len(regions) == 3 and not latest_selection["active"]\\n' +
+                                    'assert annotations[0]["name"] == "Example region"\\n' +
+                                    'assert annotations[0]["description"] == "Saved from the brush"\\n' +
+                                    'assert annotations[0]["start"] < annotations[0]["end"]',
+                                    store_history: false
+                                }).done;
+                                return result.content.status;
+                            }""")
+                            assert status == "ok", "Annotation was not saved in Python"
                         args.screenshot.parent.mkdir(parents=True, exist_ok=True)
                         pixels = canvas.screenshot(path=str(args.screenshot))
                         # A canvas element alone can exist even when rendering failed.

@@ -37,7 +37,7 @@ jobs:
           uv run pytest tests/ -x
           -m "not docs and not codegen"
           --durations=10
-      - run: node --test tests/widget.test.mjs
+      - run: node --test tests/*.test.mjs
       - run: uv build --wheel
       # Use Bash on both runners for the embedded Python script.
       - name: Check wheel contents and license metadata
@@ -108,12 +108,18 @@ jobs:
           "$RUNNER_TEMP/notebook-env/bin/python" -m playwright install --with-deps chromium
       - name: Verify offline HTML from the installed wheel
         run: |
-          "$RUNNER_TEMP/notebook-env/bin/python" -m pytest tests/browser/test_offline_rendering.py -q
+          "$RUNNER_TEMP/notebook-env/bin/python" -m pytest tests/browser/ -q
       - name: Render the brush notebook in JupyterLab
         run: |
           "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
             notebooks/brush_linked_genome_tracks.ipynb \
             --screenshot "$RUNNER_TEMP/notebook-rendering.png"
+      - name: Exercise the embed API through Jupyter comms
+        run: |
+          "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
+            notebooks/embed_api.ipynb \
+            --check-embed-interactions \
+            --screenshot "$RUNNER_TEMP/embed-api.png"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
