@@ -4659,7 +4659,7 @@ def _channel_class_source(
             annotation="",
             sort_property_specs=sort_property_specs,
         )
-        if sort_property_specs
+        if encoding_name != "order" and sort_property_specs
         else ""
     )
     methods = "".join(
@@ -4715,12 +4715,16 @@ def _channel_class_source(
     )
     direct_value_channel = encoding_name == "order" and value_property is not None
     value_annotation = (
-        value_property.annotation.annotation
+        f"{value_property.annotation.annotation} | dict[str, Any]"
         if direct_value_channel and value_property is not None
         else "Channel | SchemaBase | str | dict[str, Any]"
     )
     constructor_body = (
-        "        definition = {'value': value, **defined}\n"
+        "        definition = (\n"
+        "            {**value, **defined}\n"
+        "            if isinstance(value, dict)\n"
+        "            else {'value': value, **defined}\n"
+        "        )\n"
         f"        super().__init__(definition, encoding_name={encoding_name!r})\n"
         if direct_value_channel
         else (

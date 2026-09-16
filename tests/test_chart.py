@@ -116,6 +116,20 @@ def test_core_0_88_conditional_order_channel_is_public() -> None:
     }
 
 
+def test_core_0_88_order_channel_fluent_setters_preserve_definition() -> None:
+    order = (
+        gs.Order(0)
+        .condition({"param": "selected", "empty": False, "value": 1})
+        .value(2)
+    )
+
+    assert order.to_dict() == {
+        "value": 2,
+        "condition": {"param": "selected", "empty": False, "value": 1},
+    }
+    assert not hasattr(order, "sort")
+
+
 def test_generated_channel_simple_setters_are_schema_driven() -> None:
     channel = gs.X("position:Q").field("position_bp").type("quantitative").band(0.5)
 

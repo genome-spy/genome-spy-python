@@ -3299,7 +3299,7 @@ class Order(Channel):
 
     def __init__(
         self,
-        value: float,
+        value: float | dict[str, Any],
         /,
         *,
         condition: OrderCondition | dict[str, Any] | UndefinedType = _MISSING,
@@ -3316,7 +3316,11 @@ class Order(Channel):
         defined = {
             key: item for key, item in properties.items() if item is not _MISSING
         }
-        definition = {"value": value, **defined}
+        definition = (
+            {**value, **defined}
+            if isinstance(value, dict)
+            else {"value": value, **defined}
+        )
         super().__init__(definition, encoding_name="order")
 
     def condition(
@@ -3332,29 +3336,6 @@ class Order(Channel):
     ) -> Order:
         """Return a channel with ``value`` updated."""
         return self._with_property("value", value)
-
-    def sort(
-        self,
-        value: CompareParams
-        | CompareParamsKwds
-        | str
-        | list[str]
-        | None
-        | object = _MISSING,
-        /,
-        *,
-        field: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
-        order: Sequence[SortOrder_T] | SortOrder_T | UndefinedType = Undefined,
-    ) -> Order:
-        """Return a channel with a ``sort`` configuration."""
-        properties = {
-            "field": field,
-            "order": order,
-        }
-        defined = {
-            key: item for key, item in properties.items() if item is not Undefined
-        }
-        return self._with_sort(value, defined)
 
 
 class Sample(Channel):
