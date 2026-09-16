@@ -44,6 +44,8 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
   dataframe transport, and live dataset updates without remounting.
 - [Display controls and embed options](display-controls.md) covers image export,
   the Inspector, and rendering-time settings.
+- [Control a live embed from Python](embed-api.md) introduces the experimental
+  thin wrapper and its host connection boundary.
 - [Save and inspect charts](serialization.md) writes specifications and
   standalone HTML.
 
@@ -88,5 +90,6 @@ annotations
 interaction
 notebooks
 display-controls
+embed-api
 serialization
 ```
