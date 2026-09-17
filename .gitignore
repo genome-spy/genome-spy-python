@@ -235,6 +235,7 @@ docs/gallery/
 docs/generated/
 docs/_static/specs/
 docs/_static/generated/arrow/
+docs/_static/generated/workflows/
 
 # Local assistant state
 .pre-commit-cache/

@@ -1646,6 +1646,14 @@ def test_gallery_index_lists_every_example_in_hidden_navigation(
     markdown = extension._gallery_index_md(examples)
     build_token = gallery.build_token(examples)
 
+    assert "## Interactive workflows" in markdown
+    assert ":link: ../user-guide/workflows/annotate-intervals" in markdown
+    assert ":link: ../user-guide/workflows/select-genes" in markdown
+    assert ":link: ../user-guide/workflows/pick-genes" in markdown
+    assert ":link: ../user-guide/workflows/edit-sequence" in markdown
+    assert markdown.rindex('class="gs-gallery"') < markdown.index(
+        "## Interactive workflows"
+    )
     assert markdown.count(":hidden:") == len(gallery.grouped_by_category(examples))
     assert "## Browse by Category" not in markdown
     assert ":caption: Volcano and MA plots" in markdown
@@ -1655,7 +1663,7 @@ def test_gallery_index_lists_every_example_in_hidden_navigation(
     assert ":caption: Genome browser tracks" in markdown
     assert f"manhattan_plot.html?v={build_token}" in markdown
     assert f"manhattan_plot.png?v={build_token}" in markdown
-    assert "Each card opens the live chart and the Python code that produced it." in (
+    assert "Browse live charts and Python source, or try a notebook workflow." in (
         markdown
     )
     assert "[user guide](../user-guide/index.md)" in markdown

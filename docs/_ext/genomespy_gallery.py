@@ -21,6 +21,7 @@ import ast
 import html
 import importlib.util
 import json
+import posixpath
 import re
 import sys
 from copy import deepcopy
@@ -36,6 +37,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(_REPO_ROOT / "tools"))
 
 import docs_gallery as core  # noqa: E402
+import docs_workflows  # noqa: E402
 
 
 _TUTORIALS_DIR = _REPO_ROOT / "docs" / "tutorials"
@@ -239,8 +241,46 @@ def _gallery_index_md(examples: list[core.Example]) -> str:
     blocks = [
         "# Example gallery",
         "",
-        "Each card opens the live chart and the Python code that produced it. "
+        "Browse live charts and Python source, or try a notebook workflow. "
         "The [user guide](../user-guide/index.md) teaches the grammar they use.",
+        "",
+    ]
+    workflow_blocks = [
+        "## Interactive workflows",
+        "",
+        "Try these demos in your browser, or download a notebook to use the results in Python.",
+        "",
+        "::::{grid} 1 1 2 2",
+        ":gutter: 3",
+        "",
+        ":::{grid-item-card} Annotate genomic intervals",
+        ":link: ../user-guide/workflows/annotate-intervals",
+        ":link-type: doc",
+        "",
+        "Save named regions to an annotation track and export BED.",
+        ":::",
+        "",
+        ":::{grid-item-card} Select genes for follow-up",
+        ":link: ../user-guide/workflows/select-genes",
+        ":link-type: doc",
+        "",
+        "Brush a volcano plot and export the selected genes.",
+        ":::",
+        "",
+        ":::{grid-item-card} Pick individual genes",
+        ":link: ../user-guide/workflows/pick-genes",
+        ":link-type: doc",
+        "",
+        "Click or Shift-click points to collect selected gene records.",
+        ":::",
+        "",
+        ":::{grid-item-card} Edit a sequence",
+        ":link: ../user-guide/workflows/edit-sequence",
+        ":link-type: doc",
+        "",
+        "Choose nucleotides in a letter grid and compare with the reference.",
+        ":::",
+        "::::",
         "",
     ]
     for category, items in core.grouped_by_category(examples):
@@ -265,6 +305,8 @@ def _gallery_index_md(examples: list[core.Example]) -> str:
         blocks.append("</div>")
         blocks.append("```")
         blocks.append("")
+
+    blocks.extend(workflow_blocks)
 
     # The sidebar is built from toctrees, so every generated detail page must be
     # listed here. They are hidden because the cards above already link them;
@@ -771,9 +813,55 @@ class GenomeSpyChart(Directive):
         return [nodes.raw("", markup, format="html")]
 
 
+class GenomeSpyWorkflow(Directive):
+    """Embed a live browser workflow using its notebook's chart."""
+
+    required_arguments = 1
+    has_content = False
+    option_spec = {"code": directives.unchanged_required}
+
+    def run(self) -> list[nodes.Node]:
+        name = self.arguments[0]
+        if part := self.options.get("code"):
+            notebook = docs_workflows.NOTEBOOKS[name]
+            self.state.document.settings.env.note_dependency(str(notebook))
+            cells = [
+                cell
+                for cell in json.loads(notebook.read_text())["cells"]
+                if cell["cell_type"] == "code"
+            ]
+            if part not in ("chart", "hooks"):
+                raise self.error("code must be chart or hooks")
+            source = "".join(cells[0 if part == "chart" else 1]["source"])
+            return [nodes.literal_block(source, source, language="python")]
+        spec = docs_workflows.load_spec(name)
+        env = self.state.document.settings.env
+        script = core.STATIC_DIR / "workflows.js"
+        for path in (
+            docs_workflows.NOTEBOOKS[name],
+            Path(docs_workflows.__file__),
+            script,
+        ):
+            env.note_dependency(str(path))
+        payload = json.dumps(spec, allow_nan=False, separators=(",", ":"))
+        _write(core.STATIC_DIR / "generated" / "workflows" / f"{name}.json", payload)
+        prefix = posixpath.relpath("_static", posixpath.dirname(env.docname))
+        token = sha256(payload.encode()).hexdigest()[:12]
+        script_token = sha256(script.read_bytes()).hexdigest()[:12]
+        markup = docs_workflows.embed_html(
+            name,
+            f"{prefix}/generated/workflows/{name}.json?v={token}",
+            core.default_bundle_url(),
+            f"{prefix}/workflows.js?v={script_token}",
+        )
+        return [nodes.raw("", markup, format="html")]
+
+
 def setup(app: Any) -> dict[str, Any]:
     app.connect("config-inited", _generate_on_config)
     app.connect("env-before-read-docs", _refresh_landing_page)
     app.add_directive("genomespy-minigallery", GenomeSpyMiniGallery)
     app.add_directive("genomespy-chart", GenomeSpyChart)
+    app.add_directive("genomespy-workflow", GenomeSpyWorkflow)
+    app.add_css_file("workflows.css")
     return {"parallel_read_safe": False, "parallel_write_safe": True}

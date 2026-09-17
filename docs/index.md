@@ -53,6 +53,13 @@ Detailed reference for the public Python API.
 :::
 ::::
 
+:::{card} Interactive workflows
+:link: user-guide/workflows/index
+:link-type: doc
+
+Annotate genomic intervals or select genes for follow-up—in your browser or a notebook.
+:::
+
 ```{toctree}
 :hidden:
 :includehidden:
