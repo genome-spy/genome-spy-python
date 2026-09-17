@@ -48,6 +48,7 @@ export function createEmbedBridge(api, send) {
     if (request.target === "api") return { value: api, type: "api" };
     if (request.target === "params") return { value: api.params, type: "params" };
     if (request.target === "datasets") return { value: api.datasets, type: "datasets" };
+    if (request.target === "views") return { value: api.views, type: "views" };
     const entry = handles.get(request.target);
     if (!entry || entry.client !== request.client) throw new Error("Unknown embed handle.");
     return entry;
@@ -82,7 +83,10 @@ export function createEmbedBridge(api, send) {
       const { value, type } = target(request);
       const args = request.args;
       let result = null;
-      if (type === "params" && ["get", "getSelection"].includes(request.method)) {
+      if (type === "views" && request.method === "get") {
+        const view = value.get(...args);
+        result = { params: handle(request.client, view.params, "params") };
+      } else if (type === "params" && ["get", "getSelection"].includes(request.method)) {
         const resolved = value[request.method](...args);
         result = handle(request.client, resolved, request.method === "get" ? "param" : resolved.type);
       } else if (["param", "point", "interval"].includes(type) && request.method === "subscribe") {

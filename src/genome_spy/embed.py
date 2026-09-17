@@ -21,6 +21,8 @@ __all__ = [
     "ParamNamespace",
     "PointSelectionApi",
     "SelectionOptions",
+    "ViewHandle",
+    "ViewApi",
     "attach_embed",
 ]
 
@@ -380,6 +382,36 @@ class ParamNamespace(_Proxy):
         return cls(self._connection, handle["id"])
 
 
+class ViewHandle:
+    """A scoped view handle exposing its upstream parameter namespace."""
+
+    def __init__(self, params: ParamNamespace) -> None:
+        self.params = params
+
+
+class ViewApi(_Proxy):
+    """Resolve authored views using upstream view selectors."""
+
+    async def get(self, address: dict[str, Any] | Literal["root"]) -> ViewHandle:
+        """Resolve a view's scoped parameter access.
+
+        Description:
+            Delegates to views.get. Only the handle's params namespace is
+            currently wrapped; no view mutation or mark-event API is added.
+        Args:
+            address: Upstream selector with scope and view, or "root".
+        Returns:
+            A handle whose params resolves declarations in that view's scope.
+        Raises:
+            EmbedError: If the view cannot be resolved or the embed is gone.
+        Example:
+            >>> view = await api.views.get({"scope": [], "view": "base-cells"})
+            >>> selection = await view.params.get_selection("base_pick")
+        """
+        handle = await self._connection.call(self._target, "get", address)
+        return ViewHandle(ParamNamespace(self._connection, handle["params"]["id"]))
+
+
 class DatasetApi(_Proxy):
     """Dataset operations for the exact authored top-level owner."""
 
@@ -423,7 +455,7 @@ class DatasetApi(_Proxy):
 class EmbedResult(_Proxy):
     """Proxy for one live embed, obtained by a host using attach_embed.
 
-    This first slice exposes params and datasets; the remaining upstream
+    This first slice exposes params, datasets, and scoped view params; other
     namespaces are not yet wrapped. Replacement requires a new proxy.
     """
 
@@ -431,6 +463,7 @@ class EmbedResult(_Proxy):
         super().__init__(connection, "api")
         self.params = ParamNamespace(connection, "params")
         self.datasets = DatasetApi(connection, "datasets")
+        self.views = ViewApi(connection, "views")
 
     async def finalize(self) -> None:
         """Finalize the upstream embed and release this connection.

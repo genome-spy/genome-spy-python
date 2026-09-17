@@ -29,6 +29,7 @@ def test_live_embed_api(host: str) -> None:
             browser = await runtime.chromium.launch()
             page = await browser.new_page()
             spec = {
+                "name": "test-chart",
                 "width": 400,
                 "height": 200,
                 "datasets": {"table": [{"x": 1, "y": 2}, {"x": 2, "y": 3}]},
@@ -119,6 +120,11 @@ def test_live_embed_api(host: str) -> None:
                         else await attach_embed(queue.put_nowait, subscribe)
                     )
                     parameter = await api.params.get("threshold")
+                    view = await api.views.get({"scope": [], "view": "test-chart"})
+                    scoped = await view.params.get("threshold")
+                    assert await scoped.get_value() == 1
+                    with pytest.raises(EmbedError):
+                        await api.views.get({"scope": [], "view": "missing"})
                     doubled = await api.params.get("doubled")
                     await parameter.set_value(3)
                     assert await parameter.get_value() == 3
@@ -133,6 +139,8 @@ def test_live_embed_api(host: str) -> None:
                     assert (await brush.get_value())["active"] is False
                     point = await api.params.get_selection("selected")
                     assert point.type == "point"
+                    scoped_point = await view.params.get_selection("selected")
+                    assert (await scoped_point.get_value())["data"] == []
                     assert (await point.get_value())["data"] == []
                     events: asyncio.Queue[Any] = asyncio.Queue()
                     stop = await brush.subscribe(
@@ -164,6 +172,8 @@ def test_live_embed_api(host: str) -> None:
                     await asyncio.sleep(0)
                     with pytest.raises(EmbedError):
                         await parameter.get_value()
+                    with pytest.raises(EmbedError):
+                        await scoped.get_value()
             finally:
                 worker.cancel()
                 try:
@@ -172,6 +182,43 @@ def test_live_embed_api(host: str) -> None:
                     pass
                 if widget:
                     widget.close()
+                await browser.close()
+
+    asyncio.run(run())
+
+
+def test_locus_selection_endpoints_are_zero_based_for_bed_export() -> None:
+    async def run() -> None:
+        async with playwright.async_playwright() as runtime:
+            browser = await runtime.chromium.launch()
+            try:
+                page = await browser.new_page()
+                await page.set_content('<div id="chart"></div>')
+                snapshot = await page.evaluate(
+                    """async core => {
+                    const {embed} = await import(core);
+                    const api = await embed(document.querySelector('#chart'), {
+                        assembly: 'test',
+                        genomes: {test: {contigs: [{name: 'chrA', size: 100}, {name: 'chrB', size: 50}]}},
+                        width: 400, height: 100,
+                        data: {values: [{chrom: 'chrB', pos: 0}]}, mark: 'point',
+                        encoding: {x: {chrom: 'chrom', pos: 'pos', type: 'locus'}},
+                        params: [{name: 'brush', select: {type: 'interval', encodings: ['x']}}]
+                    }, {renderer: 'canvas'});
+                    if (!api.debug.getViewRoot()) return {error: document.body.innerText};
+                    try {
+                        api.params.get('brush').setValue({type: 'interval', intervals: {x: [100, 110]}});
+                        return api.params.getSelection('brush').getValue();
+                    } finally { api.finalize(); }
+                }""",
+                    bundled_module_url("embed"),
+                )
+                assert "error" not in snapshot, snapshot
+                assert snapshot["complexIntervals"]["x"] == [
+                    {"chrom": "chrB", "pos": 0},
+                    {"chrom": "chrB", "pos": 10},
+                ]
+            finally:
                 await browser.close()
 
     asyncio.run(run())
