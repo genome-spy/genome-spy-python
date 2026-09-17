@@ -131,14 +131,39 @@ def _parse_signatures(source: str) -> dict[str, ExpressionFunctionSpec]:
     signatures: dict[str, ExpressionFunctionSpec] = {}
     for match in _SIGNATURE_RE.finditer(source):
         name = html.unescape(match.group("name")).strip()
-        signatures.setdefault(
-            name,
-            ExpressionFunctionSpec(
-                name=name,
-                parameters=_parse_parameters(match.group("parameters")),
-            ),
+        signature = ExpressionFunctionSpec(
+            name=name,
+            parameters=_parse_parameters(match.group("parameters")),
+        )
+        existing = signatures.get(name)
+        signatures[name] = (
+            signature
+            if existing is None
+            else _merge_prefix_overloads(existing, signature)
         )
     return signatures
+
+
+def _merge_prefix_overloads(
+    first: ExpressionFunctionSpec, second: ExpressionFunctionSpec
+) -> ExpressionFunctionSpec:
+    """Merge overloads when the shorter parameter list prefixes the longer one."""
+    shorter, longer = sorted((first.parameters, second.parameters), key=len)
+    prefix = longer[: len(shorter)]
+    if tuple((item.name, item.variadic) for item in shorter) != tuple(
+        (item.name, item.variadic) for item in prefix
+    ):
+        return first
+
+    parameters = tuple(
+        ExpressionParameterSpec(
+            name=parameter.name,
+            optional=parameter.optional or index >= len(shorter),
+            variadic=parameter.variadic,
+        )
+        for index, parameter in enumerate(longer)
+    )
+    return ExpressionFunctionSpec(name=first.name, parameters=parameters)
 
 
 def _parse_parameters(source: str) -> tuple[ExpressionParameterSpec, ...]:

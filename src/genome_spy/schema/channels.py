@@ -37,9 +37,17 @@ from genome_spy.schema.core import (
     ConditionalParameterScaleDatumDef,
     ConditionalParameterValueDefNumberExprRef,
     ConditionalParameterValueDefStringNullExprRef,
+    ConditionalTestMarkPropExprDefType,
+    ConditionalTestMarkPropExprDefTypeForShape,
+    ConditionalTestMarkPropFieldDefType,
+    ConditionalTestMarkPropFieldDefTypeForShape,
+    ConditionalTestScaleDatumDef,
+    ConditionalTestValueDefNumberExprRef,
+    ConditionalTestValueDefStringNullExprRef,
     ExprRef,
     GenomeAxis,
     Legend,
+    OrderCondition,
     Scale,
 )
 from genome_spy.schema._kwds import (
@@ -64,10 +72,18 @@ class Angle(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -85,7 +101,7 @@ class Angle(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -131,10 +147,18 @@ class Angle(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> Angle:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -452,10 +476,18 @@ class Color(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -473,7 +505,7 @@ class Color(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefStringNullExprRef | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefStringNullExprRef | ConditionalTestValueDefStringNullExprRef | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any] | ConditionalTestValueDefStringNullExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -519,10 +551,18 @@ class Color(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> Color:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -1095,10 +1135,18 @@ class Dx(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -1116,7 +1164,7 @@ class Dx(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -1162,10 +1210,18 @@ class Dx(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> Dx:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -1483,10 +1539,18 @@ class Dy(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -1504,7 +1568,7 @@ class Dy(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -1550,10 +1614,18 @@ class Dy(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> Dy:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -1946,10 +2018,18 @@ class Fill(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -1967,7 +2047,7 @@ class Fill(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefStringNullExprRef | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefStringNullExprRef | ConditionalTestValueDefStringNullExprRef | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any] | ConditionalTestValueDefStringNullExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -2013,10 +2093,18 @@ class Fill(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> Fill:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -2334,10 +2422,18 @@ class FillOpacity(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -2355,7 +2451,7 @@ class FillOpacity(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -2401,10 +2497,18 @@ class FillOpacity(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> FillOpacity:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -2797,10 +2901,18 @@ class Opacity(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -2818,7 +2930,7 @@ class Opacity(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -2864,10 +2976,18 @@ class Opacity(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> Opacity:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -3174,6 +3294,50 @@ class Opacity(Channel):
         return self._with_nested("scale", value, **defined)
 
 
+class Order(Channel):
+    """Generated wrapper for the ``order`` encoding channel."""
+
+    def __init__(
+        self,
+        value: float | dict[str, Any],
+        /,
+        *,
+        condition: OrderCondition | dict[str, Any] | UndefinedType = _MISSING,
+    ) -> None:
+        """Create a ``order`` encoding channel.
+
+        Args:
+            condition (OrderCondition | dict[str, Any]): Selection condition that determines the matching level.
+            value (float): Fallback level, or the sole level when ``condition`` is omitted.
+        """
+        properties = {
+            "condition": condition,
+        }
+        defined = {
+            key: item for key, item in properties.items() if item is not _MISSING
+        }
+        definition = (
+            {**value, **defined}
+            if isinstance(value, dict)
+            else {"value": value, **defined}
+        )
+        super().__init__(definition, encoding_name="order")
+
+    def condition(
+        self,
+        value: OrderCondition | dict[str, Any],
+    ) -> Order:
+        """Return a channel with ``condition`` updated."""
+        return self._with_property("condition", value)
+
+    def value(
+        self,
+        value: float,
+    ) -> Order:
+        """Return a channel with ``value`` updated."""
+        return self._with_property("value", value)
+
+
 class Sample(Channel):
     """Generated wrapper for the ``sample`` encoding channel."""
 
@@ -3420,10 +3584,18 @@ class Shape(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefTypeForShape
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefTypeForShape
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefTypeForShape
+        | ConditionalTestMarkPropExprDefTypeForShape
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -3441,7 +3613,7 @@ class Shape(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefTypeForShape | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefTypeForShape | ConditionalParameterValueDefStringNullExprRef | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefTypeForShape | dict[str, Any] | ConditionalTestMarkPropFieldDefTypeForShape | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefTypeForShape | ConditionalTestMarkPropExprDefTypeForShape | ConditionalParameterValueDefStringNullExprRef | ConditionalTestValueDefStringNullExprRef | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any] | ConditionalTestValueDefStringNullExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -3487,10 +3659,18 @@ class Shape(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefTypeForShape
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefTypeForShape
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefTypeForShape
+        | ConditionalTestMarkPropExprDefTypeForShape
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> Shape:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -3808,10 +3988,18 @@ class Size(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -3829,7 +4017,7 @@ class Size(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -3875,10 +4063,18 @@ class Size(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> Size:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -4196,10 +4392,18 @@ class Stroke(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -4217,7 +4421,7 @@ class Stroke(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefStringNullExprRef | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefStringNullExprRef | ConditionalTestValueDefStringNullExprRef | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any] | ConditionalTestValueDefStringNullExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -4263,10 +4467,18 @@ class Stroke(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> Stroke:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -4584,10 +4796,18 @@ class StrokeOpacity(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -4605,7 +4825,7 @@ class StrokeOpacity(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -4651,10 +4871,18 @@ class StrokeOpacity(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> StrokeOpacity:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -4972,10 +5200,18 @@ class StrokeWidth(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -4993,7 +5229,7 @@ class StrokeWidth(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -5039,10 +5275,18 @@ class StrokeWidth(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> StrokeWidth:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -7061,10 +7305,18 @@ class XOffset(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -7082,7 +7334,7 @@ class XOffset(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -7128,10 +7380,18 @@ class XOffset(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> XOffset:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -8535,10 +8795,18 @@ class YOffset(Channel):
         band: float | UndefinedType = _MISSING,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = _MISSING,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
         description: str | UndefinedType = _MISSING,
@@ -8556,7 +8824,7 @@ class YOffset(Channel):
 
         Args:
             band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
-            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalParameterScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]): A field definition or one or more value definition(s) with a parameter predicate.
+            condition (ConditionalParameterMarkPropFieldDefType | dict[str, Any] | ConditionalTestMarkPropFieldDefType | ConditionalParameterScaleDatumDef | ConditionalTestScaleDatumDef | ConditionalParameterMarkPropExprDefType | ConditionalTestMarkPropExprDefType | ConditionalParameterValueDefNumberExprRef | ConditionalTestValueDefNumberExprRef | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any] | ConditionalTestValueDefNumberExprRef]): A field definition or one or more value definition(s) with a parameter predicate.
             datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
             description (str): A description of the encoded expression. Can be used for documentation and to explain the meaning of the channel mapping.
             domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
@@ -8602,10 +8870,18 @@ class YOffset(Channel):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> YOffset:
         """Return a channel with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -8923,6 +9199,7 @@ __all__ = [
     "FillOpacity",
     "Key",
     "Opacity",
+    "Order",
     "Sample",
     "Search",
     "SemanticScore",

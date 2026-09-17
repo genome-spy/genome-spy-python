@@ -56,6 +56,7 @@ shorthand such as `"score:Q"` for simple cases.
    Key
    Locus
    Opacity
+   Order
    Sample
    Search
    SemanticScore

@@ -37,7 +37,7 @@ jobs:
           uv run pytest tests/ -x
           -m "not docs and not codegen"
           --durations=10
-      - run: node --test tests/widget.test.mjs
+      - run: node --test tests/*.test.mjs
       - run: uv build --wheel
       # Use Bash on both runners for the embedded Python script.
       - name: Check wheel contents and license metadata
@@ -103,20 +103,46 @@ jobs:
           uv venv --seed --python 3.11 "$RUNNER_TEMP/notebook-env"
           for wheel in "$GITHUB_WORKSPACE"/dist/*.whl; do
             uv pip install --python "$RUNNER_TEMP/notebook-env/bin/python" \
-              "$wheel[arrow]" "anywidget==0.11.0" jupyterlab pandas numpy playwright pillow pytest
+              "$wheel[arrow]" "anywidget==0.11.0" jupyterlab pandas numpy scipy statsmodels playwright pillow pytest
           done
           "$RUNNER_TEMP/notebook-env/bin/python" -m playwright install --with-deps chromium
       - name: Verify offline HTML from the installed wheel
         run: |
-          "$RUNNER_TEMP/notebook-env/bin/python" -m pytest tests/browser/test_offline_rendering.py -q
+          "$RUNNER_TEMP/notebook-env/bin/python" -m pytest tests/browser/ -q
       - name: Render the brush notebook in JupyterLab
         run: |
           "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
             notebooks/brush_linked_genome_tracks.ipynb \
             --screenshot "$RUNNER_TEMP/notebook-rendering.png"
+      - name: Exercise the embed API through Jupyter comms
+        run: |
+          "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
+            notebooks/embed_api.ipynb \
+            --check-embed-interactions \
+            --screenshot "$RUNNER_TEMP/embed-api.png"
+      - name: Exercise interactive workflows and file exports
+        run: |
+          "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
+            notebooks/annotate_genomic_intervals.ipynb --workflow intervals \
+            --screenshot "$RUNNER_TEMP/annotate-intervals.png"
+          "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
+            notebooks/select_genes.ipynb --workflow genes \
+            --screenshot "$RUNNER_TEMP/select-genes.png"
+          "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
+            notebooks/pick_genes.ipynb --workflow points \
+            --screenshot "$RUNNER_TEMP/pick-genes.png"
+          "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
+            notebooks/edit_sequence.ipynb --workflow sequence \
+            --screenshot "$RUNNER_TEMP/edit-sequence.png"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: notebook-rendering
-          path: ${{ runner.temp }}/notebook-rendering.png
+          path: |
+            ${{ runner.temp }}/notebook-rendering.png
+            ${{ runner.temp }}/embed-api.png
+            ${{ runner.temp }}/annotate-intervals.png
+            ${{ runner.temp }}/select-genes.png
+            ${{ runner.temp }}/pick-genes.png
+            ${{ runner.temp }}/edit-sequence.png
           if-no-files-found: ignore

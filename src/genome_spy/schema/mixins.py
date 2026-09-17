@@ -194,7 +194,7 @@ class MarkMethodMixin:
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -337,7 +337,7 @@ class MarkMethodMixin:
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
             xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
@@ -440,7 +440,7 @@ class MarkMethodMixin:
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -534,7 +534,7 @@ class MarkMethodMixin:
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             thickness (float): The thickness of the tick mark in pixels. Equivalent to the ``size`` of the underlying rule mark. **Default value:** ``1``
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
             xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
@@ -676,7 +676,7 @@ class MarkMethodMixin:
             squeeze (bool | ExprRef | dict[str, Any]): If the ``squeeze`` property is true and secondary positional channels (``x2`` and/or ``y2``) are used, the text is scaled to fit mark's width and/or height. **Default value:** ``true``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             text (Scalar_T | ExprRef | dict[str, Any]): The text to display. The format of numeric data can be customized by setting a format specifier to channel definition's ``format`` property. **Default value:** ``""``
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             viewportEdgeFadeDistanceBottom (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceBottom`` property.
             viewportEdgeFadeDistanceLeft (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceLeft`` property.
             viewportEdgeFadeDistanceRight (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceRight`` property.
@@ -787,6 +787,10 @@ class MarkMethodMixin:
         | core.ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        noFadingOnSecondPass: bool
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         orient: Literal["vertical"]
         | Literal["horizontal"]
@@ -825,13 +829,14 @@ class MarkMethodMixin:
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
-            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading for selected links. Tests selections referenced by conditional encodings, excluding empty selections. Despite the property name, interval selections also bypass fading when either link endpoint is inside each selected interval. Only marks that participate in picking use this bypass. **Default value:** ``true``
+            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Alias for ``noFadingOnSecondPass``, used only when that property is unspecified. Requires active conditional ordering; selections in color or size encodings alone no longer suppress fading.
+            noFadingOnSecondPass (bool | ExprRef | dict[str, Any]): Shows foreground arcs in full by disabling distance fading during the second visual pass of an active conditional ``order`` encoding. Configure selected links with the higher order value to draw them unfaded above other links. Reversing the order values instead exempts the unselected links. Has no effect without active conditional ordering, including when all selections are empty. Picking always uses normal fading. __Default value:__ ``false``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Only applies to diagonal links. **Default value:** ``"vertical"``
             segments (float | ExprRef | dict[str, Any]): The number of segments in the bézier curve. Affects the rendering quality and performance. Use a higher value for a smoother curve. **Default value:** ``101``
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -855,6 +860,7 @@ class MarkMethodMixin:
             "minArcHeight": minArcHeight,
             "minPickingSize": minPickingSize,
             "noFadingOnPointSelection": noFadingOnPointSelection,
+            "noFadingOnSecondPass": noFadingOnSecondPass,
             "opacity": opacity,
             "orient": orient,
             "segments": segments,
@@ -981,7 +987,7 @@ class MarkMethodMixin:
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -1122,7 +1128,7 @@ class MarkMethodMixin:
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
             xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
@@ -1240,6 +1246,13 @@ class EncodingMethodMixin:
         | None
         | UndefinedType = Undefined,
         opacity: Channel
+        | SchemaBase
+        | str
+        | dict[str, Any]
+        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+        | None
+        | UndefinedType = Undefined,
+        order: Channel
         | SchemaBase
         | str
         | dict[str, Any]
@@ -1379,6 +1392,7 @@ class EncodingMethodMixin:
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
             key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
+            order (OrderDef | dict[str, Any]): Orders instances within this logical mark. The supported form has one selection condition with a finite numeric value and a finite numeric fallback. Lower levels draw first; equal or constant levels are inert.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
@@ -1408,6 +1422,7 @@ class EncodingMethodMixin:
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -1449,6 +1464,7 @@ class ResolutionMethodMixin:
         fillOpacity: ResolutionBehavior_T | UndefinedType = Undefined,
         key: ResolutionBehavior_T | UndefinedType = Undefined,
         opacity: ResolutionBehavior_T | UndefinedType = Undefined,
+        order: ResolutionBehavior_T | UndefinedType = Undefined,
         sample: ResolutionBehavior_T | UndefinedType = Undefined,
         search: ResolutionBehavior_T | UndefinedType = Undefined,
         semanticScore: ResolutionBehavior_T | UndefinedType = Undefined,
@@ -1480,6 +1496,7 @@ class ResolutionMethodMixin:
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -1517,6 +1534,7 @@ class ResolutionMethodMixin:
         fillOpacity: LegendResolutionBehavior_T | UndefinedType = Undefined,
         key: LegendResolutionBehavior_T | UndefinedType = Undefined,
         opacity: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        order: LegendResolutionBehavior_T | UndefinedType = Undefined,
         sample: LegendResolutionBehavior_T | UndefinedType = Undefined,
         search: LegendResolutionBehavior_T | UndefinedType = Undefined,
         semanticScore: LegendResolutionBehavior_T | UndefinedType = Undefined,
@@ -1548,6 +1566,7 @@ class ResolutionMethodMixin:
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -1585,6 +1604,7 @@ class ResolutionMethodMixin:
         fillOpacity: ResolutionBehavior_T | UndefinedType = Undefined,
         key: ResolutionBehavior_T | UndefinedType = Undefined,
         opacity: ResolutionBehavior_T | UndefinedType = Undefined,
+        order: ResolutionBehavior_T | UndefinedType = Undefined,
         sample: ResolutionBehavior_T | UndefinedType = Undefined,
         search: ResolutionBehavior_T | UndefinedType = Undefined,
         semanticScore: ResolutionBehavior_T | UndefinedType = Undefined,
@@ -1616,6 +1636,7 @@ class ResolutionMethodMixin:
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -5896,7 +5917,7 @@ class ConfigMethodMixin:
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -9388,6 +9409,10 @@ class ConfigMethodMixin:
         | core.ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        noFadingOnSecondPass: bool
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         opacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         orient: Literal["vertical"]
         | Literal["horizontal"]
@@ -9426,13 +9451,14 @@ class ConfigMethodMixin:
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
-            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading for selected links. Tests selections referenced by conditional encodings, excluding empty selections. Despite the property name, interval selections also bypass fading when either link endpoint is inside each selected interval. Only marks that participate in picking use this bypass. **Default value:** ``true``
+            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Alias for ``noFadingOnSecondPass``, used only when that property is unspecified. Requires active conditional ordering; selections in color or size encodings alone no longer suppress fading.
+            noFadingOnSecondPass (bool | ExprRef | dict[str, Any]): Shows foreground arcs in full by disabling distance fading during the second visual pass of an active conditional ``order`` encoding. Configure selected links with the higher order value to draw them unfaded above other links. Reversing the order values instead exempts the unselected links. Has no effect without active conditional ordering, including when all selections are empty. Picking always uses normal fading. __Default value:__ ``false``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Only applies to diagonal links. **Default value:** ``"vertical"``
             segments (float | ExprRef | dict[str, Any]): The number of segments in the bézier curve. Affects the rendering quality and performance. Use a higher value for a smoother curve. **Default value:** ``101``
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -9456,6 +9482,7 @@ class ConfigMethodMixin:
             "minArcHeight": minArcHeight,
             "minPickingSize": minPickingSize,
             "noFadingOnPointSelection": noFadingOnPointSelection,
+            "noFadingOnSecondPass": noFadingOnSecondPass,
             "opacity": opacity,
             "orient": orient,
             "segments": segments,
@@ -9515,7 +9542,7 @@ class ConfigMethodMixin:
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
             xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
@@ -9634,7 +9661,7 @@ class ConfigMethodMixin:
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
             xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
@@ -9834,7 +9861,7 @@ class ConfigMethodMixin:
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -9943,7 +9970,7 @@ class ConfigMethodMixin:
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -10237,7 +10264,7 @@ class ConfigMethodMixin:
             squeeze (bool | ExprRef | dict[str, Any]): If the ``squeeze`` property is true and secondary positional channels (``x2`` and/or ``y2``) are used, the text is scaled to fit mark's width and/or height. **Default value:** ``true``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             text (Scalar_T | ExprRef | dict[str, Any]): The text to display. The format of numeric data can be customized by setting a format specifier to channel definition's ``format`` property. **Default value:** ``""``
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             viewportEdgeFadeDistanceBottom (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceBottom`` property.
             viewportEdgeFadeDistanceLeft (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceLeft`` property.
             viewportEdgeFadeDistanceRight (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceRight`` property.
@@ -10359,7 +10386,7 @@ class ConfigMethodMixin:
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             thickness (float): The thickness of the tick mark in pixels. Equivalent to the ``size`` of the underlying rule mark. **Default value:** ``1``
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
             xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``

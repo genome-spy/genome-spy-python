@@ -4310,10 +4310,18 @@ class ColorDef(GenomeSpySchema):
         band: float | UndefinedType = Undefined,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = Undefined,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -4356,10 +4364,18 @@ class ColorDef(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> ColorDef:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -5073,6 +5089,7 @@ class ConcatSpec(GenomeSpySchema):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
+        order: OrderDef | dict[str, Any] | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         search: FieldDefWithoutScale
         | dict[str, Any]
@@ -5167,6 +5184,7 @@ class ConcatSpec(GenomeSpySchema):
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
             key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
+            order (OrderDef | dict[str, Any]): Orders instances within this logical mark. The supported form has one selection condition with a finite numeric value and a finite numeric fallback. Lower levels draw first; equal or constant levels are inert.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
@@ -5196,6 +5214,7 @@ class ConcatSpec(GenomeSpySchema):
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -5376,7 +5395,7 @@ class ConcatSpec(GenomeSpySchema):
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
@@ -5687,6 +5706,10 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         param: str | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
         **kwds: Any,
@@ -5701,6 +5724,7 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
+            test=test,
             title=title,
             type=type,
         )
@@ -5942,6 +5966,31 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("scale", value, **defined)
 
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalMarkPropExprDefType:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
     def title(self, value: str | None) -> ConditionalMarkPropExprDefType:
         """Return a copy with ``title`` updated."""
         return self._with_property("title", value)
@@ -5969,6 +6018,10 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         param: str | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
         **kwds: Any,
@@ -5983,6 +6036,7 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
+            test=test,
             title=title,
             type=type,
         )
@@ -6224,6 +6278,31 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("scale", value, **defined)
 
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
     def title(self, value: str | None) -> ConditionalMarkPropExprDefTypeForShape:
         """Return a copy with ``title`` updated."""
         return self._with_property("title", value)
@@ -6251,6 +6330,10 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
         param: str | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
         **kwds: Any,
@@ -6265,6 +6348,7 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
+            test=test,
             title=title,
             type=type,
         )
@@ -6506,6 +6590,31 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("scale", value, **defined)
 
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
     def title(self, value: str | None) -> ConditionalMarkPropFieldDefType:
         """Return a copy with ``title`` updated."""
         return self._with_property("title", value)
@@ -6533,6 +6642,10 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
         param: str | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: TypeForShape_T | UndefinedType = Undefined,
         **kwds: Any,
@@ -6547,6 +6660,7 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
+            test=test,
             title=title,
             type=type,
         )
@@ -6788,6 +6902,31 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("scale", value, **defined)
 
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
     def title(self, value: str | None) -> ConditionalMarkPropFieldDefTypeForShape:
         """Return a copy with ``title`` updated."""
         return self._with_property("title", value)
@@ -6812,6 +6951,10 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
         param: str | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
         **kwds: Any,
@@ -6825,6 +6968,7 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
             param=param,
             resolutionChannel=resolutionChannel,
             scale=scale,
+            test=test,
             title=title,
             type=type,
         )
@@ -6970,6 +7114,31 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("scale", value, **defined)
 
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalScaleDatumDef:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
     def title(self, value: str | None) -> ConditionalScaleDatumDef:
         """Return a copy with ``title`` updated."""
         return self._with_property("title", value)
@@ -6991,12 +7160,21 @@ class ConditionalValueDefNumberExprRef(GenomeSpySchema):
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         value: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
-            description=description, empty=empty, param=param, title=title, value=value
+            description=description,
+            empty=empty,
+            param=param,
+            test=test,
+            title=title,
+            value=value,
         )
         if kwds:
             self._kwds.update(kwds)
@@ -7012,6 +7190,31 @@ class ConditionalValueDefNumberExprRef(GenomeSpySchema):
     def param(self, value: str) -> ConditionalValueDefNumberExprRef:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalValueDefNumberExprRef:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
 
     def title(self, value: str | None) -> ConditionalValueDefNumberExprRef:
         """Return a copy with ``title`` updated."""
@@ -7048,12 +7251,21 @@ class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         value: str | None | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
-            description=description, empty=empty, param=param, title=title, value=value
+            description=description,
+            empty=empty,
+            param=param,
+            test=test,
+            title=title,
+            value=value,
         )
         if kwds:
             self._kwds.update(kwds)
@@ -7069,6 +7281,31 @@ class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
     def param(self, value: str) -> ConditionalValueDefStringNullExprRef:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalValueDefStringNullExprRef:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
 
     def title(self, value: str | None) -> ConditionalValueDefStringNullExprRef:
         """Return a copy with ``title`` updated."""
@@ -8535,6 +8772,1560 @@ class ConditionalParameterValueDefStringNullExprRef(GenomeSpySchema):
         return self._with_property("value", value, **defined)
 
 
+class ConditionalTestMarkPropExprDefType(GenomeSpySchema):
+    """Generated wrapper for ``ConditionalTest<MarkPropExprDef<Type>>``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get(
+        "ConditionalTest<MarkPropExprDef<Type>>", {}
+    )
+
+    def __init__(
+        self,
+        band: float | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
+        scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        type: Type_T | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            description=description,
+            domainInert=domainInert,
+            expr=expr,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            test=test,
+            title=title,
+            type=type,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def band(self, value: float) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def description(self, value: str) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(self, value: bool) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def expr(self, value: str) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def legend(
+        self,
+        value: Legend | LegendKwds | None | object = Undefined,
+        /,
+        *,
+        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFillOpacity: float | UndefinedType = Undefined,
+        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStrokeOpacity: float | UndefinedType = Undefined,
+        backgroundStrokeWidth: float | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
+        labelLimit: float | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
+        symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
+        symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
+        values: Sequence[str | float | bool] | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with a ``Legend`` legend.
+
+        Args:
+            backgroundFill (str): Fill color of the legend background.
+            backgroundFillOpacity (float): Opacity of the legend background fill.
+            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStrokeOpacity (float): Opacity of the legend background stroke.
+            backgroundStrokeWidth (float): Stroke width of the legend background border.
+            columns (float): The number of columns in which to arrange symbol legend entries.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
+            labelLimit (float): Maximum label text width in pixels.
+            offset (float): External gap in pixels between the legend and the plot edge.
+            orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
+            padding (float): Internal padding in pixels around the legend content and background.
+            style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
+            title (str | None): Title text for the legend. If ``null``, the title is removed.
+            titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
+            values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
+        """
+        defined = {
+            "backgroundFill": backgroundFill,
+            "backgroundFillOpacity": backgroundFillOpacity,
+            "backgroundStroke": backgroundStroke,
+            "backgroundStrokeOpacity": backgroundStrokeOpacity,
+            "backgroundStrokeWidth": backgroundStrokeWidth,
+            "columns": columns,
+            "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
+            "labelLimit": labelLimit,
+            "offset": offset,
+            "orient": orient,
+            "padding": padding,
+            "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
+            "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
+            "symbolType": symbolType,
+            "tickCount": tickCount,
+            "title": title,
+            "titleOrient": titleOrient,
+            "values": values,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("legend", value, **defined)
+
+    def resolutionChannel(
+        self, value: ChannelWithScale_T
+    ) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = Undefined,
+        /,
+        *,
+        align: float | UndefinedType = Undefined,
+        assembly: str
+        | UrlGenomeDefinition
+        | dict[str, Any]
+        | InlineGenomeDefinition
+        | UndefinedType = Undefined,
+        base: float | UndefinedType = Undefined,
+        bins: Sequence[float] | UndefinedType = Undefined,
+        clamp: bool | UndefinedType = Undefined,
+        constant: float | UndefinedType = Undefined,
+        domain: ScalarDomain_T
+        | Sequence[ChromosomalLocus | dict[str, Any]]
+        | SelectionDomainRef
+        | dict[str, Any]
+        | ViewportDomainRef
+        | ExprRef
+        | Sequence[float | str | bool | ExprRef | dict[str, Any]]
+        | UndefinedType = Undefined,
+        domainMax: float | UndefinedType = Undefined,
+        domainMid: float | UndefinedType = Undefined,
+        domainMin: float | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
+        exponent: float | UndefinedType = Undefined,
+        interpolate: ScaleInterpolate_T
+        | ScaleInterpolateParams
+        | ScaleInterpolateParamsKwds
+        | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        nice: bool | float | dict[str, Any] | UndefinedType = Undefined,
+        numberingOffset: float | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        paddingInner: float | UndefinedType = Undefined,
+        paddingOuter: float | UndefinedType = Undefined,
+        range: Sequence[float | str | ExprRef | dict[str, Any]]
+        | str
+        | UndefinedType = Undefined,
+        reverse: bool | UndefinedType = Undefined,
+        round: bool | UndefinedType = Undefined,
+        scheme: str | SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
+        type: ScaleType_T | UndefinedType = Undefined,
+        zero: bool | UndefinedType = Undefined,
+        zoom: bool | ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with a ``Scale`` scale.
+
+        Args:
+            align (float): The alignment of the steps within the scale range. This value must lie in the range ``[0,1]``. A value of ``0.5`` indicates that the steps should be centered within the range. A value of ``0`` or ``1`` may be used to shift the bands to one side, say to position them adjacent to an axis. __Default value:__ ``0.5``
+            assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
+            base (float): The logarithm base of the ``log`` scale (default ``10``).
+            bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
+            constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor.
+            domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            exponent (float): The exponent of the ``pow`` scale.
+            interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
+            name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
+            nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
+            reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
+            round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
+            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+        """
+        defined = {
+            "align": align,
+            "assembly": assembly,
+            "base": base,
+            "bins": bins,
+            "clamp": clamp,
+            "constant": constant,
+            "domain": domain,
+            "domainMax": domainMax,
+            "domainMid": domainMid,
+            "domainMin": domainMin,
+            "domainTransition": domainTransition,
+            "exponent": exponent,
+            "interpolate": interpolate,
+            "name": name,
+            "nice": nice,
+            "numberingOffset": numberingOffset,
+            "padding": padding,
+            "paddingInner": paddingInner,
+            "paddingOuter": paddingOuter,
+            "range": range,
+            "reverse": reverse,
+            "round": round,
+            "scheme": scheme,
+            "type": type,
+            "zero": zero,
+            "zoom": zoom,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("scale", value, **defined)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
+    def title(self, value: str | None) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(self, value: Type_T) -> ConditionalTestMarkPropExprDefType:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+
+class ConditionalTestMarkPropExprDefTypeForShape(GenomeSpySchema):
+    """Generated wrapper for ``ConditionalTest<MarkPropExprDef<TypeForShape>>``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get(
+        "ConditionalTest<MarkPropExprDef<TypeForShape>>", {}
+    )
+
+    def __init__(
+        self,
+        band: float | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
+        scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        type: Type_T | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            description=description,
+            domainInert=domainInert,
+            expr=expr,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            test=test,
+            title=title,
+            type=type,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def band(self, value: float) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def description(self, value: str) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(self, value: bool) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def expr(self, value: str) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def legend(
+        self,
+        value: Legend | LegendKwds | None | object = Undefined,
+        /,
+        *,
+        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFillOpacity: float | UndefinedType = Undefined,
+        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStrokeOpacity: float | UndefinedType = Undefined,
+        backgroundStrokeWidth: float | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
+        labelLimit: float | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
+        symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
+        symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
+        values: Sequence[str | float | bool] | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with a ``Legend`` legend.
+
+        Args:
+            backgroundFill (str): Fill color of the legend background.
+            backgroundFillOpacity (float): Opacity of the legend background fill.
+            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStrokeOpacity (float): Opacity of the legend background stroke.
+            backgroundStrokeWidth (float): Stroke width of the legend background border.
+            columns (float): The number of columns in which to arrange symbol legend entries.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
+            labelLimit (float): Maximum label text width in pixels.
+            offset (float): External gap in pixels between the legend and the plot edge.
+            orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
+            padding (float): Internal padding in pixels around the legend content and background.
+            style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
+            title (str | None): Title text for the legend. If ``null``, the title is removed.
+            titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
+            values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
+        """
+        defined = {
+            "backgroundFill": backgroundFill,
+            "backgroundFillOpacity": backgroundFillOpacity,
+            "backgroundStroke": backgroundStroke,
+            "backgroundStrokeOpacity": backgroundStrokeOpacity,
+            "backgroundStrokeWidth": backgroundStrokeWidth,
+            "columns": columns,
+            "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
+            "labelLimit": labelLimit,
+            "offset": offset,
+            "orient": orient,
+            "padding": padding,
+            "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
+            "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
+            "symbolType": symbolType,
+            "tickCount": tickCount,
+            "title": title,
+            "titleOrient": titleOrient,
+            "values": values,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("legend", value, **defined)
+
+    def resolutionChannel(
+        self, value: ChannelWithScale_T
+    ) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = Undefined,
+        /,
+        *,
+        align: float | UndefinedType = Undefined,
+        assembly: str
+        | UrlGenomeDefinition
+        | dict[str, Any]
+        | InlineGenomeDefinition
+        | UndefinedType = Undefined,
+        base: float | UndefinedType = Undefined,
+        bins: Sequence[float] | UndefinedType = Undefined,
+        clamp: bool | UndefinedType = Undefined,
+        constant: float | UndefinedType = Undefined,
+        domain: ScalarDomain_T
+        | Sequence[ChromosomalLocus | dict[str, Any]]
+        | SelectionDomainRef
+        | dict[str, Any]
+        | ViewportDomainRef
+        | ExprRef
+        | Sequence[float | str | bool | ExprRef | dict[str, Any]]
+        | UndefinedType = Undefined,
+        domainMax: float | UndefinedType = Undefined,
+        domainMid: float | UndefinedType = Undefined,
+        domainMin: float | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
+        exponent: float | UndefinedType = Undefined,
+        interpolate: ScaleInterpolate_T
+        | ScaleInterpolateParams
+        | ScaleInterpolateParamsKwds
+        | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        nice: bool | float | dict[str, Any] | UndefinedType = Undefined,
+        numberingOffset: float | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        paddingInner: float | UndefinedType = Undefined,
+        paddingOuter: float | UndefinedType = Undefined,
+        range: Sequence[float | str | ExprRef | dict[str, Any]]
+        | str
+        | UndefinedType = Undefined,
+        reverse: bool | UndefinedType = Undefined,
+        round: bool | UndefinedType = Undefined,
+        scheme: str | SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
+        type: ScaleType_T | UndefinedType = Undefined,
+        zero: bool | UndefinedType = Undefined,
+        zoom: bool | ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with a ``Scale`` scale.
+
+        Args:
+            align (float): The alignment of the steps within the scale range. This value must lie in the range ``[0,1]``. A value of ``0.5`` indicates that the steps should be centered within the range. A value of ``0`` or ``1`` may be used to shift the bands to one side, say to position them adjacent to an axis. __Default value:__ ``0.5``
+            assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
+            base (float): The logarithm base of the ``log`` scale (default ``10``).
+            bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
+            constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor.
+            domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            exponent (float): The exponent of the ``pow`` scale.
+            interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
+            name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
+            nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
+            reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
+            round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
+            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+        """
+        defined = {
+            "align": align,
+            "assembly": assembly,
+            "base": base,
+            "bins": bins,
+            "clamp": clamp,
+            "constant": constant,
+            "domain": domain,
+            "domainMax": domainMax,
+            "domainMid": domainMid,
+            "domainMin": domainMin,
+            "domainTransition": domainTransition,
+            "exponent": exponent,
+            "interpolate": interpolate,
+            "name": name,
+            "nice": nice,
+            "numberingOffset": numberingOffset,
+            "padding": padding,
+            "paddingInner": paddingInner,
+            "paddingOuter": paddingOuter,
+            "range": range,
+            "reverse": reverse,
+            "round": round,
+            "scheme": scheme,
+            "type": type,
+            "zero": zero,
+            "zoom": zoom,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("scale", value, **defined)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
+    def title(self, value: str | None) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(self, value: Type_T) -> ConditionalTestMarkPropExprDefTypeForShape:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+
+class ConditionalTestMarkPropFieldDefType(GenomeSpySchema):
+    """Generated wrapper for ``ConditionalTest<MarkPropFieldDef<Type>>``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get(
+        "ConditionalTest<MarkPropFieldDef<Type>>", {}
+    )
+
+    def __init__(
+        self,
+        description: str | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        field: str | UndefinedType = Undefined,
+        format: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
+        scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        type: Type_T | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            domainInert=domainInert,
+            field=field,
+            format=format,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            test=test,
+            title=title,
+            type=type,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def description(self, value: str) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(self, value: bool) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def field(self, value: str) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def format(self, value: str) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def legend(
+        self,
+        value: Legend | LegendKwds | None | object = Undefined,
+        /,
+        *,
+        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFillOpacity: float | UndefinedType = Undefined,
+        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStrokeOpacity: float | UndefinedType = Undefined,
+        backgroundStrokeWidth: float | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
+        labelLimit: float | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
+        symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
+        symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
+        values: Sequence[str | float | bool] | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with a ``Legend`` legend.
+
+        Args:
+            backgroundFill (str): Fill color of the legend background.
+            backgroundFillOpacity (float): Opacity of the legend background fill.
+            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStrokeOpacity (float): Opacity of the legend background stroke.
+            backgroundStrokeWidth (float): Stroke width of the legend background border.
+            columns (float): The number of columns in which to arrange symbol legend entries.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
+            labelLimit (float): Maximum label text width in pixels.
+            offset (float): External gap in pixels between the legend and the plot edge.
+            orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
+            padding (float): Internal padding in pixels around the legend content and background.
+            style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
+            title (str | None): Title text for the legend. If ``null``, the title is removed.
+            titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
+            values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
+        """
+        defined = {
+            "backgroundFill": backgroundFill,
+            "backgroundFillOpacity": backgroundFillOpacity,
+            "backgroundStroke": backgroundStroke,
+            "backgroundStrokeOpacity": backgroundStrokeOpacity,
+            "backgroundStrokeWidth": backgroundStrokeWidth,
+            "columns": columns,
+            "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
+            "labelLimit": labelLimit,
+            "offset": offset,
+            "orient": orient,
+            "padding": padding,
+            "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
+            "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
+            "symbolType": symbolType,
+            "tickCount": tickCount,
+            "title": title,
+            "titleOrient": titleOrient,
+            "values": values,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("legend", value, **defined)
+
+    def resolutionChannel(
+        self, value: ChannelWithScale_T
+    ) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = Undefined,
+        /,
+        *,
+        align: float | UndefinedType = Undefined,
+        assembly: str
+        | UrlGenomeDefinition
+        | dict[str, Any]
+        | InlineGenomeDefinition
+        | UndefinedType = Undefined,
+        base: float | UndefinedType = Undefined,
+        bins: Sequence[float] | UndefinedType = Undefined,
+        clamp: bool | UndefinedType = Undefined,
+        constant: float | UndefinedType = Undefined,
+        domain: ScalarDomain_T
+        | Sequence[ChromosomalLocus | dict[str, Any]]
+        | SelectionDomainRef
+        | dict[str, Any]
+        | ViewportDomainRef
+        | ExprRef
+        | Sequence[float | str | bool | ExprRef | dict[str, Any]]
+        | UndefinedType = Undefined,
+        domainMax: float | UndefinedType = Undefined,
+        domainMid: float | UndefinedType = Undefined,
+        domainMin: float | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
+        exponent: float | UndefinedType = Undefined,
+        interpolate: ScaleInterpolate_T
+        | ScaleInterpolateParams
+        | ScaleInterpolateParamsKwds
+        | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        nice: bool | float | dict[str, Any] | UndefinedType = Undefined,
+        numberingOffset: float | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        paddingInner: float | UndefinedType = Undefined,
+        paddingOuter: float | UndefinedType = Undefined,
+        range: Sequence[float | str | ExprRef | dict[str, Any]]
+        | str
+        | UndefinedType = Undefined,
+        reverse: bool | UndefinedType = Undefined,
+        round: bool | UndefinedType = Undefined,
+        scheme: str | SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
+        type: ScaleType_T | UndefinedType = Undefined,
+        zero: bool | UndefinedType = Undefined,
+        zoom: bool | ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with a ``Scale`` scale.
+
+        Args:
+            align (float): The alignment of the steps within the scale range. This value must lie in the range ``[0,1]``. A value of ``0.5`` indicates that the steps should be centered within the range. A value of ``0`` or ``1`` may be used to shift the bands to one side, say to position them adjacent to an axis. __Default value:__ ``0.5``
+            assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
+            base (float): The logarithm base of the ``log`` scale (default ``10``).
+            bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
+            constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor.
+            domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            exponent (float): The exponent of the ``pow`` scale.
+            interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
+            name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
+            nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
+            reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
+            round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
+            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+        """
+        defined = {
+            "align": align,
+            "assembly": assembly,
+            "base": base,
+            "bins": bins,
+            "clamp": clamp,
+            "constant": constant,
+            "domain": domain,
+            "domainMax": domainMax,
+            "domainMid": domainMid,
+            "domainMin": domainMin,
+            "domainTransition": domainTransition,
+            "exponent": exponent,
+            "interpolate": interpolate,
+            "name": name,
+            "nice": nice,
+            "numberingOffset": numberingOffset,
+            "padding": padding,
+            "paddingInner": paddingInner,
+            "paddingOuter": paddingOuter,
+            "range": range,
+            "reverse": reverse,
+            "round": round,
+            "scheme": scheme,
+            "type": type,
+            "zero": zero,
+            "zoom": zoom,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("scale", value, **defined)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
+    def title(self, value: str | None) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(self, value: Type_T) -> ConditionalTestMarkPropFieldDefType:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+
+class ConditionalTestMarkPropFieldDefTypeForShape(GenomeSpySchema):
+    """Generated wrapper for ``ConditionalTest<MarkPropFieldDef<TypeForShape>>``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get(
+        "ConditionalTest<MarkPropFieldDef<TypeForShape>>", {}
+    )
+
+    def __init__(
+        self,
+        description: str | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        field: str | UndefinedType = Undefined,
+        format: str | UndefinedType = Undefined,
+        legend: Legend | LegendKwds | None | UndefinedType = Undefined,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
+        scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        type: TypeForShape_T | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            domainInert=domainInert,
+            field=field,
+            format=format,
+            legend=legend,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            test=test,
+            title=title,
+            type=type,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def description(self, value: str) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(self, value: bool) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def field(self, value: str) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def format(self, value: str) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with ``format`` updated."""
+        return self._with_property("format", value)
+
+    def legend(
+        self,
+        value: Legend | LegendKwds | None | object = Undefined,
+        /,
+        *,
+        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFillOpacity: float | UndefinedType = Undefined,
+        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStrokeOpacity: float | UndefinedType = Undefined,
+        backgroundStrokeWidth: float | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        direction: LegendDirection_T | UndefinedType = Undefined,
+        gradientLength: float | UndefinedType = Undefined,
+        gradientOpacity: float | UndefinedType = Undefined,
+        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeWidth: float | UndefinedType = Undefined,
+        gradientThickness: float | UndefinedType = Undefined,
+        labelLimit: float | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: LegendOrient_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        style: str | Sequence[str] | None | UndefinedType = Undefined,
+        symbolFillColor: str | UndefinedType = Undefined,
+        symbolOpacity: float | UndefinedType = Undefined,
+        symbolSize: float | UndefinedType = Undefined,
+        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeWidth: float | UndefinedType = Undefined,
+        symbolType: str | UndefinedType = Undefined,
+        tickCount: float | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        titleOrient: LegendTitleOrient_T | UndefinedType = Undefined,
+        values: Sequence[str | float | bool] | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``Legend`` legend.
+
+        Args:
+            backgroundFill (str): Fill color of the legend background.
+            backgroundFillOpacity (float): Opacity of the legend background fill.
+            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStrokeOpacity (float): Opacity of the legend background stroke.
+            backgroundStrokeWidth (float): Stroke width of the legend background border.
+            columns (float): The number of columns in which to arrange symbol legend entries.
+            direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
+            gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
+            gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
+            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
+            gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
+            labelLimit (float): Maximum label text width in pixels.
+            offset (float): External gap in pixels between the legend and the plot edge.
+            orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
+            padding (float): Internal padding in pixels around the legend content and background.
+            style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
+            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
+            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
+            symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
+            tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
+            title (str | None): Title text for the legend. If ``null``, the title is removed.
+            titleOrient (LegendTitleOrient_T): The side of the legend on which to place the title.
+            values (Sequence[str | float | bool]): Explicit values to show in the legend. For discrete symbol legends, the values define an ordered subset of entries. For quantitative symbol and gradient legends, the values define the shown representative values or ticks.
+        """
+        defined = {
+            "backgroundFill": backgroundFill,
+            "backgroundFillOpacity": backgroundFillOpacity,
+            "backgroundStroke": backgroundStroke,
+            "backgroundStrokeOpacity": backgroundStrokeOpacity,
+            "backgroundStrokeWidth": backgroundStrokeWidth,
+            "columns": columns,
+            "direction": direction,
+            "gradientLength": gradientLength,
+            "gradientOpacity": gradientOpacity,
+            "gradientStrokeColor": gradientStrokeColor,
+            "gradientStrokeWidth": gradientStrokeWidth,
+            "gradientThickness": gradientThickness,
+            "labelLimit": labelLimit,
+            "offset": offset,
+            "orient": orient,
+            "padding": padding,
+            "style": style,
+            "symbolFillColor": symbolFillColor,
+            "symbolOpacity": symbolOpacity,
+            "symbolSize": symbolSize,
+            "symbolStrokeColor": symbolStrokeColor,
+            "symbolStrokeWidth": symbolStrokeWidth,
+            "symbolType": symbolType,
+            "tickCount": tickCount,
+            "title": title,
+            "titleOrient": titleOrient,
+            "values": values,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("legend", value, **defined)
+
+    def resolutionChannel(
+        self, value: ChannelWithScale_T
+    ) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = Undefined,
+        /,
+        *,
+        align: float | UndefinedType = Undefined,
+        assembly: str
+        | UrlGenomeDefinition
+        | dict[str, Any]
+        | InlineGenomeDefinition
+        | UndefinedType = Undefined,
+        base: float | UndefinedType = Undefined,
+        bins: Sequence[float] | UndefinedType = Undefined,
+        clamp: bool | UndefinedType = Undefined,
+        constant: float | UndefinedType = Undefined,
+        domain: ScalarDomain_T
+        | Sequence[ChromosomalLocus | dict[str, Any]]
+        | SelectionDomainRef
+        | dict[str, Any]
+        | ViewportDomainRef
+        | ExprRef
+        | Sequence[float | str | bool | ExprRef | dict[str, Any]]
+        | UndefinedType = Undefined,
+        domainMax: float | UndefinedType = Undefined,
+        domainMid: float | UndefinedType = Undefined,
+        domainMin: float | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
+        exponent: float | UndefinedType = Undefined,
+        interpolate: ScaleInterpolate_T
+        | ScaleInterpolateParams
+        | ScaleInterpolateParamsKwds
+        | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        nice: bool | float | dict[str, Any] | UndefinedType = Undefined,
+        numberingOffset: float | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        paddingInner: float | UndefinedType = Undefined,
+        paddingOuter: float | UndefinedType = Undefined,
+        range: Sequence[float | str | ExprRef | dict[str, Any]]
+        | str
+        | UndefinedType = Undefined,
+        reverse: bool | UndefinedType = Undefined,
+        round: bool | UndefinedType = Undefined,
+        scheme: str | SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
+        type: ScaleType_T | UndefinedType = Undefined,
+        zero: bool | UndefinedType = Undefined,
+        zoom: bool | ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``Scale`` scale.
+
+        Args:
+            align (float): The alignment of the steps within the scale range. This value must lie in the range ``[0,1]``. A value of ``0.5`` indicates that the steps should be centered within the range. A value of ``0`` or ``1`` may be used to shift the bands to one side, say to position them adjacent to an axis. __Default value:__ ``0.5``
+            assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
+            base (float): The logarithm base of the ``log`` scale (default ``10``).
+            bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
+            constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor.
+            domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            exponent (float): The exponent of the ``pow`` scale.
+            interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
+            name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
+            nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
+            reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
+            round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
+            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+        """
+        defined = {
+            "align": align,
+            "assembly": assembly,
+            "base": base,
+            "bins": bins,
+            "clamp": clamp,
+            "constant": constant,
+            "domain": domain,
+            "domainMax": domainMax,
+            "domainMid": domainMid,
+            "domainMin": domainMin,
+            "domainTransition": domainTransition,
+            "exponent": exponent,
+            "interpolate": interpolate,
+            "name": name,
+            "nice": nice,
+            "numberingOffset": numberingOffset,
+            "padding": padding,
+            "paddingInner": paddingInner,
+            "paddingOuter": paddingOuter,
+            "range": range,
+            "reverse": reverse,
+            "round": round,
+            "scheme": scheme,
+            "type": type,
+            "zero": zero,
+            "zoom": zoom,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("scale", value, **defined)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
+    def title(self, value: str | None) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(
+        self, value: TypeForShape_T
+    ) -> ConditionalTestMarkPropFieldDefTypeForShape:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+
+class ConditionalTestScaleDatumDef(GenomeSpySchema):
+    """Generated wrapper for ``ConditionalTest<ScaleDatumDef>``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get(
+        "ConditionalTest<ScaleDatumDef>", {}
+    )
+
+    def __init__(
+        self,
+        band: float | UndefinedType = Undefined,
+        datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
+        scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        type: Type_T | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            band=band,
+            datum=datum,
+            description=description,
+            domainInert=domainInert,
+            resolutionChannel=resolutionChannel,
+            scale=scale,
+            test=test,
+            title=title,
+            type=type,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def band(self, value: float) -> ConditionalTestScaleDatumDef:
+        """Return a copy with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def datum(
+        self, value: Scalar_T | ExprRef | dict[str, Any]
+    ) -> ConditionalTestScaleDatumDef:
+        """Return a copy with ``datum`` updated."""
+        return self._with_property("datum", value)
+
+    def description(self, value: str) -> ConditionalTestScaleDatumDef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(self, value: bool) -> ConditionalTestScaleDatumDef:
+        """Return a copy with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def resolutionChannel(
+        self, value: ChannelWithScale_T
+    ) -> ConditionalTestScaleDatumDef:
+        """Return a copy with ``resolutionChannel`` updated."""
+        return self._with_property("resolutionChannel", value)
+
+    def scale(
+        self,
+        value: Scale | ScaleKwds | None | object = Undefined,
+        /,
+        *,
+        align: float | UndefinedType = Undefined,
+        assembly: str
+        | UrlGenomeDefinition
+        | dict[str, Any]
+        | InlineGenomeDefinition
+        | UndefinedType = Undefined,
+        base: float | UndefinedType = Undefined,
+        bins: Sequence[float] | UndefinedType = Undefined,
+        clamp: bool | UndefinedType = Undefined,
+        constant: float | UndefinedType = Undefined,
+        domain: ScalarDomain_T
+        | Sequence[ChromosomalLocus | dict[str, Any]]
+        | SelectionDomainRef
+        | dict[str, Any]
+        | ViewportDomainRef
+        | ExprRef
+        | Sequence[float | str | bool | ExprRef | dict[str, Any]]
+        | UndefinedType = Undefined,
+        domainMax: float | UndefinedType = Undefined,
+        domainMid: float | UndefinedType = Undefined,
+        domainMin: float | UndefinedType = Undefined,
+        domainTransition: bool | UndefinedType = Undefined,
+        exponent: float | UndefinedType = Undefined,
+        interpolate: ScaleInterpolate_T
+        | ScaleInterpolateParams
+        | ScaleInterpolateParamsKwds
+        | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        nice: bool | float | dict[str, Any] | UndefinedType = Undefined,
+        numberingOffset: float | UndefinedType = Undefined,
+        padding: float | UndefinedType = Undefined,
+        paddingInner: float | UndefinedType = Undefined,
+        paddingOuter: float | UndefinedType = Undefined,
+        range: Sequence[float | str | ExprRef | dict[str, Any]]
+        | str
+        | UndefinedType = Undefined,
+        reverse: bool | UndefinedType = Undefined,
+        round: bool | UndefinedType = Undefined,
+        scheme: str | SchemeParams | SchemeParamsKwds | UndefinedType = Undefined,
+        type: ScaleType_T | UndefinedType = Undefined,
+        zero: bool | UndefinedType = Undefined,
+        zoom: bool | ZoomParams | ZoomParamsKwds | UndefinedType = Undefined,
+    ) -> ConditionalTestScaleDatumDef:
+        """Return a copy with a ``Scale`` scale.
+
+        Args:
+            align (float): The alignment of the steps within the scale range. This value must lie in the range ``[0,1]``. A value of ``0.5`` indicates that the steps should be centered within the range. A value of ``0`` or ``1`` may be used to shift the bands to one side, say to position them adjacent to an axis. __Default value:__ ``0.5``
+            assembly (str | UrlGenomeDefinition | dict[str, Any] | InlineGenomeDefinition): Genome assembly definition for locus scales. This can be: - A string reference to a named assembly (built-in or root-configured). - An inline anonymous assembly that defines either ``contigs`` or ``url``. If undefined, the default genome from the genome store is used.
+            base (float): The logarithm base of the ``log`` scale (default ``10``).
+            bins (Sequence[float]): An array of bin boundaries over the scale domain. If provided, axes and legends will use the bin boundaries to inform the choice of tick marks and text labels.
+            clamp (bool): If ``true``, values that exceed the data domain are clamped to either the minimum or maximum range value __Default value:__ derived from the Vega-Lite scale config's ``clamp`` (``true`` by default).
+            constant (float): A constant determining the slope of the symlog function around zero. Only used for ``symlog`` scales. __Default value:__ ``1``
+            domain (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | SelectionDomainRef | dict[str, Any] | ViewportDomainRef | ExprRef | Sequence[float | str | bool | ExprRef | dict[str, Any]]): Customized domain values. For quantitative fields, ``domain`` can take the form of a two-element array with minimum and maximum values. Vega-Lite piecewise scales can be created by providing a ``domain`` with more than two entries. For ordinal and nominal fields, ``domain`` can be an array that lists valid input values. The domain can also be defined by an expression reference that evaluates to the domain array. Array elements may also be expression references. All parameter names referenced by a scale, including selection-domain parameters, resolve from the view that owns the scale resolution. For a shared scale, declare controlling parameters on that owning composed view or an ancestor.
+            domainMax (float): Sets the maximum value in the scale domain, overriding the ``domain`` property. This property is only intended for use with scales having continuous domains.
+            domainMid (float): Inserts a single mid-point value into a two-element domain. The mid-point value must lie between the domain minimum and maximum values. This property can be useful for setting a midpoint for Vega-Lite diverging color scales. The domainMid property is only intended for use with scales supporting continuous, piecewise domains.
+            domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
+            domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
+            exponent (float): The exponent of the ``pow`` scale.
+            interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
+            name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
+            nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
+            numberingOffset (float): The offset added to data values when formatting tick labels on index and locus scales. This property does not transform data values. __Default value:__ ``0``
+            padding (float): For Vega-Lite continuous scales, expands the scale domain to accommodate the specified number of pixels on each of the scale range. The scale range must represent pixels for this parameter to function as intended. Padding adjustment is performed prior to all other adjustments, including the effects of the ``zero``, ``nice``, ``domainMin``, and ``domainMax`` properties. For Vega-Lite band scales, shortcut for setting ``paddingInner`` and ``paddingOuter`` to the same value. For Vega-Lite point scales, alias for ``paddingOuter``. __Default value:__ For continuous scales, derived from the Vega-Lite scale config's ``continuousPadding``. For band and point scales, see ``paddingInner`` and ``paddingOuter``. By default, Vega-Lite sets padding such that width/height = number of unique values * step.
+            paddingInner (float): The inner padding (spacing) within each band step of band scales, as a fraction of the step size. This value must lie in the range [0,1]. For point scale, this property is invalid as point scales do not have internal band widths (only step sizes between bands). __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingInner``.
+            paddingOuter (float): The outer padding (spacing) at the ends of the range of band and point scales, as a fraction of the step size. This value must lie in the range [0,1]. __Default value:__ derived from the Vega-Lite scale config's ``bandPaddingOuter`` for band scales and ``pointPadding`` for point scales. By default, Vega-Lite sets outer padding such that width/height = number of unique values * step.
+            range (Sequence[float | str | ExprRef | dict[str, Any]] | str): The range of the scale. One of: - A string indicating a pre-defined named scale range from Vega-Lite (e.g., example, ``"symbol"``, or ``"diverging"``). - For Vega-Lite continuous scales, two-element array indicating minimum and maximum values, or an array with more than two entries for specifying a Vega-Lite piecewise scale. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. - For Vega-Lite discrete and Vega-Lite discretizing scales, an array of desired output values. Array elements may also be expression references, which use the parameter scope of the view that owns the scale resolution. __Notes:__ 1) For color scales you can also specify a color ``scheme`` instead of ``range``. 2) Any directly specified ``range`` for ``x`` and ``y`` channels will be ignored. Range can be customized via the view's corresponding Vega-Lite size (``width`` and ``height``).
+            reverse (bool): If true, reverses the order of the scale range. __Default value:__ ``false``.
+            round (bool): If ``true``, rounds numeric output values to integers. This can be helpful for snapping to the pixel grid. __Default value:__ ``false``.
+            scheme (str | SchemeParams | SchemeParamsKwds): A string indicating a color Vega-Lite scheme name (e.g., ``"category10"`` or ``"blues"``) or a Vega-Lite scheme parameter object. Discrete color schemes may be used with Vega-Lite discrete or Vega-Lite discretizing scales. Continuous color schemes are intended for use with color scales. For the full list of supported schemes, please refer to the Vega Scheme reference.
+            type (ScaleType_T): The type of scale. GenomeSpy follows the Vega-Lite scale model; the links below refer to the Vega-Lite documentation: 1) **Continuous Scales** -- mapping continuous domains to continuous output ranges (``"linear"``, ``"pow"``, ``"sqrt"``, ``"symlog"``, ``"log"``, ``"time"``, ``"utc"``). 2) **Discrete Scales** -- mapping discrete domains to discrete (``"ordinal"``) or continuous (``"band"`` and ``"point"``) output ranges. 3) **Discretizing Scales** -- mapping continuous domains to discrete output ranges ``"bin-ordinal"``, ``"quantile"``, ``"quantize"`` and ``"threshold"``. GenomeSpy also provides index and locus scales for sequence and genomic coordinates. __Default value:__ please see the Vega-Lite scale type table.
+            zero (bool): If ``true``, ensures that a zero baseline value is included in the scale domain. __Default value:__ ``true`` for x and y channels if the quantitative field is not binned and no custom ``domain`` is provided; ``false`` otherwise. __Note:__ Log scales do not support ``zero``.
+            zoom (bool | ZoomParams | ZoomParamsKwds): If ``true`` and the scale is used on a positional channel, it can bee zoomed and translated interactively.
+        """
+        defined = {
+            "align": align,
+            "assembly": assembly,
+            "base": base,
+            "bins": bins,
+            "clamp": clamp,
+            "constant": constant,
+            "domain": domain,
+            "domainMax": domainMax,
+            "domainMid": domainMid,
+            "domainMin": domainMin,
+            "domainTransition": domainTransition,
+            "exponent": exponent,
+            "interpolate": interpolate,
+            "name": name,
+            "nice": nice,
+            "numberingOffset": numberingOffset,
+            "padding": padding,
+            "paddingInner": paddingInner,
+            "paddingOuter": paddingOuter,
+            "range": range,
+            "reverse": reverse,
+            "round": round,
+            "scheme": scheme,
+            "type": type,
+            "zero": zero,
+            "zoom": zoom,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("scale", value, **defined)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalTestScaleDatumDef:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
+    def title(self, value: str | None) -> ConditionalTestScaleDatumDef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(self, value: Type_T) -> ConditionalTestScaleDatumDef:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+
+class ConditionalTestValueDefNumberExprRef(GenomeSpySchema):
+    """Generated wrapper for ``ConditionalTest<ValueDef<(number|ExprRef)>>``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get(
+        "ConditionalTest<ValueDef<(number|ExprRef)>>", {}
+    )
+
+    def __init__(
+        self,
+        description: str | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        value: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(description=description, test=test, title=title, value=value)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def description(self, value: str) -> ConditionalTestValueDefNumberExprRef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalTestValueDefNumberExprRef:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
+    def title(self, value: str | None) -> ConditionalTestValueDefNumberExprRef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def value(
+        self,
+        value: float | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ConditionalTestValueDefNumberExprRef:
+        """Return a copy with a ``ExprRef`` value.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("value", value, **defined)
+
+
+class ConditionalTestValueDefStringNullExprRef(GenomeSpySchema):
+    """Generated wrapper for ``ConditionalTest<ValueDef<(string|null|ExprRef)>>``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get(
+        "ConditionalTest<ValueDef<(string|null|ExprRef)>>", {}
+    )
+
+    def __init__(
+        self,
+        description: str | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
+        title: str | None | UndefinedType = Undefined,
+        value: str | None | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(description=description, test=test, title=title, value=value)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def description(self, value: str) -> ConditionalTestValueDefStringNullExprRef:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> ConditionalTestValueDefStringNullExprRef:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
+    def title(self, value: str | None) -> ConditionalTestValueDefStringNullExprRef:
+        """Return a copy with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def value(
+        self,
+        value: str | None | ExprRef | dict[str, Any] | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> ConditionalTestValueDefStringNullExprRef:
+        """Return a copy with a ``ExprRef`` value.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("value", value, **defined)
+
+
 class Contig(GenomeSpySchema):
     """Generated wrapper for ``Contig``."""
 
@@ -9272,6 +11063,7 @@ class CoreRootSpec(GenomeSpySchema):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
+        order: OrderDef | dict[str, Any] | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         search: FieldDefWithoutScale
         | dict[str, Any]
@@ -9366,6 +11158,7 @@ class CoreRootSpec(GenomeSpySchema):
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
             key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
+            order (OrderDef | dict[str, Any]): Orders instances within this logical mark. The supported form has one selection condition with a finite numeric value and a finite numeric fallback. Lower levels draw first; equal or constant levels are inert.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
@@ -9395,6 +11188,7 @@ class CoreRootSpec(GenomeSpySchema):
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -9642,7 +11436,7 @@ class CoreRootSpec(GenomeSpySchema):
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
@@ -11344,6 +13138,7 @@ class Encoding(GenomeSpySchema):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
+        order: OrderDef | dict[str, Any] | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         search: FieldDefWithoutScale
         | dict[str, Any]
@@ -11437,6 +13232,7 @@ class Encoding(GenomeSpySchema):
             fillOpacity=fillOpacity,
             key=key,
             opacity=opacity,
+            order=order,
             sample=sample,
             search=search,
             semanticScore=semanticScore,
@@ -11614,6 +13410,24 @@ class Encoding(GenomeSpySchema):
     ) -> Encoding:
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
+
+    def order(
+        self,
+        value: OrderDef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        condition: OrderCondition | dict[str, Any] | UndefinedType = Undefined,
+    ) -> Encoding:
+        """Return a copy with a ``OrderDef`` order.
+
+        Args:
+            condition (OrderCondition | dict[str, Any]): Selection condition that determines the matching level.
+        """
+        defined = {
+            "condition": condition,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("order", value, **defined)
 
     def sample(
         self,
@@ -12177,7 +13991,12 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
         self,
         condition: ConditionalParameterValueDefStringNullExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
@@ -12209,7 +14028,12 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull(GenomeSpySchema
         self,
         value: ConditionalParameterValueDefStringNullExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -12473,7 +14297,12 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
         self,
         condition: ConditionalParameterValueDefNumberExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
@@ -12505,7 +14334,12 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber(GenomeSpySchema):
         self,
         value: ConditionalParameterValueDefNumberExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -12771,7 +14605,12 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
         self,
         condition: ConditionalParameterValueDefStringNullExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         domainInert: bool | UndefinedType = Undefined,
@@ -12803,7 +14642,12 @@ class FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull(
         self,
         value: ConditionalParameterValueDefStringNullExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -13068,7 +14912,12 @@ class FieldOrDatumDefWithConditionScaleDatumDefStringNull(GenomeSpySchema):
         band: float | UndefinedType = Undefined,
         condition: ConditionalParameterValueDefStringNullExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = Undefined,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -13101,7 +14950,12 @@ class FieldOrDatumDefWithConditionScaleDatumDefStringNull(GenomeSpySchema):
         self,
         value: ConditionalParameterValueDefStringNullExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> FieldOrDatumDefWithConditionScaleDatumDefStringNull:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -13264,7 +15118,12 @@ class FieldOrDatumDefWithConditionScaleDatumDefNumber(GenomeSpySchema):
         band: float | UndefinedType = Undefined,
         condition: ConditionalParameterValueDefNumberExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = Undefined,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -13297,7 +15156,12 @@ class FieldOrDatumDefWithConditionScaleDatumDefNumber(GenomeSpySchema):
         self,
         value: ConditionalParameterValueDefNumberExprRef
         | dict[str, Any]
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> FieldOrDatumDefWithConditionScaleDatumDefNumber:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -14637,7 +16501,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -18114,6 +19978,10 @@ class GenomeSpyConfig(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        noFadingOnSecondPass: bool
+        | ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         opacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         orient: Literal["vertical"]
         | Literal["horizontal"]
@@ -18152,13 +20020,14 @@ class GenomeSpyConfig(GenomeSpySchema):
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
-            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Disables fading for selected links. Tests selections referenced by conditional encodings, excluding empty selections. Despite the property name, interval selections also bypass fading when either link endpoint is inside each selected interval. Only marks that participate in picking use this bypass. **Default value:** ``true``
+            noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Alias for ``noFadingOnSecondPass``, used only when that property is unspecified. Requires active conditional ordering; selections in color or size encodings alone no longer suppress fading.
+            noFadingOnSecondPass (bool | ExprRef | dict[str, Any]): Shows foreground arcs in full by disabling distance fading during the second visual pass of an active conditional ``order`` encoding. Configure selected links with the higher order value to draw them unfaded above other links. Reversing the order values instead exempts the unselected links. Has no effect without active conditional ordering, including when all selections are empty. Picking always uses normal fading. __Default value:__ ``false``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Only applies to diagonal links. **Default value:** ``"vertical"``
             segments (float | ExprRef | dict[str, Any]): The number of segments in the bézier curve. Affects the rendering quality and performance. Use a higher value for a smoother curve. **Default value:** ``101``
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -18182,6 +20051,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             "minArcHeight": minArcHeight,
             "minPickingSize": minPickingSize,
             "noFadingOnPointSelection": noFadingOnPointSelection,
+            "noFadingOnSecondPass": noFadingOnSecondPass,
             "opacity": opacity,
             "orient": orient,
             "segments": segments,
@@ -18241,7 +20111,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
             xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
@@ -18351,7 +20221,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
             xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
@@ -18536,7 +20406,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
             strokeWidth (float | ExprRef | dict[str, Any]): The stroke width in pixels.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -18645,7 +20515,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
@@ -18936,7 +20806,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             squeeze (bool | ExprRef | dict[str, Any]): If the ``squeeze`` property is true and secondary positional channels (``x2`` and/or ``y2``) are used, the text is scaled to fit mark's width and/or height. **Default value:** ``true``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             text (Scalar_T | ExprRef | dict[str, Any]): The text to display. The format of numeric data can be customized by setting a format specifier to channel definition's ``format`` property. **Default value:** ``""``
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             viewportEdgeFadeDistanceBottom (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceBottom`` property.
             viewportEdgeFadeDistanceLeft (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceLeft`` property.
             viewportEdgeFadeDistanceRight (float | ExprRef | dict[str, Any]): Schema-defined ``viewportEdgeFadeDistanceRight`` property.
@@ -19058,7 +20928,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
             thickness (float): The thickness of the tick mark in pixels. Equivalent to the ``size`` of the underlying rule mark. **Default value:** ``1``
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2Offset (float | ExprRef | dict[str, Any]): Offset of the ``x2`` coordinate in logical pixels. When ``x2`` is implicit, it inherits ``xOffset`` unless this property is specified. **Default value:** inherited from ``xOffset`` for an implicit ``x2``, otherwise ``0``
             xOffset (float | ExprRef | dict[str, Any]): Offset of the ``x`` coordinate in logical pixels. **Default value:** ``0``
@@ -19730,6 +21600,7 @@ class HConcatSpec(GenomeSpySchema):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
+        order: OrderDef | dict[str, Any] | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         search: FieldDefWithoutScale
         | dict[str, Any]
@@ -19824,6 +21695,7 @@ class HConcatSpec(GenomeSpySchema):
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
             key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
+            order (OrderDef | dict[str, Any]): Orders instances within this logical mark. The supported form has one selection condition with a finite numeric value and a finite numeric fallback. Lower levels draw first; equal or constant levels are inert.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
@@ -19853,6 +21725,7 @@ class HConcatSpec(GenomeSpySchema):
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -20049,7 +21922,7 @@ class HConcatSpec(GenomeSpySchema):
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
@@ -21421,6 +23294,7 @@ class LayerSpec(GenomeSpySchema):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
+        order: OrderDef | dict[str, Any] | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         search: FieldDefWithoutScale
         | dict[str, Any]
@@ -21515,6 +23389,7 @@ class LayerSpec(GenomeSpySchema):
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
             key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
+            order (OrderDef | dict[str, Any]): Orders instances within this logical mark. The supported form has one selection condition with a finite numeric value and a finite numeric fallback. Lower levels draw first; equal or constant levels are inert.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
@@ -21544,6 +23419,7 @@ class LayerSpec(GenomeSpySchema):
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -23342,6 +25218,10 @@ class LinkConfig(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        noFadingOnSecondPass: bool
+        | ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         opacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         orient: Literal["vertical"]
         | Literal["horizontal"]
@@ -23380,6 +25260,7 @@ class LinkConfig(GenomeSpySchema):
             minArcHeight=minArcHeight,
             minPickingSize=minPickingSize,
             noFadingOnPointSelection=noFadingOnPointSelection,
+            noFadingOnSecondPass=noFadingOnSecondPass,
             opacity=opacity,
             orient=orient,
             segments=segments,
@@ -23605,6 +25486,24 @@ class LinkConfig(GenomeSpySchema):
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("noFadingOnPointSelection", value, **defined)
+
+    def noFadingOnSecondPass(
+        self,
+        value: bool | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkConfig:
+        """Return a copy with a ``ExprRef`` noFadingOnSecondPass.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("noFadingOnSecondPass", value, **defined)
 
     def opacity(
         self,
@@ -23878,6 +25777,10 @@ class LinkProps(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        noFadingOnSecondPass: bool
+        | ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         opacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         orient: Literal["vertical"]
         | Literal["horizontal"]
@@ -23917,6 +25820,7 @@ class LinkProps(GenomeSpySchema):
             minArcHeight=minArcHeight,
             minPickingSize=minPickingSize,
             noFadingOnPointSelection=noFadingOnPointSelection,
+            noFadingOnSecondPass=noFadingOnSecondPass,
             opacity=opacity,
             orient=orient,
             segments=segments,
@@ -24143,6 +26047,24 @@ class LinkProps(GenomeSpySchema):
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("noFadingOnPointSelection", value, **defined)
+
+    def noFadingOnSecondPass(
+        self,
+        value: bool | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> LinkProps:
+        """Return a copy with a ``ExprRef`` noFadingOnSecondPass.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("noFadingOnSecondPass", value, **defined)
 
     def opacity(
         self,
@@ -24729,10 +26651,18 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
         band: float | UndefinedType = Undefined,
         condition: ConditionalParameterMarkPropFieldDefTypeForShape
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefTypeForShape
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefTypeForShape
+        | ConditionalTestMarkPropExprDefTypeForShape
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = Undefined,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -24775,10 +26705,18 @@ class MarkPropDefStringNullTypeForShape(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefTypeForShape
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefTypeForShape
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefTypeForShape
+        | ConditionalTestMarkPropExprDefTypeForShape
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> MarkPropDefStringNullTypeForShape:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -25057,10 +26995,18 @@ class MarkPropDefStringNull(GenomeSpySchema):
         band: float | UndefinedType = Undefined,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = Undefined,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -25103,10 +27049,18 @@ class MarkPropDefStringNull(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> MarkPropDefStringNull:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -25383,10 +27337,18 @@ class MarkPropDefNumber(GenomeSpySchema):
         band: float | UndefinedType = Undefined,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = Undefined,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -25429,10 +27391,18 @@ class MarkPropDefNumber(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> MarkPropDefNumber:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -26619,6 +28589,10 @@ class MarkProps(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        noFadingOnSecondPass: bool
+        | ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         opacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         orient: Literal["vertical"]
         | Literal["horizontal"]
@@ -26757,6 +28731,7 @@ class MarkProps(GenomeSpySchema):
             minStemLength=minStemLength,
             minWidth=minWidth,
             noFadingOnPointSelection=noFadingOnPointSelection,
+            noFadingOnSecondPass=noFadingOnSecondPass,
             opacity=opacity,
             orient=orient,
             paddingX=paddingX,
@@ -27609,6 +29584,24 @@ class MarkProps(GenomeSpySchema):
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("noFadingOnPointSelection", value, **defined)
+
+    def noFadingOnSecondPass(
+        self,
+        value: bool | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> MarkProps:
+        """Return a copy with a ``ExprRef`` noFadingOnSecondPass.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("noFadingOnSecondPass", value, **defined)
 
     def opacity(
         self,
@@ -28876,6 +30869,7 @@ class MultiscaleSpec(GenomeSpySchema):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
+        order: OrderDef | dict[str, Any] | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         search: FieldDefWithoutScale
         | dict[str, Any]
@@ -28970,6 +30964,7 @@ class MultiscaleSpec(GenomeSpySchema):
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
             key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
+            order (OrderDef | dict[str, Any]): Orders instances within this logical mark. The supported form has one selection condition with a finite numeric value and a finite numeric fallback. Lower levels draw first; equal or constant levels are inert.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
@@ -28999,6 +30994,7 @@ class MultiscaleSpec(GenomeSpySchema):
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -29633,10 +31629,18 @@ class NumericMarkPropDef(GenomeSpySchema):
         band: float | UndefinedType = Undefined,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = Undefined,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -29679,10 +31683,18 @@ class NumericMarkPropDef(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> NumericMarkPropDef:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -30026,10 +32038,18 @@ class OffsetDef(GenomeSpySchema):
         band: float | UndefinedType = Undefined,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = Undefined,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -30072,10 +32092,18 @@ class OffsetDef(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> OffsetDef:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -30338,6 +32366,111 @@ class OffsetDef(GenomeSpySchema):
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("value", value, **defined)
+
+
+class OrderCondition(GenomeSpySchema):
+    """Generated wrapper for ``OrderCondition``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("OrderCondition", {})
+
+    def __init__(
+        self,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
+        value: float | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(empty=empty, param=param, test=test, value=value)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def empty(self, value: bool) -> OrderCondition:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def param(self, value: str) -> OrderCondition:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def test(
+        self,
+        value: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | None
+        | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+    ) -> OrderCondition:
+        """Return a copy with a ``ParameterPredicate`` test.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("test", value, **defined)
+
+    def value(self, value: float) -> OrderCondition:
+        """Return a copy with ``value`` updated."""
+        return self._with_property("value", value)
+
+
+class OrderDef(GenomeSpySchema):
+    """Generated wrapper for ``OrderDef``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("OrderDef", {})
+
+    def __init__(
+        self,
+        condition: OrderCondition | dict[str, Any] | UndefinedType = Undefined,
+        value: float | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(condition=condition, value=value)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def condition(
+        self,
+        value: OrderCondition | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+        test: ParameterPredicate
+        | dict[str, Any]
+        | SelectionUnionTest
+        | UndefinedType = Undefined,
+    ) -> OrderDef:
+        """Return a copy with a ``OrderCondition`` condition.
+
+        Args:
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            param (str): Filter using a parameter name.
+            test (ParameterPredicate | dict[str, Any] | SelectionUnionTest): Schema-defined ``test`` property.
+        """
+        defined = {
+            "empty": empty,
+            "param": param,
+            "test": test,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("condition", value, **defined)
+
+    def value(self, value: float) -> OrderDef:
+        """Return a copy with ``value`` updated."""
+        return self._with_property("value", value)
 
 
 class OtherDataFormat(GenomeSpySchema):
@@ -30789,6 +32922,30 @@ class Parameter(GenomeSpySchema):
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("value", value, **defined)
+
+
+class ParameterPredicate(GenomeSpySchema):
+    """Generated wrapper for ``ParameterPredicate``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("ParameterPredicate", {})
+
+    def __init__(
+        self,
+        empty: bool | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(empty=empty, param=param)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def empty(self, value: bool) -> ParameterPredicate:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def param(self, value: str) -> ParameterPredicate:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
 
 
 class Parse(GenomeSpySchema):
@@ -35944,6 +38101,7 @@ class ResolutionMapLegendResolutionBehavior(GenomeSpySchema):
         fillOpacity: LegendResolutionBehavior_T | UndefinedType = Undefined,
         key: LegendResolutionBehavior_T | UndefinedType = Undefined,
         opacity: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        order: LegendResolutionBehavior_T | UndefinedType = Undefined,
         sample: LegendResolutionBehavior_T | UndefinedType = Undefined,
         search: LegendResolutionBehavior_T | UndefinedType = Undefined,
         semanticScore: LegendResolutionBehavior_T | UndefinedType = Undefined,
@@ -35975,6 +38133,7 @@ class ResolutionMapLegendResolutionBehavior(GenomeSpySchema):
             fillOpacity=fillOpacity,
             key=key,
             opacity=opacity,
+            order=order,
             sample=sample,
             search=search,
             semanticScore=semanticScore,
@@ -36061,6 +38220,12 @@ class ResolutionMapLegendResolutionBehavior(GenomeSpySchema):
     ) -> ResolutionMapLegendResolutionBehavior:
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
+
+    def order(
+        self, value: LegendResolutionBehavior_T
+    ) -> ResolutionMapLegendResolutionBehavior:
+        """Return a copy with ``order`` updated."""
+        return self._with_property("order", value)
 
     def sample(
         self, value: LegendResolutionBehavior_T
@@ -36185,6 +38350,7 @@ class ResolutionMapResolutionBehavior(GenomeSpySchema):
         fillOpacity: ResolutionBehavior_T | UndefinedType = Undefined,
         key: ResolutionBehavior_T | UndefinedType = Undefined,
         opacity: ResolutionBehavior_T | UndefinedType = Undefined,
+        order: ResolutionBehavior_T | UndefinedType = Undefined,
         sample: ResolutionBehavior_T | UndefinedType = Undefined,
         search: ResolutionBehavior_T | UndefinedType = Undefined,
         semanticScore: ResolutionBehavior_T | UndefinedType = Undefined,
@@ -36216,6 +38382,7 @@ class ResolutionMapResolutionBehavior(GenomeSpySchema):
             fillOpacity=fillOpacity,
             key=key,
             opacity=opacity,
+            order=order,
             sample=sample,
             search=search,
             semanticScore=semanticScore,
@@ -36284,6 +38451,10 @@ class ResolutionMapResolutionBehavior(GenomeSpySchema):
     def opacity(self, value: ResolutionBehavior_T) -> ResolutionMapResolutionBehavior:
         """Return a copy with ``opacity`` updated."""
         return self._with_property("opacity", value)
+
+    def order(self, value: ResolutionBehavior_T) -> ResolutionMapResolutionBehavior:
+        """Return a copy with ``order`` updated."""
+        return self._with_property("order", value)
 
     def sample(self, value: ResolutionBehavior_T) -> ResolutionMapResolutionBehavior:
         """Return a copy with ``sample`` updated."""
@@ -38010,7 +40181,7 @@ class Scale(GenomeSpySchema):
         """Return a copy with a ``ZoomParams`` zoom.
 
         Args:
-            extent (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | Literal['data'] | Literal['unbounded']): The boundaries that limit zoom and pan interactions. A domain array sets explicit boundaries. ``"data"`` derives the boundaries from the data that contributes to the scale domain. For index and quantitative scales, ``"unbounded"`` allows zooming and panning without fixed boundaries. Locus scales do not support unbounded zoom. With an unbounded extent, the initial scale domain is used as the reference for the ``zoomLevel`` expression parameter. __Default value:__ The initial scale domain, except the whole genome for locus scales.
+            extent (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | Literal['data'] | Literal['unbounded']): The boundaries that limit zoom and pan interactions. A domain array sets explicit boundaries. ``"data"`` derives the boundaries from the data that contributes to the scale domain. For index and quantitative scales, ``"unbounded"`` allows zooming and panning without fixed boundaries. Locus scales do not support unbounded zoom. With an unbounded extent, the initial scale domain is used as the reference for the ``zoomLevel()`` expression helper and its channel-specific form, such as ``zoomLevel("x")``. __Default value:__ The initial scale domain, except the whole genome for locus scales.
         """
         defined = {
             "extent": extent,
@@ -38314,7 +40485,7 @@ class ScaleConfig(GenomeSpySchema):
         """Return a copy with a ``ZoomParams`` zoom.
 
         Args:
-            extent (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | Literal['data'] | Literal['unbounded']): The boundaries that limit zoom and pan interactions. A domain array sets explicit boundaries. ``"data"`` derives the boundaries from the data that contributes to the scale domain. For index and quantitative scales, ``"unbounded"`` allows zooming and panning without fixed boundaries. Locus scales do not support unbounded zoom. With an unbounded extent, the initial scale domain is used as the reference for the ``zoomLevel`` expression parameter. __Default value:__ The initial scale domain, except the whole genome for locus scales.
+            extent (ScalarDomain_T | Sequence[ChromosomalLocus | dict[str, Any]] | Literal['data'] | Literal['unbounded']): The boundaries that limit zoom and pan interactions. A domain array sets explicit boundaries. ``"data"`` derives the boundaries from the data that contributes to the scale domain. For index and quantitative scales, ``"unbounded"`` allows zooming and panning without fixed boundaries. Locus scales do not support unbounded zoom. With an unbounded extent, the initial scale domain is used as the reference for the ``zoomLevel()`` expression helper and its channel-specific form, such as ``zoomLevel("x")``. __Default value:__ The initial scale domain, except the whole genome for locus scales.
         """
         defined = {
             "extent": extent,
@@ -38959,6 +41130,30 @@ class SelectionType(GenomeSpySchema):
             self._kwds.update(kwds)
 
 
+class SelectionUnionTest(GenomeSpySchema):
+    """Generated wrapper for ``SelectionUnionTest``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("SelectionUnionTest", {})
+
+    def __init__(
+        self,
+        empty: bool | UndefinedType = Undefined,
+        param: dict[str, Any] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(empty=empty, param=param)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def empty(self, value: bool) -> SelectionUnionTest:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def param(self, value: dict[str, Any]) -> SelectionUnionTest:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+
 class SeparatorProps(GenomeSpySchema):
     """Generated wrapper for ``SeparatorProps``."""
 
@@ -39525,10 +41720,18 @@ class ShapeDef(GenomeSpySchema):
         band: float | UndefinedType = Undefined,
         condition: ConditionalParameterMarkPropFieldDefTypeForShape
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefTypeForShape
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefTypeForShape
+        | ConditionalTestMarkPropExprDefTypeForShape
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = Undefined,
         datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
@@ -39571,10 +41774,18 @@ class ShapeDef(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefTypeForShape
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefTypeForShape
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefTypeForShape
+        | ConditionalTestMarkPropExprDefTypeForShape
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> ShapeDef:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -40505,6 +42716,10 @@ class StyleConfig(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        noFadingOnSecondPass: bool
+        | ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         offset: float | UndefinedType = Undefined,
         opacity: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         orient: Literal["vertical", "horizontal"]
@@ -40769,6 +42984,7 @@ class StyleConfig(GenomeSpySchema):
             minStemLength=minStemLength,
             minWidth=minWidth,
             noFadingOnPointSelection=noFadingOnPointSelection,
+            noFadingOnSecondPass=noFadingOnSecondPass,
             offset=offset,
             opacity=opacity,
             orient=orient,
@@ -41950,6 +44166,24 @@ class StyleConfig(GenomeSpySchema):
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("noFadingOnPointSelection", value, **defined)
+
+    def noFadingOnSecondPass(
+        self,
+        value: bool | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> StyleConfig:
+        """Return a copy with a ``ExprRef`` noFadingOnSecondPass.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("noFadingOnSecondPass", value, **defined)
 
     def offset(self, value: float) -> StyleConfig:
         """Return a copy with ``offset`` updated."""
@@ -47246,6 +49480,7 @@ class UnitSpec(GenomeSpySchema):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
+        order: OrderDef | dict[str, Any] | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         search: FieldDefWithoutScale
         | dict[str, Any]
@@ -47340,6 +49575,7 @@ class UnitSpec(GenomeSpySchema):
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
             key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
+            order (OrderDef | dict[str, Any]): Orders instances within this logical mark. The supported form has one selection condition with a finite numeric value and a finite numeric fallback. Lower levels draw first; equal or constant levels are inert.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
@@ -47369,6 +49605,7 @@ class UnitSpec(GenomeSpySchema):
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -48486,6 +50723,7 @@ class VConcatSpec(GenomeSpySchema):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
+        order: OrderDef | dict[str, Any] | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         search: FieldDefWithoutScale
         | dict[str, Any]
@@ -48580,6 +50818,7 @@ class VConcatSpec(GenomeSpySchema):
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
             key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
+            order (OrderDef | dict[str, Any]): Orders instances within this logical mark. The supported form has one selection condition with a finite numeric value and a finite numeric fallback. Lower levels draw first; equal or constant levels are inert.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
@@ -48609,6 +50848,7 @@ class VConcatSpec(GenomeSpySchema):
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -48789,7 +51029,7 @@ class VConcatSpec(GenomeSpySchema):
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
@@ -49226,10 +51466,18 @@ class ValueDefWithConditionStringNullType(GenomeSpySchema):
         self,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -49246,10 +51494,18 @@ class ValueDefWithConditionStringNullType(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> ValueDefWithConditionStringNullType:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -49292,10 +51548,18 @@ class ValueDefWithConditionStringNullTypeForShape(GenomeSpySchema):
         self,
         condition: ConditionalParameterMarkPropFieldDefTypeForShape
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefTypeForShape
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefTypeForShape
+        | ConditionalTestMarkPropExprDefTypeForShape
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]]
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ]
         | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -49312,10 +51576,18 @@ class ValueDefWithConditionStringNullTypeForShape(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefTypeForShape
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefTypeForShape
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefTypeForShape
+        | ConditionalTestMarkPropExprDefTypeForShape
         | ConditionalParameterValueDefStringNullExprRef
-        | Sequence[ConditionalParameterValueDefStringNullExprRef | dict[str, Any]],
+        | ConditionalTestValueDefStringNullExprRef
+        | Sequence[
+            ConditionalParameterValueDefStringNullExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefStringNullExprRef
+        ],
     ) -> ValueDefWithConditionStringNullTypeForShape:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -49358,10 +51630,18 @@ class ValueDefWithConditionNumberType(GenomeSpySchema):
         self,
         condition: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]]
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ]
         | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -49378,10 +51658,18 @@ class ValueDefWithConditionNumberType(GenomeSpySchema):
         self,
         value: ConditionalParameterMarkPropFieldDefType
         | dict[str, Any]
+        | ConditionalTestMarkPropFieldDefType
         | ConditionalParameterScaleDatumDef
+        | ConditionalTestScaleDatumDef
         | ConditionalParameterMarkPropExprDefType
+        | ConditionalTestMarkPropExprDefType
         | ConditionalParameterValueDefNumberExprRef
-        | Sequence[ConditionalParameterValueDefNumberExprRef | dict[str, Any]],
+        | ConditionalTestValueDefNumberExprRef
+        | Sequence[
+            ConditionalParameterValueDefNumberExprRef
+            | dict[str, Any]
+            | ConditionalTestValueDefNumberExprRef
+        ],
     ) -> ValueDefWithConditionNumberType:
         """Return a copy with ``condition`` updated."""
         return self._with_property("condition", value)
@@ -50606,6 +52894,7 @@ class ViewSpec(GenomeSpySchema):
         | MarkPropExprDefType
         | ValueDefWithConditionNumberType
         | UndefinedType = Undefined,
+        order: OrderDef | dict[str, Any] | UndefinedType = Undefined,
         sample: FieldDefWithoutScale | dict[str, Any] | UndefinedType = Undefined,
         search: FieldDefWithoutScale
         | dict[str, Any]
@@ -50700,6 +52989,7 @@ class ViewSpec(GenomeSpySchema):
             fillOpacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Fill opacity of the marks.
             key (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more data fields that uniquely identify rows for stable point selections and bookmarking across sessions. Unlike ``uniqueId`` (an implicit surrogate key), key fields must be stable in the source data. Use a single field definition for simple keys, or an array of field definitions for composite keys. For composite keys, field order is significant.
             opacity (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Opacity of the marks.
+            order (OrderDef | dict[str, Any]): Orders instances within this logical mark. The supported form has one selection condition with a finite numeric value and a finite numeric fallback. Lower levels draw first; equal or constant levels are inert.
             sample (FieldDefWithoutScale | dict[str, Any]): Facet identifier for interactive filtering, sorting, and grouping in the App.
             search (FieldDefWithoutScale | dict[str, Any] | Sequence[FieldDefWithoutScale | dict[str, Any]]): One or more fields used by the App's location/search input to match rows in this view. Use a single field definition for simple search, or an array for matching against multiple fields. A row matches when any configured search field matches the entered term.
             semanticScore (dict[str, Any]): Schema-defined ``semanticScore`` property.
@@ -50729,6 +53019,7 @@ class ViewSpec(GenomeSpySchema):
             "fillOpacity": fillOpacity,
             "key": key,
             "opacity": opacity,
+            "order": order,
             "sample": sample,
             "search": search,
             "semanticScore": semanticScore,
@@ -50965,7 +53256,7 @@ class ViewSpec(GenomeSpySchema):
             strokeDash (Sequence[float]): An array of of alternating stroke and gap lengths or ``null`` for solid strokes. **Default value:** ``null``
             strokeDashOffset (float): An offset for the stroke dash pattern. **Default value:** ``0``
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
-            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``null``, no tooltip is shown. If string, specifies the tooltip handler to use.
+            tooltip (HandledTooltip | HandledTooltipKwds | None | Literal[False]): Tooltip handler. If ``false``, no tooltip is shown but the mark remains available for renderer picking and mark interactions. If ``null``, no tooltip is shown and the mark is excluded from picking unless its view declares a point selection; a point selection overrides this picking opt-out. If string, specifies the tooltip handler to use.
             type (Literal['rule']): Schema-defined ``type`` property.
             x (float | ExprRef | dict[str, Any]): Position on the x axis.
             x2 (float | ExprRef | dict[str, Any]): The secondary position on the x axis.
@@ -51584,6 +53875,13 @@ __all__ = [
     "ConditionalParameterScaleDatumDef",
     "ConditionalParameterValueDefNumberExprRef",
     "ConditionalParameterValueDefStringNullExprRef",
+    "ConditionalTestMarkPropExprDefType",
+    "ConditionalTestMarkPropExprDefTypeForShape",
+    "ConditionalTestMarkPropFieldDefType",
+    "ConditionalTestMarkPropFieldDefTypeForShape",
+    "ConditionalTestScaleDatumDef",
+    "ConditionalTestValueDefNumberExprRef",
+    "ConditionalTestValueDefStringNullExprRef",
     "Contig",
     "CoordinateLookupInput",
     "CoordinateLookupParams",
@@ -51693,6 +53991,8 @@ __all__ = [
     "NumericValueDef",
     "OffsetChannel",
     "OffsetDef",
+    "OrderCondition",
+    "OrderDef",
     "OtherDataFormat",
     "OverhangConfig",
     "PackLegendLabelsParams",
@@ -51700,6 +54000,7 @@ __all__ = [
     "Paddings",
     "ParamTransition",
     "Parameter",
+    "ParameterPredicate",
     "Parse",
     "ParseValue",
     "PileupParams",
@@ -51756,6 +54057,7 @@ __all__ = [
     "SelectionInitIntervalMapping",
     "SelectionParameter",
     "SelectionType",
+    "SelectionUnionTest",
     "SeparatorProps",
     "SequenceGenerator",
     "SequenceParams",

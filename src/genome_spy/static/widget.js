@@ -1,3 +1,5 @@
+const displayCounts = new Map();
+
 export function datasetApi(api, descriptor) {
   if (!descriptor.scoped) {
     return api.datasets;
@@ -68,6 +70,39 @@ export async function renderChart({ model, el, signal }) {
   }
 
   let api = null;
+  let embedBridge = null;
+  // Anywidget creates a fresh model proxy for each display of the same widget.
+  const widgetId = model.get("_embed_widget_id");
+  displayCounts.set(widgetId, (displayCounts.get(widgetId) ?? 0) + 1);
+  const pendingConnections = [];
+  const rejectPendingConnections = (error) => {
+    for (const message of pendingConnections.splice(0)) {
+      model.send({ channel: "genome-spy-embed", kind: "reply",
+        client: message.client, embed: null, id: message.id, error: String(error) });
+    }
+  };
+  const onEmbedMessage = (message) => {
+    if (message?.channel !== "genome-spy-embed") return;
+    if (message.method === "connect" && displayCounts.get(widgetId) !== 1) {
+      model.send({ channel: "genome-spy-embed", kind: "reply",
+        client: message.client, embed: null, id: message.id,
+        error: "Embed API attachment requires exactly one display of this widget." });
+      return;
+    }
+    if (embedBridge) void embedBridge.receive(message);
+    else if (message.method === "connect") {
+      if (!pendingConnections.some(pending => pending.id === message.id)) {
+        pendingConnections.push(message);
+      }
+      if (activeErrors.has("render")) rejectPendingConnections(activeErrors.get("render"));
+    }
+    else if (message.method === "disconnect") {
+      for (let i = pendingConnections.length - 1; i >= 0; i--) {
+        if (pendingConnections[i].client === message.client) pendingConnections.splice(i, 1);
+      }
+    }
+  };
+  model.on("msg:custom", onEmbedMessage);
   let mountedControls = null;
   let parameterSubscriptions = [];
   let renderRevision = 0;
@@ -93,11 +128,18 @@ export async function renderChart({ model, el, signal }) {
   };
 
   const disposeCurrent = ({ reportErrors = true } = {}) => {
+    const bridge = embedBridge;
+    embedBridge = null;
     const controls = mountedControls;
     const currentApi = api;
     mountedControls = null;
     api = null;
     const errors = [];
+    try {
+      bridge?.dispose();
+    } catch (error) {
+      errors.push(error);
+    }
     try {
       controls?.dispose?.();
     } catch (error) {
@@ -230,6 +272,7 @@ export async function renderChart({ model, el, signal }) {
 
   const renderSpec = async () => {
     const revision = ++renderRevision;
+    clearError("render");
     const moduleUrl = model.get("bundle_url");
     const options = model.get("embed_options") || {};
     const controlNames = model.get("controls") || [];
@@ -254,7 +297,6 @@ export async function renderChart({ model, el, signal }) {
         return;
       }
       api = nextApi;
-      clearError("render");
       try {
         const nextControls = await mountControls({
           container: el,
@@ -287,6 +329,15 @@ export async function renderChart({ model, el, signal }) {
       attachInteractions();
       await Promise.all(datasets.map((descriptor) => applyDataset(descriptor)));
       if (revision === renderRevision && !signal.aborted) {
+        const bridgeUrl = model.get("_embed_bridge_url");
+        if (bridgeUrl) {
+          const { createEmbedBridge } = await import(bridgeUrl);
+          if (revision !== renderRevision || signal.aborted) return;
+          embedBridge = createEmbedBridge(nextApi, (message) => model.send(message));
+          for (const message of pendingConnections.splice(0)) {
+            onEmbedMessage(message);
+          }
+        }
         setLoading(el, false);
       }
     } catch (error) {
@@ -295,6 +346,7 @@ export async function renderChart({ model, el, signal }) {
       }
       setLoading(el, false);
       setError(error, "render");
+      rejectPendingConnections(error);
       throw error;
     }
   };
@@ -318,6 +370,11 @@ export async function renderChart({ model, el, signal }) {
   }
 
   signal.addEventListener("abort", () => {
+    const remaining = displayCounts.get(widgetId) - 1;
+    if (remaining) displayCounts.set(widgetId, remaining);
+    else displayCounts.delete(widgetId);
+    model.off("msg:custom", onEmbedMessage);
+    rejectPendingConnections("The widget was disposed before attachment.");
     renderRevision += 1;
     model.off("change:spec", onSpecChange);
     model.off("change:bundle_url", onSpecChange);

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import base64
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any, Literal, cast
+from uuid import uuid4
 
 import anywidget
 import traitlets
@@ -23,6 +25,7 @@ from genome_spy._embed import (
 from genome_spy._chart_authoring import json_safe, records_from_data
 from genome_spy._render import _PreparedSpec, prepare_widget_spec
 from genome_spy.arrow import to_arrow_ipc
+from genome_spy.embed import EmbedResult, attach_embed
 from genome_spy.schemapi import Undefined, UndefinedType
 
 _ESM_PATH = Path(__file__).with_name("static") / "widget.js"
@@ -33,6 +36,11 @@ class JupyterChart(anywidget.AnyWidget):
     """A lightweight anywidget wrapper around GenomeSpy's ``embed`` API."""
 
     _esm = _ESM_PATH
+    _embed_widget_id = traitlets.Unicode().tag(sync=True)
+    _embed_bridge_url = traitlets.Unicode(
+        "data:text/javascript;base64,"
+        + base64.b64encode(_ESM_PATH.with_name("embed-bridge.js").read_bytes()).decode()
+    ).tag(sync=True)
 
     spec = traitlets.Dict().tag(sync=True)
     bundle_url = traitlets.Unicode(DEFAULT_EMBED_URL).tag(sync=True)
@@ -102,6 +110,7 @@ class JupyterChart(anywidget.AnyWidget):
             )
 
         super().__init__(
+            _embed_widget_id=uuid4().hex,
             spec=prepared.spec,
             bundle_url=bundled_module_url("embed") if inline else bundle_url,
             embed_options=embed_options or {},
@@ -156,6 +165,42 @@ class JupyterChart(anywidget.AnyWidget):
             ('table',)
         """
         return tuple(str(entry["name"]) for entry in self.dataset_manifest)
+
+    async def get_embed_api(self) -> EmbedResult:
+        """Attach to this widget's displayed GenomeSpy embed.
+
+        Description:
+            Display the widget before awaiting attachment. The result wraps
+            upstream methods; it is not synchronized trait state. Obtain a new
+            proxy after re-embedding. Use asyncio.timeout if display may be absent.
+            Only one displayed frontend per widget supports this connection.
+            Run setup in a background task so notebook cell execution does not
+            block browser replies (notably in VS Code). Subsequent calls must
+            use the same event loop as attachment.
+        Args:
+            None.
+        Returns:
+            A host-independent proxy for the live embed.
+        Raises:
+            EmbedError: If the browser rejects attachment.
+        Example:
+            >>> import asyncio
+            >>> display(widget)
+            >>> async def connect():
+            ...     global api
+            ...     async with asyncio.timeout(30):
+            ...         api = await widget.get_embed_api()
+            >>> connection_task = asyncio.create_task(connect())
+        """
+
+        def subscribe(callback: Any) -> Any:
+            def receive(widget: Any, content: dict[str, Any], buffers: Any) -> None:
+                callback(content)
+
+            self.on_msg(receive)
+            return lambda: self.on_msg(receive, remove=True)
+
+        return await attach_embed(self.send, subscribe)
 
     def set_dataset(
         self,

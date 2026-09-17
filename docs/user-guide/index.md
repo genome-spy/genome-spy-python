@@ -44,8 +44,16 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
   dataframe transport, and live dataset updates without remounting.
 - [Display controls and embed options](display-controls.md) covers image export,
   the Inspector, and rendering-time settings.
+- [Use chart selections in Python](embed-api.md) saves regions and selected genes.
 - [Save and inspect charts](serialization.md) writes specifications and
-  standalone HTML.
+standalone HTML.
+
+## Interactive workflows
+
+- [Annotate genomic intervals](workflows/annotate-intervals.md): save named regions
+  to a separate track and export BED.
+- [Select genes for follow-up](workflows/select-genes.md): brush a volcano plot
+  and export the selected genes.
 
 ```{toctree}
 :hidden:
@@ -88,5 +96,22 @@ annotations
 interaction
 notebooks
 display-controls
+embed-api
 serialization
+```
+
+```{toctree}
+:hidden:
+:maxdepth: 2
+:caption: Interactive workflows
+
+workflows/index
+```
+
+```{toctree}
+:hidden:
+:maxdepth: 1
+:caption: Advanced
+
+embed-integration
 ```

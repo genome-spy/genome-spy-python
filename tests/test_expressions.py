@@ -53,6 +53,8 @@ def test_generated_expr_namespace_covers_upstream_functions() -> None:
     assert str(gs.expr.mapHasKey(gs.datum.values, "key")) == (
         "mapHasKey(datum.values,'key')"
     )
+    assert str(gs.expr.zoomLevel()) == "zoomLevel()"
+    assert str(gs.expr.zoomLevel("x")) == "zoomLevel('x')"
 
 
 def test_expression_values_serialize_as_javascript_literals() -> None:

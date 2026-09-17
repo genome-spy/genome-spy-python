@@ -1,4 +1,4 @@
-// Vendored from GenomeSpy 0.87.0.
+// Vendored from GenomeSpy 0.88.1.
 var Xn=Object.defineProperty;var Kn=(t,e)=>()=>(t&&(e=t(t=0)),e);var Zn=(t,e)=>{for(var n in e)Xn(t,n,{get:e[n],enumerable:!0})};var Ft={};Zn(Ft,{GsInspectorPanel:()=>De});function Me(t,e){if(!Rt(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return xe===void 0?e:xe.createHTML(e)}function G(t,e,n=t,a){if(e===q)return e;let i=a===void 0?n._$Cl:n._$Co?.[a],r=at(e)?void 0:e._$litDirective$;return i?.constructor!==r&&(i?._$AO?.(!1),r===void 0?i=void 0:(i=new r(t),i._$AT(t,n,a)),a===void 0?n._$Cl=i:(n._$Co??=[])[a]=i),i!==void 0&&(e=G(t,i._$AS(t,e.values),i,a)),e}function Pt(t){let e=Object.entries(t);return e.length?e.map(([n,a])=>n+": "+a).join(", "):"-"}function wa(t){return t.disposed?"disposed":t.initialized?t.completed?"done":"active":"new"}function L(t){return t===void 0?"-":typeof t=="string"?t:JSON.stringify(t)}function ze(t){return c`
         <table>
             <thead>
@@ -487,8 +487,8 @@ var Xn=Object.defineProperty;var Kn=(t,e)=>()=>(t&&(e=t(t=0)),e);var Zn=(t,e)=>{
                     </label>
                 </div>
                 ${t?this.#h(t,0):c`<div class="empty">
-                          Launch the app to inspect the hierarchy.
-                      </div>`}
+                              Launch the app to inspect the hierarchy.
+                          </div>`}
             </div>
         `}#h(t,e){return c`
             <button
@@ -756,7 +756,9 @@ var Xn=Object.defineProperty;var Kn=(t,e)=>()=>(t&&(e=t(t=0)),e);var Zn=(t,e)=>{
                                   <span class="current-member">
                                       ${r.viewPath}:${r.channel}
                                   </span>
-                                  ${r.chrome?c`<span class="badge">chrome</span>`:g}
+                                  ${r.chrome?c`<span class="badge"
+                                                >chrome</span
+                                            >`:g}
                               </li>
                           `:c`
                               <li>
@@ -769,26 +771,28 @@ var Xn=Object.defineProperty;var Kn=(t,e)=>()=>(t&&(e=t(t=0)),e);var Zn=(t,e)=>{
                                   >
                                       ${r.viewPath}:${r.channel}
                                   </button>
-                                  ${r.chrome?c`<span class="badge">chrome</span>`:g}
+                                  ${r.chrome?c`<span class="badge"
+                                                >chrome</span
+                                            >`:g}
                               </li>
                           `)}
             </ul>
             ${e.length>i.length?c`
-                      <button
-                          class="inline-action"
-                          @click=${()=>this.#w(t,!0)}
-                      >
-                          Show all ${e.length}
-                      </button>
-                  `:g}
+                          <button
+                              class="inline-action"
+                              @click=${()=>this.#w(t,!0)}
+                          >
+                              Show all ${e.length}
+                          </button>
+                      `:g}
             ${a&&e.length>5?c`
-                      <button
-                          class="inline-action"
-                          @click=${()=>this.#w(t,!1)}
-                      >
-                          Show fewer
-                      </button>
-                  `:g}
+                          <button
+                              class="inline-action"
+                              @click=${()=>this.#w(t,!1)}
+                          >
+                              Show fewer
+                          </button>
+                      `:g}
         `}#p(t,e,n){return!t||!e?c`<span class="muted">-</span>`:t===this.selectedViewId?c`<span class="current-member">${e}</span>`:c`
             <button
                 class="link-button"

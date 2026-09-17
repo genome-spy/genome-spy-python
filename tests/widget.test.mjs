@@ -43,9 +43,9 @@ class MockModel {
     this.listeners.get(name)?.delete(callback);
   }
 
-  emit(name) {
+  emit(name, ...args) {
     for (const callback of this.listeners.get(name) || []) {
-      callback();
+      callback(...args);
     }
   }
 }
@@ -83,6 +83,7 @@ function descriptor(name, index, { owner = null, scoped = false } = {}) {
 
 function fixture(datasets = []) {
   const values = {
+    _embed_widget_id: crypto.randomUUID(),
     spec: { data: { name: "table" }, datasets: { table: [] } },
     bundle_url:
       "data:text/javascript,export const embed=(...args)=>globalThis.__widgetEmbed(...args)",
@@ -120,6 +121,69 @@ function fixture(datasets = []) {
     controller: new AbortController(),
   };
 }
+
+test("embed attachment rejects distinct proxies for the same displayed widget", async () => {
+  const first = fixture();
+  const second = fixture();
+  second.model.values = first.model.values;
+  const replies = [];
+  first.model.send = second.model.send = message => replies.push(message);
+  const connects = [];
+  first.model.values._embed_bridge_url = moduleUrl(`
+    export const createEmbedBridge = () => ({
+      receive: message => globalThis.__embedConnects.push(message), dispose() {},
+    });
+  `);
+  globalThis.__embedConnects = connects;
+  globalThis.__widgetEmbed = async () => apiFixture().api;
+  await renderChart({ ...first, signal: first.controller.signal });
+  await renderChart({ ...second, signal: second.controller.signal });
+  const request = { channel: "genome-spy-embed", method: "connect", client: "test", id: "1" };
+  try {
+    first.model.emit("msg:custom", request);
+    second.model.emit("msg:custom", request);
+    assert.equal(connects.length, 0);
+    assert.equal(replies.length, 2);
+    assert.match(replies[0].error, /exactly one display/);
+    second.controller.abort();
+    first.model.emit("msg:custom", request);
+    assert.equal(connects.length, 1);
+  } finally {
+    first.controller.abort();
+    second.controller.abort();
+    delete globalThis.__embedConnects;
+  }
+});
+
+test("attachment after render failure rejects immediately and a new render can recover", async () => {
+  const f = fixture();
+  const messages = [];
+  f.model.send = message => messages.push(message);
+  f.model.values._embed_bridge_url = moduleUrl(`
+    export const createEmbedBridge = (api, send) => ({
+      receive: message => send({id: message.id, value: 'connected'}), dispose() {},
+    });
+  `);
+  globalThis.__widgetEmbed = async () => { throw Error("invalid spec"); };
+  const request = id => ({channel: "genome-spy-embed", client: "test", id, method: "connect"});
+  try {
+    await assert.rejects(renderChart({...f, signal: f.controller.signal}), /invalid spec/);
+    f.model.emit("msg:custom", request("failed"));
+    assert.equal(messages.length, 1);
+    assert.match(messages[0].error, /invalid spec/);
+    const next = deferred();
+    globalThis.__widgetEmbed = () => next.promise;
+    f.model.emit("change:spec");
+    f.model.emit("msg:custom", request("retry"));
+    f.model.emit("msg:custom", request("retry")); // Repeated handshake while loading.
+    assert.equal(messages.length, 1); // The retry waits for the new render.
+    next.resolve(apiFixture().api);
+    await waitFor(() => messages.length === 2);
+    assert.deepEqual(messages[1], {id: "retry", value: "connected"});
+  } finally {
+    f.controller.abort();
+  }
+});
 
 function apiFixture({ load, set } = {}) {
   const loads = [];
