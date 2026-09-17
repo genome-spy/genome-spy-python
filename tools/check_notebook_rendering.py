@@ -22,11 +22,117 @@ from PIL import Image
 from playwright.sync_api import sync_playwright
 
 
+def _run_kernel(page, code: str) -> None:
+    status = page.evaluate(
+        """async code => {
+        const kernel = window.jupyterapp.shell.currentWidget.sessionContext.session.kernel;
+        const reply = await kernel.requestExecute({code, store_history: false}).done;
+        return reply.content;
+    }""",
+        code,
+    )
+    assert status["status"] == "ok", status
+
+
+def _check_workflow(page, canvas, workflow: str) -> None:
+    if workflow in ("points", "sequence"):
+        ready = (
+            "0 genes selected."
+            if workflow == "points"
+            else "Ready. Click a cell to change that position."
+        )
+        page.get_by_text(ready, exact=True).wait_for()
+        canvas.scroll_into_view_if_needed()
+        bounds = canvas.bounding_box()
+        assert bounds is not None
+        if workflow == "sequence":
+            page.mouse.move(bounds["x"] + 48, bounds["y"] + 200)
+            page.wait_for_timeout(100)
+            page.mouse.click(bounds["x"] + 48, bounds["y"] + 200)
+            page.get_by_text("Edited: CCGTGCAATGCTAGCTACGATCGA", exact=True).wait_for()
+            _run_kernel(
+                page,
+                "assert ''.join(edited_sequence) == 'C' + REFERENCE[1:]\nassert REFERENCE.startswith('A')",
+            )
+        else:
+            for fraction in (0.45, 0.46, 0.47, 0.48, 0.49):
+                page.mouse.click(
+                    bounds["x"] + bounds["width"] * fraction, bounds["y"] + 270
+                )
+                page.wait_for_timeout(150)
+                if page.get_by_text("1 genes selected.", exact=True).count():
+                    break
+            page.get_by_text("1 genes selected.", exact=True).wait_for()
+            _run_kernel(
+                page,
+                "assert len(selected_genes) == 1\nassert selected_genes.iloc[0].ensgene.startswith('ENSG')",
+            )
+        return
+    if workflow == "intervals":
+        page.get_by_text(
+            "Ready — brush the chart, enter a name, then save.", exact=True
+        ).wait_for()
+    else:
+        page.get_by_text(
+            "0 genes selected. Showing up to 20 rows.", exact=True
+        ).wait_for()
+    canvas.scroll_into_view_if_needed()
+    bounds = canvas.bounding_box()
+    assert bounds is not None
+    x, y, width, height = (bounds[key] for key in ("x", "y", "width", "height"))
+    page.mouse.move(x + width * 0.55, y + height * 0.12)
+    page.mouse.down()
+    page.mouse.move(
+        x + width * 0.82,
+        y + height * (0.25 if workflow == "intervals" else 0.85),
+        steps=12,
+    )
+    page.mouse.up()
+    if workflow == "intervals":
+        page.get_by_role("textbox", name="Name:", exact=True).fill("GC-rich-region")
+        page.get_by_role("textbox", name="Note:", exact=True).fill(
+            "Candidate for follow-up"
+        )
+        page.get_by_role("button", name="Save annotation", exact=True).click()
+        page.wait_for_timeout(1500)
+        _run_kernel(page, "assert not ('Error:' in status.value), status.value")
+        page.get_by_text("Saved 1 annotation(s).", exact=True).wait_for()
+        page.get_by_role("button", name="Export BED", exact=True).click()
+        page.locator('a[href*="annotations.hg38."]').wait_for()
+        _run_kernel(
+            page,
+            """assert len(annotations) == 1
+assert annotations[0]['chrom'] == 'chr5'
+assert 177500000 <= annotations[0]['start'] < annotations[0]['end'] <= 177700000
+bed = list(Path('.').glob('annotations.hg38.*.bed'))
+assert len(bed) == 1
+assert bed[0].read_text().strip().split('\\t') == [str(annotations[0][key]) for key in ('chrom', 'start', 'end', 'name')]
+""",
+        )
+    else:
+        export = page.get_by_role("button", name="Export selected genes", exact=True)
+        export.click()
+        page.locator('a[href*="selected-genes."]').wait_for()
+        _run_kernel(
+            page,
+            """import pandas as pd
+assert len(selected_genes) > 20
+csv = list(Path('.').glob('selected-genes.*.csv'))
+assert len(csv) == 1
+exported = pd.read_csv(csv[0])
+assert exported.ensgene.tolist() == selected_genes.ensgene.tolist()
+""",
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("notebook", type=Path)
     parser.add_argument("--screenshot", type=Path, required=True)
     parser.add_argument("--check-embed-interactions", action="store_true")
+    parser.add_argument(
+        "--workflow", choices=["intervals", "genes", "points", "sequence"]
+    )
     args = parser.parse_args()
     notebook = json.loads(args.notebook.read_text())
     # Test fresh execution, not saved outputs or widget state from another kernel.
@@ -241,6 +347,8 @@ def main() -> None:
                             }""")
                             assert status == "ok", "Annotation was not saved in Python"
                         args.screenshot.parent.mkdir(parents=True, exist_ok=True)
+                        if args.workflow:
+                            _check_workflow(page, canvas, args.workflow)
                         pixels = canvas.screenshot(path=str(args.screenshot))
                         # A canvas element alone can exist even when rendering failed.
                         colors = (
@@ -252,6 +360,46 @@ def main() -> None:
                             raise AssertionError(
                                 "Chart canvas is blank or unexpectedly uniform"
                             )
+                        if args.workflow:
+                            page.set_viewport_size({"width": 1500, "height": 1800})
+                            canvas.locator(
+                                "xpath=ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' jp-OutputArea ')][1]"
+                            ).screenshot(path=str(args.screenshot))
+                            # Rerunning resets in-memory state, not exported files.
+                            page.evaluate(
+                                "window.jupyterapp.commands.execute('notebook:run-all-cells')"
+                            )
+                            if args.workflow == "intervals":
+                                page.get_by_text(
+                                    "Ready — brush the chart, enter a name, then save.",
+                                    exact=True,
+                                ).wait_for()
+                                _run_kernel(
+                                    page,
+                                    "assert annotations == []\nassert len(list(Path('.').glob('annotations.hg38.*.bed'))) == 1",
+                                )
+                            elif args.workflow in ("points", "sequence"):
+                                ready = (
+                                    "0 genes selected."
+                                    if args.workflow == "points"
+                                    else "Ready. Click a cell to change that position."
+                                )
+                                page.get_by_text(ready, exact=True).wait_for()
+                                _run_kernel(
+                                    page,
+                                    "assert selected_genes.empty"
+                                    if args.workflow == "points"
+                                    else "assert ''.join(edited_sequence) == REFERENCE",
+                                )
+                            else:
+                                page.get_by_text(
+                                    "0 genes selected. Showing up to 20 rows.",
+                                    exact=True,
+                                ).wait_for()
+                                _run_kernel(
+                                    page,
+                                    "assert selected_genes.empty\nassert len(list(Path('.').glob('selected-genes.*.csv'))) == 1",
+                                )
                     finally:
                         browser.close()
             except Exception:
