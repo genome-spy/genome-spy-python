@@ -177,12 +177,16 @@ class JupyterChart(anywidget.AnyWidget):
             Run setup in a background task so notebook cell execution does not
             block browser replies (notably in VS Code). Subsequent calls must
             use the same event loop as attachment.
+
         Args:
             None.
+
         Returns:
             A host-independent proxy for the live embed.
+
         Raises:
             EmbedError: If the browser rejects attachment.
+
         Example:
             >>> import asyncio
             >>> display(widget)

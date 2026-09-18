@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import importlib.util
+import inspect
+from io import StringIO
 import re
 import sys
 from pathlib import Path
@@ -15,6 +17,20 @@ pytestmark = pytest.mark.docs
 REPO_ROOT = Path(__file__).resolve().parent.parent
 API_PAGE = REPO_ROOT / "docs" / "api.md"
 TEMPLATES_DIR = REPO_ROOT / "docs" / "_templates" / "autosummary"
+
+
+def test_embed_attachment_docstring_parses_without_warnings() -> None:
+    napoleon = pytest.importorskip("sphinx.ext.napoleon.docstring")
+    docutils = pytest.importorskip("docutils.core")
+    docstring = inspect.getdoc(gs.JupyterChart.get_embed_api)
+    assert docstring
+    rendered = str(napoleon.GoogleDocstring(docstring))
+    warnings = StringIO()
+    docutils.publish_doctree(
+        rendered,
+        settings_overrides={"warning_stream": warnings, "halt_level": 6},
+    )
+    assert warnings.getvalue() == ""
 
 
 def _load_generator():
