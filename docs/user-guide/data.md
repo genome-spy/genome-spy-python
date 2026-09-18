@@ -41,7 +41,7 @@ uses column names as fields. A pandas index is not a field, so call
 `frame.reset_index()` first when an index contains values needed by the chart.
 
 Notebook display and live updates use Arrow IPC for supported tables when
-available. See [Create and update charts in notebooks](notebooks.md) for setup
+available. See [Charts in notebooks](notebooks.md) for setup
 and transport details.
 
 The grammar is easiest to use with **long-form data**, where one row represents

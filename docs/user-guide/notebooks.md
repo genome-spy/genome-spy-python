@@ -1,32 +1,31 @@
-# Create and update charts in notebooks
+# Charts in notebooks
 
-GenomeSpy charts display through a notebook widget in JupyterLab, Jupyter
-Notebook, VS Code notebooks, and Marimo. By default, the browser loads the
-pinned GenomeSpy JavaScript bundle from a CDN.
-
-For an offline or network-restricted notebook, explicitly display the packaged
-runtime:
-
-```python
-chart.display(inline=True)
-```
-
-Use `chart.widget(inline=True)` when retaining the widget for updates. Inline
-mode increases the widget payload because it includes GenomeSpy Core and the
-modules used by the display controls.
+Create a chart in Python and display it in JupyterLab, Jupyter Notebook,
+VS Code notebooks, or Marimo. You can explore it with the mouse without writing
+any JavaScript.
 
 ## Install for notebooks
 
-Install the package with Arrow support when using it in a notebook. This also
-installs PyArrow for dataframe transport:
+Install GenomeSpy in the Python environment your notebook uses:
 
-```bash
+```sh
+pip install genome-spy-python
+```
+
+If you use pandas, Polars, or PyArrow tables, also install the optional
+`arrow` support:
+
+```sh
 pip install "genome-spy-python[arrow]"
 ```
 
 ## Display a chart
 
-Build a chart normally:
+Here is a complete example with three measurements:
+
+```python
+import genome_spy as gs
+```
 
 ```{literalinclude} ../tutorials/notebooks.py
 :language: python
@@ -34,7 +33,7 @@ Build a chart normally:
 :end-before: notebooks-chart-end
 ```
 
-Leave the chart as the final expression in a notebook cell to display it:
+Leave the chart as the last expression in a cell:
 
 ```{literalinclude} ../tutorials/notebooks.py
 :language: python
@@ -42,33 +41,29 @@ Leave the chart as the final expression in a notebook cell to display it:
 :end-before: notebooks-implicit-display-end
 ```
 
-This form is enough when later Python cells do not need to update the displayed
-data.
+This is enough to display and explore a chart.
 
-## Display a dataframe
+### Create a chart from a dataframe
 
-{py:class}`~genome_spy.Chart` accepts pandas and Polars dataframes, plus PyArrow `Table` and
-`RecordBatch` objects:
+You can pass a pandas or Polars dataframe directly to `gs.Chart()`. PyArrow
+tables and record batches also work. For example, with pandas installed:
 
 ```python
-import genome_spy as gs
 import pandas as pd
 
 frame = pd.DataFrame({"sample": ["A", "B"], "value": [2.1, 3.4]})
-
-chart = gs.Chart(frame).mark_point().encode(x="sample:N", y="value:Q")
-chart
+gs.Chart(frame).mark_point().encode(x="sample:N", y="value:Q")
 ```
 
-Notebook rendering transfers supported tables with Arrow automatically. This
-changes only how data reaches the widget: {py:meth}`~genome_spy.TopLevelSpec.to_dict` and
-{py:meth}`~genome_spy.TopLevelSpec.to_json` still produce ordinary JSON-compatible specifications. A
-pandas index is not a chart field, so use `frame.reset_index()` first when the
-index contains values the chart needs.
+GenomeSpy uses Arrow to send these tables to the displayed chart efficiently.
+You do not need to manage that transfer yourself. A pandas index is not a
+chart field: use `frame.reset_index()` if you want to plot it.
 
-## Keep a widget for updates
+## Keep a widget for later updates
 
-Call {py:meth}`~genome_spy.TopLevelSpec.widget` when the displayed chart must receive new data:
+A *widget* is the displayed chart's connection to Python. Keep it in a variable
+when you want a later cell to change the data in that same chart. Continuing
+with the measurements chart above:
 
 ```{literalinclude} ../tutorials/notebooks.py
 :language: python
@@ -76,29 +71,22 @@ Call {py:meth}`~genome_spy.TopLevelSpec.widget` when the displayed chart must re
 :end-before: notebooks-widget-end
 ```
 
-Display `view` once and keep the same object alive. Updating it preserves the
-mounted GenomeSpy instance, including its current zoom and selections.
+Display `view` once. Update that object rather than creating another chart.
 
-The chart uses a named dataset:
+## Update the chart’s data
+
+To update `view`, specify which dataset to replace. The measurements chart
+already declares a dataset named `"measurements"` in its `gs.Chart(...)` call:
 
 ```python
 data={"name": "measurements"},
 datasets={"measurements": initial_rows},
 ```
 
-`data.name` tells the chart which dataset to read. The root `datasets` mapping
-provides its initial rows and gives later updates a stable target. The GenomeSpy
-documentation describes this indirection in
-[named data](https://genomespy.app/docs/grammar/data/eager/#named-data).
+`data` tells the chart to read that dataset; `datasets` supplies its initial
+rows. Use the same name in `view.set_dataset()` to replace those rows.
 
-Equal unnamed tables are shared automatically. Updating a shared dataset changes
-all charts that read it. Use different explicit names when charts need independent
-updates, even if they start with the same rows. See
-{ref}`reuse-chart-data`.
-
-## Replace the named dataset
-
-Use {py:meth}`~genome_spy.api.JupyterChart.set_dataset` to replace its records:
+Run this in a later cell:
 
 ```{literalinclude} ../tutorials/notebooks.py
 :language: python
@@ -106,29 +94,23 @@ Use {py:meth}`~genome_spy.api.JupyterChart.set_dataset` to replace its records:
 :end-before: notebooks-record-update-end
 ```
 
-New rows should retain the fields and value types expected by the chart. For a
-widget with exactly one named dataset, `view.set_data(updated_rows,
-format="records")` is a shorter equivalent.
-
-Dataframes and PyArrow tables can be passed directly:
+Keep the column names and value types that the chart expects. You can also
+pass an updated dataframe directly:
 
 ```python
 view.set_dataset("measurements", updated_frame)
 ```
 
-Arrow is the default transport for these updates. Keep column names and value
-types compatible with the chart fields. Most users do not need to call
-{py:func}`~genome_spy.to_arrow_ipc` directly.
+The chart updates without being rebuilt, so you do not have to start exploring
+from scratch. For a widget with exactly one named dataset,
+`view.set_data(updated_rows, format="records")` is a shorter alternative.
 
-In a reactive notebook, create and display the widget in a stable cell. Let
-dependent cells prepare new rows and call `set_dataset()` on that same object.
-Create a new chart only when its fields, marks, encodings, or composition need
-to change.
+Equal unnamed tables may be shared automatically. Use separate explicit names
+when different charts need independent updates; see {ref}`reuse-chart-data`.
 
 ## Use Marimo
 
-Marimo displays the same widget through its anywidget support. Create and wrap
-the widget once in a stable cell:
+Marimo can display the same widget. Create it once in a cell:
 
 ```python
 import marimo as mo
@@ -138,22 +120,27 @@ chart_widget = mo.ui.anywidget(view)
 chart_widget
 ```
 
-Dependent cells can prepare a new dataframe and update the existing widget:
+Other cells can update its data with `view.set_dataset("measurements", updated_frame)`.
+Keep the original widget instead of rebuilding it whenever a control changes.
+
+## Use it without internet access
+
+Normally the chart downloads GenomeSpy's display code when it opens. Use the
+copy included with the Python package instead:
 
 ```python
-view.set_dataset("measurements", updated_frame)
+chart.display(inline=True)
 ```
 
-Keeping the widget in its original cell avoids rebuilding the chart whenever a
-Marimo control changes.
-
-See the {py:class}`genome_spy.api.JupyterChart` reference for multiple datasets,
-transport options, and method signatures.
+For a chart you plan to update, use `chart.widget(inline=True)`. This sends
+more data to the notebook, but avoids downloading the display code. Datasets
+loaded from remote URLs still need network access.
 
 ## If a chart does not appear
 
-Make sure the package is installed in the Python environment your notebook
-uses. After installing or upgrading it, restart the notebook's Python session
-and rerun the cells. The chart also needs internet access to load its display
-code. As an alternative, use {py:meth}`~genome_spy.TopLevelSpec.save` to save an
-HTML file and open it in a browser.
+Check that GenomeSpy is installed in the notebook's Python environment.
+After installing or upgrading, restart the kernel (the Python session) and
+rerun the cells. If downloads are blocked, try `inline=True` as shown above.
+
+You can also [save an HTML file](serialization.md) and open it in a browser.
+See the {py:class}`genome_spy.api.JupyterChart` reference for all widget options.

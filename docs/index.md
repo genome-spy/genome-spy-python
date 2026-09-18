@@ -63,7 +63,7 @@ Annotate genomic intervals or select genes for follow-up—in your browser or a 
 ```{toctree}
 :hidden:
 :includehidden:
-:maxdepth: 3
+:maxdepth: 4
 
 Getting started <getting-started>
 User guide <user-guide/index>

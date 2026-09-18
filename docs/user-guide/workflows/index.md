@@ -35,6 +35,10 @@ Choose nucleotides in a letter grid and compare edits with the reference.
 The web demos need no Python kernel. Each page also includes a notebook
 for Jupyter or VS Code.
 
+New to using selections in Python? Start with
+[Use chart interactions in Python](../embed-api.md), which includes a small
+notebook example and an optional web app.
+
 ```{toctree}
 :hidden:
 

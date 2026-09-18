@@ -36,24 +36,16 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
 - [Label points and genomic coordinates](annotations.md) adds selected point callouts
   and scored gene tracks.
 
-## Interaction and output
+## Interaction
 
 - [Parameters and interaction](interaction.md) covers zooming, controls,
   overview brushes, selections, and cursor rulers.
-- [Create and update charts in notebooks](notebooks.md) covers display,
-  dataframe transport, and live dataset updates without remounting.
-- [Display controls and embed options](display-controls.md) covers image export,
-  the Inspector, and rendering-time settings.
-- [Use chart selections in Python](embed-api.md) saves regions and selected genes.
-- [Save and inspect charts](serialization.md) writes specifications and
-standalone HTML.
 
-## Interactive workflows
+## Using and sharing charts
 
-- [Annotate genomic intervals](workflows/annotate-intervals.md): save named regions
-  to a separate track and export BED.
-- [Select genes for follow-up](workflows/select-genes.md): brush a volcano plot
-  and export the selected genes.
+[Start here](using-charts.md) to display charts in notebooks, share interactive
+HTML files, or use selected regions and genes in Python. The section also
+includes runnable annotation, gene-selection, and sequence-editing workflows.
 
 ```{toctree}
 :hidden:
@@ -91,27 +83,15 @@ annotations
 ```{toctree}
 :hidden:
 :maxdepth: 1
-:caption: Interaction and output
+:caption: Interaction
 
 interaction
-notebooks
-display-controls
-embed-api
-serialization
 ```
 
 ```{toctree}
 :hidden:
-:maxdepth: 2
-:caption: Interactive workflows
+:maxdepth: 3
+:caption: Using charts
 
-workflows/index
-```
-
-```{toctree}
-:hidden:
-:maxdepth: 1
-:caption: Advanced
-
-embed-integration
+using-charts
 ```

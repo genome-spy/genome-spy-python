@@ -977,11 +977,14 @@ def test_serialization_guide_uses_executable_tutorial_sections() -> None:
     for marker in (
         "serialization-dict-start",
         "serialization-json-start",
-        "serialization-save-start",
     ):
         assert f":start-after: {marker}" in source
 
-    assert "{genomespy-chart}" not in source
+    assert 'chart.save("chart.html")' in source
+    assert 'chart.save("chart.json")' in source
+    assert source.index("## Save an interactive chart") < source.index(
+        "## Inspect the specification"
+    )
 
 
 def test_tutorial_directive_uses_direct_static_bundle_embed() -> None:
@@ -1044,20 +1047,63 @@ def test_display_controls_guide_uses_executable_tutorial_sections() -> None:
     tutorial = _load_module(
         "_display_controls_tutorial", DISPLAY_CONTROLS_TUTORIAL_PATH
     )
-    source = DISPLAY_CONTROLS_GUIDE_PATH.read_text(encoding="utf-8")
+    source = SERIALIZATION_GUIDE_PATH.read_text(encoding="utf-8")
 
     assert tutorial.chart.to_dict()["assembly"] == "hg38"
     for marker in (
-        "display-controls-basic-start",
         "display-controls-override-start",
         "display-controls-widget-start",
-        "display-controls-embed-options-start",
-        "display-controls-output-start",
     ):
         assert f":start-after: {marker}" in source
 
     assert ":controls: svg,png,inspector" in source
-    assert ":controls: png" in source
+    assert 'chart.save("chart.html", controls=False)' in source
+    # Old published URLs remain useful without duplicating the guide.
+    legacy = DISPLAY_CONTROLS_GUIDE_PATH.read_text(encoding="utf-8")
+    assert (
+        "{ref}`Save, export, and share charts <choose-or-hide-the-buttons>`" in legacy
+    )
+    assert "orphan: true" in legacy
+
+
+def test_using_charts_has_four_canonical_destinations() -> None:
+    guide = REPO_ROOT / "docs/user-guide"
+
+    def children(path: Path) -> list[str]:
+        blocks = re.findall(r"```\{toctree\}\n(.*?)```", path.read_text(), re.S)
+        return [
+            line.strip()
+            for block in blocks
+            for line in block.splitlines()
+            if line.strip() and not line.startswith(":")
+        ]
+
+    assert children(guide / "using-charts.md") == [
+        "notebooks",
+        "serialization",
+        "embed-api",
+        "workflows/index",
+    ]
+    assert "using-charts" in children(guide / "index.md")
+    assert not set(children(guide / "index.md")) & {
+        "notebooks",
+        "serialization",
+        "embed-api",
+        "connect-python",
+        "display-controls",
+        "embed-integration",
+        "workflows/index",
+    }
+    assert children(guide / "workflows/index.md") == [
+        "annotate-intervals",
+        "select-genes",
+        "pick-genes",
+        "edit-sequence",
+    ]
+    interactions = (guide / "embed-api.md").read_text()
+    assert "../integration/notebook.ipynb" in interactions
+    assert "../integration/server.py" in interactions
+    assert "embed-integration.md" not in interactions
 
 
 def test_tutorial_chart_target_rejects_paths() -> None:

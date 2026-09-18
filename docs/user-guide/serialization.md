@@ -1,13 +1,97 @@
-# Save and inspect charts
+# Save, export, and share charts
 
-A GenomeSpy Python chart can be converted to the JSON-compatible specification
-that GenomeSpy renders in the browser. Most readers only need this when saving a
-chart, passing it to another tool, or inspecting the generated grammar.
+Save an interactive chart as an HTML file, or download a picture of the current
+view. The examples below assume you have already created a `chart`; see
+[Getting started](../getting-started.md) for a complete first example.
+
+(save-an-interactive-chart)=
+## Save an interactive chart
+
+```python
+chart.save("chart.html")
+```
+
+Open the file in a browser or share it with someone else. They do not need
+Python to zoom, hover, or use interactions defined in the chart.
+
+The file does **not** include a running Python session. Code that responds to
+selections in Python needs a [live connection](embed-api.md).
+
+For HTML as a string rather than a file, use `chart.to_html()`.
+
+### Use it without internet access
+
+By default, the HTML file downloads GenomeSpy's display code when opened.
+Include that code in the file instead:
+
+```python
+chart.save("chart.html", inline=True)
+```
+
+The file is larger, but no download is needed for the display code. Data
+supplied directly to the chart is included too. Data loaded from URLs still
+needs network access; `inline=True` does not download those datasets.
+
+## Download an image
+
+Hover over the chart, or give it keyboard focus, to reveal its buttons.
+Choose **PNG** for a raster image or **SVG** for a vector image. These capture
+the current view, including its zoom.
+
+Try the buttons on this chart:
+
+```{genomespy-chart} display_controls:chart
+:height: 230
+:title: Variant scores with image export controls
+:controls: svg,png,inspector
+```
+
+(choose-or-hide-the-buttons)=
+## Choose or hide the buttons
+
+The default buttons are PNG, SVG, and Inspector. Inspector is a developer tool
+for examining a chart; you can hide it if you do not need it.
+
+```{literalinclude} ../tutorials/display_controls.py
+:language: python
+:start-after: display-controls-override-start
+:end-before: display-controls-override-end
+:dedent: 4
+```
+
+Available names are `"png"`, `"svg"`, `"inspector"`, and `"full-window"`
+(which expands the chart). Their order in the list sets their display order.
+
+The same `controls` option works when keeping a notebook widget or saving HTML:
+
+```{literalinclude} ../tutorials/display_controls.py
+:language: python
+:start-after: display-controls-widget-start
+:end-before: display-controls-widget-end
+:dedent: 4
+```
+
+```python
+chart.save("chart.html", controls=False)
+```
+
+(save-json-or-html)=
+## Save the chart definition as JSON
+
+For another tool to load the chart definition, save JSON instead of HTML:
+
+```python
+chart.save("chart.json")
+```
+
+JSON stores the instructions and data references, not a displayed chart.
+It does not include display buttons or Python callbacks.
 
 ## Inspect the specification
 
-{py:meth}`~genome_spy.TopLevelSpec.to_dict` returns the complete specification as Python dictionaries, lists,
-strings, and numbers:
+A *specification* is the collection of instructions GenomeSpy uses to draw the
+chart: its data, marks, axes, and interactions. You normally do not need to
+inspect it, but it can help when debugging or using the JavaScript API.
 
 ```{literalinclude} ../tutorials/serialization.py
 :language: python
@@ -15,14 +99,7 @@ strings, and numbers:
 :end-before: serialization-dict-end
 ```
 
-The result uses GenomeSpy property names. For example, {py:class}`gs.X <genome_spy.X>`
-becomes an x-channel definition with `field` and `type`. The root `$schema` URL
-identifies the GenomeSpy schema used to validate the chart. Those property names
-are the ones documented in the
-[GenomeSpy grammar](https://genomespy.app/docs/grammar/), so a serialized chart
-can be read against it directly.
-
-Use {py:meth}`~genome_spy.TopLevelSpec.to_json` when another program expects JSON text:
+`chart.to_dict()` returns Python dictionaries and lists. For JSON text, use:
 
 ```{literalinclude} ../tutorials/serialization.py
 :language: python
@@ -30,35 +107,8 @@ Use {py:meth}`~genome_spy.TopLevelSpec.to_json` when another program expects JSO
 :end-before: serialization-json-end
 ```
 
-Both methods validate the chart by default. Inline tables become ordinary JSON
-records, while URL and lazy data sources remain URLs for the browser to load.
+Both methods check the chart for validity by default. Data supplied directly
+becomes JSON records; remote data remains a URL. The property names follow the
+[GenomeSpy grammar](https://genomespy.app/docs/grammar/).
 
-## Save JSON or HTML
-
-The filename extension selects JSON or standalone HTML output:
-
-```{literalinclude} ../tutorials/serialization.py
-:language: python
-:start-after: serialization-save-start
-:end-before: serialization-save-end
-```
-
-```python
-from pathlib import Path
-
-json_path, html_path = save_examples(Path("output"))
-```
-
-The JSON file contains the validated specification. By default, the HTML file
-contains the chart container and embedding code but loads the GenomeSpy
-JavaScript modules from a CDN. Use `chart.save("chart.html", inline=True)` to
-embed the version-matched modules for offline use. This makes the HTML file
-larger. Remote datasets in the chart specification still require network access;
-inline tables are included in the file.
-
-Use {py:meth}`~genome_spy.TopLevelSpec.to_html` when integration code needs the HTML as a string rather
-than a file. Complete method signatures and validation options are listed in the
-[API reference](../api.md).
-
-See [Display controls and embed options](display-controls.md) to choose controls
-or pass settings to GenomeSpy's embed API.
+See the [API reference](../api.md) for serialization method options.

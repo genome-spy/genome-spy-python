@@ -1,42 +1,124 @@
-# Use chart selections in Python
+# Use chart interactions in Python
 
-Brush a chart to get selected regions or genes in Python. You can save those
-results or send new annotations back to the chart.
+Select a region in a chart and use its coordinates in your Python analysis.
+You can also send results back to the chart—for example, to show saved
+regions on an annotation track.
 
-Start with an [interactive workflow](workflows/index.md):
+The example below does both. Drag across the chart, then release: Python adds
+the region to a list called `annotations`, and a mark appears in the lower
+track. The list stays in memory; restarting the example clears it.
 
-- [Annotate genomic intervals](workflows/annotate-intervals.md): name regions,
-  add them to a separate track, and export BED.
-- [Select genes for follow-up](workflows/select-genes.md): brush a volcano plot,
-  inspect the selected genes, and export a CSV.
+The data is fictional: `chrDemo` has 1,000 bases. Coordinates are zero-based,
+with the end excluded: an interval from 10 to 20 contains 10 bases.
+Overlapping saved regions share one compact track.
 
-## How it works
+The Python connection API used here is experimental.
 
-Each notebook connects the chart to Python in a background task. Let the cell
-finish, then interact with the chart. The connection keeps listening while you
-work.
+## Try it in a notebook
 
-The annotation notebook stores records in `annotations`. The gene-selection
-notebook updates a pandas table called `selected_genes`:
+Download these two files into the same folder:
 
-```python
-# Run after brushing in the gene-selection notebook.
-selected_genes[["ensgene", "log2fc", "padj"]]
+- {download}`notebook.ipynb <../integration/notebook.ipynb>` — the notebook to open.
+- {download}`component.py <../integration/component.py>` — the chart and Python
+  code that handles selections.
+
+Install the dependencies in the Python environment your notebook uses:
+
+```sh
+pip install "genome-spy-python>=0.4.0" ipywidgets ipykernel
 ```
 
-These values stay in memory until you export them. Rerun an inspection cell to
-refresh its output; the tables beside the charts update automatically.
+Open the notebook in Jupyter or VS Code and select that environment's kernel
+(the Python session running your cells). Run the first code cell and wait for
+**Ready**. Drag across the chart and release. The status reports what Python
+received, and the lower track shows the saved interval.
 
-:::{note}
-The web demos run in your browser. To update Python values, use a running
-kernel in Jupyter or VS Code and wait for the notebook's connection message.
-:::
+Run the next cell to inspect your results:
 
-## If it does not connect
+```python
+annotations
+```
 
-Restart the kernel and run all cells. Keep the background-task setup from the
-example: waiting for a browser reply directly in a cell can block that reply
-in VS Code.
+Rerun that inspection cell after another selection to refresh its output.
+The status above the list updates automatically.
 
-The embed API is experimental. See [advanced integration](embed-integration.md)
-for supported operations, custom hosts, and connection details.
+### If it does not connect
+
+Make sure you installed the package in the notebook's Python environment,
+then restart the kernel and run the cells again. Wait for **Ready** before
+selecting a region. Let the setup cell finish: keeping it waiting for a reply
+can prevent that reply from arriving in VS Code.
+
+## Add your own Python work
+
+The notebook's widget provides the connection to Python. A background task
+keeps listening for selections while you use other cells. Keep that setup
+when adapting the example.
+
+In `component.py`, `annotate()` waits for you to finish dragging, adds the
+region to `annotations`, and updates the lower track. Put your own processing
+after `annotations.append(record)`. In the notebook, you can also process
+the list in another cell.
+
+::::{dropdown} Chart and annotation code
+```{literalinclude} ../integration/component.py
+:language: python
+```
+::::
+
+For named annotations and BED export, use
+[Annotate genomic intervals](workflows/annotate-intervals.md). The other
+[interactive workflows](workflows/index.md) show gene selection and sequence
+editing. Their web demos run without Python; download their notebooks to
+work with the results in Python.
+
+(optional-run-the-same-example-as-a-web-app)=
+## Optional: run the same example as a web app
+
+Use this when you want a browser page to send selections to Python outside a
+notebook. If you only want to share an interactive chart,
+{ref}`save it as HTML <save-an-interactive-chart>` instead—no server is needed.
+
+Put these files in one folder:
+
+- {download}`component.py <../integration/component.py>` — the same Python code.
+- {download}`server.py <../integration/server.py>` — the Python program that serves the page.
+- {download}`index.html <../integration/index.html>` — the page shown in your browser.
+
+[Install uv](https://docs.astral.sh/uv/getting-started/installation/) if needed.
+Open a terminal in that folder and run:
+
+```sh
+uv run --with "genome-spy-python>=0.4.0" --with aiohttp server.py
+```
+
+Keep the command running and open <http://127.0.0.1:8080>. This address opens
+the example on your own computer. Drag and release to save a region in Python.
+Stop the program with Ctrl+C.
+
+Each browser tab has its own Python list. Reloading that tab starts over.
+Nothing is written to disk.
+
+::::{dropdown} How the web connection works
+The notebook normally provides the connection to Python. Here the example
+server provides it instead, using [aiohttp](https://docs.aiohttp.org/en/stable/web_quickstart.html#websockets).
+
+The page keeps a two-way connection, called a WebSocket, open to Python.
+JavaScript draws the chart and passes messages back and forth; the shared
+Python code decides what to save. Both sides use GenomeSpy's existing embed API.
+::::
+
+::::{dropdown} Python server
+```{literalinclude} ../integration/server.py
+:language: python
+```
+::::
+
+::::{dropdown} HTML and JavaScript
+```{literalinclude} ../integration/index.html
+:language: html
+```
+::::
+
+This is a local teaching example, not a public hosting setup. Publishing an
+app requires additional security and decisions about storing users' results.

@@ -185,10 +185,8 @@ as BED. Other formats may require a coordinate offset, as described in
 - Combine linked tracks with [composition](user-guide/composition.md).
 - Browse complete applications in the [example gallery](gallery/index.md), or
   try the [packaged datasets](datasets.md) behind them.
-- [Save and inspect charts](user-guide/serialization.md) writes the generated
-  specification with `to_dict()`, `to_json()`, and `save()`.
-- Advanced: [update a displayed chart](user-guide/notebooks.md) without
-  rebuilding it.
+- [Using and sharing charts](user-guide/using-charts.md) shows how to work in
+  notebooks, share an interactive chart, and use selections in Python.
 - Consult the [GenomeSpy documentation](https://genomespy.app/docs/grammar/) for
   the complete grammar. This guide teaches a subset; every property it describes
   is available here through the same names.

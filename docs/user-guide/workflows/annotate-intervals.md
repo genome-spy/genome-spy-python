@@ -20,6 +20,9 @@ chromosomes are rejected. Gene bodies cover the initial region only.
 The chart and Python hooks below come directly from the downloadable notebook.
 The web demo uses JavaScript for the same interactions; Python hooks run in a notebook.
 
+To run the Python hooks in your own web app, see
+{ref}`Use chart interactions in Python <optional-run-the-same-example-as-a-web-app>`.
+
 ::::{dropdown} Chart specification (Python)
 ```{genomespy-workflow} intervals
 :code: chart
