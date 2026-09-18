@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Brush annotations saved in Python</title>
+<style>
+  body { font: 16px system-ui; max-width: 850px; margin: 40px auto; }
+  #status { white-space: pre-wrap; }
+</style>
+<h1>Save brushed intervals in Python</h1>
+<p>Drag across the chart, then release. Python saves each interval and updates the lower track.</p>
+<div id="chart"></div>
+<p id="status" role="status">Connecting to Python…</p>
+<p>These are fictional coordinates. Reloading starts a new, empty session.</p>
+<script type="module">
+import { embed } from "/static/genome-spy.js";
+import { createEmbedBridge } from "/static/embed-bridge.js";
+
+const status = document.querySelector("#status");
+let api, bridge, socket;
+function dispose() {
+  bridge?.dispose();
+  api?.finalize();
+  bridge = api = undefined;
+}
+try {
+  const response = await fetch("/spec.json");
+  if (!response.ok) throw new Error("Could not load the chart specification.");
+  api = await embed(document.querySelector("#chart"), await response.json(), { bare: true });
+  socket = new WebSocket(`ws://${location.host}/ws`);
+  bridge = createEmbedBridge(api, message => {
+    if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
+  });
+  socket.onmessage = event => {
+    const message = JSON.parse(event.data);
+    if ("status" in message) status.textContent = message.status;
+    else bridge.receive(message);
+  };
+  socket.onerror = () => { status.textContent = "Connection failed. Check the Python terminal."; };
+  socket.onclose = () => {
+    status.textContent = "Disconnected from Python. Reload to start a new session.";
+    dispose();
+  };
+  window.addEventListener("pagehide", () => { dispose(); socket.close(); }, { once: true });
+} catch (error) {
+  status.textContent = String(error);
+  dispose();
+  socket?.close();
+}
+</script>
+</html>

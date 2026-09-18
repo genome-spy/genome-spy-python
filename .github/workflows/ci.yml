@@ -103,7 +103,7 @@ jobs:
           uv venv --seed --python 3.11 "$RUNNER_TEMP/notebook-env"
           for wheel in "$GITHUB_WORKSPACE"/dist/*.whl; do
             uv pip install --python "$RUNNER_TEMP/notebook-env/bin/python" \
-              "$wheel[arrow]" "anywidget==0.11.0" jupyterlab pandas numpy scipy statsmodels playwright pillow pytest
+              "$wheel[arrow]" "anywidget==0.11.0" jupyterlab pandas numpy scipy statsmodels playwright pillow pytest aiohttp
           done
           "$RUNNER_TEMP/notebook-env/bin/python" -m playwright install --with-deps chromium
       - name: Verify offline HTML from the installed wheel
