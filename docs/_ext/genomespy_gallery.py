@@ -158,6 +158,11 @@ GALLERY_CARD_LABELS = {
         "Zoom-adaptive allele contributions",
         "SPI1 binding-QTL data",
     ),
+    "pisa_squid": ("PISA squid plot", "Drosophila sog enhancer · dm6"),
+    "pisa_interaction_matrix": (
+        "PISA interaction matrix",
+        "Drosophila sog enhancer · dm6",
+    ),
     "cytobands": ("Chromosome ideogram", "Human cytobands · hg38"),
     "copy_number": (
         "Allele-specific copy-number profile",
