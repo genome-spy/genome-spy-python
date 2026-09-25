@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-09-25
+
+### Added
+
+- Compose selection conditions in `gs.when()` with `and`, `or`, and `not`,
+  endpoint projections, and named predicate references. Nested selection
+  handles retain their empty-selection behavior.
+- Add PISA squid and interaction-matrix gallery examples adapted from the
+  official GenomeSpy specifications, with endpoint brushing, conditional link
+  highlighting, and zoom-dependent cell labels.
+
+### Changed
+
+- Reorganize the gallery into 13 categories, separating regulatory model
+  interpretation, read alignments and RNA splicing, sequences and alignments,
+  and interaction examples from the broader browser, annotation, and basic groups.
+- Upgrade GenomeSpy Core, controls, and Inspector from 0.88.1 to 0.89.0.
+  Regenerate support for 2D displacement, bidirectional arrows, debounced
+  expression parameters and transforms, composed selection predicates, and
+  `tickStep` expressions.
+- Upstream interval brushes now use half-open boundaries. View-level scale
+  declarations require explicit `axes` settings to create axes when no
+  positional encoding supplies them.
+
+### Fixed
+
+- Preserve explicitly wrapped `ExprParameter` declarations after upstream
+  split expression parameters into plain, transitioned, and debounced variants.
+- Refresh the bundled runtime build for the relocated upstream font license.
+
 ## [0.4.0] - 2026-09-18
 
 ### Added
@@ -96,6 +126,7 @@ First public alpha release, targeting GenomeSpy Core 0.87.0.
 - Packaged example datasets, documentation, tutorials, and an interactive
   visualization gallery.
 
+[0.5.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.1.0...v0.2.0
