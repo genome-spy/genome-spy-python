@@ -3,11 +3,6 @@ for calling a gene changed. The fold-change guides move, and genes passing both
 cutoffs are recolored immediately. The p-value cutoff has no line because an MA
 plot has no p-value axis.
 
-Python selects eight gene labels to illustrate crowded annotations. In the
-browser, [`displace2d`](https://genomespy.app/docs/grammar/transform/displace2d/)
-separates the labels and connects them to their points. Zoom in to see the layout
-adapt; the labeled genes are illustrative, not a significance ranking.
-
 :::{admonition} Data use and provenance
 :class: note
 
@@ -20,6 +15,6 @@ with attribution and license details in the
 <a href="../THIRD_PARTY_NOTICES.md">third-party notices</a>. During data
 loading, the package filters genes, computes paired treated-versus-control
 log-count tests and Benjamini-Hochberg adjusted p-values, and selects the genes
-to plot. Gene symbols were checked against Ensembl. GenomeSpy then renders
-the prepared table and applies the interactive classification in the browser.
+to plot. GenomeSpy then renders the prepared table and applies the interactive
+classification in the browser.
 :::
