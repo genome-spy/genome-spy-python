@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Use browser-side `displace2d` label placement in the airway volcano and MA
+  gallery plots, with denser gene annotations and adaptive leader lines.
+
 - Reorganize the gallery into 13 categories, separating regulatory model
   interpretation, read alignments and RNA splicing, sequences and alignments,
   and interaction examples from the broader browser, annotation, and basic groups.
