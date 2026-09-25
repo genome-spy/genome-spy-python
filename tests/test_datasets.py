@@ -379,22 +379,15 @@ def test_airway_differential_expression_is_chart_ready() -> None:
         "direction",
         "gene_symbol",
         "volcano_label",
-        "volcano_x_offset",
-        "volcano_y_offset",
-        "volcano_label_side",
         "ma_label",
-        "ma_x_offset",
-        "ma_y_offset",
-        "ma_label_side",
     } <= set(data.columns)
     assert set(data["direction"]) <= {"up in dex", "down in dex", "n.s."}
-    assert set(data.loc[data["volcano_label"].notna(), "volcano_label_side"]) == {
-        "left",
-    }
-    assert set(data.loc[data["ma_label"].notna(), "ma_label_side"]) == {
-        "left",
-        "right",
-    }
+    for field in ("volcano_label", "ma_label"):
+        labels = data.loc[data[field].notna()]
+        assert len(labels) == 8
+        assert labels["ensgene"].is_unique
+        assert labels[field].equals(labels["gene_symbol"].rename(field))
+    assert not any("offset" in column for column in data.columns)
     assert set(domains) == {"ma_x", "ma_y", "volcano_x", "volcano_y", "pvalue_cutoff"}
 
 

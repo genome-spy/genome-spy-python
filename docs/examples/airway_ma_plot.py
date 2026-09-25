@@ -27,7 +27,7 @@ MAX_GENES = 12_000
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
 
-# Load gene results with fold changes, p-values, and label positions ready to use.
+# Load gene results with fold changes, p-values, and selected gene labels.
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
     max_genes=MAX_GENES,
@@ -114,74 +114,81 @@ ma_fc_rules = (
     )
 )
 
-# Connect the selected gene labels to their points.
+# Share the displaced layout between labels and their shortened leader lines.
 ma_callout_lines = (
     gs.Chart()
-    .transform_collect()
-    .transform_filter(gs.datum.ma_label)
     .mark_rule(color="#3f4750", size=1, tooltip=None)
     .encode(
-        x=gs.X("log10_base_mean:Q")
-        .scale(domain=domains["ma_x"], zoom=True)
-        .title("log10 mean count"),
-        xOffset=gs.XOffset("ma_x_offset:Q").scale(None),
-        y=gs.Y("log2fc:Q")
-        .scale(reverse=False, domain=domains["ma_y"], zoom=True)
-        .title("log2 fold change"),
-        yOffset=gs.YOffset("ma_y_offset:Q").scale(None),
         x2=gs.X2("log10_base_mean"),
         y2=gs.Y2("log2fc"),
+        xOffset=gs.XOffset("leader_dx:Q").scale(None),
+        yOffset=gs.YOffset("leader_dy:Q").scale(None),
     )
     .properties(name="ma-callout-lines")
 )
 
-
-def ma_callout_label(*, side: str, name: str) -> gs.Chart:
-    """Build one label layer just beyond its shortened leader line."""
-    return (
-        gs.Chart()
-        .transform_collect()
-        .transform_filter(gs.datum.ma_label & (gs.datum.ma_label_side == side))
-        .mark_text(
-            align="right" if side == "left" else "left",
-            baseline="middle",
-            dx=-4 if side == "left" else 4,
-            dy=0,
-            fontWeight="bold",
-            color="#20262d",
-            tooltip=None,
-        )
-        .encode(
-            x=gs.X("log10_base_mean:Q")
-            .scale(domain=domains["ma_x"], zoom=True)
-            .title("log10 mean count"),
-            xOffset=gs.XOffset("ma_x_offset:Q").scale(None),
-            y=gs.Y("log2fc:Q")
-            .scale(reverse=False, domain=domains["ma_y"], zoom=True)
-            .title("log2 fold change"),
-            yOffset=gs.YOffset("ma_y_offset:Q").scale(None),
-            text=gs.Text("ma_label:N"),
-        )
-        .properties(name=name)
+ma_callout_labels = (
+    gs.Chart()
+    .mark_text(
+        align="center",
+        baseline="middle",
+        size=14,
+        fontWeight="bold",
+        color="#20262d",
+        tooltip=None,
     )
-
-
-# Place labels on either side, leaving a small gap after each line.
-ma_callout_labels = [
-    ma_callout_label(
-        side=side,
-        name=f"ma-label-{side}",
+    .encode(
+        text=gs.Text("ma_label:N"),
+        xOffset=gs.XOffset("label_dx:Q").scale(None),
+        yOffset=gs.YOffset("label_dy:Q").scale(None),
     )
-    for side in ("left", "right")
-]
+    .properties(name="ma-labels")
+)
+
+ma_annotations = (
+    (ma_callout_lines + ma_callout_labels)
+    .transform_filter(gs.datum.ma_label)
+    .transform_measure_text(
+        field="ma_label", fontSize=14, fontWeight="bold", as_="label_width"
+    )
+    .transform_formula(expr="datum.label_width + 4", as_="label_width")
+    .transform_collect()
+    .transform_filter(
+        "inrange(datum.log10_base_mean, domain('x')) && "
+        "inrange(datum.log2fc, domain('y'))"
+    )
+    # Tight collision boxes reduce unnecessary separation during zooming.
+    .transform_displace2d(
+        key="ensgene",
+        x="log10_base_mean",
+        y="log2fc",
+        width="label_width",
+        height=16,
+        anchorWidth=8,
+        anchorHeight=8,
+        as_=["label_dx", "label_dy"],
+    )
+    # Stop each leader at the padded label box instead of crossing the text.
+    .transform_formula(
+        expr="max(0, 1 - min(datum.label_width / 2 / max(abs(datum.label_dx), 1e-6), "
+        "8 / max(abs(datum.label_dy), 1e-6)))",
+        as_="leader_scale",
+    )
+    .transform_formula(expr="datum.label_dx * datum.leader_scale", as_="leader_dx")
+    .transform_formula(expr="datum.label_dy * datum.leader_scale", as_="leader_dy")
+    .encode(
+        x=gs.X("log10_base_mean:Q").title("log10 mean count"),
+        y=gs.Y("log2fc:Q").title("log2 fold change"),
+    )
+    .properties(name="ma-annotations")
+)
 
 # Put the points, guides, and labels together, then attach the sliders.
 chart = (
     gs.layer(
         ma_fc_rules,
         ma_points,
-        ma_callout_lines,
-        *ma_callout_labels,
+        ma_annotations,
     )
     .properties(
         data=data,

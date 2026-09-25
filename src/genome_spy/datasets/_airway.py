@@ -13,6 +13,17 @@ if TYPE_CHECKING:
 
 
 _AIRWAY_GENE_SYMBOLS = {
+    # Ensembl gene symbols; curated neighbors illustrate label displacement.
+    "ENSG00000117461": "PIK3R3",
+    "ENSG00000103742": "IGDCC4",
+    "ENSG00000131771": "PPP1R1B",
+    "ENSG00000185745": "IFIT1",
+    "ENSG00000146250": "PRSS35",
+    "ENSG00000163884": "KLF15",
+    "ENSG00000127954": "STEAP4",
+    "ENSG00000163083": "INHBB",
+    "ENSG00000096060": "FKBP5",
+    "ENSG00000196136": "SERPINA3",
     "ENSG00000109906": "ZBTB16",
     "ENSG00000116711": "PLA2G4A",
     "ENSG00000145777": "TSLP",
@@ -95,7 +106,7 @@ def airway_differential_expression(
         Hochberg adjusted p-values, then adds the transformed fields and
         significance classification shared by the MA and volcano examples.
         A small curated set of genes also receives chart-ready callout labels
-        and label offsets.
+        for browser-side placement.
 
     Args:
         min_base_mean: Minimum mean count required before testing.
@@ -164,56 +175,33 @@ def airway_differential_expression(
         "pvalue_cutoff": [-float(np.log10(pvalue_cutoff))],
     }
     data["gene_symbol"] = data["ensgene"].map(_AIRWAY_GENE_SYMBOLS)
-    _add_airway_annotation_positions(data)
+    _add_airway_annotations(data)
     return data, domains
 
 
-def _add_airway_annotation_positions(data: pd.DataFrame) -> None:
-    """Add sparse label endpoints used by the airway gallery examples."""
-    # Pixel offsets keep annotation spacing stable while the reader zooms. The
-    # side tells the text mark to extend away from the leader endpoint.
-    volcano_offsets = {
-        "ZBTB16": (-30, -32),
-        "PLA2G4A": (-30, -38),
-        "TSLP": (-36, 28),
+def _add_airway_annotations(data: pd.DataFrame) -> None:
+    """Select gene labels, including nearby points to demonstrate displacement."""
+    volcano_genes = {
+        "ZBTB16",
+        "PLA2G4A",
+        "TSLP",
+        "PIK3R3",
+        "IGDCC4",
+        "PPP1R1B",
+        "IFIT1",
+        "PRSS35",
     }
-    ma_offsets = {
-        "ZBTB16": (48, 16),
-        "PLA2G4A": (-36, 16),
-        "SPARCL1": (48, 15),
+    ma_genes = {
+        "ZBTB16",
+        "PLA2G4A",
+        "SPARCL1",
+        "KLF15",
+        "STEAP4",
+        "INHBB",
+        "FKBP5",
+        "SERPINA3",
     }
-
     data["volcano_label"] = data["gene_symbol"].where(
-        data["gene_symbol"].isin(volcano_offsets)
+        data["gene_symbol"].isin(volcano_genes)
     )
-    data["ma_label"] = data["gene_symbol"].where(data["gene_symbol"].isin(ma_offsets))
-
-    volcano_dx = data["gene_symbol"].map(
-        {symbol: offset[0] for symbol, offset in volcano_offsets.items()}
-    )
-    volcano_dy = data["gene_symbol"].map(
-        {symbol: offset[1] for symbol, offset in volcano_offsets.items()}
-    )
-    ma_dx = data["gene_symbol"].map(
-        {symbol: offset[0] for symbol, offset in ma_offsets.items()}
-    )
-    ma_dy = data["gene_symbol"].map(
-        {symbol: offset[1] for symbol, offset in ma_offsets.items()}
-    )
-
-    data["volcano_x_offset"] = volcano_dx
-    data["volcano_y_offset"] = volcano_dy
-    data["volcano_label_side"] = data["gene_symbol"].map(
-        {
-            symbol: "left" if offset[0] < 0 else "right"
-            for symbol, offset in volcano_offsets.items()
-        }
-    )
-    data["ma_x_offset"] = ma_dx
-    data["ma_y_offset"] = ma_dy
-    data["ma_label_side"] = data["gene_symbol"].map(
-        {
-            symbol: "left" if offset[0] < 0 else "right"
-            for symbol, offset in ma_offsets.items()
-        }
-    )
+    data["ma_label"] = data["gene_symbol"].where(data["gene_symbol"].isin(ma_genes))

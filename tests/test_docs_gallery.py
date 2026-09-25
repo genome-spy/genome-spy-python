@@ -738,17 +738,22 @@ def test_ma_and_volcano_thresholds_drive_point_classification(
     assert all(param["bind"]["input"] == "range" for param in spec["params"])
 
     points = next(layer for layer in spec["layer"] if layer["mark"]["type"] == "point")
-    classification_formula = points["transform"][0]
+    classification_formula = next(
+        transform
+        for transform in points["transform"]
+        if transform.get("as") == classification
+    )
     assert classification_formula["type"] == "formula"
     assert classification_formula["as"] == classification
     assert effect_param in classification_formula["expr"]
     assert significance_param in classification_formula["expr"]
 
     rule_expressions = {
-        layer["transform"][0]["expr"]
+        transform["expr"]
         for layer in spec["layer"]
-        if layer["mark"]["type"] == "rule"
-        and layer.get("transform", [{}])[0].get("type") == "formula"
+        if layer.get("mark", {}).get("type") == "rule"
+        for transform in layer.get("transform", [])
+        if transform["type"] == "formula"
     }
     assert f"(datum.side * {effect_param})" in rule_expressions
     if "volcano" in filename:
@@ -777,119 +782,61 @@ def test_gallery_code_snippets_hide_internal_layout_metadata() -> None:
 
 
 @pytest.mark.parametrize(
-    ("filename", "prefix", "label_field"),
+    ("prefix", "x_field", "y_field"),
     [
-        ("airway_volcano_plot.py", "volcano", "volcano_label"),
-        ("airway_ma_plot.py", "ma", "ma_label"),
+        ("volcano", "log2fc", "neglog10_pvalue_plot"),
+        ("ma", "log10_base_mean", "log2fc"),
     ],
 )
-def test_airway_expression_plots_include_gene_callouts(
-    filename: str, prefix: str, label_field: str
+def test_airway_callouts_share_displaced_layout(
+    prefix: str, x_field: str, y_field: str
 ) -> None:
     gallery = _load_gallery()
-    example = gallery.collect_example(EXAMPLES_DIR / filename)
-    layers = example.spec["layer"]
-    names = [layer.get("name") for layer in layers]
-    line = next(
-        layer for layer in layers if layer.get("name") == f"{prefix}-callout-lines"
+    spec = gallery.collect_example(EXAMPLES_DIR / f"airway_{prefix}_plot.py").spec
+    annotations = next(
+        layer for layer in spec["layer"] if layer.get("name") == f"{prefix}-annotations"
     )
-    labels = [
-        layer
-        for layer in layers
-        if layer.get("name") in {f"{prefix}-label-left", f"{prefix}-label-right"}
+    transforms = annotations["transform"]
+    assert [t["type"] for t in transforms] == [
+        "filter",
+        "measureText",
+        "formula",
+        "collect",
+        "filter",
+        "displace2d",
+        "formula",
+        "formula",
+        "formula",
     ]
-
-    assert line["mark"]["type"] == "rule"
-    assert line["transform"] == [{"type": "filter", "expr": f"datum.{label_field}"}]
-    assert len(labels) == 2
-    assert all(layer["mark"]["type"] == "text" for layer in labels)
-    assert all(layer["encoding"]["text"]["field"] == label_field for layer in labels)
-    assert names.index(f"{prefix}-callout-lines") < min(
-        names.index(layer["name"]) for layer in labels
-    )
-
-
-@pytest.mark.parametrize(
-    ("filename", "prefix", "x_field", "y_field"),
-    [
-        (
-            "airway_volcano_plot.py",
-            "volcano",
-            "log2fc",
-            "neglog10_pvalue_plot",
-        ),
-        ("airway_ma_plot.py", "ma", "log10_base_mean", "log2fc"),
-    ],
-)
-def test_airway_callouts_use_pixel_offsets(
-    filename: str, prefix: str, x_field: str, y_field: str
-) -> None:
-    gallery = _load_gallery()
-    example = gallery.collect_example(EXAMPLES_DIR / filename)
-    rule = next(
-        layer
-        for layer in example.spec["layer"]
-        if layer.get("name") == f"{prefix}-callout-lines"
-    )
-    labels = [
-        layer
-        for layer in example.spec["layer"]
-        if layer.get("name") in {f"{prefix}-label-left", f"{prefix}-label-right"}
-    ]
-
+    displacement = transforms[5]
+    assert displacement["key"] == "ensgene"
+    assert (displacement["x"], displacement["y"]) == (x_field, y_field)
+    assert displacement["as"] == ["label_dx", "label_dy"]
+    assert displacement["width"] == transforms[1]["as"]
+    assert "domain('x')" in transforms[4]["expr"]
+    assert "domain('y')" in transforms[4]["expr"]
+    rule, label = annotations["layer"]
     assert rule["mark"]["type"] == "rule"
-    assert rule["mark"]["tooltip"] is None
-    assert "x2Offset" not in rule["mark"]
-    assert "y2Offset" not in rule["mark"]
-    assert rule["transform"] == [{"type": "filter", "expr": f"datum.{prefix}_label"}]
     assert rule["encoding"]["x2"] == {"field": x_field}
     assert rule["encoding"]["y2"] == {"field": y_field}
-    assert rule["encoding"]["xOffset"] == {
-        "field": f"{prefix}_x_offset",
-        "type": "quantitative",
-        "scale": None,
-    }
-    assert rule["encoding"]["yOffset"] == {
-        "field": f"{prefix}_y_offset",
-        "type": "quantitative",
-        "scale": None,
-    }
-
-    for label in labels:
-        assert label["encoding"]["x"]["field"] == x_field
-        assert label["encoding"]["y"]["field"] == y_field
-        assert label["encoding"]["xOffset"] == {
-            "field": f"{prefix}_x_offset",
+    assert label["encoding"]["text"]["field"] == f"{prefix}_label"
+    assert label["mark"]["align"] == "center"
+    assert label["mark"]["baseline"] == "middle"
+    assert label["mark"]["size"] == transforms[1]["fontSize"]
+    assert label["mark"]["fontWeight"] == transforms[1]["fontWeight"]
+    for channel, axis in [("xOffset", "dx"), ("yOffset", "dy")]:
+        assert label["encoding"][channel] == {
+            "field": f"label_{axis}",
             "type": "quantitative",
             "scale": None,
         }
-        assert label["encoding"]["yOffset"] == {
-            "field": f"{prefix}_y_offset",
+        assert rule["encoding"][channel] == {
+            "field": f"leader_{axis}",
             "type": "quantitative",
             "scale": None,
         }
-
-
-@pytest.mark.parametrize("prefix", ["volcano", "ma"])
-def test_airway_callout_labels_are_single_readable_layers(prefix: str) -> None:
-    gallery = _load_gallery()
-    example = gallery.collect_example(EXAMPLES_DIR / f"airway_{prefix}_plot.py")
-    layers = example.spec["layer"]
-    for side, base_dx in (("left", -4), ("right", 4)):
-        label = next(
-            layer for layer in layers if layer.get("name") == f"{prefix}-label-{side}"
-        )
-        assert label["mark"]["type"] == "text"
-        assert label["mark"]["color"] == "#20262d"
-        assert label["mark"]["align"] == ("right" if side == "left" else "left")
-        assert label["mark"]["baseline"] == "middle"
-        assert label["mark"]["tooltip"] is None
-        assert label["mark"]["dx"] == base_dx
-        assert label["mark"]["dy"] == 0
-        assert not any(
-            layer.get("name", "").startswith(f"{prefix}-label-halo-")
-            for layer in layers
-        )
+    assert "x2Offset" not in rule["encoding"]
+    assert "y2Offset" not in rule["encoding"]
 
 
 @pytest.mark.parametrize("filename", ["airway_volcano_plot.py", "airway_ma_plot.py"])

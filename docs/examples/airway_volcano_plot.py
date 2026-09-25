@@ -27,7 +27,7 @@ MAX_GENES = 12_000
 ZOOM_LEVEL = gs.Expression("zoomLevel")
 POINT_SIZE = gs.expr(gs.expr.min(14 * gs.expr.pow(ZOOM_LEVEL, 0.75), 64))
 
-# Load gene results with fold changes, p-values, and label positions ready to use.
+# Load gene results with fold changes, p-values, and selected gene labels.
 data, domains = airway_differential_expression(
     min_base_mean=MIN_BASE_MEAN,
     max_genes=MAX_GENES,
@@ -127,66 +127,74 @@ volcano_padj_rule = (
     )
 )
 
-# Connect the selected gene labels to their points.
+# Share the displaced layout between labels and their shortened leader lines.
 volcano_callout_lines = (
     gs.Chart()
-    .transform_filter(gs.datum.volcano_label)
     .mark_rule(color="#3f4750", size=1, tooltip=None)
     .encode(
-        x=gs.X("log2fc:Q")
-        .scale(domain=domains["volcano_x"], zoom=True)
-        .title("log2 fold change (treated / control)"),
-        xOffset=gs.XOffset("volcano_x_offset:Q").scale(None),
-        y=gs.Y("neglog10_pvalue_plot:Q")
-        .scale(reverse=False, domain=domains["volcano_y"], zoom=True)
-        .title("-log10 p-value"),
-        yOffset=gs.YOffset("volcano_y_offset:Q").scale(None),
         x2=gs.X2("log2fc"),
         y2=gs.Y2("neglog10_pvalue_plot"),
+        xOffset=gs.XOffset("leader_dx:Q").scale(None),
+        yOffset=gs.YOffset("leader_dy:Q").scale(None),
     )
     .properties(name="volcano-callout-lines")
 )
 
-
-def volcano_callout_label(*, side: str, name: str) -> gs.Chart:
-    """Build one label layer just beyond its shortened leader line."""
-    return (
-        gs.Chart()
-        .transform_filter(
-            gs.datum.volcano_label & (gs.datum.volcano_label_side == side)
-        )
-        .mark_text(
-            align="right" if side == "left" else "left",
-            baseline="middle",
-            dx=-4 if side == "left" else 4,
-            dy=0,
-            fontWeight="bold",
-            color="#20262d",
-            tooltip=None,
-        )
-        .encode(
-            x=gs.X("log2fc:Q")
-            .scale(domain=domains["volcano_x"], zoom=True)
-            .title("log2 fold change (treated / control)"),
-            xOffset=gs.XOffset("volcano_x_offset:Q").scale(None),
-            y=gs.Y("neglog10_pvalue_plot:Q")
-            .scale(reverse=False, domain=domains["volcano_y"], zoom=True)
-            .title("-log10 p-value"),
-            yOffset=gs.YOffset("volcano_y_offset:Q").scale(None),
-            text=gs.Text("volcano_label:N"),
-        )
-        .properties(name=name)
+volcano_callout_labels = (
+    gs.Chart()
+    .mark_text(
+        align="center",
+        baseline="middle",
+        size=14,
+        fontWeight="bold",
+        color="#20262d",
+        tooltip=None,
     )
-
-
-# Place labels on either side, leaving a small gap after each line.
-volcano_callout_labels = [
-    volcano_callout_label(
-        side=side,
-        name=f"volcano-label-{side}",
+    .encode(
+        text=gs.Text("volcano_label:N"),
+        xOffset=gs.XOffset("label_dx:Q").scale(None),
+        yOffset=gs.YOffset("label_dy:Q").scale(None),
     )
-    for side in ("left", "right")
-]
+    .properties(name="volcano-labels")
+)
+
+volcano_annotations = (
+    (volcano_callout_lines + volcano_callout_labels)
+    .transform_filter(gs.datum.volcano_label)
+    .transform_measure_text(
+        field="volcano_label", fontSize=14, fontWeight="bold", as_="label_width"
+    )
+    .transform_formula(expr="datum.label_width + 4", as_="label_width")
+    .transform_collect()
+    .transform_filter(
+        "inrange(datum.log2fc, domain('x')) && "
+        "inrange(datum.neglog10_pvalue_plot, domain('y'))"
+    )
+    # Tight collision boxes reduce unnecessary separation during zooming.
+    .transform_displace2d(
+        key="ensgene",
+        x="log2fc",
+        y="neglog10_pvalue_plot",
+        width="label_width",
+        height=16,
+        anchorWidth=8,
+        anchorHeight=8,
+        as_=["label_dx", "label_dy"],
+    )
+    # Stop each leader at the padded label box instead of crossing the text.
+    .transform_formula(
+        expr="max(0, 1 - min(datum.label_width / 2 / max(abs(datum.label_dx), 1e-6), "
+        "8 / max(abs(datum.label_dy), 1e-6)))",
+        as_="leader_scale",
+    )
+    .transform_formula(expr="datum.label_dx * datum.leader_scale", as_="leader_dx")
+    .transform_formula(expr="datum.label_dy * datum.leader_scale", as_="leader_dy")
+    .encode(
+        x=gs.X("log2fc:Q").title("log2 fold change (treated / control)"),
+        y=gs.Y("neglog10_pvalue_plot:Q").title("-log10 p-value"),
+    )
+    .properties(name="volcano-annotations")
+)
 
 # Put the points, guides, and labels together, then attach the sliders.
 chart = (
@@ -194,8 +202,7 @@ chart = (
         volcano_fc_rules,
         volcano_padj_rule,
         volcano_points,
-        volcano_callout_lines,
-        *volcano_callout_labels,
+        volcano_annotations,
     )
     .properties(
         data=data,
