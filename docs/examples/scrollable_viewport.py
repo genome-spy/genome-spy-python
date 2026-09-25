@@ -8,7 +8,7 @@ import genome_spy as gs
 from genome_spy.datasets._grammar import sincos_data
 
 META = {
-    "category": "Basics",
+    "category": "Interaction and exploration",
     "order": 70,
     "height": 260,
 }

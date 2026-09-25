@@ -8,7 +8,7 @@ import pandas as pd
 
 import genome_spy as gs
 
-META = {"category": "Basics", "order": 29, "height": 360}
+META = {"category": "Basic charts and composition", "order": 29, "height": 360}
 
 # Create positions for 20 columns and eight rows of points.
 data = pd.DataFrame({"z": np.arange(160)})

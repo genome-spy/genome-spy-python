@@ -8,7 +8,7 @@ import pandas as pd
 
 import genome_spy as gs
 
-META = {"category": "Basics", "order": 27, "height": 360}
+META = {"category": "Basic charts and composition", "order": 27, "height": 360}
 
 # Generate regularly spaced positions along a sine wave.
 data = pd.DataFrame({"x": np.arange(0, 6.284, 0.39269908169)})

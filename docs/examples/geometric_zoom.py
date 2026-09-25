@@ -8,7 +8,7 @@ import pandas as pd
 
 import genome_spy as gs
 
-META = {"category": "Basics", "order": 32, "height": 360}
+META = {"category": "Interaction and exploration", "order": 32, "height": 360}
 
 # A fixed seed keeps the noisy wave the same each time.
 rng = np.random.default_rng(42)

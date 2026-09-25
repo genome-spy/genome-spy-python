@@ -5,7 +5,7 @@ Explore a dense embedding with sample colors and points that grow on zoom.
 
 import genome_spy as gs
 
-META = {"category": "Basics", "order": 80, "height": 540}
+META = {"category": "Interaction and exploration", "order": 80, "height": 540}
 
 # Read the upstream Parquet file directly, without copying it into the spec.
 data = gs.Data(

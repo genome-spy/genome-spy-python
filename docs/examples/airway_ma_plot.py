@@ -12,7 +12,7 @@ from genome_spy.datasets._airway import airway_differential_expression
 from genome_spy.schema import Scale
 
 META = {
-    "category": "Volcano and MA plots",
+    "category": "Differential analysis",
     "order": 11,
     "height": 420,
     "max_width": 760,

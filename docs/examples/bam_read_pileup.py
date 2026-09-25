@@ -5,7 +5,7 @@ Load a genomic window from an indexed BAM file and stack its reads by strand.
 
 import genome_spy as gs
 
-META = {"category": "Genome browser tracks", "order": 25, "height": 520}
+META = {"category": "Read alignments and RNA splicing", "order": 25, "height": 520}
 
 # Change the space between read rows without reloading the data.
 lane_height = gs.param(

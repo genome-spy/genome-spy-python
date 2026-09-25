@@ -9,7 +9,7 @@ from genome_spy.datasets._grammar import sequence_logo_data
 from genome_spy.schema import Scale
 
 META = {
-    "category": "Basics",
+    "category": "Sequences, alignments, and logos",
     "order": 50,
     "height": 300,
 }

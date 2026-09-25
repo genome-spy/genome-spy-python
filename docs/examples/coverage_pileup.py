@@ -8,7 +8,7 @@ import pandas as pd
 
 import genome_spy as gs
 
-META = {"category": "Basics", "order": 31, "height": 420}
+META = {"category": "Basic charts and composition", "order": 31, "height": 420}
 
 data = pd.DataFrame({"start": np.arange(1, 100)})
 

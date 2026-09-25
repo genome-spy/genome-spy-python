@@ -7,7 +7,7 @@ label transform keeps the most useful RefSeq gene symbols visible.
 import genome_spy as gs
 
 META = {
-    "category": "Reference annotation tracks",
+    "category": "Genome annotations",
     "order": 15,
     "height": 110,
     "max_width": 980,

@@ -9,7 +9,7 @@ from genome_spy.datasets._hapmap import hapmap_volcano_data
 from genome_spy.schema import Scale
 
 META = {
-    "category": "Volcano and MA plots",
+    "category": "Differential analysis",
     "order": 30,
     "height": 440,
 }

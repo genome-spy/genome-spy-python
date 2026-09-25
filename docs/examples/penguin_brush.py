@@ -5,7 +5,7 @@ Select penguins in a scatter plot and count the selection by species and sex.
 
 import genome_spy as gs
 
-META = {"category": "Basics", "order": 33, "height": 460}
+META = {"category": "Interaction and exploration", "order": 33, "height": 460}
 
 data = gs.Data(
     url="https://cdn.jsdelivr.net/npm/vega-datasets@2.9.0/data/penguins.json"

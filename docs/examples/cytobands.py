@@ -10,7 +10,7 @@ from __future__ import annotations
 import genome_spy as gs
 
 META = {
-    "category": "Reference annotation tracks",
+    "category": "Genome annotations",
     "order": 5,
     "height": 120,
     "max_width": 920,

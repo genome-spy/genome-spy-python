@@ -5,7 +5,7 @@ Overlay probe measurements and segment means with separate vertical axes.
 
 import genome_spy as gs
 
-META = {"category": "Basics", "order": 28, "height": 360}
+META = {"category": "Basic charts and composition", "order": 28, "height": 360}
 
 # Keep the upstream tables remote, rather than embedding them in the spec.
 probes = gs.Data(url="https://genomespy.app/docs/data/cnv_chr19_raw.tsv")

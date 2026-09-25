@@ -7,7 +7,7 @@ over the same base-resolution locus.
 import genome_spy as gs
 
 META = {
-    "category": "Genome browser tracks",
+    "category": "Regulatory model interpretation",
     "order": 34,
     "height": 300,
     "max_width": 980,

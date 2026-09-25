@@ -12,7 +12,7 @@ from genome_spy.datasets._direct_rna import rnf7_direct_rna_data
 from genome_spy.schema import Axis
 
 META = {
-    "category": "Genome browser tracks",
+    "category": "Read alignments and RNA splicing",
     "order": 18,
     "height": 820,
     "max_width": 980,

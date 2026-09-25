@@ -9,7 +9,7 @@ import genome_spy as gs
 from genome_spy.datasets import load_dataset
 
 META = {
-    "category": "Reference annotation tracks",
+    "category": "Sequences, alignments, and logos",
     "order": 29,
     "height": 850,
     "max_width": 1000,

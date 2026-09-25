@@ -7,7 +7,7 @@ letters to labeled bars as the reader zooms in.
 import genome_spy as gs
 
 META = {
-    "category": "Genome browser tracks",
+    "category": "Regulatory model interpretation",
     "order": 35,
     "height": 300,
     "max_width": 980,

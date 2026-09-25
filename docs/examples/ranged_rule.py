@@ -8,7 +8,7 @@ import genome_spy as gs
 from genome_spy.datasets._grammar import ranged_rule_data
 
 META = {
-    "category": "Basics",
+    "category": "Basic charts and composition",
     "order": 30,
     "height": 280,
 }

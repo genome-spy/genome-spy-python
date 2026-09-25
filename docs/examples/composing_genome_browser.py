@@ -7,7 +7,7 @@ are imported by URL and aligned under a parent-owned genomic scale and axis.
 import genome_spy as gs
 
 META = {
-    "category": "Genome browser tracks",
+    "category": "Multi-track genome browsers",
     "order": 38,
     "height": 650,
     "max_width": 980,

@@ -38,39 +38,58 @@ ARROW_DIR = STATIC_DIR / "generated" / "arrow"
 CATEGORIES: dict[str, tuple[int, str]] = {
     "Association plots": (
         10,
-        "Genome-wide association views such as Manhattan and QQ plots.",
+        "Manhattan plots and brush-linked views of genome-wide associations.",
     ),
-    "Volcano and MA plots": (
+    "Differential analysis": (
         20,
         "Differential-effect views such as volcano and MA plots.",
     ),
-    "Genome browser tracks": (
+    "Regulatory model interpretation": (
         30,
-        "Shared-locus browser views with signal tracks or read-level detail.",
+        "PISA effects and DynSeq contribution scores for interpreting regulatory models.",
     ),
-    "Reference annotation tracks": (
+    "Multi-track genome browsers": (
         40,
-        "Reference tracks such as cytobands, sequence, gene models, and annotations.",
+        "Compose signal, sequence, and annotation tracks on a shared genomic axis.",
+    ),
+    "Read alignments and RNA splicing": (
+        50,
+        "BAM alignments, direct-RNA reads, coverage, and splice-junction views.",
+    ),
+    "Genome annotations": (
+        60,
+        "Cytobands, regulatory intervals, and gene annotations from GFF3 and RefSeq.",
+    ),
+    "Sequences, alignments, and logos": (
+        70,
+        "Reference sequences, reading frames, multiple-sequence alignments, and logos.",
     ),
     "Mutation position plots": (
-        50,
+        80,
         "Mutation-position views such as lollipop, rainfall, and variant tracks.",
     ),
     "Oncoprints and cohort summaries": (
-        60,
+        90,
         "Cohort-level alteration matrices and related summaries.",
     ),
-    "Set intersections": (
-        65,
-        "Set-membership combinations and intersection-size summaries.",
-    ),
     "Copy-number plots": (
-        70,
+        100,
         "Genome-wide copy-number and allele-specific signal views.",
     ),
-    "Basics": (90, "Core chart types and grammar building blocks."),
+    "Set intersections": (
+        110,
+        "Set-membership combinations and intersection-size summaries.",
+    ),
+    "Basic charts and composition": (
+        120,
+        "Marks, encodings, transforms, layering, and chart composition.",
+    ),
+    "Interaction and exploration": (
+        130,
+        "Brushing, zoom-dependent displays, scrolling, and dense-data exploration.",
+    ),
 }
-UNKNOWN_CATEGORY = (100, "")
+UNKNOWN_CATEGORY = (1000, "")
 
 
 @dataclass(frozen=True, slots=True)
@@ -156,7 +175,7 @@ def _collect_example(path: Path, module: ModuleType, spec: dict) -> Example:
         title=meta.get("title", title),
         description=meta.get("description", description),
         prose=prose,
-        category=meta.get("category", "Basics"),
+        category=meta.get("category", "Basic charts and composition"),
         order=int(meta.get("order", 100)),
         height=int(meta.get("height", 400)),
         max_width=(

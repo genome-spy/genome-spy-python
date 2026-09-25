@@ -9,7 +9,7 @@ from genome_spy.datasets._grammar import heatmap_data
 from genome_spy.schema import Scale
 
 META = {
-    "category": "Basics",
+    "category": "Basic charts and composition",
     "order": 20,
     "height": 360,
 }

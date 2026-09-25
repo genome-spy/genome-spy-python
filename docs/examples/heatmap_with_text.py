@@ -8,7 +8,7 @@ import pandas as pd
 
 import genome_spy as gs
 
-META = {"category": "Basics", "order": 25, "height": 480}
+META = {"category": "Interaction and exploration", "order": 25, "height": 480}
 
 # Create one row for each cell in a 200 × 200 grid.
 grid = pd.DataFrame({"i": np.arange(40000)})

@@ -7,7 +7,7 @@ on both strands and kept aligned with a base-level reference track.
 import genome_spy as gs
 
 META = {
-    "category": "Reference annotation tracks",
+    "category": "Sequences, alignments, and logos",
     "order": 18,
     "height": 170,
     "max_width": 980,

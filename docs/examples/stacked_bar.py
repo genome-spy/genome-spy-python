@@ -5,7 +5,7 @@ Compare barley yields by variety, with each growing site shown as a segment.
 
 import genome_spy as gs
 
-META = {"category": "Basics", "order": 26, "height": 400}
+META = {"category": "Basic charts and composition", "order": 26, "height": 400}
 
 # Load the same barley table used by the upstream example.
 data = gs.Data(url="https://cdn.jsdelivr.net/npm/vega-datasets@2.9.0/data/barley.json")

@@ -1656,11 +1656,11 @@ def test_gallery_index_lists_every_example_in_hidden_navigation(
     )
     assert markdown.count(":hidden:") == len(gallery.grouped_by_category(examples))
     assert "## Browse by Category" not in markdown
-    assert ":caption: Volcano and MA plots" in markdown
+    assert ":caption: Differential analysis" in markdown
     assert "airway_ma_plot" in markdown
     assert "airway_volcano_plot" in markdown
     assert ":caption: Association plots" in markdown
-    assert ":caption: Genome browser tracks" in markdown
+    assert ":caption: Multi-track genome browsers" in markdown
     assert f"manhattan_plot.html?v={build_token}" in markdown
     assert f"manhattan_plot.png?v={build_token}" in markdown
     assert "Browse live charts and Python source, or try a notebook workflow." in (
@@ -2033,7 +2033,7 @@ def test_gallery_generation_writes_prepared_arrow_assets(
         title="Arrow example",
         description="",
         prose="",
-        category="Basics",
+        category="Basic charts and composition",
         order=1,
         height=200,
         max_width=None,

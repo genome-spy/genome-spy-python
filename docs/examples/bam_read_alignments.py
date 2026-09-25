@@ -8,7 +8,7 @@ from __future__ import annotations
 import genome_spy as gs
 
 META = {
-    "category": "Genome browser tracks",
+    "category": "Read alignments and RNA splicing",
     "order": 26,
     "height": 600,
     "max_width": 980,
