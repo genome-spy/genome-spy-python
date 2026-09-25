@@ -1116,9 +1116,14 @@ _PARAMETER_TYPES = (
     core.Parameter,
     core.PlainValueParameter,
     core.TransitionedValueParameter,
-    core.ExprParameter,
+    core.PlainExprParameter,
+    core.TransitionedExprParameter,
+    core.DebouncedExprParameter,
     core.SelectionParameter,
     core.RulerParameter,
+    core.VariableParameter,
+    core.ValueParameter,
+    core.ExprParameter,
 )
 _SELECTION_PARAMETER_TYPES = (core.SelectionParameter,)
 
@@ -1177,7 +1182,34 @@ def param(
     description: str | UndefinedType = Undefined,
     persist: bool | UndefinedType = Undefined,
     push: Literal["outer"] | UndefinedType = Undefined,
-    transition: core.LerpTransition | dict[str, Any] | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    expr: str | ExpressionOperand,
+    transition: core.LerpTransition | dict[str, Any],
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
+    empty: bool = True,
+) -> Parameter: ...
+
+
+@overload
+def param(
+    name: str | None = None,
+    /,
+    *,
+    debounce: float,
+    expr: str | ExpressionOperand,
+    description: str | UndefinedType = Undefined,
+    persist: bool | UndefinedType = Undefined,
+    push: Literal["outer"] | UndefinedType = Undefined,
     empty: bool = True,
 ) -> Parameter: ...
 
@@ -1228,6 +1260,7 @@ def param(
     | core.BindInput
     | BindInputKwds
     | UndefinedType = Undefined,
+    debounce: float | UndefinedType = Undefined,
     description: str | UndefinedType = Undefined,
     expr: str | ExpressionOperand | UndefinedType = Undefined,
     persist: bool | UndefinedType = Undefined,
@@ -1250,6 +1283,7 @@ def param(
     Args:
         name: Parameter name. A stable name is generated when omitted.
         bind: Binds the parameter to an external input element such as a slider, selection list or radio button group.
+        debounce: Delays publication until the expression dependencies have remained unchanged for the specified number of milliseconds. The initial value is published immediately.
         description: A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.
         expr: An expression for the value of the parameter. This expression may include other parameters, in which case the parameter will automatically update in response to upstream parameter changes.
         persist: Whether the parameter should be persisted in bookmarks and provenance. This primarily affects GenomeSpy App behavior. Set to ``false`` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing ``encoding.key``. __Default value:__ ``true``
@@ -1275,6 +1309,7 @@ def param(
     return _make_parameter(
         name,
         bind=bind,
+        debounce=debounce,
         description=description,
         expr=expr,
         persist=persist,
@@ -1286,7 +1321,9 @@ def param(
         _variants=(
             core.PlainValueParameter,
             core.TransitionedValueParameter,
-            core.ExprParameter,
+            core.PlainExprParameter,
+            core.TransitionedExprParameter,
+            core.DebouncedExprParameter,
             core.SelectionParameter,
             core.RulerParameter,
         ),

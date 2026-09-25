@@ -279,8 +279,7 @@ class ArrowConfig(GenomeSpySchema):
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        direction: Literal["forward"]
-        | Literal["reverse"]
+        direction: ArrowDirection_T
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
@@ -426,27 +425,10 @@ class ArrowConfig(GenomeSpySchema):
         return self._with_property("cursor", value, **defined)
 
     def direction(
-        self,
-        value: Literal["forward"]
-        | Literal["reverse"]
-        | ExprRef
-        | dict[str, Any]
-        | None
-        | object = Undefined,
-        /,
-        *,
-        expr: str | UndefinedType = Undefined,
+        self, value: ArrowDirection_T | ExprRef | dict[str, Any]
     ) -> ArrowConfig:
-        """Return a copy with a ``ExprRef`` direction.
-
-        Args:
-            expr (str): The expression string.
-        """
-        defined = {
-            "expr": expr,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("direction", value, **defined)
+        """Return a copy with ``direction`` updated."""
+        return self._with_property("direction", value)
 
     def fill(
         self,
@@ -941,8 +923,7 @@ class ArrowProps(GenomeSpySchema):
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        direction: Literal["forward"]
-        | Literal["reverse"]
+        direction: ArrowDirection_T
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
@@ -1090,27 +1071,10 @@ class ArrowProps(GenomeSpySchema):
         return self._with_property("cursor", value, **defined)
 
     def direction(
-        self,
-        value: Literal["forward"]
-        | Literal["reverse"]
-        | ExprRef
-        | dict[str, Any]
-        | None
-        | object = Undefined,
-        /,
-        *,
-        expr: str | UndefinedType = Undefined,
+        self, value: ArrowDirection_T | ExprRef | dict[str, Any]
     ) -> ArrowProps:
-        """Return a copy with a ``ExprRef`` direction.
-
-        Args:
-            expr (str): The expression string.
-        """
-        defined = {
-            "expr": expr,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("direction", value, **defined)
+        """Return a copy with ``direction`` updated."""
+        return self._with_property("direction", value)
 
     def fill(
         self,
@@ -4756,7 +4720,9 @@ class ConcatSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
@@ -4779,6 +4745,7 @@ class ConcatSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -5176,7 +5143,7 @@ class ConcatSpec(GenomeSpySchema):
         Args:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the GenomeSpy scale documentation for more information about customizing color schemes.
-            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
+            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"``, ``"reverse"``, or ``"both"``. The automatic range contains only ``"forward"`` and ``"reverse"``; use an explicit value or range to select ``"both"``. This channel is supported by arrow marks only and does not create a legend.
             dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
             dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
@@ -5317,7 +5284,9 @@ class ConcatSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ],
@@ -5545,6 +5514,7 @@ class ConcatSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -5704,11 +5674,13 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         expr: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
@@ -5722,6 +5694,7 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
             expr=expr,
             legend=legend,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             test=test,
@@ -5851,6 +5824,10 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
+    def project(self, value: dict[str, Any]) -> ConditionalMarkPropExprDefType:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
+
     def resolutionChannel(
         self, value: ChannelWithScale_T
     ) -> ConditionalMarkPropExprDefType:
@@ -5968,28 +5945,13 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalMarkPropExprDefType:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalMarkPropExprDefType:
         """Return a copy with ``title`` updated."""
@@ -6016,11 +5978,13 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         expr: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
@@ -6034,6 +5998,7 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
             expr=expr,
             legend=legend,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             test=test,
@@ -6163,6 +6128,10 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
+    def project(self, value: dict[str, Any]) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
+
     def resolutionChannel(
         self, value: ChannelWithScale_T
     ) -> ConditionalMarkPropExprDefTypeForShape:
@@ -6280,28 +6249,13 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalMarkPropExprDefTypeForShape:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalMarkPropExprDefTypeForShape:
         """Return a copy with ``title`` updated."""
@@ -6328,11 +6282,13 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
@@ -6346,6 +6302,7 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
             format=format,
             legend=legend,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             test=test,
@@ -6475,6 +6432,10 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
+    def project(self, value: dict[str, Any]) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
+
     def resolutionChannel(
         self, value: ChannelWithScale_T
     ) -> ConditionalMarkPropFieldDefType:
@@ -6592,28 +6553,13 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalMarkPropFieldDefType:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalMarkPropFieldDefType:
         """Return a copy with ``title`` updated."""
@@ -6640,11 +6586,13 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: TypeForShape_T | UndefinedType = Undefined,
@@ -6658,6 +6606,7 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
             format=format,
             legend=legend,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             test=test,
@@ -6787,6 +6736,10 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
+    def project(self, value: dict[str, Any]) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
+
     def resolutionChannel(
         self, value: ChannelWithScale_T
     ) -> ConditionalMarkPropFieldDefTypeForShape:
@@ -6904,28 +6857,13 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalMarkPropFieldDefTypeForShape:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalMarkPropFieldDefTypeForShape:
         """Return a copy with ``title`` updated."""
@@ -6949,11 +6887,13 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
         domainInert: bool | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
@@ -6966,6 +6906,7 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
             domainInert=domainInert,
             empty=empty,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             test=test,
@@ -7000,6 +6941,10 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
     def param(self, value: str) -> ConditionalScaleDatumDef:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def project(self, value: dict[str, Any]) -> ConditionalScaleDatumDef:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
     def resolutionChannel(self, value: ChannelWithScale_T) -> ConditionalScaleDatumDef:
         """Return a copy with ``resolutionChannel`` updated."""
@@ -7116,28 +7061,13 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalScaleDatumDef:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalScaleDatumDef:
         """Return a copy with ``title`` updated."""
@@ -7160,9 +7090,11 @@ class ConditionalValueDefNumberExprRef(GenomeSpySchema):
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
-        test: ParameterPredicate
+        project: dict[str, Any] | UndefinedType = Undefined,
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         value: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -7172,6 +7104,7 @@ class ConditionalValueDefNumberExprRef(GenomeSpySchema):
             description=description,
             empty=empty,
             param=param,
+            project=project,
             test=test,
             title=title,
             value=value,
@@ -7191,30 +7124,19 @@ class ConditionalValueDefNumberExprRef(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
+    def project(self, value: dict[str, Any]) -> ConditionalValueDefNumberExprRef:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
+
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalValueDefNumberExprRef:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalValueDefNumberExprRef:
         """Return a copy with ``title`` updated."""
@@ -7251,9 +7173,11 @@ class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
-        test: ParameterPredicate
+        project: dict[str, Any] | UndefinedType = Undefined,
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         value: str | None | ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -7263,6 +7187,7 @@ class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
             description=description,
             empty=empty,
             param=param,
+            project=project,
             test=test,
             title=title,
             value=value,
@@ -7282,30 +7207,19 @@ class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
+    def project(self, value: dict[str, Any]) -> ConditionalValueDefStringNullExprRef:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
+
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalValueDefStringNullExprRef:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalValueDefStringNullExprRef:
         """Return a copy with ``title`` updated."""
@@ -7346,6 +7260,7 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
         expr: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -7360,6 +7275,7 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
             expr=expr,
             legend=legend,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             title=title,
@@ -7487,6 +7403,10 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
     def param(self, value: str) -> ConditionalParameterMarkPropExprDefType:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def project(self, value: dict[str, Any]) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -7628,6 +7548,7 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
         expr: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -7642,6 +7563,7 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
             expr=expr,
             legend=legend,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             title=title,
@@ -7773,6 +7695,12 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
     def param(self, value: str) -> ConditionalParameterMarkPropExprDefTypeForShape:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def project(
+        self, value: dict[str, Any]
+    ) -> ConditionalParameterMarkPropExprDefTypeForShape:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -7916,6 +7844,7 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -7930,6 +7859,7 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
             format=format,
             legend=legend,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             title=title,
@@ -8057,6 +7987,12 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
     def param(self, value: str) -> ConditionalParameterMarkPropFieldDefType:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def project(
+        self, value: dict[str, Any]
+    ) -> ConditionalParameterMarkPropFieldDefType:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -8198,6 +8134,7 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
         format: str | UndefinedType = Undefined,
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -8212,6 +8149,7 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
             format=format,
             legend=legend,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             title=title,
@@ -8343,6 +8281,12 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
     def param(self, value: str) -> ConditionalParameterMarkPropFieldDefTypeForShape:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def project(
+        self, value: dict[str, Any]
+    ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -8487,6 +8431,7 @@ class ConditionalParameterScaleDatumDef(GenomeSpySchema):
         domainInert: bool | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
@@ -8500,6 +8445,7 @@ class ConditionalParameterScaleDatumDef(GenomeSpySchema):
             domainInert=domainInert,
             empty=empty,
             param=param,
+            project=project,
             resolutionChannel=resolutionChannel,
             scale=scale,
             title=title,
@@ -8533,6 +8479,10 @@ class ConditionalParameterScaleDatumDef(GenomeSpySchema):
     def param(self, value: str) -> ConditionalParameterScaleDatumDef:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def project(self, value: dict[str, Any]) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -8670,12 +8620,18 @@ class ConditionalParameterValueDefNumberExprRef(GenomeSpySchema):
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         value: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
-            description=description, empty=empty, param=param, title=title, value=value
+            description=description,
+            empty=empty,
+            param=param,
+            project=project,
+            title=title,
+            value=value,
         )
         if kwds:
             self._kwds.update(kwds)
@@ -8691,6 +8647,12 @@ class ConditionalParameterValueDefNumberExprRef(GenomeSpySchema):
     def param(self, value: str) -> ConditionalParameterValueDefNumberExprRef:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def project(
+        self, value: dict[str, Any]
+    ) -> ConditionalParameterValueDefNumberExprRef:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
     def title(self, value: str | None) -> ConditionalParameterValueDefNumberExprRef:
         """Return a copy with ``title`` updated."""
@@ -8727,12 +8689,18 @@ class ConditionalParameterValueDefStringNullExprRef(GenomeSpySchema):
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         value: str | None | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
-            description=description, empty=empty, param=param, title=title, value=value
+            description=description,
+            empty=empty,
+            param=param,
+            project=project,
+            title=title,
+            value=value,
         )
         if kwds:
             self._kwds.update(kwds)
@@ -8748,6 +8716,12 @@ class ConditionalParameterValueDefStringNullExprRef(GenomeSpySchema):
     def param(self, value: str) -> ConditionalParameterValueDefStringNullExprRef:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def project(
+        self, value: dict[str, Any]
+    ) -> ConditionalParameterValueDefStringNullExprRef:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
     def title(self, value: str | None) -> ConditionalParameterValueDefStringNullExprRef:
         """Return a copy with ``title`` updated."""
@@ -8788,9 +8762,10 @@ class ConditionalTestMarkPropExprDefType(GenomeSpySchema):
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
@@ -9040,28 +9015,13 @@ class ConditionalTestMarkPropExprDefType(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalTestMarkPropExprDefType:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalTestMarkPropExprDefType:
         """Return a copy with ``title`` updated."""
@@ -9088,9 +9048,10 @@ class ConditionalTestMarkPropExprDefTypeForShape(GenomeSpySchema):
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
@@ -9340,28 +9301,13 @@ class ConditionalTestMarkPropExprDefTypeForShape(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalTestMarkPropExprDefTypeForShape:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalTestMarkPropExprDefTypeForShape:
         """Return a copy with ``title`` updated."""
@@ -9388,9 +9334,10 @@ class ConditionalTestMarkPropFieldDefType(GenomeSpySchema):
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
@@ -9640,28 +9587,13 @@ class ConditionalTestMarkPropFieldDefType(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalTestMarkPropFieldDefType:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalTestMarkPropFieldDefType:
         """Return a copy with ``title`` updated."""
@@ -9688,9 +9620,10 @@ class ConditionalTestMarkPropFieldDefTypeForShape(GenomeSpySchema):
         legend: Legend | LegendKwds | None | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: TypeForShape_T | UndefinedType = Undefined,
@@ -9940,28 +9873,13 @@ class ConditionalTestMarkPropFieldDefTypeForShape(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalTestMarkPropFieldDefTypeForShape:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalTestMarkPropFieldDefTypeForShape:
         """Return a copy with ``title`` updated."""
@@ -9989,9 +9907,10 @@ class ConditionalTestScaleDatumDef(GenomeSpySchema):
         domainInert: bool | UndefinedType = Undefined,
         resolutionChannel: ChannelWithScale_T | UndefinedType = Undefined,
         scale: Scale | ScaleKwds | None | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         type: Type_T | UndefinedType = Undefined,
@@ -10146,28 +10065,13 @@ class ConditionalTestScaleDatumDef(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalTestScaleDatumDef:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalTestScaleDatumDef:
         """Return a copy with ``title`` updated."""
@@ -10188,9 +10092,10 @@ class ConditionalTestValueDefNumberExprRef(GenomeSpySchema):
     def __init__(
         self,
         description: str | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         value: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -10206,28 +10111,13 @@ class ConditionalTestValueDefNumberExprRef(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalTestValueDefNumberExprRef:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalTestValueDefNumberExprRef:
         """Return a copy with ``title`` updated."""
@@ -10262,9 +10152,10 @@ class ConditionalTestValueDefStringNullExprRef(GenomeSpySchema):
     def __init__(
         self,
         description: str | UndefinedType = Undefined,
-        test: ParameterPredicate
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
         value: str | None | ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -10280,28 +10171,13 @@ class ConditionalTestValueDefStringNullExprRef(GenomeSpySchema):
 
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> ConditionalTestValueDefStringNullExprRef:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def title(self, value: str | None) -> ConditionalTestValueDefStringNullExprRef:
         """Return a copy with ``title`` updated."""
@@ -10367,6 +10243,7 @@ class CoordinateLookupInput(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -10432,6 +10309,7 @@ class CoordinateLookupInput(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -10531,6 +10409,7 @@ class CoordinateLookupParams(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -10563,7 +10442,7 @@ class CoordinateLookupParams(GenomeSpySchema):
 
         Args:
             data (LazyData | dict[str, Any]): The lazy side data source.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): Transforms applied to the side data before lookup.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): Transforms applied to the side data before lookup.
         """
         defined = {
             "data": data,
@@ -10682,11 +10561,14 @@ class CoreRootSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
         | UndefinedType = Undefined,
+        predicates: dict[str, Any] | UndefinedType = Undefined,
         resolve: ResolveKwds | UndefinedType = Undefined,
         scales: ScalesKwds | UndefinedType = Undefined,
         separator: bool
@@ -10713,6 +10595,7 @@ class CoreRootSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -10807,6 +10690,7 @@ class CoreRootSpec(GenomeSpySchema):
             overhang=overhang,
             padding=padding,
             params=params,
+            predicates=predicates,
             resolve=resolve,
             scales=scales,
             separator=separator,
@@ -11150,7 +11034,7 @@ class CoreRootSpec(GenomeSpySchema):
         Args:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the GenomeSpy scale documentation for more information about customizing color schemes.
-            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
+            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"``, ``"reverse"``, or ``"both"``. The automatic range contains only ``"forward"`` and ``"reverse"``; use an explicit value or range to select ``"both"``. This channel is supported by arrow marks only and does not create a legend.
             dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
             dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
@@ -11358,13 +11242,19 @@ class CoreRootSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ],
     ) -> CoreRootSpec:
         """Return a copy with ``params`` updated."""
         return self._with_property("params", value)
+
+    def predicates(self, value: dict[str, Any]) -> CoreRootSpec:
+        """Return a copy with ``predicates`` updated."""
+        return self._with_property("predicates", value)
 
     def resolve(self, value: ResolveKwds) -> CoreRootSpec:
         """Return a copy with ``resolve`` updated."""
@@ -11602,6 +11492,7 @@ class CoreRootSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -12020,6 +11911,7 @@ class CrossInput(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -12071,6 +11963,7 @@ class CrossInput(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -12142,6 +12035,7 @@ class CrossParams(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -12174,7 +12068,7 @@ class CrossParams(GenomeSpySchema):
 
         Args:
             data (UrlData | dict[str, Any] | InlineData | NamedData | SequenceGenerator): Finite eager data crossed with the primary input.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): Unary transforms applied to the foreign data before crossing.
+            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): Unary transforms applied to the foreign data before crossing.
         """
         defined = {
             "data": data,
@@ -12637,6 +12531,57 @@ class DataSource(GenomeSpySchema):
         return self._with_property("values", value, **defined)
 
 
+class DebouncedExprParameter(GenomeSpySchema):
+    """Generated wrapper for ``DebouncedExprParameter``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("DebouncedExprParameter", {})
+
+    def __init__(
+        self,
+        debounce: float | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        persist: bool | UndefinedType = Undefined,
+        push: Literal["outer"] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            debounce=debounce,
+            description=description,
+            expr=expr,
+            name=name,
+            persist=persist,
+            push=push,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def debounce(self, value: float) -> DebouncedExprParameter:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
+
+    def description(self, value: str) -> DebouncedExprParameter:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def expr(self, value: str) -> DebouncedExprParameter:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def name(self, value: str) -> DebouncedExprParameter:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def persist(self, value: bool) -> DebouncedExprParameter:
+        """Return a copy with ``persist`` updated."""
+        return self._with_property("persist", value)
+
+    def push(self, value: Literal["outer"]) -> DebouncedExprParameter:
+        """Return a copy with ``push`` updated."""
+        return self._with_property("push", value)
+
+
 class DirectionDef(GenomeSpySchema):
     """Generated wrapper for ``DirectionDef``."""
 
@@ -12908,6 +12853,97 @@ class Displace1DParams(GenomeSpySchema):
     def type(self, value: Literal["displace1d"]) -> Displace1DParams:
         """Return a copy with ``type`` updated."""
         return self._with_property("type", value)
+
+
+class Displace2DParams(GenomeSpySchema):
+    """Generated wrapper for ``Displace2DParams``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("Displace2DParams", {})
+
+    def __init__(
+        self,
+        anchorHeight: float
+        | Field_T
+        | ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        anchorWidth: float
+        | Field_T
+        | ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        as_: Sequence[str] | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+        height: float | Field_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        key: Field_T | UndefinedType = Undefined,
+        type: Literal["displace2d"] | UndefinedType = Undefined,
+        width: float | Field_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        x: Field_T | UndefinedType = Undefined,
+        y: Field_T | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            anchorHeight=anchorHeight,
+            anchorWidth=anchorWidth,
+            description=description,
+            height=height,
+            key=key,
+            type=type,
+            width=width,
+            x=x,
+            y=y,
+            **{"as": as_},
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def anchorHeight(
+        self, value: float | Field_T | ExprRef | dict[str, Any]
+    ) -> Displace2DParams:
+        """Return a copy with ``anchorHeight`` updated."""
+        return self._with_property("anchorHeight", value)
+
+    def anchorWidth(
+        self, value: float | Field_T | ExprRef | dict[str, Any]
+    ) -> Displace2DParams:
+        """Return a copy with ``anchorWidth`` updated."""
+        return self._with_property("anchorWidth", value)
+
+    def as_(self, value: Sequence[str]) -> Displace2DParams:
+        """Return a copy with ``as`` updated."""
+        return self._with_property("as", value)
+
+    def description(self, value: str) -> Displace2DParams:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def height(
+        self, value: float | Field_T | ExprRef | dict[str, Any]
+    ) -> Displace2DParams:
+        """Return a copy with ``height`` updated."""
+        return self._with_property("height", value)
+
+    def key(self, value: Field_T) -> Displace2DParams:
+        """Return a copy with ``key`` updated."""
+        return self._with_property("key", value)
+
+    def type(self, value: Literal["displace2d"]) -> Displace2DParams:
+        """Return a copy with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def width(
+        self, value: float | Field_T | ExprRef | dict[str, Any]
+    ) -> Displace2DParams:
+        """Return a copy with ``width`` updated."""
+        return self._with_property("width", value)
+
+    def x(self, value: Field_T) -> Displace2DParams:
+        """Return a copy with ``x`` updated."""
+        return self._with_property("x", value)
+
+    def y(self, value: Field_T) -> Displace2DParams:
+        """Return a copy with ``y`` updated."""
+        return self._with_property("y", value)
 
 
 class DomEventType(GenomeSpySchema):
@@ -13801,14 +13837,21 @@ class ExprFilterParams(GenomeSpySchema):
 
     def __init__(
         self,
+        debounce: float | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
         type: Literal["filter"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(description=description, expr=expr, type=type)
+        super().__init__(
+            debounce=debounce, description=description, expr=expr, type=type
+        )
         if kwds:
             self._kwds.update(kwds)
+
+    def debounce(self, value: float) -> ExprFilterParams:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
 
     def description(self, value: str) -> ExprFilterParams:
         """Return a copy with ``description`` updated."""
@@ -13830,6 +13873,7 @@ class ExprParameter(GenomeSpySchema):
 
     def __init__(
         self,
+        debounce: float | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
         name: str | UndefinedType = Undefined,
@@ -13839,6 +13883,7 @@ class ExprParameter(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            debounce=debounce,
             description=description,
             expr=expr,
             name=name,
@@ -13848,6 +13893,10 @@ class ExprParameter(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def debounce(self, value: float) -> ExprParameter:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
 
     def description(self, value: str) -> ExprParameter:
         """Return a copy with ``description`` updated."""
@@ -15317,6 +15366,7 @@ class FilterParams(GenomeSpySchema):
 
     def __init__(
         self,
+        debounce: float | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
@@ -15326,6 +15376,7 @@ class FilterParams(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
+            debounce=debounce,
             description=description,
             empty=empty,
             expr=expr,
@@ -15335,6 +15386,10 @@ class FilterParams(GenomeSpySchema):
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def debounce(self, value: float) -> FilterParams:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
 
     def description(self, value: str) -> FilterParams:
         """Return a copy with ``description`` updated."""
@@ -15680,18 +15735,29 @@ class FormulaParams(GenomeSpySchema):
     def __init__(
         self,
         as_: str | UndefinedType = Undefined,
+        debounce: float | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
         type: Literal["formula"] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(description=description, expr=expr, type=type, **{"as": as_})
+        super().__init__(
+            debounce=debounce,
+            description=description,
+            expr=expr,
+            type=type,
+            **{"as": as_},
+        )
         if kwds:
             self._kwds.update(kwds)
 
     def as_(self, value: str) -> FormulaParams:
         """Return a copy with ``as`` updated."""
         return self._with_property("as", value)
+
+    def debounce(self, value: float) -> FormulaParams:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
 
     def description(self, value: str) -> FormulaParams:
         """Return a copy with ``description`` updated."""
@@ -16419,8 +16485,7 @@ class GenomeSpyConfig(GenomeSpySchema):
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        direction: Literal["forward"]
-        | Literal["reverse"]
+        direction: ArrowDirection_T
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
@@ -16481,7 +16546,7 @@ class GenomeSpyConfig(GenomeSpySchema):
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
-            direction (Literal['forward'] | Literal['reverse'] | ExprRef | dict[str, Any]): Direction of the arrowhead. ``"forward"`` places the arrowhead at the secondary endpoint (``x2``, ``y2``). ``"reverse"`` places it at the primary endpoint (``x``, ``y``). For data-driven direction, use the ``direction`` encoding channel. __Default value:__ ``"forward"``
+            direction (ArrowDirection_T | ExprRef | dict[str, Any]): Direction of the arrowhead. ``"forward"`` places the arrowhead at the secondary endpoint (``x2``, ``y2``). ``"reverse"`` places it at the primary endpoint (``x``, ``y``). ``"both"`` places equivalent heads at both endpoints and suppresses ``headSpacing`` and ``startNotch`` for that arrow. For data-driven direction, use the ``direction`` encoding channel. __Default value:__ ``"forward"``
             fill (str | ExprRef | dict[str, Any]): The fill color.
             fillOpacity (float | ExprRef | dict[str, Any]): The fill opacity. Value between ``0`` and ``1``.
             filled (bool): Whether the ``color`` represents the ``fill`` color (``true``) or the ``stroke`` color (``false``).
@@ -16489,13 +16554,13 @@ class GenomeSpyConfig(GenomeSpySchema):
             headNotchAngle (float | ExprRef | dict[str, Any]): Angle in degrees between the arrow axis and the arrowhead notch edge. ``90`` places the notch point at the tip, producing a triangular head when ``headAngle`` is less than ``90``. Applies to ``"triangle"`` heads. ``"open"`` heads use ``headAngle`` for the notch edge as well. Values are clamped to ``[1, 90]``. __Default value:__ ``90``
             headPlacement (Literal['inside'] | Literal['outside'] | ExprRef | dict[str, Any]): Placement of the arrowhead relative to the encoded segment. ``"inside"`` keeps the whole arrowhead within the encoded segment. ``"outside"`` places the arrowhead beyond the encoded segment so that the head starts at the segment endpoint. __Default value:__ ``"inside"``
             headShape (Literal['triangle'] | Literal['open'] | ExprRef | dict[str, Any]): Shape of the arrowhead. ``"triangle"`` draws a filled head. ``"open"`` draws an open head whose thickness matches the resolved ``size``, even when ``stem`` is ``false``. __Default value:__ ``"triangle"``
-            headSpacing (float | None | ExprRef | dict[str, Any]): Spacing between repeated arrowheads as a multiplier of resolved ``size``. The effective spacing is at least the rendered arrowhead footprint, including stroke. If ``null``, arrowheads are not repeated. __Default value:__ ``null``
+            headSpacing (float | None | ExprRef | dict[str, Any]): Spacing between repeated arrowheads as a multiplier of resolved ``size``. The effective spacing is at least the rendered arrowhead footprint, including stroke. If ``null``, arrowheads are not repeated. Repetition is suppressed when ``direction`` resolves to ``"both"``. __Default value:__ ``null``
             headWidth (float | ExprRef | dict[str, Any]): Width of the arrowhead as a multiplier of resolved ``size``. Values above ``1`` make the arrowhead wider than the stem. __Default value:__ ``3``
             minSize (float | ExprRef | dict[str, Any]): Minimum resolved arrow stem thickness in pixels. Applies to numeric, band-relative, and encoded ``size`` values. __Default value:__ ``1``
             minStemLength (float | ExprRef | dict[str, Any]): Minimum visible length of the arrow stem in pixels. When a non-repeated arrow is too short for the configured shape and minimum stem length, the affected notch or head angle is made blunter toward 90 degrees. For ``"inside"`` placement, this applies to ``"triangle"`` heads and is measured from the start of the stem to where the stem meets the head notch edge. For ``"outside"`` placement, this applies when ``startNotch`` is ``true`` and is measured from the start notch to the head start. Has no effect when ``stem`` is ``false``. __Default value:__ ``0``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
             size (float | ArrowRelativeSize | dict[str, Any] | ExprRef): Arrow stem thickness in pixels, or as a fraction of the perpendicular band or view span for axis-aligned arrows. Numeric values are pixels. ``{ "band": 0.8 }`` resolves to 80% of the perpendicular band width, or 80% of the perpendicular view span when no band scale is available. Use ``channel`` to explicitly select the reference channel. Band-relative size is not supported for diagonal arrows. __Default value:__ ``8``
-            startNotch (bool | ExprRef | dict[str, Any]): Whether to draw a notch at the start of the arrow. The start notch uses the same slope as the arrowhead edge. __Default value:__ ``false``
+            startNotch (bool | ExprRef | dict[str, Any]): Whether to draw a notch at the start of the arrow. The start notch uses the same slope as the arrowhead edge. It is suppressed when ``direction`` resolves to ``"both"`` because a bidirectional arrow has no unique start. __Default value:__ ``false``
             stem (bool | ExprRef | dict[str, Any]): Whether to draw the arrow stem. When ``false``, the resolved ``size`` still controls open-head thickness. ``minStemLength`` has no effect when the stem is hidden. __Default value:__ ``true``
             stroke (str | ExprRef | dict[str, Any]): The stroke color
             strokeOpacity (float | ExprRef | dict[str, Any]): The stroke opacity. Value between ``0`` and ``1``.
@@ -21281,7 +21346,9 @@ class HConcatSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
@@ -21304,6 +21371,7 @@ class HConcatSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -21687,7 +21755,7 @@ class HConcatSpec(GenomeSpySchema):
         Args:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the GenomeSpy scale documentation for more information about customizing color schemes.
-            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
+            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"``, ``"reverse"``, or ``"both"``. The automatic range contains only ``"forward"`` and ``"reverse"``; use an explicit value or range to select ``"both"``. This channel is supported by arrow marks only and does not create a legend.
             dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
             dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
@@ -21844,7 +21912,9 @@ class HConcatSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ],
@@ -22072,6 +22142,7 @@ class HConcatSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -22285,7 +22356,9 @@ class ImportSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
@@ -22430,7 +22503,9 @@ class ImportSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
@@ -22822,7 +22897,7 @@ class IntervalSelectionConfig(GenomeSpySchema):
         """Return a copy with a ``BrushConfig`` mark.
 
         Args:
-            clip (bool | Literal['never']): Whether the brush rectangle should be clipped to the viewport. __Default value:__ ``true``
+            clip (bool | Literal['never']): Clip the brush rectangle to the viewport along the selected axes. An explicit value overrides this direction-based default. __Default value:__ ``"x"`` for x selections, ``"y"`` for y selections, and ``true`` for x/y selections.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the interval mark. __Default value:__ ``{ expr: "intervalDragActive ? 'grabbing' : 'move'" }``
             fill (str): The fill color of the interval mark. __Default value:__ ``"#808080"``
             fillOpacity (float): The fill opacity of the interval mark (a value between ``0`` and ``1``). __Default value:__ ``0.05``
@@ -22986,7 +23061,9 @@ class LayerSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
@@ -23004,6 +23081,7 @@ class LayerSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -23381,7 +23459,7 @@ class LayerSpec(GenomeSpySchema):
         Args:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the GenomeSpy scale documentation for more information about customizing color schemes.
-            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
+            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"``, ``"reverse"``, or ``"both"``. The automatic range contains only ``"forward"`` and ``"reverse"``; use an explicit value or range to select ``"both"``. This channel is supported by arrow marks only and does not create a legend.
             dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
             dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
@@ -23538,7 +23616,9 @@ class LayerSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ],
@@ -23659,6 +23739,7 @@ class LayerSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -28515,8 +28596,7 @@ class MarkProps(GenomeSpySchema):
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        direction: Literal["forward"]
-        | Literal["reverse"]
+        direction: ArrowDirection_T
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
@@ -29009,27 +29089,10 @@ class MarkProps(GenomeSpySchema):
         return self._with_property("cursor", value, **defined)
 
     def direction(
-        self,
-        value: Literal["forward"]
-        | Literal["reverse"]
-        | ExprRef
-        | dict[str, Any]
-        | None
-        | object = Undefined,
-        /,
-        *,
-        expr: str | UndefinedType = Undefined,
+        self, value: ArrowDirection_T | ExprRef | dict[str, Any]
     ) -> MarkProps:
-        """Return a copy with a ``ExprRef`` direction.
-
-        Args:
-            expr (str): The expression string.
-        """
-        defined = {
-            "expr": expr,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("direction", value, **defined)
+        """Return a copy with ``direction`` updated."""
+        return self._with_property("direction", value)
 
     def dx(
         self,
@@ -30555,7 +30618,9 @@ class MultiscaleSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
@@ -30578,6 +30643,7 @@ class MultiscaleSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -30956,7 +31022,7 @@ class MultiscaleSpec(GenomeSpySchema):
         Args:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the GenomeSpy scale documentation for more information about customizing color schemes.
-            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
+            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"``, ``"reverse"``, or ``"both"``. The automatic range contains only ``"forward"`` and ``"reverse"``; use an explicit value or range to select ``"both"``. This channel is supported by arrow marks only and does not create a legend.
             dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
             dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
@@ -31113,7 +31179,9 @@ class MultiscaleSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ],
@@ -31244,6 +31312,7 @@ class MultiscaleSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -31606,6 +31675,21 @@ class NamedGenomeConfig(GenomeSpySchema):
     def url(self, value: str) -> NamedGenomeConfig:
         """Return a copy with ``url`` updated."""
         return self._with_property("url", value)
+
+
+class NamedSelectionPredicateRef(GenomeSpySchema):
+    """Generated wrapper for ``NamedSelectionPredicateRef``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("NamedSelectionPredicateRef", {})
+
+    def __init__(self, ref: str | UndefinedType = Undefined, **kwds: Any) -> None:
+        super().__init__(ref=ref)
+        if kwds:
+            self._kwds.update(kwds)
+
+    def ref(self, value: str) -> NamedSelectionPredicateRef:
+        """Return a copy with ``ref`` updated."""
+        return self._with_property("ref", value)
 
 
 class NumericDomain(GenomeSpySchema):
@@ -32377,14 +32461,18 @@ class OrderCondition(GenomeSpySchema):
         self,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
-        test: ParameterPredicate
+        project: dict[str, Any] | UndefinedType = Undefined,
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
         value: float | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(empty=empty, param=param, test=test, value=value)
+        super().__init__(
+            empty=empty, param=param, project=project, test=test, value=value
+        )
         if kwds:
             self._kwds.update(kwds)
 
@@ -32396,30 +32484,19 @@ class OrderCondition(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
+    def project(self, value: dict[str, Any]) -> OrderCondition:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
+
     def test(
         self,
-        value: ParameterPredicate
+        value: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
-        | None
-        | object = Undefined,
-        /,
-        *,
-        empty: bool | UndefinedType = Undefined,
-        param: str | UndefinedType = Undefined,
+        | NamedSelectionPredicateRef,
     ) -> OrderCondition:
-        """Return a copy with a ``ParameterPredicate`` test.
-
-        Args:
-            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
-            param (str): Filter using a parameter name.
-        """
-        defined = {
-            "empty": empty,
-            "param": param,
-        }
-        defined = {key: item for key, item in defined.items() if item is not Undefined}
-        return self._with_property("test", value, **defined)
+        """Return a copy with ``test`` updated."""
+        return self._with_property("test", value)
 
     def value(self, value: float) -> OrderCondition:
         """Return a copy with ``value`` updated."""
@@ -32448,9 +32525,11 @@ class OrderDef(GenomeSpySchema):
         *,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
-        test: ParameterPredicate
+        project: dict[str, Any] | UndefinedType = Undefined,
+        test: SelectionPredicateOperand
         | dict[str, Any]
         | SelectionUnionTest
+        | NamedSelectionPredicateRef
         | UndefinedType = Undefined,
     ) -> OrderDef:
         """Return a copy with a ``OrderCondition`` condition.
@@ -32458,11 +32537,13 @@ class OrderDef(GenomeSpySchema):
         Args:
             empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
             param (str): Filter using a parameter name.
-            test (ParameterPredicate | dict[str, Any] | SelectionUnionTest): Schema-defined ``test`` property.
+            project (dict[str, Any]): Bind interval selection components to positional channels of this mark. For example, ``{ "x": "x2" }`` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.
+            test (SelectionPredicateOperand | dict[str, Any] | SelectionUnionTest | NamedSelectionPredicateRef): Schema-defined ``test`` property.
         """
         defined = {
             "empty": empty,
             "param": param,
+            "project": project,
             "test": test,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -32770,6 +32851,7 @@ class Parameter(GenomeSpySchema):
         | BindInput
         | BindInputKwds
         | UndefinedType = Undefined,
+        debounce: float | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
         name: str | UndefinedType = Undefined,
@@ -32787,6 +32869,7 @@ class Parameter(GenomeSpySchema):
     ) -> None:
         super().__init__(
             bind=bind,
+            debounce=debounce,
             description=description,
             expr=expr,
             name=name,
@@ -32813,6 +32896,10 @@ class Parameter(GenomeSpySchema):
     ) -> Parameter:
         """Return a copy with ``bind`` updated."""
         return self._with_property("bind", value)
+
+    def debounce(self, value: float) -> Parameter:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
 
     def description(self, value: str) -> Parameter:
         """Return a copy with ``description`` updated."""
@@ -32933,9 +33020,10 @@ class ParameterPredicate(GenomeSpySchema):
         self,
         empty: bool | UndefinedType = Undefined,
         param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
-        super().__init__(empty=empty, param=param)
+        super().__init__(empty=empty, param=param, project=project)
         if kwds:
             self._kwds.update(kwds)
 
@@ -32946,6 +33034,10 @@ class ParameterPredicate(GenomeSpySchema):
     def param(self, value: str) -> ParameterPredicate:
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
+
+    def project(self, value: dict[str, Any]) -> ParameterPredicate:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
 
 class Parse(GenomeSpySchema):
@@ -33036,6 +33128,47 @@ class PileupParams(GenomeSpySchema):
     def type(self, value: Literal["pileup"]) -> PileupParams:
         """Return a copy with ``type`` updated."""
         return self._with_property("type", value)
+
+
+class PlainExprParameter(GenomeSpySchema):
+    """Generated wrapper for ``PlainExprParameter``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("PlainExprParameter", {})
+
+    def __init__(
+        self,
+        description: str | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        persist: bool | UndefinedType = Undefined,
+        push: Literal["outer"] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description, expr=expr, name=name, persist=persist, push=push
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def description(self, value: str) -> PlainExprParameter:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def expr(self, value: str) -> PlainExprParameter:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def name(self, value: str) -> PlainExprParameter:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def persist(self, value: bool) -> PlainExprParameter:
+        """Return a copy with ``persist`` updated."""
+        return self._with_property("persist", value)
+
+    def push(self, value: Literal["outer"]) -> PlainExprParameter:
+        """Return a copy with ``push`` updated."""
+        return self._with_property("push", value)
 
 
 class PlainValueParameter(GenomeSpySchema):
@@ -40976,6 +41109,7 @@ class SelectionFilterParams(GenomeSpySchema):
 
     def __init__(
         self,
+        debounce: float | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         empty: bool | UndefinedType = Undefined,
         fields: dict[str, Any] | UndefinedType = Undefined,
@@ -40984,10 +41118,19 @@ class SelectionFilterParams(GenomeSpySchema):
         **kwds: Any,
     ) -> None:
         super().__init__(
-            description=description, empty=empty, fields=fields, param=param, type=type
+            debounce=debounce,
+            description=description,
+            empty=empty,
+            fields=fields,
+            param=param,
+            type=type,
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def debounce(self, value: float) -> SelectionFilterParams:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
 
     def description(self, value: str) -> SelectionFilterParams:
         """Return a copy with ``description`` updated."""
@@ -41117,6 +41260,180 @@ class SelectionParameter(GenomeSpySchema):
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._with_property("value", value, **defined)
+
+
+class SelectionPredicateDefinition(GenomeSpySchema):
+    """Generated wrapper for ``SelectionPredicateDefinition``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get(
+        "SelectionPredicateDefinition", {}
+    )
+
+    def __init__(
+        self,
+        and_: Sequence[SelectionPredicateOperand | dict[str, Any]]
+        | UndefinedType = Undefined,
+        empty: bool | UndefinedType = Undefined,
+        not_: SelectionPredicateOperand | dict[str, Any] | UndefinedType = Undefined,
+        or_: Sequence[SelectionPredicateOperand | dict[str, Any]]
+        | UndefinedType = Undefined,
+        param: dict[str, Any] | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            empty=empty,
+            param=param,
+            project=project,
+            **{"and": and_, "not": not_, "or": or_},
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def and_(
+        self, value: Sequence[SelectionPredicateOperand | dict[str, Any]]
+    ) -> SelectionPredicateDefinition:
+        """Return a copy with ``and`` updated."""
+        return self._with_property("and", value)
+
+    def empty(self, value: bool) -> SelectionPredicateDefinition:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def not_(
+        self,
+        value: SelectionPredicateOperand | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        and_: Sequence[SelectionPredicateOperand | dict[str, Any]]
+        | UndefinedType = Undefined,
+        empty: bool | UndefinedType = Undefined,
+        not_: SelectionPredicateOperand | dict[str, Any] | UndefinedType = Undefined,
+        or_: Sequence[SelectionPredicateOperand | dict[str, Any]]
+        | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
+    ) -> SelectionPredicateDefinition:
+        """Return a copy with a ``SelectionPredicateOperand`` not.
+
+        Args:
+            and\\_ (Sequence[SelectionPredicateOperand | dict[str, Any]]): Schema-defined ``and`` property.
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            not\\_ (SelectionPredicateOperand | dict[str, Any]): Schema-defined ``not`` property.
+            or\\_ (Sequence[SelectionPredicateOperand | dict[str, Any]]): Schema-defined ``or`` property.
+            param (str): Filter using a parameter name.
+            project (dict[str, Any]): Bind interval selection components to positional channels of this mark. For example, ``{ "x": "x2" }`` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.
+        """
+        defined = {
+            "and": and_,
+            "empty": empty,
+            "not": not_,
+            "or": or_,
+            "param": param,
+            "project": project,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("not", value, **defined)
+
+    def or_(
+        self, value: Sequence[SelectionPredicateOperand | dict[str, Any]]
+    ) -> SelectionPredicateDefinition:
+        """Return a copy with ``or`` updated."""
+        return self._with_property("or", value)
+
+    def param(self, value: dict[str, Any]) -> SelectionPredicateDefinition:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def project(self, value: dict[str, Any]) -> SelectionPredicateDefinition:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
+
+
+class SelectionPredicateOperand(GenomeSpySchema):
+    """Generated wrapper for ``SelectionPredicateOperand``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("SelectionPredicateOperand", {})
+
+    def __init__(
+        self,
+        and_: Sequence[SelectionPredicateOperand | dict[str, Any]]
+        | UndefinedType = Undefined,
+        empty: bool | UndefinedType = Undefined,
+        not_: SelectionPredicateOperand | dict[str, Any] | UndefinedType = Undefined,
+        or_: Sequence[SelectionPredicateOperand | dict[str, Any]]
+        | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            empty=empty,
+            param=param,
+            project=project,
+            **{"and": and_, "not": not_, "or": or_},
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def and_(
+        self, value: Sequence[SelectionPredicateOperand | dict[str, Any]]
+    ) -> SelectionPredicateOperand:
+        """Return a copy with ``and`` updated."""
+        return self._with_property("and", value)
+
+    def empty(self, value: bool) -> SelectionPredicateOperand:
+        """Return a copy with ``empty`` updated."""
+        return self._with_property("empty", value)
+
+    def not_(
+        self,
+        value: SelectionPredicateOperand | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        and_: Sequence[SelectionPredicateOperand | dict[str, Any]]
+        | UndefinedType = Undefined,
+        empty: bool | UndefinedType = Undefined,
+        not_: SelectionPredicateOperand | dict[str, Any] | UndefinedType = Undefined,
+        or_: Sequence[SelectionPredicateOperand | dict[str, Any]]
+        | UndefinedType = Undefined,
+        param: str | UndefinedType = Undefined,
+        project: dict[str, Any] | UndefinedType = Undefined,
+    ) -> SelectionPredicateOperand:
+        """Return a copy with a ``SelectionPredicateOperand`` not.
+
+        Args:
+            and\\_ (Sequence[SelectionPredicateOperand | dict[str, Any]]): Schema-defined ``and`` property.
+            empty (bool): For selection parameters, the predicate of empty selections returns true by default. Override this behavior, by setting this property ``empty: false``.
+            not\\_ (SelectionPredicateOperand | dict[str, Any]): Schema-defined ``not`` property.
+            or\\_ (Sequence[SelectionPredicateOperand | dict[str, Any]]): Schema-defined ``or`` property.
+            param (str): Filter using a parameter name.
+            project (dict[str, Any]): Bind interval selection components to positional channels of this mark. For example, ``{ "x": "x2" }`` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.
+        """
+        defined = {
+            "and": and_,
+            "empty": empty,
+            "not": not_,
+            "or": or_,
+            "param": param,
+            "project": project,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("not", value, **defined)
+
+    def or_(
+        self, value: Sequence[SelectionPredicateOperand | dict[str, Any]]
+    ) -> SelectionPredicateOperand:
+        """Return a copy with ``or`` updated."""
+        return self._with_property("or", value)
+
+    def param(self, value: str) -> SelectionPredicateOperand:
+        """Return a copy with ``param`` updated."""
+        return self._with_property("param", value)
+
+    def project(self, value: dict[str, Any]) -> SelectionPredicateOperand:
+        """Return a copy with ``project`` updated."""
+        return self._with_property("project", value)
 
 
 class SelectionType(GenomeSpySchema):
@@ -42596,8 +42913,7 @@ class StyleConfig(GenomeSpySchema):
         | Literal["y"]
         | UndefinedType = Undefined,
         cursor: str | ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        direction: Literal["forward"]
-        | Literal["reverse"]
+        direction: ArrowDirection_T
         | ExprRef
         | dict[str, Any]
         | LegendDirection_T
@@ -43401,12 +43717,7 @@ class StyleConfig(GenomeSpySchema):
         return self._with_property("cursor", value, **defined)
 
     def direction(
-        self,
-        value: Literal["forward"]
-        | Literal["reverse"]
-        | ExprRef
-        | dict[str, Any]
-        | LegendDirection_T,
+        self, value: ArrowDirection_T | ExprRef | dict[str, Any] | LegendDirection_T
     ) -> StyleConfig:
         """Return a copy with ``direction`` updated."""
         return self._with_property("direction", value)
@@ -48253,6 +48564,16 @@ class TransformParams(GenomeSpySchema):
 
     def __init__(
         self,
+        anchorHeight: float
+        | Field_T
+        | ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        anchorWidth: float
+        | Field_T
+        | ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         as_: Sequence[str | None] | UndefinedType = Undefined,
         asChrom: str | UndefinedType = Undefined,
         asEnd: str | UndefinedType = Undefined,
@@ -48273,6 +48594,7 @@ class TransformParams(GenomeSpySchema):
         columnRegex: Sequence[str] | str | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         copyFields: Sequence[str] | UndefinedType = Undefined,
+        debounce: float | UndefinedType = Undefined,
         default: Any | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         direction: Literal["vertical", "horizontal"] | UndefinedType = Undefined,
@@ -48299,6 +48621,7 @@ class TransformParams(GenomeSpySchema):
         | LookupSelfInput
         | UndefinedType = Undefined,
         groupby: Sequence[Field_T] | UndefinedType = Undefined,
+        height: float | Field_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         ignorePeers: bool | UndefinedType = Undefined,
         index: str | UndefinedType = Undefined,
         key: Field_T | Sequence[Field_T] | UndefinedType = Undefined,
@@ -48354,12 +48677,16 @@ class TransformParams(GenomeSpySchema):
         values: Sequence[Field_T] | None | UndefinedType = Undefined,
         weight: Field_T | UndefinedType = Undefined,
         width: Field_T | UndefinedType = Undefined,
+        x: Field_T | UndefinedType = Undefined,
         xOffset: float | UndefinedType = Undefined,
+        y: Field_T | UndefinedType = Undefined,
         yExtent: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         yOffset: float | UndefinedType = Undefined,
         **kwds: Any,
     ) -> None:
         super().__init__(
+            anchorHeight=anchorHeight,
+            anchorWidth=anchorWidth,
             asChrom=asChrom,
             asEnd=asEnd,
             asKey=asKey,
@@ -48379,6 +48706,7 @@ class TransformParams(GenomeSpySchema):
             columnRegex=columnRegex,
             columns=columns,
             copyFields=copyFields,
+            debounce=debounce,
             default=default,
             description=description,
             direction=direction,
@@ -48397,6 +48725,7 @@ class TransformParams(GenomeSpySchema):
             fontWeight=fontWeight,
             frame=frame,
             groupby=groupby,
+            height=height,
             ignorePeers=ignorePeers,
             index=index,
             key=key,
@@ -48447,13 +48776,27 @@ class TransformParams(GenomeSpySchema):
             values=values,
             weight=weight,
             width=width,
+            x=x,
             xOffset=xOffset,
+            y=y,
             yExtent=yExtent,
             yOffset=yOffset,
             **{"as": as_, "from": from_},
         )
         if kwds:
             self._kwds.update(kwds)
+
+    def anchorHeight(
+        self, value: float | Field_T | ExprRef | dict[str, Any]
+    ) -> TransformParams:
+        """Return a copy with ``anchorHeight`` updated."""
+        return self._with_property("anchorHeight", value)
+
+    def anchorWidth(
+        self, value: float | Field_T | ExprRef | dict[str, Any]
+    ) -> TransformParams:
+        """Return a copy with ``anchorWidth`` updated."""
+        return self._with_property("anchorWidth", value)
 
     def as_(self, value: Sequence[str | None]) -> TransformParams:
         """Return a copy with ``as`` updated."""
@@ -48536,6 +48879,10 @@ class TransformParams(GenomeSpySchema):
     def copyFields(self, value: Sequence[str]) -> TransformParams:
         """Return a copy with ``copyFields`` updated."""
         return self._with_property("copyFields", value)
+
+    def debounce(self, value: float) -> TransformParams:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
 
     def default(self, value: Any) -> TransformParams:
         """Return a copy with ``default`` updated."""
@@ -48635,6 +48982,12 @@ class TransformParams(GenomeSpySchema):
     def groupby(self, value: Sequence[Field_T]) -> TransformParams:
         """Return a copy with ``groupby`` updated."""
         return self._with_property("groupby", value)
+
+    def height(
+        self, value: float | Field_T | ExprRef | dict[str, Any]
+    ) -> TransformParams:
+        """Return a copy with ``height`` updated."""
+        return self._with_property("height", value)
 
     def ignorePeers(self, value: bool) -> TransformParams:
         """Return a copy with ``ignorePeers`` updated."""
@@ -48875,9 +49228,17 @@ class TransformParams(GenomeSpySchema):
         """Return a copy with ``width`` updated."""
         return self._with_property("width", value)
 
+    def x(self, value: Field_T) -> TransformParams:
+        """Return a copy with ``x`` updated."""
+        return self._with_property("x", value)
+
     def xOffset(self, value: float) -> TransformParams:
         """Return a copy with ``xOffset`` updated."""
         return self._with_property("xOffset", value)
+
+    def y(self, value: Field_T) -> TransformParams:
+        """Return a copy with ``y`` updated."""
+        return self._with_property("y", value)
 
     def yExtent(
         self,
@@ -48900,6 +49261,59 @@ class TransformParams(GenomeSpySchema):
     def yOffset(self, value: float) -> TransformParams:
         """Return a copy with ``yOffset`` updated."""
         return self._with_property("yOffset", value)
+
+
+class TransitionedExprParameter(GenomeSpySchema):
+    """Generated wrapper for ``TransitionedExprParameter``."""
+
+    _schema = _ROOT_SCHEMA.get("definitions", {}).get("TransitionedExprParameter", {})
+
+    def __init__(
+        self,
+        description: str | UndefinedType = Undefined,
+        expr: str | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        persist: bool | UndefinedType = Undefined,
+        push: Literal["outer"] | UndefinedType = Undefined,
+        transition: LerpTransition | dict[str, Any] | UndefinedType = Undefined,
+        **kwds: Any,
+    ) -> None:
+        super().__init__(
+            description=description,
+            expr=expr,
+            name=name,
+            persist=persist,
+            push=push,
+            transition=transition,
+        )
+        if kwds:
+            self._kwds.update(kwds)
+
+    def description(self, value: str) -> TransitionedExprParameter:
+        """Return a copy with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def expr(self, value: str) -> TransitionedExprParameter:
+        """Return a copy with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def name(self, value: str) -> TransitionedExprParameter:
+        """Return a copy with ``name`` updated."""
+        return self._with_property("name", value)
+
+    def persist(self, value: bool) -> TransitionedExprParameter:
+        """Return a copy with ``persist`` updated."""
+        return self._with_property("persist", value)
+
+    def push(self, value: Literal["outer"]) -> TransitionedExprParameter:
+        """Return a copy with ``push`` updated."""
+        return self._with_property("push", value)
+
+    def transition(
+        self, value: LerpTransition | dict[str, Any]
+    ) -> TransitionedExprParameter:
+        """Return a copy with ``transition`` updated."""
+        return self._with_property("transition", value)
 
 
 class TransitionedMultiscaleStops(GenomeSpySchema):
@@ -49172,11 +49586,14 @@ class UnitSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
         | UndefinedType = Undefined,
+        predicates: dict[str, Any] | UndefinedType = Undefined,
         resolve: ResolveKwds | UndefinedType = Undefined,
         scales: ScalesKwds | UndefinedType = Undefined,
         templates: dict[str, Any] | UndefinedType = Undefined,
@@ -49190,6 +49607,7 @@ class UnitSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -49263,6 +49681,7 @@ class UnitSpec(GenomeSpySchema):
             overhang=overhang,
             padding=padding,
             params=params,
+            predicates=predicates,
             resolve=resolve,
             scales=scales,
             templates=templates,
@@ -49567,7 +49986,7 @@ class UnitSpec(GenomeSpySchema):
         Args:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the GenomeSpy scale documentation for more information about customizing color schemes.
-            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
+            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"``, ``"reverse"``, or ``"both"``. The automatic range contains only ``"forward"`` and ``"reverse"``; use an explicit value or range to select ``"both"``. This channel is supported by arrow marks only and does not create a legend.
             dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
             dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
@@ -49730,13 +50149,19 @@ class UnitSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ],
     ) -> UnitSpec:
         """Return a copy with ``params`` updated."""
         return self._with_property("params", value)
+
+    def predicates(self, value: dict[str, Any]) -> UnitSpec:
+        """Return a copy with ``predicates`` updated."""
+        return self._with_property("predicates", value)
 
     def resolve(self, value: ResolveKwds) -> UnitSpec:
         """Return a copy with ``resolve`` updated."""
@@ -49851,6 +50276,7 @@ class UnitSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -50393,7 +50819,9 @@ class VConcatSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
@@ -50416,6 +50844,7 @@ class VConcatSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -50810,7 +51239,7 @@ class VConcatSpec(GenomeSpySchema):
         Args:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the GenomeSpy scale documentation for more information about customizing color schemes.
-            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
+            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"``, ``"reverse"``, or ``"both"``. The automatic range contains only ``"forward"`` and ``"reverse"``; use an explicit value or range to select ``"both"``. This channel is supported by arrow marks only and does not create a legend.
             dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
             dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
@@ -50951,7 +51380,9 @@ class VConcatSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ],
@@ -51179,6 +51610,7 @@ class VConcatSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -51792,6 +52224,7 @@ class VariableParameter(GenomeSpySchema):
         | BindInput
         | BindInputKwds
         | UndefinedType = Undefined,
+        debounce: float | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         expr: str | UndefinedType = Undefined,
         name: str | UndefinedType = Undefined,
@@ -51803,6 +52236,7 @@ class VariableParameter(GenomeSpySchema):
     ) -> None:
         super().__init__(
             bind=bind,
+            debounce=debounce,
             description=description,
             expr=expr,
             name=name,
@@ -51827,6 +52261,10 @@ class VariableParameter(GenomeSpySchema):
     ) -> VariableParameter:
         """Return a copy with ``bind`` updated."""
         return self._with_property("bind", value)
+
+    def debounce(self, value: float) -> VariableParameter:
+        """Return a copy with ``debounce`` updated."""
+        return self._with_property("debounce", value)
 
     def description(self, value: str) -> VariableParameter:
         """Return a copy with ``description`` updated."""
@@ -52529,11 +52967,14 @@ class ViewSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ]
         | UndefinedType = Undefined,
+        predicates: dict[str, Any] | UndefinedType = Undefined,
         resolve: ResolveKwds | UndefinedType = Undefined,
         scales: ScalesKwds | UndefinedType = Undefined,
         separator: bool
@@ -52557,6 +52998,7 @@ class ViewSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -52647,6 +53089,7 @@ class ViewSpec(GenomeSpySchema):
             overhang=overhang,
             padding=padding,
             params=params,
+            predicates=predicates,
             resolve=resolve,
             scales=scales,
             separator=separator,
@@ -52981,7 +53424,7 @@ class ViewSpec(GenomeSpySchema):
         Args:
             angle (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType): Rotation angle of point and text marks.
             color (FieldOrDatumDefWithConditionMarkPropFieldDefTypeStringNull | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefStringNull | MarkPropExprDefType | ValueDefWithConditionStringNullType): Color of the marks – either fill or stroke color based on the ``filled`` property of mark definition. Note: 1) For fine-grained control over both fill and stroke colors of the marks, please use the ``fill`` and ``stroke`` channels. The ``fill`` or ``stroke`` encodings have higher precedence than ``color``, thus may override the ``color`` encoding if conflicting encodings are specified. 2) See the GenomeSpy scale documentation for more information about customizing color schemes.
-            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"`` or ``"reverse"``. This channel is supported by arrow marks only and does not create a legend.
+            direction (DirectionDef | dict[str, Any]): Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be ``"forward"``, ``"reverse"``, or ``"both"``. The automatic range contains only ``"forward"`` and ``"reverse"``; use an explicit value or range to select ``"both"``. This channel is supported by arrow marks only and does not create a legend.
             dx (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy horizontal pixel offset for point marks.
             dy (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef): Legacy vertical pixel offset for point marks. Positive values move in the opposite direction from ``yOffset``.
             facetIndex (FieldDefWithoutScale | dict[str, Any]): For internal use
@@ -53178,13 +53621,19 @@ class ViewSpec(GenomeSpySchema):
             PlainValueParameter
             | dict[str, Any]
             | TransitionedValueParameter
-            | ExprParameter
+            | PlainExprParameter
+            | TransitionedExprParameter
+            | DebouncedExprParameter
             | SelectionParameter
             | RulerParameter
         ],
     ) -> ViewSpec:
         """Return a copy with ``params`` updated."""
         return self._with_property("params", value)
+
+    def predicates(self, value: dict[str, Any]) -> ViewSpec:
+        """Return a copy with ``predicates`` updated."""
+        return self._with_property("predicates", value)
 
     def resolve(self, value: ResolveKwds) -> ViewSpec:
         """Return a copy with ``resolve`` updated."""
@@ -53416,6 +53865,7 @@ class ViewSpec(GenomeSpySchema):
             | CoordinateLookupParams
             | CrossParams
             | Displace1DParams
+            | Displace2DParams
             | FlattenDelimitedParams
             | FormulaParams
             | LookupParams
@@ -53894,8 +54344,10 @@ __all__ = [
     "Data",
     "DataFormat",
     "DataSource",
+    "DebouncedExprParameter",
     "DirectionDef",
     "Displace1DParams",
+    "Displace2DParams",
     "DomEventType",
     "DomainValue",
     "DomainValueArray",
@@ -53985,6 +54437,7 @@ __all__ = [
     "MultiscaleStopsDef",
     "NamedData",
     "NamedGenomeConfig",
+    "NamedSelectionPredicateRef",
     "NumericDomain",
     "NumericMarkPropDef",
     "NumericStopDef",
@@ -54004,6 +54457,7 @@ __all__ = [
     "Parse",
     "ParseValue",
     "PileupParams",
+    "PlainExprParameter",
     "PlainValueParameter",
     "PointConfig",
     "PointProps",
@@ -54056,6 +54510,8 @@ __all__ = [
     "SelectionFilterParams",
     "SelectionInitIntervalMapping",
     "SelectionParameter",
+    "SelectionPredicateDefinition",
+    "SelectionPredicateOperand",
     "SelectionType",
     "SelectionUnionTest",
     "SeparatorProps",
@@ -54086,6 +54542,7 @@ __all__ = [
     "Tooltip",
     "TooltipDef",
     "TransformParams",
+    "TransitionedExprParameter",
     "TransitionedMultiscaleStops",
     "TransitionedValueParameter",
     "TruncateTextParams",

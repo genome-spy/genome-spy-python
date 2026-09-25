@@ -36,7 +36,9 @@ from genome_spy.schema import (
     Legend,
     MultiscaleSpec,
     Parameter as GeneratedParameter,
+    DebouncedExprParameter,
     ExprParameter,
+    PlainExprParameter,
     PlainValueParameter,
     RulerParameter,
     SCHEMA_VERSION,
@@ -44,6 +46,7 @@ from genome_spy.schema import (
     SelectionParameter,
     Title,
     TransitionedValueParameter,
+    TransitionedExprParameter,
     Scale,
     SelectionDomainRef,
     UnitSpec,
@@ -646,7 +649,7 @@ def test_parameter_factory_selects_exact_schema_leaf() -> None:
 
     assert type(value.param) is PlainValueParameter
     assert type(transitioned.param) is TransitionedValueParameter
-    assert type(expression.param) is ExprParameter
+    assert type(expression.param) is PlainExprParameter
     assert type(selection.param) is SelectionParameter
     assert type(ruler.param) is RulerParameter
     assert expression.param.to_dict()["expr"] == "(value + ' suffix')"
@@ -654,6 +657,32 @@ def test_parameter_factory_selects_exact_schema_leaf() -> None:
         _ = selection + 1
     with pytest.raises(TypeError, match="condition or filter context"):
         selection.to_dict()
+
+
+def test_expression_parameter_timing_variants() -> None:
+    source = gs.param("source", value=1)
+    debounced = gs.param("delayed", expr=source * 2, debounce=100)
+    transitioned = gs.param("smooth", expr=source * 2, transition={"type": "lerp"})
+
+    assert type(debounced.param) is DebouncedExprParameter
+    assert type(transitioned.param) is TransitionedExprParameter
+    chart = (
+        gs.Chart([{"x": 1}]).mark_point().add_params(source, debounced, transitioned)
+    )
+    assert chart.to_dict()["params"][1:] == [
+        {"name": "delayed", "expr": "(source * 2)", "debounce": 100},
+        {"name": "smooth", "expr": "(source * 2)", "transition": {"type": "lerp"}},
+    ]
+    with pytest.raises(TypeError, match="No GenomeSpy parameter variant"):
+        gs.param("invalid", expr=source * 2, debounce=100, transition={"type": "lerp"})
+
+
+def test_parameter_handle_accepts_expression_union_wrapper() -> None:
+    parameter = gs.Parameter(ExprParameter(name="derived", expr="1 + 1"))
+
+    assert not parameter.is_selection
+    chart = gs.Chart([{"x": 1}]).mark_point().add_params(parameter)
+    assert chart.to_dict()["params"] == [{"name": "derived", "expr": "1 + 1"}]
 
 
 def test_public_parameter_handle_derives_selection_semantics() -> None:

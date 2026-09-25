@@ -282,6 +282,11 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("indexof", array, value)
 
     @classmethod
+    def inrange(cls, value: IntoExpression, range: IntoExpression, /) -> Expression:
+        """Build a GenomeSpy ``inrange`` expression."""
+        return _function_expression("inrange", value, range)
+
+    @classmethod
     def lastindexof(cls, array: IntoExpression, value: IntoExpression, /) -> Expression:
         """Build a GenomeSpy ``lastindexof`` expression."""
         return _function_expression("lastindexof", array, value)
@@ -466,6 +471,13 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         if any(argument is Undefined for argument in arguments):
             raise ValueError("zoomLevel optional arguments cannot contain gaps")
         return _function_expression("zoomLevel", *arguments)
+
+    @classmethod
+    def tickStep(
+        cls, start: IntoExpression, stop: IntoExpression, count: IntoExpression, /
+    ) -> Expression:
+        """Build a GenomeSpy ``tickStep`` expression."""
+        return _function_expression("tickStep", start, stop, count)
 
     @classmethod
     def mapHasKey(cls, map: IntoExpression, key: IntoExpression, /) -> Expression:

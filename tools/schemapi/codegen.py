@@ -2843,7 +2843,9 @@ class SchemaWrapperGenerator:
                     ),
                     *(
                         [
-                            _parameter_type_metadata_source(parameter_variants),
+                            _parameter_type_metadata_source(
+                                parameter_variants, self._analyzer.definitions
+                            ),
                             _parameter_helper_source(parameter_variants),
                         ]
                         if parameter_variants
@@ -3830,6 +3832,7 @@ def _core_class_tuple_source(class_names: tuple[str, ...]) -> str:
 
 def _parameter_type_metadata_source(
     variants: tuple[UnionVariantSpec, ...],
+    definitions: dict[str, Any],
 ) -> str:
     """Render private runtime type tuples from the generated parameter union."""
     variant_names = (
@@ -3840,6 +3843,22 @@ def _parameter_type_metadata_source(
             if variant.schema_name is not None
         ),
     )
+    # Keep intermediate union wrappers valid when upstream splits a former leaf.
+    names = list(variant_names)
+    visited: set[str] = set()
+
+    def visit(schema: dict[str, Any]) -> None:
+        name = _ref_name(schema)
+        if name is not None and name not in visited:
+            visited.add(name)
+            if name not in names:
+                names.append(name)
+            visit(definitions[name])
+        for union_keyword in ("anyOf", "oneOf", "allOf"):
+            for branch in schema.get(union_keyword, []):
+                visit(branch)
+
+    visit(definitions["Parameter"])
     selection_variant_names = tuple(
         variant.schema_name
         for variant in variants
@@ -3847,7 +3866,7 @@ def _parameter_type_metadata_source(
     )
     return "\n".join(
         [
-            f"_PARAMETER_TYPES = {_core_class_tuple_source(variant_names)}",
+            f"_PARAMETER_TYPES = {_core_class_tuple_source(tuple(names))}",
             "_SELECTION_PARAMETER_TYPES = "
             + _core_class_tuple_source(selection_variant_names),
         ]

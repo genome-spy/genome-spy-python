@@ -8,7 +8,7 @@ AggregateOp_T: TypeAlias = Literal[
     "count", "valid", "sum", "min", "max", "mean", "q1", "median", "q3", "variance"
 ]
 Align_T: TypeAlias = Literal["left", "center", "right"]
-ArrowDirection_T: TypeAlias = Literal["forward", "reverse"]
+ArrowDirection_T: TypeAlias = Literal["forward", "reverse", "both"]
 AxisOrient_T: TypeAlias = Literal["top", "bottom", "left", "right"]
 AxisPlacement_T: TypeAlias = Literal["outside", "inside"]
 Baseline_T: TypeAlias = Literal["top", "middle", "bottom", "alphabetic", "baseline"]

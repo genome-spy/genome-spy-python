@@ -764,6 +764,7 @@ class ParameterKwds(TypedDict, total=False):
         | BindInput
         | BindInputKwds
     )
+    debounce: float
     description: str
     expr: str
     name: str

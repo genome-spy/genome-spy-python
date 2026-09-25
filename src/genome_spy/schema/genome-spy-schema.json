@@ -185,18 +185,13 @@
         "direction": {
           "anyOf": [
             {
-              "const": "forward",
-              "type": "string"
-            },
-            {
-              "const": "reverse",
-              "type": "string"
+              "$ref": "#/definitions/ArrowDirection"
             },
             {
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Direction of the arrowhead. `\"forward\"` places the arrowhead at the secondary endpoint (`x2`, `y2`). `\"reverse\"` places it at the primary endpoint (`x`, `y`). For data-driven direction, use the `direction` encoding channel.\n\n__Default value:__ `\"forward\"`"
+          "description": "Direction of the arrowhead. `\"forward\"` places the arrowhead at the secondary endpoint (`x2`, `y2`). `\"reverse\"` places it at the primary endpoint (`x`, `y`). `\"both\"` places equivalent heads at both endpoints and suppresses `headSpacing` and `startNotch` for that arrow. For data-driven direction, use the `direction` encoding channel.\n\n__Default value:__ `\"forward\"`"
         },
         "fill": {
           "anyOf": [
@@ -290,7 +285,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Spacing between repeated arrowheads as a multiplier of resolved `size`. The effective spacing is at least the rendered arrowhead footprint, including stroke. If `null`, arrowheads are not repeated.\n\n__Default value:__ `null`"
+          "description": "Spacing between repeated arrowheads as a multiplier of resolved `size`. The effective spacing is at least the rendered arrowhead footprint, including stroke. If `null`, arrowheads are not repeated. Repetition is suppressed when `direction` resolves to `\"both\"`.\n\n__Default value:__ `null`"
         },
         "headWidth": {
           "anyOf": [
@@ -349,7 +344,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Whether to draw a notch at the start of the arrow. The start notch uses the same slope as the arrowhead edge.\n\n__Default value:__ `false`"
+          "description": "Whether to draw a notch at the start of the arrow. The start notch uses the same slope as the arrowhead edge. It is suppressed when `direction` resolves to `\"both\"` because a bidirectional arrow has no unique start.\n\n__Default value:__ `false`"
         },
         "stem": {
           "anyOf": [
@@ -507,7 +502,8 @@
     "ArrowDirection": {
       "enum": [
         "forward",
-        "reverse"
+        "reverse",
+        "both"
       ],
       "type": "string"
     },
@@ -579,18 +575,13 @@
         "direction": {
           "anyOf": [
             {
-              "const": "forward",
-              "type": "string"
-            },
-            {
-              "const": "reverse",
-              "type": "string"
+              "$ref": "#/definitions/ArrowDirection"
             },
             {
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Direction of the arrowhead. `\"forward\"` places the arrowhead at the secondary endpoint (`x2`, `y2`). `\"reverse\"` places it at the primary endpoint (`x`, `y`). For data-driven direction, use the `direction` encoding channel.\n\n__Default value:__ `\"forward\"`"
+          "description": "Direction of the arrowhead. `\"forward\"` places the arrowhead at the secondary endpoint (`x2`, `y2`). `\"reverse\"` places it at the primary endpoint (`x`, `y`). `\"both\"` places equivalent heads at both endpoints and suppresses `headSpacing` and `startNotch` for that arrow. For data-driven direction, use the `direction` encoding channel.\n\n__Default value:__ `\"forward\"`"
         },
         "fill": {
           "anyOf": [
@@ -684,7 +675,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Spacing between repeated arrowheads as a multiplier of resolved `size`. The effective spacing is at least the rendered arrowhead footprint, including stroke. If `null`, arrowheads are not repeated.\n\n__Default value:__ `null`"
+          "description": "Spacing between repeated arrowheads as a multiplier of resolved `size`. The effective spacing is at least the rendered arrowhead footprint, including stroke. If `null`, arrowheads are not repeated. Repetition is suppressed when `direction` resolves to `\"both\"`.\n\n__Default value:__ `null`"
         },
         "headWidth": {
           "anyOf": [
@@ -743,7 +734,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Whether to draw a notch at the start of the arrow. The start notch uses the same slope as the arrowhead edge.\n\n__Default value:__ `false`"
+          "description": "Whether to draw a notch at the start of the arrow. The start notch uses the same slope as the arrowhead edge. It is suppressed when `direction` resolves to `\"both\"` because a bidirectional arrow has no unique start.\n\n__Default value:__ `false`"
         },
         "stem": {
           "anyOf": [
@@ -2255,7 +2246,7 @@
               "type": "string"
             }
           ],
-          "description": "Whether the brush rectangle should be clipped to the viewport.\n\n__Default value:__ `true`"
+          "description": "Clip the brush rectangle to the viewport along the selected axes. An explicit value overrides this direction-based default.\n\n__Default value:__ `\"x\"` for x selections, `\"y\"` for y selections, and `true` for x/y selections."
         },
         "cursor": {
           "anyOf": [
@@ -2613,7 +2604,7 @@
       "properties": {
         "axes": {
           "additionalProperties": false,
-          "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
           "properties": {
             "x": {
               "additionalProperties": false,
@@ -3623,7 +3614,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+          "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -3906,6 +3897,27 @@
           "description": "Filter using a parameter name.",
           "type": "string"
         },
+        "project": {
+          "additionalProperties": false,
+          "description": "Bind interval selection components to positional channels of this mark. For example, `{ \"x\": \"x2\" }` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.",
+          "properties": {
+            "x": {
+              "enum": [
+                "x",
+                "x2"
+              ],
+              "type": "string"
+            },
+            "y": {
+              "enum": [
+                "y",
+                "y2"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
         "resolutionChannel": {
           "$ref": "#/definitions/ChannelWithScale",
           "description": "An alternative channel for scale resolution.\n\nThis is mainly for internal use and allows using `color` channel to resolve `fill` and `stroke` channels under certain circumstances."
@@ -3979,6 +3991,27 @@
           "description": "Filter using a parameter name.",
           "type": "string"
         },
+        "project": {
+          "additionalProperties": false,
+          "description": "Bind interval selection components to positional channels of this mark. For example, `{ \"x\": \"x2\" }` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.",
+          "properties": {
+            "x": {
+              "enum": [
+                "x",
+                "x2"
+              ],
+              "type": "string"
+            },
+            "y": {
+              "enum": [
+                "y",
+                "y2"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
         "resolutionChannel": {
           "$ref": "#/definitions/ChannelWithScale",
           "description": "An alternative channel for scale resolution.\n\nThis is mainly for internal use and allows using `color` channel to resolve `fill` and `stroke` channels under certain circumstances."
@@ -4050,6 +4083,27 @@
           "description": "Filter using a parameter name.",
           "type": "string"
         },
+        "project": {
+          "additionalProperties": false,
+          "description": "Bind interval selection components to positional channels of this mark. For example, `{ \"x\": \"x2\" }` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.",
+          "properties": {
+            "x": {
+              "enum": [
+                "x",
+                "x2"
+              ],
+              "type": "string"
+            },
+            "y": {
+              "enum": [
+                "y",
+                "y2"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
         "resolutionChannel": {
           "$ref": "#/definitions/ChannelWithScale",
           "description": "An alternative channel for scale resolution.\n\nThis is mainly for internal use and allows using `color` channel to resolve `fill` and `stroke` channels under certain circumstances."
@@ -4120,6 +4174,27 @@
           "description": "Filter using a parameter name.",
           "type": "string"
         },
+        "project": {
+          "additionalProperties": false,
+          "description": "Bind interval selection components to positional channels of this mark. For example, `{ \"x\": \"x2\" }` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.",
+          "properties": {
+            "x": {
+              "enum": [
+                "x",
+                "x2"
+              ],
+              "type": "string"
+            },
+            "y": {
+              "enum": [
+                "y",
+                "y2"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
         "resolutionChannel": {
           "$ref": "#/definitions/ChannelWithScale",
           "description": "An alternative channel for scale resolution.\n\nThis is mainly for internal use and allows using `color` channel to resolve `fill` and `stroke` channels under certain circumstances."
@@ -4188,6 +4263,27 @@
           "description": "Filter using a parameter name.",
           "type": "string"
         },
+        "project": {
+          "additionalProperties": false,
+          "description": "Bind interval selection components to positional channels of this mark. For example, `{ \"x\": \"x2\" }` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.",
+          "properties": {
+            "x": {
+              "enum": [
+                "x",
+                "x2"
+              ],
+              "type": "string"
+            },
+            "y": {
+              "enum": [
+                "y",
+                "y2"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
         "resolutionChannel": {
           "$ref": "#/definitions/ChannelWithScale",
           "description": "An alternative channel for scale resolution.\n\nThis is mainly for internal use and allows using `color` channel to resolve `fill` and `stroke` channels under certain circumstances."
@@ -4234,6 +4330,27 @@
           "description": "Filter using a parameter name.",
           "type": "string"
         },
+        "project": {
+          "additionalProperties": false,
+          "description": "Bind interval selection components to positional channels of this mark. For example, `{ \"x\": \"x2\" }` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.",
+          "properties": {
+            "x": {
+              "enum": [
+                "x",
+                "x2"
+              ],
+              "type": "string"
+            },
+            "y": {
+              "enum": [
+                "y",
+                "y2"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
         "title": {
           "description": "A title for the field. If `null`, the title will be removed.",
           "type": [
@@ -4273,6 +4390,27 @@
         "param": {
           "description": "Filter using a parameter name.",
           "type": "string"
+        },
+        "project": {
+          "additionalProperties": false,
+          "description": "Bind interval selection components to positional channels of this mark. For example, `{ \"x\": \"x2\" }` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.",
+          "properties": {
+            "x": {
+              "enum": [
+                "x",
+                "x2"
+              ],
+              "type": "string"
+            },
+            "y": {
+              "enum": [
+                "y",
+                "y2"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
         },
         "title": {
           "description": "A title for the field. If `null`, the title will be removed.",
@@ -4352,10 +4490,10 @@
         "test": {
           "anyOf": [
             {
-              "$ref": "#/definitions/ParameterPredicate"
+              "$ref": "#/definitions/SelectionPredicateDefinition"
             },
             {
-              "$ref": "#/definitions/SelectionUnionTest"
+              "$ref": "#/definitions/NamedSelectionPredicateRef"
             }
           ]
         },
@@ -4427,10 +4565,10 @@
         "test": {
           "anyOf": [
             {
-              "$ref": "#/definitions/ParameterPredicate"
+              "$ref": "#/definitions/SelectionPredicateDefinition"
             },
             {
-              "$ref": "#/definitions/SelectionUnionTest"
+              "$ref": "#/definitions/NamedSelectionPredicateRef"
             }
           ]
         },
@@ -4500,10 +4638,10 @@
         "test": {
           "anyOf": [
             {
-              "$ref": "#/definitions/ParameterPredicate"
+              "$ref": "#/definitions/SelectionPredicateDefinition"
             },
             {
-              "$ref": "#/definitions/SelectionUnionTest"
+              "$ref": "#/definitions/NamedSelectionPredicateRef"
             }
           ]
         },
@@ -4572,10 +4710,10 @@
         "test": {
           "anyOf": [
             {
-              "$ref": "#/definitions/ParameterPredicate"
+              "$ref": "#/definitions/SelectionPredicateDefinition"
             },
             {
-              "$ref": "#/definitions/SelectionUnionTest"
+              "$ref": "#/definitions/NamedSelectionPredicateRef"
             }
           ]
         },
@@ -4642,10 +4780,10 @@
         "test": {
           "anyOf": [
             {
-              "$ref": "#/definitions/ParameterPredicate"
+              "$ref": "#/definitions/SelectionPredicateDefinition"
             },
             {
-              "$ref": "#/definitions/SelectionUnionTest"
+              "$ref": "#/definitions/NamedSelectionPredicateRef"
             }
           ]
         },
@@ -4675,10 +4813,10 @@
         "test": {
           "anyOf": [
             {
-              "$ref": "#/definitions/ParameterPredicate"
+              "$ref": "#/definitions/SelectionPredicateDefinition"
             },
             {
-              "$ref": "#/definitions/SelectionUnionTest"
+              "$ref": "#/definitions/NamedSelectionPredicateRef"
             }
           ]
         },
@@ -4717,10 +4855,10 @@
         "test": {
           "anyOf": [
             {
-              "$ref": "#/definitions/ParameterPredicate"
+              "$ref": "#/definitions/SelectionPredicateDefinition"
             },
             {
-              "$ref": "#/definitions/SelectionUnionTest"
+              "$ref": "#/definitions/NamedSelectionPredicateRef"
             }
           ]
         },
@@ -4889,7 +5027,7 @@
             },
             "axes": {
               "additionalProperties": false,
-              "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
               "properties": {
                 "x": {
                   "additionalProperties": false,
@@ -5894,6 +6032,13 @@
               },
               "type": "array"
             },
+            "predicates": {
+              "additionalProperties": {
+                "$ref": "#/definitions/SelectionPredicateDefinition"
+              },
+              "description": "Define a selection test once instead of repeating it across this unit's conditional encodings, including conditional draw order. Use `test: { ref: \"name\" }` in a condition to reference it.\n\nDefinitions are local to this unit and are not inherited. An inherited encoding may reference a name if each consuming unit defines it. Selection parameters and projected channels resolve in this unit. Filter transforms do not use these definitions.",
+              "type": "object"
+            },
             "resolve": {
               "additionalProperties": false,
               "description": "Specifies how scales, axes, and legends are [resolved](https://genomespy.app/docs/grammar/composition/#scale-axis-and-legend-resolution) in the view hierarchy.\n\nIf legend resolution is not configured explicitly, it follows the corresponding scale resolution.",
@@ -5912,7 +6057,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+              "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -6099,7 +6244,7 @@
             },
             "axes": {
               "additionalProperties": false,
-              "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
               "properties": {
                 "x": {
                   "additionalProperties": false,
@@ -7130,7 +7275,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+              "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -7316,7 +7461,7 @@
             },
             "axes": {
               "additionalProperties": false,
-              "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
               "properties": {
                 "x": {
                   "additionalProperties": false,
@@ -8347,7 +8492,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+              "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -8551,7 +8696,7 @@
             },
             "axes": {
               "additionalProperties": false,
-              "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
               "properties": {
                 "x": {
                   "additionalProperties": false,
@@ -9559,7 +9704,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+              "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -9783,7 +9928,7 @@
             },
             "axes": {
               "additionalProperties": false,
-              "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
               "properties": {
                 "x": {
                   "additionalProperties": false,
@@ -10804,7 +10949,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+              "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -11002,7 +11147,7 @@
             },
             "axes": {
               "additionalProperties": false,
-              "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+              "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
               "properties": {
                 "x": {
                   "additionalProperties": false,
@@ -12027,7 +12172,7 @@
             },
             "scales": {
               "additionalProperties": false,
-              "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+              "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
               "properties": {
                 "angle": {
                   "$ref": "#/definitions/Scale"
@@ -12416,6 +12561,43 @@
         }
       ]
     },
+    "DebouncedExprParameter": {
+      "additionalProperties": false,
+      "properties": {
+        "debounce": {
+          "description": "Delays publication until the expression dependencies have remained unchanged for the specified number of milliseconds. The initial value is published immediately.",
+          "minimum": 0,
+          "type": "number"
+        },
+        "description": {
+          "description": "A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.",
+          "type": "string"
+        },
+        "expr": {
+          "description": "An expression for the value of the parameter. This expression may include other parameters, in which case the parameter will automatically update in response to upstream parameter changes.",
+          "type": "string"
+        },
+        "name": {
+          "description": "A unique name for the variable parameter. Parameter names should be valid JavaScript identifiers: they should contain only alphanumeric characters (or \"$\", or \"_\") and may not start with a digit. Reserved keywords that may not be used as parameter names are: \"datum\".",
+          "type": "string"
+        },
+        "persist": {
+          "description": "Whether the parameter should be persisted in bookmarks and provenance.\n\nThis primarily affects GenomeSpy App behavior. Set to `false` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing `encoding.key`.\n\n__Default value:__ `true`",
+          "type": "boolean"
+        },
+        "push": {
+          "const": "outer",
+          "description": "Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first.\n\nThis is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "debounce",
+        "expr",
+        "name"
+      ],
+      "type": "object"
+    },
     "DirectionDef": {
       "anyOf": [
         {
@@ -12601,6 +12783,106 @@
       ],
       "type": "object"
     },
+    "Displace2DParams": {
+      "additionalProperties": false,
+      "description": "Progressively displaces axis-aligned rectangles to reduce overlap while keeping them close to positions mapped through the view's x and y scales. Every input row receives signed pixel offsets. Earlier rows have higher placement priority.",
+      "properties": {
+        "anchorHeight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Field"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Height in logical pixels of an obstacle centered on the anchor. A number or expression supplies one value for all rows; a field supplies per-row values. Setting either anchor dimension to zero disables the obstacle for that row.\n\n__Default value:__ `0`"
+        },
+        "anchorWidth": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Field"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Width in logical pixels of an obstacle centered on the anchor. A number or expression supplies one value for all rows; a field supplies per-row values. Setting either anchor dimension to zero disables the obstacle for that row.\n\n__Default value:__ `0`"
+        },
+        "as": {
+          "description": "Names of the output fields for signed horizontal and vertical pixel offsets. Positive values move right and down, respectively. Neither name may overwrite `key`.\n\n__Default value:__ `[\"xDisplacement\", \"yDisplacement\"]`",
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "description": {
+          "description": "A description of the transform step. Can be used for documentation and agent context.",
+          "type": "string"
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Field"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Collision height in logical pixels, including any desired vertical spacing. A number or expression supplies one value for all rows; a field supplies per-row values. Values must be non-negative. Setting either collision dimension to zero disables displacement for that row."
+        },
+        "key": {
+          "$ref": "#/definitions/Field",
+          "description": "Field containing a unique string or finite numeric identifier. Use a key to preserve placement when upstream transforms replace, filter, or reorder rows. Without a key, placement state follows row object identity."
+        },
+        "type": {
+          "const": "displace2d",
+          "description": "The type of the transform to be applied",
+          "type": "string"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/Field"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Collision width in logical pixels, including any desired horizontal spacing. A number or expression supplies one value for all rows; a field supplies per-row values. Values must be non-negative. Setting either collision dimension to zero disables displacement for that row."
+        },
+        "x": {
+          "$ref": "#/definitions/Field",
+          "description": "Field containing the anchor value mapped through the view's x scale."
+        },
+        "y": {
+          "$ref": "#/definitions/Field",
+          "description": "Field containing the anchor value mapped through the view's y scale."
+        }
+      },
+      "required": [
+        "height",
+        "type",
+        "width",
+        "x",
+        "y"
+      ],
+      "type": "object"
+    },
     "DomEventType": {
       "anyOf": [
         {
@@ -12747,7 +13029,7 @@
         },
         "direction": {
           "$ref": "#/definitions/DirectionDef",
-          "description": "Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be `\"forward\"` or `\"reverse\"`.\n\nThis channel is supported by arrow marks only and does not create a legend."
+          "description": "Direction of arrow marks. Encoded values are mapped with a discrete scale whose range values must be `\"forward\"`, `\"reverse\"`, or `\"both\"`. The automatic range contains only `\"forward\"` and `\"reverse\"`; use an explicit value or range to select `\"both\"`.\n\nThis channel is supported by arrow marks only and does not create a legend."
         },
         "dx": {
           "anyOf": [
@@ -13286,6 +13568,11 @@
     "ExprFilterParams": {
       "additionalProperties": false,
       "properties": {
+        "debounce": {
+          "description": "Trailing-edge delay in milliseconds before requesting dataflow replay after a reactive expression dependency changes. Repeated changes restart the delay.\n\nParameter updates and incoming data are not delayed. Incoming batches use current parameter values, and a completed batch satisfies any pending reactive replay. The delay does not wait for independently scheduled lazy data loads.\n\n__Default value:__ no delay",
+          "minimum": 0,
+          "type": "number"
+        },
         "description": {
           "description": "A description of the transform step. Can be used for documentation and agent context.",
           "type": "string"
@@ -13307,39 +13594,17 @@
       "type": "object"
     },
     "ExprParameter": {
-      "additionalProperties": false,
-      "properties": {
-        "description": {
-          "description": "A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.",
-          "type": "string"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/PlainExprParameter"
         },
-        "expr": {
-          "description": "An expression for the value of the parameter. This expression may include other parameters, in which case the parameter will automatically update in response to upstream parameter changes.",
-          "type": "string"
+        {
+          "$ref": "#/definitions/TransitionedExprParameter"
         },
-        "name": {
-          "description": "A unique name for the variable parameter. Parameter names should be valid JavaScript identifiers: they should contain only alphanumeric characters (or \"$\", or \"_\") and may not start with a digit. Reserved keywords that may not be used as parameter names are: \"datum\".",
-          "type": "string"
-        },
-        "persist": {
-          "description": "Whether the parameter should be persisted in bookmarks and provenance.\n\nThis primarily affects GenomeSpy App behavior. Set to `false` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing `encoding.key`.\n\n__Default value:__ `true`",
-          "type": "boolean"
-        },
-        "push": {
-          "const": "outer",
-          "description": "Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first.\n\nThis is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.",
-          "type": "string"
-        },
-        "transition": {
-          "$ref": "#/definitions/ParamTransition",
-          "description": "Smoothly follows numeric expression output values."
+        {
+          "$ref": "#/definitions/DebouncedExprParameter"
         }
-      },
-      "required": [
-        "expr",
-        "name"
-      ],
-      "type": "object"
+      ]
     },
     "ExprRef": {
       "additionalProperties": false,
@@ -14117,6 +14382,11 @@
           "description": "The (new) field where the computed value is written to",
           "type": "string"
         },
+        "debounce": {
+          "description": "Trailing-edge delay in milliseconds before requesting dataflow replay after a reactive expression dependency changes. Repeated changes restart the delay.\n\nParameter updates and incoming data are not delayed. Incoming batches use current parameter values, and a completed batch satisfies any pending reactive replay. The delay does not wait for independently scheduled lazy data loads.\n\n__Default value:__ no delay",
+          "minimum": 0,
+          "type": "number"
+        },
         "description": {
           "description": "A description of the transform step. Can be used for documentation and agent context.",
           "type": "string"
@@ -14795,7 +15065,7 @@
         },
         "axes": {
           "additionalProperties": false,
-          "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
           "properties": {
             "x": {
               "additionalProperties": false,
@@ -15801,7 +16071,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+          "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -16380,7 +16650,7 @@
       "properties": {
         "axes": {
           "additionalProperties": false,
-          "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
           "properties": {
             "x": {
               "additionalProperties": false,
@@ -17396,7 +17666,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+          "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -19661,7 +19931,7 @@
       "properties": {
         "axes": {
           "additionalProperties": false,
-          "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
           "properties": {
             "x": {
               "additionalProperties": false,
@@ -20677,7 +20947,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+          "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -20899,6 +21169,19 @@
         }
       ]
     },
+    "NamedSelectionPredicateRef": {
+      "additionalProperties": false,
+      "description": "Reference to a named selection predicate in the consuming unit view.",
+      "properties": {
+        "ref": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "type": "object"
+    },
     "NumericDomain": {
       "items": {
         "type": "number"
@@ -20952,6 +21235,27 @@
               "description": "Filter using a parameter name.",
               "type": "string"
             },
+            "project": {
+              "additionalProperties": false,
+              "description": "Bind interval selection components to positional channels of this mark. For example, `{ \"x\": \"x2\" }` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.",
+              "properties": {
+                "x": {
+                  "enum": [
+                    "x",
+                    "x2"
+                  ],
+                  "type": "string"
+                },
+                "y": {
+                  "enum": [
+                    "y",
+                    "y2"
+                  ],
+                  "type": "string"
+                }
+              },
+              "type": "object"
+            },
             "value": {
               "type": "number"
             }
@@ -20968,10 +21272,10 @@
             "test": {
               "anyOf": [
                 {
-                  "$ref": "#/definitions/ParameterPredicate"
+                  "$ref": "#/definitions/SelectionPredicateDefinition"
                 },
                 {
-                  "$ref": "#/definitions/SelectionUnionTest"
+                  "$ref": "#/definitions/NamedSelectionPredicateRef"
                 }
               ]
             },
@@ -21200,6 +21504,27 @@
         "param": {
           "description": "Filter using a parameter name.",
           "type": "string"
+        },
+        "project": {
+          "additionalProperties": false,
+          "description": "Bind interval selection components to positional channels of this mark. For example, `{ \"x\": \"x2\" }` tests the selected x interval against x2 alone. Each selected component must be mapped when this is provided. The target must be an unconditional field encoding of the same data type.",
+          "properties": {
+            "x": {
+              "enum": [
+                "x",
+                "x2"
+              ],
+              "type": "string"
+            },
+            "y": {
+              "enum": [
+                "y",
+                "y2"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
         }
       },
       "required": [
@@ -21279,6 +21604,37 @@
         "end",
         "start",
         "type"
+      ],
+      "type": "object"
+    },
+    "PlainExprParameter": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "description": "A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.",
+          "type": "string"
+        },
+        "expr": {
+          "description": "An expression for the value of the parameter. This expression may include other parameters, in which case the parameter will automatically update in response to upstream parameter changes.",
+          "type": "string"
+        },
+        "name": {
+          "description": "A unique name for the variable parameter. Parameter names should be valid JavaScript identifiers: they should contain only alphanumeric characters (or \"$\", or \"_\") and may not start with a digit. Reserved keywords that may not be used as parameter names are: \"datum\".",
+          "type": "string"
+        },
+        "persist": {
+          "description": "Whether the parameter should be persisted in bookmarks and provenance.\n\nThis primarily affects GenomeSpy App behavior. Set to `false` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing `encoding.key`.\n\n__Default value:__ `true`",
+          "type": "boolean"
+        },
+        "push": {
+          "const": "outer",
+          "description": "Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first.\n\nThis is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expr",
+        "name"
       ],
       "type": "object"
     },
@@ -26176,6 +26532,11 @@
     "SelectionFilterParams": {
       "additionalProperties": false,
       "properties": {
+        "debounce": {
+          "description": "Trailing-edge delay in milliseconds before requesting dataflow replay after a reactive expression dependency changes. Repeated changes restart the delay.\n\nParameter updates and incoming data are not delayed. Incoming batches use current parameter values, and a completed batch satisfies any pending reactive replay. The delay does not wait for independently scheduled lazy data loads.\n\n__Default value:__ no delay",
+          "minimum": 0,
+          "type": "number"
+        },
         "description": {
           "description": "A description of the transform step. Can be used for documentation and agent context.",
           "type": "string"
@@ -26285,6 +26646,69 @@
         "select"
       ],
       "type": "object"
+    },
+    "SelectionPredicateDefinition": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/SelectionPredicateOperand"
+        },
+        {
+          "$ref": "#/definitions/SelectionUnionTest"
+        }
+      ],
+      "description": "A selection test; definitions cannot refer to other named predicates."
+    },
+    "SelectionPredicateOperand": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ParameterPredicate"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "and": {
+              "items": {
+                "$ref": "#/definitions/SelectionPredicateOperand"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "and"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "or": {
+              "items": {
+                "$ref": "#/definitions/SelectionPredicateOperand"
+              },
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "or"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "not": {
+              "$ref": "#/definitions/SelectionPredicateOperand"
+            }
+          },
+          "required": [
+            "not"
+          ],
+          "type": "object"
+        }
+      ],
+      "description": "Selection predicates may be combined under a condition's `test` property."
     },
     "SelectionType": {
       "enum": [
@@ -27314,18 +27738,13 @@
             {
               "anyOf": [
                 {
-                  "const": "forward",
-                  "type": "string"
-                },
-                {
-                  "const": "reverse",
-                  "type": "string"
+                  "$ref": "#/definitions/ArrowDirection"
                 },
                 {
                   "$ref": "#/definitions/ExprRef"
                 }
               ],
-              "description": "Direction of the arrowhead. `\"forward\"` places the arrowhead at the secondary endpoint (`x2`, `y2`). `\"reverse\"` places it at the primary endpoint (`x`, `y`). For data-driven direction, use the `direction` encoding channel.\n\n__Default value:__ `\"forward\"`"
+              "description": "Direction of the arrowhead. `\"forward\"` places the arrowhead at the secondary endpoint (`x2`, `y2`). `\"reverse\"` places it at the primary endpoint (`x`, `y`). `\"both\"` places equivalent heads at both endpoints and suppresses `headSpacing` and `startNotch` for that arrow. For data-driven direction, use the `direction` encoding channel.\n\n__Default value:__ `\"forward\"`"
             },
             {
               "$ref": "#/definitions/LegendDirection",
@@ -27737,7 +28156,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Spacing between repeated arrowheads as a multiplier of resolved `size`. The effective spacing is at least the rendered arrowhead footprint, including stroke. If `null`, arrowheads are not repeated.\n\n__Default value:__ `null`"
+          "description": "Spacing between repeated arrowheads as a multiplier of resolved `size`. The effective spacing is at least the rendered arrowhead footprint, including stroke. If `null`, arrowheads are not repeated. Repetition is suppressed when `direction` resolves to `\"both\"`.\n\n__Default value:__ `null`"
         },
         "headWidth": {
           "anyOf": [
@@ -28346,7 +28765,7 @@
               "$ref": "#/definitions/ExprRef"
             }
           ],
-          "description": "Whether to draw a notch at the start of the arrow. The start notch uses the same slope as the arrowhead edge.\n\n__Default value:__ `false`"
+          "description": "Whether to draw a notch at the start of the arrow. The start notch uses the same slope as the arrowhead edge. It is suppressed when `direction` resolves to `\"both\"` because a bidirectional arrow has no unique start.\n\n__Default value:__ `false`"
         },
         "stem": {
           "anyOf": [
@@ -30751,6 +31170,9 @@
           "$ref": "#/definitions/Displace1DParams"
         },
         {
+          "$ref": "#/definitions/Displace2DParams"
+        },
+        {
           "$ref": "#/definitions/FlattenDelimitedParams"
         },
         {
@@ -30823,6 +31245,42 @@
           "$ref": "#/definitions/WindowParams"
         }
       ]
+    },
+    "TransitionedExprParameter": {
+      "additionalProperties": false,
+      "properties": {
+        "description": {
+          "description": "A description of the parameter. Can be used for documentation and to explain the meaning of the control or selection.",
+          "type": "string"
+        },
+        "expr": {
+          "description": "An expression for the value of the parameter. This expression may include other parameters, in which case the parameter will automatically update in response to upstream parameter changes.",
+          "type": "string"
+        },
+        "name": {
+          "description": "A unique name for the variable parameter. Parameter names should be valid JavaScript identifiers: they should contain only alphanumeric characters (or \"$\", or \"_\") and may not start with a digit. Reserved keywords that may not be used as parameter names are: \"datum\".",
+          "type": "string"
+        },
+        "persist": {
+          "description": "Whether the parameter should be persisted in bookmarks and provenance.\n\nThis primarily affects GenomeSpy App behavior. Set to `false` for ephemeral params (e.g., hover selections) or when the selection cannot be persisted due to missing `encoding.key`.\n\n__Default value:__ `true`",
+          "type": "boolean"
+        },
+        "push": {
+          "const": "outer",
+          "description": "Reuses the nearest same-named parameter in an ancestor scope and writes updates to it. Declare the target parameter on the ancestor first.\n\nThis is useful when interaction in a child view updates state owned by a composed view, such as a parameter that controls a shared scale.",
+          "type": "string"
+        },
+        "transition": {
+          "$ref": "#/definitions/ParamTransition",
+          "description": "Smoothly follows numeric expression output values."
+        }
+      },
+      "required": [
+        "expr",
+        "name",
+        "transition"
+      ],
+      "type": "object"
     },
     "TransitionedMultiscaleStops": {
       "additionalProperties": false,
@@ -30969,7 +31427,7 @@
       "properties": {
         "axes": {
           "additionalProperties": false,
-          "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
           "properties": {
             "x": {
               "additionalProperties": false,
@@ -31959,6 +32417,13 @@
           },
           "type": "array"
         },
+        "predicates": {
+          "additionalProperties": {
+            "$ref": "#/definitions/SelectionPredicateDefinition"
+          },
+          "description": "Define a selection test once instead of repeating it across this unit's conditional encodings, including conditional draw order. Use `test: { ref: \"name\" }` in a condition to reference it.\n\nDefinitions are local to this unit and are not inherited. An inherited encoding may reference a name if each consuming unit defines it. Selection parameters and projected channels resolve in this unit. Filter transforms do not use these definitions.",
+          "type": "object"
+        },
         "resolve": {
           "additionalProperties": false,
           "description": "Specifies how scales, axes, and legends are [resolved](https://genomespy.app/docs/grammar/composition/#scale-axis-and-legend-resolution) in the view hierarchy.\n\nIf legend resolution is not configured explicitly, it follows the corresponding scale resolution.",
@@ -31977,7 +32442,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+          "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"
@@ -32319,7 +32784,7 @@
         },
         "axes": {
           "additionalProperties": false,
-          "description": "Defines properties for axis resolutions used by this view subtree.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
+          "description": "Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here.\n\nUse this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.",
           "properties": {
             "x": {
               "additionalProperties": false,
@@ -33312,7 +33777,7 @@
         },
         "scales": {
           "additionalProperties": false,
-          "description": "Defines properties for scale resolutions used by this view subtree.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
+          "description": "Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding `axes` property when an axis is needed without a positional encoding.\n\nUse this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.",
           "properties": {
             "angle": {
               "$ref": "#/definitions/Scale"

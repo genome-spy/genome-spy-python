@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.88.1",
+  "schema_version": "0.89.0",
   "definitions": [
     "AggregateOp",
     "AggregateParams",
@@ -72,8 +72,10 @@
     "Data",
     "DataFormat",
     "DataSource",
+    "DebouncedExprParameter",
     "DirectionDef",
     "Displace1DParams",
+    "Displace2DParams",
     "DomEventType",
     "DomainValue",
     "DomainValueArray",
@@ -163,6 +165,7 @@
     "MultiscaleStopsDef",
     "NamedData",
     "NamedGenomeConfig",
+    "NamedSelectionPredicateRef",
     "NumericDomain",
     "NumericMarkPropDef",
     "NumericStopDef",
@@ -182,6 +185,7 @@
     "Parse",
     "ParseValue",
     "PileupParams",
+    "PlainExprParameter",
     "PlainValueParameter",
     "PointConfig",
     "PointProps",
@@ -234,6 +238,8 @@
     "SelectionFilterParams",
     "SelectionInitIntervalMapping",
     "SelectionParameter",
+    "SelectionPredicateDefinition",
+    "SelectionPredicateOperand",
     "SelectionType",
     "SelectionUnionTest",
     "SeparatorProps",
@@ -264,6 +270,7 @@
     "Tooltip",
     "TooltipDef",
     "TransformParams",
+    "TransitionedExprParameter",
     "TransitionedMultiscaleStops",
     "TransitionedValueParameter",
     "TruncateTextParams",
@@ -373,6 +380,11 @@
       "schema": "Displace1DParams",
       "type": "displace1d",
       "method": "transform_displace1d"
+    },
+    {
+      "schema": "Displace2DParams",
+      "type": "displace2d",
+      "method": "transform_displace2d"
     },
     {
       "schema": "FlattenDelimitedParams",

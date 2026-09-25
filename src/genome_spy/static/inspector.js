@@ -1,4 +1,4 @@
-// Vendored from GenomeSpy 0.88.1.
+// Vendored from GenomeSpy 0.89.0.
 var Xn=Object.defineProperty;var Kn=(t,e)=>()=>(t&&(e=t(t=0)),e);var Zn=(t,e)=>{for(var n in e)Xn(t,n,{get:e[n],enumerable:!0})};var Ft={};Zn(Ft,{GsInspectorPanel:()=>De});function Me(t,e){if(!Rt(t)||!t.hasOwnProperty("raw"))throw Error("invalid template strings array");return xe===void 0?e:xe.createHTML(e)}function G(t,e,n=t,a){if(e===q)return e;let i=a===void 0?n._$Cl:n._$Co?.[a],r=at(e)?void 0:e._$litDirective$;return i?.constructor!==r&&(i?._$AO?.(!1),r===void 0?i=void 0:(i=new r(t),i._$AT(t,n,a)),a===void 0?n._$Cl=i:(n._$Co??=[])[a]=i),i!==void 0&&(e=G(t,i._$AS(t,e.values),i,a)),e}function Pt(t){let e=Object.entries(t);return e.length?e.map(([n,a])=>n+": "+a).join(", "):"-"}function wa(t){return t.disposed?"disposed":t.initialized?t.completed?"done":"active":"new"}function L(t){return t===void 0?"-":typeof t=="string"?t:JSON.stringify(t)}function ze(t){return c`
         <table>
             <thead>

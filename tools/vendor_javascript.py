@@ -42,9 +42,9 @@ def main() -> None:
             with tarfile.open(archive_path, "r:gz") as archive:
                 archive.extractall(destination, filter="data")
 
-        font_license = (work / "core/package/dist/src/fonts/OFL.txt").read_text(
-            encoding="utf-8"
-        )
+        font_license = (
+            work / "core/package/dist/src/rendering/webgl/fonts/OFL.txt"
+        ).read_text(encoding="utf-8")
         (ROOT / "LICENSES/LATO-OFL-1.1.txt").write_text(font_license, encoding="utf-8")
         for output, entry in (
             ("genome-spy", "core/package/dist/bundle/index.es.js"),
