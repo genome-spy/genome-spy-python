@@ -103,7 +103,7 @@ and reactive parameters in
 A selection parameter stores what the user picks. Use
 {py:func}`~genome_spy.selection_point` for discrete marks
 Use {py:func}`~genome_spy.when` to make an encoding conditional: choose one
-visual value when a condition matches (`.then(...)`) and optionally another when it does not (`.otherwise(...)`). This reacts to a selection or a value parameter, for example, changing a mark’s color, opacity, size, or outline.
+visual value when a condition matches (`.then(...)`) and optionally another when it does not (`.otherwise(...)`). This reacts to a selection, for example, changing a mark’s color, opacity, size, or outline.
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -128,6 +128,36 @@ identify it. This helps the chart keep the right point selected if its data is
 updated or reordered.
 
 See [point](https://genomespy.app/docs/grammar/parameters/#point-selection) for more configuration options.
+
+### Compose selection conditions
+
+`gs.when()` also accepts GenomeSpy predicate mappings. Combine selection handles
+with `and`, `or`, and `not`; each handle retains its own `empty` behavior:
+
+```python
+selected = gs.selection_point("selected", empty=False)
+brush = gs.selection_interval("brush", encodings=["x"])
+color = (
+    gs.when({"and": [brush, {"not": selected}]})
+    .then(gs.value("red"))
+    .otherwise(gs.value("gray"))
+)
+```
+
+Attach both declarations with `.add_params(brush, selected)`. To test the
+second endpoint of a ranged mark, use
+`gs.when({"param": brush, "project": {"x": "x2"}})`. An explicit `empty`
+key in that mapping overrides the handle's setting for this condition.
+
+For a predicate reused across encodings, define it on the unit chart with
+`.properties(predicates={"highlight": {"and": [{"param": "brush"}, {"param": "selected"}]}})`
+and use `gs.when({"ref": "highlight"})`. Named definitions contain selection
+names and cannot reference other named predicates. Generated predicate schema
+objects are accepted too. These are selection tests; arbitrary expression and
+value parameters are not accepted by `gs.when()`.
+
+The [PISA squid plot](../gallery/pisa_squid) combines projected brushes and
+Shift-hover, sharing one named predicate across three encodings.
 
 ## Select intervals with brushing
 
