@@ -51,5 +51,4 @@ chart = (
         text=gs.Text("base:N"),
         color=gs.Color("base:N").scale(base_colors).legend(None),
     )
-    .properties(title="Sequence logo")
 )

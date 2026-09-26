@@ -203,6 +203,7 @@ def test_heatmap_with_text_generates_grid_and_separates_text_colors() -> None:
         "project",
         "formula",
     ]
+    assert "title" not in spec
     assert spec["encoding"]["x"]["type"] == "index"
     assert spec["encoding"]["y"]["type"] == "index"
     assert spec["resolve"]["scale"]["color"] == "independent"
@@ -358,9 +359,23 @@ def test_sequence_examples_use_typed_sort_and_data_format_helpers() -> None:
 def test_sequence_logo_zooms_only_along_positions() -> None:
     gallery = _load_gallery()
     spec = gallery.collect_example(EXAMPLES_DIR / "sequence_logo.py").spec
+    assert "title" not in spec
     assert spec["encoding"]["x"]["type"] == "index"
     assert spec["encoding"]["x"]["scale"]["zoom"] is True
     assert spec["encoding"]["y"]["scale"] == {"domain": [0, 2], "zoom": False}
+
+
+def test_alignment_shares_bottom_axis_and_keeps_information_scale_fixed() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "multiple_sequence_alignment.py").spec
+    logo, alignment = spec["vconcat"]
+    assert spec["resolve"]["scale"]["x"] == "shared"
+    assert spec["resolve"]["axis"]["x"] == "shared"
+    assert logo["encoding"]["y"]["scale"] == {"domain": [0, 2], "zoom": False}
+    assert alignment["encoding"]["y"]["scale"]["zoom"] is False
+    for track in (logo, alignment):
+        assert "title" not in track
+        assert track["encoding"]["x"]["title"] is None
 
 
 def test_examples_use_typed_axis_and_view_configuration() -> None:

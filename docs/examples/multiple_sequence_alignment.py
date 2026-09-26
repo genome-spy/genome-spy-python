@@ -47,13 +47,13 @@ logo = (
         paddingY=0,
     )
     .encode(
-        x=gs.X("pos:I").axis(None),
-        y=gs.Y("_y0:Q").scale(domain=[0, 2], zoom=True).title("Information"),
+        x=gs.X("pos:I").title(None),
+        y=gs.Y("_y0:Q").scale(domain=[0, 2], zoom=False).title("Information"),
         y2=gs.Y2("_y1"),
         text=gs.Text("base:N"),
         color=gs.Color("base:N").scale(BASE_COLORS).legend(None),
     )
-    .properties(height=70, title="Sequence logo")
+    .properties(height=70)
 )
 
 # Show each sequence as colored tiles with letters, in a scrollable list.
@@ -65,11 +65,11 @@ alignment = (
         .encode(color=gs.value("black"), text=gs.Text("sequence:N")),
     )
     .encode(
-        x=gs.X("pos:I"),
-        y=gs.Y("identifier:N").title(None),
+        x=gs.X("pos:I").title(None),
+        y=gs.Y("identifier:N").scale(zoom=False).title(None),
         color=gs.Color("sequence:N").scale(BASE_COLORS).legend(None),
     )
-    .properties(height=gs.step(14), viewportHeight="container", title="Alignment")
+    .properties(height=gs.step(14), viewportHeight="container")
 )
 
 # Load the aligned sequences and put the summary above them.
@@ -87,5 +87,5 @@ chart = (
     # Split each sequence into individual letters at numbered positions.
     .transform_flatten_sequence()
     .resolve_scale(x="shared")
-    .resolve_axis(x="independent")
+    .resolve_axis(x="shared")
 )
