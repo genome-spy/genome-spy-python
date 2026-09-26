@@ -145,7 +145,7 @@ chart = (
     .transform_flatten_sequence()
     # Set positions and colors.
     .encode(
-        x=gs.X("pos:I").scale(domain=[190, 310], zoom=True),
+        x=gs.X("pos:I").scale(domain=[190, 310], zoom=True).title(None),
         color=gs.Color("sequence:N")
         .scale(
             domain=list("ACTGN-"),
@@ -155,11 +155,12 @@ chart = (
     )
     # Share zoom and colors.
     .resolve_scale(x="shared", color="shared")
+    .resolve_axis(x="shared")
 )
 chart
 ```
 
-![Sequence logo and aligned sequences zooming across multiple regions](https://raw.githubusercontent.com/genome-spy/genome-spy-python/main/docs/_static/readme-sequence-logo.webp?v=ac64144cdc0f)
+![Sequence logo and aligned sequences zooming across multiple regions](https://raw.githubusercontent.com/genome-spy/genome-spy-python/main/docs/_static/readme-sequence-logo.webp?v=4cd9f86a0d31)
 
 Charts can be serialized to a portable GenomeSpy specification or standalone
 HTML:
