@@ -14,7 +14,7 @@ Python data.
 
 ## Filter rows
 
-A filter keeps rows for which its predicate is true:
+A filter keeps only the rows that meet a condition:
 
 ```{literalinclude} ../tutorials/transforms.py
 :language: python
@@ -38,9 +38,14 @@ remain. Use the following Python syntax to build short conditions:
 | `&`, `\|` | Both conditions, or either condition. |
 | `~` | Reverse a condition. |
 
-For a small calculation inside a condition, use the {py:obj}`~genome_spy.expr`
-helpers, such as {py:meth}`~genome_spy.expr.if_`
-or {py:meth}`~genome_spy.expr.isValid`.
+Put parentheses around each comparison when combining conditions:
+
+```python
+(gs.datum.quality >= 0.7) & (gs.datum.response > 0.5)
+```
+
+Use `&`, `|`, and `~` here instead of Python's `and`, `or`, and `not`.
+These operators describe conditions that GenomeSpy checks when drawing the chart.
 
 The GenomeSpy documentation describes the
 [expression language](https://genomespy.app/docs/grammar/expressions/) and the
@@ -74,7 +79,22 @@ deriving a category used only by the chart. See the
 [formula transform](https://genomespy.app/docs/grammar/transform/formula/) in
 the GenomeSpy documentation.
 
-(cache-rows-for-interactive-transforms)=
+### Choose between two values
+
+Use `gs.expr.if_()` when a calculated field depends on a condition. Its three
+arguments are the condition, the value to use when it is true, and the value
+to use otherwise. For example, label each measurement by its quality:
+
+```python
+quality_chart = formula_chart.transform_calculate(
+    qualityLabel=gs.expr.if_(gs.datum.quality >= 0.7, "pass", "low quality"),
+)
+```
+
+GenomeSpy adds `qualityLabel` to each row when it draws the chart. Use `None`
+for a missing value if one branch should have no result. Use `gs.expr.if_()`
+rather than Python's `a if condition else b`, which tries to choose a value
+while the Python code runs.
 
 ## Summarize groups
 
@@ -148,6 +168,8 @@ preserves the same order as the method chain.
 Filtering before an aggregate changes which rows contribute to the summary;
 filtering afterward tests the summary rows instead. Choose the order from the
 question the visualization should answer.
+
+(cache-rows-for-interactive-transforms)=
 
 ## Cache rows for interactive transforms
 

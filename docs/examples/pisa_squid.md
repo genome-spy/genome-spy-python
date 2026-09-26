@@ -7,10 +7,10 @@ context on the same genomic scale.
 
 Positive effects are red and negative effects are blue; opacity shows effect
 magnitude. Drag on **Accessibility** to select output positions, or on
-**Contribution score** to select input positions. Links matching both active
-brushes retain their effect encoding and draw above muted links. An empty brush
-leaves its endpoint unconstrained. Bars and sequence letters outside an active
-brush turn gray.
+**Contribution score** to select input positions. Links within both selected
+ranges keep their colors and appear above gray links. Clearing a brush removes
+the restriction on that end of the link. Bars and sequence letters outside an
+active brush turn gray.
 
 Hold **Shift** and hover to highlight a link, including one outside the brushes.
 With no active brush or Shift-hover, all links look normal. Double-click a track
@@ -19,15 +19,20 @@ base-colored letters in the contribution track.
 
 ## How the chart is built
 
-Python authors the chart and references the prepared remote Parquet tables;
-it does not load or recalculate PISA effects. GenomeSpy loads the tables and
-executes the declarative filters and formulas in the browser. These select the
-margin tracks, calculate absolute effect magnitude, and format motif labels.
+The Python example defines the chart using URLs for prepared Parquet tables.
+GenomeSpy loads those tables in the browser, filters the rows for each track,
+and calculates the values used for opacity and motif labels. Python does not
+load the tables or recalculate the PISA effects.
 
-The link view defines one `highlightedLink` predicate combining Shift-hover
-with interval brushes projected onto `x` (input) and `x2` (output).
-`gs.when({"ref": "highlightedLink"})` reuses it for color, opacity, and draw
-order. The `+` and `&` operators layer the motif annotations and stack the tracks.
+The `highlighted_link` condition decides which links to highlight using the
+input brush, output brush, and Shift-hover selection. The chart names this
+condition `highlightedLink` so that color, opacity, and drawing order all use
+the same rule. See {ref}`combine-selections`
+for how to write and reuse these conditions.
+
+The `+` operator places the motif annotations over the links; `&` stacks the
+tracks vertically. `EFFECT_COLOR_STOPS` pairs each effect value with its color,
+and `effect_scale` applies those pairs to the links.
 
 See the [PISA interaction matrix](pisa_interaction_matrix) for the full effect
 field and the [official GenomeSpy squid example](https://genomespy.app/docs/examples/genomic-data/bpreveal-pisa-squid/)

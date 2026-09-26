@@ -16,19 +16,21 @@ from bars to base-colored sequence letters as you zoom in.
 
 ## How the chart is built
 
-Python authors a three-cell `gs.concat(..., columns=2)` grid: matrix, right-hand
-accessibility track, and bottom contribution track. Shared index scales align
-each margin with the matrix; each margin's signal scale is excluded from the
-shared genomic resolution.
+`gs.concat(..., columns=2)` arranges three charts: the matrix, an accessibility
+track on its right, and a contribution track below it. The genomic axes are
+linked so that positions stay aligned when you pan or zoom. Each side track
+has its own scale for the signal it shows.
 
-The example references prepared remote Parquet tables without loading or
-processing them in Python. GenomeSpy loads the tables and executes all
-declarative transforms in the browser. Reactive parameters measure the visible
-domain spans. A collected branch filters labels to stable 10-by-15-base tiles
-intersecting the viewport, and only when cells are readable. The full matrix
-stays visible while this smaller text layer changes. This example uses
-expression parameters rather than selection conditions, so it does not need
-`gs.when()`.
+The Python example provides URLs for prepared Parquet tables. GenomeSpy loads
+and filters the data in the browser; Python does not load or process the tables.
+Calculations using the visible x and y ranges decide when cells are large
+enough for labels. When labels are visible, only rows near the visible region
+are used to draw them. Their bounds are rounded to 10 bases horizontally and
+15 bases vertically, so small pans do not continually rebuild the labels.
+
+`EFFECT_COLOR_STOPS` pairs each effect value with its color. The chart uses
+these pairs through `effect_scale`, preserving the reference example's white
+center and green and pink extremes.
 
 See the [PISA squid plot](pisa_squid) for linked endpoint brushing and the
 [official GenomeSpy matrix example](https://genomespy.app/docs/examples/genomic-data/bpreveal-pisa-matrix/)

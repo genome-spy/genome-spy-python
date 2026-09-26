@@ -1,13 +1,14 @@
 # Parameters and interaction
 
-Interaction lets a users to change and manipulate a visualization without rebuilding it from scratch. The `genome-spy-python`API follows closely the parameter ergonomics of
-[Altair](https://altair-viz.github.io/user_guide/interactions/parameters.html):
-create a handle, attach it to a chart, then reuse that handle in an
-encoding, expression, or filter.
+Interaction lets users explore a chart by moving a slider, selecting points,
+or zooming into a region. A **parameter** stores a value that can change, such
+as a slider's cutoff or the points a user selects. Create it in Python, attach
+it to a chart, and use it to control what the chart shows.
 
-In practice, GenomeSpy represents interactive state with named **parameters**. Scales,
-transforms, encodings, and expressions can read those names and update when
-their values change. The GenomeSpy documentation describes the complete parameter model in [parameters](https://genomespy.app/docs/grammar/parameters/).
+This pattern is similar to
+[Altair's parameters](https://altair-viz.github.io/user_guide/interactions/parameters.html).
+GenomeSpy's [parameter reference](https://genomespy.app/docs/grammar/parameters/)
+covers all available settings.
 
 ## Zoom and pan
 
@@ -70,13 +71,13 @@ filter again in the browser.
 Use {ref}`transform_collect() before a parameter-dependent transform <cache-rows-for-interactive-transforms>`
 to replay cached rows instead of returning to the data source when a slider changes.
 
-The second parameter demonstrates a reactive expression:
+A parameter can also calculate its value from another parameter:
 
 ```python
 point_size = gs.param("pointSize", expr=60 + min_score * 100)
 ```
 
-GenomeSpy recalculates `point_size` when `min_score` changes. Passing the handle
+GenomeSpy recalculates `point_size` when `min_score` changes. Passing `point_size`
 to `mark_point(size=...)` uses its current value.
 
 The x-axis is told to always show all variant names. Moving the filter slider may hide some points, but it does not make the remaining names shift position.
@@ -101,9 +102,10 @@ and reactive parameters in
 ## Select marks and style them conditionally
 
 A selection parameter stores what the user picks. Use
-{py:func}`~genome_spy.selection_point` for discrete marks
-Use {py:func}`~genome_spy.when` to make an encoding conditional: choose one
-visual value when a condition matches (`.then(...)`) and optionally another when it does not (`.otherwise(...)`). This reacts to a selection, for example, changing a mark’s color, opacity, size, or outline.
+{py:func}`~genome_spy.selection_point` to select individual marks, such as points.
+Then use {py:func}`~genome_spy.when` to change how selected marks look:
+`.then(...)` gives the selected value and `.otherwise(...)` gives the value
+for other marks. This can change a mark's color, opacity, size, or outline.
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -118,8 +120,8 @@ visual value when a condition matches (`.then(...)`) and optionally another when
 
 Selected points are opaque and outlined; other points are faint.
 
-In the selection definition, `empty=False` makes the chart start with no
-selected points:
+Use `empty=False` so that, before any points are selected, all points use
+the `.otherwise(...)` style:
 
 `selected_variant = gs.selection_point("selectedVariant", empty=False)`
 
@@ -129,43 +131,13 @@ updated or reordered.
 
 See [point](https://genomespy.app/docs/grammar/parameters/#point-selection) for more configuration options.
 
-### Compose selection conditions
-
-`gs.when()` also accepts GenomeSpy predicate mappings. Combine selection handles
-with `and`, `or`, and `not`; each handle retains its own `empty` behavior:
-
-```python
-selected = gs.selection_point("selected", empty=False)
-brush = gs.selection_interval("brush", encodings=["x"])
-color = (
-    gs.when({"and": [brush, {"not": selected}]})
-    .then(gs.value("red"))
-    .otherwise(gs.value("gray"))
-)
-```
-
-Attach both declarations with `.add_params(brush, selected)`. To test the
-second endpoint of a ranged mark, use
-`gs.when({"param": brush, "project": {"x": "x2"}})`. An explicit `empty`
-key in that mapping overrides the handle's setting for this condition.
-
-For a predicate reused across encodings, define it on the unit chart with
-`.properties(predicates={"highlight": {"and": [{"param": "brush"}, {"param": "selected"}]}})`
-and use `gs.when({"ref": "highlight"})`. Named definitions contain selection
-names and cannot reference other named predicates. Generated predicate schema
-objects are accepted too. These are selection tests; arbitrary expression and
-value parameters are not accepted by `gs.when()`.
-
-The [PISA squid plot](../gallery/pisa_squid) combines projected brushes and
-Shift-hover, sharing one named predicate across three encodings.
-
 ## Select intervals with brushing
 
 Use {py:func}`~genome_spy.selection_interval` or a **brush** for a dragged range selection. A **brush** is a translucent rectangle a user drags to choose an area. It is useful, for example, when an overview, such as a chromosome track, should control what other linked tracks show.
 
 In code, create a named value to hold the selected brush range with {py:func}`~genome_spy.param`. Then add an interval selection with the same name using {py:func}`~genome_spy.selection_interval` to let the user drag a rectangle. Dragging updates `brush` with the chosen range. Other chart parts can reuse `brush` to zoom, filter data, or change mark styles.
 
-In the following example, The top row is a map of the chromosomes. Drag across it to choose which part of the genome appears below. That dragged rectangle is the **brush**. It stores the selected genomic range under the name `brush`, and both detail tracks read that same range, so they move together.
+In the following example, the top row is a map of the chromosomes. Drag across it to choose which part of the genome appears below. That dragged rectangle is the **brush**. It stores the selected genomic range under the name `brush`, and both detail tracks read that same range, so they move together.
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
@@ -197,6 +169,49 @@ controls two linked detail tracks.
 See GenomeSpy's documentation on
 [interval selections](https://genomespy.app/docs/grammar/parameters/#interval-selection) and [domains from selection parameters](https://genomespy.app/docs/grammar/scale/#domain-from-selection-parameters)
 for the underlying grammar. The [linked brush gallery example](../gallery/brush_linked_genome_tracks.md) applies the same pattern to three genome-wide association tracks.
+
+(combine-selections)=
+
+### Combine selections
+
+After creating point and brush selections, you can combine them into one
+condition. For example, color a point red only when it has been clicked **and**
+it is inside the brush. The API calls each selection test a *predicate*:
+
+```python
+selected = gs.selection_point("selected", empty=False)
+brush = gs.selection_interval("brush", encodings=["x"], empty=False)
+selected_test = gs.SelectionPredicateOperand(param=selected.name, empty=False)
+brush_test = gs.SelectionPredicateOperand(param=brush.name, empty=False)
+highlight = gs.SelectionPredicateDefinition(and_=[selected_test, brush_test])
+color = gs.when(highlight).then(gs.value("red")).otherwise(gs.value("gray"))
+```
+
+Use `color` in `.encode(color=color)` and attach the selections with
+`.add_params(selected, brush)`. Here, `empty=False` means a test matches no
+points until a selection has been made.
+
+`and_` requires all tests to match; `or_` requires at least one. `not_` reverses a test. The underscores
+keep these argument names separate from Python's keywords.
+
+:::{dropdown} Reuse a condition or select the end of a link
+
+To use the same condition for several encodings, give it a name on the chart:
+
+```python
+chart = chart.properties(predicates={"highlight": highlight})
+highlight_condition = gs.when(gs.NamedSelectionPredicateRef(ref="highlight"))
+```
+
+You can then use `highlight_condition.then(...).otherwise(...)` for color,
+opacity, or other encodings. Keep each named condition self-contained; one
+named condition cannot refer to another.
+
+For a link, a brush can test either end. `brush_test.project(x="x2")` tests
+the end encoded by `x2` rather than the end encoded by `x`.
+The [PISA squid plot](../gallery/pisa_squid) uses this to select links by their
+input or output positions and share one highlight condition across encodings.
+:::
 
 ## Add one ruler across linked tracks
 
