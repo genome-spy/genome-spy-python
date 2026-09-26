@@ -17,9 +17,31 @@ tracks = gs.Data(url=DATA + "fig2cd-atac-tracks.parquet", format={"type": "parqu
 INPUT_DOMAIN = [15646649, 15647250]
 OUTPUT_DOMAIN = [15646499, 15647400]
 
+# Preserve the reference palette: each effect value is paired with its color.
+EFFECT_COLOR_STOPS = (
+    (-0.14427, "#18f894"),
+    (-0.138499, "#053061"),
+    (-0.115416, "#2166ac"),
+    (-0.086562, "#4393c3"),
+    (-0.057708, "#92c5de"),
+    (-0.028854, "#d1e5f0"),
+    (0, "#ffffff"),
+    (0.028854, "#fddbc7"),
+    (0.057708, "#f4a582"),
+    (0.086562, "#d6604d"),
+    (0.115416, "#b2182b"),
+    (0.138499, "#67001f"),
+    (0.14427, "#f81894"),
+)
+effect_scale = gs.Scale(
+    domain=[value for value, _ in EFFECT_COLOR_STOPS],
+    range=[color for _, color in EFFECT_COLOR_STOPS],
+    clamp=True,
+)
+
 # Label visibility depends on the rendered cell size in both dimensions.
-label_x_span = gs.param("labelVisibilityXSpan", expr="width / 15")
-label_y_span = gs.param("labelVisibilityYSpan", expr="height / 8")
+label_x_span = gs.param("labelVisibilityXSpan", expr=gs.Expression("width") / 15)
+label_y_span = gs.param("labelVisibilityYSpan", expr=gs.Expression("height") / 8)
 x_tile_size = gs.param("labelXBinSize", value=10)
 y_tile_size = gs.param("labelYBinSize", value=15)
 show_labels = gs.param(
@@ -49,39 +71,7 @@ cells = (
         x=gs.X("input:I").axis(None),
         y=gs.Y("output:I").axis(title=None, tickCount=4, grid=False),
         color=gs.Color("effect:Q")
-        .scale(
-            domain=[
-                -0.14427,
-                -0.138499,
-                -0.115416,
-                -0.086562,
-                -0.057708,
-                -0.028854,
-                0,
-                0.028854,
-                0.057708,
-                0.086562,
-                0.115416,
-                0.138499,
-                0.14427,
-            ],
-            range=[
-                "#18f894",
-                "#053061",
-                "#2166ac",
-                "#4393c3",
-                "#92c5de",
-                "#d1e5f0",
-                "#ffffff",
-                "#fddbc7",
-                "#f4a582",
-                "#d6604d",
-                "#b2182b",
-                "#67001f",
-                "#f81894",
-            ],
-            clamp=True,
-        )
+        .scale(effect_scale)
         .legend(
             title="PISA (log2(fc))",
             orient="left",
@@ -114,30 +104,52 @@ diagonal = (
 )
 
 # Stable tile bounds prevent materializing a text mark for every matrix cell.
-tile_bounds = [
-    gs.param(
-        "labelXStart",
-        expr="showCellLabels ? floor(min(domain('x')[0], domain('x')[1]) / labelXBinSize) * labelXBinSize : null",
+x_domain = gs.expr.domain("x")
+y_domain = gs.expr.domain("y")
+label_x_start = gs.param(
+    "labelXStart",
+    expr=gs.expr.if_(
+        show_labels,
+        gs.expr.floor(gs.expr.min(x_domain[0], x_domain[1]) / x_tile_size)
+        * x_tile_size,
+        None,
     ),
-    gs.param(
-        "labelXEnd",
-        expr="showCellLabels ? ceil(max(domain('x')[0], domain('x')[1]) / labelXBinSize) * labelXBinSize : null",
+)
+label_x_end = gs.param(
+    "labelXEnd",
+    expr=gs.expr.if_(
+        show_labels,
+        gs.expr.ceil(gs.expr.max(x_domain[0], x_domain[1]) / x_tile_size) * x_tile_size,
+        None,
     ),
-    gs.param(
-        "labelYStart",
-        expr="showCellLabels ? floor(min(domain('y')[0], domain('y')[1]) / labelYBinSize) * labelYBinSize : null",
+)
+label_y_start = gs.param(
+    "labelYStart",
+    expr=gs.expr.if_(
+        show_labels,
+        gs.expr.floor(gs.expr.min(y_domain[0], y_domain[1]) / y_tile_size)
+        * y_tile_size,
+        None,
     ),
-    gs.param(
-        "labelYEnd",
-        expr="showCellLabels ? ceil(max(domain('y')[0], domain('y')[1]) / labelYBinSize) * labelYBinSize : null",
+)
+label_y_end = gs.param(
+    "labelYEnd",
+    expr=gs.expr.if_(
+        show_labels,
+        gs.expr.ceil(gs.expr.max(y_domain[0], y_domain[1]) / y_tile_size) * y_tile_size,
+        None,
     ),
-]
+)
 labels = (
     gs.Chart()
-    .add_params(*tile_bounds)
+    .add_params(label_x_start, label_x_end, label_y_start, label_y_end)
     .transform_collect()
     .transform_filter(
-        "showCellLabels && datum.input >= labelXStart && datum.input < labelXEnd && datum.output >= labelYStart && datum.output < labelYEnd"
+        show_labels
+        & (gs.datum.input >= label_x_start)
+        & (gs.datum.input < label_x_end)
+        & (gs.datum.output >= label_y_start)
+        & (gs.datum.output < label_y_end)
     )
     .mark_text(
         size=10,
@@ -203,13 +215,17 @@ motifs = (
         ),
     )
     .transform_calculate(
-        motifLabel="datum.name == 'm1bp' ? 'M1bp' : datum.name == 'gaga' ? 'Gaga' : 'Zelda'"
+        motifLabel=gs.expr.if_(
+            gs.datum.name == "m1bp",
+            "M1bp",
+            gs.expr.if_(gs.datum.name == "gaga", "Gaga", "Zelda"),
+        )
     )
     .encode(
         x=gs.X("start:I").axis(None),
         x2="end",
-        y=gs.value(gs.expr("4 / height")),
-        y2=gs.value(gs.expr("20 / height")),
+        y=gs.value(gs.expr(4 / gs.Expression("height"))),
+        y2=gs.value(gs.expr(20 / gs.Expression("height"))),
     )
 )
 matrix = (

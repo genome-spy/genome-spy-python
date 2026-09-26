@@ -5,12 +5,18 @@ import runpy
 
 import pytest
 
+import genome_spy as gs
+
 pytestmark = pytest.mark.docs
 EXAMPLES = Path(__file__).resolve().parents[1] / "docs" / "examples"
 
 
 def test_squid_projects_brushes_and_reuses_one_highlight_predicate() -> None:
-    spec = runpy.run_path(str(EXAMPLES / "pisa_squid.py"))["chart"].to_dict()
+    example = runpy.run_path(str(EXAMPLES / "pisa_squid.py"))
+    assert isinstance(example["highlighted_link"], gs.SelectionPredicateDefinition)
+    assert isinstance(example["output_endpoint"], gs.SelectionPredicateOperand)
+    assert isinstance(example["input_endpoint"], gs.SelectionPredicateOperand)
+    spec = example["chart"].to_dict()
     prediction, middle, importance = spec["vconcat"]
     links, motifs = middle["layer"]
     assert spec["scales"]["x"] == {"domain": [15646649, 15647250], "zoom": True}
@@ -40,7 +46,7 @@ def test_squid_projects_brushes_and_reuses_one_highlight_predicate() -> None:
         {"param": "contributionRegion", "project": {"x": "x"}, "empty": False},
     ]
     assert links["data"]["url"].endswith("/v3/fig2c-atac-links.parquet")
-    assert motifs["encoding"]["y2"] == {"value": {"expr": "20 / height"}}
+    assert motifs["encoding"]["y2"] == {"value": {"expr": "(20 / height)"}}
     assert importance["stops"]["values"] == [0.15]
 
 
@@ -70,9 +76,19 @@ def test_matrix_aligns_margin_tracks_and_limits_label_materialization() -> None:
         {"type": "collect"},
         {
             "type": "filter",
-            "expr": "showCellLabels && datum.input >= labelXStart && datum.input < labelXEnd && datum.output >= labelYStart && datum.output < labelYEnd",
+            "expr": "((((showCellLabels && (datum.input >= labelXStart)) && (datum.input < labelXEnd)) && (datum.output >= labelYStart)) && (datum.output < labelYEnd))",
         },
     ]
     assert labels["encoding"]["text"]["format"] == ".2f"
-    assert len(labels["params"]) == 4
+    assert {p["name"]: p["expr"] for p in labels["params"]} == {
+        f"label{axis}{edge}": (
+            f"if(showCellLabels,({rounding}(({extreme}(domain('{axis.lower()}')[0],"
+            f"domain('{axis.lower()}')[1]) / label{axis}BinSize)) * label{axis}BinSize),null)"
+        )
+        for axis in ("X", "Y")
+        for edge, rounding, extreme in (
+            ("Start", "floor", "min"),
+            ("End", "ceil", "max"),
+        )
+    }
     assert contribution["multiscale"][1]["mark"]["logoLetters"] is True

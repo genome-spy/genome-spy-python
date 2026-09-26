@@ -16,6 +16,26 @@ DATA = "https://data.genomespy.app/datasets/bpreveal-pisa/v3/"
 tracks = gs.Data(url=DATA + "fig2cd-atac-tracks.parquet", format={"type": "parquet"})
 MUTED = "#d8dbe0"
 
+# Preserve the reference palette: each effect value is paired with its color.
+EFFECT_COLOR_STOPS = (
+    (-0.216404, "#053061"),
+    (-0.173123, "#2166ac"),
+    (-0.129843, "#4393c3"),
+    (-0.086562, "#92c5de"),
+    (-0.043281, "#d1e5f0"),
+    (0, "#ffffff"),
+    (0.043281, "#fddbc7"),
+    (0.086562, "#f4a582"),
+    (0.129843, "#d6604d"),
+    (0.173123, "#b2182b"),
+    (0.216404, "#67001f"),
+)
+effect_scale = gs.Scale(
+    domain=[value for value, _ in EFFECT_COLOR_STOPS],
+    range=[color for _, color in EFFECT_COLOR_STOPS],
+    clamp=True,
+)
+
 # Each track updates a selection stored in the parent view's parameter scope.
 output_brush = gs.selection_interval(
     "accessibilityRegion",
@@ -72,64 +92,30 @@ accessibility = (
 
 # A projected brush tests the input (x) or output (x2) endpoint of a link.
 # The final OR makes Shift-hover isolate links when both brushes are empty.
-highlighted_link = {
-    "or": [
-        {"param": "pisaLinkHover", "empty": False},
-        {
-            "and": [
-                {"param": "accessibilityRegion", "project": {"x": "x2"}},
-                {"param": "contributionRegion", "project": {"x": "x"}},
-                {
-                    "or": [
-                        {"param": "pisaLinkHover"},
-                        {
-                            "param": "accessibilityRegion",
-                            "project": {"x": "x2"},
-                            "empty": False,
-                        },
-                        {
-                            "param": "contributionRegion",
-                            "project": {"x": "x"},
-                            "empty": False,
-                        },
+output_endpoint = gs.SelectionPredicateOperand(param=output_brush.name).project(x="x2")
+input_endpoint = gs.SelectionPredicateOperand(param=input_brush.name).project(x="x")
+highlighted_link = gs.SelectionPredicateDefinition(
+    or_=[
+        gs.SelectionPredicateOperand(param=hover.name, empty=False),
+        gs.SelectionPredicateOperand(
+            and_=[
+                output_endpoint,
+                input_endpoint,
+                gs.SelectionPredicateOperand(
+                    or_=[
+                        gs.SelectionPredicateOperand(param=hover.name),
+                        output_endpoint.empty(False),
+                        input_endpoint.empty(False),
                     ]
-                },
+                ),
             ]
-        },
+        ),
     ]
-}
-highlight = gs.when({"ref": "highlightedLink"})
+)
+highlight = gs.when(gs.NamedSelectionPredicateRef(ref="highlightedLink"))
 effect_color = (
     gs.Color("effect:Q")
-    .scale(
-        domain=[
-            -0.216404,
-            -0.173123,
-            -0.129843,
-            -0.086562,
-            -0.043281,
-            0,
-            0.043281,
-            0.086562,
-            0.129843,
-            0.173123,
-            0.216404,
-        ],
-        range=[
-            "#053061",
-            "#2166ac",
-            "#4393c3",
-            "#92c5de",
-            "#d1e5f0",
-            "#ffffff",
-            "#fddbc7",
-            "#f4a582",
-            "#d6604d",
-            "#b2182b",
-            "#67001f",
-        ],
-        clamp=True,
-    )
+    .scale(effect_scale)
     .legend(
         title="PISA (log2(fc))",
         orient="left",
@@ -211,13 +197,17 @@ motifs = (
         ),
     )
     .transform_calculate(
-        motifLabel="datum.name == 'm1bp' ? 'M1bp' : datum.name == 'gaga' ? 'Gaga' : 'Zelda'"
+        motifLabel=gs.expr.if_(
+            gs.datum.name == "m1bp",
+            "M1bp",
+            gs.expr.if_(gs.datum.name == "gaga", "Gaga", "Zelda"),
+        )
     )
     .encode(
         x=gs.X("start:I").title("dm6 chrX"),
         x2="end",
-        y=gs.value(gs.expr("4 / height")),
-        y2=gs.value(gs.expr("20 / height")),
+        y=gs.value(gs.expr(4 / gs.Expression("height"))),
+        y2=gs.value(gs.expr(20 / gs.Expression("height"))),
     )
 )
 
