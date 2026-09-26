@@ -128,7 +128,7 @@ sunrise = (
     .properties(
         name="sunrise-plot",
         title=gs.Title(
-            text=gs.expr("Purity/ploidy integer-fit distance - " + SAMPLE),
+            text="Purity/ploidy integer-fit distance - " + SAMPLE,
             style="overlay-title",
         ),
         height=240,
