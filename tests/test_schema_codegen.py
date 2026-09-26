@@ -1148,3 +1148,32 @@ def test_resolution_methods_follow_referenced_resolution_maps() -> None:
     assert "def resolve_axis(\n        self,\n        *,\n        color:" in source
     assert "LegendResolutionBehavior_T" in source
     assert "ResolutionBehavior_T" in source
+
+
+def test_inline_projection_setter_is_derived_from_schema() -> None:
+    schema = {
+        "definitions": {
+            "Predicate": {
+                "type": "object",
+                "properties": {
+                    "project": {
+                        "type": "object",
+                        "properties": {"x": {"enum": ["x", "x2"]}},
+                    }
+                },
+            }
+        }
+    }
+    source = (
+        SchemaWrapperGenerator(schema).generate_core_module().source.replace("'", '"')
+    )
+    assert 'x: Literal["x", "x2"] | UndefinedType = Undefined' in source
+    assert 'self._with_property("project", value, **defined)' in source
+    schema["definitions"]["Predicate"]["properties"]["project"]["properties"] = {
+        "y": {"enum": ["y", "y2"]}
+    }
+    source = (
+        SchemaWrapperGenerator(schema).generate_core_module().source.replace("'", '"')
+    )
+    assert 'y: Literal["y", "y2"] | UndefinedType = Undefined' in source
+    assert 'x: Literal["x", "x2"]' not in source

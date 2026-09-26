@@ -68,6 +68,8 @@ KWDS_TARGETS = frozenset(
         "ZoomParams",
     }
 )
+# Inline schema objects exposed through keyword-based property setters.
+INLINE_OBJECT_SETTERS = frozenset({"project"})
 ANONYMOUS_PROPERTY_KWDS = {
     "axes": "AxesKwds",
     "legends": "LegendsKwds",
@@ -3124,6 +3126,23 @@ def _schema_class_source(
     analyzer: SchemaAnalyzer,
 ) -> GeneratedSchemaClass:
     property_specs = analyzer.property_specs(definition)
+    resolved_properties = analyzer.resolve_properties(definition.schema)
+    nested_specs = {
+        spec.name: (
+            _nested_property_specs(analyzer, spec.nested_schema_class_name)
+            if spec.nested_schema_class_name is not None
+            else analyzer.property_specs_from_properties(
+                resolved_properties[spec.name].get("properties", {})
+                if spec.name in INLINE_OBJECT_SETTERS
+                else {}
+            )
+        )
+        for spec in property_specs
+    }
+    annotation_specs = (
+        *property_specs,
+        *(spec for specs in nested_specs.values() for spec in specs),
+    )
     args = ", ".join(
         f"{property_spec.python_name}: {property_spec.annotation.annotation} | UndefinedType = Undefined"
         for property_spec in property_specs
@@ -3160,9 +3179,7 @@ def _schema_class_source(
             property_spec.name,
             annotation=property_spec.annotation.annotation,
             nested_schema_class_name=property_spec.nested_schema_class_name,
-            nested_property_specs=_nested_property_specs(
-                analyzer, property_spec.nested_schema_class_name
-            ),
+            nested_property_specs=nested_specs[property_spec.name],
         )
         for property_spec in property_specs
     )
@@ -3179,16 +3196,17 @@ def _schema_class_source(
             f"{methods}"
         ),
         needs_literal=any(
-            property_spec.annotation.needs_literal for property_spec in property_specs
+            property_spec.annotation.needs_literal for property_spec in annotation_specs
         ),
         needs_sequence=any(
-            property_spec.annotation.needs_sequence for property_spec in property_specs
+            property_spec.annotation.needs_sequence
+            for property_spec in annotation_specs
         ),
         used_aliases=tuple(
             sorted(
                 {
                     alias_name
-                    for property_spec in property_specs
+                    for property_spec in annotation_specs
                     for alias_name in _annotation_alias_names(
                         property_spec.annotation.annotation
                     )
@@ -3199,7 +3217,7 @@ def _schema_class_source(
             sorted(
                 {
                     kwds_name
-                    for property_spec in property_specs
+                    for property_spec in annotation_specs
                     for kwds_name in _annotation_kwds_names(
                         property_spec.annotation.annotation
                     )
@@ -4869,7 +4887,7 @@ def _schema_property_method_source(
     nested_property_specs: tuple[PropertySpec, ...] = (),
 ) -> str:
     method_name = _python_property_name(property_name)
-    if nested_schema_class_name is None:
+    if nested_schema_class_name is None and not nested_property_specs:
         value_annotation = annotation if annotation != "Any" else "Any"
         return (
             "\n"
@@ -4887,6 +4905,8 @@ def _schema_property_method_source(
         ),
         docstring=(
             f"Return a copy with a ``{nested_schema_class_name}`` {property_name}."
+            if nested_schema_class_name is not None
+            else f"Return a copy with ``{property_name}`` updated."
         ),
         call=f"self._with_property({property_name!r}, value, **defined)",
         return_annotation=class_name,

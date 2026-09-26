@@ -5824,9 +5824,26 @@ class ConditionalMarkPropExprDefType(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ConditionalMarkPropExprDefType:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ConditionalMarkPropExprDefType:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -6128,9 +6145,26 @@ class ConditionalMarkPropExprDefTypeForShape(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ConditionalMarkPropExprDefTypeForShape:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ConditionalMarkPropExprDefTypeForShape:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -6432,9 +6466,26 @@ class ConditionalMarkPropFieldDefType(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ConditionalMarkPropFieldDefType:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ConditionalMarkPropFieldDefType:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -6736,9 +6787,26 @@ class ConditionalMarkPropFieldDefTypeForShape(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ConditionalMarkPropFieldDefTypeForShape:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ConditionalMarkPropFieldDefTypeForShape:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -6942,9 +7010,26 @@ class ConditionalScaleDatumDef(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ConditionalScaleDatumDef:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ConditionalScaleDatumDef:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(self, value: ChannelWithScale_T) -> ConditionalScaleDatumDef:
         """Return a copy with ``resolutionChannel`` updated."""
@@ -7124,9 +7209,26 @@ class ConditionalValueDefNumberExprRef(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ConditionalValueDefNumberExprRef:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ConditionalValueDefNumberExprRef:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def test(
         self,
@@ -7207,9 +7309,26 @@ class ConditionalValueDefStringNullExprRef(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ConditionalValueDefStringNullExprRef:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ConditionalValueDefStringNullExprRef:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def test(
         self,
@@ -7404,9 +7523,26 @@ class ConditionalParameterMarkPropExprDefType(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ConditionalParameterMarkPropExprDefType:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ConditionalParameterMarkPropExprDefType:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -7697,10 +7833,25 @@ class ConditionalParameterMarkPropExprDefTypeForShape(GenomeSpySchema):
         return self._with_property("param", value)
 
     def project(
-        self, value: dict[str, Any]
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
     ) -> ConditionalParameterMarkPropExprDefTypeForShape:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -7989,10 +8140,25 @@ class ConditionalParameterMarkPropFieldDefType(GenomeSpySchema):
         return self._with_property("param", value)
 
     def project(
-        self, value: dict[str, Any]
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
     ) -> ConditionalParameterMarkPropFieldDefType:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -8283,10 +8449,25 @@ class ConditionalParameterMarkPropFieldDefTypeForShape(GenomeSpySchema):
         return self._with_property("param", value)
 
     def project(
-        self, value: dict[str, Any]
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
     ) -> ConditionalParameterMarkPropFieldDefTypeForShape:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -8480,9 +8661,26 @@ class ConditionalParameterScaleDatumDef(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ConditionalParameterScaleDatumDef:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ConditionalParameterScaleDatumDef:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def resolutionChannel(
         self, value: ChannelWithScale_T
@@ -8649,10 +8847,25 @@ class ConditionalParameterValueDefNumberExprRef(GenomeSpySchema):
         return self._with_property("param", value)
 
     def project(
-        self, value: dict[str, Any]
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
     ) -> ConditionalParameterValueDefNumberExprRef:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def title(self, value: str | None) -> ConditionalParameterValueDefNumberExprRef:
         """Return a copy with ``title`` updated."""
@@ -8718,10 +8931,25 @@ class ConditionalParameterValueDefStringNullExprRef(GenomeSpySchema):
         return self._with_property("param", value)
 
     def project(
-        self, value: dict[str, Any]
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
     ) -> ConditionalParameterValueDefStringNullExprRef:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def title(self, value: str | None) -> ConditionalParameterValueDefStringNullExprRef:
         """Return a copy with ``title`` updated."""
@@ -32484,9 +32712,26 @@ class OrderCondition(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> OrderCondition:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> OrderCondition:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
     def test(
         self,
@@ -33035,9 +33280,26 @@ class ParameterPredicate(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> ParameterPredicate:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> ParameterPredicate:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
 
 class Parse(GenomeSpySchema):
@@ -41345,9 +41607,26 @@ class SelectionPredicateDefinition(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> SelectionPredicateDefinition:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> SelectionPredicateDefinition:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
 
 class SelectionPredicateOperand(GenomeSpySchema):
@@ -41431,9 +41710,26 @@ class SelectionPredicateOperand(GenomeSpySchema):
         """Return a copy with ``param`` updated."""
         return self._with_property("param", value)
 
-    def project(self, value: dict[str, Any]) -> SelectionPredicateOperand:
-        """Return a copy with ``project`` updated."""
-        return self._with_property("project", value)
+    def project(
+        self,
+        value: dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        x: Literal["x", "x2"] | UndefinedType = Undefined,
+        y: Literal["y", "y2"] | UndefinedType = Undefined,
+    ) -> SelectionPredicateOperand:
+        """Return a copy with ``project`` updated.
+
+        Args:
+            x (Literal['x', 'x2']): Schema-defined ``x`` property.
+            y (Literal['y', 'y2']): Schema-defined ``y`` property.
+        """
+        defined = {
+            "x": x,
+            "y": y,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("project", value, **defined)
 
 
 class SelectionType(GenomeSpySchema):

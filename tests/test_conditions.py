@@ -104,3 +104,32 @@ def test_value_parameters_and_expressions_are_not_selection_predicates() -> None
     for predicate in [gs.expr("datum.x > 0"), "brush", {"and": [gs.param(value=1)]}]:
         with pytest.raises(TypeError, match="selection parameter"):
             gs.when(predicate)
+
+
+def test_public_generated_predicate_classes() -> None:
+    from genome_spy import api, schema
+
+    for name in (
+        "NamedSelectionPredicateRef",
+        "ParameterPredicate",
+        "SelectionPredicateDefinition",
+        "SelectionPredicateOperand",
+        "SelectionUnionTest",
+    ):
+        assert getattr(gs, name) is getattr(schema, name)
+        assert getattr(api, name) is getattr(schema, name)
+        assert name in gs.__all__
+        assert name in api.__all__
+
+
+def test_generated_projection_setter_preserves_original_predicate() -> None:
+    original = gs.ParameterPredicate(param="brush")
+    projected = original.project(x="x2", y="y")
+    assert original.to_dict() == {"param": "brush"}
+    assert gs.when(projected).then(gs.value(1)).to_dict()["condition"] == {
+        "param": "brush",
+        "project": {"x": "x2", "y": "y"},
+        "value": 1,
+    }
+    with pytest.raises(SchemaValidationError):
+        gs.when(original.project(x="y"))
