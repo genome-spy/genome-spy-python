@@ -248,3 +248,6 @@ tools/__pycache__/
 scripts/*alphagenome*.py
 scripts/fetch_*_reference.py
 scripts/_fetch_reference.py
+
+# Local recording demos and working files
+/demos/

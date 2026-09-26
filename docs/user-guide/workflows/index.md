@@ -5,25 +5,11 @@ Try these demos in your browser, or use the results in Python with a notebook.
 ::::{grid} 1 1 2 2
 :gutter: 3
 
-:::{grid-item-card} Review regulatory regions
-:link: annotate-regulatory-regions
-:link-type: doc
-
-Inspect the sog enhancer squid plot, save review notes, and export CSV/BED.
-:::
-
 :::{grid-item-card} Annotate genomic intervals
 :link: annotate-intervals
 :link-type: doc
 
 Brush a region, name it, and add it to a separate annotation track. Export BED.
-:::
-
-:::{grid-item-card} Review treatment-responsive genes
-:link: review-volcano
-:link-type: doc
-
-Brush or pick genes and export an application shortlist.
 :::
 
 :::{grid-item-card} Select genes for follow-up
@@ -32,12 +18,14 @@ Brush or pick genes and export an application shortlist.
 
 Brush a volcano plot and export the selected genes.
 :::
+
 :::{grid-item-card} Pick individual genes
 :link: pick-genes
 :link-type: doc
 
 Click or Shift-click points to collect selected gene records.
 :::
+
 :::{grid-item-card} Edit a sequence
 :link: edit-sequence
 :link-type: doc
@@ -57,8 +45,6 @@ notebook example and an optional web app.
 :hidden:
 
 annotate-intervals
-annotate-regulatory-regions
-review-volcano
 select-genes
 pick-genes
 edit-sequence

@@ -27,7 +27,7 @@ for JSON files. Pass `as_format="text"` to get the raw file contents instead.
 
 | Dataset | Contents |
 | --- | --- |
-| `airway_review` | Gallery airway statistics and sample counts for the [volcano review](user-guide/workflows/review-volcano.md) |
+| `airway_review` | Gallery airway statistics and sample counts for downstream gene review |
 | `airway_metadata` | Sample table for the airway RNA-seq experiment |
 | `airway_scaledcounts` | Rounded, length-scaled gene counts for the same eight samples |
 | `hapmap_gwas` | HapMap coordinates with simulated p-values and effect sizes |
