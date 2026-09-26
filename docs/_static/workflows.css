@@ -104,5 +104,33 @@
 .gs-workflow [data-error]:empty { display: none; }
 .gs-workflow [data-error] { margin: 0 10px; color: #b3261e; }
 .gs-export-actions { display: flex; gap: 8px; margin-top: 12px; }
-#workflow-volcano [data-results] { margin-top: 12px; }
+#workflow-volcano [data-results] { margin-top: 4px; }
 #workflow-volcano [data-results] input { min-width: 160px; }
+
+/* Keep the plot and live selection visible together, wrapping on narrow pages. */
+#workflow-volcano { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: start; }
+#workflow-volcano > * { flex: 1 1 100%; min-width: 0; }
+#workflow-volcano > .gs-doc-embed { flex: 1.6 1 530px; }
+#workflow-volcano > .gs-volcano-selection { flex: 1 1 340px; }
+#workflow-volcano .gs-volcano-selection h3 { margin: 0 0 4px; }
+#workflow-volcano .gs-volcano-selection p { margin: 8px 0; font-size: 13px; }
+#workflow-volcano .gs-volcano-selection fieldset { margin: 6px 0; gap: 6px; }
+#workflow-volcano .gs-volcano-selection button { padding: 5px 8px; font-size: 13px; }
+#workflow-volcano .gs-volcano-selection .gs-workflow-table { max-height: 355px; }
+#workflow-volcano .gs-volcano-selection th { position: sticky; top: 0; background: white; }
+#workflow-volcano .gs-volcano-selection :is(th, td) { white-space: nowrap; padding: 6px; }
+#workflow-volcano > :is(h3, p) { margin: 0; }
+#workflow-volcano > [data-export-shortlist] { flex: 0 0 auto; }
+#workflow-volcano .gs-input-binding {
+  grid-template-columns: repeat(2, minmax(0, 190px));
+  justify-content: center;
+  grid-template-rows: auto auto;
+  grid-auto-flow: column;
+  gap: 6px 12px;
+}
+#workflow-volcano .gs-input-binding > label { font-size: 13px; align-self: end; }
+#workflow-volcano .gs-input-binding > div { display: flex; align-items: center; min-width: 0; }
+#workflow-volcano .gs-input-binding input[type="range"] { min-width: 0; width: 100%; padding: 0; }
+@media (max-width: 600px) {
+  #workflow-volcano .gs-input-binding { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; }
+}

@@ -372,7 +372,6 @@ export function mountVolcano(root, api, rows, samples) {
   const show = records => {
     selected = records;
     root.querySelector("[data-status]").textContent = `${records.length} selected · ${shortlist.size} saved to your application shortlist`;
-    root.querySelector("[data-selection-count]").textContent = `${records.length} selected; showing up to 20. Exports include every selected gene.`;
     const table = root.querySelector("[data-selected]");
     renderTable(table, displayRows(records.slice(0, 20)), columns);
     ["Gene ID", "Symbol", "log₂ FC", "Adjusted p"].forEach((label, i) => {table.tHead.rows[0].cells[i].textContent = label;});
@@ -402,7 +401,7 @@ export function mountVolcano(root, api, rows, samples) {
     if (snapshot.active) picked.clear();
     show(volcanoRows(rows, snapshot));
     updating = false;
-  }, {delivery: "commit"});
+  });
   picked.subscribe(snapshot => {
     if (updating || (!snapshot.active && brush.getValue().active)) return;
     updating = true;

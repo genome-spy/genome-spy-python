@@ -44,7 +44,7 @@ def embed_html(name: str, spec_url: str, bundle_url: str, script_url: str) -> st
         "points": 420,
         "sequence": 350,
         "squid": 530,
-        "volcano": 570,
+        "volcano": 470,
     }[name]
     fields = (
         """
@@ -102,14 +102,15 @@ def embed_html(name: str, spec_url: str, bundle_url: str, script_url: str) -> st
 """
     if name == "volcano":
         controls = """
+  <section class="gs-volcano-selection" aria-label="Selected genes">
+  <h3>Selected genes</h3>
   <fieldset disabled>
     <button type="button" data-clear>Clear selection</button>
     <button type="button" data-save disabled>Add to shortlist</button>
     <button type="button" data-download disabled>Export selection CSV</button>
   </fieldset>
-  <p>Shift-drag to brush · Click a gene to select · Scroll to zoom</p>
-  <h3>Selected genes</h3><p data-selection-count></p>
   <div class="gs-workflow-table"><table data-selected></table></div>
+  </section>
   <h3>Application shortlist</h3>
   <p>Saved genes stay here when the plot selection changes. Notes are included in the export.</p>
   <button type="button" data-export-shortlist disabled>Export shortlist CSV</button>

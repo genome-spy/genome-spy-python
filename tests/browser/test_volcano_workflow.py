@@ -51,7 +51,7 @@ def test_volcano_shortlist(tmp_path):
         }
         async with playwright.async_playwright() as runtime:
             browser = await runtime.chromium.launch()
-            page = await browser.new_page(viewport={"width": 1150, "height": 1250})
+            page = await browser.new_page(viewport={"width": 1150, "height": 800})
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
 
@@ -120,6 +120,13 @@ def test_volcano_shortlist(tmp_path):
             await page.mouse.move(*point(1, 2))
             await page.mouse.down()
             await page.mouse.move(*point(5, 4), steps=12)
+            await page.wait_for_function(
+                "document.querySelector('[data-selected] tbody').rows.length > 0"
+            )
+            live_table = await page.locator("[data-selected]").bounding_box()
+            assert live_table and live_table["y"] < 400
+            assert live_table["x"] >= canvas["x"] + canvas["width"]
+            assert await page.evaluate("window.scrollY") == 0
             await page.mouse.up()
             await page.keyboard.up("Shift")
             await page.wait_for_timeout(300)
