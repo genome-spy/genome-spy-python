@@ -159,7 +159,7 @@ chart = (
 chart
 ```
 
-![Sequence logo and aligned sequences zooming across multiple regions](https://raw.githubusercontent.com/genome-spy/genome-spy-python/a6c724f48d94f86d8d0a8c3200549d7560a88a3c/docs/_static/readme-sequence-logo.webp)
+![Sequence logo and aligned sequences zooming across multiple regions](https://raw.githubusercontent.com/genome-spy/genome-spy-python/main/docs/_static/readme-sequence-logo.webp?v=ac64144cdc0f)
 
 Charts can be serialized to a portable GenomeSpy specification or standalone
 HTML:
