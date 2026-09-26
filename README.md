@@ -63,59 +63,112 @@ See the [getting-started guide](docs/getting-started.md) for the first example.
 
 ## Examples
 
-```python
-import genome_spy as gs
-
-chart = (
-    gs.Chart(
-        [
-            {"x": 1, "y": 4, "group": "A"},
-            {"x": 2, "y": 3, "group": "B"},
-            {"x": 3, "y": 5, "group": "A"},
-        ]
-    )
-    .mark_point(size=80)
-    .encode(
-        x="x:Q",
-        y="y:Q",
-        color="group:N",
-    )
-)
-
-chart
-```
-
-GenomeSpy also has locus-scaled axes for genomic coordinates. This small
-example renders intervals along a region of chromosome 1:
+A zoomable Manhattan plot using the bundled HapMap data (requires `pandas`):
 
 ```python
 import genome_spy as gs
-
-intervals = [
-    {"chrom": "chr1", "start": 100, "end": 220, "name": "gene A"},
-    {"chrom": "chr1", "start": 280, "end": 420, "name": "gene B"},
-]
+from genome_spy.datasets import load_dataset
 
 chart = (
-    gs.Chart(intervals)
-    .mark_rect()
+    # Load data.
+    gs.Chart(load_dataset("hapmap_gwas"))
+    # Format chromosome names.
+    .transform_formula(expr="datum.CHR == 23 ? 'chrX' : 'chr' + datum.CHR", as_="chrom")
+    # Calculate −log10 p.
+    .transform_formula(expr="-log(datum.P) / log(10)", as_="neglogp")
+    # Draw variants.
+    .mark_point(size=12)
+    # Set positions and colors.
     .encode(
-        x=gs.Locus("chrom", "start"),
-        x2="end:Q",
-        y="name:N",
-        color="name:N",
+        x=gs.Locus("chrom", "BP").scale(assembly="hg18"),
+        y=gs.Y("neglogp:Q").title("−log10 p"),
+        color=gs.Color("CHR:N").scale(range=["#5b8fd6", "#8f98a3"]).legend(None),
     )
 )
-
 chart
 ```
+
+![Manhattan plot zooming from the whole genome into an association peak](https://raw.githubusercontent.com/genome-spy/genome-spy-python/main/docs/_static/readme-manhattan.webp)
+
+[Explore the full example and data provenance](https://genomespy.app/genome-spy-python/gallery/manhattan_plot.html).
+
+A sequence logo and aligned sequences with shared horizontal zoom:
+
+```python
+import genome_spy as gs
+
+logo = (
+    gs.Chart()
+    # Count bases at each position.
+    .transform_aggregate(groupby=["pos", "sequence"])
+    # Handle gaps.
+    .transform_formula(expr="datum.sequence == '-' ? null : datum.sequence", as_="base")
+    # Stack bases by information content.
+    .transform_stack(
+        field="count",
+        groupby=["pos"],
+        offset="information",
+        baseField="base",
+        as_=["y0", "y1"],
+    )
+    # Draw logo letters.
+    .mark_text(logoLetters=True, fitToBand=True, fontWeight="bold")
+    # Set stack bounds.
+    .encode(
+        y=gs.Y("y0:Q").scale(domain=[0, 2], zoom=False).title("Bits"),
+        y2="y1:Q",
+        text="base:N",
+    )
+    .properties(height=100)
+)
+# Create sequence rows.
+rows = gs.Chart().encode(y=gs.Y("identifier:N").scale(zoom=False).axis(None))
+# Add base labels.
+letters = rows.mark_text(size=11, fitToBand=True, opacity=0.7).encode(
+    text="sequence:N", color=gs.value("black")
+)
+# Layer tiles and labels.
+sequences = (rows.mark_rect() + letters).properties(
+    height=gs.step(16), viewportHeight=160
+)
+chart = (
+    # Combine panels.
+    (logo & sequences)
+    # Load data.
+    .properties(
+        data=gs.Data(
+            url="https://data.genomespy.app/sample-data/16SRNA_Deino_87seq.aln",
+            format=gs.data_format(type="fasta"),
+        )
+    )
+    # Split sequences into bases.
+    .transform_flatten_sequence()
+    # Set positions and colors.
+    .encode(
+        x=gs.X("pos:I").scale(domain=[190, 310], zoom=True),
+        color=gs.Color("sequence:N")
+        .scale(
+            domain=list("ACTGN-"),
+            range=["#4FBF45", "#4D96E8", "#E85F78", "#E8B322", "#BDBDBD", "#f5f5f5"],
+        )
+        .legend(None),
+    )
+    # Share zoom and colors.
+    .resolve_scale(x="shared", color="shared")
+)
+chart
+```
+
+![Sequence logo and aligned sequences zooming across multiple regions](https://raw.githubusercontent.com/genome-spy/genome-spy-python/main/docs/_static/readme-sequence-logo.webp)
 
 Charts can be serialized to a portable GenomeSpy specification or standalone
 HTML:
 
 ```python
+# Export JSON.
 chart.to_json()
-chart.save("intervals.html")
+# Save HTML.
+chart.save("chart.html")
 ```
 
 ### Update data without recreating the chart
@@ -126,12 +179,15 @@ existing GenomeSpy instance, so view state such as zoom is preserved.
 
 ```python
 chart = (
+    # Create an empty chart.
     gs.Chart(data={"name": "table"}, datasets={"table": []})
     .mark_point()
     .encode(x="x:Q", y="y:Q")
 )
+# Show widget.
 view = chart.widget()
 
+# Update data.
 view.set_dataset("table", updated_dataframe)
 ```
 
