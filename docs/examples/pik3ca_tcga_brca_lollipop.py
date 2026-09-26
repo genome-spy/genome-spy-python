@@ -25,7 +25,8 @@ protein_length = gs.param("proteinLength", value=data["proteinLength"])
 line_width = gs.param("lineWidth", value=1)
 # Track the space available per protein position to keep nearby points apart.
 pixels_per_residue = gs.param(
-    "pixelsPerResidue", expr="width * (scale('x', 1) - scale('x', 0))"
+    "pixelsPerResidue",
+    expr=gs.Expression("width") * (gs.expr.scale("x", 1) - gs.expr.scale("x", 0)),
 )
 
 # Tilt mutation names so neighboring labels take up less horizontal space.

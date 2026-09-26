@@ -61,7 +61,15 @@ arc_layer = (
         y=gs.Y("span:Q")
         .scale(
             type="sqrt",
-            domain=gs.expr("[0, span(domain('x')) * height / width * 5]"),
+            domain=gs.expr(
+                [
+                    0,
+                    gs.expr.span(gs.expr.domain("x"))
+                    * gs.Expression("height")
+                    / gs.Expression("width")
+                    * 5,
+                ]
+            ),
             reverse=False,
         )
         .axis(None),

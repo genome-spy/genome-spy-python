@@ -164,11 +164,11 @@ volcano_annotations = (
     .transform_measure_text(
         field="volcano_label", fontSize=14, fontWeight="bold", as_="label_width"
     )
-    .transform_formula(expr="datum.label_width + 4", as_="label_width")
+    .transform_formula(expr=gs.datum.label_width + 4, as_="label_width")
     .transform_collect()
     .transform_filter(
-        "inrange(datum.log2fc, domain('x')) && "
-        "inrange(datum.neglog10_pvalue_plot, domain('y'))"
+        gs.expr.inrange(gs.datum.log2fc, gs.expr.domain("x"))
+        & gs.expr.inrange(gs.datum.neglog10_pvalue_plot, gs.expr.domain("y"))
     )
     # Tight collision boxes reduce unnecessary separation during zooming.
     .transform_displace2d(
@@ -183,12 +183,18 @@ volcano_annotations = (
     )
     # Stop each leader at the padded label box instead of crossing the text.
     .transform_formula(
-        expr="max(0, 1 - min(datum.label_width / 2 / max(abs(datum.label_dx), 1e-6), "
-        "8 / max(abs(datum.label_dy), 1e-6)))",
+        expr=gs.expr.max(
+            0,
+            1
+            - gs.expr.min(
+                gs.datum.label_width / 2 / gs.expr.max(abs(gs.datum.label_dx), 1e-6),
+                8 / gs.expr.max(abs(gs.datum.label_dy), 1e-6),
+            ),
+        ),
         as_="leader_scale",
     )
-    .transform_formula(expr="datum.label_dx * datum.leader_scale", as_="leader_dx")
-    .transform_formula(expr="datum.label_dy * datum.leader_scale", as_="leader_dy")
+    .transform_formula(expr=gs.datum.label_dx * gs.datum.leader_scale, as_="leader_dx")
+    .transform_formula(expr=gs.datum.label_dy * gs.datum.leader_scale, as_="leader_dy")
     .encode(
         x=gs.X("log2fc:Q").title("log2 fold change (treated / control)"),
         y=gs.Y("neglog10_pvalue_plot:Q").title("-log10 p-value"),

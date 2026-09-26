@@ -40,7 +40,12 @@ endpoint_markers = (
 # Connect the breakpoints with arcs, making the hovered arc thicker and darker.
 sv_links = (
     gs.Chart()
-    .mark_link(arcFadingDistance=gs.expr("[height - 20, height + 20]"), segments=200)
+    .mark_link(
+        arcFadingDistance=gs.expr(
+            [gs.Expression("height") - 20, gs.Expression("height") + 20]
+        ),
+        segments=200,
+    )
     .encode(
         x=gs.Locus("chrom1", "breakpoint1", band=0),
         x2=gs.Locus("chrom2", "breakpoint2", band=0),

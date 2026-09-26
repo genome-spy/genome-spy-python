@@ -120,7 +120,7 @@ exon_blocks = (
 )
 exon_labels = (
     gs.Chart()
-    .transform_formula(expr="'Exon ' + datum.exon", as_="label")
+    .transform_formula(expr="Exon " + gs.datum.exon, as_="label")
     .mark_text(color="white", fontWeight=500, tooltip=None)
     .encode(
         x=gs.X("displayCenter:I"),
