@@ -169,3 +169,12 @@ The adapted areas are:
   `tools/generate_schema_wrapper.py`;
 - the multifeature penguins and cars strip-plot cases in `tests/test_chart.py`,
   adapted from Altair's example suite and mark documentation.
+
+## Prepared airway review table
+
+`airway_review.json.gz` uses the same Bioconnector workshop tables and paired
+log-count t-tests as the gallery volcano example. Source attribution and
+CC BY-NC-SA 4.0 terms are listed under Airway data above. Added fields contain
+gallery statistics, display values, sample counts, and host aliases;
+`tools/prepare_airway_review.py` reproduces the transformation. Source checksums
+are retained in the bundle. No PyDESeq2 analysis is used.

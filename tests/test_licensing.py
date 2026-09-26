@@ -48,6 +48,7 @@ def test_license_metadata_includes_borrowed_materials() -> None:
 
 # Keep published data identities aligned with the recorded provenance.
 _AUDITED_DATA = {
+    "airway_review.json.gz": "8839e9839623eca225de706fdd921eb9c72e093a61b1efceb88f8cb7da10d3e6",
     "airway_metadata.csv": "05bd7e78a0ca5b2a2f60ec715296381ca19f31a8c5a51e70c9f60583fa9fcf97",
     "airway_scaledcounts.csv": "4d34df15affa22fa5d5539874e148378ea18db1c9d731d175ef1b9f73cbc2927",
     "brca.maf.gz": "61d5355e960bd480bec4f245b8f096e2333408659ced0d196e42b0e38de3d724",

@@ -29,6 +29,7 @@ from genome_spy.datasets._oncoprint import laml_oncoplot_data, luad_oncoprint_da
 def test_available_datasets_are_stable() -> None:
     assert available_datasets() == (
         "airway_metadata",
+        "airway_review",
         "airway_scaledcounts",
         "brca_maf",
         "hapmap_gwas",

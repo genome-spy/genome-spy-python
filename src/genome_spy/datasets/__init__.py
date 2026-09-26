@@ -16,6 +16,7 @@ __all__ = [
 
 _DATA_DIR = files("genome_spy.datasets").joinpath("data")
 _DATASETS = {
+    "airway_review": "airway_review.json.gz",
     "airway_metadata": "airway_metadata.csv",
     "airway_scaledcounts": "airway_scaledcounts.csv",
     "brca_maf": "brca.maf.gz",
