@@ -355,6 +355,14 @@ def test_sequence_examples_use_typed_sort_and_data_format_helpers() -> None:
     }
 
 
+def test_sequence_logo_zooms_only_along_positions() -> None:
+    gallery = _load_gallery()
+    spec = gallery.collect_example(EXAMPLES_DIR / "sequence_logo.py").spec
+    assert spec["encoding"]["x"]["type"] == "index"
+    assert spec["encoding"]["x"]["scale"]["zoom"] is True
+    assert spec["encoding"]["y"]["scale"] == {"domain": [0, 2], "zoom": False}
+
+
 def test_examples_use_typed_axis_and_view_configuration() -> None:
     gallery = _load_gallery()
     composing = gallery.collect_example(EXAMPLES_DIR / "composing_genome_browser.py")
