@@ -1096,6 +1096,8 @@ def test_using_charts_has_four_canonical_destinations() -> None:
     }
     assert children(guide / "workflows/index.md") == [
         "annotate-intervals",
+        "annotate-regulatory-regions",
+        "review-volcano",
         "select-genes",
         "pick-genes",
         "edit-sequence",

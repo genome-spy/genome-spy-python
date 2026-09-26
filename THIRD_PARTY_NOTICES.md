@@ -14,6 +14,10 @@ browser files are generated from the pinned `@genome-spy/core` and
 `@genome-spy/inspector` npm releases and include their bundled open-source
 runtime dependencies.
 
+The workflow menu and dialog styles in `docs/_static/workflows.css` adapt
+GenomeSpy App's `_generic.scss`, `baseDialog.js`, and `componentStyles.js`
+under the same MIT license.
+
 The Core browser bundle embeds the Lato font bitmap and metrics, copyright
 2010–2014 tyPoland Lukasz Dziedzic, with Reserved Font Name "Lato", under the
 SIL Open Font License 1.1. Its full upstream notice is retained in
