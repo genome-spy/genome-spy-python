@@ -13100,6 +13100,7 @@ class Displace2DParams(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        animationHalfLife: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         as_: Sequence[str] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         height: float | Field_T | ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -13113,6 +13114,7 @@ class Displace2DParams(GenomeSpySchema):
         super().__init__(
             anchorHeight=anchorHeight,
             anchorWidth=anchorWidth,
+            animationHalfLife=animationHalfLife,
             description=description,
             height=height,
             key=key,
@@ -13136,6 +13138,24 @@ class Displace2DParams(GenomeSpySchema):
     ) -> Displace2DParams:
         """Return a copy with ``anchorWidth`` updated."""
         return self._with_property("anchorWidth", value)
+
+    def animationHalfLife(
+        self,
+        value: float | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> Displace2DParams:
+        """Return a copy with a ``ExprRef`` animationHalfLife.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("animationHalfLife", value, **defined)
 
     def as_(self, value: Sequence[str]) -> Displace2DParams:
         """Return a copy with ``as`` updated."""
@@ -48870,6 +48890,7 @@ class TransformParams(GenomeSpySchema):
         | ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        animationHalfLife: float | ExprRef | dict[str, Any] | UndefinedType = Undefined,
         as_: Sequence[str | None] | UndefinedType = Undefined,
         asChrom: str | UndefinedType = Undefined,
         asEnd: str | UndefinedType = Undefined,
@@ -48983,6 +49004,7 @@ class TransformParams(GenomeSpySchema):
         super().__init__(
             anchorHeight=anchorHeight,
             anchorWidth=anchorWidth,
+            animationHalfLife=animationHalfLife,
             asChrom=asChrom,
             asEnd=asEnd,
             asKey=asKey,
@@ -49093,6 +49115,24 @@ class TransformParams(GenomeSpySchema):
     ) -> TransformParams:
         """Return a copy with ``anchorWidth`` updated."""
         return self._with_property("anchorWidth", value)
+
+    def animationHalfLife(
+        self,
+        value: float | ExprRef | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        expr: str | UndefinedType = Undefined,
+    ) -> TransformParams:
+        """Return a copy with a ``ExprRef`` animationHalfLife.
+
+        Args:
+            expr (str): The expression string.
+        """
+        defined = {
+            "expr": expr,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._with_property("animationHalfLife", value, **defined)
 
     def as_(self, value: Sequence[str | None]) -> TransformParams:
         """Return a copy with ``as`` updated."""

@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-10-01
+
+### Added
+
+- Add the prepared `airway_review` dataset for gene-review examples.
+- Add an experimental local AlphaGenome-PyTorch TAL1 sequence-design notebook
+  with linked locus interactions, multi-base editing, and DynSeq predictions.
+  Model dependencies are optional and separate from the installed library.
+
+### Changed
+
+- Upgrade GenomeSpy Core, controls, and Inspector to 1.0.0 and regenerate
+  the Python schema API, including configurable `displace2d` animation half-life.
+- Extend the sequence-editing notebook to support multi-base edits across the
+  displayed locus.
+- Improve interaction and PISA documentation, gallery expressions, and README
+  animations.
+
+### Fixed
+
+- Expose selection predicate classes through `gs` and support typed endpoint
+  projection setters, avoiding raw dictionaries in composed conditions.
+- Restrict sequence-logo and alignment-logo zoom to the position axis and share
+  one bottom alignment axis.
+- Render the ASCAT fitting example title as literal text.
+
 ## [0.5.0] - 2026-09-25
 
 ### Added

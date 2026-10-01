@@ -144,12 +144,17 @@ Schema-backed configuration objects accepted by charts, channels, and helpers.
    GenomeAxis
    HandledTooltip
    Legend
+   NamedSelectionPredicateRef
    Paddings
    Parameter
+   ParameterPredicate
    Parse
    RulerMarkConfig
    Scale
    SelectionDomainRef
+   SelectionPredicateDefinition
+   SelectionPredicateOperand
+   SelectionUnionTest
    SizeDef
    Step
    Title
