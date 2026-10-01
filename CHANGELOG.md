@@ -10,9 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add the prepared `airway_review` dataset for gene-review examples.
-- Add an experimental local AlphaGenome-PyTorch TAL1 sequence-design notebook
-  with linked locus interactions, multi-base editing, and DynSeq predictions.
-  Model dependencies are optional and separate from the installed library.
 
 ### Changed
 
