@@ -38,6 +38,32 @@ from genome_spy.schema.mixins import TransformMethodMixin
 from genome_spy.schemapi import SchemaValidationError
 
 
+@pytest.mark.parametrize(
+    ("half_life", "expected"),
+    [(240, 240), (gs.expr("labelSpeed"), {"expr": "labelSpeed"})],
+)
+def test_displace2d_animation_half_life_is_generated(half_life, expected) -> None:
+    spec = (
+        gs.Chart([{"x": 1, "y": 2}])
+        .transform_displace2d(
+            x="x", y="y", width=40, height=12, animationHalfLife=half_life
+        )
+        .mark_text()
+        .encode(x="x:Q", y="y:Q")
+        .to_dict()
+    )
+    assert spec["transform"] == [
+        {
+            "type": "displace2d",
+            "x": "x",
+            "y": "y",
+            "width": 40,
+            "height": 12,
+            "animationHalfLife": expected,
+        }
+    ]
+
+
 @pytest.mark.parametrize("compose", [gs.hconcat, gs.vconcat])
 def test_track_annotations_are_generated_composition_properties(compose) -> None:
     track = gs.Chart([{"x": 1}]).mark_point().encode(x="x:Q")

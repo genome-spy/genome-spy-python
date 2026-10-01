@@ -10905,6 +10905,10 @@ class TransformMethodMixin:
         | core.ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
+        animationHalfLife: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         as_: Sequence[str] | UndefinedType = Undefined,
         description: str | UndefinedType = Undefined,
         key: Field_T | UndefinedType = Undefined,
@@ -10918,6 +10922,7 @@ class TransformMethodMixin:
             y (Field_T): Field containing the anchor value mapped through the view's y scale.
             anchorHeight (float | Field_T | ExprRef | dict[str, Any]): Height in logical pixels of an obstacle centered on the anchor. A number or expression supplies one value for all rows; a field supplies per-row values. Setting either anchor dimension to zero disables the obstacle for that row. __Default value:__ ``0``
             anchorWidth (float | Field_T | ExprRef | dict[str, Any]): Width in logical pixels of an obstacle centered on the anchor. A number or expression supplies one value for all rows; a field supplies per-row values. Setting either anchor dimension to zero disables the obstacle for that row. __Default value:__ ``0``
+            animationHalfLife (float | ExprRef | dict[str, Any]): Easing half-life in milliseconds for displayed offsets as they approach their solved positions. Larger values make label motion slower without changing the placement. An expression can adjust the speed while the visualization is running. Must be positive and finite. __Default value:__ ``120``
             as\\_ (Sequence[str]): Names of the output fields for signed horizontal and vertical pixel offsets. Positive values move right and down, respectively. Neither name may overwrite ``key``. __Default value:__ ``["xDisplacement", "yDisplacement"]``
             description (str): A description of the transform step. Can be used for documentation and agent context.
             key (Field_T): Field containing a unique string or finite numeric identifier. Use a key to preserve placement when upstream transforms replace, filter, or reorder rows. Without a key, placement state follows row object identity.
@@ -10931,6 +10936,8 @@ class TransformMethodMixin:
             transform["anchorHeight"] = anchorHeight
         if anchorWidth is not Undefined:
             transform["anchorWidth"] = anchorWidth
+        if animationHalfLife is not Undefined:
+            transform["animationHalfLife"] = animationHalfLife
         if as_ is not Undefined:
             transform["as"] = as_
         if description is not Undefined:

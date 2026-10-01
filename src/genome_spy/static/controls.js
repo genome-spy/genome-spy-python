@@ -1,4 +1,4 @@
-// Vendored from GenomeSpy 0.89.0.
+// Vendored from GenomeSpy 1.0.0.
 var S=`
     :host {
         position: absolute;

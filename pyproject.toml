@@ -1,6 +1,6 @@
 [project]
 name = "genome-spy-python"
-version = "0.5.0"
+version = "0.6.0"
 description = "genome-spy-python is a declarative genomics visualization library for Python, built on top of the genome-spy JSON specification."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -101,7 +101,7 @@ artifacts = [
 ]
 
 [tool.genome-spy]
-core-version = "0.89.0"
+core-version = "1.0.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

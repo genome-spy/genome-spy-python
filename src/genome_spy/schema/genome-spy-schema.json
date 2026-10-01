@@ -12815,6 +12815,17 @@
           ],
           "description": "Width in logical pixels of an obstacle centered on the anchor. A number or expression supplies one value for all rows; a field supplies per-row values. Setting either anchor dimension to zero disables the obstacle for that row.\n\n__Default value:__ `0`"
         },
+        "animationHalfLife": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "$ref": "#/definitions/ExprRef"
+            }
+          ],
+          "description": "Easing half-life in milliseconds for displayed offsets as they approach their solved positions. Larger values make label motion slower without changing the placement. An expression can adjust the speed while the visualization is running. Must be positive and finite.\n\n__Default value:__ `120`"
+        },
         "as": {
           "description": "Names of the output fields for signed horizontal and vertical pixel offsets. Positive values move right and down, respectively. Neither name may overwrite `key`.\n\n__Default value:__ `[\"xDisplacement\", \"yDisplacement\"]`",
           "items": {
