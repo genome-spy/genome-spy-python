@@ -44,8 +44,9 @@ GenomeSpy and Vega expression documentation.
   are [CC BY 4.0](https://www.uniprot.org/help/license/); retain attribution,
   the license link, and this modification notice. UniProt provides no warranty
   of correctness and does not grant patent or other third-party rights.
-- **`pik3ca_mutations.json`:** Plotly's NeedlePlot PIK3CA fixture,
-  copied without modification. Its 173 feature rows match UniProt P42336
+- **`pik3ca_mutations` (remote):** Plotly's NeedlePlot PIK3CA fixture,
+  loaded without modification from its [pinned original URL](https://raw.githubusercontent.com/plotly/datasets/1f6923b9c30c19ed825d3dad96754d0cb0f76708/Dash_Bio/Genetic/needle_PIK3CA.json).
+  It is no longer bundled in the package. Its 173 feature rows match UniProt P42336
   entry version 193 (also 197, 201 and 203), grouped by feature type and
   coordinates; values count annotations, not tumor samples. The separate
   domain track comes from Pfam through the
@@ -105,6 +106,19 @@ The full CC BY 4.0 and CC0 texts are in `LICENSES/CC-BY-4.0.txt` and
 `LICENSES/CC0-1.0.txt`. The source-repository MIT notices in
 `LICENSES/DATA-SOURCE-REPOSITORIES-MIT.txt` accompany the corresponding
 selection, formatting and example contributions.
+
+## PBMC marker expression
+
+`pbmc_markers.json.gz` contains 12 markers from 2,638 cells in Scanpy's processed
+PBMC3k fixture, obtained from [cellxgene revision
+68dfbcc](https://github.com/chanzuckerberg/cellxgene/blob/68dfbcc2eb675e96c6a5e2a6b7a0d3465ccf46bc/example-dataset/pbmc3k.h5ad).
+The original [10x Genomics PBMC3k dataset](https://www.10xgenomics.com/datasets/3-k-pbm-cs-from-a-healthy-donor-1-standard-1-1-0)
+is licensed CC BY 4.0; credit 10x Genomics and Scanpy's preprocessing contributors.
+The subset retains saved `raw.X` log1p counts and cell-type annotations, groups
+cells while preserving within-group order, and adds marker means, a single-linkage
+Euclidean group tree, and plotting coordinates. `tools/prepare_pbmc_gallery_data.py` reproduces these modifications;
+the source checksum is retained in the bundle. The CC BY 4.0 text is in
+`LICENSES/CC-BY-4.0.txt`.
 
 ## Bundled TCGA example tables
 

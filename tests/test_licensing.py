@@ -48,6 +48,7 @@ def test_license_metadata_includes_borrowed_materials() -> None:
 
 # Keep published data identities aligned with the recorded provenance.
 _AUDITED_DATA = {
+    "pbmc_markers.json.gz": "7ae4721b2e9c31cb6015b0a308aac162ec20cc3e2bfebebd63493ff881733850",
     "airway_review.json.gz": "8839e9839623eca225de706fdd921eb9c72e093a61b1efceb88f8cb7da10d3e6",
     "airway_metadata.csv": "05bd7e78a0ca5b2a2f60ec715296381ca19f31a8c5a51e70c9f60583fa9fcf97",
     "airway_scaledcounts.csv": "4d34df15affa22fa5d5539874e148378ea18db1c9d731d175ef1b9f73cbc2927",
@@ -56,7 +57,6 @@ _AUDITED_DATA = {
     "mutation_impact_reference.json": "81e1d4bb5803e38228e80dbdaec8ff450ccccf9dc1c5ca1c97646dcd2688f048",
     "oncoprint_dataset3.json": "e07aa6ae9cf4f5f3a9f331d9979855ccf33bc47ed1bb2f4b871939b47c2a09ef",
     "p53_sequence_comparison_aligned.fasta.gz": "bfb9b427b31dba6d41095fca95aa6cd306f8caee9e9819254428f54407a08956",
-    "pik3ca_mutations.json": "4f36df9ad960c1429827522bbd4fce0cb47520d14a5c642abe8a55969f177aec",
     "pik3ca_tcga_brca_lollipop.json": "3d13291134b4bd3af801848a8be384b08936fb99d2371b34fbe49df00e42e685",
     "refseq_gene_bodies.csv.gz": "6ecb8f12d120cc10724a816d4dc6f8ebdf5e468f725950809de5082f8db17785",
     "rnf7_direct_rna.json.gz": "2aee7e31edd025341ed453110fa2e2358e369c61b784779b407102028293b54a",

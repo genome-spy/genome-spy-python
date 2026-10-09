@@ -1,4 +1,4 @@
-"""Dataset helpers for packaged GenomeSpy example data."""
+"""Dataset helpers for packaged and remote GenomeSpy example data."""
 
 from __future__ import annotations
 
@@ -8,7 +8,12 @@ from importlib.resources.abc import Traversable
 from pathlib import Path
 from typing import Any, Literal, cast, overload
 
+from genome_spy.datasets._remote import SOURCES as _REMOTE_SOURCES
+from genome_spy.datasets._remote import DatasetDownloadError
+from genome_spy.datasets._remote import read_text as _read_remote_text
+
 __all__ = [
+    "DatasetDownloadError",
     "DatasetNotFoundError",
     "available_datasets",
     "load_dataset",
@@ -23,6 +28,7 @@ _DATASETS = {
     "hapmap_gwas": "hapmap_gwas.csv",
     "mutation_impact_reference": "mutation_impact_reference.json",
     "p53_sequence_comparison": "p53_sequence_comparison_aligned.fasta.gz",
+    "pbmc_markers": "pbmc_markers.json.gz",
     "pik3ca_mutations": "pik3ca_mutations.json",
     "pik3ca_tcga_brca_lollipop": "pik3ca_tcga_brca_lollipop.json",
     "tal1_alphagenome_reference": "tal1_alphagenome_reference.json.gz",
@@ -43,12 +49,12 @@ class DatasetNotFoundError(ValueError):
 
     Description:
         ``load_dataset`` and related helpers use this exception to report an
-        unknown dataset name together with the valid packaged choices.
+        unknown dataset name together with the valid dataset choices.
     """
 
 
 def available_datasets() -> tuple[str, ...]:
-    """Packaged dataset names.
+    """Available dataset names.
 
     Description:
         The returned names are the public identifiers accepted by
@@ -136,11 +142,12 @@ def load_dataset(
     *,
     as_format: Literal["auto", "dataframe", "json", "text"] = "auto",
 ) -> Any:
-    """Load a packaged example dataset by name.
+    """Load an example dataset by name.
 
     Description:
-        The loader understands the small set of real datasets vendored with the
-        package for examples and tutorials. ``"auto"`` returns a pandas
+        Most example datasets are packaged. ``pik3ca_mutations`` is downloaded
+        from its pinned original Plotly URL on each load and requires network
+        access; its size and SHA-256 are verified before parsing. ``"auto"`` returns a pandas
         ``DataFrame`` for CSV, TSV, and compressed MAF files and parsed Python
         objects for JSON files.
 
@@ -153,6 +160,7 @@ def load_dataset(
 
     Raises:
         DatasetNotFoundError: If the dataset name is unknown.
+        DatasetDownloadError: If a remote download fails or its integrity changes.
         ImportError: If ``as_format="dataframe"`` is requested without pandas.
         ValueError: If the requested format does not match the stored file type.
 
@@ -167,6 +175,8 @@ def load_dataset(
     suffixes = Path(filename).suffixes
 
     if as_format == "text":
+        if name in _REMOTE_SOURCES:
+            return _read_remote_text(name)
         if suffix == ".gz":
             import gzip
 

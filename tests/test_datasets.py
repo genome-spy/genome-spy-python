@@ -35,6 +35,7 @@ def test_available_datasets_are_stable() -> None:
         "hapmap_gwas",
         "mutation_impact_reference",
         "p53_sequence_comparison",
+        "pbmc_markers",
         "pik3ca_mutations",
         "pik3ca_tcga_brca_lollipop",
         "pyoncoprint_tcga",
@@ -55,14 +56,6 @@ def test_load_tabular_dataset_as_dataframe() -> None:
 
     assert list(data.columns[:4]) == ["CHR", "BP", "P", "SNP"]
     assert not data.empty
-
-
-def test_load_json_dataset() -> None:
-    data = load_dataset("pik3ca_mutations", as_format="json")
-
-    assert isinstance(data, dict)
-    assert "domains" in data
-    assert isinstance(data["domains"], list)
 
 
 def test_load_pik3ca_lollipop_dataset() -> None:
@@ -159,7 +152,6 @@ def test_packaged_dataset_files_are_byte_stable() -> None:
     expected_hashes = {
         "brca.maf.gz": "61d5355e960bd480bec4f245b8f096e2333408659ced0d196e42b0e38de3d724",
         "oncoprint_dataset3.json": "e07aa6ae9cf4f5f3a9f331d9979855ccf33bc47ed1bb2f4b871939b47c2a09ef",
-        "pik3ca_mutations.json": "4f36df9ad960c1429827522bbd4fce0cb47520d14a5c642abe8a55969f177aec",
         "pik3ca_tcga_brca_lollipop.json": "3d13291134b4bd3af801848a8be384b08936fb99d2371b34fbe49df00e42e685",
         "refseq_gene_bodies.csv.gz": "6ecb8f12d120cc10724a816d4dc6f8ebdf5e468f725950809de5082f8db17785",
         "rnf7_direct_rna.json.gz": "2aee7e31edd025341ed453110fa2e2358e369c61b784779b407102028293b54a",

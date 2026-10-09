@@ -92,6 +92,10 @@ you need them as a field. The table is a snapshot; recreate it after changing
 AnnData. See the {py:func}`API reference <genome_spy.anndata.from_anndata>` for
 selection options and supported arrays.
 
+Try the [marker matrix](../gallery/pbmc_marker_matrix.md),
+[cell heatmap](../gallery/pbmc_cell_heatmap.md), and
+[expression tracks](../gallery/pbmc_expression_tracks.md) with packaged PBMC data.
+
 ## Try it with packaged data
 
 The package ships the tables used by the gallery examples:

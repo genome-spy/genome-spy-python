@@ -44,6 +44,10 @@ CATEGORIES: dict[str, tuple[int, str]] = {
         20,
         "Differential-effect views such as volcano and MA plots.",
     ),
+    "Single-cell expression": (
+        25,
+        "AnnData marker expression as group means, cell heatmaps, and stacked tracks.",
+    ),
     "Regulatory model interpretation": (
         30,
         "PISA effects and DynSeq contribution scores for interpreting regulatory models.",
