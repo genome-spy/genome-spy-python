@@ -84,6 +84,13 @@ serialization. It supports `consolidate_datasets` and temporary overrides with
 
 {data_transformers}
 
+## AnnData projection
+
+Optional AnnData support uses the existing pandas table interface. See
+{{ref}}`AnnData inputs <anndata-inputs>` for metadata and embedding examples.
+
+{anndata}
+
 ## Example datasets
 
 Packaged tables used by the gallery examples. See
@@ -196,6 +203,11 @@ def render_api_page() -> str:
             ["DataTransformerSettings"],
             group="data",
             module="genome_spy.data_transformers",
+        ),
+        anndata=_section(
+            ["from_anndata", "AnnDataProjectionError"],
+            group="data",
+            module="genome_spy.anndata",
         ),
         datasets=_section(
             ["available_datasets", "load_dataset", "DatasetNotFoundError"],
