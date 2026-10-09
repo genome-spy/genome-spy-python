@@ -7,9 +7,8 @@ position, color, size, or another visual channel.
 ## Records and fields
 
 A list of dictionaries is the smallest useful input. Each dictionary below is
-one observation with the same three fields:
-
-Pass the records as the first argument to {py:class}`~genome_spy.Chart`:
+one observation with the same three fields. Pass the records as the first
+argument to {py:class}`~genome_spy.Chart`:
 
 ```{literalinclude} ../tutorials/data_inputs.py
 :language: python
@@ -36,8 +35,8 @@ this and the other eager sources in
 - Polars `DataFrame`;
 - PyArrow `Table` and `RecordBatch`.
 
-Use the same chart construction for any of them: {py:class}`gs.Chart <genome_spy.Chart>`. GenomeSpy
-uses column names as fields. A pandas index is not a field, so call
+Pass a table directly to {py:class}`gs.Chart <genome_spy.Chart>`. Column names
+become fields. A pandas index is not a field, so call
 `frame.reset_index()` first when an index contains values needed by the chart.
 
 Notebook display and live updates use Arrow IPC for supported tables when
@@ -48,6 +47,50 @@ The grammar is easiest to use with **long-form data**, where one row represents
 one observation and categories such as `sample` are stored as values in a
 field. If category names are spread across several columns, reshape the table
 before constructing the chart or use a suitable GenomeSpy transform.
+
+(anndata-inputs)=
+
+### AnnData
+
+Install support with `pip install 'genome-spy-python[anndata]'`. The examples
+below use an existing AnnData object, `adata`.
+
+Pass it directly to chart columns from `adata.obs`:
+
+```python
+import genome_spy as gs
+
+chart = gs.Chart(adata).mark_point().encode(
+    x="total_counts", y="n_genes_by_counts", color="cell_type"
+)
+```
+
+To combine observation metadata with an existing embedding and selected genes,
+use {py:func}`~genome_spy.anndata.from_anndata`:
+
+```python
+from genome_spy.anndata import from_anndata
+
+cells = from_anndata(
+    adata,
+    obs=["cell_type"],
+    genes=["MS4A1"],
+    obsm_keys=[("X_umap", 0), ("X_umap", 1)],
+)
+chart = gs.Chart(cells).mark_point().encode(
+    x="X_umap-0", y="X_umap-1", color="MS4A1", tooltip="cell_type:N"
+)
+```
+
+The helper prepares a pandas table in Python. Genes come from `X`; embedding
+components are zero-based and become fields such as `X_umap-0`. It converts only
+the selected expression columns to dense values and leaves AnnData unchanged.
+For backed, lazy, or GPU expression, materialize a subset first.
+
+Observation names are an index, so use `cells.reset_index(names="cell_id")` if
+you need them as a field. The table is a snapshot; recreate it after changing
+AnnData. See the {py:func}`API reference <genome_spy.anndata.from_anndata>` for
+selection options and supported arrays.
 
 ## Try it with packaged data
 

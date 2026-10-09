@@ -192,6 +192,22 @@ serialization. It supports `consolidate_datasets` and temporary overrides with
    DataTransformerSettings
 ```
 
+## AnnData projection
+
+Optional AnnData support uses the existing pandas table interface. See
+{ref}`AnnData inputs <anndata-inputs>` for metadata and embedding examples.
+
+```{eval-rst}
+.. currentmodule:: genome_spy.anndata
+
+.. autosummary::
+   :toctree: generated/data/
+   :nosignatures:
+
+   from_anndata
+   AnnDataProjectionError
+```
+
 ## Example datasets
 
 Packaged tables used by the gallery examples. See
