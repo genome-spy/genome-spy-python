@@ -8,11 +8,7 @@ sources and processing are described in the
 [p53 comparison](gallery/p53_sequence_comparison.md) gallery pages.
 
 The package ships the tables that the [gallery](gallery/index.md) examples use,
-so you can try the API on real data using the packaged tables. The legacy `pik3ca_mutations` fixture is loaded
-from its [original Plotly URL](https://raw.githubusercontent.com/plotly/datasets/1f6923b9c30c19ed825d3dad96754d0cb0f76708/Dash_Bio/Genetic/needle_PIK3CA.json),
-requires network access on each load, and is verified against a pinned SHA-256.
-Its name and returned JSON/text remain unchanged; download or integrity failures
-raise `DatasetDownloadError`.
+so you can try the API on real data without downloading anything.
 
 Data retain their own terms, independently of the source packages' software
 licenses. See the
@@ -36,7 +32,7 @@ for JSON files. Pass `as_format="text"` to get the raw file contents instead.
 | `airway_scaledcounts` | Rounded, length-scaled gene counts for the same eight samples |
 | `hapmap_gwas` | HapMap coordinates with simulated p-values and effect sizes |
 | `brca_maf` | Somatic mutation calls for one TCGA breast-tumor sample |
-| `pik3ca_mutations` | Historical UniProt feature counts and Pfam protein domains; fetched from Plotly |
+| `pik3ca_mutations` | Historical UniProt feature counts and Pfam protein domains |
 | `tcga_oncoprint` | Plotly Dash Bio alteration fixture |
 | `mutation_impact_reference` | Project-authored synthetic reference window |
 | `tal1_alphagenome_reference` | UCSC hg38 reference sequence with interval metadata |

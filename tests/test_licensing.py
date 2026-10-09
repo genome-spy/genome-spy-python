@@ -57,6 +57,7 @@ _AUDITED_DATA = {
     "mutation_impact_reference.json": "81e1d4bb5803e38228e80dbdaec8ff450ccccf9dc1c5ca1c97646dcd2688f048",
     "oncoprint_dataset3.json": "e07aa6ae9cf4f5f3a9f331d9979855ccf33bc47ed1bb2f4b871939b47c2a09ef",
     "p53_sequence_comparison_aligned.fasta.gz": "bfb9b427b31dba6d41095fca95aa6cd306f8caee9e9819254428f54407a08956",
+    "pik3ca_mutations.json": "4f36df9ad960c1429827522bbd4fce0cb47520d14a5c642abe8a55969f177aec",
     "pik3ca_tcga_brca_lollipop.json": "3d13291134b4bd3af801848a8be384b08936fb99d2371b34fbe49df00e42e685",
     "refseq_gene_bodies.csv.gz": "6ecb8f12d120cc10724a816d4dc6f8ebdf5e468f725950809de5082f8db17785",
     "rnf7_direct_rna.json.gz": "2aee7e31edd025341ed453110fa2e2358e369c61b784779b407102028293b54a",

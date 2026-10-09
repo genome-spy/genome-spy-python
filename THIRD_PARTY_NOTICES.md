@@ -44,9 +44,8 @@ GenomeSpy and Vega expression documentation.
   are [CC BY 4.0](https://www.uniprot.org/help/license/); retain attribution,
   the license link, and this modification notice. UniProt provides no warranty
   of correctness and does not grant patent or other third-party rights.
-- **`pik3ca_mutations` (remote):** Plotly's NeedlePlot PIK3CA fixture,
-  loaded without modification from its [pinned original URL](https://raw.githubusercontent.com/plotly/datasets/1f6923b9c30c19ed825d3dad96754d0cb0f76708/Dash_Bio/Genetic/needle_PIK3CA.json).
-  It is no longer bundled in the package. Its 173 feature rows match UniProt P42336
+- **`pik3ca_mutations.json`:** Plotly's NeedlePlot PIK3CA fixture,
+  copied without modification. Its 173 feature rows match UniProt P42336
   entry version 193 (also 197, 201 and 203), grouped by feature type and
   coordinates; values count annotations, not tumor samples. The separate
   domain track comes from Pfam through the
