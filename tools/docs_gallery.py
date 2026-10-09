@@ -46,7 +46,7 @@ CATEGORIES: dict[str, tuple[int, str]] = {
     ),
     "Single-cell expression": (
         25,
-        "AnnData marker expression as group means, cell heatmaps, and stacked tracks.",
+        "Single-cell UMAPs, marker heatmaps, and expression tracks with AnnData.",
     ),
     "Regulatory model interpretation": (
         30,

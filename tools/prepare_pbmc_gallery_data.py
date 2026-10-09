@@ -19,6 +19,7 @@ from scipy.cluster.hierarchy import leaves_list, linkage
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_URL = "https://raw.githubusercontent.com/chanzuckerberg/cellxgene/68dfbcc2eb675e96c6a5e2a6b7a0d3465ccf46bc/example-dataset/pbmc3k.h5ad"
 SOURCE_SHA256 = "0db367b991dd95809732b218539ede489bea99113807f62ebd7ccc970025fe38"
+UMAP_GENES = ["CD79A", "MS4A1", "IGJ", "CD3D", "FCER1A", "FCGR3A"]
 MARKERS = {
     "CD4 T cells": ["IL7R"],
     "CD14+ Monocytes": ["CD14", "LYZ"],
@@ -73,10 +74,21 @@ def main() -> None:
     )
     selected = selected[order].copy()
     values = selected.X.toarray()
+    umap = original.obsm["X_umap"][order]
+    umap_expression = original.raw[:, UMAP_GENES].X[order].toarray()
+    if umap.shape != (2638, 2) or not np.isfinite(umap).all():
+        raise ValueError("Unexpected PBMC UMAP coordinates.")
+    lower, upper = umap.min(axis=0), umap.max(axis=0)
+    padding = (upper - lower) * 0.08
     if values.shape != (2638, 12) or not np.isfinite(values).all() or values.min() < 0:
         raise ValueError("Unexpected PBMC marker matrix.")
     cells = [
-        {"cell": str(cell), "cell_type": str(group), "cell_order": i}
+        {
+            "cell": str(cell),
+            "cell_type": str(group),
+            "cell_order": i,
+            "n_counts": int(selected.obs["n_counts"].iloc[i]),
+        }
         for i, (cell, group) in enumerate(
             zip(selected.obs_names, selected.obs["louvain"], strict=True)
         )
@@ -180,12 +192,22 @@ def main() -> None:
             "url": SOURCE_URL,
             "sha256": SOURCE_SHA256,
             "expression": "raw.X: log1p counts before normalization",
-            "processing": "12 markers; original louvain labels; dendrogram group order; stable cells within groups",
+            "embedding": "obsm.X_umap: saved source coordinates",
+            "processing": "12 expression-view markers; 6 UMAP markers; original n_counts and louvain labels; dendrogram group order; stable cells within groups",
             "license": "CC-BY-4.0",
             "anndata_version": version("anndata"),
         },
         "cells": cells,
         "expression": values.tolist(),
+        "umap": umap.tolist(),
+        "umap_genes": UMAP_GENES,
+        "umap_expression": umap_expression.tolist(),
+        "umap_expression_limit": int(np.ceil(umap_expression.max())),
+        "n_counts_limit": int(np.ceil(selected.obs["n_counts"].max() / 1000) * 1000),
+        "umap_domains": {
+            "x": [float(lower[0] - padding[0]), float(upper[0] + padding[0])],
+            "y": [float(lower[1] - padding[1]), float(upper[1] + padding[1])],
+        },
         "groups": groups,
         "markers": markers,
         "marker_groups": marker_groups,

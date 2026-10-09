@@ -79,6 +79,103 @@ def test_pbmc_projection_reshape_preserves_cell_gene_values() -> None:
         assert selected["cell_end"].tolist() == list(range(1, 2639))
 
 
+def test_pbmc_umap_preserves_source_coordinates_and_cell_alignment() -> None:
+    adata = pbmc_markers()
+    data = load_dataset("pbmc_markers", as_format="json")
+    # Three coordinates from the pinned source, before grouping the cells.
+    reference = {
+        "AAACATACAACCAC-1": [1.35285573560809, 2.26612718696679],
+        "CCAAAGTGCTACGA-1": [-8.302173262858318, 6.532531074910839],
+        "TTTGCATGCCTCAC-1": [2.628033215265815, 0.36722542845369793],
+    }
+    for cell, coordinates in reference.items():
+        np.testing.assert_allclose(
+            adata[cell].obsm["X_umap"][0], coordinates, atol=1e-12
+        )
+    projection = from_anndata(
+        adata,
+        obs=["cell", "cell_type"],
+        genes=["IL7R"],
+        obsm_keys=[("X_umap", 0), ("X_umap", 1)],
+    )
+    assert projection["cell"].tolist() == adata.obs_names.tolist()
+    np.testing.assert_array_equal(
+        projection[["X_umap-0", "X_umap-1"]], adata.obsm["X_umap"]
+    )
+    np.testing.assert_array_equal(projection["IL7R"], adata.X[:, 0])
+    for i, axis in enumerate(("x", "y")):
+        domain = data["umap_domains"][axis]
+        assert domain[0] < adata.obsm["X_umap"][:, i].min()
+        assert domain[1] > adata.obsm["X_umap"][:, i].max()
+
+
+def test_pbmc_umap_markers_and_total_counts_match_source_cells() -> None:
+    adata = pbmc_markers(umap_genes=True)
+    assert adata.shape == (2638, 6)
+    assert adata.obs.loc[
+        ["AAACATACAACCAC-1", "CCAAAGTGCTACGA-1", "TTTGCATGCCTCAC-1"], "n_counts"
+    ].tolist() == [2419, 3438, 1984]
+    assert adata["AAACATACAACCAC-1", "CD3D"].X[0, 0] == pytest.approx(1.6094379425)
+    assert adata["TTTGCATGCCTCAC-1", "CD3D"].X[0, 0] == pytest.approx(1.0986123085)
+    assert (adata.obs["n_counts"].to_numpy() > np.expm1(adata.X).sum(axis=1)).all()
+
+
+@pytest.mark.docs
+def test_pbmc_umap_grid_shares_coordinates_and_one_arrow_table() -> None:
+    prepared = import_module("docs.examples.pbmc_umap_genes").chart._prepare_render()
+    spec = prepared.spec
+    assert len(spec["concat"]) == 8 and spec["columns"] == 4
+    assert spec["resolve"]["scale"] == {
+        "x": "shared",
+        "y": "shared",
+        "color": "independent",
+    }
+    assert spec["resolve"]["legend"]["default"] == "collected"
+    assert len(prepared.buffers) == 1
+    table = pa.ipc.open_file(
+        pa.BufferReader(next(iter(prepared.buffers.values())))
+    ).read_all()
+    assert table.num_rows == 2638
+    assert {"X_umap-0", "X_umap-1", "cell", "cell_type", "n_counts"} <= set(
+        table.column_names
+    )
+    fields = [panel["encoding"]["color"]["field"] for panel in spec["concat"]]
+    assert fields == [
+        "CD79A",
+        "MS4A1",
+        "IGJ",
+        "CD3D",
+        "FCER1A",
+        "FCGR3A",
+        "n_counts",
+        "cell_type",
+    ]
+    assert list(pbmc_markers(umap_genes=True).var_names) == fields[:6]
+    for panel in spec["concat"]:
+        encoding = panel["encoding"]
+        assert encoding["x"]["field"] == "X_umap-0"
+        assert encoding["y"]["field"] == "X_umap-1"
+        assert encoding["x"]["scale"]["zoom"] is True
+        assert encoding["y"]["scale"]["zoom"] is True
+    for panel in spec["concat"][:6]:
+        assert panel["encoding"]["color"]["scale"]["domain"] == [0, 6]
+        assert (
+            panel["transform"][0]["sort"]["field"]
+            == panel["encoding"]["color"]["field"]
+        )
+    counts, labels = spec["concat"][-2:]
+    assert counts["encoding"]["color"]["type"] == "quantitative"
+    assert counts["encoding"]["color"]["scale"]["domain"] == [0, 9000]
+    assert labels["encoding"]["color"]["type"] == "nominal"
+    assert set(labels["encoding"]["color"]["scale"]["domain"]) == set(
+        pbmc_markers().obs.cell_type
+    )
+    assert spec["concat"][0]["encoding"]["color"]["legend"]["title"] == "log1p(counts)"
+    assert all(
+        panel["encoding"]["color"]["legend"] is None for panel in spec["concat"][1:6]
+    )
+
+
 def test_pbmc_dendrogram_matches_marker_means_and_group_coordinates() -> None:
     from scipy.cluster.hierarchy import leaves_list, linkage
 

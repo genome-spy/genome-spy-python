@@ -12,15 +12,15 @@ if TYPE_CHECKING:
     from anndata import AnnData
 
 
-def pbmc_markers() -> AnnData:
+def pbmc_markers(*, umap_genes: bool = False) -> AnnData:
     """Load the prepared PBMC marker expression as AnnData.
 
     Description:
-        Contains 2,638 cells and 12 marker genes with saved log1p counts,
-        original cell-type labels, and a stable group ordering.
+        By default, contains 2,638 cells and 12 marker genes with saved log1p counts,
+        original cell-type labels, UMAP coordinates, and a stable group ordering.
 
     Args:
-        None.
+        umap_genes: Load the six UMAP-panel markers instead of the twelve heatmap markers.
 
     Returns:
         A new AnnData object with cell identifiers and plotting coordinates in obs.
@@ -41,10 +41,19 @@ def pbmc_markers() -> AnnData:
     assert isinstance(data, dict)
     obs = pd.DataFrame.from_records(data["cells"]).set_index("cell", drop=False)
     obs["cell_end"] = obs["cell_order"] + 1
+    genes = (
+        data["umap_genes"]
+        if umap_genes
+        else [marker["gene"] for marker in data["markers"]]
+    )
     return AnnData(
-        X=np.asarray(data["expression"], dtype=np.float32),
+        X=np.asarray(
+            data["umap_expression"] if umap_genes else data["expression"],
+            dtype=np.float32,
+        ),
         obs=obs,
-        var=pd.DataFrame(index=[marker["gene"] for marker in data["markers"]]),
+        var=pd.DataFrame(index=genes),
+        obsm={"X_umap": np.asarray(data["umap"], dtype=np.float64)},
     )
 
 
