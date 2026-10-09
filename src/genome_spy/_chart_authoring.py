@@ -8,6 +8,7 @@ from datetime import date, datetime
 from typing import Any, cast
 
 from genome_spy._utils import is_mapping
+from genome_spy.anndata import _as_dataframe
 from genome_spy.arrow import _is_pandas_frame, _is_polars_frame, _is_pyarrow_table
 from genome_spy.channels import Channel, channel
 from genome_spy.schemapi import (
@@ -58,6 +59,7 @@ def json_safe(value: Any) -> Any:
 
 def records_from_data(data: Any) -> list[dict[str, Any]] | None:
     """Extract record-like rows from common Python table inputs."""
+    data = _as_dataframe(data)
     if isinstance(data, list):
         return data
     if _is_pyarrow_table(data):
@@ -90,6 +92,7 @@ def records_data(records: list[dict[str, Any]]) -> dict[str, Any]:
 
 def infer_field_type(field: str, data: Any) -> str | None:
     """Infer a GenomeSpy encoding type from up to the first 100 records."""
+    data = _as_dataframe(data)
     table_type = infer_table_field_type(field, data)
     if table_type is not None:
         return table_type

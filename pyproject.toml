@@ -45,6 +45,7 @@ Repository = "https://github.com/genome-spy/genome-spy-python"
 Issues = "https://github.com/genome-spy/genome-spy-python/issues"
 
 [project.optional-dependencies]
+anndata = ["anndata>=0.11.0"]
 arrow = ["pyarrow>=18.0.0"]
 
 [dependency-groups]
@@ -61,6 +62,7 @@ docs = [
     "pyarrow>=18.0.0",
 ]
 dev = [
+    "anndata>=0.11.0",
     "altair>=6.0.0",
     "ipykernel>=7.3.0",
     "ipywidgets>=8.1.8",
