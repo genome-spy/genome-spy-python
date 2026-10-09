@@ -113,7 +113,10 @@ def test_importing_genome_spy_does_not_import_optional_table_libraries() -> None
             "-c",
             "import genome_spy, sys; "
             "assert 'pandas' not in sys.modules; "
-            "assert 'pyarrow' not in sys.modules",
+            "assert 'pyarrow' not in sys.modules; "
+            "assert 'anndata' not in sys.modules; "
+            "assert 'numpy' not in sys.modules; "
+            "assert 'scipy' not in sys.modules",
         ],
         check=False,
         capture_output=True,

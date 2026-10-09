@@ -5,6 +5,8 @@ from __future__ import annotations
 from io import BytesIO
 from typing import Any
 
+from genome_spy.anndata import _as_dataframe
+
 __all__ = ["to_arrow_ipc"]
 
 
@@ -94,6 +96,7 @@ def _try_to_arrow_ipc(data: Any) -> bytes | None:
     from recognized writers intentionally propagate rather than falling back to
     JSON records.
     """
+    data = _as_dataframe(data)
     if _is_polars_frame(data):
         return _write_ipc_method(data)
     if _is_pyarrow_table(data):
@@ -112,8 +115,9 @@ def to_arrow_ipc(data: Any) -> bytes:
 
     Description:
         Supports Polars dataframes, PyArrow tables and record batches, pandas
-        dataframes when the optional ``arrow`` extra is installed, and custom
-        objects with a Polars-compatible ``write_ipc`` method. The helper
+        dataframes and AnnData observation metadata when the optional ``arrow``
+        extra is installed, and custom objects with a Polars-compatible
+        ``write_ipc`` method. The helper
         intentionally writes uncompressed IPC because GenomeSpy's Arrow decoder
         does not support compressed IPC buffers yet.
 
@@ -136,6 +140,7 @@ def to_arrow_ipc(data: Any) -> bytes:
         b'ARROW1'
     """
 
+    data = _as_dataframe(data)
     payload = _try_to_arrow_ipc(data)
     if payload is not None:
         return payload
