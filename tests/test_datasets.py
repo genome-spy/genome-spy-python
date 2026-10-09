@@ -35,6 +35,7 @@ def test_available_datasets_are_stable() -> None:
         "hapmap_gwas",
         "mutation_impact_reference",
         "p53_sequence_comparison",
+        "pbmc_markers",
         "pik3ca_mutations",
         "pik3ca_tcga_brca_lollipop",
         "pyoncoprint_tcga",

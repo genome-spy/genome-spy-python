@@ -107,6 +107,11 @@ def _remove_stale_arrow_assets(referenced: set[str]) -> None:
 # Cards share titles, but only the gallery index shows data subtitles.
 # Example headings stay unchanged; new examples fall back to their source title.
 GALLERY_CARD_LABELS = {
+    "pbmc_umap": ("PBMC UMAP", "PBMC3k · Cell types"),
+    "pbmc_umap_genes": ("PBMC UMAP panels", "PBMC3k · Markers and cell types"),
+    "pbmc_marker_matrix": ("PBMC marker matrix", "PBMC3k · 12 marker genes"),
+    "pbmc_cell_heatmap": ("PBMC cell heatmap", "PBMC3k · 2,638 cells"),
+    "pbmc_expression_tracks": ("PBMC expression tracks", "PBMC3k · AnnData"),
     "stacked_bar": ("Horizontal stacked bars", "Barley yields · Vega datasets"),
     "layered_lollipop": ("Layered lollipop plot", "Synthetic sine wave"),
     "independent_scales": (

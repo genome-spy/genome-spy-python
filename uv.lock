@@ -709,6 +709,8 @@ dev = [
     { name = "statsmodels" },
 ]
 docs = [
+    { name = "anndata", version = "0.12.19", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
+    { name = "anndata", version = "0.13.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "furo" },
     { name = "myst-parser" },
     { name = "pyarrow" },
@@ -755,6 +757,7 @@ dev = [
     { name = "statsmodels", specifier = ">=0.14.2" },
 ]
 docs = [
+    { name = "anndata", specifier = ">=0.11.0" },
     { name = "furo", specifier = ">=2024.8.6" },
     { name = "myst-parser", specifier = ">=3.0" },
     { name = "pyarrow", specifier = ">=18.0.0" },

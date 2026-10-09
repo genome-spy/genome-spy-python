@@ -71,6 +71,14 @@ def test_every_public_export_is_documented_once() -> None:
         assert class_name in listed, f"{name} is not documented in docs/api.md"
 
 
+def test_anndata_projection_is_documented_in_its_optional_module() -> None:
+    page = _load_generator().render_api_page()
+    section = page.split("## AnnData projection\n", 1)[1].split("\n## ", 1)[0]
+    assert ".. currentmodule:: genome_spy.anndata" in section
+    assert "   from_anndata\n" in section
+    assert "   AnnDataProjectionError\n" in section
+
+
 def test_case_colliding_names_use_separate_stub_directories() -> None:
     """``Locus`` and ``locus`` must not share one autosummary output directory."""
     page = API_PAGE.read_text(encoding="utf-8")

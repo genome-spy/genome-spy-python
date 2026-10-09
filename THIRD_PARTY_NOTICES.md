@@ -106,6 +106,19 @@ The full CC BY 4.0 and CC0 texts are in `LICENSES/CC-BY-4.0.txt` and
 `LICENSES/DATA-SOURCE-REPOSITORIES-MIT.txt` accompany the corresponding
 selection, formatting and example contributions.
 
+## PBMC marker expression
+
+`pbmc_markers.json.gz` contains selected markers from 2,638 cells in Scanpy's processed
+PBMC3k fixture, obtained from [cellxgene revision
+68dfbcc](https://github.com/chanzuckerberg/cellxgene/blob/68dfbcc2eb675e96c6a5e2a6b7a0d3465ccf46bc/example-dataset/pbmc3k.h5ad).
+The original [10x Genomics PBMC3k dataset](https://www.10xgenomics.com/datasets/3-k-pbm-cs-from-a-healthy-donor-1-standard-1-1-0)
+is licensed CC BY 4.0; credit 10x Genomics and Scanpy's preprocessing contributors.
+The subset retains saved UMAP coordinates, `raw.X` log1p counts and cell-type annotations, groups
+cells while preserving within-group order, and adds marker means, a single-linkage
+Euclidean group tree, and plotting coordinates. `tools/prepare_pbmc_gallery_data.py` reproduces these modifications;
+the source checksum is retained in the bundle. The CC BY 4.0 text is in
+`LICENSES/CC-BY-4.0.txt`.
+
 ## Bundled TCGA example tables
 
 | Files | Source and processing |

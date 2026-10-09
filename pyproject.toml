@@ -50,6 +50,7 @@ arrow = ["pyarrow>=18.0.0"]
 
 [dependency-groups]
 docs = [
+    "anndata>=0.11.0",
     "furo>=2024.8.6",
     "sphinx>=7.3",
     "myst-parser>=3.0",

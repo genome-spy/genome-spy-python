@@ -41,6 +41,7 @@ for JSON files. Pass `as_format="text"` to get the raw file contents instead.
 | `tcga_laml_annotations` | Clinical annotations for those leukemia samples |
 | `tcga_laml_combined_oncoplot` | Prepared mutation, copy-number, clinical, pathway, VAF, and MutSig tables |
 | `p53_sequence_comparison` | 34 p53 protein sequences aligned with MAFFT L-INS-i, compressed FASTA |
+| `pbmc_markers` | PBMC3k marker expression for 2,638 cells, with cell types, total counts, UMAP coordinates, and group means |
 | `pyoncoprint_tcga` | Alteration matrix for TCGA lung adenocarcinoma samples |
 | `tcga_ov_gistic_scores` | GISTIC2 copy-number scores for TCGA ovarian tumors |
 | `tcga_ov_gistic_lesions` | GISTIC2 peak regions for the same cohort |
@@ -50,6 +51,14 @@ for JSON files. Pass `as_format="text"` to get the raw file contents instead.
 :::{admonition} Data use and provenance
 :class: note
 
+- `pbmc_markers` is a curated subset of Scanpy's processed
+  [10x Genomics PBMC3k dataset](https://www.10xgenomics.com/datasets/3-k-pbm-cs-from-a-healthy-donor-1-standard-1-1-0)
+  (CC BY 4.0). It retains saved log1p counts and original cell-type annotations;
+  Python prepares group means and cell order for the
+  [UMAPs](gallery/pbmc_umap_genes.md),
+  [marker matrix](gallery/pbmc_marker_matrix.md),
+  [heatmap](gallery/pbmc_cell_heatmap.md), and
+  [tracks](gallery/pbmc_expression_tracks.md).
 - `airway_metadata` and `airway_scaledcounts` describe the airway smooth muscle
   RNA-seq experiment of Himes et al., *PLoS One* 2014
   ([GEO GSE52778](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE52778)),
