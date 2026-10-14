@@ -1,0 +1,92 @@
+[
+  {
+    "path": "quickstart.md",
+    "source": "docs/agents/quickstart.md",
+    "title": "Quickstart",
+    "section": "Start here",
+    "description": "Create, validate, and deliver a table chart with a complete runnable example."
+  },
+  {
+    "path": "skill-distribution.md",
+    "source": "docs/agents/skill-distribution.md",
+    "title": "Install the agent skill",
+    "section": "Start here",
+    "description": "Install for Codex or Claude Code, choose scope, and preserve local edits."
+  },
+  {
+    "path": "skill.md",
+    "source": "skills/create-genomespy-visualization/SKILL.md",
+    "title": "Visualization skill",
+    "section": "Start here",
+    "description": "Portable authoring workflow, verification requirements, and recovery paths."
+  },
+  {
+    "path": "data.md",
+    "source": "docs/agents/data.md",
+    "title": "Data inputs",
+    "section": "Author charts",
+    "description": "Records, dataframes, URLs, indexes, AnnData projections, and preparation boundaries."
+  },
+  {
+    "path": "encodings.md",
+    "source": "docs/agents/encodings.md",
+    "title": "Encodings and composition",
+    "section": "Author charts",
+    "description": "Fields and types, scale choices, constant positions, and composition operators."
+  },
+  {
+    "path": "scales-axes-legends.md",
+    "source": "docs/agents/scales-axes-legends.md",
+    "title": "Scales, axes, and legends",
+    "section": "Author charts",
+    "description": "Domains, category order, legend configuration, and color/size semantics."
+  },
+  {
+    "path": "api.md",
+    "title": "Python API signatures",
+    "section": "Author charts",
+    "description": "Generated signatures for core chart authoring, channels, guides, and output; intentionally a focused subset."
+  },
+  {
+    "path": "api-chart.md",
+    "title": "Chart authoring signatures",
+    "section": "API details",
+    "api_section": "Chart authoring",
+    "description": "Construct charts and marks, encode fields, configure views, and resolve composition scales."
+  },
+  {
+    "path": "api-encodings.md",
+    "title": "Encoding and guide signatures",
+    "section": "API details",
+    "api_section": "Fields and guides",
+    "description": "Field/channel constructors, scale and axis methods, and legend options."
+  },
+  {
+    "path": "api-output.md",
+    "title": "Validation and output signatures",
+    "section": "API details",
+    "api_section": "Validation and output",
+    "description": "Validate specs, save files, display charts, and retain notebook widgets."
+  },
+  {
+    "path": "rendering.md",
+    "source": "docs/agents/rendering.md",
+    "title": "Notebooks and export",
+    "section": "Deliver and verify",
+    "description": "Widget display, validated JSON, inline HTML, frontend checks, and bounded recovery."
+  },
+  {
+    "path": "table-chart.md",
+    "source": "skills/create-genomespy-visualization/references/table-chart.md",
+    "title": "Table charts and reference fidelity",
+    "section": "Deliver and verify",
+    "description": "Executable fallback, geometry and marker footprints, overlays, color mapping, and capture limits."
+  },
+  {
+    "path": "grouped-charts.md",
+    "source": "skills/create-genomespy-visualization/references/grouped-charts.md",
+    "title": "Grouped charts and distributions",
+    "section": "Deliver and verify",
+    "description": "Summary denominators, matrices, clustering alignment, and sampled-shape limitations."
+  }
+]

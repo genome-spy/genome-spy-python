@@ -35,6 +35,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_sitemap",
     "genomespy_gallery",
+    "genomespy_agents",
 ]
 
 myst_enable_extensions = [
@@ -46,7 +47,8 @@ myst_enable_extensions = [
 myst_links_external_new_tab = True
 
 # Generated gallery pages and Sphinx scaffolding are not prose sources.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "examples"]
+# Agent sources publish separately as plain Markdown through genomespy_agents.
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "examples", "agents/**"]
 
 autosummary_generate = True
 autodoc_typehints = "none"

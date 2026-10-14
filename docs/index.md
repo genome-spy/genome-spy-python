@@ -60,6 +60,9 @@ Detailed reference for the public Python API.
 Annotate genomic intervals or select genes for follow-up—in your browser or a notebook.
 :::
 
+**Agent documentation.** Agents can use the [Markdown documentation index](https://genomespy.app/genome-spy-python/llms.txt)
+to find focused guides, categorized gallery examples, and Python API signatures.
+
 ```{toctree}
 :hidden:
 :includehidden:
