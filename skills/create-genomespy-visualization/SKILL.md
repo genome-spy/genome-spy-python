@@ -17,40 +17,59 @@ Requires Python 3.11+, genome-spy-python, and Python/file execution. Frontend
 verification needs browser or notebook access. Optional table dependencies depend
 on the input; plain records need only the base package.
 
-## Read the relevant guide
+## Find a working pattern through the index
 
-Start with the self-contained [table-chart guide](references/table-chart.md) for a
-runnable example, API pitfalls, fidelity checks, overlays, and color calibration.
-For grouped summaries, matrices, distributions, or clustering trees, also read
-[grouped charts](references/grouped-charts.md). Both work outside this repository.
-For more context, start with the [agent documentation index](https://genomespy.app/genome-spy-python/llms.txt)
-and read only relevant pages. Before authoring, consult the [gallery catalog](https://genomespy.app/genome-spy-python/agents/gallery.md)
-for the closest working example. Reuse its public chart API, encodings, composition,
-and rendering path; adapt data, labels, and domains. Check dependencies and data
-preparation rather than copying internal dataset helpers. Add a workaround only
-when the existing pattern cannot meet the task, and explain the specific gap.
-The index also links maintained user guides for deeper context. Use its explicit
-Markdown endpoints; do not assume arbitrary human pages have Markdown equivalents. The checkout's fuller
-quickstart remains `docs/agents/quickstart.md`.
+1. Read [llms.txt](https://genomespy.app/genome-spy-python/llms.txt) at the start of
+   the task. Use its descriptions and gallery categories to select pages; retain
+   the index and selected URLs for the task instead of repeatedly downloading them.
+   Follow listed Markdown URLs rather than guessing endpoints.
+   Titles can repeat across agent and user-guide sections; keep entries distinct
+   by section and URL, and prefer the focused agent guide before the fuller page.
+2. Select the closest gallery example by the intended comparison, marks,
+   composition, and interaction, rather than just its sample dataset. Read its
+   Python source and explanation before authoring. Load only the selected example
+   and needed guides, not the entire documentation collection.
+   A related example can supply summary and ordering patterns while a documented
+   native mark supplies the requested chart form. Reuse only needed components.
+3. Adapt the example's public chart API, encodings, composition, and rendering
+   path. Replace example data, field names, labels, and domains with the user's
+   inputs. Check dependencies, preparation, and provenance; use public data APIs
+   rather than copying internal dataset helpers or assuming prepared fields exist.
+   For recreation, check example-specific palettes, opacity, zoom-dependent mark
+   sizes, and panel dimensions against the frozen reference before retaining them.
+4. Resolve missing detail with the indexed pages below. Prefer focused agent
+   guides; use the fuller user guides or API signatures for unresolved options.
+   If no example fits, use documented native marks and transforms. If the requested
+   chart form is unsupported, explain the gap and offer a supported alternative.
+   Implement custom geometry only when the user explicitly requests it; label it
+   as custom and keep its recipes in task-local code, outside this skill.
+   Keep native guides attached to their encodings whenever supported.
 
-If the index is unavailable, try the direct Markdown links below. If those fail,
-use the corresponding human guide, local docs, or bundled references and report
-the access limit. Publication builds can precede live deployment.
-
-Read only the relevant agent page for further detail:
-
-| Task | Guide |
+| Need | Find in the index |
 | --- | --- |
-| Data inputs or index fields | [Data](https://genomespy.app/genome-spy-python/agents/data.md) |
-| Fields, types, channels | [Encodings](https://genomespy.app/genome-spy-python/agents/encodings.md) |
-| Scales and legends | [Scales and guides](https://genomespy.app/genome-spy-python/agents/scales-axes-legends.md) |
-| Notebook display | [Notebooks](https://genomespy.app/genome-spy-python/agents/rendering.md) |
-| Export | [Serialization](https://genomespy.app/genome-spy-python/agents/rendering.md) |
-| Public signatures | [API](https://genomespy.app/genome-spy-python/agents/api.md) |
+| Minimal chart or delivery workflow | Quickstart; Notebooks and export |
+| Table formats, indexes, or prepared fields | Data inputs; Data and chart inputs |
+| Fields, types, or channel mappings | Encodings and composition; Encodings and channels |
+| Domains, color/size mappings, axes, or legends | Scales, axes, and legends |
+| Filtering, derived fields, or aggregation | Transforms |
+| Layers, panels, or shared scales | Composition; Chart authoring signatures |
+| Notebook interaction or HTML output | Charts in notebooks; Save, export, and share charts |
+| Unfamiliar Python options | Python API signatures and the relevant API details page |
 
 Check installed public signatures/docstrings before using unfamiliar options.
-If an option is unavailable or web access fails, use matching checkout docs
-and bundled references. Report the limitation; do not treat unverified features as available.
+If an option is unavailable, prefer matching checkout docs and installed APIs;
+do not treat an online example as proof that the installed version supports it.
+
+For recreation, read the bundled [table-chart guide](references/table-chart.md)
+for geometry, marker footprints, overlays, and color checks. For grouped
+summaries or matrices, read
+[grouped charts](references/grouped-charts.md). Load these when relevant.
+
+If the index is unavailable, try the direct [gallery catalog](https://genomespy.app/genome-spy-python/agents/gallery.md)
+or [quickstart](https://genomespy.app/genome-spy-python/agents/quickstart.md).
+If online pages also fail, use matching local docs or the self-contained bundled
+references and report the access limit. The checkout quickstart is
+`docs/agents/quickstart.md`; bundled references also work outside this repository.
 
 ## Author from the data's meaning
 
@@ -66,7 +85,7 @@ and bundled references. Report the limitation; do not treat unverified features 
   color for continuous values, and units in labels. Embeddings usually need
   `zero=False`; use equal screen scaling when geometry requires it.
 - For recreation, freeze the reference call, version, data, palette, domains, and
-  plot-area dimensions first. Preserve data selection, expression source, order,
+  plot-area dimensions first. Preserve data selection, measurement source, order,
   scale limits, and color meaning; disclose departures. Do not recompute supplied
   coordinates/measurements or substitute a similar dataset.
 - Python prepares tables and authors specs. GenomeSpy runs declarative transforms
@@ -83,7 +102,10 @@ and bundled references. Report the limitation; do not treat unverified features 
    colors, readability, runtime errors, and a known record's tooltip. Canvas
    presence alone does not verify correct rendering. For recreation, follow the table-chart guide's
    side-by-side, footprint, common-capture color, and overlay checks.
+   In composed charts, verify which panels should zoom together and which color
+   scales should remain independent; observe the interaction when tools support it.
 4. Deliver reusable source and the artifact with a brief processing/check report.
+   Link the example or guides reused and explain material departures.
    Distinguish spec validation from observed rendering and interaction. State
    frontend verification limits instead of claiming visual success without evidence.
 

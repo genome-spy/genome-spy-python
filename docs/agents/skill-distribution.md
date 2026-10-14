@@ -93,7 +93,7 @@ effect.
 
 Our router plus bundled references already follows progressive disclosure.
 Grouped-chart detail has now been split into `references/grouped-charts.md` so a
-simple table-chart request does not need the full distribution/clustering material.
+simple table-chart request does not need the grouped-summary reference.
 The installer now closes the packaging and discovery gap for explicit local
 installation. Successful HTML builds also publish separate agent Markdown and
 the `llms.txt` index.

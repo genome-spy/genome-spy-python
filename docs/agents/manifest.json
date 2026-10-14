@@ -85,8 +85,8 @@
   {
     "path": "grouped-charts.md",
     "source": "skills/create-genomespy-visualization/references/grouped-charts.md",
-    "title": "Grouped charts and distributions",
+    "title": "Grouped summaries and matrices",
     "section": "Deliver and verify",
-    "description": "Summary denominators, matrices, clustering alignment, and sampled-shape limitations."
+    "description": "Summary denominators, normalization, matrices, ordering, and capability boundaries."
   }
 ]
