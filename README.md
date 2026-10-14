@@ -61,6 +61,21 @@ for supported tables and live updates.
 
 See the [getting-started guide](docs/getting-started.md) for the first example.
 
+## Agent skill
+
+The package bundles a visualization skill for Codex and Claude Code. Installation
+is explicit; importing or installing the Python package does not modify agent
+configuration. To install for both agents in the current project:
+
+```bash
+genome-spy-install-skills
+```
+
+Use `--agent codex` or `--agent claude` to select one agent, `--project PATH` for
+another project, or `--user` for personal installation. Existing modified skills
+are preserved unless `--force` is supplied. See
+[installation and update details](docs/agents/skill-distribution.md).
+
 ## Examples
 
 A zoomable Manhattan plot using the bundled HapMap data (requires `pandas`):

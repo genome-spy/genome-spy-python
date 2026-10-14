@@ -38,6 +38,9 @@ dependencies = [
     "traitlets>=5.14.3",
 ]
 
+[project.scripts]
+genome-spy-install-skills = "genome_spy._skill_install:main"
+
 [project.urls]
 Homepage = "https://github.com/genome-spy/genome-spy-python"
 Documentation = "https://genomespy.app/genome-spy-python/"
@@ -102,6 +105,12 @@ artifacts = [
     "src/genome_spy/static/controls.js",
     "src/genome_spy/static/inspector.js",
 ]
+
+[tool.hatch.build.targets.wheel.force-include]
+"skills/create-genomespy-visualization" = "genome_spy/skills/create-genomespy-visualization"
+
+[tool.hatch.build.targets.sdist.force-include]
+"skills/create-genomespy-visualization" = "skills/create-genomespy-visualization"
 
 [tool.genome-spy]
 core-version = "1.0.0"
