@@ -6,22 +6,15 @@ answer in the browser.
 
 ## Calculate from a row
 
-`gs.datum.score` reads the current row's `score`. Here, each score is doubled
-and stored in a new field:
+`gs.datum.score` reads the current row's `score`. This expression doubles it:
 
 ```{literalinclude} ../tutorials/expressions.py
 :language: python
-:start-after: expressions-calculate-start
-:end-before: expressions-calculate-end
-```
-
-```{genomespy-chart} expressions:chart
-:height: 240
-:title: Each score multiplied by two
+:start-after: expressions-row-start
+:end-before: expressions-row-end
 ```
 
 Use brackets for field names with spaces or dots: `gs.datum["Sample score"]`.
-See [Transforms](transforms.md) for more ways to calculate and filter rows.
 
 (expression-tests)=
 
@@ -65,8 +58,8 @@ You can also write the calculation using JavaScript-style syntax. These two
 forms mean the same thing:
 
 ```python
-chart.transform_calculate(doubled=gs.datum.score * 2)
-chart.transform_calculate(doubled="datum.score * 2")
+double_score = gs.datum.score * 2
+double_score = "datum.score * 2"
 ```
 
 The [GenomeSpy expression reference](https://genomespy.app/docs/grammar/expressions/)
@@ -75,3 +68,23 @@ lists the available operators and functions.
 For expressions in channels, see {ref}`Encodings <encoding-definitions>`.
 To calculate a mark property from a parameter, see
 {ref}`Parameters and interaction <parameter-expressions>`.
+
+## Use expressions with transforms
+
+`transform_calculate()` stores an expression's answer in a field.
+`transform_filter()` keeps rows that pass a test:
+
+```{literalinclude} ../tutorials/expressions.py
+:language: python
+:start-after: expressions-transforms-start
+:end-before: expressions-transforms-end
+```
+
+```{genomespy-chart} expressions:chart
+:height: 240
+:title: Double each score, then keep values of at least 10
+```
+
+This stores `double_score` and `score_label` as `doubled` and `label`, then
+keeps rows where `doubled` is at least 10. See [Transforms](transforms.md)
+for more ways to change rows.
