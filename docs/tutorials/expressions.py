@@ -25,17 +25,7 @@ labeled_chart = chart.transform_calculate(
 # expressions-choice-end
 
 
-# expressions-property-start
-point_size = gs.param("pointSize", value=50)
-resized_chart = chart.mark_point(
-    filled=True,
-    size=gs.expr(point_size * 2),
-).add_params(point_size)
-# expressions-property-end
-
-
 CHARTS = {
     "chart": chart,
     "labeled_chart": labeled_chart,
-    "resized_chart": resized_chart,
 }

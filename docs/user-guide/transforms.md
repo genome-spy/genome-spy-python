@@ -27,27 +27,8 @@ A filter keeps only the rows that meet a condition:
 :title: Only rows with quality of at least 0.7 reach the marks
 ```
 
-{py:obj}`~genome_spy.datum` means “the row currently being considered.” In the
-example, {py:obj}`~genome_spy.datum`.quality is at least `0.7`, so four rows
-remain. Use the following Python syntax to build short conditions:
-
-| Write | Meaning |
-| --- | --- |
-| {py:obj}`~genome_spy.datum`.quality | Read the `quality` value from the current row. |
-| `>=`, `<`, `==` | Compare values. |
-| `&`, `\|` | Both conditions, or either condition. |
-| `~` | Reverse a condition. |
-
-Put parentheses around each comparison when combining conditions:
-
-```python
-(gs.datum.quality >= 0.7) & (gs.datum.response > 0.5)
-```
-
-Use `&`, `|`, and `~` here instead of Python's `and`, `or`, and `not`.
-These operators describe conditions that GenomeSpy checks when drawing the chart.
-
-See [Expressions](expressions.md) for more calculations and functions, and
+`gs.datum.quality` reads each row's quality. The test `>= 0.7` keeps four rows.
+See {ref}`Expressions <expression-tests>` for writing and combining tests, and
 GenomeSpy's [filter transform](https://genomespy.app/docs/grammar/transform/filter/)
 for filter options.
 
@@ -77,22 +58,8 @@ deriving a category used only by the chart. See the
 [formula transform](https://genomespy.app/docs/grammar/transform/formula/) in
 the GenomeSpy documentation.
 
-### Choose between two values
-
-Use `gs.expr.if_()` when a calculated field depends on a condition. Its three
-arguments are the condition, the value to use when it is true, and the value
-to use otherwise. For example, label each measurement by its quality:
-
-```python
-quality_chart = formula_chart.transform_calculate(
-    qualityLabel=gs.expr.if_(gs.datum.quality >= 0.7, "pass", "low quality"),
-)
-```
-
-GenomeSpy adds `qualityLabel` to each row when it draws the chart. Use `None`
-for a missing value if one branch should have no result. Use `gs.expr.if_()`
-rather than Python's `a if condition else b`, which tries to choose a value
-while the Python code runs.
+To choose a value based on a test, see
+{ref}`Choose between two values <expression-choices>` in the Expressions guide.
 
 ## Summarize groups
 
