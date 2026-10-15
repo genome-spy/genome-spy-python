@@ -19,6 +19,7 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
   their guides.
 - [Transforms](transforms.md) filters, derives, and summarizes rows before they
   are drawn.
+- [Expressions](expressions.md) builds calculations and tests from data values.
 
 ## Larger and genomic views
 
@@ -57,6 +58,7 @@ charts
 encodings
 scales-axes-legends
 transforms
+expressions
 ```
 
 ```{toctree}

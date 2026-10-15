@@ -126,6 +126,14 @@ definition_chart = (
 # encoding-channels-definitions-end
 
 
+# encoding-channels-conditional-start
+selected = gs.selection_point("selected", empty=False)
+conditional_chart = shorthand_chart.encode(
+    color=gs.when(selected).then(gs.value("red")).otherwise(gs.value("gray")),
+).add_params(selected)
+# encoding-channels-conditional-end
+
+
 CHARTS = {
     "shorthand_chart": shorthand_chart,
     "explicit_chart": explicit_chart,
@@ -133,4 +141,5 @@ CHARTS = {
     "index_chart": index_chart,
     "locus_chart": locus_chart,
     "definition_chart": definition_chart,
+    "conditional_chart": conditional_chart,
 }

@@ -40,6 +40,8 @@ follows it.
 - {py:meth}`~genome_spy.TopLevelSpec.add_params` puts the parameter on the
   chart that owns it.
 
+(bind-parameter-to-input)=
+
 ## Bind a parameter to an input
 
 {py:func}`~genome_spy.param` declares a value,
@@ -79,6 +81,7 @@ point_size = gs.param("pointSize", expr=60 + min_score * 100)
 
 GenomeSpy recalculates `point_size` when `min_score` changes. Passing `point_size`
 to `mark_point(size=...)` uses its current value.
+See [Expressions](expressions.md) for more ways to write calculations.
 
 The x-axis is told to always show all variant names. Moving the filter slider may hide some points, but it does not make the remaining names shift position.
 
@@ -99,6 +102,8 @@ and reactive parameters in
   [ASCAT fitting](../gallery/ascat_fitting.md) use sliders to filter data or
   adjust a track’s layout and model settings.
 
+(select-marks-conditionally)=
+
 ## Select marks and style them conditionally
 
 A selection parameter stores what the user picks. Use
@@ -106,6 +111,7 @@ A selection parameter stores what the user picks. Use
 Then use {py:func}`~genome_spy.when` to change how selected marks look:
 `.then(...)` gives the selected value and `.otherwise(...)` gives the value
 for other marks. This can change a mark's color, opacity, size, or outline.
+See {ref}`Conditional encodings <conditional-encodings>` for the basic syntax.
 
 ```{literalinclude} ../tutorials/interaction.py
 :language: python
