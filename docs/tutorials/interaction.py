@@ -95,6 +95,15 @@ bound_chart = (
 # interaction-binding-end
 
 
+# interaction-property-start
+resized_chart = bound_chart.mark_point(
+    filled=True,
+    color="#4c78a8",
+    size=gs.expr(point_size * 2),
+)
+# interaction-property-end
+
+
 # interaction-selection-start
 # Clicking a point updates this named selection.
 selected_variant = gs.selection_point("selectedVariant", empty=False)
@@ -269,6 +278,7 @@ ruler_chart = (
 CHARTS = {
     "zoom_chart": zoom_chart,
     "bound_chart": bound_chart,
+    "resized_chart": resized_chart,
     "selection_chart": selection_chart,
     "brush_chart": brush_chart,
     "ruler_chart": ruler_chart,

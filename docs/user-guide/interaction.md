@@ -73,22 +73,28 @@ filter again in the browser.
 Use {ref}`transform_collect() before a parameter-dependent transform <cache-rows-for-interactive-transforms>`
 to replay cached rows instead of returning to the data source when a slider changes.
 
-A parameter can also calculate its value from another parameter:
-
-```python
-point_size = gs.param("pointSize", expr=60 + min_score * 100)
-```
-
-GenomeSpy recalculates `point_size` when `min_score` changes. Passing `point_size`
-to `mark_point(size=...)` uses its current value.
-See [Expressions](expressions.md) for more ways to write calculations.
-
 The x-axis is told to always show all variant names. Moving the filter slider may hide some points, but it does not make the remaining names shift position.
 
 The GenomeSpy documentation covers the available input widgets in
 [input bindings](https://genomespy.app/docs/grammar/parameters/#using-input-bindings)
 and reactive parameters in
 [expressions](https://genomespy.app/docs/grammar/parameters/#expressions).
+
+(parameter-expressions)=
+
+### Calculate a mark property
+
+The `point_size` parameter above is calculated from `min_score`, so it changes
+with the slider. Wrap a calculation in `gs.expr(...)` to use it in a mark property:
+
+```{literalinclude} ../tutorials/interaction.py
+:language: python
+:start-after: interaction-property-start
+:end-before: interaction-property-end
+```
+
+Here, the point size is twice `point_size`. See [Expressions](expressions.md)
+for more ways to write calculations.
 
 ### More slider examples
 

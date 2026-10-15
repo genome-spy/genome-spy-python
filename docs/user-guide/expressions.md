@@ -23,9 +23,12 @@ and stored in a new field:
 Use brackets for field names with spaces or dots: `gs.datum["Sample score"]`.
 See [Transforms](transforms.md) for more ways to calculate and filter rows.
 
+(expression-tests)=
+
 ## Compare and combine
 
-Expressions also describe tests, such as “the score is at least 5 and below 10”:
+Compare values with `>`, `>=`, `<`, `<=`, `==`, or `!=`. This test means
+“the score is at least 5 and below 10”:
 
 ```python
 (gs.datum.score >= 5) & (gs.datum.score < 10)
@@ -51,7 +54,8 @@ it is false:
 ```
 
 A score of 5 or more gets the label `"high"`; other scores get `"low"`.
-Use this instead of Python's `a if test else b` inside expressions.
+Use `None` for a missing result. Use `gs.expr.if_()` instead of Python's
+`a if test else b` inside expressions.
 
 For styling selected marks, see {ref}`Conditional encodings <conditional-encodings>`.
 
@@ -68,18 +72,6 @@ chart.transform_calculate(doubled="datum.score * 2")
 The [GenomeSpy expression reference](https://genomespy.app/docs/grammar/expressions/)
 lists the available operators and functions.
 
-## Change a mark property
-
-Wrap a calculation in `gs.expr(...)` to use it in a mark property. A parameter
-holds a value that the calculation can use:
-
-```{literalinclude} ../tutorials/expressions.py
-:language: python
-:start-after: expressions-property-start
-:end-before: expressions-property-end
-```
-
-The point size is twice the parameter's value. The
-{ref}`interaction guide <bind-parameter-to-input>` shows how to
-change a parameter with a slider. The {ref}`encodings guide <encoding-definitions>`
-shows how to use expressions in channels.
+For expressions in channels, see {ref}`Encodings <encoding-definitions>`.
+To calculate a mark property from a parameter, see
+{ref}`Parameters and interaction <parameter-expressions>`.
