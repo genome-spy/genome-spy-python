@@ -1,6 +1,6 @@
 # Notebook display and export
 
-This example builds a chart before displaying or saving it:
+## Validate and save
 
 ```python
 import genome_spy as gs
@@ -9,30 +9,55 @@ chart = gs.Chart([{"x": 1, "y": 2}, {"x": 2, "y": 1}]).mark_point().encode(
     x="x:Q", y="y:Q"
 )
 spec = chart.to_dict()
+spec_json = chart.to_json()
 chart.save("chart.json")
 chart.save("chart.html", inline=True)
 ```
 
-In a notebook, leave `chart` as the last expression or use
-`chart.display(inline=True)`. Retain `view = chart.widget(inline=True)` and display
-`view` for a reusable widget. Constructing a widget or executing a notebook does
-not verify that the frontend displayed it.
+Validation checks the spec, not the picture. Inline HTML bundles the runtime
+and inline records, not URL datasets. It needs no running Python session.
+JSON contains a spec and data references, not rendered output.
 
-`to_dict()` and `to_json()` validate a spec, not a picture. Inline HTML bundles the
-runtime and inline records; it does not download URL datasets or require a running
-Python session. JSON contains specs and data references, not rendered output or
-a live connection.
+## Notebook
 
-Verify actual marks, axes, labels, guides, readability, a known record's tooltip,
-and relevant page/resource errors. Check freshness after regenerating artifacts:
-embedded previews can retain an older chart. If frontend checks are unavailable,
-state that limit separately from successful serialization/export.
+Continues **Validate and save**. Leave `chart` as the last cell expression, or
+explicitly display it:
 
-For blank charts, inspect browser errors and field/domain definitions; keep
-validation enabled. Use a supported preview path. A permitted local HTTP preview
-must bind loopback and serve only the output directory. If image download fails,
-retain HTML and use a screenshot when available. Bound export waits and record
-hover/export limits separately from rendering. Deliver source and the requested
-artifact with processing and verification notes.
+```python
+chart.display(inline=True)
+```
 
-See [the quickstart](quickstart.md) and [visual comparison checks](table-chart.md).
+Continues **Validate and save**. Retain a widget when later code needs it:
+
+```python
+from IPython.display import display
+
+view = chart.widget(inline=True)
+display(view)
+```
+
+Creating a widget or running a notebook does not prove frontend rendering.
+
+## Inspect an unfamiliar option
+
+```python
+import genome_spy as gs
+import inspect
+
+save_options = inspect.signature(gs.Chart.save)
+legend_options = inspect.signature(gs.Color("x:Q").legend)
+```
+
+## Check and recover
+
+| Check or failure | Action |
+| --- | --- |
+| Export succeeded | Open it; check marks, axes, labels, guides, readability and a known tooltip. |
+| Regenerated artifact | Confirm the latest file loaded; embedded previews can stay stale. |
+| Blank chart | Inspect page/resource errors and field/domain definitions; keep validation enabled. |
+| Files cannot open | Use a supported preview. Any HTTP preview must serve only the output directory on loopback. |
+| Image download fails | Keep HTML; use a screenshot if available. Bound waits. |
+| No browser or hover tool | Report visual/hover checks as unverified, separately from successful export. |
+
+Deliver source and the requested artifact, with processing and verification limits.
+See [quickstart](quickstart.md) and [visual comparison checks](table-chart.md).

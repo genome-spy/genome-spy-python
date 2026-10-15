@@ -79,27 +79,48 @@ def test_canonical_reference_edits_flow_into_published_pages(tmp_path: Path) -> 
     )
 
 
+@pytest.mark.parametrize(
+    "relative_path",
+    [
+        "docs/agents/quickstart.md",
+        "docs/agents/data.md",
+        "docs/agents/encodings.md",
+        "docs/agents/scales-axes-legends.md",
+        "docs/agents/rendering.md",
+        "skills/create-genomespy-visualization/references/table-chart.md",
+        "skills/create-genomespy-visualization/references/grouped-charts.md",
+    ],
+)
 def test_authored_python_examples_execute_and_validate(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, relative_path: str
 ) -> None:
+    import genome_spy as gs
+
     monkeypatch.chdir(tmp_path)
-    for name in (
-        "quickstart.md",
-        "data.md",
-        "encodings.md",
-        "scales-axes-legends.md",
-        "rendering.md",
-    ):
-        text = (ROOT / "docs/agents" / name).read_text()
-        namespace = {"__name__": "__agent_example__"}
-        for block in re.findall(r"```python\n(.*?)```", text, re.DOTALL):
-            if "import pandas as pd" in block:
-                (tmp_path / "measurements.csv").write_text(
-                    "id,depth,score,group\na,2,0.5,control\n"
-                )
-            exec(compile(block, name, "exec"), namespace)
-        namespace["chart"].to_dict()
-    assert (tmp_path / "chart.html").is_file()
+    (tmp_path / "measurements.csv").write_text(
+        "id,depth,score,group\na,2,0.5,control\n"
+    )
+    text = (ROOT / relative_path).read_text()
+    namespace = {"__name__": "__agent_example__"}
+    blocks = list(re.finditer(r"```python\n(.*?)```", text, re.DOTALL))
+    assert blocks
+    previous_end = 0
+    authored_chart = False
+    for block in blocks:
+        introduction = text[previous_end : block.start()]
+        if not re.search(r"\bContinues\b", introduction):
+            namespace = {"__name__": "__agent_example__"}
+        exec(compile(block[1], relative_path, "exec"), namespace)
+        charts = [
+            value for value in namespace.values() if isinstance(value, gs.TopLevelSpec)
+        ]
+        for chart in charts:
+            chart.to_dict()
+        authored_chart |= bool(charts)
+        previous_end = block.end()
+    assert authored_chart, f"No chart was authored by {relative_path}"
+    if relative_path == "docs/agents/rendering.md":
+        assert (tmp_path / "chart.html").is_file()
 
 
 def test_sphinx_html_build_includes_plain_agent_outputs(tmp_path: Path) -> None:

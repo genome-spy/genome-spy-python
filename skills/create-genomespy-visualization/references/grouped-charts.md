@@ -1,79 +1,96 @@
 # Grouped summaries and matrices
 
-Read this for grouped summaries and matrices. Start with
-[table-chart.md](table-chart.md) for a runnable chart and the basic reference-fidelity and color guidance.
+Use prepared summaries. Confirm aggregation, thresholds, denominator, zero/missing
+handling, and fraction-versus-percent units before charting.
 
-## Prepared summaries and variable mark size
+## Summary points with native guides
 
-For grouped summaries, establish the aggregation, threshold, denominator,
-missing-value handling, and whether zeros are included before chart authoring.
-Check a few summaries against the underlying observations. Distinguish an empty
-group from a valid zero result, and keep fractions versus percentages explicit.
+```python
+import genome_spy as gs
 
-Treat area, radius, and diameter as different quantities. Preserve any clipping,
-minimum/maximum area, exponent, and unit conversion in the reference mapping.
-Prefer encoding the original summary through a supported native scale when it
-expresses the reference mapping, so the attached guide retains the original units.
-Check the equation at endpoints and intermediate values: a native power scale
-and a power applied after normalization need not agree for nonzero domain minima.
-If encoding prepared display areas, use an explicit linear identity mapping to
-avoid applying another size transform. Keep the original summary values in
-tooltips and explain the size mapping in its guide. Format fractions as percentages
-on the channel definition when needed; guide geometry and placement belong to
-the legend configuration.
-Check guide symbols at representative values against the plotted area mapping,
-including exponent, clipping, and unit conversion. Color guides must share the
-plot's normalization and palette, rather than merely resembling them visually.
+rows = [
+    {"group": "A", "mean": 0.3, "fraction": 0.25},
+    {"group": "B", "mean": 0.7, "fraction": 0.75},
+]
+chart = gs.Chart(rows).mark_point(filled=True).encode(
+    x=gs.X("group:N").scale(type="band", domain=["A", "B"]),
+    color=gs.Color("mean:Q").scale(domain=[0, 1], scheme="blues")
+    .legend(title="Mean score"),
+    size=gs.Size("fraction:Q", format=".0%")
+    .scale(type="linear", domain=[0, 1], range=[0, 400], nice=False)
+    .legend(title="Fraction"),
+    tooltip=["group:N", "mean:Q", gs.Tooltip("fraction:Q", format=".0%")],
+)
+chart.to_dict()
+```
 
-Verify first/last category positions in the browser. A reversed domain array
-alone may not establish the intended visual direction; use the supported scale
-`reverse` setting when needed, and check a known row/column against its label.
+Use original summaries through native scales. Check area mappings at endpoints
+and intermediate values, including clipping, exponent and units. Area, radius
+and diameter differ. For prepared display areas, use an explicit linear identity
+mapping; do not apply the transform twice. Power-before-normalization and
+power-after-normalization differ when the minimum is nonzero.
 
-## Rectangular matrices and normalized summaries
+## Contiguous matrix
 
-Record whether normalization occurs before or after aggregation, and whether it
-uses the entire table, each row, or each column. These choices change the meaning
-of color. For independently normalized rows or columns, explain the scope in the
-guide: equal colors need not mean equal original values. Define constant-range
-behavior explicitly instead of silently dividing by zero.
+Prepared values below are scaled independently within each column:
 
-Validate category pairs and uniqueness before rendering a matrix. Compare them
-with the expected row-by-column grid and account for missing cells; do not fill
-them with zero unless the data contract requires it. Preserve explicit orders.
-For contiguous cells, use band scales with zero inner and outer padding. Also
-check borrowed mark offsets or insets: they can introduce gutters despite zero
-scale padding. Verify cell boundaries, first/last labels, and reference borders
-in the browser.
-Keep the full labelled chart beside the reference as well as the registered
-plot-area overlay. Ink-coverage overlays reveal geometry differences but do not
-establish numeric or RGB equality; check those separately.
+```python
+import genome_spy as gs
 
-For observation-level heatmaps, preserve observation IDs and within-group order;
-do not substitute group means. Align category strips, group-boundary rules, and
-group labels on the same positional scale. Group labels belong at the midpoint
-of their actual row spans, not on equal-width categorical bands when group sizes
-differ. Constant positional `value` encodings use normalized view coordinates
-(for example, `gs.value(1)` is the far edge), not pixel offsets.
+cells = [
+    {"group": "A", "feature": "one", "scaled_mean": 0.0},
+    {"group": "B", "feature": "one", "scaled_mean": 1.0},
+    {"group": "A", "feature": "two", "scaled_mean": 1.0},
+    {"group": "B", "feature": "two", "scaled_mean": 0.0},
+]
+matrix = (
+    gs.Chart(cells).mark_rect()
+    .encode(
+        x=gs.X("feature:N").scale(type="band", domain=["one", "two"], padding=0),
+        y=gs.Y("group:N").scale(type="band", domain=["A", "B"], padding=0),
+        color=gs.Color("scaled_mean:Q")
+        .scale(domain=[0, 1], scheme="blues", nice=False)
+        .legend(title="Mean scaled within each feature"),
+        tooltip=["group:N", "feature:N", "scaled_mean:Q"],
+    )
+)
+matrix.to_dict()
+```
 
-If rows or columns are narrower than one display pixel, image resampling and
-rectangle rasterization can show different stripes despite identical records and
-lookup colors. Record the reference interpolation, intended display dimensions,
-and pixels per cell. Reuse the cell-heatmap pattern's `minHeight=0, minOpacity=1`
-when thin rectangles should retain their true extent and remain opaque; verify
-these settings in the browser rather than enlarging rows to a pixel minimum.
-Check palette agreement with large flat controls when individual cells have no
-uncontaminated interior pixels. Diagnose ordering and color separately from
-sampling; do not change values or silently average rows to make screenshots agree.
+| Check | Preserve |
+| --- | --- |
+| Normalization | Before/after aggregation; whole table, row or column; explicit constant-range behavior. |
+| Matrix coverage | Unique category pairs; expected grid; missing cells distinguished from valid zeros. |
+| Equal colors | Guide states normalization scope; equal colors may not mean equal original values. |
+| Contiguous cells | Zero band padding and no inherited mark insets; check boundaries and first/last labels. |
+| Order | One supplied permutation across data, labels, colors and related panels; record its source. |
+
+## Thin observation rows
+
+Continues **Contiguous matrix**. Use these native mark settings when real rows
+are thinner than one display pixel; this four-cell fixture is only an API example.
+
+```python
+thin_cells = matrix.mark_rect(minHeight=0, minOpacity=1)
+thin_cells.to_dict()
+```
+
+For observation-level heatmaps, retain IDs and within-group order; do not replace
+cells with group means. Share positions with annotation strips and boundaries;
+anchor group labels at actual span midpoints when group sizes differ.
+
+Below one pixel per cell, image sampling and rectangle rasterization can differ.
+Record dimensions, pixels per cell and reference interpolation. Check ordering
+and palette separately, using large flat color controls when cells have no clean
+interior pixels. Do not change values or average rows to hide raster differences.
 
 ## Supplied order and capability boundaries
 
-Keep a supplied row/column order consistent across the data, labels, annotation
-colors, and related panels. Identify how the order was obtained when it affects
-interpretation; ordering inputs can differ from the displayed measurements.
+A gallery composition does not make a specialized chart form native. Check the
+installed public API; prefer native features and maintained examples. If a form
+is unsupported, explain the limit and offer a supported alternative. Implement
+custom geometry only on explicit request; keep its code in task artifacts and
+label its rendering/interaction limits. No unsupported-chart recipes belong here.
 
-A gallery example built from primitives does not make its specialized chart form
-native. Check the installed marks, transforms, and public APIs before promising
-support. Prefer a maintained example that meets the task. If custom geometry is
-explicitly requested, keep preparation and implementation in the task's artifacts,
-label the result as custom, and disclose its rendering and interaction limits.
-This guide does not provide recipes for unsupported chart forms.
+See [scales and guides](https://genomespy.app/genome-spy-python/agents/scales-axes-legends.md)
+and [reference checks](table-chart.md).

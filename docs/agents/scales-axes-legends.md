@@ -1,9 +1,6 @@
 # Scales, axes, and legends
 
-Set explicit category domains and color ranges together to preserve mappings.
-For fixed numeric reference limits, use `nice=False` and disable unintended zero
-inclusion. Check first/last category positions in the browser: reversing a domain
-array alone may not establish direction; use the supported `reverse` setting.
+## Fixed numeric limits and category colors
 
 ```python
 import genome_spy as gs
@@ -13,7 +10,7 @@ chart = (
     gs.Chart(rows).mark_point(filled=True)
     .encode(
         x=gs.X("x:Q").scale(domain=[0, 4], nice=False).axis(title="x"),
-        y=gs.Y("y:Q").axis(title="y"),
+        y=gs.Y("y:Q").scale(domain=[1, 2], zero=False, nice=False).axis(title="y"),
         color=gs.Color("group:N")
         .scale(domain=["A", "B"], range=["#1f77b4", "#ff7f0e"])
         .legend(title="Group", orient="right"),
@@ -23,19 +20,59 @@ chart = (
 chart.to_dict()
 ```
 
-Legend placement/title belong to the channel's `.legend(...)`; font sizes,
-spacing, and label limits belong to `.configure_legend(...)`. Inspect installed
-signatures before transferring options from another library.
+Keep category domain/range paired. For fixed numeric limits, use `nice=False`
+and disable unwanted zero inclusion. Legend placement/title use `.legend()`;
+fonts and spacing use `.configure_legend()`. Inspect installed signatures for
+unfamiliar options.
 
-A shared palette name does not guarantee equivalent colors. Preserve domain,
-clipping, normalization, palette direction, arithmetic precision, and lookup or
-interpolation behavior. Prepared exact color values need a verified identity
-lookup and a quantitative guide that preserves their original numeric meaning.
+## Quantitative color and area
 
-Point area, diameter, and radius are different. Preserve any exponent, minimum,
-maximum, and unit conversion; avoid a second transform on prepared display areas.
-Guides must use the same mappings as the marks. Retain axes, labels, and color/size
-guides in delivered charts, even when diagnostic overlays crop them away.
+Prepared summaries; no aggregation is performed here:
 
-See [color and footprint checks](table-chart.md) and
-[grouped summary and matrix guidance](grouped-charts.md).
+```python
+import genome_spy as gs
+
+summaries = [
+    {"group": "A", "mean": 0.2, "fraction": 0.25},
+    {"group": "B", "mean": 0.8, "fraction": 0.75},
+]
+summary = (
+    gs.Chart(summaries).mark_point(filled=True)
+    .encode(
+        x=gs.X("group:N").scale(type="band", domain=["A", "B"]),
+        color=gs.Color("mean:Q")
+        .scale(domain=[0, 1], scheme="blues", nice=False, clamp=True)
+        .legend(title="Mean score"),
+        size=gs.Size("fraction:Q", format=".0%")
+        .scale(type="linear", domain=[0, 1], range=[0, 400], nice=False)
+        .legend(title="Fraction", values=[0.25, 0.5, 0.75]),
+        tooltip=["group:N", "mean:Q", gs.Tooltip("fraction:Q", format=".0%")],
+    )
+)
+summary.to_dict()
+```
+
+Size encodes **area**, not radius or diameter. Keep original units in tooltips
+and guides; do not transform prepared display areas a second time. Here 75%
+has three times the area of 25%. Use a nonlinear mapping only when the task
+explicitly calls for one; do not inherit an example exponent.
+
+## Ordered bands and direction
+
+Continues **Quantitative color and area**. Adds a numeric y position; larger
+means appear lower because `reverse=True`.
+
+```python
+ordered = summary.encode(
+    x=gs.X("group:N").scale(type="band", domain=["A", "B"], padding=0),
+    y=gs.Y("mean:Q").scale(domain=[0, 1], reverse=True, nice=False),
+)
+ordered.to_dict()
+```
+
+Check first/last categories in the browser; reversing a domain array alone may
+not set the intended direction. Palette names alone do not establish equal RGB
+mapping: domain, clipping, normalization, direction and interpolation also matter.
+Retain axes and guides in delivered charts, even when overlays crop them away.
+
+See [color and footprint checks](table-chart.md) and [grouped summaries](grouped-charts.md).

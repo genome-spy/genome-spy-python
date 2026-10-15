@@ -1,36 +1,108 @@
 # Encodings and composition
 
-Use `Q` for quantitative fields, `N` for unordered categories, and `O` for ordered
-categories. Encode actual table columns, including indexes deliberately exposed
-as columns. Categories use nominal color; measurements use quantitative color.
-Give units in axis titles and keep domains consistent with the field's meaning.
+## Fields and types
+
+Use actual column names: `Q` quantitative, `N` nominal, `O` ordinal. Put units in
+titles; expose dataframe indexes as columns first.
 
 ```python
 import genome_spy as gs
 
 rows = [{"x": 1, "y": 3, "group": "A"}, {"x": 2, "y": 2, "group": "B"}]
-chart = (
-    gs.Chart(rows).mark_point(filled=True)
-    .encode(
-        x=gs.X("x:Q").scale(zero=False).title("x"),
-        y=gs.Y("y:Q").scale(zero=False).title("y"),
-        color=gs.Color("group:N"),
-        tooltip=["x:Q", "y:Q", "group:N"],
-    )
+chart = gs.Chart(rows).mark_point(filled=True).encode(
+    x=gs.X("x:Q").scale(zero=False).title("x"),
+    y=gs.Y("y:Q").scale(zero=False).title("y"),
+    color="group:N",
+    tooltip=["x:Q", "y:Q", "group:N"],
 )
 chart.to_dict()
 ```
 
-Authoring methods return new charts: retain the result of chained edits. Use `+`
-for layers, `&` for vertical concatenation, and `|` for horizontal concatenation
-when those operators express the intended composition. Layers may share scales;
-use `resolve_scale(color="independent")` when color rules differ. Confirm shared
-positions and scale direction in the browser.
+## Layers and panels
 
-Constant positional `gs.value(1)` refers to the far edge of a view, not one pixel.
-Use band scales for labelled categories; reserve index scales for numbered
-positions needing linear zoom/pan. Embedding geometry may need `zero=False`,
-explicit domains, and equal coordinate-unit screen scaling.
+Use `+` for layers, `|` for horizontal panels, and `&` for vertical panels.
+This complete example compares two measurements at the same positions.
+Input: numeric `position`, `signal`, `score` (0–1), and categorical `group`.
 
-See [scales and guides](scales-axes-legends.md), [current signatures](api.md), and
-[reference fidelity](table-chart.md).
+```python
+import genome_spy as gs
+
+rows = [
+    {"position": 1, "signal": 2, "score": 0.2, "group": "A"},
+    {"position": 2, "signal": 7, "score": 0.5, "group": "B"},
+    {"position": 3, "signal": 4, "score": 0.8, "group": "A"},
+    {"position": 4, "signal": 8, "score": 0.6, "group": "B"},
+]
+base = gs.Chart(rows).mark_point(filled=True, size=80).encode(
+    x=gs.X("position:Q").scale(domain=[0, 5], nice=False, zoom=True),
+)
+signal = base.encode(
+    y=gs.Y("signal:Q").scale(domain=[0, 10], nice=False, zoom=False),
+    color=gs.Color("group:N")
+    .scale(domain=["A", "B"], range=["#4c78a8", "#f58518"])
+    .legend(title="Group", orient="right"),
+    tooltip=["position:Q", "signal:Q", "group:N"],
+)
+score = base.encode(
+    y=gs.Y("score:Q").scale(domain=[0, 1], nice=False, zoom=False),
+    color=gs.Color("score:Q")
+    .scale(domain=[0, 1], scheme="viridis", nice=False)
+    .legend(title="Score", orient="right"),
+    tooltip=["position:Q", "score:Q"],
+).properties(height=180, title="Score")
+labels = signal.mark_text(dy=-10).encode(text="group:N")
+signal_panel = (signal + labels).properties(height=180, title="Signal by group")
+comparison = (
+    (signal_panel & score)
+    .resolve_scale(x="shared", y="independent", color="independent")
+    .resolve_legend(default="collected")
+    .properties(width=360, spacing=20)
+)
+comparison.to_dict()
+comparison.save("comparison.html", inline=True)
+```
+
+Expected: two stacked panels, four points per panel, labels on the upper points,
+and separate Group and Score guides. X zoom/pan moves both panels; y ranges and
+color meanings stay independent. Replace records, fields, domains and titles
+together. Put a layer's height/title on the combined view and shared width on
+the vertical composition. For horizontal panels, replace `&` with `|` and review
+dimensions and scale sharing.
+Methods return new charts; retain the result. Confirm interactions in the browser.
+
+## Browser transforms
+
+Use when the browser should filter or derive a visualization field:
+
+```python
+import genome_spy as gs
+
+rows = [{"x": 1, "y": 3}, {"x": 2, "y": 2}]
+transformed = (
+    gs.Chart(rows).mark_point()
+    .transform_filter(gs.datum.x > 1)
+    .transform_calculate(total=gs.datum.x + gs.datum.y)
+    .encode(x="x:Q", y="y:Q", size="total:Q")
+)
+transformed.to_dict()
+```
+
+Expected after rendering: one point at (2, 2), sized by `total=4`. Python serializes
+the definitions; GenomeSpy evaluates them. The Python records do not change.
+
+## Constant positions
+
+```python
+import genome_spy as gs
+
+edge_label = gs.Chart([{"label": "Right edge"}]).mark_text(align="right").encode(
+    x=gs.value(1), y=gs.value(0.5), text="label:N"
+)
+edge_label.to_dict()
+```
+
+Positional `gs.value(1)` is the far edge, not one pixel. Use band scales for
+labelled categories; index scales suit numbered positions needing zoom/pan.
+
+See [scales and guides](scales-axes-legends.md), [API signatures](api.md), and
+[reference checks](table-chart.md).

@@ -25,21 +25,21 @@
     "source": "docs/agents/data.md",
     "title": "Data inputs",
     "section": "Author charts",
-    "description": "Records, dataframes, URLs, indexes, AnnData projections, and preparation boundaries."
+    "description": "Runnable record, dataframe, URL, and AnnData examples; source and preparation limits."
   },
   {
     "path": "encodings.md",
     "source": "docs/agents/encodings.md",
     "title": "Encodings and composition",
     "section": "Author charts",
-    "description": "Fields and types, scale choices, constant positions, and composition operators."
+    "description": "Examples for typed fields, layers, panels, browser transforms, and constant positions."
   },
   {
     "path": "scales-axes-legends.md",
     "source": "docs/agents/scales-axes-legends.md",
     "title": "Scales, axes, and legends",
     "section": "Author charts",
-    "description": "Domains, category order, legend configuration, and color/size semantics."
+    "description": "Examples for fixed domains, ordered bands, native color/size guides, and guide configuration."
   },
   {
     "path": "api.md",
@@ -73,20 +73,20 @@
     "source": "docs/agents/rendering.md",
     "title": "Notebooks and export",
     "section": "Deliver and verify",
-    "description": "Widget display, validated JSON, inline HTML, frontend checks, and bounded recovery."
+    "description": "Notebook and file-export examples, installed-signature inspection, and a recovery checklist."
   },
   {
     "path": "table-chart.md",
     "source": "skills/create-genomespy-visualization/references/table-chart.md",
     "title": "Table charts and reference fidelity",
     "section": "Deliver and verify",
-    "description": "Executable fallback, geometry and marker footprints, overlays, color mapping, and capture limits."
+    "description": "Runnable chart, equal-aspect and diagnostic examples; reference and capture checks."
   },
   {
     "path": "grouped-charts.md",
     "source": "skills/create-genomespy-visualization/references/grouped-charts.md",
     "title": "Grouped summaries and matrices",
     "section": "Deliver and verify",
-    "description": "Summary denominators, normalization, matrices, ordering, and capability boundaries."
+    "description": "Native summary-point and matrix examples; normalization, ordering, and capability limits."
   }
 ]
