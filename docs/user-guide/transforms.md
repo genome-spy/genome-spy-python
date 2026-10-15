@@ -47,11 +47,9 @@ Put parentheses around each comparison when combining conditions:
 Use `&`, `|`, and `~` here instead of Python's `and`, `or`, and `not`.
 These operators describe conditions that GenomeSpy checks when drawing the chart.
 
-The GenomeSpy documentation describes the
-[expression language](https://genomespy.app/docs/grammar/expressions/) and the
-[constants and functions](https://genomespy.app/docs/grammar/expressions/#provided-constants-and-functions)
-available inside an expression, as well as the
-[filter transform](https://genomespy.app/docs/grammar/transform/filter/) itself.
+See [Expressions](expressions.md) for more calculations and functions, and
+GenomeSpy's [filter transform](https://genomespy.app/docs/grammar/transform/filter/)
+for filter options.
 
 ## Derive a field with a formula
 

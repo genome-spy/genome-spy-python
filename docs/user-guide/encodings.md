@@ -122,6 +122,8 @@ covers locus domains and coordinate conventions in detail, as does the
 [locus scale](https://genomespy.app/docs/grammar/scale/#locus-scale) in the
 GenomeSpy documentation.
 
+(encoding-definitions)=
+
 ## Field, datum, value, and expression
 
 Most encodings read a field, but an encoding definition can obtain its value in
@@ -150,8 +152,27 @@ positional value of `0` would mean the start of the visual range instead.
 
 Constants and expressions give a scale nothing to derive a domain from, so both
 set an explicit `domain`. Expressions also need an explicit `type`. The
-[expression language](https://genomespy.app/docs/grammar/expressions/) describes
-what an expression may contain.
+[Expressions](expressions.md) guide explains how to write calculations.
 
 The [multiple sequence alignment](../gallery/multiple_sequence_alignment.md)
 example encodes index positions, text, and color from the same rows.
+
+(conditional-encodings)=
+
+## Conditional encodings
+
+Use {py:func}`~genome_spy.when` to give selected marks a different style:
+
+```{literalinclude} ../tutorials/encoding_channels.py
+:language: python
+:start-after: encoding-channels-conditional-start
+:end-before: encoding-channels-conditional-end
+```
+
+`.then(...)` sets the selected color; `.otherwise(...)` sets the rest.
+`gs.value("red")` means a fixed color. With `empty=False`, points start gray.
+
+`gs.when()` tests selections. For a test such as `score >= 5`, use
+{ref}`gs.expr.if_() <expression-choices>`.
+See {ref}`Parameters and interaction <select-marks-conditionally>`
+for a clickable example.
