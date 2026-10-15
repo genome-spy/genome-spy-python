@@ -18,6 +18,30 @@ chart = gs.Chart(rows).mark_point(filled=True).encode(
 chart.to_dict()
 ```
 
+## Distinct positions with repeated labels
+
+Use stable position IDs when labels repeat. This keeps two observations separate;
+their shared descriptive label remains available in the tooltip.
+
+```python
+import genome_spy as gs
+
+rows = [
+    {"slot": "visit-1", "label": "Follow-up", "score": 2},
+    {"slot": "visit-2", "label": "Follow-up", "score": 4},
+]
+chart = gs.Chart(rows).mark_point(filled=True).encode(
+    x=gs.X("slot:O").scale(type="band", domain=["visit-1", "visit-2"])
+    .axis(title="Visit ID"),
+    y=gs.Y("score:Q").axis(title="Score"),
+    tooltip=["slot:N", "label:N", "score:Q"],
+)
+chart.to_dict()
+```
+
+Expected: two x positions. Encoding `label` instead would place both at the same
+position. Preserve the position order across related panels.
+
 ## Layers and panels
 
 Use `+` for layers, `|` for horizontal panels, and `&` for vertical panels.
@@ -40,14 +64,14 @@ signal = base.encode(
     y=gs.Y("signal:Q").scale(domain=[0, 10], nice=False, zoom=False),
     color=gs.Color("group:N")
     .scale(domain=["A", "B"], range=["#4c78a8", "#f58518"])
-    .legend(title="Group", orient="right"),
+    .legend(title="Group", orient="bottom", columns=2),
     tooltip=["position:Q", "signal:Q", "group:N"],
 )
 score = base.encode(
     y=gs.Y("score:Q").scale(domain=[0, 1], nice=False, zoom=False),
     color=gs.Color("score:Q")
     .scale(domain=[0, 1], scheme="viridis", nice=False)
-    .legend(title="Score", orient="right"),
+    .legend(title="Score", orient="bottom"),
     tooltip=["position:Q", "score:Q"],
 ).properties(height=180, title="Score")
 labels = signal.mark_text(dy=-10).encode(text="group:N")
@@ -57,13 +81,14 @@ comparison = (
     .resolve_scale(x="shared", y="independent", color="independent")
     .resolve_legend(default="collected")
     .properties(width=360, spacing=20)
+    .configure_legend(direction="horizontal", titleOrient="top", columnPadding=20)
 )
 comparison.to_dict()
 comparison.save("comparison.html", inline=True)
 ```
 
 Expected: two stacked panels, four points per panel, labels on the upper points,
-and separate Group and Score guides. X zoom/pan moves both panels; y ranges and
+and separate, collected bottom guides. X zoom/pan moves both panels; y ranges and
 color meanings stay independent. Replace records, fields, domains and titles
 together. Put a layer's height/title on the combined view and shared width on
 the vertical composition. For horizontal panels, replace `&` with `|` and review
@@ -89,6 +114,8 @@ transformed.to_dict()
 
 Expected after rendering: one point at (2, 2), sized by `total=4`. Python serializes
 the definitions; GenomeSpy evaluates them. The Python records do not change.
+For row calculations, combined tests and conditional values, read
+[Expressions](../user-guide/expressions.md).
 
 ## Constant positions
 

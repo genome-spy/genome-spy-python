@@ -86,11 +86,17 @@ interior pixels. Do not change values or average rows to hide raster differences
 
 ## Supplied order and capability boundaries
 
-A gallery composition does not make a specialized chart form native. Check the
-installed public API; prefer native features and maintained examples. If a form
-is unsupported, explain the limit and offer a supported alternative. Implement
-custom geometry only on explicit request; keep its code in task artifacts and
-label its rendering/interaction limits. No unsupported-chart recipes belong here.
+Check the installed public API and maintained examples before choosing a path:
+
+| Outcome | Report |
+| --- | --- |
+| Native support | The documented mark/transform expresses the requested form. |
+| Custom composition | Existing primitives assemble the form; this does not establish a native feature. |
+| Capability gap | State the missing feature or fidelity limit and offer a supported alternative. |
+
+Custom geometry requires an explicit request. Keep its code in task artifacts
+and label rendering/interaction limits; no workaround recipes belong in the
+skill or guides.
 
 See [scales and guides](https://genomespy.app/genome-spy-python/agents/scales-axes-legends.md)
 and [reference checks](table-chart.md).

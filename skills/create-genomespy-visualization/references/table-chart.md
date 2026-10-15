@@ -49,6 +49,29 @@ equal_units.to_dict()
 A square panel alone does not establish equal units. Freeze each panel's plot
 size separately; guides can consume different space in equally sized figures.
 
+## Marker units and export DPI
+
+Continues **Runnable baseline**. When a reference size is a squared diameter in
+typographic points, convert using the saved image's DPI, not its display DPI:
+
+```python
+reference_size_pt2 = 36
+export_dpi = 150
+image_pixels_per_css_pixel = 1.0  # Reference displayed at its natural image size.
+size_css2 = reference_size_pt2 * (export_dpi / 72 / image_pixels_per_css_pixel) ** 2
+matched_points = chart.mark_point(
+    filled=True, size=size_css2, opacity=1, fillOpacity=1, strokeWidth=0
+)
+matched_points.to_dict()
+```
+
+GenomeSpy point `size` is in squared pixels; nominal diameter is `sqrt(size)`.
+This example gives 12.5 CSS pixels. For a measured image diameter, use
+`size = (diameter_image_px / image_pixels_per_css_pixel) ** 2` instead.
+Confirm the source's size convention; physical circle area differs from diameter
+squared. Match stroke/opacity too and verify the rendered footprint. Do not
+multiply by device pixel ratio again; the renderer handles that scaling.
+
 ## Diagnostic view from the same chart
 
 Continues **Runnable baseline**. Keep the complete chart as the deliverable;
@@ -77,10 +100,39 @@ do not accept null; do not assume `None` clears every setting.
 | Guides | Preserve category/color mappings and original numeric units; retain axes, labels and legends. |
 | Render | Inspect actual marks and page/resource errors; confirm the regenerated artifact loaded. |
 | Tooltip | Hover a known record when possible. A click or declared tooltip is not a verified hover. |
-| Overlay | Use verified plot boundaries and equal dimensions; no fitted warp. Separate position from footprint/opacity. |
+| Overlay | Use settled layout, verified plot boundaries and equal dimensions; no fitted alignment/warp. Separate position from footprint/opacity. |
 | Capture | Use one capture path, preferably lossless with known profiles. Inspect codec and dimensions; measure CSS-to-image pixel ratio. |
 | RGB | Sample interiors; use large flat controls for compressed/unprofiled captures. Report tolerance and capture effects. |
 | Export | Keep the native export; label diagnostic resampling. HTML success does not prove image export or hover worked. |
+
+## Register plot-area captures
+
+Compare complete charts first. Then use guide-free diagnostic views with the same
+records, marks, scales and plot dimensions. Wait for opening animations/layout to
+settle; a nonblank canvas alone is insufficient.
+
+For a full-page screenshot, these DOM measurements give a guide-free canvas's
+document-space crop. Run in the diagnostic document; a canvas with guides is not
+the plot boundary.
+
+```javascript
+const canvas = document.querySelector("canvas");
+const bounds = canvas.getBoundingClientRect();
+const crop = {
+  x: bounds.left + window.scrollX,
+  y: bounds.top + window.scrollY,
+  width: bounds.width,
+  height: bounds.height,
+};
+```
+
+For iframe captures, translate through the frame's measured content origin too.
+Convert CSS bounds using the screenshot's image-pixel/CSS-pixel ratio; canvas
+backing-store dimensions alone do not establish that ratio. Use the same capture
+path for both charts, assert equal crop dimensions and inspect a half-opacity
+blend. Keep original crops; do not resize or fit positions to improve alignment.
+Image-difference scores diagnose discrepancies; inspect values, orientation,
+palette, footprints and rasterization separately before claiming a match.
 
 ## Continuous color
 

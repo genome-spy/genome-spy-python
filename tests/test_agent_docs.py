@@ -213,6 +213,27 @@ def test_tutorial_edits_flow_into_markdown_without_modifying_code(
         _plain_markdown(text, tmp_path / "guide.md", tmp_path)
 
 
+def test_expression_guide_exports_executable_code_and_markdown_crosslinks(
+    tmp_path: Path,
+) -> None:
+    publish_agent_docs(ROOT, tmp_path, BASE)
+    assert BASE + "user-guide/expressions.md" in (tmp_path / "llms.txt").read_text()
+    guide = (tmp_path / "user-guide/expressions.md").read_text()
+    assert BASE + "user-guide/encodings.md#conditional-encodings" in guide
+    assert BASE + "user-guide/interaction.md#parameter-expressions" in guide
+    namespace = {"__name__": "__expression_guide__"}
+    for block in re.findall(r"```python\n(.*?)```", guide, re.DOTALL):
+        exec(compile(block, "user-guide/expressions.md", "exec"), namespace)
+    spec = namespace["chart"].to_dict()
+    records = spec["datasets"][spec["data"]["name"]]
+    assert [row["sample"] for row in records] == ["A", "B", "C"]
+    assert [transform["type"] for transform in spec["transform"]] == [
+        "formula",
+        "formula",
+        "filter",
+    ]
+
+
 def test_fresh_checkout_publishes_examples_without_generated_gallery(
     tmp_path: Path,
 ) -> None:

@@ -25,21 +25,21 @@
     "source": "docs/agents/data.md",
     "title": "Data inputs",
     "section": "Author charts",
-    "description": "Runnable record, dataframe, URL, and AnnData examples; source and preparation limits."
+    "description": "Records, dataframes, URLs and AnnData; measurement sources, selection versus filtering, and preparation limits."
   },
   {
     "path": "encodings.md",
     "source": "docs/agents/encodings.md",
     "title": "Encodings and composition",
     "section": "Author charts",
-    "description": "Examples for typed fields, layers, panels, browser transforms, and constant positions."
+    "description": "Typed fields, repeated labels with stable position IDs, panels, collected guides and browser transforms."
   },
   {
     "path": "scales-axes-legends.md",
     "source": "docs/agents/scales-axes-legends.md",
     "title": "Scales, axes, and legends",
     "section": "Author charts",
-    "description": "Examples for fixed domains, ordered bands, native color/size guides, and guide configuration."
+    "description": "Fixed domains, explicit axis direction, numeric color bins, native color/size guides and guide configuration."
   },
   {
     "path": "api.md",
@@ -80,7 +80,7 @@
     "source": "skills/create-genomespy-visualization/references/table-chart.md",
     "title": "Table charts and reference fidelity",
     "section": "Deliver and verify",
-    "description": "Runnable chart, equal-aspect and diagnostic examples; reference and capture checks."
+    "description": "Runnable chart, equal units, marker size/DPI conversion and registered plot-area capture checks."
   },
   {
     "path": "grouped-charts.md",

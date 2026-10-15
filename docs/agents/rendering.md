@@ -54,6 +54,7 @@ legend_options = inspect.signature(gs.Color("x:Q").legend)
 | --- | --- |
 | Export succeeded | Open it; check marks, axes, labels, guides, readability and a known tooltip. |
 | Regenerated artifact | Confirm the latest file loaded; embedded previews can stay stale. |
+| Reference comparison | Check complete guides, then settled plot crops with measured boundaries; see [reference checks](table-chart.md#register-plot-area-captures). |
 | Blank chart | Inspect page/resource errors and field/domain definitions; keep validation enabled. |
 | Files cannot open | Use a supported preview. Any HTTP preview must serve only the output directory on loopback. |
 | Image download fails | Keep HTML; use a screenshot if available. Bound waits. |

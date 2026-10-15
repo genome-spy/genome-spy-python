@@ -59,20 +59,42 @@ explicitly calls for one; do not inherit an example exponent.
 
 ## Ordered bands and direction
 
-Continues **Quantitative color and area**. Adds a numeric y position; larger
-means appear lower because `reverse=True`.
+Continues **Quantitative color and area**. Put A above B explicitly; setting
+`reverse=False` puts A below B instead.
 
 ```python
 ordered = summary.encode(
-    x=gs.X("group:N").scale(type="band", domain=["A", "B"], padding=0),
-    y=gs.Y("mean:Q").scale(domain=[0, 1], reverse=True, nice=False),
+    x=gs.X("mean:Q").scale(domain=[0, 1], nice=False).axis(title="Mean score"),
+    y=gs.Y("group:N")
+    .scale(type="band", domain=["A", "B"], reverse=True, padding=0),
 )
 ordered.to_dict()
 ```
 
-Check first/last categories in the browser; reversing a domain array alone may
-not set the intended direction. Palette names alone do not establish equal RGB
-mapping: domain, clipping, normalization, direction and interpolation also matter.
+Check first/last categories in the browser; preserve the same order in related
+panels. For numeric axes, `reverse=True` reverses the numeric direction too.
+
+## Discrete colors for numeric values
+
+Continues **Quantitative color and area**. Equal-width bins retain numeric guide
+units; explicit ticks keep a larger palette from crowding its guide.
+
+```python
+discrete = summary.encode(
+    color=gs.Color("mean:Q", format=".2f")
+    .scale(type="quantize", domain=[0, 1], range=["#deebf7", "#9ecae1", "#3182bd"])
+    .legend(title="Mean score", values=[0, 0.5, 1], orient="bottom"),
+)
+discrete.to_dict()
+```
+
+Use `quantize` for equal-width bins, not a nominal type for continuous values.
+Check bin boundaries, endpoint behavior and palette direction against the task.
+Scale options depend on scale type; `quantize` does not need `clamp=True`.
+See [panel composition](encodings.md#layers-and-panels) for collected bottom guides.
+
+Palette names alone do not establish equal RGB mapping: domain, normalization,
+clipping, direction and interpolation also matter.
 Retain axes and guides in delivered charts, even when overlays crop them away.
 
 See [color and footprint checks](table-chart.md) and [grouped summaries](grouped-charts.md).

@@ -35,6 +35,44 @@ CSV loading and data checks happen in Python; [declarative transforms](encodings
 execute in GenomeSpy. Preserve supplied measurements and report any filtering,
 sampling, conversions, or derived columns.
 
+## Measurement source and selection scope
+
+Before encoding, identify the source table/field, units, transformations and
+aggregation. Normalizing before grouping differs from normalizing group means;
+fractions also need a denominator and missing/zero rules.
+
+Feature selection and record filtering are separate. Here a supplied feature
+list chooses columns to show; both observation groups remain visible. The means
+are prepared inputs, not calculated by this chart.
+
+```python
+import genome_spy as gs
+
+summaries = [
+    {"group": "A", "feature": "f1", "mean_normalized_score": 0.2},
+    {"group": "B", "feature": "f1", "mean_normalized_score": 0.8},
+    {"group": "A", "feature": "f2", "mean_normalized_score": 0.5},
+    {"group": "B", "feature": "f2", "mean_normalized_score": 0.4},
+]
+feature_lists = {"A": ["f1"], "B": ["f2"]}
+selected_features = feature_lists["A"]
+visible_groups = ["A", "B"]
+selected = [
+    row for row in summaries
+    if row["feature"] in selected_features and row["group"] in visible_groups
+]
+chart = gs.Chart(selected).mark_point(filled=True).encode(
+    x=gs.X("feature:N").scale(type="band", domain=selected_features),
+    y=gs.Y("group:N").scale(type="band", domain=visible_groups, reverse=True),
+    color=gs.Color("mean_normalized_score:Q").legend(title="Mean normalized score"),
+)
+chart.to_dict()
+```
+
+Expected: two points for `f1`, one per group. Changing `visible_groups` filters
+records; changing its order changes display order. Choosing a different value
+field changes the measurement. Keep these decisions explicit.
+
 ## Remote CSV
 
 ```python
