@@ -1,4 +1,4 @@
 interface:
   display_name: "Create GenomeSpy Visualization"
   short_description: "Create and verify interactive GenomeSpy charts"
-  default_prompt: "Use $create-genomespy-visualization to turn my table into a validated interactive chart."
+  default_prompt: "Use $create-genomespy-visualization to consult llms.txt, adapt a working example, and create a validated interactive chart from my table."
