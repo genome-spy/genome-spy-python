@@ -1,0 +1,5185 @@
+{
+  "scanpy": "1.11.5",
+  "namespace": "scanpy.pl",
+  "entries": {
+    "DotPlot": {
+      "kind": "class",
+      "target": "scanpy.plotting._dotplot.DotPlot",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "var_names",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "num_categories",
+          "kind": "KEYWORD_ONLY",
+          "default": "7"
+        },
+        {
+          "name": "categories_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_positions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_rotation",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "expression_cutoff",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.0"
+        },
+        {
+          "name": "mean_only_expressed",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "standard_scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dot_color_df",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dot_size_df",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "MatrixPlot": {
+      "kind": "class",
+      "target": "scanpy.plotting._matrixplot.MatrixPlot",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "var_names",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "num_categories",
+          "kind": "KEYWORD_ONLY",
+          "default": "7"
+        },
+        {
+          "name": "categories_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_positions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_rotation",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "standard_scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "values_df",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "StackedViolin": {
+      "kind": "class",
+      "target": "scanpy.plotting._stacked_violin.StackedViolin",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "var_names",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "num_categories",
+          "kind": "KEYWORD_ONLY",
+          "default": "7"
+        },
+        {
+          "name": "categories_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_positions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_rotation",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "standard_scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "clustermap": {
+      "kind": "function",
+      "target": "scanpy.plotting._anndata.clustermap",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "obs_keys",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "correlation_matrix": {
+      "kind": "function",
+      "target": "scanpy.plotting._anndata.correlation_matrix",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "show_correlation_numbers",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "dendrogram",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "dendrogram": {
+      "kind": "function",
+      "target": "scanpy.plotting._anndata.dendrogram",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "dendrogram_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "orientation",
+          "kind": "KEYWORD_ONLY",
+          "default": "'top'"
+        },
+        {
+          "name": "remove_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "diffmap": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.scatterplots.diffmap",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "mask_obs",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "sort_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "edges_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.1"
+        },
+        {
+          "name": "edges_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'grey'"
+        },
+        {
+          "name": "neighbors_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "arrows",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "arrows_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dimensions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "scale_factor",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "na_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'lightgray'"
+        },
+        {
+          "name": "na_in_legend",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right margin'"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right'"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "add_outline",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "outline_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "(0.3, 0.05)"
+        },
+        {
+          "name": "outline_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "('black', 'white')"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "hspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.25"
+        },
+        {
+          "name": "wspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "dotplot": {
+      "kind": "function",
+      "target": "scanpy.plotting._dotplot.dotplot",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "var_names",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "num_categories",
+          "kind": "KEYWORD_ONLY",
+          "default": "7"
+        },
+        {
+          "name": "categories_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "expression_cutoff",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.0"
+        },
+        {
+          "name": "mean_only_expressed",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "standard_scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_title",
+          "kind": "KEYWORD_ONLY",
+          "default": "'Mean expression\\nin group'"
+        },
+        {
+          "name": "size_title",
+          "kind": "KEYWORD_ONLY",
+          "default": "'Fraction of cells\\nin group (%)'"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dendrogram",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_positions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_rotation",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "swap_axes",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "dot_color_df",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "'Reds'"
+        },
+        {
+          "name": "dot_max",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dot_min",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "smallest_dot",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.0"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "dpt_groups_pseudotime": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.dpt_groups_pseudotime",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        }
+      ]
+    },
+    "dpt_timeseries": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.dpt_timeseries",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "as_heatmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        }
+      ]
+    },
+    "draw_graph": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.scatterplots.draw_graph",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "mask_obs",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "sort_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "edges_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.1"
+        },
+        {
+          "name": "edges_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'grey'"
+        },
+        {
+          "name": "neighbors_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "arrows",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "arrows_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dimensions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "scale_factor",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "na_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'lightgray'"
+        },
+        {
+          "name": "na_in_legend",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right margin'"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right'"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "add_outline",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "outline_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "(0.3, 0.05)"
+        },
+        {
+          "name": "outline_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "('black', 'white')"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "hspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.25"
+        },
+        {
+          "name": "wspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        },
+        {
+          "name": "layout",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "embedding": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.scatterplots.embedding",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "basis",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "mask_obs",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "sort_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "edges_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.1"
+        },
+        {
+          "name": "edges_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'grey'"
+        },
+        {
+          "name": "neighbors_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "arrows",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "arrows_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dimensions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "scale_factor",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "na_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'lightgray'"
+        },
+        {
+          "name": "na_in_legend",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right margin'"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right'"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "add_outline",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "outline_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "(0.3, 0.05)"
+        },
+        {
+          "name": "outline_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "('black', 'white')"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "hspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.25"
+        },
+        {
+          "name": "wspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "embedding_density": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.embedding_density",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "basis",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "'umap'"
+        },
+        {
+          "name": "key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groupby",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "group",
+          "kind": "KEYWORD_ONLY",
+          "default": "'all'"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "'YlOrRd'"
+        },
+        {
+          "name": "bg_dotsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "80"
+        },
+        {
+          "name": "fg_dotsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "180"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "1"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "0"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "hspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.25"
+        },
+        {
+          "name": "wspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "filter_genes_dispersion": {
+      "kind": "function",
+      "target": "scanpy.plotting._preprocessing.filter_genes_dispersion",
+      "parameters": [
+        {
+          "name": "result",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "heatmap": {
+      "kind": "function",
+      "target": "scanpy.plotting._anndata.heatmap",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "var_names",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "num_categories",
+          "kind": "KEYWORD_ONLY",
+          "default": "7"
+        },
+        {
+          "name": "dendrogram",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_positions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_rotation",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "standard_scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "swap_axes",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show_gene_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "highest_expr_genes": {
+      "kind": "function",
+      "target": "scanpy.plotting._qc.highest_expr_genes",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "n_top",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "30"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "highly_variable_genes": {
+      "kind": "function",
+      "target": "scanpy.plotting._preprocessing.highly_variable_genes",
+      "parameters": [
+        {
+          "name": "adata_or_result",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "highly_variable_genes",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        }
+      ]
+    },
+    "matrix": {
+      "kind": "function",
+      "target": "scanpy.plotting._utils.matrix",
+      "parameters": [
+        {
+          "name": "matrix",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "xlabel",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ylabel",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "xticks",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "yticks",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_shrink",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.5"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "matrixplot": {
+      "kind": "function",
+      "target": "scanpy.plotting._matrixplot.matrixplot",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "var_names",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "num_categories",
+          "kind": "KEYWORD_ONLY",
+          "default": "7"
+        },
+        {
+          "name": "categories_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dendrogram",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "'viridis'"
+        },
+        {
+          "name": "colorbar_title",
+          "kind": "KEYWORD_ONLY",
+          "default": "'Mean expression\\nin group'"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_positions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_rotation",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "standard_scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "values_df",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "swap_axes",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "paga": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.paga.paga",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "threshold",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layout",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layout_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "mappingproxy({})"
+        },
+        {
+          "name": "init_pos",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "root",
+          "kind": "KEYWORD_ONLY",
+          "default": "0"
+        },
+        {
+          "name": "labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "single_component",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "solid_edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "'connectivities'"
+        },
+        {
+          "name": "dashed_edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "transitions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "text_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "mappingproxy({})"
+        },
+        {
+          "name": "node_size_scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "1.0"
+        },
+        {
+          "name": "node_size_power",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.5"
+        },
+        {
+          "name": "edge_width_scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "1.0"
+        },
+        {
+          "name": "min_edge_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "max_edge_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "arrowsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "30"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "left_margin",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.01"
+        },
+        {
+          "name": "random_state",
+          "kind": "KEYWORD_ONLY",
+          "default": "0"
+        },
+        {
+          "name": "pos",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "normalize_to_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cb_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "mappingproxy({})"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "add_pos",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "export_to_gexf",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "colors",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "plot",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "paga_adjacency": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.paga.paga_adjacency",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "adjacency",
+          "kind": "KEYWORD_ONLY",
+          "default": "'connectivities'"
+        },
+        {
+          "name": "adjacency_tree",
+          "kind": "KEYWORD_ONLY",
+          "default": "'connectivities_tree'"
+        },
+        {
+          "name": "as_heatmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "paga_compare": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.paga.paga_compare",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "basis",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "alpha",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'on data'"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "right_margin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "left_margin",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.05"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title_graph",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups_graph",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "pos",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "paga_graph_params",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "paga_path": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.paga.paga_path",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "nodes",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "keys",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "annotations",
+          "kind": "KEYWORD_ONLY",
+          "default": "('dpt_pseudotime',)"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_maps_annotations",
+          "kind": "KEYWORD_ONLY",
+          "default": "mappingproxy({'dpt_pseudotime': 'Greys'})"
+        },
+        {
+          "name": "palette_groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "n_avg",
+          "kind": "KEYWORD_ONLY",
+          "default": "1"
+        },
+        {
+          "name": "groups_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "xlim",
+          "kind": "KEYWORD_ONLY",
+          "default": "(None, None)"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "left_margin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ytick_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show_node_names",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "show_yticks",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "show_colorbar",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "normalize_to_zero_one",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "as_heatmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "return_data",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "pca": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.scatterplots.pca",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "mask_obs",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "sort_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "edges_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.1"
+        },
+        {
+          "name": "edges_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'grey'"
+        },
+        {
+          "name": "neighbors_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "arrows",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "arrows_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dimensions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "scale_factor",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "na_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'lightgray'"
+        },
+        {
+          "name": "na_in_legend",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right margin'"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right'"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "add_outline",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "outline_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "(0.3, 0.05)"
+        },
+        {
+          "name": "outline_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "('black', 'white')"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "hspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.25"
+        },
+        {
+          "name": "wspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        },
+        {
+          "name": "annotate_var_explained",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "pca_loadings": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.pca_loadings",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "components",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "include_lowest",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "n_points",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "pca_overview": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.pca_overview",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "params",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "pca_scatter": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.scatterplots.pca",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "mask_obs",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "sort_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "edges_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.1"
+        },
+        {
+          "name": "edges_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'grey'"
+        },
+        {
+          "name": "neighbors_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "arrows",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "arrows_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dimensions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "scale_factor",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "na_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'lightgray'"
+        },
+        {
+          "name": "na_in_legend",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right margin'"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right'"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "add_outline",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "outline_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "(0.3, 0.05)"
+        },
+        {
+          "name": "outline_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "('black', 'white')"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "hspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.25"
+        },
+        {
+          "name": "wspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        },
+        {
+          "name": "annotate_var_explained",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "pca_variance_ratio": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.pca_variance_ratio",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "n_pcs",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "30"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "rank_genes_groups": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.rank_genes_groups",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groups",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "n_genes",
+          "kind": "KEYWORD_ONLY",
+          "default": "20"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "key",
+          "kind": "KEYWORD_ONLY",
+          "default": "'rank_genes_groups'"
+        },
+        {
+          "name": "fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "8"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "sharey",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "rank_genes_groups_dotplot": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.rank_genes_groups_dotplot",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groups",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "n_genes",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groupby",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "values_to_plot",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_names",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "min_logfoldchange",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "rank_genes_groups_heatmap": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.rank_genes_groups_heatmap",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groups",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "n_genes",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groupby",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_names",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "min_logfoldchange",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "rank_genes_groups_matrixplot": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.rank_genes_groups_matrixplot",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groups",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "n_genes",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groupby",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "values_to_plot",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_names",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "min_logfoldchange",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "rank_genes_groups_stacked_violin": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.rank_genes_groups_stacked_violin",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groups",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "n_genes",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groupby",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_names",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "min_logfoldchange",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "rank_genes_groups_tracksplot": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.rank_genes_groups_tracksplot",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groups",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "n_genes",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groupby",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_names",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "min_logfoldchange",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "rank_genes_groups_violin": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.rank_genes_groups_violin",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groups",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "n_genes",
+          "kind": "KEYWORD_ONLY",
+          "default": "20"
+        },
+        {
+          "name": "gene_names",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "split",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "density_norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "'width'"
+        },
+        {
+          "name": "strip",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "jitter",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "1"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "_empty"
+        }
+      ]
+    },
+    "ranking": {
+      "kind": "function",
+      "target": "scanpy.plotting._anndata.ranking",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "attr",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "keys",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "dictionary",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "indices",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'black'"
+        },
+        {
+          "name": "n_points",
+          "kind": "KEYWORD_ONLY",
+          "default": "30"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "include_lowest",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "scatter": {
+      "kind": "function",
+      "target": "scanpy.plotting._anndata.scatter",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "x",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "y",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layers",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "sort_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "alpha",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "basis",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right margin'"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "right_margin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "left_margin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "scrublet_score_distribution": {
+      "kind": "function",
+      "target": "scanpy.plotting._scrublet.scrublet_score_distribution",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "scale_hist_obs",
+          "kind": "KEYWORD_ONLY",
+          "default": "'log'"
+        },
+        {
+          "name": "scale_hist_sim",
+          "kind": "KEYWORD_ONLY",
+          "default": "'linear'"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "(8, 3)"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "set_rcParams_defaults": {
+      "kind": "function",
+      "target": "scanpy.plotting._rcmod.set_rcParams_defaults",
+      "parameters": []
+    },
+    "set_rcParams_scanpy": {
+      "kind": "function",
+      "target": "scanpy.plotting._rcmod.set_rcParams_scanpy",
+      "parameters": [
+        {
+          "name": "fontsize",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "14"
+        },
+        {
+          "name": "color_map",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        }
+      ]
+    },
+    "sim": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.sim",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "tmax_realization",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "as_heatmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "shuffle",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        }
+      ]
+    },
+    "spatial": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.scatterplots.spatial",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "mask_obs",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "sort_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "edges_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.1"
+        },
+        {
+          "name": "edges_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'grey'"
+        },
+        {
+          "name": "neighbors_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "arrows",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "arrows_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dimensions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "scale_factor",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "na_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "na_in_legend",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "1.0"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right margin'"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right'"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "add_outline",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "outline_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "(0.3, 0.05)"
+        },
+        {
+          "name": "outline_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "('black', 'white')"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "hspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.25"
+        },
+        {
+          "name": "wspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        },
+        {
+          "name": "basis",
+          "kind": "KEYWORD_ONLY",
+          "default": "'spatial'"
+        },
+        {
+          "name": "img",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "img_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "_empty"
+        },
+        {
+          "name": "library_id",
+          "kind": "KEYWORD_ONLY",
+          "default": "_empty"
+        },
+        {
+          "name": "crop_coord",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "alpha_img",
+          "kind": "KEYWORD_ONLY",
+          "default": "1.0"
+        },
+        {
+          "name": "bw",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "spot_size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "stacked_violin": {
+      "kind": "function",
+      "target": "scanpy.plotting._stacked_violin.stacked_violin",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "var_names",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "num_categories",
+          "kind": "KEYWORD_ONLY",
+          "default": "7"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_title",
+          "kind": "KEYWORD_ONLY",
+          "default": "'Median expression\\nin group'"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dendrogram",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_positions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "standard_scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_rotation",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "categories_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "swap_axes",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "'Blues'"
+        },
+        {
+          "name": "stripplot",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "jitter",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "1"
+        },
+        {
+          "name": "row_palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "density_norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "_empty"
+        },
+        {
+          "name": "yticklabels",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "order",
+          "kind": "KEYWORD_ONLY",
+          "default": "_empty"
+        },
+        {
+          "name": "scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "_empty"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "timeseries": {
+      "kind": "function",
+      "target": "scanpy.plotting._utils.timeseries",
+      "parameters": [
+        {
+          "name": "X",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "timeseries_as_heatmap": {
+      "kind": "function",
+      "target": "scanpy.plotting._utils.timeseries_as_heatmap",
+      "parameters": [
+        {
+          "name": "X",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "var_names",
+          "kind": "KEYWORD_ONLY",
+          "default": "()"
+        },
+        {
+          "name": "highlights_x",
+          "kind": "KEYWORD_ONLY",
+          "default": "()"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        }
+      ]
+    },
+    "timeseries_subplot": {
+      "kind": "function",
+      "target": "scanpy.plotting._utils.timeseries_subplot",
+      "parameters": [
+        {
+          "name": "X",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "time",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_names",
+          "kind": "KEYWORD_ONLY",
+          "default": "()"
+        },
+        {
+          "name": "highlights_x",
+          "kind": "KEYWORD_ONLY",
+          "default": "()"
+        },
+        {
+          "name": "xlabel",
+          "kind": "KEYWORD_ONLY",
+          "default": "''"
+        },
+        {
+          "name": "ylabel",
+          "kind": "KEYWORD_ONLY",
+          "default": "'gene expression'"
+        },
+        {
+          "name": "yticks",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "xlim",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "'viridis'"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        }
+      ]
+    },
+    "tracksplot": {
+      "kind": "function",
+      "target": "scanpy.plotting._anndata.tracksplot",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "var_names",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "dendrogram",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_positions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "var_group_labels",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "figsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "tsne": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.scatterplots.tsne",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "mask_obs",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "sort_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "edges_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.1"
+        },
+        {
+          "name": "edges_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'grey'"
+        },
+        {
+          "name": "neighbors_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "arrows",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "arrows_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dimensions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "scale_factor",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "na_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'lightgray'"
+        },
+        {
+          "name": "na_in_legend",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right margin'"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right'"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "add_outline",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "outline_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "(0.3, 0.05)"
+        },
+        {
+          "name": "outline_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "('black', 'white')"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "hspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.25"
+        },
+        {
+          "name": "wspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "umap": {
+      "kind": "function",
+      "target": "scanpy.plotting._tools.scatterplots.umap",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "color",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "mask_obs",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "gene_symbols",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "sort_order",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "edges",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "edges_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.1"
+        },
+        {
+          "name": "edges_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'grey'"
+        },
+        {
+          "name": "neighbors_key",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "arrows",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "arrows_kwds",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "groups",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "components",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "dimensions",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "projection",
+          "kind": "KEYWORD_ONLY",
+          "default": "'2d'"
+        },
+        {
+          "name": "scale_factor",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "color_map",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "cmap",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "palette",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "na_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "'lightgray'"
+        },
+        {
+          "name": "na_in_legend",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "frameon",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontsize",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "legend_fontweight",
+          "kind": "KEYWORD_ONLY",
+          "default": "'bold'"
+        },
+        {
+          "name": "legend_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right margin'"
+        },
+        {
+          "name": "legend_fontoutline",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "colorbar_loc",
+          "kind": "KEYWORD_ONLY",
+          "default": "'right'"
+        },
+        {
+          "name": "vmax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vmin",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "vcenter",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "add_outline",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "outline_width",
+          "kind": "KEYWORD_ONLY",
+          "default": "(0.3, 0.05)"
+        },
+        {
+          "name": "outline_color",
+          "kind": "KEYWORD_ONLY",
+          "default": "('black', 'white')"
+        },
+        {
+          "name": "ncols",
+          "kind": "KEYWORD_ONLY",
+          "default": "4"
+        },
+        {
+          "name": "hspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "0.25"
+        },
+        {
+          "name": "wspace",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "title",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "return_fig",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "marker",
+          "kind": "KEYWORD_ONLY",
+          "default": "'.'"
+        },
+        {
+          "name": "kwargs",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    },
+    "violin": {
+      "kind": "function",
+      "target": "scanpy.plotting._anndata.violin",
+      "parameters": [
+        {
+          "name": "adata",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "keys",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": null
+        },
+        {
+          "name": "groupby",
+          "kind": "POSITIONAL_OR_KEYWORD",
+          "default": "None"
+        },
+        {
+          "name": "log",
+          "kind": "KEYWORD_ONLY",
+          "default": "False"
+        },
+        {
+          "name": "use_raw",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "stripplot",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "jitter",
+          "kind": "KEYWORD_ONLY",
+          "default": "True"
+        },
+        {
+          "name": "size",
+          "kind": "KEYWORD_ONLY",
+          "default": "1"
+        },
+        {
+          "name": "layer",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "density_norm",
+          "kind": "KEYWORD_ONLY",
+          "default": "'width'"
+        },
+        {
+          "name": "order",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "multi_panel",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "xlabel",
+          "kind": "KEYWORD_ONLY",
+          "default": "''"
+        },
+        {
+          "name": "ylabel",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "rotation",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "show",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "save",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "ax",
+          "kind": "KEYWORD_ONLY",
+          "default": "None"
+        },
+        {
+          "name": "scale",
+          "kind": "KEYWORD_ONLY",
+          "default": "_empty"
+        },
+        {
+          "name": "kwds",
+          "kind": "VAR_KEYWORD",
+          "default": null
+        }
+      ]
+    }
+  }
+}

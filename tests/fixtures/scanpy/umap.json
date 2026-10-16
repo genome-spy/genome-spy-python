@@ -1,0 +1,1109 @@
+{
+  "versions": {
+    "scanpy": "1.11.5",
+    "anndata": "0.12.19",
+    "numpy": "2.4.6",
+    "pandas": "2.3.3",
+    "scipy": "1.17.1",
+    "matplotlib": "3.11.2"
+  },
+  "cases": {
+    "categorical": {
+      "options": {
+        "color": "cell_type",
+        "frameon": true
+      },
+      "panels": [
+        {
+          "order": [
+            2,
+            0,
+            1,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "sizes": [
+            39.0,
+            25.0,
+            32.0,
+            46.0,
+            53.0,
+            60.0,
+            67.0,
+            74.0
+          ],
+          "coordinates": [
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              2.0,
+              1.0
+            ],
+            [
+              0.0,
+              3.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              1.5,
+              2.0
+            ]
+          ],
+          "colors": [
+            "#d3d3d3ff",
+            "#00aa00ff",
+            "#0000ffff",
+            "#00aa00ff",
+            "#ff0000ff",
+            "#0000ffff",
+            "#00aa00ff",
+            "#ff0000ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            232.5,
+            231.0
+          ],
+          "title": "cell_type",
+          "frameon": true,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": [
+            "C",
+            "B",
+            "A",
+            "unused",
+            "NA"
+          ],
+          "color_domain": null
+        }
+      ],
+      "figure_dpi": 100,
+      "export_dpi": 150
+    },
+    "continuous": {
+      "options": {
+        "color": "score",
+        "vmin": "p10",
+        "vmax": "p90",
+        "frameon": false
+      },
+      "panels": [
+        {
+          "order": [
+            2,
+            5,
+            6,
+            0,
+            3,
+            1,
+            7,
+            4
+          ],
+          "sizes": [
+            39.0,
+            60.0,
+            67.0,
+            25.0,
+            46.0,
+            32.0,
+            74.0,
+            53.0
+          ],
+          "coordinates": [
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              2.0,
+              1.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.5,
+              2.0
+            ],
+            [
+              0.0,
+              3.0
+            ]
+          ],
+          "colors": [
+            "#d3d3d3ff",
+            "#440154ff",
+            "#472d7bff",
+            "#472d7bff",
+            "#26828eff",
+            "#26828eff",
+            "#5ec962ff",
+            "#fde725ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            211.57500000000002,
+            231.0
+          ],
+          "title": "score",
+          "frameon": false,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": null,
+          "color_domain": [
+            -0.4000000059604645,
+            2.799999952316284
+          ]
+        }
+      ],
+      "figure_dpi": 100,
+      "export_dpi": 150
+    },
+    "raw": {
+      "options": {
+        "color": "g1",
+        "frameon": true
+      },
+      "panels": [
+        {
+          "order": [
+            4,
+            0,
+            5,
+            1,
+            6,
+            2,
+            7,
+            3
+          ],
+          "sizes": [
+            53.0,
+            25.0,
+            60.0,
+            32.0,
+            67.0,
+            39.0,
+            74.0,
+            46.0
+          ],
+          "coordinates": [
+            [
+              0.0,
+              3.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              1.5,
+              2.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "colors": [
+            "#440154ff",
+            "#440154ff",
+            "#31688eff",
+            "#31688eff",
+            "#35b779ff",
+            "#35b779ff",
+            "#fde725ff",
+            "#fde725ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            211.57500000000002,
+            231.0
+          ],
+          "title": "g1",
+          "frameon": true,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": null,
+          "color_domain": [
+            0.0,
+            3.0
+          ]
+        }
+      ],
+      "figure_dpi": 100,
+      "export_dpi": 150
+    },
+    "grid": {
+      "options": {
+        "color": [
+          "g1",
+          "g2",
+          "raw_only",
+          "score",
+          "cell_type",
+          "g1",
+          "score",
+          "g2"
+        ],
+        "frameon": false,
+        "ncols": 4
+      },
+      "panels": [
+        {
+          "order": [
+            4,
+            0,
+            5,
+            1,
+            6,
+            2,
+            7,
+            3
+          ],
+          "sizes": [
+            53.0,
+            25.0,
+            60.0,
+            32.0,
+            67.0,
+            39.0,
+            74.0,
+            46.0
+          ],
+          "coordinates": [
+            [
+              0.0,
+              3.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              1.5,
+              2.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "colors": [
+            "#440154ff",
+            "#440154ff",
+            "#31688eff",
+            "#31688eff",
+            "#35b779ff",
+            "#35b779ff",
+            "#fde725ff",
+            "#fde725ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            229.9386486486486,
+            218.66666666666669
+          ],
+          "title": "g1",
+          "frameon": false,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": null,
+          "color_domain": [
+            0.0,
+            3.0
+          ]
+        },
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "sizes": [
+            53.0,
+            25.0,
+            60.0,
+            32.0,
+            67.0,
+            39.0,
+            74.0,
+            46.0
+          ],
+          "coordinates": [
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              2.0,
+              1.0
+            ],
+            [
+              0.0,
+              3.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              1.5,
+              2.0
+            ]
+          ],
+          "colors": [
+            "#440154ff",
+            "#46327eff",
+            "#365c8dff",
+            "#277f8eff",
+            "#1fa187ff",
+            "#4ac16dff",
+            "#a0da39ff",
+            "#fde725ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            229.9386486486486,
+            218.66666666666669
+          ],
+          "title": "g2",
+          "frameon": false,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": null,
+          "color_domain": [
+            0.0,
+            14.0
+          ]
+        },
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "sizes": [
+            53.0,
+            25.0,
+            60.0,
+            32.0,
+            67.0,
+            39.0,
+            74.0,
+            46.0
+          ],
+          "coordinates": [
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              2.0,
+              1.0
+            ],
+            [
+              0.0,
+              3.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              1.5,
+              2.0
+            ]
+          ],
+          "colors": [
+            "#440154ff",
+            "#46327eff",
+            "#365c8dff",
+            "#277f8eff",
+            "#1fa187ff",
+            "#4ac16dff",
+            "#a0da39ff",
+            "#fde725ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            229.93864864864872,
+            218.66666666666669
+          ],
+          "title": "raw_only",
+          "frameon": false,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": null,
+          "color_domain": [
+            20.0,
+            27.0
+          ]
+        },
+        {
+          "order": [
+            2,
+            5,
+            6,
+            0,
+            3,
+            1,
+            7,
+            4
+          ],
+          "sizes": [
+            60.0,
+            39.0,
+            74.0,
+            53.0,
+            32.0,
+            25.0,
+            46.0,
+            67.0
+          ],
+          "coordinates": [
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              2.0,
+              1.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.5,
+              2.0
+            ],
+            [
+              0.0,
+              3.0
+            ]
+          ],
+          "colors": [
+            "#d3d3d3ff",
+            "#440154ff",
+            "#414487ff",
+            "#414487ff",
+            "#2a788eff",
+            "#2a788eff",
+            "#22a884ff",
+            "#fde725ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            229.93864864864872,
+            218.66666666666669
+          ],
+          "title": "score",
+          "frameon": false,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": null,
+          "color_domain": [
+            -1.0,
+            4.0
+          ]
+        },
+        {
+          "order": [
+            2,
+            0,
+            1,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "sizes": [
+            74.0,
+            60.0,
+            39.0,
+            53.0,
+            32.0,
+            25.0,
+            46.0,
+            67.0
+          ],
+          "coordinates": [
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              2.0,
+              1.0
+            ],
+            [
+              0.0,
+              3.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              1.5,
+              2.0
+            ]
+          ],
+          "colors": [
+            "#d3d3d3ff",
+            "#00aa00ff",
+            "#0000ffff",
+            "#00aa00ff",
+            "#ff0000ff",
+            "#0000ffff",
+            "#00aa00ff",
+            "#ff0000ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            229.9386486486486,
+            218.66666666666666
+          ],
+          "title": "cell_type",
+          "frameon": false,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": [
+            "C",
+            "B",
+            "A",
+            "unused",
+            "NA"
+          ],
+          "color_domain": null
+        },
+        {
+          "order": [
+            4,
+            0,
+            5,
+            1,
+            6,
+            2,
+            7,
+            3
+          ],
+          "sizes": [
+            32.0,
+            74.0,
+            25.0,
+            60.0,
+            46.0,
+            39.0,
+            67.0,
+            53.0
+          ],
+          "coordinates": [
+            [
+              0.0,
+              3.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              1.5,
+              2.0
+            ],
+            [
+              2.0,
+              1.0
+            ]
+          ],
+          "colors": [
+            "#440154ff",
+            "#440154ff",
+            "#31688eff",
+            "#31688eff",
+            "#35b779ff",
+            "#35b779ff",
+            "#fde725ff",
+            "#fde725ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            229.9386486486486,
+            218.66666666666666
+          ],
+          "title": "g1",
+          "frameon": false,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": null,
+          "color_domain": [
+            0.0,
+            3.0
+          ]
+        },
+        {
+          "order": [
+            2,
+            5,
+            6,
+            0,
+            3,
+            1,
+            7,
+            4
+          ],
+          "sizes": [
+            25.0,
+            39.0,
+            67.0,
+            32.0,
+            60.0,
+            74.0,
+            53.0,
+            46.0
+          ],
+          "coordinates": [
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              2.0,
+              1.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              1.5,
+              2.0
+            ],
+            [
+              0.0,
+              3.0
+            ]
+          ],
+          "colors": [
+            "#d3d3d3ff",
+            "#440154ff",
+            "#414487ff",
+            "#414487ff",
+            "#2a788eff",
+            "#2a788eff",
+            "#22a884ff",
+            "#fde725ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            229.93864864864872,
+            218.66666666666666
+          ],
+          "title": "score",
+          "frameon": false,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": null,
+          "color_domain": [
+            -1.0,
+            4.0
+          ]
+        },
+        {
+          "order": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "sizes": [
+            25.0,
+            39.0,
+            67.0,
+            32.0,
+            60.0,
+            74.0,
+            53.0,
+            46.0
+          ],
+          "coordinates": [
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              -2.0,
+              -1.0
+            ],
+            [
+              2.0,
+              1.0
+            ],
+            [
+              0.0,
+              3.0
+            ],
+            [
+              -1.0,
+              2.0
+            ],
+            [
+              0.5,
+              -2.0
+            ],
+            [
+              1.5,
+              2.0
+            ]
+          ],
+          "colors": [
+            "#440154ff",
+            "#46327eff",
+            "#365c8dff",
+            "#277f8eff",
+            "#1fa187ff",
+            "#4ac16dff",
+            "#a0da39ff",
+            "#fde725ff"
+          ],
+          "x_domain": [
+            -2.2,
+            2.2
+          ],
+          "y_domain": [
+            -2.25,
+            3.25
+          ],
+          "plot_size": [
+            229.93864864864872,
+            218.66666666666666
+          ],
+          "title": "g2",
+          "frameon": false,
+          "labels": [
+            "UMAP1",
+            "UMAP2"
+          ],
+          "legend": null,
+          "color_domain": [
+            0.0,
+            14.0
+          ]
+        }
+      ],
+      "figure_dpi": 100,
+      "export_dpi": 150
+    }
+  },
+  "footprint_dot": {
+    "marker": ".",
+    "size": 144,
+    "path_width": 0.5,
+    "linewidth": 0,
+    "diameter_at_export": 12.5,
+    "plot_size_at_display": [
+      232.5,
+      231.0
+    ],
+    "export_dpi": 150,
+    "display_dpi": 100
+  },
+  "footprint_circle": {
+    "marker": "o",
+    "size": 144,
+    "path_width": 1.0,
+    "linewidth": 0,
+    "diameter_at_export": 25.0,
+    "plot_size_at_display": [
+      232.5,
+      231.0
+    ],
+    "export_dpi": 150,
+    "display_dpi": 100
+  },
+  "footprint_dot-stroke": {
+    "marker": ".",
+    "size": 144,
+    "path_width": 0.5,
+    "linewidth": 2,
+    "diameter_at_export": 16.666666666666668,
+    "plot_size_at_display": [
+      232.5,
+      231.0
+    ],
+    "export_dpi": 150,
+    "display_dpi": 100
+  },
+  "assets": {
+    "categorical-panel-0.png": "a920e6cb40980b1e0b9dae36fc8b348c803f8c40852684c9bcfbe3298aa10c0f",
+    "categorical.png": "b3c69b73f99f4c4364ff7d918ba67ffdbfeafabc3e35695aeef41db5f989d2ba",
+    "continuous-panel-0.png": "da60ab91f0b06532f91c336a222875a50e58076f2ae49cc3579170a510c0571d",
+    "continuous.png": "6288660c5e60bc78db9b570dd5e234096db0096439fbc1d7e1b79a931a83bf32",
+    "footprint-circle.png": "fdb3cfeacea945706f2cbcc46f8ee24058dc9a135ade3023048310c1dfa27652",
+    "footprint-dot-stroke.png": "8dc8fe48a059a24e90ec2847980d05155e9c127fa87adbde6e912d1784265af9",
+    "footprint-dot.png": "6e4fa0e667c1c39dee6a0a811e6d09793b04c5e616a3af48741e9986ea77893e",
+    "grid-panel-0.png": "8050e1ac12e5dcdc8b3c5f043785b4c6de372de737bcb733bea4601113fd2e8f",
+    "grid-panel-1.png": "145bb06a2ff0eed28ed452897c36d10e32ae4f7e56d2f96a97cce0b960417c87",
+    "grid-panel-2.png": "145bb06a2ff0eed28ed452897c36d10e32ae4f7e56d2f96a97cce0b960417c87",
+    "grid-panel-3.png": "e98f9f5143137f41a2eacf260b0d4149406c7872ac056583edd813e179e654f3",
+    "grid-panel-4.png": "9c901b78df7cd187c7f0bd0f407ad97a0d6f0fc6c22025f5d44b22bd2b3d1e5a",
+    "grid-panel-5.png": "afa455e6fde43a4b97710596322883dea78dbe4cf1af0b1cafe7b25bb07b306c",
+    "grid-panel-6.png": "1b31fe936b2e166bfba3b5e1c3c838a503660ec49cd68701e856b67738cd01d1",
+    "grid-panel-7.png": "1b79097a311e2532bcb2fe4ad683d186971c50b875ada025c56436aeafab0a04",
+    "grid.png": "38e7a198eb28a87bd6412188de216649bffa617615027b5028b034d836b54741",
+    "raw-panel-0.png": "4621027f67a7eaf0b5a46e082b33a93e24b17fb304360d80e33df22d4adbd9c6",
+    "raw.png": "5a38112594f1b581ecfdba69ee60566d259d8c1c8f7007c79155eeb19161f71d"
+  },
+  "fixture_sha256": "5c5f503943f0ac53c5258594f273fa7c771700c39a6f9753a1a3247cd7d15be5"
+}

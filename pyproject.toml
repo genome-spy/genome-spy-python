@@ -50,8 +50,19 @@ Issues = "https://github.com/genome-spy/genome-spy-python/issues"
 [project.optional-dependencies]
 anndata = ["anndata>=0.11.0"]
 arrow = ["pyarrow>=18.0.0"]
+scanpy = ["scanpy==1.11.5"]
 
 [dependency-groups]
+scanpy-test = [
+    "scanpy==1.11.5",
+    "anndata==0.12.19",
+    "matplotlib==3.11.2",
+    "numpy==2.4.6",
+    "pandas==2.3.3",
+    "scipy==1.17.1",
+    "pillow==12.3.0",
+    "playwright==1.64.0",
+]
 docs = [
     "anndata>=0.11.0",
     "furo>=2024.8.6",
