@@ -71,6 +71,32 @@ jobs:
           --with "$GITHUB_WORKSPACE"/dist/*.whl
           python -c "from importlib.resources import files; import genome_spy as gs; package = files('genome_spy'); assert package.joinpath('schema/genome-spy-schema.json').is_file(); assert package.joinpath('schema/capabilities.json').is_file(); assert package.joinpath('static/widget.js').is_file(); assert package.joinpath('static/genome-spy.js').is_file(); assert package.joinpath('static/controls.js').is_file(); assert package.joinpath('static/inspector.js').is_file(); chart = gs.Chart([{'x': 1}]).mark_point().encode(x='x:Q'); spec = chart.to_dict(); assert spec['mark'] == 'point'; assert spec['encoding']['x']['field'] == 'x'; assert spec[chr(36) + 'schema'].endswith('/schema.json')"
 
+  scanpy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - run: uv sync --locked --dev --extra scanpy --group scanpy-test
+      - run: uv run --no-sync pytest tests/test_scanpy_reference.py tests/test_scanpy_contract.py tests/test_scanpy_umap.py -q
+      - run: uv run --no-sync python -m playwright install --with-deps chromium
+      - run: uv run --no-sync pytest tests/browser/test_scanpy_umap.py -q --basetemp="${{ runner.temp }}/scanpy-browser"
+      - run: uv run --no-sync python tools/check_notebook_rendering.py notebooks/scanpy_umap.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/notebook.png"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: scanpy-browser-${{ matrix.python }}
+          path: ${{ runner.temp }}/scanpy-browser
+          if-no-files-found: ignore
+
   codegen:
     runs-on: ubuntu-latest
     steps:

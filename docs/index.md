@@ -73,5 +73,6 @@ User guide <user-guide/index>
 Gallery <gallery/index>
 Example datasets <datasets>
 API reference <api>
+Scanpy integration <integrations/scanpy/index>
 About <about>
 ```
