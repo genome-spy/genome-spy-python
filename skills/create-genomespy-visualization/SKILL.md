@@ -25,10 +25,10 @@ need no extras; other inputs may. Frontend checks need browser/notebook access.
    marks, composition and interaction, not just dataset. Reuse needed components;
    adapt fields, domains, labels and rendering. Check preparation, dependencies
    and provenance. Use public data APIs, not internal example loaders.
-3. Use indexed data, encoding, scale and rendering guides as needed; consult
-   fuller guides/API signatures for unresolved options. Check unfamiliar options
-   against installed signatures/docstrings; online examples may target a different
-   version. Prefer matching checkout docs when versions differ.
+3. Use indexed data, encoding, scale, interaction and rendering guides as needed;
+   consult fuller guides/API signatures for unresolved options. Check unfamiliar
+   options against installed signatures/docstrings; online examples may target a
+   different version. Prefer matching checkout docs when versions differ.
 
 If no example fits, use documented native features. Distinguish native support,
 custom composition and capability gaps; offer a supported alternative for gaps.
@@ -70,8 +70,10 @@ declarative transforms and interactions in the browser.
    `inline=True` bundles the runtime, not URL datasets or a Python session.
 3. Open the latest artifact. Inspect marks, axes, labels, legends, readability,
    runtime/resource errors and a known tooltip. For recreation, compare complete
-   charts and registered plot-area overlays per the reference guide. In panels,
-   check intended shared zoom and independent color meanings when tools allow.
+   charts and registered plot-area overlays per the reference guide. When tools
+   allow, check intended shared zoom and independent color meanings in panels.
+   For linked selections, verify changed values, no matches and clearing against
+   source data.
 4. Deliver source/artifact, reused example/guide links, processing and departures.
    Distinguish spec validation, observed rendering, interaction and image export;
    report unverified checks. A canvas alone is not rendering evidence.
