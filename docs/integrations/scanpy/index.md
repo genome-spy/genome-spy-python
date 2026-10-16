@@ -6,14 +6,22 @@ Keep your existing Scanpy analysis and replace supported plotting calls:
 import scanpy as sc
 import genome_spy.scanpy as gsc
 
-# Continue preprocessing and analysis through sc.pp and sc.tl.
-# adata already contains the embedding computed by your workflow.
+# Scanpy analysis: after your usual preprocessing, compute the embedding once.
+sc.pp.neighbors(adata, random_state=0)
+sc.tl.umap(adata, random_state=0)  # Writes adata.obsm["X_umap"].
+
+# GenomeSpy plotting: reads those coordinates and returns an interactive chart.
 chart = gsc.pl.umap(
     adata, color=["cell_type", "MS4A1"], vmax="p99",
     show=False, hover=True, zoom=True,
 )
 chart.save("umap.html", inline=True)
 ```
+
+**Scanpy computes UMAP; GenomeSpy renders it.** If your workflow already has
+`adata.obsm["X_umap"]`, go straight to `gsc.pl.umap`. The plotting adapter never
+runs neighbors or UMAP analysis. A missing embedding produces an error asking
+you to compute it explicitly first.
 
 This development preview implements categorical and continuous 2D UMAP.
 Full public Scanpy plotting coverage is the destination; the inventory below
