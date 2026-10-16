@@ -574,8 +574,10 @@ def prepare_umap(adata: Any, **options: Any) -> PreparedUMAP:
                 legend_values,
                 panel_title,
                 labels,
-                width * (0.91 if shrinks else 1),
-                height,
+                float(options["width"])
+                if options["width"] is not None
+                else width * (0.91 if shrinks else 1),
+                float(options["height"]) if options["height"] is not None else height,
             )
         )
     style = {
@@ -603,8 +605,8 @@ def prepare_umap(adata: Any, **options: Any) -> PreparedUMAP:
         # and then silently fall back, including in otherwise offline HTML.
         "font": "Lato",
         "ncols": columns,
-        "hspace": hspace * height,
-        "wspace": wspace * width,
+        "hspace": hspace * (height if options["height"] is None else options["height"]),
+        "wspace": wspace * (width if options["width"] is None else options["width"]),
         "alpha": float(alpha),
         "stroke": colors.to_hex(edge),
         "stroke_opacity": edge[3]

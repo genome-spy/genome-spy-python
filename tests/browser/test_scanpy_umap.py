@@ -358,3 +358,50 @@ def test_zero_size_points_leave_no_visible_footprint(page):
         Image.open(BytesIO(page.locator("canvas").first.screenshot())).convert("RGB")
     )
     assert pixels.min() == 255
+
+
+def test_native_sized_panels_and_numeric_guide_fit_side_by_side(page, tmp_path):
+    page.set_viewport_size({"width": 1000, "height": 700})
+    chart = gsc.pl.umap(
+        fixture(),
+        color=["cell_type", "score"],
+        size=144,
+        width=300,
+        height=260,
+        ncols=2,
+        zoom=True,
+        obs_id="cell_id",
+        show=False,
+    )
+    render(page, chart)
+    panels = page.evaluate(
+        "[0,1].map(i=>api.views.getLayoutBounds({scope:[],view:`panel-${i}`}))"
+    )
+    for panel in panels:
+        np.testing.assert_allclose(
+            [panel["width"], panel["height"]], [300, 260], atol=1
+        )
+    assert panels[1]["x"] > panels[0]["x"] + panels[0]["width"]
+    assert abs(panels[0]["y"] - panels[1]["y"]) < 1
+    canvas = page.locator("canvas").first
+    assert canvas.bounding_box()["width"] <= 1000
+    png = canvas.screenshot(path=str(tmp_path / "native-sized-umap.png"))
+    pixels = np.asarray(Image.open(BytesIO(png)).convert("RGB")).astype(int)
+    # Only the continuous guide lies right of the second plot. Its chromatic
+    # pixels must reach both ends of the requested panel, inside the canvas.
+    guide = pixels[:, int(np.ceil(panels[1]["x"] + panels[1]["width"])) + 1 :]
+    yy, _ = np.where(guide.max(axis=2) - guide.min(axis=2) > 70)
+    assert len(yy) > 100
+    assert abs(yy.min() - panels[1]["y"]) <= 2
+    assert abs(yy.max() - (panels[1]["y"] + panels[1]["height"])) <= 2
+    spec = chart.to_dict()
+    domains = [
+        units(spec)[0]["layer"][0]["encoding"][d]["scale"]["domain"] for d in ("x", "y")
+    ]
+    move_to(page, panels[0], 1, 0, *domains)
+    page.get_by_text("stable-1", exact=True).wait_for(state="visible")
+    page.mouse.wheel(0, -300)
+    page.wait_for_function(
+        "low=>api.getScaleResolutionByName('umap-x-0').getDomain()[0]>low",
+        arg=domains[0][0],
+    )

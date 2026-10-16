@@ -48,6 +48,8 @@ def test_public_defaults_match_the_pinned_effective_signature() -> None:
         "zoom",
         "selection",
         "obs_id",
+        "width",
+        "height",
     }
 
 
@@ -69,6 +71,12 @@ def test_public_defaults_match_the_pinned_effective_signature() -> None:
         ({"colro": "group"}, TypeError),
         ({"hover": "False"}, TypeError),
         ({"zoom": "yes"}, TypeError),
+        ({"width": 0}, ValueError),
+        ({"height": -1}, ValueError),
+        ({"width": float("nan")}, ValueError),
+        ({"height": float("inf")}, ValueError),
+        ({"width": True}, ValueError),
+        ({"height": "300"}, ValueError),
         ({"size": 2, "s": 3}, TypeError),
         ({"edgecolor": "red", "edgecolors": "blue"}, TypeError),
         ({"color_map": "viridis", "cmap": "Blues"}, ValueError),

@@ -361,3 +361,51 @@ def test_missing_numeric_colors_and_ambiguous_genes_fail(adata):
     adata.var_names = ["g1", "g1", "junk"]
     with pytest.raises(ValueError, match="ambiguous"):
         gsc.pl.umap(adata, color="g1", use_raw=False, show=False)
+
+
+@pytest.mark.parametrize(
+    "dimensions", [{"width": 300}, {"height": 240}, {"width": 300, "height": 240}]
+)
+def test_native_dimensions_override_panel_areas_without_changing_data_or_settings(
+    adata, dimensions
+):
+    before = (list(mpl.rcParams["figure.figsize"]), mpl.rcParams["figure.dpi"])
+    default = gsc.pl.umap(adata, color=["cell_type", "score"], size=60, show=False)
+    resized = gsc.pl.umap(
+        adata, color=["cell_type", "score"], size=60, show=False, **dimensions
+    )
+    assert rows(resized) == rows(default)
+    for original, panel in zip(
+        units(default.to_dict()), units(resized.to_dict()), strict=True
+    ):
+        for name in ("width", "height"):
+            expected = dimensions.get(name, original[name])
+            assert panel[name] == expected
+            assert all(layer[name] == expected for layer in panel["layer"])
+        assert (
+            panel["config"]["legend"]["labelFontSize"]
+            == original["config"]["legend"]["labelFontSize"]
+        )
+    numeric = units(resized.to_dict())[1]
+    assert (
+        numeric["layer"][1]["encoding"]["color"]["legend"]["gradientLength"]
+        == numeric["height"]
+    )
+    assert before == (list(mpl.rcParams["figure.figsize"]), mpl.rcParams["figure.dpi"])
+
+
+def test_relative_panel_gaps_use_native_dimensions(adata):
+    chart = gsc.pl.umap(
+        adata,
+        color=["cell_type", "score"],
+        width=300,
+        height=240,
+        ncols=1,
+        wspace=0.2,
+        hspace=0.1,
+        show=False,
+    )
+    spec = chart.to_dict()
+    assert spec["spacing"] == 24
+    assert len(spec["vconcat"]) == 2
+    assert all(row["spacing"] == 60 for row in spec["vconcat"])

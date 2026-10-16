@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from importlib.metadata import PackageNotFoundError, version
+from math import isfinite
+from numbers import Real
 from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
@@ -83,6 +85,8 @@ def umap(
     zoom: bool = False,
     selection: Parameter | None = None,
     obs_id: str | None = None,
+    width: float | None = None,
+    height: float | None = None,
     **kwargs: Any,
 ) -> TopLevelSpec | None:
     """Plot existing UMAP coordinates with Scanpy-compatible color semantics.
@@ -149,6 +153,10 @@ def umap(
         selection: Reserved for the linked-selection phase; currently None.
         obs_id: Unique nonmissing observation-column key, defaulting to obs_names
             or distinct snapshot-local row keys when names repeat.
+        width: GenomeSpy plot-area width per panel in logical pixels. None
+            retains the Scanpy-compatible default. Axes and guides add space.
+        height: GenomeSpy plot-area height per panel in logical pixels. None
+            retains the Scanpy-compatible default. Does not resize markers/fonts.
         **kwargs: Supported scatter aliases: s, alpha, edgecolor/edgecolors,
             linewidth/linewidths. Other options fail before data extraction.
 
@@ -217,6 +225,16 @@ def umap(
         raise ValueError("gsc.pl.umap: cannot specify both color_map and cmap.")
     if groups is not None and mask_obs is not None:
         raise ValueError("gsc.pl.umap: groups and mask_obs are incompatible.")
+    for name, dimension in {"width": width, "height": height}.items():
+        if dimension is not None and (
+            isinstance(dimension, bool)
+            or not isinstance(dimension, Real)
+            or not isfinite(dimension)
+            or dimension <= 0
+        ):
+            raise ValueError(
+                f"gsc.pl.umap: {name} must be a positive finite number or None."
+            )
     for name, option in {
         "sort_order": sort_order,
         "na_in_legend": na_in_legend,
@@ -266,6 +284,8 @@ def umap(
         ncols=ncols,
         hspace=hspace,
         wspace=wspace,
+        width=width,
+        height=height,
         alpha=kwargs.get("alpha"),
         edgecolor=kwargs.get("edgecolor", kwargs.get("edgecolors", "none")),
         linewidth=kwargs.get("linewidth", kwargs.get("linewidths", None)),

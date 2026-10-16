@@ -13,6 +13,7 @@ sc.tl.umap(adata, random_state=0)  # Writes adata.obsm["X_umap"].
 # GenomeSpy plotting: reads those coordinates and returns an interactive chart.
 chart = gsc.pl.umap(
     adata, color=["cell_type", "MS4A1"], vmax="p99",
+    width=300, height=300, ncols=2,
     show=False, hover=True, zoom=True,
 )
 chart.save("umap.html", inline=True)
@@ -61,6 +62,7 @@ raise an error instead of being ignored.
 | mask_obs, groups | Recolor observations without dropping coordinates. Masks can be boolean arrays or an observation-column key. Groups and masks are mutually exclusive. |
 | components, dimensions | One-based component pairs or zero-based dimension pairs; broadcasting follows Scanpy. Both cannot be supplied together. |
 | frameon, title, ncols, hspace, wspace | Frame and panel layout from the supported Scanpy/Matplotlib settings. Titles and guides remain per panel; guides are not automatically collected. |
+| width, height (GenomeSpy additions) | Plot-area dimensions per panel in logical pixels. None preserves Scanpy-compatible defaults. Explicit dimensions size each panel and its guide directly; axes and legends add space. Marker and font sizes are unchanged. |
 | legend_loc, legend_fontsize, legend_fontweight | Centered right-margin legend, on-data median labels, or no legend; font sizes follow the configured figure DPI. On-data labels currently require legend_fontweight="normal" (or 400); the upstream bold default errors for that location because its glyph atlas is not bundled. |
 | alpha, edgecolor/edgecolors, linewidth/linewidths | Scalar opacity and edge styling; conflicting aliases error. Transparent palette/cmap/NA entries require scalar alpha or a disabled guide; per-entry guide transparency is not supported yet. |
 | show | False returns a native chart; True displays once through anywidget and returns None. None uses Scanpy settings.autoshow. |
@@ -131,6 +133,29 @@ Interactive HTML works without Python when data and runtime are embedded.
 Python callbacks require a live notebook kernel. HTML bundling does not make
 external URL datasets offline. Native results do not emulate Matplotlib Axes,
 Figure attributes, or artist styling methods.
+
+### Native plot sizing
+
+Set panel dimensions through GenomeSpy without importing or configuring
+Matplotlib:
+
+```python
+chart = gsc.pl.umap(
+    adata, color=["cell_type", "MS4A1"],
+    width=300, height=300, ncols=2, show=False,
+)
+```
+
+`width` and `height` are keyword-only GenomeSpy controls in logical pixels, not
+figure inches or marker areas. They apply to each plot area; titles, axes,
+spacing, and legends take additional space. Numeric guides use the requested
+height. An omitted dimension retains its Scanpy-compatible default, and plotting
+does not change global settings. Use `ncols` to arrange the panels, `wspace` and
+`hspace` for relative gaps, and `size` for marker area.
+
+For a multi-panel result, setting dimensions on the outer composition with
+`.properties()` does not resize its fixed child panels. Pass `width`/`height`
+at the plotting call to size the panels and guides together.
 
 ## Full plotting coverage inventory
 
