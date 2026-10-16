@@ -61,7 +61,7 @@ base = gs.Chart(rows).mark_point(filled=True, size=80).encode(
     x=gs.X("position:Q").scale(domain=[0, 5], nice=False, zoom=True),
 )
 signal = base.encode(
-    y=gs.Y("signal:Q").scale(domain=[0, 10], nice=False, zoom=False),
+    y=gs.Y("signal:Q").scale(domain=[0, 10], nice=False, zoom=False).title("Signal"),
     color=gs.Color("group:N")
     .scale(domain=["A", "B"], range=["#4c78a8", "#f58518"])
     .legend(title="Group", orient="bottom", columns=2),
@@ -75,7 +75,12 @@ score = base.encode(
     tooltip=["position:Q", "score:Q"],
 ).properties(height=180, title="Score")
 labels = signal.mark_text(dy=-10).encode(text="group:N")
-signal_panel = (signal + labels).properties(height=180, title="Signal by group")
+cutoff = gs.Chart([{"cutoff": 5}]).mark_rule(color="#667382").encode(
+    y=gs.Y("cutoff:Q").scale(domain=[0, 10], nice=False, zoom=False).title("Signal"),
+)
+signal_panel = (cutoff + signal + labels).properties(
+    height=180, title="Signal by group"
+)
 comparison = (
     (signal_panel & score)
     .resolve_scale(x="shared", y="independent", color="independent")
@@ -87,13 +92,15 @@ comparison.to_dict()
 comparison.save("comparison.html", inline=True)
 ```
 
-Expected: two stacked panels, four points per panel, labels on the upper points,
-and separate, collected bottom guides. X zoom/pan moves both panels; y ranges and
-color meanings stay independent. Replace records, fields, domains and titles
-together. Put a layer's height/title on the combined view and shared width on
-the vertical composition. For horizontal panels, replace `&` with `|` and review
-dimensions and scale sharing.
+Expected: two stacked panels, four points per panel, labels and a cutoff line in
+the upper panel, and separate, collected bottom guides. X zoom/pan moves both
+panels; y ranges and color meanings stay independent. Replace records, fields,
+domains and titles together. Put a layer's height/title on the combined view and
+shared width on the vertical composition. For horizontal panels, replace `&`
+with `|` and review dimensions and scale sharing.
 Methods return new charts; retain the result. Confirm interactions in the browser.
+Use the same intended axis title on layers sharing a scale; otherwise helper
+fields such as `cutoff` can appear in the combined title.
 
 ## Browser transforms
 
