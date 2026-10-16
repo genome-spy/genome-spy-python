@@ -45,6 +45,8 @@ position. Preserve the position order across related panels.
 ## Layers and panels
 
 Use `+` for layers, `|` for horizontal panels, and `&` for vertical panels.
+Operators extend a matching composition on the left. Use
+`gs.vconcat(group, detail)` to preserve a configured group as a nested view.
 This complete example compares two measurements at the same positions.
 Input: numeric `position`, `signal`, `score` (0–1), and categorical `group`.
 
