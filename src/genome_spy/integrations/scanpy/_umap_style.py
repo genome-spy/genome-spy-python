@@ -7,7 +7,7 @@ from math import isfinite
 from numbers import Integral, Real
 from typing import Any
 
-from genome_spy.scanpy._umap_colors import native_color
+from genome_spy.integrations.scanpy._umap_colors import native_color
 
 POINTS_TO_PIXELS = 100 / 72
 

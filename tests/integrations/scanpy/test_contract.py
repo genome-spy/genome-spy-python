@@ -9,21 +9,33 @@ import sys
 import pytest
 
 import genome_spy as gs
+from genome_spy.integrations import scanpy as integration
+from genome_spy.integrations.scanpy import pl
 import genome_spy.scanpy as gsc
-from genome_spy.scanpy import pl
 
 FIXTURES = Path(__file__).with_name("fixtures")
 
 
-def test_namespace_import_keeps_optional_stack_unloaded() -> None:
+@pytest.mark.parametrize(
+    "namespace",
+    ["genome_spy.integrations", "genome_spy.integrations.scanpy", "genome_spy.scanpy"],
+)
+def test_namespace_import_keeps_optional_stack_unloaded(namespace: str) -> None:
     subprocess.run(
         [
             sys.executable,
             "-c",
-            "import sys; import genome_spy.scanpy as gsc; assert callable(gsc.pl.umap); assert not set(['scanpy', 'anndata', 'numpy', 'pandas', 'scipy', 'matplotlib', 'pyarrow']) & sys.modules.keys()",
+            f"import sys; import {namespace}; assert not set(['scanpy', 'anndata', 'numpy', 'pandas', 'scipy', 'matplotlib', 'pyarrow']) & sys.modules.keys()",
         ],
         check=True,
     )
+
+
+def test_import_paths_export_the_same_public_functions() -> None:
+    from genome_spy.scanpy.pl import umap
+
+    assert gsc.pl.umap is integration.pl.umap is umap
+    assert gsc.selection_mask is integration.selection_mask
 
 
 def test_public_defaults_match_the_pinned_effective_signature() -> None:

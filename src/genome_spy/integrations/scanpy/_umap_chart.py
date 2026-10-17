@@ -7,14 +7,14 @@ from typing import Literal
 import numpy as np
 
 import genome_spy as gs
-from genome_spy.scanpy._umap_data import Panel, PreparedUMAP
-from genome_spy.scanpy._umap_interactions import (
+from genome_spy.integrations.scanpy._umap_data import Panel, PreparedUMAP
+from genome_spy.integrations.scanpy._umap_interactions import (
     brush_owner,
     point_interactions,
     validate_brush,
     with_brush_count,
 )
-from genome_spy.scanpy._umap_style import POINTS_TO_PIXELS, UMAPStyle
+from genome_spy.integrations.scanpy._umap_style import POINTS_TO_PIXELS, UMAPStyle
 
 
 def coordinate_domain(values: np.ndarray, margin: float) -> tuple[float, float]:

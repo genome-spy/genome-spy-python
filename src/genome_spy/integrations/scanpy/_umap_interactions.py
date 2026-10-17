@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import genome_spy as gs
 
-from genome_spy.scanpy._umap_data import Panel, PreparedUMAP
-from genome_spy.scanpy._umap_style import UMAPStyle
+from genome_spy.integrations.scanpy._umap_data import Panel, PreparedUMAP
+from genome_spy.integrations.scanpy._umap_style import UMAPStyle
 
 
 def point_interactions(

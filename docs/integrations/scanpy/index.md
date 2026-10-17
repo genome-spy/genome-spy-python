@@ -39,6 +39,10 @@ an actionable error at the plotting call. Importing either genome_spy or
 genome_spy.scanpy does not import Scanpy, AnnData, NumPy, pandas, SciPy,
 Matplotlib, or PyArrow. The scientific dependencies load when plotting.
 
+The implementation lives under `genome_spy.integrations.scanpy`.
+`import genome_spy.integrations.scanpy as gsc` is also supported; both import paths
+export the same plotting functions and `selection_mask`.
+
 The optional arrow extra speeds notebook transport. It is not required for
 JSON or interactive HTML. The reproducible reference environment is the
 scanpy-test dependency group and uv.lock; exact scientific-stack versions are
@@ -346,7 +350,7 @@ renders the notebook through JupyterLab. Local validation used Python 3.11.
 ## API
 
 ```{eval-rst}
-.. autofunction:: genome_spy.scanpy.pl.umap
+.. autofunction:: genome_spy.integrations.scanpy.pl.umap
 
-.. autofunction:: genome_spy.scanpy.selection_mask
+.. autofunction:: genome_spy.integrations.scanpy.selection_mask
 ```

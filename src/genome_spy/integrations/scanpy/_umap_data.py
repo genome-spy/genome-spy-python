@@ -13,7 +13,7 @@ import pandas as pd
 from scipy import sparse
 
 from genome_spy.anndata import from_anndata
-from genome_spy.scanpy._umap_colors import (
+from genome_spy.integrations.scanpy._umap_colors import (
     _categorical,
     categorical_colors,
     continuous_colors,
