@@ -10,14 +10,14 @@ import pytest
 
 import genome_spy.scanpy as gsc
 from genome_spy._embed import bundled_module_url
-from tests.scanpy_fixtures import make_adata, reference_cases
-from tests.test_scanpy_umap import units
+from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
+from tests.integrations.scanpy.helpers import units
 
 sc = pytest.importorskip("scanpy")
 mpl = pytest.importorskip("matplotlib")
 playwright = pytest.importorskip("playwright.sync_api")
 Image = pytest.importorskip("PIL.Image")
-REFERENCE_DIR = Path(__file__).parents[1] / "fixtures/scanpy"
+REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "umap.json").read_text())
 
 

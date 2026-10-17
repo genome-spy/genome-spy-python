@@ -1,11 +1,11 @@
 # Scanpy reference fixtures
 
-Generated explicitly with `uv run --group scanpy-test python -m tools.scanpy_reference`.
+Generated explicitly with `uv run --group scanpy-test python -m tests.integrations.scanpy.generate_references`.
 The environment is locked in `uv.lock`; `umap.json` records exact scientific
 versions, export/display DPI, checksums, source positions and rendered values.
 `api.json` records the complete pinned public callable inventory and defaults.
 
-The original synthetic input lives in `tests/scanpy_fixtures.py` and is covered
+The original synthetic input lives in `tests/integrations/scanpy/fixture_data.py` and is covered
 by this project's MIT license. No real datasets, benchmark implementations,
 Scanpy source, or upstream tutorial images are redistributed here.
 

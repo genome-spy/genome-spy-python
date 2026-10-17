@@ -12,26 +12,18 @@ from scipy import sparse
 
 import genome_spy as gs
 import genome_spy.scanpy as gsc
-from tests.scanpy_fixtures import make_adata, reference_cases
+from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
+from tests.integrations.scanpy.helpers import units
 
 sc = pytest.importorskip("scanpy")
 mpl = pytest.importorskip("matplotlib")
-REFERENCE = json.loads(
-    (Path(__file__).with_name("fixtures") / "scanpy/umap.json").read_text()
-)
+REFERENCE = json.loads((Path(__file__).with_name("fixtures") / "umap.json").read_text())
 
 
 @pytest.fixture
 def adata():
     with pytest.warns(UserWarning, match="Observation names are not unique"):
         return make_adata()
-
-
-def units(spec):
-    for composition in ("concat", "hconcat", "vconcat"):
-        if composition in spec:
-            return [unit for child in spec[composition] for unit in units(child)]
-    return [spec]
 
 
 def rows(chart):

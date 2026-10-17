@@ -12,7 +12,7 @@ import genome_spy as gs
 import genome_spy.scanpy as gsc
 from genome_spy.scanpy import pl
 
-FIXTURES = Path(__file__).with_name("fixtures") / "scanpy"
+FIXTURES = Path(__file__).with_name("fixtures")
 
 
 def test_namespace_import_keeps_optional_stack_unloaded() -> None:

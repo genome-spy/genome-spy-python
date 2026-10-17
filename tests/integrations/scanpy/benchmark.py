@@ -1,7 +1,7 @@
 """Measure a seeded sparse UMAP workload in a fresh process.
 
 Run each size/panel count separately, for example:
-``uv run --no-sync python -m tools.scanpy_performance --cells 100000 --panels 8``.
+``uv run --no-sync python -m tests.integrations.scanpy.benchmark --cells 100000 --panels 8``.
 This is an explicit local benchmark, not a hardware-independent CI time limit.
 The source matrix has 20,000 genes but only selected columns may be densified.
 """
@@ -142,7 +142,7 @@ def _measure_browser(spec, coordinates, output):
     import numpy as np
     from playwright.sync_api import sync_playwright
     from genome_spy._embed import bundled_module_url
-    from tests.test_scanpy_umap import units
+    from tests.integrations.scanpy.helpers import units
 
     for i, unit in enumerate(units(spec)):
         unit["name"] = f"panel-{i}"

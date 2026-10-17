@@ -1,6 +1,6 @@
 """Generate the explicit Scanpy 1.11.5 API and synthetic rendering oracles.
 
-Run ``uv run --group scanpy-test python -m tools.scanpy_reference``.
+Run ``uv run --group scanpy-test python -m tests.integrations.scanpy.generate_references``.
 No datasets are downloaded and no analysis is run. Artists are inspected only
 here, never by the production adapter. The synthetic fixture is original project
 test data, covered by the project's MIT license. API metadata describes the
@@ -51,7 +51,9 @@ def api_contract(sc: Any) -> dict[str, Any]:
 def main() -> None:
     """Freeze independent reference observations and complete figures."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=Path("tests/fixtures/scanpy"))
+    parser.add_argument(
+        "--output", type=Path, default=Path(__file__).with_name("fixtures")
+    )
     args = parser.parse_args()
     import matplotlib
 
@@ -63,7 +65,7 @@ def main() -> None:
     from matplotlib.colors import to_hex
     from matplotlib.markers import MarkerStyle
 
-    from tests.scanpy_fixtures import make_adata, reference_cases
+    from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
 
     if version("scanpy") != "1.11.5":
         raise RuntimeError("Reference generation requires Scanpy 1.11.5.")
@@ -194,7 +196,7 @@ def main() -> None:
         for p in sorted(args.output.glob("*.png"))
     }
     report["fixture_sha256"] = sha256(
-        Path("tests/scanpy_fixtures.py").read_bytes()
+        Path(__file__).with_name("fixture_data.py").read_bytes()
     ).hexdigest()
     (args.output / "umap.json").write_text(
         json.dumps(report, indent=2, allow_nan=False) + "\n"

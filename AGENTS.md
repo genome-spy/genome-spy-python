@@ -11,6 +11,7 @@ before app-specific concepts. Notebook rendering is first-class; prefer `anywidg
 | --- | --- |
 | `src/genome_spy/` | Installable library |
 | `tests/` | pytest suite |
+| `integrations/` | Tracked integration plans and per-library workflow notebooks |
 | `scripts/` | Helpers run via `uv run` |
 | `plans/` | Plans, context, and implementation notes |
 | `material/` | Local reference documents; not committed |
@@ -58,6 +59,7 @@ explicitly asked.
 
 | Document | Read when |
 | --- | --- |
+| `integrations/<library>/PLAN.md` | Planning or extending a library integration |
 | `plans/implementation_plan.md` | Starting implementation; understand phases and open questions |
 | `plans/deferred.md` | Adding scope; avoid intentionally deferred work |
 | `plans/architecture.md` | Changing public API shape, schema strategy, or notebook integration |

@@ -10,7 +10,7 @@ import genome_spy.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
 
 sc = pytest.importorskip("scanpy")
-NOTEBOOKS = Path(__file__).parents[1] / "notebooks"
+NOTEBOOKS = Path(__file__).resolve().parents[3] / "integrations/scanpy/notebooks"
 
 
 @pytest.mark.parametrize(

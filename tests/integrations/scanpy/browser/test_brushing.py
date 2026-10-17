@@ -12,7 +12,7 @@ import genome_spy as gs
 import genome_spy.scanpy as gsc
 from genome_spy._embed import bundled_module_url
 from tests.browser.test_embed_api import module_url
-from tests.test_scanpy_umap import units
+from tests.integrations.scanpy.helpers import units
 
 ad = pytest.importorskip("anndata")
 pytest.importorskip("scanpy")

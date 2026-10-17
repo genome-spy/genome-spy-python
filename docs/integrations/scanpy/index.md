@@ -189,7 +189,7 @@ native count. It supports reordered/sliced observations that retain their
 coordinates. Do not recompute or edit UMAP between plotting and retrieval.
 Pass `dimensions=(i, j)` if you plotted a nondefault component pair.
 
-The runnable {download}`linked brushing notebook <../../../notebooks/scanpy_linked_brushing.ipynb>`
+The runnable {download}`linked brushing notebook <../../../integrations/scanpy/notebooks/scanpy_linked_brushing.ipynb>`
 uses this normal widget path. For navigation and brushing together, use
 `zoom=True` and the default interval gesture: Shift-drag brushes, ordinary
 dragging pans. Custom `on`, `clear`, and brush-zoom settings follow the native
@@ -202,13 +202,13 @@ The examples load `sc.datasets.pbmc68k_reduced()` through Scanpy's public API:
 The plotting adapter does not recompute the embedding or differential expression.
 No dataset copy is vendored here.
 
-- {download}`Core UMAP examples <../../../notebooks/scanpy_umap.ipynb>`:
+- {download}`Core UMAP examples <../../../integrations/scanpy/notebooks/scanpy_umap.ipynb>`:
   gene expression, categorical annotations, and the tutorial's eight-panel marker
   overview with its original point size and percentile limits.
-- {download}`Advanced UMAP customization <../../../notebooks/scanpy_umap_customization.ipynb>`:
+- {download}`Advanced UMAP customization <../../../integrations/scanpy/notebooks/scanpy_umap_customization.ipynb>`:
   layout, subsets, titles, categorical ordering/palettes, and a real gene score
   computed explicitly with `sc.tl.score_genes`.
-- {download}`Linked brushing <../../../notebooks/scanpy_linked_brushing.ipynb>`:
+- {download}`Linked brushing <../../../integrations/scanpy/notebooks/scanpy_linked_brushing.ipynb>`:
   native count and ordinary Python subset retrieval.
 
 These adapt the supported UMAP sections of Scanpy's
@@ -284,17 +284,17 @@ Developers can reproduce the pinned API metadata and full reference figures:
 
 ```sh
 uv sync --dev --extra scanpy --group scanpy-test
-uv run --no-sync python -m tools.scanpy_reference
-uv run --no-sync pytest tests/test_scanpy_reference.py tests/test_scanpy_contract.py tests/test_scanpy_umap.py
+uv run --no-sync python -m tests.integrations.scanpy.generate_references
+uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser
 uv run --no-sync python -m playwright install chromium
-uv run --no-sync pytest tests/browser/test_scanpy_umap.py
+uv run --no-sync pytest tests/integrations/scanpy/browser
 ```
 
 Reference generation is explicit and separate from ordinary tests and runtime.
 It renders Scanpy figures and records their observed geometry, colors, and
 ordering; independent tests also check hand-calculated values, source identities,
 sparse allocation, and mutation behavior. PNG checksums, export/display DPI, and
-versions are retained under tests/fixtures/scanpy. Browser tests measure actual
+versions are retained under tests/integrations/scanpy/fixtures. Browser tests measure actual
 marker footprints, retain registered overlays and complete-chart captures, and
 exercise hover, navigation, and offline delivery.
 
@@ -303,8 +303,8 @@ exercise hover, navigation, and offline delivery.
 The explicit benchmark is reproducible without local research directories:
 
 ```sh
-uv run --no-sync python -m tools.scanpy_performance --cells 100000 --panels 8 --output /tmp/umap-memory.json
-uv run --no-sync python -m tools.scanpy_performance --cells 10000 --panels 8 --browser --output /tmp/umap-browser.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark --cells 100000 --panels 8 --output /tmp/umap-memory.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark --cells 10000 --panels 8 --browser --output /tmp/umap-browser.json
 ```
 
 The tracked performance-baseline.json records versions, source dimensions,
@@ -329,7 +329,7 @@ large validated JSON export remains expensive; Arrow is the preferred notebook
 transport for that workload. Peak RSS includes imports, fixture construction,
 and serialization, rather than measuring expression extraction alone.
 
-The [self-contained notebook](https://github.com/genome-spy/genome-spy-python/blob/main/notebooks/scanpy_umap.ipynb)
+The {download}`self-contained notebook <../../../integrations/scanpy/notebooks/scanpy_umap.ipynb>`
 demonstrates the native widget and its live Python connection. CI runs semantic
 and browser checks with the pinned stack on Python 3.11, 3.12, and 3.13, and
 renders the notebook through JupyterLab. Local validation used Python 3.11.
