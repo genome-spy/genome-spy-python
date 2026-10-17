@@ -69,6 +69,9 @@ export async function renderChart({ model, el, signal }) {
     return;
   }
 
+  // Keep chart gestures, including Shift-drag, out of notebook cell selection.
+  el.addEventListener("mousedown", event => event.stopPropagation(), { signal });
+
   let api = null;
   let embedBridge = null;
   // Anywidget creates a fresh model proxy for each display of the same widget.
