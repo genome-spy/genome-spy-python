@@ -1,0 +1,285 @@
+"""Native UMAP marks, guides, and panel composition."""
+
+from __future__ import annotations
+
+from typing import Literal
+
+import numpy as np
+
+import genome_spy as gs
+from genome_spy.scanpy._umap_data import Panel, PreparedUMAP
+from genome_spy.scanpy._umap_interactions import (
+    brush_owner,
+    point_interactions,
+    validate_brush,
+    with_brush_count,
+)
+from genome_spy.scanpy._umap_style import POINTS_TO_PIXELS, UMAPStyle
+
+
+def coordinate_domain(values: np.ndarray, margin: float) -> tuple[float, float]:
+    low, high = float(values.min()), float(values.max())
+    if low == high:
+        padding = abs(low) * 0.05 or 0.05
+        low, high = low - padding, high + padding
+    padding = (high - low) * margin
+    return low - padding, high + padding
+
+
+def _coordinate(
+    field: str,
+    dimension: int,
+    values: np.ndarray,
+    style: UMAPStyle,
+    zoom: bool,
+    *,
+    horizontal: bool,
+) -> gs.X | gs.Y:
+    channel = gs.X if horizontal else gs.Y
+    margin = style.xmargin if horizontal else style.ymargin
+    result = channel(f"{field}:Q").scale(
+        domain=list(coordinate_domain(values, margin)),
+        zero=False,
+        nice=False,
+        zoom=zoom,
+    )
+    if zoom:
+        result = result.scale(name=f"umap-{'x' if horizontal else 'y'}-{dimension}")
+    return (
+        result.axis(
+            title=f"UMAP{dimension + 1}",
+            ticks=False,
+            labels=False,
+            domain=False,
+            titleFontSize=style.axis_fontsize,
+            titleFont=style.font,
+        )
+        if style.frameon
+        else result.axis(None)
+    )
+
+
+def _legend(panel: Panel, style: UMAPStyle) -> gs.Legend | None:
+    if panel.categorical:
+        if panel.key is None or style.legend_loc != "right margin":
+            return None
+        count = len(panel.legend_values)
+        return gs.Legend(
+            title=None,
+            orient="right",
+            values=list(panel.legend_values),
+            columns=1 if count <= 14 else 2 if count <= 30 else 3,
+            symbolSize=36 * POINTS_TO_PIXELS**2,
+            symbolOpacity=style.alpha,
+            labelLimit=1000,
+        )
+    if style.colorbar_loc is None:
+        return None
+    return gs.Legend(
+        title=None,
+        orient="right",
+        gradientLength=style.height,
+        gradientThickness=style.height / 30,
+        gradientOpacity=style.alpha,
+        gradientStrokeColor=style.frame_color,
+        gradientStrokeWidth=style.frame_width,
+    )
+
+
+def _color(panel: Panel, index: int, style: UMAPStyle) -> gs.Color:
+    color = gs.Color(f"_color_{index}:N" if panel.categorical else f"_color_{index}:Q")
+    color = color.scale(
+        type="ordinal" if panel.categorical else "linear",
+        domain=list(panel.domain),
+        nice=False,
+    )
+    if panel.scheme is not None:
+        color = color.scale(scheme=panel.scheme)
+    else:
+        color = color.scale(range=list(panel.palette))
+    if not panel.categorical:
+        color = color.scale(zero=False, clamp=True)
+        # Without a colorbar, Scanpy maps a constant range to its first color.
+        if panel.domain[0] == panel.domain[1] and panel.scheme is not None:
+            return gs.Color({"datum": 0, "type": "quantitative"}).scale(
+                type="linear",
+                domain=[0, 1],
+                scheme=panel.scheme,
+                zero=False,
+                nice=False,
+            )
+    return color.legend(_legend(panel, style))
+
+
+def _panel(
+    prepared: PreparedUMAP,
+    panel: Panel,
+    index: int,
+    style: UMAPStyle,
+    *,
+    hover: bool,
+    zoom: bool,
+    selection: gs.Parameter | None,
+) -> gs.TopLevelSpec:
+    table = prepared.table
+    x_field, y_field = [f"_coord_{d}" for d in panel.dimensions]
+    x = _coordinate(
+        x_field,
+        panel.dimensions[0],
+        table[x_field].to_numpy(),
+        style,
+        zoom,
+        horizontal=True,
+    )
+    y = _coordinate(
+        y_field,
+        panel.dimensions[1],
+        table[y_field].to_numpy(),
+        style,
+        zoom,
+        horizontal=False,
+    )
+    maximum_size = max(1.0, float(table[f"_size_{index}"].max()))
+    diameter = POINTS_TO_PIXELS * (0.5 if panel.marker == "." else 1)
+    points = (
+        gs.Chart(table)
+        .transform_collect(sort={"field": f"_order_{index}", "order": "ascending"})
+        .mark_point(
+            filled=True,
+            fillOpacity=style.alpha,
+            stroke=style.stroke,
+            strokeOpacity=style.stroke_opacity,
+            strokeWidth=style.stroke_width,
+            inwardStroke=False,
+            tooltip={"handler": "default"} if hover else None,
+        )
+        .encode(
+            x=x,
+            y=y,
+            key=gs.Key("_obs_id"),
+            size=gs.Size(f"_size_{index}:Q")
+            .scale(
+                domain=[0, maximum_size],
+                range=[0, maximum_size * diameter**2],
+                nice=False,
+                zero=True,
+            )
+            .legend(None),
+        )
+        .properties(width=style.width, height=style.height)
+    )
+    points = point_interactions(
+        points,
+        panel,
+        index,
+        hover=hover,
+        selection=selection,
+        opacity=style.alpha,
+        stroke_opacity=style.stroke_opacity,
+    )
+    colored = points.encode(color=_color(panel, index, style))
+    layers: list[gs.TopLevelSpec] = []
+    # Missing quantitative values cannot enter a native numeric color scale.
+    separate_missing = (
+        panel.scheme is not None and table[f"_value_{index}"].isna().any()
+    )
+    if separate_missing:
+        layers.append(
+            points.transform_filter(f"!isValid(datum._value_{index})").encode(
+                color=gs.value(style.na_color)
+            )
+        )
+        colored = colored.transform_filter(f"isValid(datum._value_{index})")
+    layers.append(colored)
+    if panel.categorical and style.legend_loc == "on data":
+        labels = [
+            {
+                "label": label,
+                "x": float(
+                    table.loc[table[f"_color_{index}"] == label, x_field].median()
+                ),
+                "y": float(
+                    table.loc[table[f"_color_{index}"] == label, y_field].median()
+                ),
+            }
+            for label in panel.legend_values
+            if (table[f"_color_{index}"] == label).any()
+        ]
+        layers.append(
+            gs.Chart(labels)
+            .mark_text(size=style.legend_fontsize, font=style.font, fontWeight="normal")
+            .encode(x=x.field("x"), y=y.field("y"), text="label:N")
+        )
+    result = (gs.layer(*layers) if len(layers) > 1 else colored).properties(
+        width=style.width, height=style.height
+    )
+    if selection is not None and index == 0:
+        result = brush_owner(result, selection)
+    if panel.title:
+        result = result.properties(
+            title=gs.title(panel.title, fontSize=style.title_fontsize, font=style.font)
+        )
+    return result.configure_view(
+        stroke=style.frame_color if style.frameon else "transparent",
+        strokeWidth=style.frame_width if style.frameon else 0,
+    ).configure_legend(
+        labelFont=style.font,
+        labelFontSize=style.legend_fontsize
+        if panel.categorical
+        else style.tick_fontsize,
+        rowPadding=style.legend_labelspacing * style.legend_fontsize,
+        labelOffset=style.legend_handletextpad * style.legend_fontsize,
+        layout={"anchor": "middle", "wrap": False},
+    )
+
+
+def _compose(
+    charts: list[gs.TopLevelSpec], style: UMAPStyle, *, share_coordinates: bool
+) -> gs.TopLevelSpec:
+    if len(charts) == 1:
+        return charts[0]
+    position: Literal["shared", "independent"] = (
+        "shared" if share_coordinates else "independent"
+    )
+    resolutions: dict[str, Literal["shared", "independent"]] = dict(
+        x=position,
+        y=position,
+        color="independent",
+        size="independent",
+    )
+    rows = [
+        gs.hconcat(
+            *charts[start : start + style.ncols], spacing=style.wspace * style.width
+        )
+        .resolve_scale(**resolutions)
+        .resolve_legend(default="independent")
+        for start in range(0, len(charts), style.ncols)
+    ]
+    return (
+        gs.vconcat(*rows, spacing=style.hspace * style.height)
+        .resolve_scale(**resolutions)
+        .resolve_legend(default="independent")
+    )
+
+
+def build_umap(
+    prepared: PreparedUMAP,
+    style: UMAPStyle,
+    *,
+    hover: bool,
+    zoom: bool,
+    selection: gs.Parameter | None = None,
+) -> gs.TopLevelSpec:
+    if selection is not None:
+        validate_brush(prepared)
+    charts = [
+        _panel(prepared, panel, i, style, hover=hover, zoom=zoom, selection=selection)
+        for i, panel in enumerate(prepared.panels)
+    ]
+    share_coordinates = zoom and len({p.dimensions for p in prepared.panels}) == 1
+    chart = _compose(charts, style, share_coordinates=share_coordinates)
+    return (
+        with_brush_count(chart, prepared, style, selection)
+        if selection is not None
+        else chart
+    )

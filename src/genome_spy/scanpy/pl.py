@@ -121,8 +121,8 @@ def umap(
         projection: Currently only "2d" is supported.
         scale_factor: Reserved upstream spatial scaling option.
         color_map: Alias for cmap, mutually exclusive with it.
-        cmap: Matplotlib colormap name/object; defaults to the current rcParam.
-        palette: Categorical colors as a name, sequence, mapping, or color cycler.
+        cmap: GenomeSpy color scheme name; defaults to "viridis".
+        palette: Native scheme name, CSS color sequence, or category-to-color mapping.
         na_color: Color for missing or masked values.
         na_in_legend: Include a missing-category legend entry.
         size: Marker area in points squared, scalar or one value per observation.
@@ -153,14 +153,14 @@ def umap(
         selection: Native ``gs.selection_interval(..., encodings=["x", "y"])``.
             Brush in the first panel to highlight matching coordinates in all
             panels and show a native selected-cell count. Requires the same
-            dimension pair in every panel and scalar opacity per panel.
+            dimension pair in every panel.
             Point selections are not yet supported.
         obs_id: Unique nonmissing observation-column key, defaulting to obs_names
             or distinct snapshot-local row keys when names repeat.
         width: GenomeSpy plot-area width per panel in logical pixels. None
-            retains the Scanpy-compatible default. Axes and guides add space.
+            uses 300 pixels. Axes and guides add space.
         height: GenomeSpy plot-area height per panel in logical pixels. None
-            retains the Scanpy-compatible default. Does not resize markers/fonts.
+            uses 300 pixels. Does not resize markers/fonts.
         **kwargs: Supported scatter aliases: s, alpha, edgecolor/edgecolors,
             linewidth/linewidths. Other options fail before data extraction.
 
@@ -276,8 +276,9 @@ def umap(
             "gsc.pl.umap: automatic image saving is not supported yet; "
             "use save=False and chart.save('umap.html', inline=True)."
         )
-    from genome_spy.scanpy._prepare import prepare_umap
-    from genome_spy.scanpy._charts import build_umap
+    from genome_spy.scanpy._umap_data import prepare_umap
+    from genome_spy.scanpy._umap_chart import build_umap
+    from genome_spy.scanpy._umap_style import umap_style
 
     prepared = prepare_umap(
         adata,
@@ -300,22 +301,27 @@ def umap(
         vmax=vmax,
         title=title,
         obs_id=obs_id,
-        frameon=frameon,
-        legend_loc=legend_loc,
-        legend_fontsize=legend_fontsize,
-        legend_fontweight=legend_fontweight,
         colorbar_loc=colorbar_loc,
+    )
+    style = umap_style(
+        count=len(prepared.panels),
+        width=width,
+        height=height,
+        frameon=sc.settings._frameon if frameon is None else frameon,
+        legend_loc=legend_loc,
+        colorbar_loc=colorbar_loc,
+        legend_fontsize=legend_fontsize,
         ncols=ncols,
         hspace=hspace,
         wspace=wspace,
-        width=width,
-        height=height,
         alpha=kwargs.get("alpha"),
         edgecolor=kwargs.get("edgecolor", kwargs.get("edgecolors", "none")),
-        linewidth=kwargs.get("linewidth", kwargs.get("linewidths", None)),
+        linewidth=kwargs.get("linewidth", kwargs.get("linewidths")),
+        na_color=na_color,
     )
-    chart = build_umap(prepared, hover=hover, zoom=zoom, selection=selection)
-    if sc.settings.autoshow if show is None else show:
+    chart = build_umap(prepared, style, hover=hover, zoom=zoom, selection=selection)
+    should_show = sc.settings.autoshow if show is None else show
+    if should_show:
         chart.display()
         return None
     return chart

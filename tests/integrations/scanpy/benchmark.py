@@ -27,7 +27,6 @@ def main() -> None:
     parser.add_argument("--browser", action="store_true")
     args = parser.parse_args()
     import anndata as ad
-    import matplotlib as mpl
     import numpy as np
     import pandas as pd
     import scanpy as sc
@@ -71,14 +70,13 @@ def main() -> None:
     sparse.csr_matrix.toarray = selected_only
     start = perf_counter()
     keys = ["group", "score", "g0", "g1", "g2", "g3", "group", "score"]
-    with mpl.rc_context({"figure.figsize": (3, 3), "figure.dpi": 100}):
-        chart = gsc.pl.umap(
-            a,
-            color=keys if args.panels == 8 else "g0",
-            zoom=args.browser,
-            size=36 if args.browser else None,
-            show=False,
-        )
+    chart = gsc.pl.umap(
+        a,
+        color=keys if args.panels == 8 else "g0",
+        zoom=args.browser,
+        size=36 if args.browser else None,
+        show=False,
+    )
     prepared_at = perf_counter()
     transport = chart._prepare_render()
     serialized_at = perf_counter()
@@ -126,8 +124,8 @@ def main() -> None:
         },
         "densified_shapes": shapes,
         "render_settings": {
-            "figure_inches": [3, 3],
-            "display_dpi": 100,
+            "panel_logical_pixels": [300, 300],
+            "logical_pixels_per_point": 100 / 72,
             "native_font": "Lato",
             "reference_font": "DejaVu Sans",
         },
@@ -142,7 +140,7 @@ def _measure_browser(spec, coordinates, output):
     import numpy as np
     from playwright.sync_api import sync_playwright
     from genome_spy._embed import bundled_module_url
-    from tests.integrations.scanpy.helpers import units
+    from tests.integrations.scanpy.helpers import points, units
 
     for i, unit in enumerate(units(spec)):
         unit["name"] = f"panel-{i}"
@@ -167,7 +165,7 @@ def _measure_browser(spec, coordinates, output):
         page.wait_for_timeout(800)
         bounds = page.evaluate("api.views.getLayoutBounds({scope:[],view:'panel-0'})")
         unit = units(spec)[0]
-        encoding = unit.get("layer", [unit])[0]["encoding"]
+        encoding = points(unit)["encoding"]
         xd, yd = [encoding[d]["scale"]["domain"] for d in ("x", "y")]
         observed = page.evaluate(
             "[api.getScaleResolutionByName('umap-x-0').getDomain(), api.getScaleResolutionByName('umap-y-1').getDomain()]"

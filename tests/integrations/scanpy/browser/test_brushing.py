@@ -12,7 +12,7 @@ import genome_spy as gs
 import genome_spy.scanpy as gsc
 from genome_spy._embed import bundled_module_url
 from tests.browser.test_embed_api import module_url
-from tests.integrations.scanpy.helpers import units
+from tests.integrations.scanpy.helpers import points, units
 
 ad = pytest.importorskip("anndata")
 pytest.importorskip("scanpy")
@@ -115,7 +115,7 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
 
                 def position(panel, x, y):
                     xd, yd = [
-                        panels[panel]["layer"][0]["encoding"][c]["scale"]["domain"]
+                        points(panels[panel])["encoding"][c]["scale"]["domain"]
                         for c in ("x", "y")
                     ]
                     b = bounds[panel]
@@ -164,7 +164,8 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
                     adata, widget.parameter_values.get(brush.name)
                 ).any()
                 before = await samples()
-                await drag(0, (0.95, 0.95), (2.4, 2.05))
+                # Start inside the plot; its lower y boundary is exactly 0.95.
+                await drag(0, (0.98, 0.98), (2.4, 2.05))
                 await page.screenshot(path=str(tmp_path / "brush-gesture.png"))
                 assert await page.evaluate(
                     "api.getParam('cells').getValue().intervals.x !== null"
@@ -184,7 +185,7 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
                         255 - before[panel, 2]
                     ).sum()
                 await page.screenshot(path=str(tmp_path / "linked-brush.png"))
-                await drag(1, (2.6, 0.95), (3.05, 1.4))
+                await drag(1, (2.6, 0.98), (3.05, 1.4))
                 assert (
                     await page.evaluate("api.getParam('cells').getValue()") == snapshot
                 )
@@ -203,7 +204,7 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
                 assert await count() == "0 cells selected"
                 np.testing.assert_array_equal(await samples(), before)
                 # Double-click is the user-facing clear gesture.
-                await drag(0, (0.95, 0.95), (2.4, 2.05))
+                await drag(0, (0.98, 0.98), (2.4, 2.05))
                 x, y = position(0, 2.7, 1.7)
                 await page.mouse.dblclick(box["x"] + x, box["y"] + y)
                 assert await count() == "0 cells selected"
@@ -237,7 +238,7 @@ def test_linked_brush_widget_traits_count_and_offline_html(tmp_path, zoom):
                 box = await canvas.bounding_box()
                 offline_before = await samples()
                 box = await canvas.bounding_box()
-                await drag(0, (0.95, 0.95), (2.4, 2.05))
+                await drag(0, (0.98, 0.98), (2.4, 2.05))
                 offline_after = await samples()
                 await page.screenshot(path=str(tmp_path / "offline-brush.png"))
                 for panel in range(2):

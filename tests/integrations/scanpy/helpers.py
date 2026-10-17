@@ -9,3 +9,12 @@ def units(spec: dict[str, Any]) -> list[dict[str, Any]]:
         if composition in spec:
             return [unit for child in spec[composition] for unit in units(child)]
     return [spec]
+
+
+def points(panel: dict[str, Any]) -> dict[str, Any]:
+    """Find the observation mark that owns the native color scale and guide."""
+    return next(
+        layer
+        for layer in panel.get("layer", [panel])
+        if "scale" in layer.get("encoding", {}).get("color", {})
+    )

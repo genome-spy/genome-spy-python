@@ -11,7 +11,7 @@ import pytest
 import genome_spy.scanpy as gsc
 from genome_spy._embed import bundled_module_url
 from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
-from tests.integrations.scanpy.helpers import units
+from tests.integrations.scanpy.helpers import points, units
 
 sc = pytest.importorskip("scanpy")
 mpl = pytest.importorskip("matplotlib")
@@ -22,11 +22,12 @@ REFERENCE = json.loads((REFERENCE_DIR / "umap.json").read_text())
 
 
 @pytest.fixture
-def page():
+def page(request):
     with playwright.sync_playwright() as runtime:
         browser = runtime.chromium.launch()
         context = browser.new_context(
-            viewport={"width": 1800, "height": 1400}, device_scale_factor=1
+            viewport={"width": 1800, "height": 1400},
+            device_scale_factor=getattr(request, "param", 1),
         )
         page = context.new_page()
         errors = []
@@ -71,7 +72,7 @@ def render(page, chart, *, renderer="webgl"):
     return page.evaluate("api.views.getLayoutBounds({scope:[],view:'panel-0'})")
 
 
-def move_to(page, bounds, x, y, x_domain, y_domain):
+def move_to(page, bounds, x, y, x_domain, y_domain, expected_id):
     canvas = page.locator("canvas").first.bounding_box()
     px = (
         canvas["x"]
@@ -87,7 +88,12 @@ def move_to(page, bounds, x, y, x_domain, y_domain):
     # Native tooltips suppress flashes for 70 ms on entry and 400 ms after a
     # large jump. Model a pointer pause before the final short movement.
     page.wait_for_timeout(450)
-    page.mouse.move(px, py)
+    # Probe only the one-pixel picking neighborhood, as in the resource benchmark.
+    for dx, dy in [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)]:
+        page.mouse.move(px + dx, py + dy)
+        page.wait_for_timeout(80)
+        if page.get_by_text(expected_id, exact=True).is_visible():
+            break
     return px, py
 
 
@@ -103,11 +109,11 @@ def test_hover_reports_known_zero_nonzero_and_missing_observations(page, color):
         )
     bounds = render(page, chart)
     spec = chart.to_dict()
-    unit = spec.get("layer", [spec])[0]
+    unit = points(spec)
     domains = [unit["encoding"][d]["scale"]["domain"] for d in ("x", "y")]
     for index in [1, 4, 6, 2]:
         x, y = a.obsm["X_umap"][index, :2]
-        move_to(page, bounds, float(x), float(y), *domains)
+        move_to(page, bounds, float(x), float(y), *domains, f"stable-{index}")
         page.get_by_text(f"stable-{index}", exact=True).wait_for(state="visible")
         assert page.get_by_text("Observation ID", exact=True).is_visible()
 
@@ -143,6 +149,7 @@ def test_complete_chart_has_original_guides_labels_and_unclipped_layout(
     assert geometry["rendered"]["height"] <= geometry["logical"]["height"] + 1
 
 
+@pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize(
     "marker,token,linewidth",
     [(".", "dot", 0), ("o", "circle", 0), (".", "dot-stroke", 2)],
@@ -152,8 +159,7 @@ def test_rendered_marker_footprint_matches_registered_scanpy_export(
 ):
     a = fixture()[:1].copy()
     a.obsm["X_umap"] = np.array([[0.0, 0.0]])
-    # Reference exports at 150 DPI from a 100-DPI figure. Set native logical
-    # dimensions to the known export DPI; no fitted resizing/alignment.
+    # Reference exports at 150 DPI from a 100-DPI figure; browser DPR is 1.5.
     with mpl.rc_context({"figure.figsize": (3, 3), "figure.dpi": 150}):
         chart = gsc.pl.umap(
             a,
@@ -263,13 +269,14 @@ def test_overlapping_points_hover_the_last_visible_observation(page, color):
         a, color=color, size=144, frameon=False, show=False, obs_id="cell_id"
     )
     bounds = render(page, chart)
-    spec = chart.to_dict()["layer"][0]
+    spec = points(chart.to_dict())
     domains = [spec["encoding"][d]["scale"]["domain"] for d in ("x", "y")]
-    move_to(page, bounds, -2, -1, *domains)
+    move_to(page, bounds, -2, -1, *domains, "stable-0")
     page.get_by_text("stable-0", exact=True).wait_for(state="visible")
     assert not page.get_by_text("stable-2", exact=True).is_visible()
 
 
+@pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", ["categorical", "continuous", "grid"])
 def test_registered_plot_areas_match_reference_positions_colors_and_footprints(
     page, tmp_path, case
@@ -277,10 +284,15 @@ def test_registered_plot_areas_match_reference_positions_colors_and_footprints(
     from scipy.ndimage import distance_transform_edt
 
     page.set_viewport_size({"width": 2800, "height": 1800})
-    with mpl.rc_context({"figure.figsize": (3, 3), "figure.dpi": 150}):
-        chart = gsc.pl.umap(
-            fixture(), **reference_cases()[case], size=np.arange(8) * 7 + 25, show=False
-        )
+    width, height = REFERENCE["cases"][case]["panels"][0]["plot_size"]
+    chart = gsc.pl.umap(
+        fixture(),
+        **reference_cases()[case],
+        size=np.arange(8) * 7 + 25,
+        width=width,
+        height=height,
+        show=False,
+    )
     render(page, chart)
     canvas = page.locator("canvas").first.bounding_box()
     for i, panel in enumerate(REFERENCE["cases"][case]["panels"]):
@@ -289,7 +301,7 @@ def test_registered_plot_areas_match_reference_positions_colors_and_footprints(
         )
         np.testing.assert_allclose(
             [bounds["width"], bounds["height"]],
-            np.array(panel["plot_size"]) * 1.5,
+            np.array(panel["plot_size"]),
             # Native layout rounds panel edges to backing pixels.
             atol=1,
         )
@@ -326,8 +338,18 @@ def test_registered_plot_areas_match_reference_positions_colors_and_footprints(
 
         native_ink, reference_ink = colored(native), colored(reference)
         assert native_ink.sum() > 30 and reference_ink.sum() > 30
-        assert distance_transform_edt(~reference_ink)[native_ink].max() <= 2.5
-        assert distance_transform_edt(~native_ink)[reference_ink].max() <= 2.5
+        # Layout rounds logical edges before DPR conversion; include only the
+        # measured rounding displacement, without fitting or shifting images.
+        rounding = 1.5 * np.max(
+            np.abs(np.array([bounds["width"], bounds["height"]]) - panel["plot_size"])
+        )
+        assert rounding <= 1.5
+        assert (
+            distance_transform_edt(~reference_ink)[native_ink].max() <= 2.5 + rounding
+        )
+        assert (
+            distance_transform_edt(~native_ink)[reference_ink].max() <= 2.5 + rounding
+        )
         # Compare actual interior paint at each non-overlapping observation.
         # Antialiased intersections can blend two valid colors differently in
         # Agg/WebGL, so they are covered by geometry and draw-order checks.
@@ -337,8 +359,8 @@ def test_registered_plot_areas_match_reference_positions_colors_and_footprints(
             if source_index in (0, 2):
                 continue
             xd, yd = panel["x_domain"], panel["y_domain"]
-            px = round((x - xd[0]) / (xd[1] - xd[0]) * bounds["width"])
-            py = round((1 - (y - yd[0]) / (yd[1] - yd[0])) * bounds["height"])
+            px = round((x - xd[0]) / (xd[1] - xd[0]) * bounds["width"] * 1.5)
+            py = round((1 - (y - yd[0]) / (yd[1] - yd[0])) * bounds["height"] * 1.5)
             expected_color = np.array([int(paint[j : j + 2], 16) for j in (1, 3, 5)])
             region = native[max(0, py - 1) : py + 2, max(0, px - 1) : px + 2]
             assert np.abs(region - expected_color).max(axis=2).min() <= 12
@@ -358,6 +380,30 @@ def test_zero_size_points_leave_no_visible_footprint(page):
         Image.open(BytesIO(page.locator("canvas").first.screenshot())).convert("RGB")
     )
     assert pixels.min() == 255
+
+
+@pytest.mark.parametrize(
+    "colorbar,expected", [(None, [68, 1, 84]), ("right", [33, 145, 140])]
+)
+def test_constant_expression_preserves_scanpy_colorbar_normalization(
+    page, colorbar, expected
+):
+    a = fixture()[:1].copy()
+    a.obs["score"] = 5.0
+    bounds = render(
+        page,
+        gsc.pl.umap(
+            a, color="score", colorbar_loc=colorbar, size=144, frameon=False, show=False
+        ),
+    )
+    pixels = Image.open(BytesIO(page.locator("canvas").first.screenshot())).convert(
+        "RGB"
+    )
+    center = (
+        round(bounds["x"] + bounds["width"] / 2),
+        round(bounds["y"] + bounds["height"] / 2),
+    )
+    np.testing.assert_allclose(pixels.getpixel(center), expected, atol=3)
 
 
 def test_native_sized_panels_and_numeric_guide_fit_side_by_side(page, tmp_path):
@@ -396,9 +442,9 @@ def test_native_sized_panels_and_numeric_guide_fit_side_by_side(page, tmp_path):
     assert abs(yy.max() - (panels[1]["y"] + panels[1]["height"])) <= 2
     spec = chart.to_dict()
     domains = [
-        units(spec)[0]["layer"][0]["encoding"][d]["scale"]["domain"] for d in ("x", "y")
+        points(units(spec)[0])["encoding"][d]["scale"]["domain"] for d in ("x", "y")
     ]
-    move_to(page, panels[0], 1, 0, *domains)
+    move_to(page, panels[0], 1, 0, *domains, "stable-1")
     page.get_by_text("stable-1", exact=True).wait_for(state="visible")
     page.mouse.wheel(0, -300)
     page.wait_for_function(
