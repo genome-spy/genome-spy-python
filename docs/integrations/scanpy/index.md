@@ -138,60 +138,85 @@ Figure attributes, or artist styling methods.
 
 ### Linked UMAP brushing
 
-```python
-import genome_spy as gs
+Use Scanpy’s packaged PBMC data, which already contains UMAP coordinates:
 
-brush = gs.selection_interval("selected_cells", encodings=["x", "y"])
+```python
+import scanpy as sc
+import genome_spy as gs
+import genome_spy.scanpy as gsc
+
+pbmc = sc.datasets.pbmc68k_reduced()
+brush = gs.selection_interval("cells", encodings=["x", "y"], on="mousedown", zoom=False)
 chart = gsc.pl.umap(
-    adata, color=["cell_type", "MS4A1"], obs_id="cell_id",
-    selection=brush, zoom=True, width=280, height=300, ncols=2, show=False,
+    pbmc, color=["louvain", "CD79A"], selection=brush,
+    zoom=False, width=280, height=280, show=False,
 )
-widget = chart.widget(inline=True, controls=False)
-widget
+view = chart.widget(parameter_names=[brush.name], inline=True, controls=False)
+view
 ```
 
-With zoom enabled, Shift-drag in the first panel to brush; ordinary dragging pans.
-With zoom disabled, ordinary dragging brushes. The second panel displays the
-same selected coordinates and does not start a brush. Unselected fills and
-outlines dim to 20% of their original opacity. Default empty selections preserve
-the initial appearance. Per-entry transparency currently requires an explicit
-scalar `alpha` when brushing. Both panels must use the same dimension pair;
-their color scales, palettes, guides, and draw orders remain independent.
-Custom `on`, `clear`, and brush-zoom settings follow the native interval parameter.
+**Drag in the first panel without holding any keys.** Both panels highlight the
+same observations and a native text mark below them shows the selected-cell
+count. Double-click in the first panel to clear. Navigation is disabled in this
+example so ordinary dragging always brushes. The second panel displays the
+selection but does not start a brush.
+
+The count and highlighting run entirely in GenomeSpy, including in exported
+interactive HTML. An empty rectangle reports zero selected cells while retaining
+the initial point appearance. Unselected fills and outlines dim to 20% of their
+original opacity. Per-entry transparency requires an explicit scalar `alpha`
+when brushing. All panels must use the same dimension pair; their color scales,
+palettes, guides, and draw orders remain independent.
+
+The existing JupyterChart synchronizes the named parameter through
+`parameter_values`. After brushing, run an ordinary Python cell:
+
+```python
+mask = gsc.selection_mask(pbmc, view.parameter_values.get(brush.name))
+selected_ids = pbmc.obs_names[mask]
+selected_adata = pbmc[mask].copy()
+```
+
+No asynchronous setup, callback registration, or separate widget controls are
+needed. Rerun the retrieval cell after changing the brush to refresh the subset.
+Only interval bounds cross to Python; expression data is copied only when you
+explicitly request the AnnData subset. Python retrieval requires a live kernel.
+
+`selection_mask` reads the unchanged plotted embedding and returns membership in
+the supplied AnnData's current row order, preserving distinct coincident rows.
+It uses the same lower-inclusive, upper-exclusive bounds as highlighting and the
+native count. It supports reordered/sliced observations that retain their
+coordinates. Do not recompute or edit UMAP between plotting and retrieval.
+Pass `dimensions=(i, j)` if you plotted a nondefault component pair.
 
 The runnable {download}`linked brushing notebook <../../../notebooks/scanpy_linked_brushing.ipynb>`
-shows a selected-cell count, metadata, stable IDs, and an explicit AnnData subset.
-It computes the embedding through Scanpy and needs no Matplotlib setup or Core
-patches. A native debounced parameter updates Python after 150 ms without brush
-changes, while highlighting updates immediately in the browser. An empty brush reports
-zero selected cells even though all points retain their original appearance.
+uses this normal widget path. For navigation and brushing together, use
+`zoom=True` and the default interval gesture: Shift-drag brushes, ordinary
+dragging pans. Custom `on`, `clear`, and brush-zoom settings follow the native
+interval parameter. Command-drag is not the default brush gesture.
 
-The existing embed API resolves the brush through its owning panel:
+### Examples adapted from Scanpy tutorials
 
-```python
-# Before displaying, add a native debounced value for Python updates:
-settled = gs.param("settled_cells", expr=brush.name, debounce=150)
-chart = chart.add_params(settled)
+The examples load `sc.datasets.pbmc68k_reduced()` through Scanpy's public API:
+700 real PBMC observations, 765 genes, annotations, and stored UMAP coordinates.
+The plotting adapter does not recompute the embedding or differential expression.
+No dataset copy is vendored here.
 
-# Inside background setup, after displaying the new widget:
-api = await widget.get_embed_api()
-owner = await api.views.get({"scope": [], "view": f"umap-brush-{brush.name}"})
-selection = await owner.params.get_selection(brush.name)
-updates = await api.params.get(settled.name)
-stop = await updates.subscribe(on_selection)
-```
+- {download}`Core UMAP examples <../../../notebooks/scanpy_umap.ipynb>`:
+  gene expression, categorical annotations, and the tutorial's eight-panel marker
+  overview with its original point size and percentile limits.
+- {download}`Advanced UMAP customization <../../../notebooks/scanpy_umap_customization.ipynb>`:
+  layout, subsets, titles, categorical ordering/palettes, and a real gene score
+  computed explicitly with `sc.tl.score_genes`.
+- {download}`Linked brushing <../../../notebooks/scanpy_linked_brushing.ipynb>`:
+  native count and ordinary Python subset retrieval.
 
-Use a background task for setup so notebook execution can process browser
-replies; the notebook includes setup and cleanup examples. Interval snapshots
-contain x/y domain bounds, rather than observation IDs. Map them against a copy
-of the coordinates and IDs captured when plotting, using lower-inclusive and
-upper-exclusive comparisons. This preserves distinct observations at duplicate
-coordinates and does not depend on rendering order. The notebook copies the
-expression matrix only when the user explicitly requests the selected AnnData
-subset. Exported interactive HTML retains brushing and linked highlighting;
-Python callbacks and the displayed count require a live kernel. This example
-uses value-parameter debouncing because completion-event delivery for a pushed
-interval brush is not reliable in the bundled Core 1.0.0.
+These adapt the supported UMAP sections of Scanpy's
+[core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
+[advanced](https://scanpy.scverse.org/en/stable/tutorials/plotting/advanced.html)
+plotting tutorials. The next tutorial coverage is grouped dotplot/matrixplot
+with Python-computed dendrograms, then heatmaps and ranked-gene variants. The
+remaining tutorial plots and Matplotlib artist styling are not implemented yet.
 
 ### Native plot sizing
 
@@ -313,4 +338,6 @@ renders the notebook through JupyterLab. Local validation used Python 3.11.
 
 ```{eval-rst}
 .. autofunction:: genome_spy.scanpy.pl.umap
+
+.. autofunction:: genome_spy.scanpy.selection_mask
 ```

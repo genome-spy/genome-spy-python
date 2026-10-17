@@ -418,8 +418,21 @@ def test_brushing_has_one_owner_without_changing_prepared_data_or_guides(adata):
     linked = gsc.pl.umap(adata, selection=brush, **options)
     spec = linked.to_dict()
     assert rows(linked) == rows(original)
-    assert spec["params"] == [{"name": brush.name, "value": None}]
-    panels = units(spec)
+    assert spec["params"] == [
+        {
+            "name": brush.name,
+            "value": {"type": "interval", "intervals": {"x": None, "y": None}},
+        }
+    ]
+    panels = units(spec["vconcat"][0])
+    counter = spec["vconcat"][1]
+    assert counter["name"] == f"umap-count-{brush.name}"
+    assert counter["transform"][-2] == {
+        "type": "aggregate",
+        "fields": ["selected"],
+        "ops": ["sum"],
+        "as": ["count"],
+    }
     assert panels[0]["name"] == f"umap-brush-{brush.name}"
     assert panels[0]["params"] == [
         {
@@ -450,8 +463,8 @@ def test_single_panel_brush_has_an_ancestor_value_and_respects_empty(adata, lege
         adata, color="cell_type", selection=brush, legend_loc=legend_loc, show=False
     )
     spec = chart.to_dict()
-    assert spec["params"] == [{"name": "cells", "value": None}]
-    panel = spec["layer"][0]
+    assert spec["params"][0]["value"]["intervals"] == {"x": None, "y": None}
+    panel = units(spec["vconcat"][0])[0]
     assert panel["params"][0]["push"] == "outer"
     point = panel.get("layer", [panel])[0]
     assert point["encoding"]["fillOpacity"]["condition"]["empty"] is False
@@ -480,7 +493,8 @@ def test_brushing_preserves_scalar_alpha_and_strokes_and_rejects_mixed_alpha(ada
     spec = gsc.pl.umap(
         adata, alpha=0.4, edgecolor="black", linewidth=1, **options
     ).to_dict()
-    point = spec["layer"][0]
+    point = units(spec["vconcat"][0])[0]
+    point = point.get("layer", [point])[0]
     for channel in ("fillOpacity", "strokeOpacity"):
         opacity = point["encoding"][channel]
         assert opacity["condition"]["value"] == 0.4

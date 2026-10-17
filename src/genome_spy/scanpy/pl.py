@@ -152,8 +152,9 @@ def umap(
         zoom: Enable coordinate navigation, shared across panels.
         selection: Native ``gs.selection_interval(..., encodings=["x", "y"])``.
             Brush in the first panel to highlight matching coordinates in all
-            panels. Requires the same dimension pair in every panel and scalar
-            opacity per panel. Point selections are not yet supported.
+            panels and show a native selected-cell count. Requires the same
+            dimension pair in every panel and scalar opacity per panel.
+            Point selections are not yet supported.
         obs_id: Unique nonmissing observation-column key, defaulting to obs_names
             or distinct snapshot-local row keys when names repeat.
         width: GenomeSpy plot-area width per panel in logical pixels. None

@@ -11,6 +11,41 @@ from matplotlib.ticker import MaxNLocator
 from genome_spy.scanpy._prepare import PreparedUMAP, coordinate_domain
 
 
+def _with_brush_count(
+    chart: gs.TopLevelSpec, prepared: PreparedUMAP, selection: gs.Parameter
+) -> gs.TopLevelSpec:
+    x, y = [f"_coord_{d}" for d in prepared.panels[0].dimensions]
+    name = selection.name
+    # Explicit half-open point membership also handles coincident observations.
+    # The interval filter transform's segment-overlap test includes both ends.
+    predicate = (
+        f"{name}.intervals.x && {name}.intervals.y && "
+        f"{name}.intervals.x[0] <= datum.{x} && datum.{x} < {name}.intervals.x[1] && "
+        f"{name}.intervals.y[0] <= datum.{y} && datum.{y} < {name}.intervals.y[1]"
+    )
+    count = (
+        gs.Chart(prepared.table)
+        .transform_collect()
+        .transform_formula(expr=f"({predicate}) ? 1 : 0", as_="selected")
+        .transform_aggregate(fields=["selected"], ops=["sum"], as_=["count"])
+        .transform_formula(expr="datum.count + ' cells selected'", as_="label")
+        .mark_text(align="left", baseline="middle", size=12, tooltip=None)
+        .encode(x=gs.value(0), y=gs.value(0.5), text="label:N")
+        .properties(
+            name=f"umap-count-{name}", width=prepared.panels[0].width, height=24
+        )
+    )
+    return (
+        gs.vconcat(chart, count, spacing=8)
+        .resolve_scale(x="independent", y="independent")
+        .add_params(
+            gs.param(
+                name, value={"type": "interval", "intervals": {"x": None, "y": None}}
+            )
+        )
+    )
+
+
 def build_umap(
     prepared: PreparedUMAP,
     *,
@@ -234,7 +269,7 @@ def build_umap(
         charts.append(result)
     if len(charts) == 1:
         return (
-            gs.layer(charts[0]).add_params(gs.param(selection.name, value=None))
+            _with_brush_count(charts[0], prepared, selection)
             if selection is not None
             else charts[0]
         )
@@ -265,7 +300,7 @@ def build_umap(
         .resolve_legend(default="independent")
     )
     return (
-        combined.add_params(gs.param(selection.name, value=None))
+        _with_brush_count(combined, prepared, selection)
         if selection is not None
         else combined
     )
