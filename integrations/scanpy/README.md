@@ -12,13 +12,29 @@ not in this workspace or the documentation:
 | --- | --- |
 | [__init__.py](../../src/genome_spy/scanpy/__init__.py) | Lightweight explicit namespace exports. |
 | [pl.py](../../src/genome_spy/scanpy/pl.py) | Public UMAP signature, compatibility validation, optional dependency/version check, and display/return behavior. |
-| [_prepare.py](../../src/genome_spy/scanpy/_prepare.py) | UMAP-only AnnData extraction, ordered observation snapshot, color/size semantics, and prepared panel descriptions. |
-| [_charts.py](../../src/genome_spy/scanpy/_charts.py) | Native UMAP marks, guides, panel composition, linked brush, and count. |
+| [_umap_data.py](../../src/genome_spy/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
+| [_umap_colors.py](../../src/genome_spy/scanpy/_umap_colors.py) | Category order, CSS palette values, numeric bounds, and native scheme validation. |
+| [_umap_style.py](../../src/genome_spy/scanpy/_umap_style.py) | Explicit native presentation defaults and scalar style validation. |
+| [_umap_chart.py](../../src/genome_spy/scanpy/_umap_chart.py) | Native points, axes, legends, labels, and panel composition. |
+| [_umap_interactions.py](../../src/genome_spy/scanpy/_umap_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
 | [_selection.py](../../src/genome_spy/scanpy/_selection.py) | Pure interval-to-observation membership for Python subset retrieval. |
 
-These preparation and chart modules currently implement UMAP only. Their names
-do not imply a completed common adapter framework. Future plot families get
-explicit preparation/rendering modules as described in the plan.
+Scanpy owns analysis. The data module only resolves the inputs a plotting call
+needs: which raw/layer vector a gene refers to, which categories to display, and
+which existing coordinate columns to send. Expression access uses AnnData's
+public `obs_vector`; no upstream plotting or private plotting helpers run.
+`scanpy.get.obs_df` is not used because its duplicate-label rejection and raw
+symbol lookup differ from UMAP's behavior.
+
+There are no Matplotlib imports, figure creation, global style reads, or Python
+colormap sampling in the adapter. CSS palette values, including saved AnnData
+palettes and Scanpy's public default palette lists, go directly to native scales.
+GenomeSpy maps continuous values and draws the guides. Plotting retains source
+measurements; it does not compute embeddings, rankings, or new scientific results.
+
+These modules implement UMAP only. Future plot families get their own small data
+and chart modules. Review basic plot reproduction before adding interactions;
+reuse code only when another implemented family demonstrates the need.
 
 ## Workflow notebooks
 

@@ -47,7 +47,7 @@ Each plotting family follows this path:
 1. Public Scanpy-shaped function: validate names/defaults/aliases and supported
    options before scientific extraction; handle native display/return behavior.
 2. Pure Python preparation: select the required AnnData columns/results and
-   produce detached tables plus semantic layout metadata. Do not construct
+   produce detached tables plus plotting metadata. Do not construct
    charts, inspect rendered artists, mutate the input, or import test/prototype
    modules here.
 3. GenomeSpy authoring: build marks, axes, labels, legends, composition, and
@@ -55,10 +55,26 @@ Each plotting family follows this path:
 4. Existing chart/widget delivery: JSON, notebook display, HTML, and ordinary
    parameter synchronization. Integration notebooks need no connection tasks.
 
-The current `pl.py`, `_prepare.py`, and `_charts.py` implement this separation
-for UMAP. Before the next family lands, give preparation/rendering files explicit
-family names, for example `_umap_data.py` and `_umap_chart.py`, followed by
-`_dotplot_data.py` and `_dotplot_chart.py`. Keep public signatures discoverable;
+UMAP has explicit `_umap_data.py`, `_umap_colors.py`, `_umap_style.py`,
+`_umap_chart.py`, and `_umap_interactions.py` modules. Data access uses public
+AnnData vector access and the existing observation/embedding projection. It
+contains no analysis, Matplotlib layout emulation, or global style settings.
+The chart module uses actual native color scales and their guides; it does not
+encode prepainted RGB values or create hidden guide marks. Missing numeric values
+use a separate visible native point layer behind valid measurements.
+
+Native color support is the deliberate rendering boundary: accept GenomeSpy
+scheme names and opaque CSS color names/hex values. Reject Matplotlib colormap
+objects/names without a native equivalent, color cyclers, RGB(A) tuples,
+Matplotlib shorthand colors, and entry alpha. Native interpolation can differ
+from Matplotlib LUT bins; do not recover exact colors by sampling Matplotlib.
+Numeric bounds, source precision, and draw order still have independent checks.
+Named schemes with a custom missing-category legend are deferred; explicit CSS
+palettes support that legend now. Native dimensions default to 300 by 300 logical
+pixels, with fixed point-to-pixel conversion (100/72), independent of rcParams.
+
+For dotplot, start with `_dotplot_data.py` and `_dotplot_chart.py` and review the
+plain chart before adding brushing/linking. Keep public signatures discoverable;
 if `pl.py` becomes unwieldy, use an explicit `pl/` package with named exports.
 Extract shared version/input helpers only when a second production family uses
 them. Do not add a registry, adapter base class, plugin dispatcher, or a general
@@ -85,7 +101,7 @@ A family is available only after all of these are reviewed:
   views/backed inputs, thresholds, denominators, normalization order, and supplied
   coordinates. Densify selected columns only. Define cache reuse and mutation
   behavior explicitly; UMAP currently reads snapshots without writing caches.
-- **Complete charts:** compare axes, labels, legends, palette bins, point/mark
+- **Complete charts:** compare axes, labels, legends, native palette interpolation, point/mark
   footprints, and draw order, with measured registered overlays. Record export
   DPI, fonts, and browser rasterization limits; an image mean alone is not parity.
 - **Interaction/delivery:** observe real hover, brush/selection, linked views,

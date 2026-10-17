@@ -47,7 +47,7 @@ also recorded in the reference manifest.
 ## UMAP compatibility
 
 The native function retains the effective Scanpy UMAP parameter names and
-defaults, with the explicit renderer-object exceptions below. A parameter
+defaults, within the explicit native rendering boundaries below. A parameter
 present in the signature can be reserved for later support: unsupported values
 raise an error instead of being ignored.
 
@@ -55,16 +55,16 @@ raise an error instead of being ignored.
 | --- | --- |
 | color | None, one key, or multiple observation/gene keys. Each panel retains its original numeric measurements and supplied coordinates. |
 | use_raw, layer, gene_symbols | raw.X by default if available; a layer overrides the automatic raw choice. Explicit use_raw=True plus a layer is an error. Symbol lookup follows UMAP's adata.var lookup before selected expression extraction. |
-| palette, na_color, na_in_legend | Explicit sequences/mappings/color cyclers, named Matplotlib palettes, stored category colors, or Scanpy defaults. Preserve categorical order and unused categories; missing points retain a distinct color. |
-| cmap, color_map, vmin, vmax | Named/public Matplotlib colormaps and numeric or percentile bounds, including per-panel bounds. Conflicting aliases error. Lookup-table fills preserve source precision and the chart has a native numeric color guide. |
+| palette, na_color, na_in_legend | Opaque CSS color sequences/mappings, GenomeSpy scheme names, stored CSS category colors, or Scanpy default palette values. Preserve categorical order and unused categories. Named schemes with missing values require na_in_legend=False; use an explicit CSS palette for an NA legend. |
+| cmap, color_map, vmin, vmax | GenomeSpy scheme names (default viridis) and numeric or percentile bounds, including per-panel bounds. Conflicting aliases error. GenomeSpy maps the retained measurements and draws the numeric guide. Unsupported names such as coolwarm and Matplotlib colormap objects error. |
 | sort_order | Scanpy's continuous sort, including reversed equal-value ties; missing points draw first. Categorical source order is retained apart from moving missing points behind other points. |
-| size, s, marker | Scalar or observation-length sizes in points squared; dot and circle markers. Conversion accounts for marker path width and figure DPI. As in 1.11.5, an observation-size vector is carried in its reordered form between panels; reference tests cover this version-specific behavior. |
+| size, s, marker | Scalar or observation-length sizes in points squared; dot and circle markers. Conversion accounts for marker path width, using a fixed 100/72 logical pixels per point. As in 1.11.5, an observation-size vector is carried in its reordered form between panels; reference tests cover this version-specific behavior. |
 | mask_obs, groups | Recolor observations without dropping coordinates. Masks can be boolean arrays or an observation-column key. Groups and masks are mutually exclusive. |
 | components, dimensions | One-based component pairs or zero-based dimension pairs; broadcasting follows Scanpy. Both cannot be supplied together. |
-| frameon, title, ncols, hspace, wspace | Frame and panel layout from the supported Scanpy/Matplotlib settings. Titles and guides remain per panel; guides are not automatically collected. |
-| width, height (GenomeSpy additions) | Plot-area dimensions per panel in logical pixels. None preserves Scanpy-compatible defaults. Explicit dimensions size each panel and its guide directly; axes and legends add space. Marker and font sizes are unchanged. |
-| legend_loc, legend_fontsize, legend_fontweight | Centered right-margin legend, on-data median labels, or no legend; font sizes follow the configured figure DPI. On-data labels currently require legend_fontweight="normal" (or 400); the upstream bold default errors for that location because its glyph atlas is not bundled. |
-| alpha, edgecolor/edgecolors, linewidth/linewidths | Scalar opacity and edge styling; conflicting aliases error. Transparent palette/cmap/NA entries require scalar alpha or a disabled guide; per-entry guide transparency is not supported yet. |
+| frameon, title, ncols, hspace, wspace | Frame defaults to Scanpy's frame setting; panel layout uses explicit native defaults. Titles and guides remain per panel; guides are not automatically collected. |
+| width, height (GenomeSpy additions) | Plot-area dimensions per panel in logical pixels. None uses 300 by 300 logical pixels. Explicit dimensions size each panel and its guide directly; axes and legends add space. Marker and font sizes are unchanged. |
+| legend_loc, legend_fontsize, legend_fontweight | Centered right-margin legend, on-data median labels, or no legend; point font sizes use the fixed native conversion. On-data labels currently require legend_fontweight="normal" (or 400); the upstream bold default errors for that location because its glyph atlas is not bundled. |
+| alpha, edgecolor/edgecolors, linewidth/linewidths | Scalar opacity and edge styling; conflicting aliases error. Matplotlib color shorthands, numeric RGB(A) tuples, cyclers, and per-entry alpha are rejected. Use opaque CSS names/hex and scalar alpha. |
 | show | False returns a native chart; True displays once through anywidget and returns None. None uses Scanpy settings.autoshow. |
 | save | None/False are supported when no automatic image save is requested. Image formats and automatic save currently error; native chart.save supports HTML/JSON. |
 | ax, return_fig | Omitted. Passing either, even ax=None, raises a targeted error. Use show=False and native chart composition/configuration. |
@@ -86,16 +86,23 @@ named "NA" alongside missing values currently errors because the native guide
 cannot distinguish those two labels faithfully.
 
 Plot preparation does not mutate AnnData, write palettes, run Scanpy plotting
-functions, construct Matplotlib artists, or perform analysis. Charts contain
+functions, import Matplotlib directly, construct artists, or perform analysis. Scanpy itself
+depends on Matplotlib; the plotting adapter does not call it. Charts contain
 detached snapshots: later AnnData edits do not change an existing chart.
 
 ### Visual fidelity boundaries
 
-Supported defaults retain source coordinate domains, plot dimensions, palette
-bins, color normalization, point footprints, draw order, titles, axis labels,
-and right-side guide meaning. Numeric guide ticks use public Matplotlib locator
-arithmetic. Each panel retains its own guide. Row and column spacing are authored
-separately.
+The adapter retains source coordinates/domains, numeric color bounds, categorical
+order and explicit palette values, point footprints, draw order, titles, axis
+labels, and per-panel guide meaning. GenomeSpy owns numeric color mapping and
+guide ticks. Its scheme interpolation can differ from Matplotlib's lookup-table
+bins. Named categorical schemes also use native color ordering/sampling; use
+explicit CSS colors when category colors must match exactly. There are no Python color-conversion utilities or hidden guide marks.
+
+Native defaults use 300 by 300 logical pixels, fixed typography, and fixed
+point-unit conversion. Matplotlib rcParams and style sheets do not affect the
+result. Reference comparisons explicitly match known plot-area sizes and export
+DPI rather than recreating Matplotlib's subplot layout in production.
 
 The native runtime embeds **Lato Regular**, while the default reference font is
 DejaVu Sans. This preview uses bundled Lato to make the default chart portable
@@ -312,18 +319,20 @@ payloads, hardware, viewport, DPI/DPR, and timing definitions. On an Apple M5
 with 32 GiB RAM, the seeded 100,000-cell × 20,000-gene sparse fixture used about
 16.4 MB for expression; its dense float32 equivalent would use 8 GB. Preparation
 read one selected gene column for one panel and four unique columns for eight
-panels. No full matrix was densified.
+panels. No full matrix was densified. The table below records the October 17
+native renderer at 300 by 300 logical pixels per panel; the tracked manifest also
+retains the previous renderer's October 16 measurements as historical evidence.
 
 | Workload | Chart preparation | Arrow transport preparation | Validated JSON export | Arrow / JSON payload | Peak Python RSS |
 | --- | --- | --- | --- | --- | --- |
-| 100,000 cells, 1 panel | 0.26 s | 0.27 s | 2.49 s | 8.1 / 25.9 MB | 660 MB |
-| 100,000 cells, 8 panels | 1.64 s | 1.33 s | 69.95 s | 40.1 / 122.5 MB | 1.67 GB |
+| 100,000 cells, 1 panel | 0.01 s | 0.25 s | 1.33 s | 6.0 / 20.3 MB | 591 MB |
+| 100,000 cells, 8 panels | 0.09 s | 1.13 s | 25.25 s | 23.3 / 78.5 MB | 1.20 GB |
 
 In Chromium 156, a separate 10,000-cell eight-panel WebGL run at 2800 × 1800,
-DPR 1, took 6.55 seconds to first paint including spec dispatch. All 16 known-ID
-hover probes succeeded; median/p95 observed response was 79/181 ms after native
+DPR 1, took 5.35 seconds to first paint including spec dispatch. All 16 known-ID
+hover probes succeeded; median/p95 observed response was 79/118 ms after native
 tooltip dwell, including the one-pixel pointer approach and assertion. A wheel
-event changed the coordinate domain in 220 ms. Browser JS heap was 148 MB.
+event changed the coordinate domain in 203 ms. Browser JS heap was 104 MB.
 These single-run observations are not portable timing limits. In particular,
 large validated JSON export remains expensive; Arrow is the preferred notebook
 transport for that workload. Peak RSS includes imports, fixture construction,
