@@ -245,7 +245,7 @@ coordinates. Do not recompute or edit UMAP between plotting and retrieval.
 Pass `dimensions=(i, j)` if you plotted a nondefault component pair.
 
 The linked-brushing section of the
-{download}`plotting workflow <../../../integrations/scanpy/notebooks/scanpy_plotting.ipynb>`
+{download}`UMAP notebook <../../../integrations/scanpy/notebooks/scanpy_umap.ipynb>`
 uses this normal widget path. For navigation and brushing together, use
 `zoom=True` and the default interval gesture: Shift-drag brushes, ordinary
 dragging pans. Custom `on`, `clear`, and brush-zoom settings follow the native
@@ -258,14 +258,15 @@ The examples load `sc.datasets.pbmc68k_reduced()` through Scanpy's public API:
 The plotting adapter does not recompute the embedding or differential expression.
 No dataset copy is vendored here.
 
-The {download}`plotting notebook <../../../integrations/scanpy/notebooks/scanpy_plotting.ipynb>`
-has one shared setup and proceeds through:
+Two notebooks run independently:
 
-1. Basic categorical/continuous UMAP and a plain marker dotplot on `bulk_labels`.
-2. Linked brushing, a native count, and ordinary Python subset retrieval.
-3. Customization: subsets, titles/frames, categorical order/palettes, a real
-   Scanpy gene score with symmetric color bounds, and the eight-panel marker
-   overview with its original point size and percentile limits.
+- {download}`UMAP <../../../integrations/scanpy/notebooks/scanpy_umap.ipynb>`:
+  basic categorical/continuous UMAP, linked brushing/count/Python retrieval, then
+  customization with subsets, titles/frames, categorical order/palettes, an
+  explicit Scanpy gene score and the eight-panel marker overview.
+- {download}`Expression plots <../../../integrations/scanpy/notebooks/scanpy_expression.ipynb>`:
+  marker dotplot on `bulk_labels` with summary hover. Matrixplot and heatmap
+  examples will extend this workflow as their APIs are implemented.
 
 These adapt supported UMAP and dotplot sections of Scanpy's
 [core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
@@ -387,10 +388,10 @@ large validated JSON export remains expensive; Arrow is the preferred notebook
 transport for that workload. Peak RSS includes imports, fixture construction,
 and serialization, rather than measuring expression extraction alone.
 
-The {download}`self-contained notebook <../../../integrations/scanpy/notebooks/scanpy_plotting.ipynb>`
+The {download}`self-contained UMAP notebook <../../../integrations/scanpy/notebooks/scanpy_umap.ipynb>`
 demonstrates the native widget and its live Python connection. CI runs semantic
 and browser checks with the pinned stack on Python 3.11, 3.12, and 3.13, and
-renders the notebook through JupyterLab. Local validation used Python 3.11.
+renders both workflow notebooks through JupyterLab. Local validation used Python 3.11.
 
 ## API
 

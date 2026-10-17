@@ -54,26 +54,27 @@ shared functions focused on equivalent semantics, including raw/layer selection,
 ordering, thresholds, and normalization. Review basic plot reproduction before
 adding interactions.
 
-## Plotting workflow
+## Plotting workflows
 
-The [plotting notebook](notebooks/scanpy_plotting.ipynb) loads Scanpy's packaged
-`pbmc68k_reduced()` dataset once and retains its stored UMAP coordinates:
+Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
 
-1. Basic categorical and continuous UMAP with x/y zoom/panning, then a marker
-   dotplot with summary hover using the core tutorial dictionary and existing `bulk_labels`.
-2. Shift-drag linked brushing, selected-cell count, and Python subset retrieval.
-3. Customization: subsets/titles, categorical order/palettes, a gene score with
-   symmetric color bounds, and the tutorial's marker overview.
+- [UMAP](notebooks/scanpy_umap.ipynb): basic categorical/continuous plotting with
+  x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
+  Existing coordinates are retained; gene scoring is an explicit Scanpy operation.
+- [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot and summary
+  hover using the core tutorial dictionary and existing `bulk_labels`. Matrixplot
+  and heatmap examples belong here as their APIs are implemented, reusing its data
+  and marker setup.
 
-It adapts supported UMAP and dotplot portions of the official core and advanced tutorials.
-Gene scoring is an explicit Scanpy operation. Extend this workflow as plot families
-arrive, keeping shared setup and avoiding repeated examples.
+These adapt supported portions of the official core and advanced tutorials.
+Keep related examples together within each workflow, without placeholder cells
+for unimplemented plots.
 
 From the repository root:
 
 ```sh
 uv sync --dev --extra scanpy --group scanpy-test
-uv run jupyter lab integrations/scanpy/notebooks/scanpy_plotting.ipynb
+uv run jupyter lab integrations/scanpy/notebooks/
 ```
 
 ## Validation

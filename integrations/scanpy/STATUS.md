@@ -20,6 +20,12 @@ Use `import genome_spy.integrations.scanpy as gsc`. This is the sole integration
 namespace; there is no parallel compatibility package. General library imports
 remain independent of the optional scientific stack.
 
+Workflow notebooks are split into [UMAP](notebooks/scanpy_umap.ipynb) and
+[expression plots](notebooks/scanpy_expression.ipynb). Both run independently.
+UMAP keeps basic plotting, linked selection and customization together. Dotplot
+starts the expression workflow; matrixplot and heatmap examples will reuse its
+data/marker setup as their APIs arrive.
+
 **Next ready slice: M03.a–c**, matrixplot using the verified grouped access and
 means. Preserve authoritative `values_df` scaling/order, then build and validate
 native tiles on the same PBMC marker workflow. Trees attach in M04, heatmaps in
@@ -34,7 +40,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | Milestone | State | Delivered evidence or remaining work |
 | --- | --- | --- |
 | M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, sole integration namespace, source/test/workflow layout, full inventory and shared lifecycle exist. Initial relocation is `cec0428`; current verification below. |
-| M01 UMAP/linked preview | Closed (preview only) | Runtime modules, one PBMC plotting notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
+| M01 UMAP/linked preview | Closed (preview only) | Runtime modules, dedicated PBMC UMAP notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
 | M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
 | M03 matrixplot | Planned | Reuse grouped access/means; authoritative values_df, scaling and native tile chart. |
 | M04 trees/correlation | Planned | Python computation/cache policy, shared rule layout, standalone and attached trees. No native tree capability blocker. |
@@ -63,7 +69,7 @@ history in Git. Its retained evidence is:
 - [Reference metadata and images](../../tests/integrations/scanpy/fixtures/README.md),
   [resource baseline](../../tests/integrations/scanpy/fixtures/performance-baseline.json),
   and explicit [benchmark](../../tests/integrations/scanpy/benchmark.py).
-- [Combined real packaged-data workflow](README.md#plotting-workflow): basic
+- [UMAP packaged-data workflow](README.md#plotting-workflows): basic
   plotting, linked brushing/Python retrieval, then customization. Shared setup
   and duplicate charts from the three earlier notebooks have been consolidated.
   All UMAP examples enable x/y zoom and panning. Linked brushing uses Shift-drag
@@ -72,7 +78,7 @@ history in Git. Its retained evidence is:
 UMAP preview baseline (`cfc01b7`): 119 integration checks and 20 browser checks pass,
 as do Ruff formatting/lint and mypy. The workflow test executes every cell,
 checks unchanged source UMAP coordinates, and reruns Python retrieval for a
-nonempty selection. The combined notebook renders in a fresh kernel/browser.
+nonempty selection. The UMAP notebook renders in a fresh kernel/browser.
 A built-wheel smoke test confirms that the compatibility package is absent,
 the sole integration namespace imports lazily, and UMAP chart authoring works.
 Notebook format, documentation/download/CI paths, and all 50 inventory rows were
@@ -81,6 +87,12 @@ also checked. The shared source/test links above retain the evidence.
 The full documentation site and unrelated test suites were not rebuilt for this
 cleanup. Resource results are the retained October 17 baseline, not a new
 performance measurement. No new plot family or Core capability was implemented.
+
+Workflow split verification (October 17): both notebooks execute independently
+in fresh Jupyter kernels and retain their existing charts. The two workflow tests
+and repository Ruff checks pass; notebook format and updated download/CI paths
+were checked. CI now renders both workflows. The full documentation site was
+not rebuilt for this reorganization; no working plan is newly eligible to clear.
 
 ## M02.a/b preparation and statistics
 
@@ -135,9 +147,10 @@ orientation, mean/percentage guides, clipped power area mapping, numeric color
 bounds, supplied color tables, native sizing and explicit display/export errors.
 Scanpy 1.11.5 applies scaling again after transposing the display table; supplied
 color tables skip only the constructor pass. Tests retain both behaviors.
-The combined [PBMC notebook](notebooks/scanpy_plotting.ipynb) now adds the core
-tutorial marker dictionary against existing `bulk_labels`, after basic UMAP and
-before linking/customization. No clustering or ranking is added to the example.
+The [PBMC expression notebook](notebooks/scanpy_expression.ipynb) uses the core
+tutorial marker dictionary against existing `bulk_labels`. Its data/marker setup
+will serve matrixplot and heatmap examples too. No clustering or ranking is added
+to the example.
 
 Evidence:
 
@@ -170,7 +183,7 @@ checks including the added missing-value/raw-access and constant-paint cases
 checks passed, including UMAP regression checks; the final bracket endpoint/stroke
 adjustment and constant-paint case have their own browser reruns (34 distinct
 browser checks covered). Ruff and mypy pass.
-The combined notebook was run from a fresh live kernel and its PBMC dotplot viewed.
+The PBMC dotplot workflow was run from a fresh live kernel and viewed.
 The full documentation site and unrelated test suites were not rebuilt.
 
 Label-placement correction (October 17): rotated text now uses screen-position

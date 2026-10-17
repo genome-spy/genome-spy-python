@@ -212,8 +212,8 @@ Categorical/continuous 2D UMAP reads stored coordinates, raw/layer values,
 metadata, masks, components and original identities. Native axes/color guides,
 size/order semantics, optional hover/zoom, and native sizing are implemented.
 One first-panel interval owner supports linked highlighting, a native count, and
-Python `selection_mask` through the ordinary widget. Use the combined PBMC
-plotting notebook and frozen semantic/complete-chart/browser/resource checks as
+Python `selection_mask` through the ordinary widget. Use the dedicated PBMC
+UMAP notebook and frozen semantic/complete-chart/browser/resource checks as
 evidence. Its order is basic plotting, linked selection, then customization.
 
 Acceptance: preserve supplied coordinates and independent per-panel color scales;
@@ -252,7 +252,9 @@ Trees, builders and summary selections remain in their named later slices.
   zero/all-equal fractions. Respect supplied `dot_color_df`/builder `dot_size_df`
   labels/order without silently recomputing or rescaling supplied values.
 - M02.d: freeze default, reordered, log, scaled, supplied-statistic and repeated-
-  slot references; reproduce the core tutorial marker dotplot on PBMC. Measure
+  slot references; reproduce the core tutorial marker dotplot on PBMC.
+  Keep dotplot, matrixplot and heatmap examples in the expression notebook,
+  sharing its data/marker setup as those families arrive. Measure
   selected-gene preparation for 100k cells × 20k sparse genes and group×feature
   chart costs. Observe summary hover in both orientations, including clipped dot
   sizes and single-slot axes. Review plain charts before adding summary selection.
@@ -537,14 +539,17 @@ Integrations
   Scanpy
     Start here: analysis ownership, install, first replacement
     Compatibility: plots, parameters, methods, returns, exports, limits
-    Plotting workflow: basics, linked selection, customization
+    UMAP workflow: basics, linked selection, customization
+    Expression workflow: dotplot, matrixplot, heatmap
     API reference
 ```
 
 Review navigation, status/version labels, code visibility, chart placement,
 download/run links, narrow-screen/large-chart behavior and Python-only retrieval.
-No empty library cards. Use the single canonical plotting notebook under this workspace,
-with explicit pinned preparation and reusable native chart artifacts. The
+No empty library cards. Use the dedicated UMAP notebook and a shared expression
+notebook for dotplot, matrixplot and heatmap examples under this workspace. Each
+notebook runs independently with explicit pinned preparation and reusable native
+chart artifacts. Add examples only when their plotting APIs are implemented. The
 ordinary Sphinx build must not run unbounded analysis or downloads. A static page
 can run hover/brush/count; Python subset retrieval requires a live kernel.
 

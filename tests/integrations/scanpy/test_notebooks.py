@@ -1,4 +1,4 @@
-"""Run the plotting workflow on Scanpy's packaged PBMC data."""
+"""Run the independent plotting workflows on Scanpy's packaged PBMC data."""
 
 import json
 from pathlib import Path
@@ -11,38 +11,35 @@ from genome_spy.chart import TopLevelSpec
 from tests.integrations.scanpy.helpers import points, units
 
 sc = pytest.importorskip("scanpy")
-NOTEBOOK = (
-    Path(__file__).resolve().parents[3]
-    / "integrations/scanpy/notebooks/scanpy_plotting.ipynb"
-)
+NOTEBOOKS = Path(__file__).resolve().parents[3] / "integrations/scanpy/notebooks"
 
 
-def test_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypatch):
+def run_notebook(path, namespace):
+    notebook = json.loads(path.read_text())
+    for cell in notebook["cells"]:
+        if cell["cell_type"] == "code":
+            exec(compile("".join(cell["source"]), str(path), "exec"), namespace)
+    return notebook
+
+
+def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypatch):
     charts = []
     monkeypatch.setattr(
         TopLevelSpec, "display", lambda chart, **kwargs: charts.append(chart)
     )
     original = sc.datasets.pbmc68k_reduced()
     namespace = {}
-    notebook = json.loads(NOTEBOOK.read_text())
+    path = NOTEBOOKS / "scanpy_umap.ipynb"
     try:
-        for cell in notebook["cells"]:
-            if cell["cell_type"] == "code":
-                exec(compile("".join(cell["source"]), str(NOTEBOOK), "exec"), namespace)
+        notebook = run_notebook(path, namespace)
         pbmc = namespace["pbmc"]
         assert pbmc.shape == original.shape == (700, 765)
         assert pbmc.obs_names.equals(original.obs_names)
         np.testing.assert_array_equal(pbmc.obsm["X_umap"], original.obsm["X_umap"])
         assert charts
-        assert namespace["dotplot"] in charts
         for chart in charts:
             spec = chart.to_dict()
             assert spec["datasets"]
-            if chart is namespace["dotplot"]:
-                dot = points(spec)
-                assert len(spec["datasets"][dot["data"]["name"]]) == 100
-                assert dot["encoding"]["color"]["scale"]["scheme"] == "reds"
-                continue
             for panel in units(spec):
                 for channel in ("x", "y"):
                     assert points(panel)["encoding"][channel]["scale"]["zoom"] is True
@@ -71,7 +68,7 @@ def test_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypatch):
             for c in notebook["cells"]
             if "mask = gsc.selection_mask" in "".join(c["source"])
         )
-        exec("".join(retrieval["source"]), namespace)
+        exec(compile("".join(retrieval["source"]), str(path), "exec"), namespace)
         expected = (
             (xy[:, 0] >= lower[0])
             & (xy[:, 0] < upper[0])
@@ -88,3 +85,25 @@ def test_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypatch):
     finally:
         if "view" in namespace:
             namespace["view"].close()
+
+
+def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
+    charts = []
+    monkeypatch.setattr(
+        TopLevelSpec, "display", lambda chart, **kwargs: charts.append(chart)
+    )
+    namespace = {}
+    run_notebook(NOTEBOOKS / "scanpy_expression.ipynb", namespace)
+    assert charts == [namespace["dotplot"]]
+    assert namespace["pbmc"].shape == (700, 765)
+    spec = charts[0].to_dict()
+    dot = points(spec)
+    assert len(spec["datasets"][dot["data"]["name"]]) == 100
+    assert dot["encoding"]["color"]["scale"]["scheme"] == "reds"
+    assert dot["encoding"]["x"]["type"] == dot["encoding"]["y"]["type"] == "index"
+    assert [item["title"] for item in dot["encoding"]["tooltip"]] == [
+        "Gene",
+        "Group",
+        "Mean expression",
+        "Expressing cells (%)",
+    ]
