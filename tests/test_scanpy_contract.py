@@ -8,6 +8,7 @@ import sys
 
 import pytest
 
+import genome_spy as gs
 import genome_spy.scanpy as gsc
 from genome_spy.scanpy import pl
 
@@ -67,7 +68,22 @@ def test_public_defaults_match_the_pinned_effective_signature() -> None:
         ({"legend_fontoutline": 2}, NotImplementedError),
         ({"legend_loc": "on data"}, NotImplementedError),
         ({"add_outline": True}, NotImplementedError),
-        ({"selection": object()}, NotImplementedError),
+        ({"selection": object()}, TypeError),
+        ({"selection": gs.selection_point()}, NotImplementedError),
+        ({"selection": gs.param("cells", value=1)}, NotImplementedError),
+        ({"selection": gs.selection_interval()}, NotImplementedError),
+        (
+            {"selection": gs.selection_interval(encodings=["x", "y"], push="outer")},
+            NotImplementedError,
+        ),
+        (
+            {
+                "selection": gs.selection_interval(
+                    encodings=["x", "y"], value={"x": [0, 1]}
+                )
+            },
+            NotImplementedError,
+        ),
         ({"colro": "group"}, TypeError),
         ({"hover": "False"}, TypeError),
         ({"zoom": "yes"}, TypeError),

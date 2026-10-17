@@ -409,3 +409,79 @@ def test_relative_panel_gaps_use_native_dimensions(adata):
     assert spec["spacing"] == 24
     assert len(spec["vconcat"]) == 2
     assert all(row["spacing"] == 60 for row in spec["vconcat"])
+
+
+def test_brushing_has_one_owner_without_changing_prepared_data_or_guides(adata):
+    brush = gs.selection_interval(encodings=["x", "y"])
+    options = dict(color=["cell_type", "score"], obs_id="cell_id", show=False)
+    original = gsc.pl.umap(adata, **options)
+    linked = gsc.pl.umap(adata, selection=brush, **options)
+    spec = linked.to_dict()
+    assert rows(linked) == rows(original)
+    assert spec["params"] == [{"name": brush.name, "value": None}]
+    panels = units(spec)
+    assert panels[0]["name"] == f"umap-brush-{brush.name}"
+    assert panels[0]["params"] == [
+        {
+            "name": brush.name,
+            "select": {"type": "interval", "encodings": ["x", "y"]},
+            "push": "outer",
+        }
+    ]
+    assert "params" not in panels[1]
+    for panel, baseline in zip(panels, units(original.to_dict()), strict=True):
+        assert panel["layer"][1:] == baseline["layer"][1:]
+        point = panel["layer"][0]
+        assert "params" not in point
+        for channel in ("x", "y", "fill", "size", "tooltip", "key"):
+            assert (
+                point["encoding"][channel] == baseline["layer"][0]["encoding"][channel]
+            )
+        assert point["encoding"]["fillOpacity"] == {
+            "condition": {"param": brush.name, "empty": True, "value": 1.0},
+            "value": 0.2,
+        }
+
+
+@pytest.mark.parametrize("legend_loc", [None, "right margin"])
+def test_single_panel_brush_has_an_ancestor_value_and_respects_empty(adata, legend_loc):
+    brush = gs.selection_interval("cells", encodings=["x", "y"], empty=False)
+    chart = gsc.pl.umap(
+        adata, color="cell_type", selection=brush, legend_loc=legend_loc, show=False
+    )
+    spec = chart.to_dict()
+    assert spec["params"] == [{"name": "cells", "value": None}]
+    panel = spec["layer"][0]
+    assert panel["params"][0]["push"] == "outer"
+    point = panel.get("layer", [panel])[0]
+    assert point["encoding"]["fillOpacity"]["condition"]["empty"] is False
+
+
+def test_brushing_rejects_different_projection_pairs(adata):
+    with pytest.raises(NotImplementedError, match="same dimensions"):
+        gsc.pl.umap(
+            adata,
+            dimensions=[(0, 1), (1, 2)],
+            selection=gs.selection_interval(encodings=["x", "y"]),
+            show=False,
+        )
+
+
+def test_brushing_preserves_scalar_alpha_and_strokes_and_rejects_mixed_alpha(adata):
+    options = dict(
+        color="cell_type",
+        palette=["#ff000080", "blue", "green", "grey"],
+        legend_loc=None,
+        selection=gs.selection_interval(encodings=["x", "y"]),
+        show=False,
+    )
+    with pytest.raises(NotImplementedError, match="set scalar alpha"):
+        gsc.pl.umap(adata, **options)
+    spec = gsc.pl.umap(
+        adata, alpha=0.4, edgecolor="black", linewidth=1, **options
+    ).to_dict()
+    point = spec["layer"][0]
+    for channel in ("fillOpacity", "strokeOpacity"):
+        opacity = point["encoding"][channel]
+        assert opacity["condition"]["value"] == 0.4
+        assert opacity["value"] == pytest.approx(0.08)

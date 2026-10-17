@@ -112,13 +112,15 @@ instead of fetching a remote font or silently changing the requested style.
 hover=True adds observation ID, original observation name, value/source, and
 coordinate tooltips without changing the initial marks. hover=False disables
 record hover. zoom=True enables coordinate navigation; it is off by default.
-The selection argument is reserved for the linked-selection phase and currently
-rejects non-None values.
+The selection argument supports an x/y interval brush, owned by the first panel,
+with linked highlighting across panels showing the same dimension pair. Point
+selection, initial brush values, and caller-supplied push scopes currently error.
 
 obs_id selects an existing unique, nonmissing observation-column key. Without it,
 unique obs_names supply IDs. Duplicate names receive distinct snapshot-local row
 keys, preserving every observation even when coordinates repeat. Those local
-keys are not cross-AnnData identity; supply explicit IDs for future linking.
+keys are not cross-AnnData identity; supply explicit IDs when matching selections
+back to an AnnData object that may have been reordered or sliced.
 
 Use normal native chart composition and configuration:
 
@@ -133,6 +135,63 @@ Interactive HTML works without Python when data and runtime are embedded.
 Python callbacks require a live notebook kernel. HTML bundling does not make
 external URL datasets offline. Native results do not emulate Matplotlib Axes,
 Figure attributes, or artist styling methods.
+
+### Linked UMAP brushing
+
+```python
+import genome_spy as gs
+
+brush = gs.selection_interval("selected_cells", encodings=["x", "y"])
+chart = gsc.pl.umap(
+    adata, color=["cell_type", "MS4A1"], obs_id="cell_id",
+    selection=brush, zoom=True, width=280, height=300, ncols=2, show=False,
+)
+widget = chart.widget(inline=True, controls=False)
+widget
+```
+
+With zoom enabled, Shift-drag in the first panel to brush; ordinary dragging pans.
+With zoom disabled, ordinary dragging brushes. The second panel displays the
+same selected coordinates and does not start a brush. Unselected fills and
+outlines dim to 20% of their original opacity. Default empty selections preserve
+the initial appearance. Per-entry transparency currently requires an explicit
+scalar `alpha` when brushing. Both panels must use the same dimension pair;
+their color scales, palettes, guides, and draw orders remain independent.
+Custom `on`, `clear`, and brush-zoom settings follow the native interval parameter.
+
+The runnable {download}`linked brushing notebook <../../../notebooks/scanpy_linked_brushing.ipynb>`
+shows a selected-cell count, metadata, stable IDs, and an explicit AnnData subset.
+It computes the embedding through Scanpy and needs no Matplotlib setup or Core
+patches. A native debounced parameter updates Python after 150 ms without brush
+changes, while highlighting updates immediately in the browser. An empty brush reports
+zero selected cells even though all points retain their original appearance.
+
+The existing embed API resolves the brush through its owning panel:
+
+```python
+# Before displaying, add a native debounced value for Python updates:
+settled = gs.param("settled_cells", expr=brush.name, debounce=150)
+chart = chart.add_params(settled)
+
+# Inside background setup, after displaying the new widget:
+api = await widget.get_embed_api()
+owner = await api.views.get({"scope": [], "view": f"umap-brush-{brush.name}"})
+selection = await owner.params.get_selection(brush.name)
+updates = await api.params.get(settled.name)
+stop = await updates.subscribe(on_selection)
+```
+
+Use a background task for setup so notebook execution can process browser
+replies; the notebook includes setup and cleanup examples. Interval snapshots
+contain x/y domain bounds, rather than observation IDs. Map them against a copy
+of the coordinates and IDs captured when plotting, using lower-inclusive and
+upper-exclusive comparisons. This preserves distinct observations at duplicate
+coordinates and does not depend on rendering order. The notebook copies the
+expression matrix only when the user explicitly requests the selected AnnData
+subset. Exported interactive HTML retains brushing and linked highlighting;
+Python callbacks and the displayed count require a live kernel. This example
+uses value-parameter debouncing because completion-event delivery for a pushed
+interval brush is not reliable in the bundled Core 1.0.0.
 
 ### Native plot sizing
 

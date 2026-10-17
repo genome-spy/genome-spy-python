@@ -150,7 +150,10 @@ def umap(
         marker: Dot (".") or circle ("o"), optionally per panel.
         hover: Enable record/value tooltips without changing initial appearance.
         zoom: Enable coordinate navigation, shared across panels.
-        selection: Reserved for the linked-selection phase; currently None.
+        selection: Native ``gs.selection_interval(..., encodings=["x", "y"])``.
+            Brush in the first panel to highlight matching coordinates in all
+            panels. Requires the same dimension pair in every panel and scalar
+            opacity per panel. Point selections are not yet supported.
         obs_id: Unique nonmissing observation-column key, defaulting to obs_names
             or distinct snapshot-local row keys when names repeat.
         width: GenomeSpy plot-area width per panel in logical pixels. None
@@ -193,9 +196,29 @@ def umap(
         "add_outline": add_outline not in (False, None),
         "outline_width": outline_width != (0.3, 0.05),
         "outline_color": outline_color != ("black", "white"),
-        "selection": selection is not None,
         "save": save is not None and save is not False,
     }
+    if selection is not None:
+        from genome_spy import Parameter
+
+        if not isinstance(selection, Parameter):
+            raise TypeError("gsc.pl.umap: selection must be a GenomeSpy parameter.")
+        definition = selection.param.to_dict()
+        config = definition.get("select")
+        if not isinstance(config, dict) or config.get("type") != "interval":
+            raise NotImplementedError(
+                "gsc.pl.umap: selection currently supports x/y interval brushing; "
+                "point selections are not supported yet."
+            )
+        if sorted(config.get("encodings", [])) != ["x", "y"]:
+            raise NotImplementedError(
+                "gsc.pl.umap: selection requires encodings=['x', 'y']."
+            )
+        if "push" in definition or "value" in definition:
+            raise NotImplementedError(
+                "gsc.pl.umap: selection push and initial value are not supported; "
+                "the adapter owns the shared brush scope."
+            )
     for name in ("ax", "return_fig"):
         if name in kwargs:
             raise TypeError(
@@ -290,7 +313,7 @@ def umap(
         edgecolor=kwargs.get("edgecolor", kwargs.get("edgecolors", "none")),
         linewidth=kwargs.get("linewidth", kwargs.get("linewidths", None)),
     )
-    chart = build_umap(prepared, hover=hover, zoom=zoom)
+    chart = build_umap(prepared, hover=hover, zoom=zoom, selection=selection)
     if sc.settings.autoshow if show is None else show:
         chart.display()
         return None

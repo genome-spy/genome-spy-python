@@ -11,9 +11,27 @@ from matplotlib.ticker import MaxNLocator
 from genome_spy.scanpy._prepare import PreparedUMAP, coordinate_domain
 
 
-def build_umap(prepared: PreparedUMAP, *, hover: bool, zoom: bool) -> gs.TopLevelSpec:
+def build_umap(
+    prepared: PreparedUMAP,
+    *,
+    hover: bool,
+    zoom: bool,
+    selection: gs.Parameter | None = None,
+) -> gs.TopLevelSpec:
     style = prepared.style
     table = prepared.table
+    if selection is not None:
+        if len({panel.dimensions for panel in prepared.panels}) != 1:
+            raise NotImplementedError(
+                "gsc.pl.umap: linked brushing requires the same dimensions in all panels."
+            )
+        if any(
+            table[f"_opacity_{i}"].nunique() != 1 for i in range(len(prepared.panels))
+        ):
+            raise NotImplementedError(
+                "gsc.pl.umap: brushing with per-entry transparency is not supported; "
+                "set scalar alpha explicitly."
+            )
     charts = []
     for i, panel in enumerate(prepared.panels):
         x_field, y_field = [f"_coord_{d}" for d in panel.dimensions]
@@ -150,6 +168,16 @@ def build_umap(prepared: PreparedUMAP, *, hover: bool, zoom: bool) -> gs.TopLeve
                     gs.Tooltip(f"{y_field}:Q", title=f"UMAP{panel.dimensions[1] + 1}"),
                 ]
             )
+        if selection is not None:
+            opacity = float(table[f"_opacity_{i}"].iloc[0])
+            chart = chart.encode(
+                fillOpacity=gs.when(selection)
+                .then(gs.value(opacity))
+                .otherwise(gs.value(opacity * 0.2)),
+                strokeOpacity=gs.when(selection)
+                .then(gs.value(style["stroke_opacity"]))
+                .otherwise(gs.value(style["stroke_opacity"] * 0.2)),
+            )
         layers: list[gs.TopLevelSpec] = [chart]
         if legend is not None:
             # The point renderer drops an unused color channel when fill is
@@ -178,6 +206,12 @@ def build_umap(prepared: PreparedUMAP, *, hover: bool, zoom: bool) -> gs.TopLeve
         result = (gs.layer(*layers) if len(layers) > 1 else chart).properties(
             width=panel.width, height=panel.height
         )
+        if selection is not None and i == 0:
+            # A single panel owns the native interval controller. Declaring the
+            # selection on each nested container makes ownership ambiguous.
+            result = result.add_params(
+                selection.copy(name=selection.name, push="outer")
+            ).properties(name=f"umap-brush-{selection.name}")
         if panel.title:
             result = result.properties(
                 title=gs.title(
@@ -199,7 +233,11 @@ def build_umap(prepared: PreparedUMAP, *, hover: bool, zoom: bool) -> gs.TopLeve
         )
         charts.append(result)
     if len(charts) == 1:
-        return charts[0]
+        return (
+            gs.layer(charts[0]).add_params(gs.param(selection.name, value=None))
+            if selection is not None
+            else charts[0]
+        )
     # Independent guides preserve the initial Scanpy layout. Dataset consolidation
     # shares the table even though each panel has a separate draw permutation.
     position_resolution: Literal["shared", "independent"] = (
@@ -221,8 +259,13 @@ def build_umap(prepared: PreparedUMAP, *, hover: bool, zoom: bool) -> gs.TopLeve
         .resolve_legend(default="independent")
         for start in range(0, len(charts), style["ncols"])
     ]
-    return (
+    combined = (
         gs.vconcat(*rows, spacing=style["hspace"])
         .resolve_scale(**resolutions)
         .resolve_legend(default="independent")
+    )
+    return (
+        combined.add_params(gs.param(selection.name, value=None))
+        if selection is not None
+        else combined
     )
