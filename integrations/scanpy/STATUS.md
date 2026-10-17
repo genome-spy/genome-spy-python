@@ -173,6 +173,15 @@ browser checks covered). Ruff and mypy pass.
 The combined notebook was run from a fresh live kernel and its PBMC dotplot viewed.
 The full documentation site and unrelated test suites were not rebuilt.
 
+Label-placement correction (October 17): rotated text now uses screen-position
+offsets, so gene labels clear the matrix and marker-group labels stay centered
+outside their brackets. Scanpy's bracket coordinates are unchanged. Browser
+checks measure exported text bounds for vertical/horizontal top labels, repeated
+genes, unequal label lengths and swapped axes; the new clearance check fails with
+the original offsets. All 15 dotplot browser checks and 43 dotplot/workflow checks,
+Ruff and mypy pass. The packaged-PBMC notebook was rerun and inspected in Jupyter.
+Resource measurements and unrelated families were not rerun for this layout fix.
+
 Preview limits, retained in the [compatibility guide](../../docs/integrations/scanpy/index.md#dotplot-compatibility):
 unused/empty groups error; all-zero fractions require explicit `dot_max=1`;
 missing statistics retain slots but do not paint; no dotplot interactions yet.

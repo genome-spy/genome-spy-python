@@ -222,10 +222,12 @@ in the chart and Python. No local Core patch or notebook connection task.
 This closes a preview only. Remaining normalization, overlays, fonts, 3D,
 backed expression, and broader selection modes stay in M07/M14.
 
-### M02 — grouped access and dotplot (in progress)
+### M02 — grouped access and dotplot (plain-chart preview closed)
 
-M02.a/b data and statistics are verified; see [slice evidence and limits](STATUS.md#m02ab-preparation-and-statistics).
-M02.c native chart authoring is next. No public dotplot function is exported yet.
+M02.a–d are verified for the plain-chart preview; see [data evidence](STATUS.md#m02ab-preparation-and-statistics)
+and [chart evidence and limits](STATUS.md#m02cd-plain-dotplot-preview).
+The public dotplot function is available. Trees, builders and interactions remain
+in their named later slices.
 
 - M02.a: reuse compatible accessors for selected expression, grouping keys,
   category order and palettes. Support scalar/list/mapping `var_names`, repeated

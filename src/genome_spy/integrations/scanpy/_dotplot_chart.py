@@ -93,7 +93,7 @@ def _slot_labels(labels: list[str], coordinate: Any, *, horizontal: bool) -> gs.
                 angle=-90,
                 align="right",
                 baseline="middle",
-                dy=8,
+                yOffset=8,
                 clip="never",
                 tooltip=None,
             )
@@ -106,7 +106,7 @@ def _slot_labels(labels: list[str], coordinate: Any, *, horizontal: bool) -> gs.
             size=_TICK,
             align="right",
             baseline="middle",
-            dx=-8,
+            xOffset=-8,
             clip="never",
             tooltip=None,
         )
@@ -159,8 +159,9 @@ def _brackets(
         angle=-rotation,
         align="left" if not swapped and rotation == 90 else "center",
         baseline="middle" if rotation else "bottom",
-        dx=8 if swapped else 0,
-        dy=0 if swapped else -8,
+        # Positional offsets stay outside the plot when the text rotates.
+        xOffset=16 if swapped else 0,
+        yOffset=0 if swapped else -8,
         clip="never",
         tooltip=None,
     )

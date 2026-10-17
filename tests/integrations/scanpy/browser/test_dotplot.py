@@ -18,14 +18,17 @@ REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "dotplot.json").read_text())
 
 
-@pytest.mark.parametrize("swapped", [False, True])
-def test_complete_dotplot_labels_guides_and_brackets(page, adata, tmp_path, swapped):
+@pytest.mark.parametrize("swapped,rotation", [(False, None), (False, 0), (True, None)])
+def test_complete_dotplot_labels_guides_and_brackets(
+    page, adata, tmp_path, swapped, rotation
+):
     chart = gsc.pl.dotplot(
         adata,
-        {"first": ["g2", "g1"], "again": "g2"},
+        {"first markers": ["g2", "g1"], "again": "g2"},
         "group",
         use_raw=False,
         swap_axes=swapped,
+        var_group_rotation=rotation,
         title="Grouped markers",
         width=300,
         height=180,
@@ -39,7 +42,7 @@ def test_complete_dotplot_labels_guides_and_brackets(page, adata, tmp_path, swap
         "Grouped markers",
         "g2",
         "g1",
-        "first",
+        "first markers",
         "again",
         "B",
         "A",
@@ -47,6 +50,46 @@ def test_complete_dotplot_labels_guides_and_brackets(page, adata, tmp_path, swap
         "Fraction of cells",
     ]:
         assert label in svg
+    labels = page.evaluate(
+        """async svg => {
+        const host = document.createElement('div');
+        host.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
+        host.innerHTML = svg;
+        document.body.append(host);
+        await document.fonts.ready;
+        const labels = [...host.querySelectorAll('text')].map(element => {
+            const rect = element.getBoundingClientRect();
+            return {text:element.textContent, x:rect.x, y:rect.y,
+                    width:rect.width, height:rect.height};
+        });
+        host.remove();
+        return labels;
+    }""",
+        svg,
+    )
+    bottom = bounds["y"] + bounds["height"]
+    right = bounds["x"] + bounds["width"]
+    assert [label["text"] for label in labels].count("g2") == 2
+    for text in ["first markers", "again"]:
+        assert [label["text"] for label in labels].count(text) == 1
+    for label in labels:
+        if label["text"] in (["B", "A"] if swapped else ["g1", "g2"]):
+            assert label["y"] >= bottom + 6
+        if label["text"] in (["g1", "g2"] if swapped else ["B", "A"]):
+            assert label["x"] + label["width"] <= bounds["x"] - 6
+        if label["text"] in {"first markers", "again"}:
+            # Bracket centers follow the covered slots, independent of text length.
+            slot = 0.95 if label["text"] == "first markers" else 2.45
+            if swapped:
+                expected = bounds["y"] + (slot + 0.5) / 4 * bounds["height"]
+                assert label["y"] + label["height"] / 2 == pytest.approx(
+                    expected, abs=2
+                )
+                assert label["x"] >= right + 6
+            else:
+                expected = bounds["x"] + (slot + 0.3) / 3.6 * bounds["width"]
+                assert label["x"] + label["width"] / 2 == pytest.approx(expected, abs=2)
+                assert label["y"] + label["height"] <= bounds["y"] - 6
     page.screenshot(
         path=str(tmp_path / f"dotplot-{swapped}-complete.png"), full_page=True
     )
