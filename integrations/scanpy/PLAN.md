@@ -97,13 +97,6 @@ fractions. Share dendrogram computation/layout across grouped plots. Preserve
 each caller's thresholds, denominators, and normalization order in tests. Start
 with `_dotplot_chart.py` and review the plain chart before adding brushing/linking.
 
-Apply YAGNI and the [Ponytail rules](https://github.com/DietrichGebert/ponytail/blob/main/.agents/rules/ponytail.md):
-prefer existing repository helpers, then standard-library/platform features,
-then installed dependencies, then the minimum new code needed. Keep existing
-layers; add modules, wrappers, or options only when the current task needs them.
-Complete affected callers and tests together, preserve validation/error handling
-when sharing code, and keep comments to short explanations of why.
-
 Keep public signatures discoverable; if `pl.py` becomes unwieldy, use an explicit
 `pl/` package with named exports. Do not add a registry, adapter base class, plugin
 dispatcher, or a general cross-library framework now.

@@ -20,11 +20,22 @@ before app-specific concepts. Notebook rendering is first-class; prefer `anywidg
 ## Working rules
 
 - Think before coding: state assumptions and tradeoffs; push back when warranted.
-- Solve the current problem with minimal code. Avoid speculative features and
-  premature abstractions; duplicate a little first. If 200 lines could be 50,
-  rewrite them.
+- Apply YAGNI and the [Ponytail rules](https://github.com/DietrichGebert/ponytail/blob/main/.agents/rules/ponytail.md):
+  complete the task with the least new code. Avoid unrequested features,
+  wrappers, conversions, options, and speculative abstractions. If 200 lines
+  could be 50, rewrite them.
+- Prefer existing repository code, then standard-library/platform features,
+  then installed dependencies, then minimal new code. Do not add a dependency
+  for a few lines of functionality.
+- Before editing, trace affected callers, tests, fixtures, configuration, and
+  exports. Fix shared root causes once and complete every affected part.
 - Make surgical changes: match existing style, remove imports/variables orphaned
-  by your edits, and leave unrelated code alone.
+  by your edits, preserve existing layers and native value forms, and leave
+  unrelated code alone. Keep validation and error handling when moving code.
+- Prefer equally small solutions that handle edge cases. Preserve security,
+  accessibility, trust-boundary checks, and required hardware calibration.
+- Keep comments to one-line explanations of why. Document deliberate shortcuts
+  as `shortcut: <the limit>, <when to upgrade>`.
 - Set verifiable goals and give a brief plan for multi-step work.
 - Keep core logic pure Python; isolate I/O and integration at the edges.
 - Follow the linked [language, docstring, formatting, and gallery standards](docs/contributing/standards.md).
@@ -38,7 +49,8 @@ Check": tighten any test that could pass for the wrong reason.
 
 Use `uv` for environments and dependencies. Before handoff, run targeted tests for
 changed behavior and lint. Format before finalizing non-trivial edits; type-check
-when public Python code changes. Report anything you could not validate locally.
+when public Python code changes. End the handoff with any skipped or unvalidated
+work and material risks.
 Ruff is the formatting/lint authority; fix issues rather than suppressing them by
 default.
 
