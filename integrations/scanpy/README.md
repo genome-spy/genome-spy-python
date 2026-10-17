@@ -2,7 +2,8 @@
 
 Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
 [current compatibility guide](../../docs/integrations/scanpy/index.md).
-Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`.
+Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)` or
+`gsc.pl.dotplot(...)`.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
 The implementation lives in the installable [source package](../../src/genome_spy/integrations/scanpy/),
@@ -11,9 +12,11 @@ not in this workspace or the documentation:
 | Source | Responsibility |
 | --- | --- |
 | [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
-| [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public UMAP signature, compatibility validation, optional dependency/version check, and display/return behavior. |
+| [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public plotting signatures, compatibility validation, optional dependency/version check, and display/return behavior. |
 | [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared raw/layer resolution and resident-expression checks, reused by UMAP and grouped data. |
 | [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Detached grouped values, feature slots/brackets, means, expression fractions and min–max scaling; no chart authoring. |
+| [_colors.py](../../src/genome_spy/integrations/scanpy/_colors.py) | Shared native scheme and opaque CSS color validation. |
+| [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, axes, labels, brackets, sizing and guides. |
 | [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
 | [_umap_colors.py](../../src/genome_spy/integrations/scanpy/_umap_colors.py) | Category order, CSS palette values, numeric bounds, and native scheme validation. |
 | [_umap_style.py](../../src/genome_spy/integrations/scanpy/_umap_style.py) | Explicit native presentation defaults and scalar style validation. |
@@ -37,7 +40,7 @@ palettes and Scanpy's public default palette lists, go directly to native scales
 GenomeSpy maps continuous values and draws the guides. Plotting retains source
 measurements; it does not compute embeddings, rankings, or new scientific results.
 
-UMAP is the currently implemented plot family. Each future family gets its own
+UMAP and plain dotplots are currently implemented. Each future family gets its own
 chart module and reuses compatible AnnData access, category/color handling, and
 plotting computations. A separate data module per family is optional: add one
 only when that family needs distinct preparation that merits its own module.
@@ -56,12 +59,13 @@ adding interactions.
 The [plotting notebook](notebooks/scanpy_plotting.ipynb) loads Scanpy's packaged
 `pbmc68k_reduced()` dataset once and retains its stored UMAP coordinates:
 
-1. Basic categorical and continuous plotting, with x/y zoom and panning.
+1. Basic categorical and continuous UMAP with x/y zoom/panning, then a marker
+   dotplot using the core tutorial dictionary and existing `bulk_labels`.
 2. Shift-drag linked brushing, selected-cell count, and Python subset retrieval.
 3. Customization: subsets/titles, categorical order/palettes, a gene score with
    symmetric color bounds, and the tutorial's marker overview.
 
-It adapts supported UMAP portions of the official core and advanced tutorials.
+It adapts supported UMAP and dotplot portions of the official core and advanced tutorials.
 Gene scoring is an explicit Scanpy operation. Extend this workflow as plot families
 arrive, keeping shared setup and avoiding repeated examples.
 
@@ -94,6 +98,8 @@ tests compare against the frozen results instead of regenerating them.
 ```sh
 uv run --no-sync python -m tests.integrations.scanpy.generate_references --help
 uv run --no-sync python -m tests.integrations.scanpy.generate_grouped_references
+uv run --no-sync python -m tests.integrations.scanpy.generate_dotplot_references
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_dotplot --browser --output /tmp/dotplot.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark --help
 ```
 

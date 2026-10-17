@@ -7,9 +7,11 @@ not delivery promises.
 
 ## Current position and next work
 
-**Available:** categorical/continuous 2D UMAP development preview, native sizing,
-optional hover/zoom, linked interval highlighting/count and Python subset retrieval.
-**Implemented families:** UMAP only. Scanpy **1.11.5** is the only accepted version;
+**Available:** categorical/continuous 2D UMAP and plain dotplot development previews.
+UMAP includes native sizing, optional hover/zoom, linked interval highlighting/count
+and Python subset retrieval. Dotplot includes grouped summaries, brackets and native
+size/color guides, without interactions yet.
+**Implemented families:** UMAP and dotplot (partial). Scanpy **1.11.5** is the only accepted version;
 bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibility.
 
 Implementation is in
@@ -18,12 +20,11 @@ Use `import genome_spy.integrations.scanpy as gsc`. This is the sole integration
 namespace; there is no parallel compatibility package. General library imports
 remain independent of the optional scientific stack.
 
-**Next ready slice: M02.c**, native dotplot chart authoring using verified grouped
-data access/statistics from M02.a/b. Implement and review the plain chart, including
-size/color guides, feature slots/brackets, bounds and supplied statistics. Then
-validate the PBMC tutorial and complete-chart/resource envelope (M02.d), and move to
-matrixplot (M03), trees (M04), heatmap (M05) and ranked summaries (M06).
-Do not add brushing before basic plot reproduction passes review.
+**Next ready slice: M03.a–c**, matrixplot using the verified grouped access and
+means. Preserve authoritative `values_df` scaling/order, then build and validate
+native tiles on the same PBMC marker workflow. Trees attach in M04, heatmaps in
+M05 and ranked summaries in M06. Dotplot brushing remains deferred until the
+plain-chart preview has user review; this delivery does not add it.
 
 ## Milestones
 
@@ -34,7 +35,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | --- | --- | --- |
 | M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, sole integration namespace, source/test/workflow layout, full inventory and shared lifecycle exist. Initial relocation is `cec0428`; current verification below. |
 | M01 UMAP/linked preview | Closed (preview only) | Runtime modules, one PBMC plotting notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
-| M02 grouped access/dotplot | In progress (a/b verified; c ready) | Shared source checks, public Scanpy table extraction, feature slots/brackets and independent grouped statistics pass 64 checks with 17 frozen upstream cases. Native chart and complete-chart validation remain; no public dotplot yet. |
+| M02 grouped access/dotplot | Closed (plain-chart preview) | Shared access/statistics, public dotplot, native dots/labels/brackets/guides, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/interactions are not closed. |
 | M03 matrixplot | Planned | Reuse grouped access/means; authoritative values_df, scaling and native tile chart. |
 | M04 trees/correlation | Planned | Python computation/cache policy, shared rule layout, standalone and attached trees. No native tree capability blocker. |
 | M05 heatmap/matrix/clustermap | Planned | Observation permutations, annotations, clustering contracts and large tile policy. |
@@ -117,18 +118,80 @@ Current input boundaries:
   their own missing/expressed-only denominator.
 
 M02.a/b are closed for this stated scope, with no separate working plan to clear.
-M02.c must resolve native chart behavior for empty groups, labels/guides, supplied
-statistics, dot-size mapping and public validation/returns. M02.d owns full chart,
-browser, workflow and resource validation; M14.c owns broader backed/lazy and
-sparse-array access. The public callable ledger remains
-unchanged. No browser suite was repeated for this data-only slice; the combined
-notebook was opened and run in the live app browser with all cells completing.
+M14.c owns broader backed/lazy and sparse-array access. These were data-only
+checks; the chart delivery below supplies separate browser/workflow evidence.
+
+## M02.c/d plain dotplot preview
+
+Runtime: [public callable](../../src/genome_spy/integrations/scanpy/pl.py),
+[pure displayed statistics](../../src/genome_spy/integrations/scanpy/_grouped_data.py),
+[native chart](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py), and
+[shared color validation](../../src/genome_spy/integrations/scanpy/_colors.py).
+Chart construction takes detached tables, not AnnData. It uses released points,
+rules and text; no Core patches, custom polygon recipes or benchmark imports.
+
+Delivered: category/feature ordering, repeated feature slots, brackets on either
+orientation, mean/percentage guides, clipped power area mapping, numeric color
+bounds, supplied color tables, native sizing and explicit display/export errors.
+Scanpy 1.11.5 applies scaling again after transposing the display table; supplied
+color tables skip only the constructor pass. Tests retain both behaviors.
+The combined [PBMC notebook](notebooks/scanpy_plotting.ipynb) now adds the core
+tutorial marker dictionary against existing `bulk_labels`, after basic UMAP and
+before linking/customization. No clustering or ranking is added to the example.
+
+Evidence:
+
+- [Dotplot contract/semantic tests](../../tests/integrations/scanpy/test_dotplot.py)
+  include hand calculations, frozen geometry, kwargs, source access, missing
+  values, allocation shape, immutability, supplied labels and display modes.
+- [Eleven frozen full figures/crops](../../tests/integrations/scanpy/fixtures/dotplot.json)
+  record Scanpy 1.11.5 exports at 100/150 display/export DPI, input checksums,
+  versions, domains, point positions/areas/paint and labels. The
+  [explicit generator](../../tests/integrations/scanpy/generate_dotplot_references.py)
+  uses original MIT test inputs. No Scanpy source or real dataset is vendored.
+- [14 dotplot browser checks](../../tests/integrations/scanpy/browser/test_dotplot.py)
+  cover complete charts in both orientations, native guides/brackets, registered
+  plot areas/overlays at DPR 1.5, zero footprints, colors and offline HTML.
+  Viridis comparisons isolate shared-palette paint from Vega reds' different
+  stops. Footprints allow 2 backing pixels; interior paint allows 12/255 per RGB
+  channel for palette bins/WebGL rasterization. No fitted image alignment.
+- The [resource baseline](../../tests/integrations/scanpy/fixtures/dotplot-performance.json)
+  records 100,000 × 20,000 sparse input with 40 selected genes and 50 groups.
+  Only a 100,000 × 40 table densifies; 2,000 summary dots serialize to 151 KB.
+  Cold plotting including optional imports took 2.90 s, peak tracked allocations
+  149 MB and process RSS 513 MB. Chromium 156 first paint including dispatch took
+  0.81 s with 10 MB JS heap at DPR 1. These are local observations, not portable
+  timing limits. The [benchmark](../../tests/integrations/scanpy/benchmark_dotplot.py)
+  is explicit and independent of ignored research.
+
+Validation: 222 integration checks passed, followed by all 43 dotplot/workflow
+checks including the added missing-value/raw-access and constant-paint cases
+(225 distinct integration checks covered in total). All 33 integration browser
+checks passed, including UMAP regression checks; the final bracket endpoint/stroke
+adjustment and constant-paint case have their own browser reruns (34 distinct
+browser checks covered). Ruff and mypy pass.
+The combined notebook was run from a fresh live kernel and its PBMC dotplot viewed.
+The full documentation site and unrelated test suites were not rebuilt.
+
+Preview limits, retained in the [compatibility guide](../../docs/integrations/scanpy/index.md#dotplot-compatibility):
+unused/empty groups error; all-zero fractions require explicit `dot_max=1`;
+missing statistics retain slots but do not paint; no dotplot interactions yet.
+Native Lato, guide layout, line-break flattening and Vega reds differ from the
+Matplotlib reference. `figsize` is a documented native plot/guide budget rather
+than a fixed outer canvas. Full typography/palette/export/access closure remains
+M14; trees remain M04; `DotPlot` and supplied `dot_size_df`/style chains remain M13.
+No unimplemented option is silently ignored. C08's dotplot slot handling is
+verified with native text labels; other grouped families still need their checks.
+
+M02 is closed only for this plain-chart preview. M03 is ready. The maintained
+source, notebook, tests, references and compatibility contract are retained;
+there is no per-slice working plan to clear and no research artifacts are deleted.
 
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. Exactly one function is available as a partial preview; 47 plot/builder
+helpers. Two functions are available as partial previews; 46 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -142,7 +205,7 @@ No placeholder functions are exported for planned work.
 | `correlation_matrix` | Not implemented | M04 |
 | `dendrogram` | Not implemented | M04 |
 | `diffmap` | Not implemented | M07 |
-| `dotplot` | Not implemented; next family | M02; trees M04; methods M13 |
+| `dotplot` | Partial plain-chart preview; limits above | M02; trees M04; methods M13 |
 | `dpt_groups_pseudotime` | Not implemented | M11 |
 | `dpt_timeseries` | Not implemented | M11 |
 | `draw_graph` | Not implemented | M07 |

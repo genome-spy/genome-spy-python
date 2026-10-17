@@ -24,9 +24,9 @@ chart.save("umap.html", inline=True)
 runs neighbors or UMAP analysis. A missing embedding produces an error asking
 you to compute it explicitly first.
 
-This development preview implements categorical and continuous 2D UMAP.
+This development preview implements categorical/continuous 2D UMAP and plain dotplots.
 Full public Scanpy plotting coverage is the destination; the inventory below
-records remaining work. No other plotting family is implemented yet.
+records remaining work. Dendrograms and plot builders remain planned.
 
 ## Installation and version contract
 
@@ -113,6 +113,52 @@ This is not a claim of pixel-identical complete figures or support for arbitrary
 Matplotlib rcParams/style sheets. Exact typography and per-entry transparent
 guides need native runtime work; unsupported bold/outlined on-data styling errors
 instead of fetching a remote font or silently changing the requested style.
+
+## Dotplot compatibility
+
+```python
+pbmc = sc.datasets.pbmc68k_reduced()
+chart = gsc.pl.dotplot(
+    pbmc, {"B-cell": ["CD79A", "MS4A1"], "T-cell": ["CD3D"]},
+    groupby="bulk_labels", show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+Dot color represents group mean expression and dot area represents the fraction
+strictly above `expression_cutoff`. Only selected unique columns are read through
+public `sc.get.obs_df`. Chart construction receives detached summary tables;
+it does not read AnnData or call Scanpy plotting. No embedding, clustering,
+ranking, palette write, or cached-result mutation occurs.
+
+| Parameters | Current behavior |
+| --- | --- |
+| `var_names`, `groupby` | String/list/mapping features, repeated slots and labeled brackets; categorical, string, numeric-bin or multiple categorical string groups. Missing single-key groups are excluded. Unused categories error; remove them explicitly or pre-bin numeric data. Missing multi-key groups and joined-label collisions error. |
+| `use_raw`, `layer`, `gene_symbols` | Scanpy public getter lookup, including raw symbol annotations. Raw is automatic when available, a layer overrides that default, explicit raw+layer conflicts error. Dense NumPy and CSR/CSC matrices and views work; backed/lazy expression and sparse arrays error before extraction. |
+| `categories_order`, `num_categories` | Full category order and Scanpy numeric-bin edges. Repeated feature labels retain distinct slots. Ambiguous variable names error. |
+| `log`, `expression_cutoff`, `mean_only_expressed` | `log1p` before comparison/aggregation; strict `>` threshold. Fractions use comparison/count denominators, including implicit zeros. Ordinary NaN compares false; nullable NA follows upstream count exclusion. Expressed-only means use their own denominator and fill empty means with zero. |
+| `standard_scale`, `swap_axes` | Preserve 1.11.5's constructor scaling and second render-time scaling after optional transpose. Constant ranges become zero. |
+| `dot_color_df` | Labeled authoritative table, aligned by group/feature. Repeated feature slots use its first matching column. No means are substituted. As upstream, supplied colors skip constructor scaling but receive render-time scaling. Missing/extra labels, duplicate group labels and nonnumeric values error. |
+| `dot_min`, `dot_max`, `smallest_dot` | Clip fractions, normalize to the specified interval, raise to 1.5, then map area from `smallest_dot` to 200 points squared. Default upper limit rounds the observed maximum up to 0.1. Exact native area lookup also drives the percentage guide. Degenerate/inverted limits error; for all-zero fractions pass `dot_max=1` to retain invisible zero-area dots. |
+| `cmap`, `vmin`, `vmax` | Native schemes (default `Reds` selects Vega `reds`) and finite numeric bounds. Constant bounds paint the first palette color; the guide expands by 10%, or ±0.1 at zero, matching Scanpy's precomputed dot colors. Missing values are omitted from painting without removing their slots; infinities and all-missing colors error. |
+| `title`, `colorbar_title`, `size_title`, `var_group_*` | Native labels, bracket rules and size/color guides. Mapping features supply brackets directly. Scalar `linewidth` styles dot edges. |
+| `width`, `height` | Plot-area logical pixels; defaults are 37 pixels per feature column and 35 per group row, exchanged with the axes. Labels and guides add space. |
+| `figsize` | Explicit native layout budget at 100 logical pixels/inch: subtract a fixed 150-pixel guide allowance from width; height sizes the plot area. Labels and renderer padding add space, so this does not fix the outer canvas dimensions. Conflicts with `width`/`height` error. |
+| `show`, `save`, `ax`, `return_fig` | Same native return/display/export boundary as UMAP. No Axes dictionaries or fake builders. |
+| `dendrogram`, `norm`, `vcenter`, other forwarded kwargs | Nondefault/reserved forms error. Tree attachment is M04; `DotPlot`, supplied `dot_size_df`, and builder styling are M13. Only scalar `linewidth` is accepted from scatter kwargs. |
+
+This slice reproduces the plain chart before adding interactions. It does not
+offer dotplot hover, brushes, cell selection or navigation. Summary marks describe
+groups and features rather than individual observations.
+
+Native labels use portable Lato Regular and native guides. Line breaks in guide
+titles become spaces; fractional percentage ticks retain native numeric precision
+instead of Scanpy's integer label rounding. Guide sizing/padding and rotated text alignment
+differ from Matplotlib. Vega `reds` has different stops from Matplotlib `Reds`,
+including a darker low end; no Matplotlib colors are sampled or imported. Use
+`cmap="viridis"` for the shared-palette reference comparisons. Browser tests
+register plot areas at the recorded export DPI and check positions, sizes and
+paint with renderer-specific tolerances; they do not claim identical full figures.
 
 ## Interaction and native results
 
@@ -213,16 +259,16 @@ No dataset copy is vendored here.
 The {download}`plotting notebook <../../../integrations/scanpy/notebooks/scanpy_plotting.ipynb>`
 has one shared setup and proceeds through:
 
-1. Basic categorical and continuous UMAP.
+1. Basic categorical/continuous UMAP and a plain marker dotplot on `bulk_labels`.
 2. Linked brushing, a native count, and ordinary Python subset retrieval.
 3. Customization: subsets, titles/frames, categorical order/palettes, a real
    Scanpy gene score with symmetric color bounds, and the eight-panel marker
    overview with its original point size and percentile limits.
 
-These adapt the supported UMAP sections of Scanpy's
+These adapt supported UMAP and dotplot sections of Scanpy's
 [core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
 [advanced](https://scanpy.scverse.org/en/stable/tutorials/plotting/advanced.html)
-plotting tutorials. The next tutorial coverage is grouped dotplot/matrixplot
+plotting tutorials. The next tutorial coverage is matrixplot
 with Python-computed dendrograms, then heatmaps and ranked-gene variants. The
 remaining tutorial plots and Matplotlib artist styling are not implemented yet.
 
@@ -257,8 +303,8 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available | umap |
-| Group summaries and trees | dotplot, matrixplot, dendrogram, correlation_matrix |
+| Available as partial previews | umap, dotplot |
+| Group summaries and trees | matrixplot, dendrogram, correlation_matrix |
 | Cell heatmaps and ranked summaries | heatmap, matrix, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap |
 | Other embeddings and PCA | scatter, embedding, tsne, pca, pca_scatter, diffmap, draw_graph, pca_loadings, pca_overview, pca_variance_ratio |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
@@ -268,7 +314,7 @@ remain visible. Function coverage and parameter coverage are separate.
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
 
-All entries except UMAP and settings helpers remain required future integration
+All entries except the UMAP/dotplot previews and settings helpers remain required future integration
 work. Settings remain owned by Scanpy. The external.pl namespace is separate
 from this core inventory.
 
@@ -348,6 +394,8 @@ renders the notebook through JupyterLab. Local validation used Python 3.11.
 
 ```{eval-rst}
 .. autofunction:: genome_spy.integrations.scanpy.pl.umap
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.dotplot
 
 .. autofunction:: genome_spy.integrations.scanpy.selection_mask
 ```

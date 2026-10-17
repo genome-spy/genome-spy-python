@@ -10,24 +10,25 @@ from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     from anndata import AnnData
+    import pandas as pd
 
     from genome_spy import Parameter, TopLevelSpec
 
-__all__ = ["umap"]
+__all__ = ["dotplot", "umap"]
 
 _Bound = float | str | Sequence[float | str | None] | None
 
 
-def _require_scanpy() -> Any:
+def _require_scanpy(context: str = "gsc.pl.umap") -> Any:
     try:
         installed = version("scanpy")
     except PackageNotFoundError as error:
         raise ImportError(
-            "gsc.pl.umap requires genome-spy-python[scanpy] (Scanpy 1.11.5)."
+            f"{context} requires genome-spy-python[scanpy] (Scanpy 1.11.5)."
         ) from error
     if installed != "1.11.5":
         raise ImportError(
-            f"gsc.pl.umap supports Scanpy 1.11.5; found {installed}. "
+            f"{context} supports Scanpy 1.11.5; found {installed}. "
             "Install genome-spy-python[scanpy]."
         )
     import scanpy
@@ -322,6 +323,189 @@ def umap(
     chart = build_umap(prepared, style, hover=hover, zoom=zoom, selection=selection)
     should_show = sc.settings.autoshow if show is None else show
     if should_show:
+        chart.display()
+        return None
+    return chart
+
+
+def dotplot(
+    adata: AnnData,
+    var_names: str | Sequence[str] | Mapping[str, str | Sequence[str]],
+    groupby: str | Sequence[str],
+    *,
+    use_raw: bool | None = None,
+    log: bool = False,
+    num_categories: int = 7,
+    categories_order: Sequence[str] | None = None,
+    expression_cutoff: float = 0.0,
+    mean_only_expressed: bool = False,
+    standard_scale: Literal["var", "group"] | None = None,
+    title: str | None = None,
+    colorbar_title: str | None = "Mean expression\nin group",
+    size_title: str | None = "Fraction of cells\nin group (%)",
+    figsize: tuple[float, float] | None = None,
+    dendrogram: bool | str = False,
+    gene_symbols: str | None = None,
+    var_group_positions: Sequence[tuple[int, int]] | None = None,
+    var_group_labels: Sequence[str] | None = None,
+    var_group_rotation: float | None = None,
+    layer: str | None = None,
+    swap_axes: bool | None = False,
+    dot_color_df: pd.DataFrame | None = None,
+    show: bool | None = None,
+    save: str | bool | None = None,
+    vmin: float | None = None,
+    vmax: float | None = None,
+    vcenter: float | None = None,
+    norm: Any = None,
+    cmap: Any = "Reds",
+    dot_max: float | None = None,
+    dot_min: float | None = None,
+    smallest_dot: float = 0.0,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot grouped mean expression and the fraction of expressing cells.
+
+    Reads selected values through Scanpy's public getter and computes detached
+    summaries in Python. GenomeSpy renders the dots, labels, brackets and guides.
+    No analysis, AnnData mutation, or Matplotlib rendering occurs.
+
+    Args:
+        adata: AnnData containing expression and grouping annotations.
+        var_names: Feature keys, repeated slots, or labeled feature groups.
+        groupby: Observation key or categorical grouping keys.
+        use_raw: Use raw by default when available; layer overrides that default.
+        log: Apply log1p before calculating means and expression fractions.
+        num_categories: Number of bins for numeric grouping annotations.
+        categories_order: Complete order of the grouping categories.
+        expression_cutoff: Strict lower threshold for an expressed value.
+        mean_only_expressed: Average only expressed values, with empty means zero.
+        standard_scale: Min–max scale means per variable or group.
+        title: Plot title.
+        colorbar_title: Color guide title; None removes its title.
+        size_title: Percentage guide title; None removes its title.
+        figsize: Native layout budget in inches at 100 logical pixels/inch.
+            Width includes a fixed 150-pixel guide allowance; height sizes the
+            plot area. Labels and renderer padding add space. Cannot be combined
+            with width or height. No Matplotlib settings are consulted.
+        dendrogram: Only False is supported until tree attachment is implemented.
+        gene_symbols: Variable annotation column for symbol lookup.
+        var_group_positions: Inclusive feature-slot bracket endpoints.
+        var_group_labels: Bracket labels; mappings already supply these.
+        var_group_rotation: Bracket label rotation in degrees.
+        layer: Expression layer instead of the automatic raw/X source.
+        swap_axes: Place groups on x and features on y.
+        dot_color_df: Authoritative labeled colors; scaling follows Scanpy 1.11.5.
+        show: Display once, return the chart when False, or use Scanpy autoshow.
+        save: Only inactive None/False; use the returned chart's HTML/JSON saving.
+        vmin: Numeric lower color bound.
+        vmax: Numeric upper color bound.
+        vcenter: Reserved; nondefault values error.
+        norm: Reserved; Matplotlib normalization objects error.
+        cmap: GenomeSpy scheme name; the default Reds selects native reds.
+        dot_max: Upper clipped fraction, or the observed maximum rounded up to 0.1.
+        dot_min: Lower clipped fraction, default zero.
+        smallest_dot: Minimum dot area in points squared; maximum is 200.
+        width: Native plot-area width in logical pixels, default 37 per column.
+        height: Native plot-area height in logical pixels, default 35 per row.
+        **kwds: Only scalar linewidth is supported; other scatter options error.
+
+    Returns:
+        A detached native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If Scanpy 1.11.5 is unavailable.
+        TypeError: If input types or forwarded options are invalid.
+        ValueError: If groups, supplied labels, bounds or sizes are invalid.
+        NotImplementedError: If a rendering option is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.dotplot(pbmc, ["CD79A", "CD3D"], "louvain", show=False)
+        >>> chart.save("markers.html", inline=True)
+    """
+    for name in ("ax", "return_fig"):
+        if name in kwds:
+            raise TypeError(
+                f"gsc.pl.dotplot: {name} is omitted; use show=False and the native chart."
+            )
+    unknown = kwds.keys() - {"linewidth"}
+    if unknown:
+        raise TypeError(
+            f"gsc.pl.dotplot: unsupported option(s): {', '.join(sorted(unknown))}."
+        )
+    for name, rejected in {
+        "dendrogram": dendrogram is not False,
+        "save": save is not None and save is not False,
+        "vcenter": vcenter is not None,
+        "norm": norm is not None,
+    }.items():
+        if rejected:
+            raise NotImplementedError(f"gsc.pl.dotplot: {name} is not supported yet.")
+    for name, value in {"log": log, "mean_only_expressed": mean_only_expressed}.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"gsc.pl.dotplot: {name} must be boolean.")
+    for name, nullable in {"show": show, "swap_axes": swap_axes}.items():
+        if nullable is not None and not isinstance(nullable, bool):
+            raise TypeError(f"gsc.pl.dotplot: {name} must be boolean or None.")
+    if standard_scale not in (None, "var", "group"):
+        raise ValueError(
+            "gsc.pl.dotplot: standard_scale must be 'var', 'group', or None."
+        )
+    sc = _require_scanpy("gsc.pl.dotplot")
+    if sc.settings.autosave and save is None:
+        raise NotImplementedError(
+            "gsc.pl.dotplot: automatic image saving is unsupported; use save=False."
+        )
+    from genome_spy.integrations.scanpy._grouped_data import (
+        dotplot_statistics,
+        grouped_expression,
+    )
+    from genome_spy.integrations.scanpy._dotplot_chart import build_dotplot
+
+    prepared = grouped_expression(
+        adata,
+        var_names,
+        groupby,
+        use_raw=use_raw,
+        log=log,
+        num_categories=num_categories,
+        categories_order=categories_order,
+        gene_symbols=gene_symbols,
+        layer=layer,
+        var_group_positions=var_group_positions,
+        var_group_labels=var_group_labels,
+    )
+    colors, fractions = dotplot_statistics(
+        prepared.values,
+        expression_cutoff=expression_cutoff,
+        mean_only_expressed=mean_only_expressed,
+        standard_scale=standard_scale,
+        dot_color_df=dot_color_df,
+        swap_axes=bool(swap_axes),
+    )
+    chart = build_dotplot(
+        colors,
+        fractions,
+        prepared.feature_groups,
+        swap_axes=bool(swap_axes),
+        title=title,
+        colorbar_title=colorbar_title,
+        size_title=size_title,
+        cmap=cmap,
+        vmin=vmin,
+        vmax=vmax,
+        dot_min=dot_min,
+        dot_max=dot_max,
+        smallest_dot=smallest_dot,
+        linewidth=kwds.get("linewidth", 0.2),
+        rotation=var_group_rotation,
+        width=width,
+        height=height,
+        figsize=figsize,
+    )
+    if sc.settings.autoshow if show is None else show:
         chart.display()
         return None
     return chart

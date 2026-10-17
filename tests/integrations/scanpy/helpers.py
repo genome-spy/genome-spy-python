@@ -12,7 +12,7 @@ def units(spec: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def points(panel: dict[str, Any]) -> dict[str, Any]:
-    """Find the observation mark that owns the native color scale and guide."""
+    """Find the point mark that owns the native color scale and guide."""
     return next(
         layer
         for layer in panel.get("layer", [panel])

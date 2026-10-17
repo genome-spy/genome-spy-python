@@ -15,26 +15,9 @@ from tests.integrations.scanpy.helpers import points, units
 
 sc = pytest.importorskip("scanpy")
 mpl = pytest.importorskip("matplotlib")
-playwright = pytest.importorskip("playwright.sync_api")
 Image = pytest.importorskip("PIL.Image")
 REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "umap.json").read_text())
-
-
-@pytest.fixture
-def page(request):
-    with playwright.sync_playwright() as runtime:
-        browser = runtime.chromium.launch()
-        context = browser.new_context(
-            viewport={"width": 1800, "height": 1400},
-            device_scale_factor=getattr(request, "param", 1),
-        )
-        page = context.new_page()
-        errors = []
-        page.on("pageerror", lambda e: errors.append(str(e)))
-        yield page
-        assert not errors, errors
-        browser.close()
 
 
 def fixture():

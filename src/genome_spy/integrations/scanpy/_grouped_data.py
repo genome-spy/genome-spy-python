@@ -261,3 +261,56 @@ def scale_means(
     axis = 0 if standard_scale == "var" else 1
     shifted = means.sub(means.min(axis=axis), axis=1 - axis)
     return shifted.div(shifted.max(axis=axis), axis=1 - axis).fillna(0)
+
+
+def dotplot_statistics(
+    values: pd.DataFrame,
+    *,
+    expression_cutoff: float,
+    mean_only_expressed: bool,
+    standard_scale: Literal["var", "group"] | None,
+    dot_color_df: pd.DataFrame | None,
+    swap_axes: bool,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Return displayed colors/fractions, including the pinned render-time scaling."""
+    fractions = expression_fractions(values, expression_cutoff=expression_cutoff)
+    if fractions.empty:
+        raise ValueError("gsc.pl.dotplot: no observed groups to plot.")
+    if len(fractions) != len(values.index.categories):
+        raise ValueError(
+            "gsc.pl.dotplot: unused categories have no statistics; "
+            "remove unused categories explicitly before plotting."
+        )
+    if dot_color_df is None:
+        colors = group_means(
+            values,
+            expression_cutoff=expression_cutoff if mean_only_expressed else None,
+        )
+        colors = scale_means(colors, standard_scale)
+    else:
+        if not isinstance(dot_color_df, pd.DataFrame):
+            raise TypeError("gsc.pl.dotplot: dot_color_df must be a pandas DataFrame.")
+        if not dot_color_df.index.is_unique or (
+            set(dot_color_df.index) != set(fractions.index)
+            or set(dot_color_df.columns) != set(fractions.columns)
+        ):
+            raise ValueError(
+                "gsc.pl.dotplot: dot_color_df needs exactly the plotted group/feature labels."
+            )
+        # Repeated slots share the first supplied column, as in Scanpy 1.11.5.
+        unique = dot_color_df.loc[:, ~dot_color_df.columns.duplicated()]
+        colors = unique.loc[fractions.index, fractions.columns].copy()
+        if not all(
+            pd.api.types.is_numeric_dtype(dtype)
+            and not pd.api.types.is_complex_dtype(dtype)
+            for dtype in colors.dtypes
+        ):
+            raise TypeError("gsc.pl.dotplot: dot_color_df values must be real numbers.")
+        if np.isinf(colors.to_numpy(dtype=float, na_value=np.nan)).any():
+            raise ValueError(
+                "gsc.pl.dotplot: dot_color_df values must be finite or missing."
+            )
+    if swap_axes:
+        colors, fractions = colors.T, fractions.T
+    # Scanpy also scales the displayed table after a possible transpose.
+    return scale_means(colors, standard_scale), fractions

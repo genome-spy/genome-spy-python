@@ -64,9 +64,9 @@ free of the scientific stack.
   unsupported Matplotlib names/objects, cyclers, numeric color tuples, and entry
   alpha. Do not sample Matplotlib colormaps or read rcParams. Per-plot scalar alpha
   remains supported where implemented.
-- Give `figsize` an explicit native contract before adding grouped plots: preserve
-  the argument/default, convert explicitly supplied inches at a fixed documented
-  100 logical pixels/inch, and define whether it sizes the whole composition.
+- Grouped `figsize` is a native layout budget at 100 logical pixels/inch. Dotplot
+  width includes a fixed 150-pixel guide allowance; height sizes the plot area.
+  Labels and renderer padding add space, so it does not fix the outer canvas.
   Reject conflicts with native panel `width`/`height`; test resulting panel and
   guide sizes. Do not consult global Matplotlib settings.
 - No ignored kwargs: supported aliases/conflicts have tests; unsupported values
@@ -252,7 +252,7 @@ M02.c native chart authoring is next. No public dotplot function is exported yet
   selected-gene preparation for 100k cells × 20k sparse genes and group×feature
   chart costs. Review plain charts before adding summary hover/selection.
 
-Target call (not available yet):
+Plain-chart preview call (current limits and evidence in STATUS):
 
 ```python
 chart = gsc.pl.dotplot(

@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 
 from genome_spy.anndata import from_anndata
+from genome_spy.integrations.scanpy._colors import native_color
 from genome_spy.integrations.scanpy._data import (
     require_resident_expression,
     resolve_use_raw,
@@ -20,7 +21,6 @@ from genome_spy.integrations.scanpy._umap_colors import (
     _categorical,
     categorical_colors,
     continuous_colors,
-    native_color,
 )
 
 

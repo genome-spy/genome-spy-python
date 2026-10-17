@@ -34,9 +34,15 @@ def test_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypatch):
         assert pbmc.obs_names.equals(original.obs_names)
         np.testing.assert_array_equal(pbmc.obsm["X_umap"], original.obsm["X_umap"])
         assert charts
+        assert namespace["dotplot"] in charts
         for chart in charts:
             spec = chart.to_dict()
             assert spec["datasets"]
+            if chart is namespace["dotplot"]:
+                dot = points(spec)
+                assert len(spec["datasets"][dot["data"]["name"]]) == 100
+                assert dot["encoding"]["color"]["scale"]["scheme"] == "reds"
+                continue
             for panel in units(spec):
                 for channel in ("x", "y"):
                     assert points(panel)["encoding"][channel]["scale"]["zoom"] is True
