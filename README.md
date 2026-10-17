@@ -36,7 +36,6 @@ links each implementation, tracked plan, workflow notebooks, tests, and user gui
 The Scanpy preview is implemented in
 [`src/genome_spy/integrations/scanpy/`](src/genome_spy/integrations/scanpy/), exposed as
 `import genome_spy.integrations.scanpy as gsc` and `gsc.pl.umap(...)`.
-The short import `import genome_spy.scanpy as gsc` uses the same functions.
 
 ## Installation
 

@@ -19,7 +19,6 @@ Keep the analysis in Scanpy and replace supported plotting calls:
 ```python
 import scanpy as sc
 import genome_spy.integrations.scanpy as gsc
-# Also supported: import genome_spy.scanpy as gsc
 
 pbmc = sc.datasets.pbmc68k_reduced()  # Includes stored UMAP coordinates.
 chart = gsc.pl.umap(pbmc, color=["louvain", "CD79A"], show=False)
@@ -82,8 +81,8 @@ not reasons to skip complete-chart validation.
 ## Code and data ownership
 
 Installable implementation: `src/genome_spy/integrations/scanpy/`. The
-[workspace source map](README.md) explains current modules. `genome_spy.scanpy`
-contains only explicit exports of those same functions, preserving the short API.
+[workspace source map](README.md) explains current modules. This is the sole
+public Scanpy integration namespace; do not add parallel import aliases.
 Workflows stay here, validation under `tests/integrations/scanpy/`, and user docs
 under `docs/integrations/scanpy/`. Generic `tools/` has no integration code.
 
@@ -197,8 +196,8 @@ geometry does not stop diagnostics or graph work.
   distinguish plotting, builder, and renderer-only entries.
 - M00.b: keep optional dependencies lazy, explicit reference generation separate
   from ordinary tests, and synthetic edge fixtures independently interpretable.
-- M00.c: place implementation under `genome_spy.integrations.scanpy`; preserve
-  both public import paths with identical function objects and signatures. Test
+- M00.c: place implementation and public imports under
+  `genome_spy.integrations.scanpy`, without a compatibility namespace. Test
   base/namespace import isolation and wheel packaging.
 - M00.d: maintain the full inventory, milestone/next-work ledger, evidence links,
   and clearance decisions under the shared lifecycle.
@@ -213,8 +212,9 @@ Categorical/continuous 2D UMAP reads stored coordinates, raw/layer values,
 metadata, masks, components and original identities. Native axes/color guides,
 size/order semantics, optional hover/zoom, and native sizing are implemented.
 One first-panel interval owner supports linked highlighting, a native count, and
-Python `selection_mask` through the ordinary widget. Use the existing three PBMC
-notebooks and frozen semantic/complete-chart/browser/resource checks as evidence.
+Python `selection_mask` through the ordinary widget. Use the combined PBMC
+plotting notebook and frozen semantic/complete-chart/browser/resource checks as
+evidence. Its order is basic plotting, linked selection, then customization.
 
 Acceptance: preserve supplied coordinates and independent per-panel color scales;
 plain-drag brush example, clear, coincident cells and half-open membership agree
@@ -506,8 +506,8 @@ Python linkage/KDE/graph computation cannot supply a missing renderer primitive.
   parameter limit. Maintain a per-family parameter/method matrix as each family
   is added; unexplained omissions block full compatibility claims.
 - M14.d: test the oldest/newest declared Scanpy versions plus pinned scientific
-  dependencies, signatures/defaults, fresh installs, wheel imports, canonical/short
-  namespaces, semantic/reference/browser/resource suites and deprecation behavior.
+  dependencies, signatures/defaults, fresh installs, wheel/namespace imports,
+  semantic/reference/browser/resource suites and deprecation behavior.
   Only then widen `scanpy==1.11.5` to the tested range.
 
 Acceptance: every inventory entry is verified or an explicit renderer-specific
@@ -527,13 +527,13 @@ Integrations
   Scanpy
     Start here: analysis ownership, install, first replacement
     Compatibility: plots, parameters, methods, returns, exports, limits
-    Workflows: core tutorial, advanced tutorial, linked selection
+    Plotting workflow: basics, linked selection, customization
     API reference
 ```
 
 Review navigation, status/version labels, code visibility, chart placement,
 download/run links, narrow-screen/large-chart behavior and Python-only retrieval.
-No empty library cards. Use one canonical notebook source under this workspace,
+No empty library cards. Use the single canonical plotting notebook under this workspace,
 with explicit pinned preparation and reusable native chart artifacts. The
 ordinary Sphinx build must not run unbounded analysis or downloads. A static page
 can run hover/brush/count; Python subset retrieval requires a live kernel.

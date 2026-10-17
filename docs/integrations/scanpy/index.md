@@ -4,7 +4,7 @@ Keep your existing Scanpy analysis and replace supported plotting calls:
 
 ```python
 import scanpy as sc
-import genome_spy.scanpy as gsc
+import genome_spy.integrations.scanpy as gsc
 
 # Scanpy analysis: after your usual preprocessing, compute the embedding once.
 sc.pp.neighbors(adata, random_state=0)
@@ -36,12 +36,8 @@ pip install "genome-spy-python[scanpy]"
 
 The integration currently supports **Scanpy 1.11.5 only**. Other versions raise
 an actionable error at the plotting call. Importing either genome_spy or
-genome_spy.scanpy does not import Scanpy, AnnData, NumPy, pandas, SciPy,
+genome_spy.integrations.scanpy does not import Scanpy, AnnData, NumPy, pandas, SciPy,
 Matplotlib, or PyArrow. The scientific dependencies load when plotting.
-
-The implementation lives under `genome_spy.integrations.scanpy`.
-`import genome_spy.integrations.scanpy as gsc` is also supported; both import paths
-export the same plotting functions and `selection_mask`.
 
 The optional arrow extra speeds notebook transport. It is not required for
 JSON or interactive HTML. The reproducible reference environment is the
@@ -154,7 +150,7 @@ Use Scanpy’s packaged PBMC data, which already contains UMAP coordinates:
 ```python
 import scanpy as sc
 import genome_spy as gs
-import genome_spy.scanpy as gsc
+import genome_spy.integrations.scanpy as gsc
 
 pbmc = sc.datasets.pbmc68k_reduced()
 brush = gs.selection_interval("cells", encodings=["x", "y"], on="mousedown", zoom=False)
@@ -200,7 +196,8 @@ native count. It supports reordered/sliced observations that retain their
 coordinates. Do not recompute or edit UMAP between plotting and retrieval.
 Pass `dimensions=(i, j)` if you plotted a nondefault component pair.
 
-The runnable {download}`linked brushing notebook <../../../integrations/scanpy/notebooks/scanpy_linked_brushing.ipynb>`
+The linked-brushing section of the
+{download}`plotting workflow <../../../integrations/scanpy/notebooks/scanpy_plotting.ipynb>`
 uses this normal widget path. For navigation and brushing together, use
 `zoom=True` and the default interval gesture: Shift-drag brushes, ordinary
 dragging pans. Custom `on`, `clear`, and brush-zoom settings follow the native
@@ -213,14 +210,14 @@ The examples load `sc.datasets.pbmc68k_reduced()` through Scanpy's public API:
 The plotting adapter does not recompute the embedding or differential expression.
 No dataset copy is vendored here.
 
-- {download}`Core UMAP examples <../../../integrations/scanpy/notebooks/scanpy_umap.ipynb>`:
-  gene expression, categorical annotations, and the tutorial's eight-panel marker
-  overview with its original point size and percentile limits.
-- {download}`Advanced UMAP customization <../../../integrations/scanpy/notebooks/scanpy_umap_customization.ipynb>`:
-  layout, subsets, titles, categorical ordering/palettes, and a real gene score
-  computed explicitly with `sc.tl.score_genes`.
-- {download}`Linked brushing <../../../integrations/scanpy/notebooks/scanpy_linked_brushing.ipynb>`:
-  native count and ordinary Python subset retrieval.
+The {download}`plotting notebook <../../../integrations/scanpy/notebooks/scanpy_plotting.ipynb>`
+has one shared setup and proceeds through:
+
+1. Basic categorical and continuous UMAP.
+2. Linked brushing, a native count, and ordinary Python subset retrieval.
+3. Customization: subsets, titles/frames, categorical order/palettes, a real
+   Scanpy gene score with symmetric color bounds, and the eight-panel marker
+   overview with its original point size and percentile limits.
 
 These adapt the supported UMAP sections of Scanpy's
 [core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
@@ -342,7 +339,7 @@ large validated JSON export remains expensive; Arrow is the preferred notebook
 transport for that workload. Peak RSS includes imports, fixture construction,
 and serialization, rather than measuring expression extraction alone.
 
-The {download}`self-contained notebook <../../../integrations/scanpy/notebooks/scanpy_umap.ipynb>`
+The {download}`self-contained notebook <../../../integrations/scanpy/notebooks/scanpy_plotting.ipynb>`
 demonstrates the native widget and its live Python connection. CI runs semantic
 and browser checks with the pinned stack on Python 3.11, 3.12, and 3.13, and
 renders the notebook through JupyterLab. Local validation used Python 3.11.

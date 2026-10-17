@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-import genome_spy.scanpy as gsc
+import genome_spy.integrations.scanpy as gsc
 
 ad = pytest.importorskip("anndata")
 

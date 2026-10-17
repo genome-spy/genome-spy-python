@@ -174,7 +174,7 @@ def umap(
         NotImplementedError: If a recognized plotting option is unsupported.
 
     Example:
-        >>> import genome_spy.scanpy as gsc
+        >>> import genome_spy.integrations.scanpy as gsc
         >>> chart = gsc.pl.umap(adata, color=["cell_type", "MS4A1"], show=False)
         >>> chart.save("umap.html", inline=True)
     """

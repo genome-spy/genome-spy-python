@@ -20,10 +20,8 @@ Use these locations for each integration:
   explicit reference generation, and benchmarks.
 - `docs/integrations/<library>/`: user-facing documentation.
 
-Scanpy also retains the short public import `genome_spy.scanpy`. Its two small
-modules explicitly export the implementation's public functions; they contain no
-adapter logic or duplicate signatures. Base and integration namespace imports
-must remain lightweight.
+Use `genome_spy.integrations.<library>` consistently in code and examples.
+Base and integration namespace imports must remain lightweight.
 
 Generic `tools/` stays for shared schema/Altair-derived development and
 documentation utilities. Integration-specific validation belongs with its tests.

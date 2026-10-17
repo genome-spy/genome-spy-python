@@ -32,7 +32,7 @@ def main() -> None:
     import scanpy as sc
     from scipy import sparse
 
-    import genome_spy.scanpy as gsc
+    import genome_spy.integrations.scanpy as gsc
 
     sc.settings.autoshow = False
 

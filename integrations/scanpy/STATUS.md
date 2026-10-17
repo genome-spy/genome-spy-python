@@ -14,9 +14,9 @@ bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibil
 
 Implementation is in
 [`src/genome_spy/integrations/scanpy/`](../../src/genome_spy/integrations/scanpy/).
-Both `import genome_spy.integrations.scanpy as gsc` and
-`import genome_spy.scanpy as gsc` expose the same functions. General library
-imports remain independent of the optional scientific stack.
+Use `import genome_spy.integrations.scanpy as gsc`. This is the sole integration
+namespace; there is no parallel compatibility package. General library imports
+remain independent of the optional scientific stack.
 
 **Next ready slice: M02.a + M02.b**, shared grouped data access and dotplot
 statistics. First write small independent fixtures for source precedence,
@@ -34,8 +34,8 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 
 | Milestone | State | Delivered evidence or remaining work |
 | --- | --- | --- |
-| M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, source/test/workflow layout, full inventory and shared lifecycle exist. Package relocation is `cec0428`; 122 integration checks, 20 browser checks, fresh linked notebook, built-wheel smoke test, Ruff and typing pass. |
-| M01 UMAP/linked preview | Closed (preview only) | Runtime modules, three PBMC notebooks, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
+| M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, sole integration namespace, source/test/workflow layout, full inventory and shared lifecycle exist. Initial relocation is `cec0428`; current verification below. |
+| M01 UMAP/linked preview | Closed (preview only) | Runtime modules, one PBMC plotting notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
 | M02 grouped access/dotplot | Ready (a/b) | Exact target call and hand-check cases in PLAN. No production dotplot yet; render/validation slices c/d follow data verification. |
 | M03 matrixplot | Planned | Reuse grouped access/means; authoritative values_df, scaling and native tile chart. |
 | M04 trees/correlation | Planned | Python computation/cache policy, shared rule layout, standalone and attached trees. No native tree capability blocker. |
@@ -64,18 +64,22 @@ history in Git. Its retained evidence is:
 - [Reference metadata and images](../../tests/integrations/scanpy/fixtures/README.md),
   [resource baseline](../../tests/integrations/scanpy/fixtures/performance-baseline.json),
   and explicit [benchmark](../../tests/integrations/scanpy/benchmark.py).
-- [Three real packaged-data workflows](README.md#workflow-notebooks).
+- [Combined real packaged-data workflow](README.md#plotting-workflow): basic
+  plotting, linked brushing/Python retrieval, then customization. Shared setup
+  and duplicate charts from the three earlier notebooks have been consolidated.
 
-Layout verification (`cec0428`): 122 integration checks and 20 browser checks
-passed, as did the seven existing API-documentation checks, Ruff formatting/lint
-and mypy. The linked notebook was executed in a fresh kernel and its chart
-inspected. A built-wheel smoke test verified packaged modules, both lazy import
-paths and chart authoring. The 50-entry ledger was checked against the pinned
-inventory, and integration Markdown file links were checked.
+Current cleanup verification: 119 integration checks and 20 browser checks pass,
+as do Ruff formatting/lint and mypy. The workflow test executes every cell,
+checks unchanged source UMAP coordinates, and reruns Python retrieval for a
+nonempty selection. The combined notebook renders in a fresh kernel/browser.
+A built-wheel smoke test confirms that the compatibility package is absent,
+the sole integration namespace imports lazily, and UMAP chart authoring works.
+Notebook format, documentation/download/CI paths, and all 50 inventory rows were
+also checked. The shared source/test links above retain the evidence.
 
 The full documentation site and unrelated test suites were not rebuilt for this
-move. Resource results are the retained October 17 baseline, not a new performance
-measurement. No new plot family or Core capability was implemented by the move.
+cleanup. Resource results are the retained October 17 baseline, not a new
+performance measurement. No new plot family or Core capability was implemented.
 
 ## Public callable coverage
 

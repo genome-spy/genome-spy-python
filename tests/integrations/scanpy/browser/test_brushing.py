@@ -9,7 +9,7 @@ import pandas as pd
 import pytest
 
 import genome_spy as gs
-import genome_spy.scanpy as gsc
+import genome_spy.integrations.scanpy as gsc
 from genome_spy._embed import bundled_module_url
 from tests.browser.test_embed_api import module_url
 from tests.integrations.scanpy.helpers import points, units

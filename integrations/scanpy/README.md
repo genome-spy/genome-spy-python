@@ -3,13 +3,10 @@
 Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
 [current compatibility guide](../../docs/integrations/scanpy/index.md).
 Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`.
-The short import `import genome_spy.scanpy as gsc` exports the same functions.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
 The implementation lives in the installable [source package](../../src/genome_spy/integrations/scanpy/),
-not in this workspace or the documentation. The short-path
-[`genome_spy.scanpy`](../../src/genome_spy/scanpy/) modules contain explicit public
-exports only:
+not in this workspace or the documentation:
 
 | Source | Responsibility |
 | --- | --- |
@@ -49,21 +46,25 @@ shared functions focused on equivalent semantics, including raw/layer selection,
 ordering, thresholds, and normalization. Review basic plot reproduction before
 adding interactions.
 
-## Workflow notebooks
+## Plotting workflow
 
-All examples load Scanpy's packaged `pbmc68k_reduced()` dataset and retain its
-stored UMAP coordinates. The advanced example runs gene scoring explicitly in
-Scanpy. These cover supported UMAP portions of the official plotting tutorials.
+The [plotting notebook](notebooks/scanpy_plotting.ipynb) loads Scanpy's packaged
+`pbmc68k_reduced()` dataset once and retains its stored UMAP coordinates:
 
-- [Core UMAP examples](notebooks/scanpy_umap.ipynb)
-- [Advanced UMAP customization](notebooks/scanpy_umap_customization.ipynb)
-- [Linked brushing and Python retrieval](notebooks/scanpy_linked_brushing.ipynb)
+1. Basic categorical and continuous plotting.
+2. Linked brushing, selected-cell count, and Python subset retrieval.
+3. Customization: subsets/titles, categorical order/palettes, a gene score with
+   symmetric color bounds, and the tutorial's marker overview.
+
+It adapts supported UMAP portions of the official core and advanced tutorials.
+Gene scoring is an explicit Scanpy operation. Extend this workflow as plot families
+arrive, keeping shared setup and avoiding repeated examples.
 
 From the repository root:
 
 ```sh
 uv sync --dev --extra scanpy --group scanpy-test
-uv run jupyter lab integrations/scanpy/notebooks
+uv run jupyter lab integrations/scanpy/notebooks/scanpy_plotting.ipynb
 ```
 
 ## Validation

@@ -8,7 +8,7 @@ import warnings
 import numpy as np
 import pytest
 
-import genome_spy.scanpy as gsc
+import genome_spy.integrations.scanpy as gsc
 from genome_spy._embed import bundled_module_url
 from tests.integrations.scanpy.fixture_data import make_adata, reference_cases
 from tests.integrations.scanpy.helpers import points, units

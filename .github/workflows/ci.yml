@@ -89,9 +89,7 @@ jobs:
       - run: uv run --no-sync pytest tests/integrations/scanpy --ignore=tests/integrations/scanpy/browser -q
       - run: uv run --no-sync python -m playwright install --with-deps chromium
       - run: uv run --no-sync pytest tests/integrations/scanpy/browser -q --basetemp="${{ runner.temp }}/scanpy-browser"
-      - run: uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_umap.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/notebook.png"
-      - run: uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_linked_brushing.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/linked-notebook.png"
-      - run: uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_umap_customization.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/customization-notebook.png"
+      - run: uv run --no-sync python tools/check_notebook_rendering.py integrations/scanpy/notebooks/scanpy_plotting.ipynb --screenshot "${{ runner.temp }}/scanpy-browser/notebook.png"
       - uses: actions/upload-artifact@v7
         if: always()
         with:
