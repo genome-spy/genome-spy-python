@@ -10,9 +10,12 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from scipy import sparse
 
 from genome_spy.anndata import from_anndata
+from genome_spy.integrations.scanpy._data import (
+    require_resident_expression,
+    resolve_use_raw,
+)
 from genome_spy.integrations.scanpy._umap_colors import (
     _categorical,
     categorical_colors,
@@ -118,24 +121,7 @@ def _expression(
         raise ValueError(
             f"gsc.pl.umap: gene {key!r} is missing or ambiguous in the selected representation."
         )
-    if layer is not None and layer not in adata.layers:
-        raise ValueError(f"gsc.pl.umap: layer {layer!r} is missing.")
-    # Backed views may load a wide slice when X is accessed.
-    if adata.isbacked:
-        raise TypeError(
-            "gsc.pl.umap: backed/lazy expression is not supported yet; "
-            "load the required expression into memory explicitly."
-        )
-    if use_raw:
-        matrix = adata.raw.X
-    elif layer is not None:
-        matrix = adata.layers[layer]
-    else:
-        matrix = adata.X
-    if not isinstance(matrix, np.ndarray) and not sparse.issparse(matrix):
-        raise TypeError(
-            "gsc.pl.umap: selected expression requires in-memory NumPy or SciPy data; backed/lazy expression is not supported yet."
-        )
+    require_resident_expression(adata, use_raw, layer, context="gsc.pl.umap")
     # Use the same public vector access as Scanpy's embedding plots.
     if use_raw:
         values = adata.raw.obs_vector(resolved)
@@ -144,18 +130,6 @@ def _expression(
         values = adata.obs_vector(resolved, layer=layer)
         source = "X" if layer is None else f"layers[{layer!r}]"
     return np.asarray(values).copy(), source
-
-
-def _use_raw(adata: Any, requested: bool | None, layer: str | None) -> bool:
-    if requested is not None and not isinstance(requested, bool):
-        raise TypeError("gsc.pl.umap: use_raw must be True, False, or None.")
-    if requested is True and layer is not None:
-        raise ValueError("gsc.pl.umap: use_raw=True and layer are incompatible.")
-    if requested is True and adata.raw is None:
-        raise ValueError("gsc.pl.umap: use_raw=True requires adata.raw.")
-    if requested is None:
-        return adata.raw is not None and layer is None
-    return requested
 
 
 def _panel_inputs(
@@ -306,7 +280,7 @@ def prepare_umap(
         raise TypeError("gsc.pl.umap: expected AnnData.")
     if adata.n_obs == 0:
         raise ValueError("gsc.pl.umap: at least one observation is required.")
-    use_raw = _use_raw(adata, use_raw, layer)
+    use_raw = resolve_use_raw(adata, use_raw, layer, context="gsc.pl.umap")
     inputs = _panel_inputs(adata, color, components, dimensions, marker)
     table = _observations(adata, [dimensions for _, dimensions, _ in inputs], obs_id)
     mask = _mask(adata, mask_obs)

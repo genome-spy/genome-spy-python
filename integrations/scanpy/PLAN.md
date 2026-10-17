@@ -222,7 +222,10 @@ in the chart and Python. No local Core patch or notebook connection task.
 This closes a preview only. Remaining normalization, overlays, fonts, 3D,
 backed expression, and broader selection modes stay in M07/M14.
 
-### M02 — grouped access and dotplot (next)
+### M02 — grouped access and dotplot (in progress)
+
+M02.a/b data and statistics are verified; see [slice evidence and limits](STATUS.md#m02ab-preparation-and-statistics).
+M02.c native chart authoring is next. No public dotplot function is exported yet.
 
 - M02.a: reuse compatible accessors for selected expression, grouping keys,
   category order and palettes. Support scalar/list/mapping `var_names`, repeated
@@ -231,8 +234,10 @@ backed expression, and broader selection modes stay in M07/M14.
   ordering. Document differing duplicate-label behavior from UMAP.
 - M02.b: pure grouped summaries. Apply `log=True` as `log1p` to selected
   observations before thresholding/means. Fraction uses strict
-  `value > expression_cutoff` over the full eligible group denominator, including
-  implicit zeros; do not substitute `count_nonzero`. `mean_only_expressed`
+  `value > expression_cutoff` with Scanpy's comparison/count denominator, including
+  implicit zeros. Ordinary NaN compares false and remains in that denominator;
+  pandas nullable NA follows the pinned nullable-count exclusion. Do not substitute
+  `count_nonzero`. `mean_only_expressed`
   changes the mean's denominator, not the fraction's. Check missing-value rules,
   signed values, exact-cutoff values, empty/constant groups and unequal sizes.
   Apply `standard_scale` to means on the specified axis after aggregation,

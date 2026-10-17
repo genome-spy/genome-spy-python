@@ -12,6 +12,8 @@ not in this workspace or the documentation:
 | --- | --- |
 | [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
 | [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public UMAP signature, compatibility validation, optional dependency/version check, and display/return behavior. |
+| [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared raw/layer resolution and resident-expression checks, reused by UMAP and grouped data. |
+| [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Detached grouped values, feature slots/brackets, means, expression fractions and min–max scaling; no chart authoring. |
 | [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
 | [_umap_colors.py](../../src/genome_spy/integrations/scanpy/_umap_colors.py) | Category order, CSS palette values, numeric bounds, and native scheme validation. |
 | [_umap_style.py](../../src/genome_spy/integrations/scanpy/_umap_style.py) | Explicit native presentation defaults and scalar style validation. |
@@ -19,12 +21,15 @@ not in this workspace or the documentation:
 | [_umap_interactions.py](../../src/genome_spy/integrations/scanpy/_umap_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
 | [_selection.py](../../src/genome_spy/integrations/scanpy/_selection.py) | Pure interval-to-observation membership for Python subset retrieval. |
 
-Scanpy owns analysis. The data module only resolves the inputs a plotting call
+Scanpy owns analysis. UMAP's data module only resolves the inputs a plotting call
 needs: which raw/layer vector a gene refers to, which categories to display, and
 which existing coordinate columns to send. Expression access uses AnnData's
 public `obs_vector`; no upstream plotting or private plotting helpers run.
-`scanpy.get.obs_df` is not used because its duplicate-label rejection and raw
-symbol lookup differ from UMAP's behavior.
+`scanpy.get.obs_df` is not used for UMAP because its duplicate-label rejection and
+raw symbol lookup differ from UMAP's behavior. Grouped plots use that public
+getter directly, with only selected unique keys. Public AnnData string conversion
+operates on the detached table, preserving category order without mutating AnnData.
+Grouped statistics are independently tested before adding the dotplot chart.
 
 There are no Matplotlib imports, figure creation, global style reads, or Python
 colormap sampling in the adapter. CSS palette values, including saved AnnData
@@ -88,6 +93,7 @@ tests compare against the frozen results instead of regenerating them.
 
 ```sh
 uv run --no-sync python -m tests.integrations.scanpy.generate_references --help
+uv run --no-sync python -m tests.integrations.scanpy.generate_grouped_references
 uv run --no-sync python -m tests.integrations.scanpy.benchmark --help
 ```
 

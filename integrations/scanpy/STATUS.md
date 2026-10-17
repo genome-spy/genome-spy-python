@@ -18,12 +18,10 @@ Use `import genome_spy.integrations.scanpy as gsc`. This is the sole integration
 namespace; there is no parallel compatibility package. General library imports
 remain independent of the optional scientific stack.
 
-**Next ready slice: M02.a + M02.b**, shared grouped data access and dotplot
-statistics. First write small independent fixtures for source precedence,
-categories/repeated slots, numeric grouping, strict cutoffs, denominators,
-missing values and log/scaling order. Reuse existing access/color functions;
-extract focused shared helpers as needed. Then implement/review plain dotplot
-(M02.c), validate the PBMC tutorial and resource envelope (M02.d), and move to
+**Next ready slice: M02.c**, native dotplot chart authoring using verified grouped
+data access/statistics from M02.a/b. Implement and review the plain chart, including
+size/color guides, feature slots/brackets, bounds and supplied statistics. Then
+validate the PBMC tutorial and complete-chart/resource envelope (M02.d), and move to
 matrixplot (M03), trees (M04), heatmap (M05) and ranked summaries (M06).
 Do not add brushing before basic plot reproduction passes review.
 
@@ -36,7 +34,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | --- | --- | --- |
 | M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, sole integration namespace, source/test/workflow layout, full inventory and shared lifecycle exist. Initial relocation is `cec0428`; current verification below. |
 | M01 UMAP/linked preview | Closed (preview only) | Runtime modules, one PBMC plotting notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
-| M02 grouped access/dotplot | Ready (a/b) | Exact target call and hand-check cases in PLAN. No production dotplot yet; render/validation slices c/d follow data verification. |
+| M02 grouped access/dotplot | In progress (a/b verified; c ready) | Shared source checks, public Scanpy table extraction, feature slots/brackets and independent grouped statistics pass 64 checks with 17 frozen upstream cases. Native chart and complete-chart validation remain; no public dotplot yet. |
 | M03 matrixplot | Planned | Reuse grouped access/means; authoritative values_df, scaling and native tile chart. |
 | M04 trees/correlation | Planned | Python computation/cache policy, shared rule layout, standalone and attached trees. No native tree capability blocker. |
 | M05 heatmap/matrix/clustermap | Planned | Observation permutations, annotations, clustering contracts and large tile policy. |
@@ -68,7 +66,7 @@ history in Git. Its retained evidence is:
   plotting, linked brushing/Python retrieval, then customization. Shared setup
   and duplicate charts from the three earlier notebooks have been consolidated.
 
-Current cleanup verification: 119 integration checks and 20 browser checks pass,
+UMAP preview baseline (`cfc01b7`): 119 integration checks and 20 browser checks pass,
 as do Ruff formatting/lint and mypy. The workflow test executes every cell,
 checks unchanged source UMAP coordinates, and reruns Python retrieval for a
 nonempty selection. The combined notebook renders in a fresh kernel/browser.
@@ -80,6 +78,49 @@ also checked. The shared source/test links above retain the evidence.
 The full documentation site and unrelated test suites were not rebuilt for this
 cleanup. Resource results are the retained October 17 baseline, not a new
 performance measurement. No new plot family or Core capability was implemented.
+
+## M02.a/b preparation and statistics
+
+Verified scope: [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py)
+reuses public `sc.get.obs_df` for selected expression/metadata, raw/layer and symbol
+lookup. AnnData categorization touches only the detached table. Values retain
+observation order, repeated feature slots, grouping/category order and bracket
+metadata. Means, strict-cutoff fractions and scaling are separate pure functions.
+[_data.py](../../src/genome_spy/integrations/scanpy/_data.py) shares source/storage
+checks with UMAP; its existing semantics remain covered.
+
+Evidence: [64 focused semantic/resource checks](../../tests/integrations/scanpy/test_grouped_data.py),
+[17 frozen upstream cases](../../tests/integrations/scanpy/fixtures/grouped.json)
+with [original input/provenance](../../tests/integrations/scanpy/grouped_fixture.py)
+and an [explicit generator](../../tests/integrations/scanpy/generate_grouped_references.py).
+All **183 integration checks**, Ruff and mypy pass. The allocation guard uses
+100,000 observations × 20,000 sparse genes, densifies only three unique requested
+columns, retains float32 values, and caps preparation/statistics allocations at
+64 MiB. This is a data-allocation guard, not a browser/render performance baseline.
+
+Current input boundaries:
+
+- Dense NumPy and CSR/CSC matrices, views, and resident observation metadata are
+  covered. Backed/lazy expression is rejected before reading X. Scanpy 1.11.5's
+  public getter does not handle sparse arrays; grouped preparation rejects those
+  explicitly. UMAP keeps its existing sparse-array support.
+- Raw symbol lookup and duplicate-variable rejection follow the grouped getter,
+  which intentionally differs from UMAP. Infinite values, undefined log1p
+  inputs, ambiguous index/column grouping and joined-label collisions fail clearly.
+- Multi-key grouping currently requires nonmissing categorical string annotations.
+  Missing multi-key values are rejected explicitly. Unused categories remain
+  metadata; statistics include only observed groups, without invented zero rows.
+- Ordinary NaN comparisons are false and count toward the fraction denominator;
+  nullable pandas NA retains the upstream comparison/count exclusion. Means have
+  their own missing/expressed-only denominator.
+
+M02.a/b are closed for this stated scope, with no separate working plan to clear.
+M02.c must resolve native chart behavior for empty groups, labels/guides, supplied
+statistics, dot-size mapping and public validation/returns. M02.d owns full chart,
+browser, workflow and resource validation; M14.c owns broader backed/lazy and
+sparse-array access. The public callable ledger remains
+unchanged. No browser suite was repeated for this data-only slice; the combined
+notebook was opened and run in the live app browser with all cells completing.
 
 ## Public callable coverage
 
