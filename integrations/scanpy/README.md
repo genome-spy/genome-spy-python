@@ -1,23 +1,26 @@
 # Scanpy integration workspace
 
-Start with the [implementation plan](PLAN.md) and the
+Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
 [current compatibility guide](../../docs/integrations/scanpy/index.md).
-The API is `import genome_spy.scanpy as gsc`, then `gsc.pl.umap(...)`.
+Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`.
+The short import `import genome_spy.scanpy as gsc` exports the same functions.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
-The implementation lives in the installable [source package](../../src/genome_spy/scanpy/),
-not in this workspace or the documentation:
+The implementation lives in the installable [source package](../../src/genome_spy/integrations/scanpy/),
+not in this workspace or the documentation. The short-path
+[`genome_spy.scanpy`](../../src/genome_spy/scanpy/) modules contain explicit public
+exports only:
 
 | Source | Responsibility |
 | --- | --- |
-| [__init__.py](../../src/genome_spy/scanpy/__init__.py) | Lightweight explicit namespace exports. |
-| [pl.py](../../src/genome_spy/scanpy/pl.py) | Public UMAP signature, compatibility validation, optional dependency/version check, and display/return behavior. |
-| [_umap_data.py](../../src/genome_spy/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
-| [_umap_colors.py](../../src/genome_spy/scanpy/_umap_colors.py) | Category order, CSS palette values, numeric bounds, and native scheme validation. |
-| [_umap_style.py](../../src/genome_spy/scanpy/_umap_style.py) | Explicit native presentation defaults and scalar style validation. |
-| [_umap_chart.py](../../src/genome_spy/scanpy/_umap_chart.py) | Native points, axes, legends, labels, and panel composition. |
-| [_umap_interactions.py](../../src/genome_spy/scanpy/_umap_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
-| [_selection.py](../../src/genome_spy/scanpy/_selection.py) | Pure interval-to-observation membership for Python subset retrieval. |
+| [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
+| [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public UMAP signature, compatibility validation, optional dependency/version check, and display/return behavior. |
+| [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
+| [_umap_colors.py](../../src/genome_spy/integrations/scanpy/_umap_colors.py) | Category order, CSS palette values, numeric bounds, and native scheme validation. |
+| [_umap_style.py](../../src/genome_spy/integrations/scanpy/_umap_style.py) | Explicit native presentation defaults and scalar style validation. |
+| [_umap_chart.py](../../src/genome_spy/integrations/scanpy/_umap_chart.py) | Native points, axes, legends, labels, and panel composition. |
+| [_umap_interactions.py](../../src/genome_spy/integrations/scanpy/_umap_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
+| [_selection.py](../../src/genome_spy/integrations/scanpy/_selection.py) | Pure interval-to-observation membership for Python subset retrieval. |
 
 Scanpy owns analysis. The data module only resolves the inputs a plotting call
 needs: which raw/layer vector a gene refers to, which categories to display, and

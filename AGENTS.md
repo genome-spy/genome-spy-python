@@ -10,6 +10,7 @@ before app-specific concepts. Notebook rendering is first-class; prefer `anywidg
 | Path | Purpose |
 | --- | --- |
 | `src/genome_spy/` | Installable library |
+| `src/genome_spy/integrations/<library>/` | Optional integration implementations |
 | `tests/` | pytest suite |
 | `integrations/` | Tracked integration plans and per-library workflow notebooks |
 | `scripts/` | Helpers run via `uv run` |
@@ -71,7 +72,9 @@ explicitly asked.
 
 | Document | Read when |
 | --- | --- |
-| `integrations/<library>/PLAN.md` | Planning or extending a library integration |
+| `integrations/README.md` | Integration layout, plan lifecycle, and clearance rules |
+| `integrations/<library>/STATUS.md` | Current implementation, next slice, blockers, and retained evidence |
+| `integrations/<library>/PLAN.md` | Planning or extending a library integration; update status with implementation |
 | `plans/implementation_plan.md` | Starting implementation; understand phases and open questions |
 | `plans/deferred.md` | Adding scope; avoid intentionally deferred work |
 | `plans/architecture.md` | Changing public API shape, schema strategy, or notebook integration |
