@@ -47,9 +47,11 @@ Each plotting family follows this path:
 1. Public Scanpy-shaped function: validate names/defaults/aliases and supported
    options before scientific extraction; handle native display/return behavior.
 2. Pure Python preparation: select the required AnnData columns/results and
-   produce detached tables plus plotting metadata. Do not construct
-   charts, inspect rendered artists, mutate the input, or import test/prototype
-   modules here.
+   produce detached tables plus plotting metadata using shared access functions
+   and suitable public Scanpy/AnnData operations. This responsibility does not
+   require a separate data module for every plot family. Do not construct charts,
+   inspect rendered artists, mutate the input, or import test/prototype modules
+   here.
 3. GenomeSpy authoring: build marks, axes, labels, legends, composition, and
    explicit interactions from prepared data, without reading AnnData again.
 4. Existing chart/widget delivery: JSON, notebook display, HTML, and ordinary
@@ -73,11 +75,32 @@ Named schemes with a custom missing-category legend are deferred; explicit CSS
 palettes support that legend now. Native dimensions default to 300 by 300 logical
 pixels, with fixed point-to-pixel conversion (100/72), independent of rcParams.
 
-For dotplot, start with `_dotplot_data.py` and `_dotplot_chart.py` and review the
-plain chart before adding brushing/linking. Keep public signatures discoverable;
-if `pl.py` becomes unwieldy, use an explicit `pl/` package with named exports.
-Extract shared version/input helpers only when a second production family uses
-them. Do not add a registry, adapter base class, plugin dispatcher, or a general
+Each plot family gets its own chart module. Shared functions should own compatible
+AnnData access, representation selection, field lookup, category order, palettes,
+masks, observation identity, and common computations. Reuse suitable public
+Scanpy/AnnData functions and existing `genome_spy.anndata` support before writing
+new extraction code. Extract a focused shared helper whenever the current code
+benefits from it; there is no second-family prerequisite. Current UMAP filenames
+describe the implementation today, not exclusive ownership of these operations.
+
+A family-specific data module is optional. Add one only for distinct preparation
+that warrants a module. A public plotting function can call shared accessors and
+summary functions directly, then pass their results to its chart module. Preserve
+pure, independently testable data functions even when no family-specific
+preparation module is needed. Keep plot-specific transformations separate when
+their semantics differ; do not hide those differences in a universal preparation
+function with many switches.
+
+For dotplot and matrixplot, reuse representation selection, group/feature order,
+and compatible group-mean computations; dotplot additionally needs expression
+fractions. Share dendrogram computation/layout across grouped plots. Preserve
+each caller's thresholds, denominators, and normalization order in tests. Start
+with `_dotplot_chart.py` and review the plain chart before adding brushing/linking.
+
+Apply YAGNI: implement functionality required by the current plot, use small
+shared functions, and avoid speculative extension points. Keep public signatures
+discoverable; if `pl.py` becomes unwieldy, use an explicit `pl/` package with named
+exports. Do not add a registry, adapter base class, plugin dispatcher, or a general
 cross-library framework now.
 
 Upstream public computation may be reused when its semantics match the required

@@ -32,9 +32,19 @@ palettes and Scanpy's public default palette lists, go directly to native scales
 GenomeSpy maps continuous values and draws the guides. Plotting retains source
 measurements; it does not compute embeddings, rankings, or new scientific results.
 
-These modules implement UMAP only. Future plot families get their own small data
-and chart modules. Review basic plot reproduction before adding interactions;
-reuse code only when another implemented family demonstrates the need.
+UMAP is the currently implemented plot family. Each future family gets its own
+chart module and reuses compatible AnnData access, category/color handling, and
+plotting computations. A separate data module per family is optional: add one
+only when that family needs distinct preparation that merits its own module.
+Share common operations directly; there is no requirement to implement another
+family before extracting a useful shared helper. Reuse suitable public
+Scanpy/AnnData functions and existing library helpers first.
+
+Apply YAGNI to new functionality and abstractions: implement the current plot's
+needs with small functions, without building a general adapter framework. Keep
+shared functions focused on equivalent semantics, including raw/layer selection,
+ordering, thresholds, and normalization. Review basic plot reproduction before
+adding interactions.
 
 ## Workflow notebooks
 
