@@ -16,7 +16,7 @@ not in this workspace or the documentation:
 | [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared raw/layer resolution and resident-expression checks, reused by UMAP and grouped data. |
 | [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Detached grouped values, feature slots/brackets, means, expression fractions and min–max scaling; no chart authoring. |
 | [_colors.py](../../src/genome_spy/integrations/scanpy/_colors.py) | Shared native scheme and opaque CSS color validation. |
-| [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, axes, labels, brackets, sizing and guides. |
+| [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, index slots, exact area/percentage lookup, labels, brackets, guides and summary hover. |
 | [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
 | [_umap_colors.py](../../src/genome_spy/integrations/scanpy/_umap_colors.py) | Category order, CSS palette values, numeric bounds, and native scheme validation. |
 | [_umap_style.py](../../src/genome_spy/integrations/scanpy/_umap_style.py) | Explicit native presentation defaults and scalar style validation. |
@@ -60,7 +60,7 @@ The [plotting notebook](notebooks/scanpy_plotting.ipynb) loads Scanpy's packaged
 `pbmc68k_reduced()` dataset once and retains its stored UMAP coordinates:
 
 1. Basic categorical and continuous UMAP with x/y zoom/panning, then a marker
-   dotplot using the core tutorial dictionary and existing `bulk_labels`.
+   dotplot with summary hover using the core tutorial dictionary and existing `bulk_labels`.
 2. Shift-drag linked brushing, selected-cell count, and Python subset retrieval.
 3. Customization: subsets/titles, categorical order/palettes, a gene score with
    symmetric color bounds, and the tutorial's marker overview.

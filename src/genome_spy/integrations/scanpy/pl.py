@@ -362,6 +362,7 @@ def dotplot(
     dot_max: float | None = None,
     dot_min: float | None = None,
     smallest_dot: float = 0.0,
+    hover: bool = True,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -408,6 +409,7 @@ def dotplot(
         dot_max: Upper clipped fraction, or the observed maximum rounded up to 0.1.
         dot_min: Lower clipped fraction, default zero.
         smallest_dot: Minimum dot area in points squared; maximum is 200.
+        hover: Show gene, group, displayed color value and expressing percentage.
         width: Native plot-area width in logical pixels, default 37 per column.
         height: Native plot-area height in logical pixels, default 35 per row.
         **kwds: Only scalar linewidth is supported; other scatter options error.
@@ -443,7 +445,11 @@ def dotplot(
     }.items():
         if rejected:
             raise NotImplementedError(f"gsc.pl.dotplot: {name} is not supported yet.")
-    for name, value in {"log": log, "mean_only_expressed": mean_only_expressed}.items():
+    for name, value in {
+        "log": log,
+        "mean_only_expressed": mean_only_expressed,
+        "hover": hover,
+    }.items():
         if not isinstance(value, bool):
             raise TypeError(f"gsc.pl.dotplot: {name} must be boolean.")
     for name, nullable in {"show": show, "swap_axes": swap_axes}.items():
@@ -499,6 +505,9 @@ def dotplot(
         dot_min=dot_min,
         dot_max=dot_max,
         smallest_dot=smallest_dot,
+        hover=hover,
+        value_title=("Color value" if dot_color_df is not None else "Mean expression")
+        + (" (scaled)" if standard_scale is not None else ""),
         linewidth=kwds.get("linewidth", 0.2),
         rotation=var_group_rotation,
         width=width,

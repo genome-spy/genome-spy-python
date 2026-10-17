@@ -55,7 +55,8 @@ def test_signature_preserves_scanpy_defaults_and_native_boundary():
         assert (
             None if actual.default is inspect.Parameter.empty else repr(actual.default)
         ) == parameter["default"]
-    assert set(native) - {p["name"] for p in reference} == {"width", "height"}
+    assert set(native) - {p["name"] for p in reference} == {"width", "height", "hover"}
+    assert native["hover"].default is True
 
 
 @pytest.mark.parametrize("case", dotplot_cases())
@@ -66,19 +67,20 @@ def test_displayed_geometry_matches_frozen_scanpy_exports(adata, case):
     result = chart(adata, **dotplot_cases()[case])
     spec, data = result.to_dict(), table(result)
     unit = points(spec)
-    np.testing.assert_allclose(data[["_x", "_y"]], reference["positions"])
+    np.testing.assert_allclose(data[["_x", "_y"]] + 0.5, reference["positions"])
     size = unit["encoding"]["size"]["scale"]
     area_map = dict(zip(size["domain"], size["range"], strict=True))
     np.testing.assert_allclose(
         [area_map[p] for p in data["_percent"]],
         np.array(reference["sizes"]) * (100 / 72) ** 2,
     )
-    np.testing.assert_allclose(
-        unit["encoding"]["x"]["scale"]["domain"], reference["x_domain"]
-    )
-    np.testing.assert_allclose(
-        unit["encoding"]["y"]["scale"]["domain"][::-1], reference["y_domain"]
-    )
+    for channel, padding in [("x", 0.3), ("y", 0.5)]:
+        encoding = unit["encoding"][channel]
+        assert encoding["type"] == "index"
+        assert encoding["scale"]["domain"] == [0, int(data[f"_{channel}"].max())]
+        assert encoding["scale"]["paddingOuter"] == padding
+        assert encoding["scale"]["zoom"] is False
+    assert unit["encoding"]["y"]["scale"]["reverse"] is True
     size_labels = [
         str(round(value)) for value in unit["encoding"]["size"]["legend"]["values"]
     ]
@@ -96,7 +98,7 @@ def test_hand_calculated_means_fractions_and_exact_area_mapping(adata):
         assert area == pytest.approx((percent / 100) ** 1.5 * 200 * (100 / 72) ** 2)
     assert unit["mark"]["stroke"] == "black"
     assert unit["mark"]["strokeWidth"] == pytest.approx(0.2 * 100 / 72)
-    assert unit["mark"]["tooltip"] is None
+    assert unit["mark"]["tooltip"] == {"handler": "default"}
 
 
 def test_swapped_scaling_preserves_both_scanpy_scaling_passes(adata):
@@ -122,12 +124,69 @@ def test_supplied_colors_align_labels_scale_once_and_do_not_mutate(adata):
 def test_repeated_feature_slots_keep_distinct_coordinates_and_labels(adata):
     result = chart(adata, var_names={"first": ["g2", "g1"], "again": "g2"})
     data = table(result)
-    assert data["_x"].tolist() == [0.5, 1.5, 2.5] * 2
+    assert data["_x"].tolist() == [0, 1, 2] * 2
     np.testing.assert_allclose(data["_mean"], [1, 1, 1, 1.5, 0.5, 1.5])
     spec = result.to_dict()
     labels = spec["datasets"][spec["layer"][1]["data"]["name"]]
     assert [v["label"] for v in labels] == ["g2", "g1", "g2"]
     assert spec["layer"][3]["mark"]["type"] == "rule"
+
+
+@pytest.mark.parametrize("swapped", [False, True])
+def test_hover_preserves_gene_group_and_unclipped_fraction(adata, swapped):
+    result = chart(
+        adata,
+        var_names=["g2", "g1", "g2"],
+        swap_axes=swapped,
+        dot_min=0.4,
+        dot_max=0.8,
+    )
+    data = table(result)
+    assert data["_gene"].tolist() == (
+        ["g2", "g2", "g1", "g1", "g2", "g2"] if swapped else ["g2", "g1", "g2"] * 2
+    )
+    assert data["_group"].tolist() == (
+        ["B", "A"] * 3 if swapped else ["B"] * 3 + ["A"] * 3
+    )
+    np.testing.assert_allclose(
+        data["_percent"],
+        [200 / 3, 50, 100 / 3, 50, 200 / 3, 50]
+        if swapped
+        else [200 / 3, 100 / 3, 200 / 3, 50, 50, 50],
+    )
+    tooltip = points(result.to_dict())["encoding"]["tooltip"]
+    assert [item["field"] for item in tooltip] == [
+        "_gene",
+        "_group",
+        "_mean",
+        "_percent",
+    ]
+    assert tooltip[2]["title"] == "Mean expression"
+
+
+@pytest.mark.parametrize(
+    "supplied,scaled", [(False, True), (True, False), (True, True)]
+)
+def test_hover_names_displayed_color_values(adata, supplied, scaled):
+    options = {"standard_scale": "var"} if scaled else {}
+    if supplied:
+        options["dot_color_df"] = pd.DataFrame(
+            4.0, index=["B", "A"], columns=["g1", "g2", "g3"]
+        )
+    tooltip = points(chart(adata, **options).to_dict())["encoding"]["tooltip"]
+    assert tooltip[2]["title"] == ("Color value" if supplied else "Mean expression") + (
+        " (scaled)" if scaled else ""
+    )
+
+
+def test_hover_can_be_disabled_without_changing_geometry(adata):
+    enabled = points(chart(adata).to_dict())
+    disabled = points(chart(adata, hover=False).to_dict())
+    assert disabled["mark"]["tooltip"] is None
+    assert "tooltip" not in disabled["encoding"]
+    assert {k: v for k, v in enabled["encoding"].items() if k != "tooltip"} == disabled[
+        "encoding"
+    ]
 
 
 def test_dot_limits_clip_then_power_and_guides_use_percentages(adata):
@@ -181,6 +240,7 @@ def test_no_analysis_or_mutation_and_chart_is_a_snapshot(adata, monkeypatch):
         ({"figsize": (5, 4), "width": 200}, TypeError, "figsize"),
         ({"standard_scale": "obs"}, ValueError, "standard_scale"),
         ({"mean_only_expressed": "yes"}, TypeError, "mean_only_expressed"),
+        ({"hover": "yes"}, TypeError, "hover"),
     ],
 )
 def test_unsupported_or_invalid_options_are_named(adata, options, error, match):
@@ -206,8 +266,8 @@ def test_nullable_missing_group_statistic_retains_its_slot(adata):
     adata.obs["nullable"] = pd.array([None, 1, None, 0, 2, None], dtype="Float64")
     result = chart(adata, var_names="nullable")
     data = table(result)
-    assert data["_x"].tolist() == [0.5, 0.5]
-    assert data["_y"].tolist() == [0.5, 1.5]
+    assert data["_x"].tolist() == [0, 0]
+    assert data["_y"].tolist() == [0, 1]
     assert pd.isna(data["_mean"].iloc[0]) and pd.isna(data["_percent"].iloc[0])
     assert data["_mean"].iloc[1] == 0.5 and data["_percent"].iloc[1] == 50
 

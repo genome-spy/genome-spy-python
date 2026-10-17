@@ -226,8 +226,8 @@ backed expression, and broader selection modes stay in M07/M14.
 
 M02.a–d are verified for the plain-chart preview; see [data evidence](STATUS.md#m02ab-preparation-and-statistics)
 and [chart evidence and limits](STATUS.md#m02cd-plain-dotplot-preview).
-The public dotplot function is available. Trees, builders and interactions remain
-in their named later slices.
+The public dotplot function includes index-scaled slots and optional summary hover.
+Trees, builders and summary selections remain in their named later slices.
 
 - M02.a: reuse compatible accessors for selected expression, grouping keys,
   category order and palettes. Support scalar/list/mapping `var_names`, repeated
@@ -245,14 +245,17 @@ in their named later slices.
   Apply `standard_scale` to means on the specified axis after aggregation,
   preserving constant-row/column behavior.
 - M02.c: `_dotplot_chart.py` authors native dot area, color/size guides, group and
-  feature axes, brackets, title, `swap_axes`, padding and sizing. Check clipped
+  feature axes, brackets, title, `swap_axes`, padding and sizing. Use integer index
+  slots and band positions for brackets, retaining Scanpy spacing and repeated labels.
+  Offer optional summary hover without changing the initial marks. Check clipped
   `dot_min`/`dot_max`, inferred limits, size exponent and `smallest_dot`, including
   zero/all-equal fractions. Respect supplied `dot_color_df`/builder `dot_size_df`
   labels/order without silently recomputing or rescaling supplied values.
 - M02.d: freeze default, reordered, log, scaled, supplied-statistic and repeated-
   slot references; reproduce the core tutorial marker dotplot on PBMC. Measure
   selected-gene preparation for 100k cells × 20k sparse genes and group×feature
-  chart costs. Review plain charts before adding summary hover/selection.
+  chart costs. Observe summary hover in both orientations, including clipped dot
+  sizes and single-slot axes. Review plain charts before adding summary selection.
 
 Plain-chart preview call (current limits and evidence in STATUS):
 

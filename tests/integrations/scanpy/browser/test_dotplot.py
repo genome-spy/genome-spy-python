@@ -69,9 +69,17 @@ def test_complete_dotplot_labels_guides_and_brackets(
     )
     bottom = bounds["y"] + bounds["height"]
     right = bounds["x"] + bounds["width"]
+    pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
     assert [label["text"] for label in labels].count("g2") == 2
     for text in ["first markers", "again"]:
         assert [label["text"] for label in labels].count(text) == 1
+    for title, tick in [
+        ("Fraction of cells in group (%)", "30"),
+        ("Mean expression in group", "1.0"),
+    ]:
+        heading = next(label for label in labels if label["text"] == title)
+        entry = next(label for label in labels if label["text"] == tick)
+        assert entry["y"] >= heading["y"] + heading["height"]
     for label in labels:
         if label["text"] in (["B", "A"] if swapped else ["g1", "g2"]):
             assert label["y"] >= bottom + 6
@@ -86,14 +94,88 @@ def test_complete_dotplot_labels_guides_and_brackets(
                     expected, abs=2
                 )
                 assert label["x"] >= right + 6
+                px, py = round(right + 4), round(expected)
             else:
                 expected = bounds["x"] + (slot + 0.3) / 3.6 * bounds["width"]
                 assert label["x"] + label["width"] / 2 == pytest.approx(expected, abs=2)
                 assert label["y"] + label["height"] <= bounds["y"] - 6
+                px, py = round(expected), round(bounds["y"] - 4)
+            assert pixels[py - 1 : py + 2, px - 1 : px + 2].min() < 64
     page.screenshot(
         path=str(tmp_path / f"dotplot-{swapped}-complete.png"), full_page=True
     )
     (tmp_path / f"dotplot-{swapped}-complete.svg").write_text(svg)
+
+
+@pytest.mark.parametrize("swapped", [False, True])
+@pytest.mark.parametrize("hover", [False, True])
+def test_dotplot_hover_reports_summary_values(page, adata, swapped, hover):
+    chart = gsc.pl.dotplot(
+        adata,
+        ["g2"],
+        "group",
+        use_raw=False,
+        swap_axes=swapped,
+        dot_max=0.4,
+        hover=hover,
+        width=240,
+        height=180,
+        show=False,
+    )
+    bounds = render(page, chart)
+    canvas = page.locator("canvas").first.bounding_box()
+    columns, rows = (2, 1) if swapped else (1, 2)
+    px = canvas["x"] + bounds["x"] + 0.8 / (columns + 0.6) * bounds["width"]
+    py = canvas["y"] + bounds["y"] + 1 / (rows + 1) * bounds["height"]
+    page.mouse.move(px - 2, py - 2)
+    page.wait_for_timeout(450)
+    page.mouse.move(px, py)
+    if hover:
+        page.get_by_text("Expressing cells (%)", exact=True).wait_for(state="visible")
+        rows = page.locator("table.attributes tr").all()
+        assert [
+            (row.locator("th").inner_text(), row.locator("td").inner_text().strip())
+            for row in rows
+        ] == [
+            ("Gene", "g2"),
+            ("Group", "B"),
+            ("Mean expression", "1.000"),
+            ("Expressing cells (%)", "66.7"),
+        ]
+    else:
+        page.wait_for_timeout(150)
+        assert page.locator("table.attributes").count() == 0
+
+
+def test_pbmc_marker_brackets_paint_single_and_multiple_gene_spans(page):
+    import scanpy as sc
+
+    markers = {
+        "B-cell": ["CD79A", "MS4A1"],
+        "Dendritic": ["FCER1A", "CST3"],
+        "Monocytes": ["FCGR3A"],
+        "NK": ["GNLY", "NKG7"],
+        "Other": ["IGLL1"],
+        "Plasma": ["IGJ"],
+        "T-cell": ["CD3D"],
+    }
+    chart = gsc.pl.dotplot(
+        sc.datasets.pbmc68k_reduced(),
+        markers,
+        "bulk_labels",
+        width=400,
+        height=350,
+        show=False,
+    )
+    bounds = render(page, chart)
+    pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
+    start = 0
+    for genes in markers.values():
+        midpoint = start + (len(genes) - 1) / 2 + 0.45
+        px = round(bounds["x"] + (midpoint + 0.3) / 10.6 * bounds["width"])
+        py = round(bounds["y"] - 4)
+        assert pixels[py - 1 : py + 2, px - 1 : px + 2].min() < 64, genes
+        start += len(genes)
 
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)

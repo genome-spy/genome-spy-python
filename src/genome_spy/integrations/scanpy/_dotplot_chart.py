@@ -70,12 +70,11 @@ def _coordinate(
     channel: Any, field: str, count: int, padding: float, *, reverse: bool = False
 ) -> Any:
     return (
-        channel(f"{field}:Q")
+        channel(f"{field}:I")
         .scale(
-            domain=[-padding, count + padding],
+            domain=[0, count - 1],
+            paddingOuter=padding,
             reverse=reverse,
-            nice=False,
-            zero=False,
             zoom=False,
         )
         .axis(None)
@@ -83,7 +82,7 @@ def _coordinate(
 
 
 def _slot_labels(labels: list[str], coordinate: Any, *, horizontal: bool) -> gs.Chart:
-    table = [{"slot": i + 0.5, "label": label} for i, label in enumerate(labels)]
+    table = [{"slot": i, "label": label} for i, label in enumerate(labels)]
     if horizontal:
         return (
             gs.Chart(table)
@@ -121,27 +120,29 @@ def _brackets(
     swapped: bool,
     rotation: float | None,
 ) -> list[gs.Chart]:
+    # Keep index spans half-open while retaining Scanpy's asymmetric bracket ends.
     table = [
         {
-            "start": group.start + 0.2,
-            "end": group.end + 0.7,
-            "slot": (group.start + group.end + 0.9) / 2,
+            "start": group.start,
+            "end": group.end,
+            "stop": group.end + 1,
+            "slot": (group.start + group.end) // 2,
+            "band": 0.45 + (group.start + group.end) % 2 / 2,
             "label": group.label,
         }
         for group in groups
     ]
-    ends = [{"slot": row[key]} for row in table for key in ("start", "end")]
     line = gs.Chart(table).mark_rule(
         color="black",
         size=1.5 * _PT,
         clip="never",
         tooltip=None,
         xOffset=4 if swapped else 0,
-        x2Offset=4 if swapped else 0,
+        x2Offset=4 if swapped else gs.expr("-0.3 * bandwidth('x') * width"),
         yOffset=0 if swapped else -4,
-        y2Offset=0 if swapped else -4,
+        y2Offset=gs.expr("-0.3 * bandwidth('y') * height") if swapped else -4,
     )
-    caps = gs.Chart(ends).mark_rule(
+    caps = gs.Chart(table).mark_rule(
         color="black",
         size=1.5 * _PT,
         clip="never",
@@ -167,33 +168,53 @@ def _brackets(
     )
     if swapped:
         line = line.encode(
-            y=coordinate.field("start"),
-            y2=gs.Y2("end:Q"),
+            y=coordinate.field("start").band(0.2),
+            y2=gs.Y2("stop:I").band(0),
             x=gs.value(1),
             x2=gs.value(1),
         )
-        caps = caps.encode(
-            y=coordinate.field("slot"),
-            y2=gs.Y2("slot:Q"),
+        left = caps.encode(
+            y=coordinate.field("start").band(0.2),
+            y2=gs.Y2("start:I").band(0.2),
             x=gs.value(1),
             x2=gs.value(1),
         )
-        text = text.encode(y=coordinate.field("slot"), x=gs.value(1), text="label:N")
+        right = left.encode(
+            y=coordinate.field("end").band(0.7), y2=gs.Y2("end:I").band(0.7)
+        )
+        text = text.encode(
+            y=coordinate.field("slot").band(0),
+            yOffset=gs.YOffset(
+                gs.expr("datum.band * bandwidth('y') * height"), type="quantitative"
+            ).scale(None),
+            x=gs.value(1),
+            text="label:N",
+        )
     else:
         line = line.encode(
-            x=coordinate.field("start"),
-            x2=gs.X2("end:Q"),
+            x=coordinate.field("start").band(0.2),
+            x2=gs.X2("stop:I").band(0),
             y=gs.value(1),
             y2=gs.value(1),
         )
-        caps = caps.encode(
-            x=coordinate.field("slot"),
-            x2=gs.X2("slot:Q"),
+        left = caps.encode(
+            x=coordinate.field("start").band(0.2),
+            x2=gs.X2("start:I").band(0.2),
             y=gs.value(1),
             y2=gs.value(1),
         )
-        text = text.encode(x=coordinate.field("slot"), y=gs.value(1), text="label:N")
-    return [line, caps, text]
+        right = left.encode(
+            x=coordinate.field("end").band(0.7), x2=gs.X2("end:I").band(0.7)
+        )
+        text = text.encode(
+            x=coordinate.field("slot").band(0),
+            xOffset=gs.XOffset(
+                gs.expr("datum.band * bandwidth('x') * width"), type="quantitative"
+            ).scale(None),
+            y=gs.value(1),
+            text="label:N",
+        )
+    return [line, left, right, text]
 
 
 def build_dotplot(
@@ -211,6 +232,8 @@ def build_dotplot(
     dot_min: float | None,
     dot_max: float | None,
     smallest_dot: float,
+    hover: bool,
+    value_title: str,
     linewidth: float,
     rotation: float | None,
     width: float | None,
@@ -276,10 +299,17 @@ def build_dotplot(
         fractions.to_numpy(dtype=float, na_value=np.nan), dot_min, dot_max, smallest_dot
     )
     yy, xx = np.indices(colors.shape)
+    xlabels, ylabels = [str(v) for v in colors.columns], [str(v) for v in colors.index]
     table = pd.DataFrame(
         {
-            "_x": xx.ravel() + 0.5,
-            "_y": yy.ravel() + 0.5,
+            "_x": xx.ravel(),
+            "_y": yy.ravel(),
+            "_gene": np.asarray(ylabels if swap_axes else xlabels)[
+                (yy if swap_axes else xx).ravel()
+            ],
+            "_group": np.asarray(xlabels if swap_axes else ylabels)[
+                (xx if swap_axes else yy).ravel()
+            ],
             "_mean": values.ravel(),
             "_percent": fractions.to_numpy(dtype=float, na_value=np.nan).ravel() * 100,
         }
@@ -290,7 +320,7 @@ def build_dotplot(
     x = _coordinate(gs.X, "_x", columns, 0.3)
     y = _coordinate(gs.Y, "_y", rows, 0.5, reverse=True)
     x_axis = x.axis(
-        values=(np.arange(columns) + 0.5).tolist(),
+        values=list(range(columns)),
         labels=False,
         title=None,
         domain=False,
@@ -299,7 +329,7 @@ def build_dotplot(
         tickWidth=0.8 * _PT,
     )
     y_axis = y.axis(
-        values=(np.arange(rows) + 0.5).tolist(),
+        values=list(range(rows)),
         labels=False,
         title=None,
         domain=False,
@@ -307,7 +337,6 @@ def build_dotplot(
         tickSize=3.5 * _PT,
         tickWidth=0.8 * _PT,
     )
-    xlabels, ylabels = [str(v) for v in colors.columns], [str(v) for v in colors.index]
     if len(set(ylabels if not swap_axes else xlabels)) != (
         rows if not swap_axes else columns
     ):
@@ -326,7 +355,7 @@ def build_dotplot(
             stroke="black",
             strokeWidth=linewidth * _PT,
             inwardStroke=False,
-            tooltip=None,
+            tooltip={"handler": "default"} if hover else None,
         )
         .encode(
             x=x_axis,
@@ -372,6 +401,15 @@ def build_dotplot(
     if smallest_dot == 0:
         # A zero-area dot must not leave a stroke-only picking/raster footprint.
         dots = dots.transform_filter(f"datum._percent > {100 * (dot_min or 0)}")
+    if hover:
+        dots = dots.encode(
+            tooltip=[
+                gs.Tooltip("_gene:N", title="Gene"),
+                gs.Tooltip("_group:N", title="Group"),
+                gs.Tooltip("_mean:Q", title=value_title, format=".4g"),
+                gs.Tooltip("_percent:Q", title="Expressing cells (%)", format=".1f"),
+            ]
+        )
     layers: list[gs.Chart] = [
         dots,
         _slot_labels(xlabels, x, horizontal=True),
@@ -411,6 +449,7 @@ def build_dotplot(
         titleFont=_FONT,
         titleFontSize=_TICK,
         titleFontWeight="normal",
+        titleOrient="top",
         layout={"anchor": "end", "direction": "vertical", "wrap": False},
         spacing=25,
     )

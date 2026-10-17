@@ -9,8 +9,8 @@ not delivery promises.
 
 **Available:** categorical/continuous 2D UMAP and plain dotplot development previews.
 UMAP includes native sizing, optional hover/zoom, linked interval highlighting/count
-and Python subset retrieval. Dotplot includes grouped summaries, brackets and native
-size/color guides, without interactions yet.
+and Python subset retrieval. Dotplot includes index-scaled slots, grouped summaries,
+brackets, native size/color guides and optional summary hover.
 **Implemented families:** UMAP and dotplot (partial). Scanpy **1.11.5** is the only accepted version;
 bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibility.
 
@@ -35,7 +35,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | --- | --- | --- |
 | M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, sole integration namespace, source/test/workflow layout, full inventory and shared lifecycle exist. Initial relocation is `cec0428`; current verification below. |
 | M01 UMAP/linked preview | Closed (preview only) | Runtime modules, one PBMC plotting notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
-| M02 grouped access/dotplot | Closed (plain-chart preview) | Shared access/statistics, public dotplot, native dots/labels/brackets/guides, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/interactions are not closed. |
+| M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
 | M03 matrixplot | Planned | Reuse grouped access/means; authoritative values_df, scaling and native tile chart. |
 | M04 trees/correlation | Planned | Python computation/cache policy, shared rule layout, standalone and attached trees. No native tree capability blocker. |
 | M05 heatmap/matrix/clustermap | Planned | Observation permutations, annotations, clustering contracts and large tile policy. |
@@ -182,9 +182,28 @@ the original offsets. All 15 dotplot browser checks and 43 dotplot/workflow chec
 Ruff and mypy pass. The packaged-PBMC notebook was rerun and inspected in Jupyter.
 Resource measurements and unrelated families were not rerun for this layout fix.
 
+Index scales and summary hover (October 17): both axes now use integer index slots,
+with outer padding and within-band bracket positions preserving registered Scanpy
+geometry. Native tooltip rows identify gene, group, displayed mean/color value and
+the actual expressing-cell percentage before size clipping. `hover=True` is the
+default; `hover=False` disables picking/tooltips. Scaled means and supplied colors
+have explicit tooltip labels. Zero-area and missing dots remain unpainted.
+All 50 dotplot/workflow checks and 20 dotplot browser checks pass, including native
+bracket-span painting for all seven PBMC marker groups, both orientations and
+legend title placement. Ruff and mypy pass.
+The updated PBMC notebook was rerun from a fresh kernel and hovered in Jupyter.
+
+The [updated resource observation](../../tests/integrations/scanpy/fixtures/dotplot-index-hover-performance.json)
+still densifies only the requested 100,000 × 40 columns of the 20,000-gene sparse
+matrix. Its 2,000 summaries serialize to 198 KB including tooltip labels; cold
+preparation took 3.04 s, peak tracked allocations 149 MB and process RSS 511 MB.
+Chromium first paint took 0.86 s with 10 MB JS heap. The earlier baseline remains
+retained; these are local observations, not portable timing limits. Other plot
+families and the complete documentation site were not rerun for this slice.
+
 Preview limits, retained in the [compatibility guide](../../docs/integrations/scanpy/index.md#dotplot-compatibility):
 unused/empty groups error; all-zero fractions require explicit `dot_max=1`;
-missing statistics retain slots but do not paint; no dotplot interactions yet.
+missing statistics retain slots but do not paint; no dotplot selections or navigation yet.
 Native Lato, guide layout, line-break flattening and Vega reds differ from the
 Matplotlib reference. `figsize` is a documented native plot/guide budget rather
 than a fixed outer canvas. Full typography/palette/export/access closure remains

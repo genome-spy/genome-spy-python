@@ -143,13 +143,15 @@ ranking, palette write, or cached-result mutation occurs.
 | `cmap`, `vmin`, `vmax` | Native schemes (default `Reds` selects Vega `reds`) and finite numeric bounds. Constant bounds paint the first palette color; the guide expands by 10%, or ±0.1 at zero, matching Scanpy's precomputed dot colors. Missing values are omitted from painting without removing their slots; infinities and all-missing colors error. |
 | `title`, `colorbar_title`, `size_title`, `var_group_*` | Native labels, bracket rules and size/color guides. Mapping features supply brackets directly. Scalar `linewidth` styles dot edges. |
 | `width`, `height` | Plot-area logical pixels; defaults are 37 pixels per feature column and 35 per group row, exchanged with the axes. Labels and guides add space. |
+| `hover` | Enabled by default. Tooltips show gene, group, displayed mean/color value and actual expressing-cell percentage, before dot-size clipping. Use `hover=False` to disable them. Scaled means and supplied color values are labeled explicitly. |
 | `figsize` | Explicit native layout budget at 100 logical pixels/inch: subtract a fixed 150-pixel guide allowance from width; height sizes the plot area. Labels and renderer padding add space, so this does not fix the outer canvas dimensions. Conflicts with `width`/`height` error. |
 | `show`, `save`, `ax`, `return_fig` | Same native return/display/export boundary as UMAP. No Axes dictionaries or fake builders. |
 | `dendrogram`, `norm`, `vcenter`, other forwarded kwargs | Nondefault/reserved forms error. Tree attachment is M04; `DotPlot`, supplied `dot_size_df`, and builder styling are M13. Only scalar `linewidth` is accepted from scatter kwargs. |
 
-This slice reproduces the plain chart before adding interactions. It does not
-offer dotplot hover, brushes, cell selection or navigation. Summary marks describe
-groups and features rather than individual observations.
+Rows and columns use integer index-scale slots with padding that preserves the
+initial Scanpy spacing. Repeated gene labels retain separate slots. Hover
+describes group/feature summaries; these dots do not identify individual cells.
+Brushes, cell selection and coordinate navigation remain deferred.
 
 Native labels use portable Lato Regular and native guides. Line breaks in guide
 titles become spaces; fractional percentage ticks retain native numeric precision

@@ -38,7 +38,10 @@ uv run --no-sync python -m tests.integrations.scanpy.generate_dotplot_references
 20,000-gene check: only 40 requested columns densify; the chart carries 50 × 40
 summary dots. Cold preparation includes optional imports; browser first paint
 includes dispatch. Heap, Python allocation/RSS, payload and runtime metadata
-are single-machine observations, not portable limits. Reproduce explicitly:
+are single-machine observations, not portable limits.
+`dotplot-index-hover-performance.json` repeats that workload after the index-scale
+and default-hover update, retaining the earlier observation for comparison.
+Reproduce explicitly:
 
 ```sh
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_dotplot --browser --output /tmp/dotplot.json
