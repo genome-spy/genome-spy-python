@@ -230,13 +230,20 @@ def test_wheel_navigation_changes_coordinates_and_offline_html_needs_no_network(
     bounds = render(page, chart)
     canvas = page.locator("canvas").first.bounding_box()
     before = page.locator("canvas").first.screenshot()
+    domains = page.evaluate(
+        "['umap-x-0', 'umap-y-1'].map(name => api.getScaleResolutionByName(name).getDomain())"
+    )
     page.mouse.move(
         canvas["x"] + bounds["x"] + bounds["width"] / 2,
         canvas["y"] + bounds["y"] + bounds["height"] / 2,
     )
     page.mouse.wheel(0, -300)
     page.wait_for_function(
-        "() => api.getScaleResolutionByName('umap-x-0').getDomain()[0] > -2.2"
+        """before => ['umap-x-0', 'umap-y-1'].every((name, i) => {
+            const domain = api.getScaleResolutionByName(name).getDomain();
+            return domain[1] - domain[0] < before[i][1] - before[i][0];
+        })""",
+        arg=domains,
     )
     assert page.locator("canvas").first.screenshot() != before
     page.evaluate("api.getScaleResolutionByName('umap-x-0').resetZoom()")

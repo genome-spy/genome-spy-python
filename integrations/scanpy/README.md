@@ -56,8 +56,8 @@ adding interactions.
 The [plotting notebook](notebooks/scanpy_plotting.ipynb) loads Scanpy's packaged
 `pbmc68k_reduced()` dataset once and retains its stored UMAP coordinates:
 
-1. Basic categorical and continuous plotting.
-2. Linked brushing, selected-cell count, and Python subset retrieval.
+1. Basic categorical and continuous plotting, with x/y zoom and panning.
+2. Shift-drag linked brushing, selected-cell count, and Python subset retrieval.
 3. Customization: subsets/titles, categorical order/palettes, a gene score with
    symmetric color bounds, and the tutorial's marker overview.
 

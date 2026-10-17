@@ -65,6 +65,8 @@ history in Git. Its retained evidence is:
 - [Combined real packaged-data workflow](README.md#plotting-workflow): basic
   plotting, linked brushing/Python retrieval, then customization. Shared setup
   and duplicate charts from the three earlier notebooks have been consolidated.
+  All UMAP examples enable x/y zoom and panning. Linked brushing uses Shift-drag
+  in the first panel so ordinary dragging remains available for navigation.
 
 UMAP preview baseline (`cfc01b7`): 119 integration checks and 20 browser checks pass,
 as do Ruff formatting/lint and mypy. The workflow test executes every cell,

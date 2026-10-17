@@ -8,6 +8,7 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
+from tests.integrations.scanpy.helpers import points, units
 
 sc = pytest.importorskip("scanpy")
 NOTEBOOK = (
@@ -34,15 +35,20 @@ def test_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypatch):
         np.testing.assert_array_equal(pbmc.obsm["X_umap"], original.obsm["X_umap"])
         assert charts
         for chart in charts:
-            assert chart.to_dict()["datasets"]
+            spec = chart.to_dict()
+            assert spec["datasets"]
+            for panel in units(spec):
+                for channel in ("x", "y"):
+                    assert points(panel)["encoding"][channel]["scale"]["zoom"] is True
         view, brush = namespace["view"], namespace["brush"]
         assert view.parameter_names == [brush.name]
         assert brush.param.to_dict()["select"] == {
             "type": "interval",
             "encodings": ["x", "y"],
-            "on": "mousedown",
-            "zoom": False,
         }
+        for panel in units(view.spec["vconcat"][0]):
+            for channel in ("x", "y"):
+                assert points(panel)["encoding"][channel]["scale"]["zoom"] is True
         xy = original.obsm["X_umap"]
         lower, upper = np.quantile(xy, [0.25, 0.75], axis=0)
         view.parameter_values = {
