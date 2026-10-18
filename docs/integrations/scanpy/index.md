@@ -24,7 +24,8 @@ chart.save("umap.html", inline=True)
 runs neighbors or UMAP analysis. A missing embedding produces an error asking
 you to compute it explicitly first.
 
-This development preview implements categorical/continuous 2D UMAP and plain dotplots.
+This development preview implements categorical/continuous 2D UMAP, plain dotplots
+and matrixplots.
 Full public Scanpy plotting coverage is the destination; the inventory below
 records remaining work. Dendrograms and plot builders remain planned.
 
@@ -162,6 +163,37 @@ including a darker low end; no Matplotlib colors are sampled or imported. Use
 register plot areas at the recorded export DPI and check positions, sizes and
 paint with renderer-specific tolerances; they do not claim identical full figures.
 
+## Matrixplot compatibility
+
+```python
+chart = gsc.pl.matrixplot(
+    pbmc, marker_genes, "bulk_labels", standard_scale="var",
+    cmap="Blues", colorbar_title="column scaled\nexpression", show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+Each tile represents a group/feature mean. Matrixplot shares dotplot's selected
+expression access, category/feature handling, native labels, brackets and sizing.
+It uses its own tile chart and statistical path; expression fractions are not
+computed. It performs no analysis or AnnData/cache writes.
+
+| Parameters | Current behavior |
+| --- | --- |
+| `var_names`, `groupby`, `use_raw`, `layer`, `gene_symbols`, `num_categories`, `categories_order` | Same grouped access and storage limits as dotplot. Repeated feature slots remain distinct. Computed means require observed categories; unused categories error explicitly. |
+| `log`, `standard_scale`, `swap_axes` | Apply log1p to selected observations, aggregate means, then min–max scale per gene (`"var"`) or group (`"group"`) once before an optional transpose. Constant ranges become zero. Matrixplot does not use dotplot's second scaling pass. |
+| `values_df` | Authoritative real numeric table. Preserve supplied values and row/column order; only explicit `categories_order` reindexes its rows. `log` and `standard_scale` do not transform the supplied table. Require exactly the plotted groups and feature multiplicities, with unique group labels. Repeated supplied feature columns retain their own slot values. Missing/extra labels, unexpected duplicates, infinities and nonnumeric entries error. |
+| `cmap`, `vmin`, `vmax` | Native scheme (default viridis) with finite numeric bounds and clipping. Constant bounds expand the guide by 10%, or ±0.1 at zero; tiles map against that expanded domain, unlike dotplot's frozen constant colors. Missing tiles are unpainted but retain their slots; all-missing values error. |
+| `title`, `colorbar_title`, `var_group_*`, `width`, `height`, `figsize` | Shared native grouped layout and horizontal color guide. Index slots have no outer padding, so adjacent tiles fill the matrix. Default cells are 37 × 35 logical pixels, exchanged when axes swap. Frame width follows matrixplot's 1.5-point default. |
+| `edgecolor`, `linewidth` in kwargs | Scalar opaque CSS edge color and nonnegative width in points; defaults are gray and 0.1. `edgecolor="none"` disables edges. Plural aliases error: Scanpy 1.11.5 overwrites those forwarded forms with its defaults; use the singular forms explicitly. Other pcolor kwargs error. |
+| `hover` | Enabled by default; show gene, group and displayed mean/scaled mean or supplied value. `hover=False` disables picking without changing tile geometry. Summary tiles do not identify individual cells. |
+| `show`, `save`, `ax`, `return_fig`, `dendrogram`, `norm`, `vcenter` | Same native delivery and unsupported-option boundary as dotplot. Trees are M04; the MatrixPlot builder and its styling methods are M13. Brushes and tile navigation remain deferred. |
+
+Native palette interpolation, fonts and guide layout have the same documented
+fidelity boundaries as dotplot. Complete-chart checks cover labels, brackets,
+frame and guide placement; registered tile comparisons use 150 export DPI and
+DPR 1.5. The production adapter never imports upstream plotting or Matplotlib.
+
 ## Interaction and native results
 
 hover=True adds observation ID, original observation name, value/source, and
@@ -265,14 +297,14 @@ Two notebooks run independently:
   customization with subsets, titles/frames, categorical order/palettes, an
   explicit Scanpy gene score and the eight-panel marker overview.
 - {download}`Expression plots <../../../integrations/scanpy/notebooks/scanpy_expression.ipynb>`:
-  marker dotplot on `bulk_labels` with summary hover. Matrixplot and heatmap
-  examples will extend this workflow as their APIs are implemented.
+  marker dotplot and per-gene scaled matrixplot on `bulk_labels`, with summary
+  hover. Heatmap examples will extend this workflow when implemented.
 
-These adapt supported UMAP and dotplot sections of Scanpy's
+These adapt supported UMAP, dotplot and matrixplot sections of Scanpy's
 [core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
 [advanced](https://scanpy.scverse.org/en/stable/tutorials/plotting/advanced.html)
-plotting tutorials. The next tutorial coverage is matrixplot
-with Python-computed dendrograms, then heatmaps and ranked-gene variants. The
+plotting tutorials. The next tutorial coverage is Python-computed dendrograms,
+then heatmaps and ranked-gene variants. The
 remaining tutorial plots and Matplotlib artist styling are not implemented yet.
 
 ### Native plot sizing
@@ -306,8 +338,8 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot |
-| Group summaries and trees | matrixplot, dendrogram, correlation_matrix |
+| Available as partial previews | umap, dotplot, matrixplot |
+| Trees and correlation | dendrogram, correlation_matrix |
 | Cell heatmaps and ranked summaries | heatmap, matrix, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap |
 | Other embeddings and PCA | scatter, embedding, tsne, pca, pca_scatter, diffmap, draw_graph, pca_loadings, pca_overview, pca_variance_ratio |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
@@ -317,7 +349,7 @@ remain visible. Function coverage and parameter coverage are separate.
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
 
-All entries except the UMAP/dotplot previews and settings helpers remain required future integration
+All entries except the UMAP/dotplot/matrixplot previews and settings helpers remain required future integration
 work. Settings remain owned by Scanpy. The external.pl namespace is separate
 from this core inventory.
 
@@ -399,6 +431,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.umap
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.dotplot
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 
 .. autofunction:: genome_spy.integrations.scanpy.selection_mask
 ```

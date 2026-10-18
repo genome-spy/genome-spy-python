@@ -19,10 +19,11 @@ REFERENCE = json.loads((REFERENCE_DIR / "dotplot.json").read_text())
 
 
 @pytest.mark.parametrize("swapped,rotation", [(False, None), (False, 0), (True, None)])
-def test_complete_dotplot_labels_guides_and_brackets(
-    page, adata, tmp_path, swapped, rotation
+@pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
+def test_complete_grouped_labels_guides_and_brackets(
+    page, adata, tmp_path, swapped, rotation, family
 ):
-    chart = gsc.pl.dotplot(
+    chart = getattr(gsc.pl, family)(
         adata,
         {"first markers": ["g2", "g1"], "again": "g2"},
         "group",
@@ -47,7 +48,7 @@ def test_complete_dotplot_labels_guides_and_brackets(
         "B",
         "A",
         "Mean expression",
-        "Fraction of cells",
+        *(["Fraction of cells"] if family == "dotplot" else []),
     ]:
         assert label in svg
     labels = page.evaluate(
@@ -73,10 +74,10 @@ def test_complete_dotplot_labels_guides_and_brackets(
     assert [label["text"] for label in labels].count("g2") == 2
     for text in ["first markers", "again"]:
         assert [label["text"] for label in labels].count(text) == 1
-    for title, tick in [
-        ("Fraction of cells in group (%)", "30"),
-        ("Mean expression in group", "1.0"),
-    ]:
+    guides = [("Mean expression in group", "1.0")]
+    if family == "dotplot":
+        guides.append(("Fraction of cells in group (%)", "30"))
+    for title, tick in guides:
         heading = next(label for label in labels if label["text"] == title)
         entry = next(label for label in labels if label["text"] == tick)
         assert entry["y"] >= heading["y"] + heading["height"]
@@ -89,22 +90,29 @@ def test_complete_dotplot_labels_guides_and_brackets(
             # Bracket centers follow the covered slots, independent of text length.
             slot = 0.95 if label["text"] == "first markers" else 2.45
             if swapped:
-                expected = bounds["y"] + (slot + 0.5) / 4 * bounds["height"]
+                padding = 0.5 if family == "dotplot" else 0
+                expected = (
+                    bounds["y"]
+                    + (slot + padding) / (3 + 2 * padding) * bounds["height"]
+                )
                 assert label["y"] + label["height"] / 2 == pytest.approx(
                     expected, abs=2
                 )
                 assert label["x"] >= right + 6
                 px, py = round(right + 4), round(expected)
             else:
-                expected = bounds["x"] + (slot + 0.3) / 3.6 * bounds["width"]
+                padding = 0.3 if family == "dotplot" else 0
+                expected = (
+                    bounds["x"] + (slot + padding) / (3 + 2 * padding) * bounds["width"]
+                )
                 assert label["x"] + label["width"] / 2 == pytest.approx(expected, abs=2)
                 assert label["y"] + label["height"] <= bounds["y"] - 6
                 px, py = round(expected), round(bounds["y"] - 4)
             assert pixels[py - 1 : py + 2, px - 1 : px + 2].min() < 64
     page.screenshot(
-        path=str(tmp_path / f"dotplot-{swapped}-complete.png"), full_page=True
+        path=str(tmp_path / f"{family}-{swapped}-complete.png"), full_page=True
     )
-    (tmp_path / f"dotplot-{swapped}-complete.svg").write_text(svg)
+    (tmp_path / f"{family}-{swapped}-complete.svg").write_text(svg)
 
 
 @pytest.mark.parametrize("swapped", [False, True])
@@ -131,6 +139,12 @@ def test_dotplot_hover_reports_summary_values(page, adata, swapped, hover):
     page.wait_for_timeout(450)
     page.mouse.move(px, py)
     if hover:
+        # Match the one-pixel picking neighborhood used by the UMAP checks.
+        for dx, dy in [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]:
+            page.mouse.move(px + dx, py + dy)
+            page.wait_for_timeout(80)
+            if page.locator("table.attributes").is_visible():
+                break
         page.get_by_text("Expressing cells (%)", exact=True).wait_for(state="visible")
         rows = page.locator("table.attributes tr").all()
         assert [

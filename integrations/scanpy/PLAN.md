@@ -65,7 +65,8 @@ free of the scientific stack.
   alpha. Do not sample Matplotlib colormaps or read rcParams. Per-plot scalar alpha
   remains supported where implemented.
 - Grouped `figsize` is a native layout budget at 100 logical pixels/inch. Dotplot
-  width includes a fixed 150-pixel guide allowance; height sizes the plot area.
+  width includes a fixed 150-pixel guide allowance; matrixplot uses the same budget.
+  Height sizes the plot area.
   Labels and renderer padding add space, so it does not fix the outer canvas.
   Reject conflicts with native panel `width`/`height`; test resulting panel and
   guide sizes. Do not consult global Matplotlib settings.
@@ -280,9 +281,15 @@ M04; it does not close full dotplot coverage or the DotPlot builder.
   `standard_scale="var"/"group"` min–max order and zero-range behavior.
 - M03.b: `values_df` is an authoritative labeled table; test reindexing,
   mismatch/duplicate errors and the distinct supplied-table scaling path.
+  In 1.11.5 supplied values bypass log/scaling, keep column and row order, and
+  only explicit `categories_order` reindexes rows. Repeated feature multiplicities
+  must match the plotted slots; duplicate group labels fail clearly.
 - M03.c: `_matrixplot_chart.py` uses native rectangles, actual color scales,
   swapped axes, brackets and per-panel guides. Preserve color bounds and edge
   styling; compare complete charts on the same grouped PBMC marker workflow.
+  Reuse native index slots/labels/brackets with zero outer padding, a horizontal
+  color guide and optional summary hover. Accept singular scalar `edgecolor` and
+  `linewidth`; reject plural aliases that upstream overwrites with defaults.
 
 Target: `gsc.pl.matrixplot(pbmc, markers, "louvain", standard_scale="var", show=False)`.
 Acceptance: shared access/mean code is used, table values and ordering are exact,

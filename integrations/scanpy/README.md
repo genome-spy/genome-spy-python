@@ -2,8 +2,8 @@
 
 Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
 [current compatibility guide](../../docs/integrations/scanpy/index.md).
-Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)` or
-`gsc.pl.dotplot(...)`.
+Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
+`gsc.pl.dotplot(...)` or `gsc.pl.matrixplot(...)`.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
 The implementation lives in the installable [source package](../../src/genome_spy/integrations/scanpy/),
@@ -16,7 +16,9 @@ not in this workspace or the documentation:
 | [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared raw/layer resolution and resident-expression checks, reused by UMAP and grouped data. |
 | [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Detached grouped values, feature slots/brackets, means, expression fractions and min–max scaling; no chart authoring. |
 | [_colors.py](../../src/genome_spy/integrations/scanpy/_colors.py) | Shared native scheme and opaque CSS color validation. |
-| [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, index slots, exact area/percentage lookup, labels, brackets, guides and summary hover. |
+| [_grouped_chart.py](../../src/genome_spy/integrations/scanpy/_grouped_chart.py) | Shared native index slots, labels, brackets, sizing and color guides. |
+| [_matrixplot_chart.py](../../src/genome_spy/integrations/scanpy/_matrixplot_chart.py) | Native tiles, edge styling and summary hover; no AnnData access. |
+| [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
 | [_umap_colors.py](../../src/genome_spy/integrations/scanpy/_umap_colors.py) | Category order, CSS palette values, numeric bounds, and native scheme validation. |
 | [_umap_style.py](../../src/genome_spy/integrations/scanpy/_umap_style.py) | Explicit native presentation defaults and scalar style validation. |
@@ -40,8 +42,8 @@ palettes and Scanpy's public default palette lists, go directly to native scales
 GenomeSpy maps continuous values and draws the guides. Plotting retains source
 measurements; it does not compute embeddings, rankings, or new scientific results.
 
-UMAP and plain dotplots are currently implemented. Each future family gets its own
-chart module and reuses compatible AnnData access, category/color handling, and
+UMAP, plain dotplots and matrixplots are currently implemented. Each future family
+gets its own chart module and reuses compatible AnnData access, category/color handling, and
 plotting computations. A separate data module per family is optional: add one
 only when that family needs distinct preparation that merits its own module.
 Share common operations directly; there is no requirement to implement another
@@ -61,10 +63,9 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
 - [UMAP](notebooks/scanpy_umap.ipynb): basic categorical/continuous plotting with
   x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
   Existing coordinates are retained; gene scoring is an explicit Scanpy operation.
-- [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot and summary
-  hover using the core tutorial dictionary and existing `bulk_labels`. Matrixplot
-  and heatmap examples belong here as their APIs are implemented, reusing its data
-  and marker setup.
+- [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot, scaled
+  matrixplot and summary hover using the core tutorial dictionary and existing
+  `bulk_labels`. Heatmaps will reuse this data and marker setup when implemented.
 
 These adapt supported portions of the official core and advanced tutorials.
 Keep related examples together within each workflow, without placeholder cells
@@ -100,7 +101,9 @@ tests compare against the frozen results instead of regenerating them.
 uv run --no-sync python -m tests.integrations.scanpy.generate_references --help
 uv run --no-sync python -m tests.integrations.scanpy.generate_grouped_references
 uv run --no-sync python -m tests.integrations.scanpy.generate_dotplot_references
-uv run --no-sync python -m tests.integrations.scanpy.benchmark_dotplot --browser --output /tmp/dotplot.json
+uv run --no-sync python -m tests.integrations.scanpy.generate_matrixplot_references
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot dotplot --browser --output /tmp/dotplot.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --browser --output /tmp/matrixplot.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark --help
 ```
 

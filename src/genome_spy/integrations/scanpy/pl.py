@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
     from genome_spy import Parameter, TopLevelSpec
 
-__all__ = ["dotplot", "umap"]
+__all__ = ["dotplot", "matrixplot", "umap"]
 
 _Bound = float | str | Sequence[float | str | None] | None
 
@@ -510,6 +510,185 @@ def dotplot(
         + (" (scaled)" if standard_scale is not None else ""),
         linewidth=kwds.get("linewidth", 0.2),
         rotation=var_group_rotation,
+        width=width,
+        height=height,
+        figsize=figsize,
+    )
+    if sc.settings.autoshow if show is None else show:
+        chart.display()
+        return None
+    return chart
+
+
+def matrixplot(
+    adata: AnnData,
+    var_names: str | Sequence[str] | Mapping[str, str | Sequence[str]],
+    groupby: str | Sequence[str],
+    *,
+    use_raw: bool | None = None,
+    log: bool = False,
+    num_categories: int = 7,
+    categories_order: Sequence[str] | None = None,
+    figsize: tuple[float, float] | None = None,
+    dendrogram: bool | str = False,
+    title: str | None = None,
+    cmap: Any = "viridis",
+    colorbar_title: str | None = "Mean expression\nin group",
+    gene_symbols: str | None = None,
+    var_group_positions: Sequence[tuple[int, int]] | None = None,
+    var_group_labels: Sequence[str] | None = None,
+    var_group_rotation: float | None = None,
+    layer: str | None = None,
+    standard_scale: Literal["var", "group"] | None = None,
+    values_df: pd.DataFrame | None = None,
+    swap_axes: bool = False,
+    show: bool | None = None,
+    save: str | bool | None = None,
+    vmin: float | None = None,
+    vmax: float | None = None,
+    vcenter: float | None = None,
+    norm: Any = None,
+    hover: bool = True,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot group mean expression as native GenomeSpy tiles.
+
+    Selected-data access, means and scaling run in Python, without modifying
+    AnnData or invoking analysis. Chart construction shares dotplot's native
+    slots, labels and brackets. Supplied values bypass aggregation and scaling.
+
+    Args:
+        adata: AnnData with expression and grouping annotations.
+        var_names: Feature keys, repeated slots, or labeled feature groups.
+        groupby: Observation key or categorical grouping keys.
+        use_raw: Use raw by default when available; layer overrides that default.
+        log: Apply log1p before computing means; ignored for supplied values_df.
+        num_categories: Number of bins for numeric grouping annotations.
+        categories_order: Complete category order, also applied to values_df rows.
+        figsize: Native layout budget in inches at 100 logical pixels/inch.
+            Width includes a 150-pixel guide allowance; height sizes the plot
+            area. Labels and padding add space. Conflicts with width/height.
+        dendrogram: Only False until tree attachment in M04.
+        title: Plot title.
+        cmap: GenomeSpy color scheme name; None uses viridis.
+        colorbar_title: Color guide title; None removes its title.
+        gene_symbols: Variable annotation column for symbol lookup.
+        var_group_positions: Inclusive feature-slot bracket endpoints.
+        var_group_labels: Bracket labels; mappings supply these directly.
+        var_group_rotation: Bracket label rotation in degrees.
+        layer: Expression layer instead of the automatic raw/X source.
+        standard_scale: Min–max scale computed means per variable or group,
+            once before swapping axes. Constant ranges become zero.
+            Supplied values_df is never scaled.
+        values_df: Authoritative numeric table with exactly the plotted labels
+            and feature multiplicities. Retains its row/column order unless
+            categories_order reorders rows. Duplicate group labels error.
+        swap_axes: Place groups on x and features on y.
+        show: Display once, return chart when False, or use Scanpy autoshow.
+        save: Only inactive None/False; use native chart HTML/JSON saving.
+        vmin: Finite numeric lower color bound.
+        vmax: Finite numeric upper color bound.
+        vcenter: Reserved; nondefault values error.
+        norm: Reserved; Matplotlib normalization objects error.
+        hover: Show gene, group and displayed mean or supplied value.
+        width: Plot-area logical pixels, default 37 per feature column.
+        height: Plot-area logical pixels, default 35 per group row.
+        **kwds: Scalar edgecolor and linewidth. Defaults are gray edges at 0.1
+            points; edgecolor="none" removes edges. Plural aliases and all
+            other pcolor options error.
+
+    Returns:
+        A detached native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If Scanpy 1.11.5 is unavailable.
+        TypeError: If input types or forwarded options are invalid.
+        ValueError: If groups, table labels, bounds or dimensions are invalid.
+        NotImplementedError: If a rendering option is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.matrixplot(
+        ...     pbmc, ["CD79A", "CD3D"], "bulk_labels",
+        ...     standard_scale="var", show=False,
+        ... )
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.matrixplot"
+    for name in ("ax", "return_fig"):
+        if name in kwds:
+            raise TypeError(
+                f"{context}: {name} is omitted; use show=False and the native chart."
+            )
+    unknown = kwds.keys() - {"edgecolor", "linewidth"}
+    if unknown:
+        raise TypeError(
+            f"{context}: unsupported option(s): {', '.join(sorted(unknown))}. "
+            "Use scalar edgecolor and linewidth for tile edges."
+        )
+    for name, rejected in {
+        "dendrogram": dendrogram is not False,
+        "save": save is not None and save is not False,
+        "vcenter": vcenter is not None,
+        "norm": norm is not None,
+    }.items():
+        if rejected:
+            raise NotImplementedError(f"{context}: {name} is not supported yet.")
+    for name, value in {"log": log, "swap_axes": swap_axes, "hover": hover}.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    if show is not None and not isinstance(show, bool):
+        raise TypeError(f"{context}: show must be boolean or None.")
+    if standard_scale not in (None, "var", "group"):
+        raise ValueError(f"{context}: standard_scale must be 'var', 'group', or None.")
+    sc = _require_scanpy(context)
+    if sc.settings.autosave and save is None:
+        raise NotImplementedError(
+            f"{context}: automatic image saving is unsupported; use save=False."
+        )
+    from genome_spy.integrations.scanpy._grouped_data import (
+        grouped_expression,
+        matrixplot_statistics,
+    )
+    from genome_spy.integrations.scanpy._matrixplot_chart import build_matrixplot
+
+    prepared = grouped_expression(
+        adata,
+        var_names,
+        groupby,
+        use_raw=use_raw,
+        log=log if values_df is None else False,
+        num_categories=num_categories,
+        categories_order=categories_order,
+        gene_symbols=gene_symbols,
+        layer=layer,
+        var_group_positions=var_group_positions,
+        var_group_labels=var_group_labels,
+    )
+    colors = matrixplot_statistics(
+        prepared.values,
+        standard_scale=standard_scale,
+        values_df=values_df,
+        categories_order=categories_order,
+        swap_axes=swap_axes,
+    )
+    chart = build_matrixplot(
+        colors,
+        prepared.feature_groups,
+        swap_axes=swap_axes,
+        title=title,
+        colorbar_title=colorbar_title,
+        cmap=cmap,
+        vmin=vmin,
+        vmax=vmax,
+        edgecolor=kwds.get("edgecolor", "gray"),
+        linewidth=kwds.get("linewidth", 0.1),
+        rotation=var_group_rotation,
+        hover=hover,
+        value_title="Value"
+        if values_df is not None
+        else "Mean expression" + (" (scaled)" if standard_scale is not None else ""),
         width=width,
         height=height,
         figsize=figsize,

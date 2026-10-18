@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from collections import Counter
 from dataclasses import dataclass
 from numbers import Integral, Real
 from typing import Any, Literal
@@ -261,6 +262,53 @@ def scale_means(
     axis = 0 if standard_scale == "var" else 1
     shifted = means.sub(means.min(axis=axis), axis=1 - axis)
     return shifted.div(shifted.max(axis=axis), axis=1 - axis).fillna(0)
+
+
+def matrixplot_statistics(
+    values: pd.DataFrame,
+    *,
+    standard_scale: Literal["var", "group"] | None,
+    values_df: pd.DataFrame | None,
+    categories_order: Sequence[str] | None,
+    swap_axes: bool,
+) -> pd.DataFrame:
+    """Scale computed means once; supplied tables retain their values and order."""
+    if values_df is None:
+        means = group_means(values)
+        if means.empty:
+            raise ValueError("gsc.pl.matrixplot: no observed groups to plot.")
+        if len(means) != len(values.index.categories):
+            raise ValueError(
+                "gsc.pl.matrixplot: unused categories have no statistics; "
+                "remove unused categories explicitly before plotting."
+            )
+        means = scale_means(means, standard_scale)
+    else:
+        if not isinstance(values_df, pd.DataFrame):
+            raise TypeError("gsc.pl.matrixplot: values_df must be a pandas DataFrame.")
+        if (
+            not values_df.index.is_unique
+            or set(values_df.index) != set(values.index.categories)
+            or Counter(values_df.columns) != Counter(values.columns)
+        ):
+            raise ValueError(
+                "gsc.pl.matrixplot: values_df needs exactly the plotted group/feature "
+                "labels and repeated feature slots, with unique group labels."
+            )
+        means = values_df.copy()
+        if not all(
+            pd.api.types.is_numeric_dtype(dtype)
+            and not pd.api.types.is_complex_dtype(dtype)
+            for dtype in means.dtypes
+        ):
+            raise TypeError("gsc.pl.matrixplot: values_df values must be real numbers.")
+        if np.isinf(means.to_numpy(dtype=float, na_value=np.nan)).any():
+            raise ValueError(
+                "gsc.pl.matrixplot: values_df values must be finite or missing."
+            )
+        if categories_order is not None:
+            means = means.loc[list(categories_order)]
+    return means.T if swap_axes else means
 
 
 def dotplot_statistics(

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from math import isfinite
-from numbers import Real
 from typing import Any
 
 import numpy as np
@@ -12,30 +10,25 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.integrations.scanpy._colors import native_scheme
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+from genome_spy.integrations.scanpy._grouped_chart import (
+    bracket_space,
+    color_bounds,
+    color_legend,
+    finish_grouped_chart,
+    grouped_axes,
+    number,
+    plot_dimensions,
+    summary_records,
+)
 
 _PT = 100 / 72
-_FONT = "Lato"
-_TICK = 10 * 0.833 * _PT
-
-
-def _number(value: Any, name: str, *, minimum: float = 0) -> float:
-    if (
-        isinstance(value, bool)
-        or not isinstance(value, Real)
-        or not isfinite(value)
-        or value < minimum
-    ):
-        raise ValueError(
-            f"gsc.pl.dotplot: {name} must be a finite number >= {minimum}."
-        )
-    return float(value)
 
 
 def dot_size_scale(
     fractions: np.ndarray, dot_min: float | None, dot_max: float | None, smallest: float
 ) -> tuple[list[float], list[float], list[float]]:
     """Map exact percentage values to areas, including clipped power scaling."""
-    smallest = _number(smallest, "smallest_dot")
+    smallest = number(smallest, "smallest_dot", context="gsc.pl.dotplot")
     if smallest > 200:
         raise ValueError(
             "gsc.pl.dotplot: smallest_dot cannot exceed the largest dot (200)."
@@ -43,11 +36,13 @@ def dot_size_scale(
     valid = fractions[np.isfinite(fractions)]
     if not valid.size:
         raise ValueError("gsc.pl.dotplot: fractions need at least one finite value.")
-    low = 0.0 if dot_min is None else _number(dot_min, "dot_min")
+    low = (
+        0.0 if dot_min is None else number(dot_min, "dot_min", context="gsc.pl.dotplot")
+    )
     high = (
         float(np.ceil(valid.max() * 10) / 10)
         if dot_max is None
-        else _number(dot_max, "dot_max")
+        else number(dot_max, "dot_max", context="gsc.pl.dotplot")
     )
     if low > 1 or high > 1 or high <= low:
         raise ValueError(
@@ -64,157 +59,6 @@ def dot_size_scale(
         200 - smallest
     )
     return (domain * 100).tolist(), (areas * _PT**2).tolist(), (ticks * 100).tolist()
-
-
-def _coordinate(
-    channel: Any, field: str, count: int, padding: float, *, reverse: bool = False
-) -> Any:
-    return (
-        channel(f"{field}:I")
-        .scale(
-            domain=[0, count - 1],
-            paddingOuter=padding,
-            reverse=reverse,
-            zoom=False,
-        )
-        .axis(None)
-    )
-
-
-def _slot_labels(labels: list[str], coordinate: Any, *, horizontal: bool) -> gs.Chart:
-    table = [{"slot": i, "label": label} for i, label in enumerate(labels)]
-    if horizontal:
-        return (
-            gs.Chart(table)
-            .mark_text(
-                font=_FONT,
-                size=_TICK,
-                angle=-90,
-                align="right",
-                baseline="middle",
-                yOffset=8,
-                clip="never",
-                tooltip=None,
-            )
-            .encode(x=coordinate.field("slot"), y=gs.value(0), text="label:N")
-        )
-    return (
-        gs.Chart(table)
-        .mark_text(
-            font=_FONT,
-            size=_TICK,
-            align="right",
-            baseline="middle",
-            xOffset=-8,
-            clip="never",
-            tooltip=None,
-        )
-        .encode(x=gs.value(0), y=coordinate.field("slot"), text="label:N")
-    )
-
-
-def _brackets(
-    groups: tuple[FeatureGroup, ...],
-    coordinate: Any,
-    *,
-    swapped: bool,
-    rotation: float | None,
-) -> list[gs.Chart]:
-    # Keep index spans half-open while retaining Scanpy's asymmetric bracket ends.
-    table = [
-        {
-            "start": group.start,
-            "end": group.end,
-            "stop": group.end + 1,
-            "slot": (group.start + group.end) // 2,
-            "band": 0.45 + (group.start + group.end) % 2 / 2,
-            "label": group.label,
-        }
-        for group in groups
-    ]
-    line = gs.Chart(table).mark_rule(
-        color="black",
-        size=1.5 * _PT,
-        clip="never",
-        tooltip=None,
-        xOffset=4 if swapped else 0,
-        x2Offset=4 if swapped else gs.expr("-0.3 * bandwidth('x') * width"),
-        yOffset=0 if swapped else -4,
-        y2Offset=gs.expr("-0.3 * bandwidth('y') * height") if swapped else -4,
-    )
-    caps = gs.Chart(table).mark_rule(
-        color="black",
-        size=1.5 * _PT,
-        clip="never",
-        tooltip=None,
-        x2Offset=4 if swapped else 0,
-        y2Offset=0 if swapped else -4,
-    )
-    if rotation is None:
-        rotation = (
-            270 if swapped else 90 if any(len(g.label) > 4 for g in groups) else 0
-        )
-    text = gs.Chart(table).mark_text(
-        font=_FONT,
-        size=_TICK,
-        angle=-rotation,
-        align="left" if not swapped and rotation == 90 else "center",
-        baseline="middle" if rotation else "bottom",
-        # Positional offsets stay outside the plot when the text rotates.
-        xOffset=16 if swapped else 0,
-        yOffset=0 if swapped else -8,
-        clip="never",
-        tooltip=None,
-    )
-    if swapped:
-        line = line.encode(
-            y=coordinate.field("start").band(0.2),
-            y2=gs.Y2("stop:I").band(0),
-            x=gs.value(1),
-            x2=gs.value(1),
-        )
-        left = caps.encode(
-            y=coordinate.field("start").band(0.2),
-            y2=gs.Y2("start:I").band(0.2),
-            x=gs.value(1),
-            x2=gs.value(1),
-        )
-        right = left.encode(
-            y=coordinate.field("end").band(0.7), y2=gs.Y2("end:I").band(0.7)
-        )
-        text = text.encode(
-            y=coordinate.field("slot").band(0),
-            yOffset=gs.YOffset(
-                gs.expr("datum.band * bandwidth('y') * height"), type="quantitative"
-            ).scale(None),
-            x=gs.value(1),
-            text="label:N",
-        )
-    else:
-        line = line.encode(
-            x=coordinate.field("start").band(0.2),
-            x2=gs.X2("stop:I").band(0),
-            y=gs.value(1),
-            y2=gs.value(1),
-        )
-        left = caps.encode(
-            x=coordinate.field("start").band(0.2),
-            x2=gs.X2("start:I").band(0.2),
-            y=gs.value(1),
-            y2=gs.value(1),
-        )
-        right = left.encode(
-            x=coordinate.field("end").band(0.7), x2=gs.X2("end:I").band(0.7)
-        )
-        text = text.encode(
-            x=coordinate.field("slot").band(0),
-            xOffset=gs.XOffset(
-                gs.expr("datum.band * bandwidth('x') * width"), type="quantitative"
-            ).scale(None),
-            y=gs.value(1),
-            text="label:N",
-        )
-    return [line, left, right, text]
 
 
 def build_dotplot(
@@ -244,30 +88,20 @@ def build_dotplot(
     scheme = native_scheme(
         "viridis" if cmap is None else cmap, "cmap", context="gsc.pl.dotplot"
     )
-    linewidth = _number(linewidth, "linewidth")
+    linewidth = number(linewidth, "linewidth", context="gsc.pl.dotplot")
     if rotation is not None:
-        rotation = _number(rotation, "var_group_rotation", minimum=-360)
-    if figsize is not None:
-        if width is not None or height is not None:
-            raise TypeError(
-                "gsc.pl.dotplot: figsize cannot be combined with width or height."
-            )
-        if len(figsize) != 2:
-            raise ValueError("gsc.pl.dotplot: figsize needs (width, height) inches.")
-        width = _number(figsize[0], "figsize width") * 100 - 150
-        height = _number(figsize[1], "figsize height") * 100
-    width = (
-        columns * (35 if swap_axes else 37)
-        if width is None
-        else _number(width, "width")
+        rotation = number(
+            rotation, "var_group_rotation", minimum=-360, context="gsc.pl.dotplot"
+        )
+    width, height = plot_dimensions(
+        rows,
+        columns,
+        swap_axes=swap_axes,
+        width=width,
+        height=height,
+        figsize=figsize,
+        context="gsc.pl.dotplot",
     )
-    height = (
-        rows * (37 if swap_axes else 35)
-        if height is None
-        else _number(height, "height")
-    )
-    if width <= 0 or height <= 0:
-        raise ValueError("gsc.pl.dotplot: plot width and height must be positive.")
     for name, value in {
         "title": title,
         "size_title": size_title,
@@ -276,77 +110,21 @@ def build_dotplot(
         if value is not None and not isinstance(value, str):
             raise TypeError(f"gsc.pl.dotplot: {name} must be a string or None.")
     values = colors.to_numpy(dtype=float, na_value=np.nan)
-    valid = values[np.isfinite(values)]
-    if not valid.size:
-        raise ValueError("gsc.pl.dotplot: colors need at least one finite value.")
-    low = (
-        float(valid.min())
-        if vmin is None
-        else _number(vmin, "vmin", minimum=-float("inf"))
+    low, high, constant_color = color_bounds(
+        values, vmin, vmax, context="gsc.pl.dotplot"
     )
-    high = (
-        float(valid.max())
-        if vmax is None
-        else _number(vmax, "vmax", minimum=-float("inf"))
-    )
-    if low > high:
-        raise ValueError("gsc.pl.dotplot: vmin cannot exceed vmax.")
-    constant_color = low == high
-    if constant_color:
-        delta = abs(low) * 0.1 or 0.1
-        low, high = low - delta, high + delta
     domain, areas, ticks = dot_size_scale(
         fractions.to_numpy(dtype=float, na_value=np.nan), dot_min, dot_max, smallest_dot
     )
-    yy, xx = np.indices(colors.shape)
-    xlabels, ylabels = [str(v) for v in colors.columns], [str(v) for v in colors.index]
-    table = pd.DataFrame(
-        {
-            "_x": xx.ravel(),
-            "_y": yy.ravel(),
-            "_gene": np.asarray(ylabels if swap_axes else xlabels)[
-                (yy if swap_axes else xx).ravel()
-            ],
-            "_group": np.asarray(xlabels if swap_axes else ylabels)[
-                (xx if swap_axes else yy).ravel()
-            ],
-            "_mean": values.ravel(),
-            "_percent": fractions.to_numpy(dtype=float, na_value=np.nan).ravel() * 100,
-        }
-    )
+    table = summary_records(colors, swap_axes=swap_axes, context="gsc.pl.dotplot")
+    table["_percent"] = fractions.to_numpy(dtype=float, na_value=np.nan).ravel() * 100
     if constant_color:
         # Scanpy freezes dot colors before its colorbar expands constant bounds.
         table["_paint"] = low
-    x = _coordinate(gs.X, "_x", columns, 0.3)
-    y = _coordinate(gs.Y, "_y", rows, 0.5, reverse=True)
-    x_axis = x.axis(
-        values=list(range(columns)),
-        labels=False,
-        title=None,
-        domain=False,
-        tickColor="black",
-        tickSize=3.5 * _PT,
-        tickWidth=0.8 * _PT,
+    x, y = grouped_axes(rows, columns, xpadding=0.3, ypadding=0.5)
+    guide_offset = (
+        bracket_space(feature_groups) + 12 if feature_groups and swap_axes else 12
     )
-    y_axis = y.axis(
-        values=list(range(rows)),
-        labels=False,
-        title=None,
-        domain=False,
-        tickColor="black",
-        tickSize=3.5 * _PT,
-        tickWidth=0.8 * _PT,
-    )
-    if len(set(ylabels if not swap_axes else xlabels)) != (
-        rows if not swap_axes else columns
-    ):
-        raise ValueError(
-            "gsc.pl.dotplot: group labels collide when serialized as strings."
-        )
-    bracket_space = (
-        max((len(g.label) for g in feature_groups), default=0) * _TICK * 0.65 + 12
-    )
-    guide_offset = bracket_space + 12 if feature_groups and swap_axes else 12
     dots = (
         gs.Chart(table)
         .transform_filter("isValid(datum._mean) && isValid(datum._percent)")
@@ -358,8 +136,8 @@ def build_dotplot(
             tooltip={"handler": "default"} if hover else None,
         )
         .encode(
-            x=x_axis,
-            y=y_axis,
+            x=x,
+            y=y,
             color=gs.Color("_paint:Q" if constant_color else "_mean:Q")
             .scale(
                 type="linear",
@@ -369,18 +147,7 @@ def build_dotplot(
                 clamp=True,
                 scheme=scheme,
             )
-            .legend(
-                gs.Legend(
-                    title=colorbar_title.replace("\n", " ")
-                    if colorbar_title
-                    else colorbar_title,
-                    orient="right",
-                    direction="horizontal",
-                    gradientLength=150,
-                    gradientThickness=15,
-                    offset=guide_offset,
-                )
-            ),
+            .legend(color_legend(colorbar_title, feature_groups, swap_axes=swap_axes)),
             size=gs.Size("_percent:Q")
             .scale(type="ordinal", domain=domain, range=areas)
             .legend(
@@ -410,46 +177,16 @@ def build_dotplot(
                 gs.Tooltip("_percent:Q", title="Expressing cells (%)", format=".1f"),
             ]
         )
-    layers: list[gs.Chart] = [
+    return finish_grouped_chart(
         dots,
-        _slot_labels(xlabels, x, horizontal=True),
-        _slot_labels(ylabels, y, horizontal=False),
-    ]
-    if feature_groups:
-        layers.extend(
-            _brackets(
-                feature_groups,
-                y if swap_axes else x,
-                swapped=swap_axes,
-                rotation=rotation,
-            )
-        )
-    chart = gs.layer(*layers).properties(
+        colors,
+        feature_groups,
+        x,
+        y,
+        swap_axes=swap_axes,
+        rotation=rotation,
+        title=title,
         width=width,
         height=height,
-        padding={
-            "left": max(map(len, ylabels)) * _TICK * 0.65 + 12,
-            "bottom": max(map(len, xlabels)) * _TICK * 0.65 + 12,
-            "top": bracket_space if feature_groups and not swap_axes else 10,
-            "right": 10,
-        },
-    )
-    if title:
-        chart = chart.properties(
-            title=gs.title(
-                title,
-                font=_FONT,
-                fontSize=12 * _PT,
-                offset=bracket_space + 10 if feature_groups and not swap_axes else 10,
-            )
-        )
-    return chart.configure_view(stroke="black", strokeWidth=0.8 * _PT).configure_legend(
-        labelFont=_FONT,
-        labelFontSize=_TICK,
-        titleFont=_FONT,
-        titleFontSize=_TICK,
-        titleFontWeight="normal",
-        titleOrient="top",
-        layout={"anchor": "end", "direction": "vertical", "wrap": False},
-        spacing=25,
+        frame_width=0.8,
     )

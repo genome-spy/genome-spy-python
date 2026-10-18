@@ -34,6 +34,19 @@ in the pytest output directory, at DPR 1.5, with no image fitting.
 uv run --no-sync python -m tests.integrations.scanpy.generate_dotplot_references
 ```
 
+`matrixplot.json` and `matrixplot-*.png` retain thirteen complete Scanpy
+matrixplots and registered plot crops at the same 100/150 display/export DPI.
+The original shared grouped input is extended by `matrixplot_fixture.py`.
+Cases cover one-pass scaling before transpose, authoritative supplied values and
+ordering, explicit row reindexing, log, repeated slots, missing tiles, constant
+normalization and singular edge styling. Values, tile bounds/paint, color domain,
+labels, edge widths/colors, input checksums and versions are frozen explicitly.
+Native browser checks retain complete captures and registered overlays at DPR 1.5.
+
+```sh
+uv run --no-sync python -m tests.integrations.scanpy.generate_matrixplot_references
+```
+
 `dotplot-performance.json` records the October 17 sparse 100,000-cell ×
 20,000-gene check: only 40 requested columns densify; the chart carries 50 × 40
 summary dots. Cold preparation includes optional imports; browser first paint
@@ -44,8 +57,15 @@ and default-hover update, retaining the earlier observation for comparison.
 Reproduce explicitly:
 
 ```sh
-uv run --no-sync python -m tests.integrations.scanpy.benchmark_dotplot --browser --output /tmp/dotplot.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --browser --output /tmp/dotplot.json
 ```
+
+The same benchmark accepts `--plot matrixplot`, reusing the selected-column
+workload for 2,000 summary tiles. `matrixplot-performance.json` records the
+October 18 native tile observation, including preparation allocations, RSS,
+payload, browser first paint, hover response and live JS heap. Timings are
+single-machine observations; sparse densification remains restricted to the
+100,000 × 40 selected columns.
 
 The original synthetic input lives in `tests/integrations/scanpy/fixture_data.py` and is covered
 by this project's MIT license. No real datasets, benchmark implementations,

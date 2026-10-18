@@ -94,7 +94,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     )
     namespace = {}
     run_notebook(NOTEBOOKS / "scanpy_expression.ipynb", namespace)
-    assert charts == [namespace["dotplot"]]
+    assert charts == [namespace["dotplot"], namespace["matrixplot"]]
     assert namespace["pbmc"].shape == (700, 765)
     spec = charts[0].to_dict()
     dot = points(spec)
@@ -107,3 +107,19 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         "Mean expression",
         "Expressing cells (%)",
     ]
+    spec = charts[1].to_dict()
+    tiles = spec["layer"][0]
+    records = spec["datasets"][tiles["data"]["name"]]
+    assert tiles["mark"]["type"] == "rect"
+    assert len(records) == 100
+    assert tiles["encoding"]["color"]["scale"]["scheme"] == "blues"
+    assert tiles["encoding"]["color"]["scale"]["domain"] == [0, 1]
+    assert [item["title"] for item in tiles["encoding"]["tooltip"]] == [
+        "Gene",
+        "Group",
+        "Mean expression (scaled)",
+    ]
+    for gene in namespace["marker_genes"].values():
+        for name in gene:
+            values = [row["_mean"] for row in records if row["_gene"] == name]
+            assert min(values) == 0 and max(values) == 1
