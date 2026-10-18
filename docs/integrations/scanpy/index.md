@@ -211,33 +211,34 @@ correlations = gsc.pl.correlation_matrix(
 
 All computations run in Python. GenomeSpy renders supplied branch coordinates
 with native rules; it does not calculate profiles, correlations or linkage.
-A missing tree is computed locally using group means, Pearson correlation,
-`1 - correlation` distance, complete linkage and SciPy's leaf layout. This
-plot-derived computation does not write to `adata.uns`. For different methods,
-compute the tree explicitly through `sc.tl.dendrogram` first.
+A missing tree delegates to the public `sc.tl.dendrogram(..., inplace=False)`.
+Scanpy computes group means, Pearson correlations, `1 - correlation` distances,
+complete linkage and branch coordinates; the adapter does not implement these
+computations. No result is written to `adata.uns` by plotting. For different
+representations, components or methods, call `sc.tl.dendrogram` explicitly first.
 
 Default profiles use resident `X` when `n_vars <= sc.settings.N_PCS`, otherwise
 existing `obsm["X_pca"]`. Tree profiles do not use the selected marker genes,
 `raw`, `layer`, plot `log`, or summary scaling. Missing PCA produces an error
 asking for explicit preparation; no plotting function fits PCA, UMAP or gene
-rankings. Resident dense and sparse representations work; sparse profiles densify
-only the group-by-feature aggregate. Backed/lazy expression errors, while a
-resident PCA representation can be read from backed AnnData.
+rankings. Automatic computation requires resident dense X or X_pca because of
+Scanpy 1.11.5's input limits. It rejects sparse/backed/lazy computation clearly,
+without densifying expression. Existing trees can be rendered with sparse or
+backed data because reading a stored tree does not access X or its representation.
 
-Stored trees must have matching categorical grouping, unambiguous labels, valid
-linkage, consistent leaf order/branch coordinates and correlations matching the
-current representation. Reordered categories are aligned by labels. Stale or
-malformed caches fail without being overwritten. Reusing a cache validates group
-profiles/correlations, without rerunning linkage. Stored geometry is retained.
-Scanpy 1.11.5 does not record every computation argument: caches made with
-`n_pcs`, `var_names` or another unrecorded source may be unverifiable and currently
-error. For a component subset, store that subset in an explicit `obsm` key and
-compute `sc.tl.dendrogram(..., use_rep="that_key")` using all its components.
-Broader cache provenance is tracked in M14.
+Stored trees are treated as Scanpy snapshots. The adapter checks their structure,
+group labels, array shapes and finite values, then copies their correlations,
+leaf order and branch coordinates. It does not recompute profiles, correlations,
+linkage or layout to verify an existing result. Custom Scanpy computations such
+as `n_pcs`, `var_names`, correlation/linkage methods and optimal ordering are
+honored as stored. Reordered categories are aligned by labels. Malformed or
+incompatible results fail without overwrite. As in Scanpy, recompute the tree
+explicitly after changing the underlying data or group membership; the adapter
+does not infer staleness from expression values.
 
 | Surface | Current behavior |
 | --- | --- |
-| Grouped `dendrogram` | False retains the original plot; True uses `uns["dendrogram_<groupby>"]`, and a string selects another key. Missing results compute locally. Tree order overrides explicit `categories_order`, as in Scanpy. With at most two groups, warn and omit the attachment, matching Scanpy. |
+| Grouped `dendrogram` | False retains the original plot; True uses `uns["dendrogram_<groupby>"]`, and a string selects another key. Missing results delegate to Scanpy. Tree order overrides explicit `categories_order`, as in Scanpy. With at most two groups, warn and omit the attachment, matching Scanpy. |
 | Category and feature order | Carry the same leaf permutation through means, fractions, supplied tables and labels. When marker-block labels match the group categories, reorder their feature slots and brackets too; otherwise retain marker order. Multiple categorical string keys use Scanpy's lexically ordered joined tree groups. |
 | Standalone `dendrogram` | All four orientations and `remove_labels`, including a two-group tree. At least two observed categories are required. Unused categories, ambiguous joined/string labels, and undefined constant/missing profiles error explicitly. Native width/height default to 300 × 300 logical pixels. |
 | `correlation_matrix` | Cached or locally computed group correlations. None/True draws a left tree and orders both axes by leaves; a string selects the cache. False keeps current category order without drawing a tree. Optional two-decimal numbers and default summary hover are native marks. |
@@ -411,9 +412,9 @@ All entries except the five plotting previews and settings helpers remain requir
 work. Settings remain owned by Scanpy. The external.pl namespace is separate
 from this core inventory.
 
-Dendrograms belong with grouped-plot coverage. Reuse existing compatible results
-or compute missing profiles, distances, linkage and branch coordinates in Python,
-then render native rule marks. A dedicated tree mark is unnecessary. This does
+Dendrograms belong with grouped-plot coverage. Read stored Scanpy results or
+delegate missing computation to `sc.tl.dendrogram`, then render native rule
+marks. A dedicated tree mark is unnecessary. This does
 not authorize rerunning the user's UMAP or differential-expression analysis.
 Violin densities and track envelopes can likewise be prepared in Python, while
 their filled geometry needs appropriate native rendering support.

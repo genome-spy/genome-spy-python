@@ -1,4 +1,4 @@
-"""Independent Python tree, cache, ordering, storage and public-contract checks."""
+"""Scanpy delegation, stored tree, ordering, storage and public-contract checks."""
 
 from copy import deepcopy
 import inspect
@@ -45,7 +45,7 @@ def test_hand_calculated_correlations_and_complete_linkage():
 
 
 @pytest.mark.parametrize("case", tree_cases())
-def test_python_tree_matches_frozen_scanpy_computations(case):
+def test_delegated_tree_matches_frozen_scanpy_computations(case):
     reference = json.loads(REFERENCE.read_text())["computations"][case]
     a = make_tree_adata(case)
     if case in ("custom", "optimal"):
@@ -62,16 +62,20 @@ def test_python_tree_matches_frozen_scanpy_computations(case):
 
 
 def test_cached_results_are_verified_without_rerunning_linkage_or_mutating(monkeypatch):
+    from anndata import AnnData
     from scipy.cluster import hierarchy
 
     a = make_tree_adata()
     stored = cache(a)
     before = pickle.dumps(a.uns)
-    monkeypatch.setattr(
-        hierarchy,
-        "linkage",
-        lambda *a, **kw: pytest.fail("Cached linkage was recomputed"),
-    )
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Stored tree triggered data access or computation")
+
+    monkeypatch.setattr(AnnData, "X", property(forbidden))
+    monkeypatch.setattr(sc.tl, "dendrogram", forbidden)
+    monkeypatch.setattr(hierarchy, "linkage", forbidden)
+    monkeypatch.setattr(hierarchy, "dendrogram", forbidden)
     result = prepare_dendrogram(a, "group")
     np.testing.assert_array_equal(result.icoord, stored["dendrogram_info"]["icoord"])
     np.testing.assert_array_equal(result.dcoord, stored["dendrogram_info"]["dcoord"])
@@ -89,14 +93,9 @@ def test_cached_results_are_verified_without_rerunning_linkage_or_mutating(monke
         "geometry",
         "linkage",
         "correlation",
-        "method",
-        "representation",
-        "metadata",
-        "stale_values",
-        "stale_membership",
     ],
 )
-def test_malformed_stale_and_unverifiable_caches_fail_explicitly(kind):
+def test_malformed_and_incompatible_caches_fail_explicitly(kind):
     a = make_tree_adata()
     stored = cache(a)
     if kind == "groupby":
@@ -106,25 +105,13 @@ def test_malformed_stale_and_unverifiable_caches_fail_explicitly(kind):
     elif kind == "indices":
         stored["categories_idx_ordered"] = [0, 0, 2, 3]
     elif kind == "geometry":
-        stored["dendrogram_info"]["icoord"][0][0] += 1
+        stored["dendrogram_info"]["icoord"][0][0] = np.nan
     elif kind == "linkage":
         stored["linkage"][0][0] = 999
-    elif kind == "correlation":
-        stored["correlation_matrix"][0][1] = np.nan
-    elif kind == "method":
-        stored["cor_method"] = "unrecognized"
-    elif kind == "representation":
-        stored["use_rep"] = "missing"
-    elif kind == "metadata":
-        del stored["use_rep"]
-    elif kind == "stale_values":
-        a.X[0, 0] += 10
     else:
-        a.obs.loc["cell0", "group"] = "B"
+        stored["correlation_matrix"][0][1] = np.nan
     before = pickle.dumps(a.uns)
-    with pytest.raises(
-        ValueError, match="cache.*malformed, stale or cannot be verified"
-    ):
+    with pytest.raises(ValueError, match="cache.*malformed or incompatible"):
         prepare_dendrogram(a, "group")
     assert pickle.dumps(a.uns) == before
 
@@ -145,23 +132,79 @@ def test_reordered_categories_preserve_cached_leaves_and_align_correlations():
     "storage",
     [sparse.csr_matrix, sparse.csc_matrix, sparse.csr_array, sparse.csc_array],
 )
-def test_sparse_profiles_densify_only_group_aggregates(storage, monkeypatch):
+def test_stored_trees_work_with_sparse_expression_without_densifying(
+    storage, monkeypatch
+):
     a = make_tree_adata()
-    a.X[0, 0] = np.nan
+    cache(a)
     expected = prepare_dendrogram(a, "group")
     a.X = storage(a.X)
-    original = sparse.csr_matrix.toarray
-    shapes = []
 
-    def aggregate_only(matrix, *args, **kwargs):
-        shapes.append(matrix.shape)
-        assert matrix.shape == (4, 4)
-        return original(matrix, *args, **kwargs)
+    def forbidden(*args, **kwargs):
+        pytest.fail("Stored tree densified expression")
 
-    monkeypatch.setattr(sparse.csr_matrix, "toarray", aggregate_only)
+    for cls in (
+        sparse.csr_matrix,
+        sparse.csc_matrix,
+        sparse.csr_array,
+        sparse.csc_array,
+    ):
+        monkeypatch.setattr(cls, "toarray", forbidden)
     actual = prepare_dendrogram(a, "group")
     np.testing.assert_allclose(actual.correlation, expected.correlation)
-    assert shapes and all(shape == (4, 4) for shape in shapes)
+
+
+def test_missing_tree_delegates_to_scanpy_once_without_mutation(monkeypatch):
+    original = sc.tl.dendrogram
+    calls = []
+
+    def compute(adata, groupby, **kwargs):
+        calls.append((groupby, kwargs))
+        return original(adata, groupby, **kwargs)
+
+    monkeypatch.setattr(sc.tl, "dendrogram", compute)
+    a = make_tree_adata("pca")
+    before = pickle.dumps((a.obs, a.uns, a.obsm))
+    result = prepare_dendrogram(a, "group")
+    assert calls == [(["group"], {"use_rep": "X_pca", "inplace": False})]
+    assert pickle.dumps((a.obs, a.uns, a.obsm)) == before
+    np.testing.assert_allclose(
+        result.linkage,
+        json.loads(REFERENCE.read_text())["computations"]["pca"]["linkage"],
+    )
+
+
+def test_scanpy_component_subset_and_custom_methods_are_rendered_as_stored(monkeypatch):
+    a = make_tree_adata("pca")
+    sc.tl.dendrogram(
+        a,
+        "group",
+        n_pcs=3,
+        cor_method="spearman",
+        linkage_method="average",
+        optimal_ordering=True,
+    )
+    stored = deepcopy(a.uns["dendrogram_group"])
+    a.X[:] = np.nan
+    del a.obsm["X_pca"]
+    monkeypatch.setattr(
+        sc.tl, "dendrogram", lambda *args, **kwargs: pytest.fail("Tree recomputed")
+    )
+    tree = prepare_dendrogram(a, "group")
+    np.testing.assert_array_equal(tree.linkage, stored["linkage"])
+    np.testing.assert_array_equal(tree.correlation, stored["correlation_matrix"])
+    np.testing.assert_array_equal(tree.icoord, stored["dendrogram_info"]["icoord"])
+    assert list(tree.order) == stored["categories_ordered"]
+
+
+def test_missing_sparse_tree_fails_without_densifying(monkeypatch):
+    a = make_tree_adata()
+    a.X = sparse.csr_matrix(a.X)
+    monkeypatch.setattr(
+        sparse.csr_matrix, "toarray", lambda *args, **kwargs: pytest.fail("Densified X")
+    )
+    with pytest.raises(TypeError, match="resident dense representation"):
+        prepare_dendrogram(a, "group")
 
 
 def test_pca_guard_views_and_resident_backed_representation(monkeypatch, tmp_path):
@@ -170,7 +213,7 @@ def test_pca_guard_views_and_resident_backed_representation(monkeypatch, tmp_pat
     def forbidden(*args, **kwargs):
         pytest.fail("Analysis or upstream plotting ran")
 
-    for name in ("pca", "umap", "dendrogram", "rank_genes_groups"):
+    for name in ("pca", "umap", "rank_genes_groups"):
         monkeypatch.setattr(sc.tl, name, forbidden)
     monkeypatch.setattr(sc.pp, "pca", forbidden)
     a = make_tree_adata("pca")
@@ -178,6 +221,7 @@ def test_pca_guard_views_and_resident_backed_representation(monkeypatch, tmp_pat
     np.testing.assert_allclose(
         prepare_dendrogram(a[:, :], "group").correlation, expected.correlation
     )
+    sc.tl.dendrogram(a, "group")
     path = tmp_path / "backed.h5ad"
     a.write_h5ad(path)
     backed = ad.read_h5ad(path, backed="r")
@@ -187,6 +231,7 @@ def test_pca_guard_views_and_resident_backed_representation(monkeypatch, tmp_pat
         )
     finally:
         backed.file.close()
+    del a.uns["dendrogram_group"]
     del a.obsm["X_pca"]
     with pytest.raises(ValueError, match="Plotting never fits PCA"):
         prepare_dendrogram(a, "group")

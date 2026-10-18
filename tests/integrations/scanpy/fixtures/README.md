@@ -86,6 +86,8 @@ single-machine observations; sparse densification remains restricted to the
 existing 100,000 × 20 float32 PCA representation. It records the same allocation,
 payload, rendering, hover and heap measurements; tree computation does not
 materialize the full expression matrix. The chart has 50 groups and 2,000 tiles.
+The current observation delegates computation to public sc.tl.dendrogram;
+stored Scanpy results are read without repeating that computation.
 Correlation/linkage costs grow with group count; this is a tested workload,
 not an arbitrary-group-count performance promise.
 

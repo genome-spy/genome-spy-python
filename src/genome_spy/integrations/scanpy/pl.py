@@ -391,7 +391,7 @@ def dotplot(
             Width includes a fixed 150-pixel guide allowance; height sizes the
             plot area. Labels and renderer padding add space. Cannot be combined
             with width or height. No Matplotlib settings are consulted.
-        dendrogram: Attach a locally computed or validated cached group tree.
+        dendrogram: Attach a stored Scanpy tree or compute one through Scanpy.
             True uses the default cache key; a string selects another key.
         gene_symbols: Variable annotation column for symbol lookup.
         var_group_positions: Inclusive feature-slot bracket endpoints.
@@ -749,16 +749,17 @@ def dendrogram(
 ) -> TopLevelSpec | None:
     """Render group linkage computed in Python with native GenomeSpy rules.
 
-    Validate a stored Scanpy tree or compute a detached local tree from group
-    profiles. Default computation uses resident X for small matrices, otherwise
-    existing X_pca. Plotting never fits PCA, writes a cache or invokes Scanpy
-    plotting. Cached correlations must match the current representation.
+    Read the geometry and order stored by sc.tl.dendrogram. Missing trees delegate
+    to that public computation with inplace=False, using resident dense X for
+    small matrices or existing dense X_pca otherwise. Plotting never fits PCA,
+    writes a cache or recomputes an existing result. Recompute explicitly in
+    Scanpy after changing the data or grouping.
 
     Args:
         adata: AnnData with categorical groups and an existing representation.
         groupby: Categorical observation key; categorical key sequences also work.
         dendrogram_key: Stored uns key, default dendrogram_<groupby>.
-            Missing keys compute locally without writing to AnnData.
+            Missing keys compute through Scanpy without writing to AnnData.
         orientation: Top, bottom, left or right tree orientation.
         remove_labels: Hide leaf labels while preserving leaf geometry.
         show: Display once, return chart when False, or use Scanpy autoshow.
@@ -832,10 +833,11 @@ def correlation_matrix(
 ) -> TopLevelSpec | None:
     """Plot Python-computed group correlations with an optional aligned tree.
 
-    Reuses the dendrogram profile/cache policy and returns native tiles, labels,
+    Reuses Scanpy's stored dendrogram correlations and returns native tiles, labels,
     numbers and rules. Correlations come from the tree's representation, not the
     selected markers of a dotplot or matrixplot. No embedding, PCA, gene ranking
-    or cache writes run.
+    or cache writes run. Missing trees delegate to sc.tl.dendrogram with a guard
+    against hidden PCA; existing results are never recomputed.
 
     Args:
         adata: AnnData with categorical groups and an existing representation.

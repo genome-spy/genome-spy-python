@@ -98,6 +98,8 @@ handling, identities, group summaries, and trees wherever their semantics match.
 Extract shared helpers when useful now; a second-family prerequisite would be
 artificial. A family-specific data module is optional. Avoid a universal preparer
 with many switches, a registry, or a general adapter framework.
+Prefer public Scanpy computations over reproducing their algorithms; guard
+unwanted analysis/mutation at the call boundary and honor their stored results.
 
 | Concern | Reuse first | Independently implement/test where needed |
 | --- | --- | --- |
@@ -105,7 +107,7 @@ with many switches, a registry, or a general adapter framework.
 | Grouped expression tables | `sc.get.obs_df` when its lookup/duplicate semantics match | numeric bins, multi-key groups, repeated display slots, masks and exact permutations |
 | Group summaries | Public `sc.get.aggregate` only for proven-equivalent statistics | strict expression thresholds, denominator, missing values, log/scaling order, sparse implicit zeros |
 | Stored gene rankings | `sc.get.rank_genes_groups_df` and stored params | strict filters, group/feature slots, rank-metric colors, expression-size statistics |
-| Trees | Compatible `uns` results; public pandas correlation and SciPy linkage/layout | guarded group profiles, cache validation, shared permutations, orientation and alignment |
+| Trees | Stored `sc.tl.dendrogram` results; the same public method for missing trees | structural validation, no-hidden-PCA guard, shared permutations, orientation and alignment |
 | Distributions/graphs | Suitable public SciPy/Scanpy numerical functions | pinned KDE normalization, graph layout inputs, native chart geometry and order |
 
 UMAP uses public AnnData `obs_vector`, because `sc.get.obs_df` has different
@@ -134,8 +136,10 @@ Every applicable family checks these cases, independently of rendering:
   supported, not silently materialized.
 - Mutation/cache: charts are detached snapshots. Do not write palettes, reorder
   AnnData, or cache by object identity across calls. Reuse extraction within a
-  call; validate supplied cached results against grouping/representation metadata.
-  Stale or unverifiable caches fail with guidance rather than being overwritten.
+  call; validate stored results against available grouping/shape metadata.
+  Honor explicit Scanpy snapshots without repeating their computation to check
+  freshness. Users recompute trees after changing data/group membership;
+  malformed or incompatible results fail without being overwritten.
 - Computation: no automatic embedding, ranking, density analysis, or clustering
   rerun. Automatic plot-derived tree computation can use an available matching
   representation, return a local result, and avoid cache writes. A missing
@@ -300,25 +304,27 @@ builder styling completes in M13.
 
 M04.a–d are verified for standalone trees/correlation and dotplot/matrixplot
 attachments; see [scope and evidence](STATUS.md#m04ad-dendrogram-and-correlation-preview).
-Later-family attachments remain with M05/M08/M09. This does not close broader
-cache provenance, normalization, kwargs or export compatibility in M14.
+Later-family attachments remain with M05/M08/M09. Normalization, kwargs and
+export compatibility remain in M14.
 
 - M04.a: validate supplied `uns[dendrogram_key]` grouping, linkage, category order,
   correlations and leaf order. Cover multi-key groups, missing/constant profiles,
-  ties, reordered categories, malformed/stale caches, and one/two-group limits.
+  ties, reordered categories, malformed/incompatible caches and one/two-group
+  limits. Honor cached component/method choices without recomputing profiles.
 - M04.b: compute missing group profiles, correlations/distances, linkage and branch
   coordinates in Python. Reuse public upstream computation only when it avoids
   hidden analysis/mutation. `inplace=False` alone is insufficient if Scanpy's
   representation resolver would fit missing PCA. Require an existing matching
   representation or explicit upstream preparation; no silent PCA/embedding fit.
   Keep automatic plot-derived results local, with no new AnnData cache writes.
-  The delivered implementation reuses grouped means, public pandas correlation,
-  and SciPy complete linkage/layout. It avoids Scanpy's representation resolver
-  and mutation path. Sparse profiles densify only the group-by-feature aggregate.
-  Compatible stored correlations are checked against current profiles while
-  preserving cached linkage and geometry. Upstream caches omit n_pcs/var_names/
-  source details; unverifiable cases currently error. Explicit obsm sources using
-  all components are supported; M14 owns broader cache provenance.
+  The delivered implementation delegates to public sc.tl.dendrogram with
+  inplace=False and an explicit existing representation, preventing hidden PCA.
+  Automatic computation currently requires resident dense X or X_pca, following
+  Scanpy 1.11.5's limits. Never densify expression to bypass those limits.
+  Stored trees need no expression/representation access and work with sparse or
+  backed AnnData. Read their correlations and geometry directly, including
+  nondefault n_pcs/var_names/method results. Do not reimplement group profiles,
+  correlations, linkage, layout or freshness detection in the adapter.
 - M04.c: a focused tree layout helper feeds native rule marks for top/right/left/
   bottom orientation. Use the same group permutation for dots, tiles, labels,
   brackets, totals and leaf centers. Implement standalone `dendrogram` labels and
