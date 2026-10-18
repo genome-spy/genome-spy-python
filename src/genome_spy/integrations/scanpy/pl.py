@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from importlib.metadata import PackageNotFoundError, version
 from math import isfinite
 from numbers import Real
@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
     from anndata import AnnData
+    from numpy.typing import ArrayLike
     import pandas as pd
 
     from genome_spy import Parameter, TopLevelSpec
@@ -19,6 +20,7 @@ __all__ = [
     "dendrogram",
     "dotplot",
     "heatmap",
+    "matrix",
     "matrixplot",
     "umap",
 ]
@@ -970,6 +972,82 @@ def heatmap(
         width=width,
         height=height,
         figsize=figsize,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def matrix(
+    matrix: ArrayLike,
+    *,
+    xlabel: str | None = None,
+    ylabel: str | None = None,
+    xticks: Collection[str] | None = None,
+    yticks: Collection[str] | None = None,
+    title: str | None = None,
+    colorbar_shrink: float = 0.5,
+    color_map: Any = None,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Display a supplied numeric matrix in its original row and column order.
+
+    Description:
+        Reproduce Scanpy's matrix helper using native tiles and a linear color
+        guide. No AnnData access, aggregation or clustering occurs. Missing and
+        masked entries stay blank; color bounds follow the finite input range.
+        Matplotlib axes, image objects and colormap objects are unsupported.
+
+    Args:
+        matrix: Resident 2D numeric array, nested sequence or DataFrame.
+        xlabel: Label below the x axis.
+        ylabel: Label beside the y axis.
+        xticks: One label per column; repeated labels retain separate slots.
+        yticks: One label per row; repeated labels retain separate slots.
+        title: Plot title.
+        colorbar_shrink: Color guide length relative to plot height.
+        color_map: Native GenomeSpy scheme; None uses viridis.
+        show: Display according to Scanpy's autoshow when unset.
+        save: Only None/False; use the returned chart's HTML/JSON export.
+        hover: Include row, column and numeric value tooltips.
+        width: Native tile-area width in pixels.
+        height: Native tile-area height in pixels.
+
+    Returns:
+        A native chart for show=False, otherwise displays it and returns None.
+
+    Raises:
+        ImportError: If the optional Scanpy version is unavailable.
+        TypeError: If the source or label form is unsupported.
+        ValueError: If shape, numeric values, tick counts or sizes are invalid.
+        NotImplementedError: If image saving or a nonnative color scheme is requested.
+
+    Example:
+        >>> chart = gsc.pl.matrix(
+        ...     [[0, 1], [2, 3]], xticks=["A", "B"], show=False
+        ... )
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.matrix"
+    if not isinstance(hover, bool):
+        raise TypeError(f"{context}: hover must be boolean.")
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._matrix_chart import build_matrix
+
+    chart = build_matrix(
+        matrix,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        xticks=xticks,
+        yticks=yticks,
+        title=title,
+        colorbar_shrink=colorbar_shrink,
+        color_map=color_map,
+        hover=hover,
+        width=width,
+        height=height,
     )
     return _finish_plot(chart, show, sc)
 

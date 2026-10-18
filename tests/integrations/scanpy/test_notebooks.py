@@ -98,10 +98,11 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["dotplot"],
         namespace["matrixplot"],
         namespace["heatmap"],
+        namespace["matrix"],
     ]
     assert namespace["pbmc"].shape == (700, 765)
     order = namespace["pbmc"].uns["dendrogram_bulk_labels"]["categories_ordered"]
-    for chart in charts:
+    for chart in charts[:3]:
         chart_spec = chart.to_dict()
         values = chart_spec["datasets"][chart_spec["layer"][0]["data"]["name"]]
         assert list(dict.fromkeys(row["_group"] for row in values)) == list(order)
@@ -138,6 +139,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     spec = charts[2].to_dict()
     tiles = spec["layer"][0]
     cells = spec["datasets"][tiles["data"]["name"]]
+    assert all(tiles["encoding"][axis]["scale"]["zoom"] is True for axis in ("x", "y"))
     assert len(cells) == 700 * 10
     assert len({row["_obs_id"] for row in cells}) == 700
     assert tiles["encoding"]["color"]["scale"]["domain"] == [0, 1]
@@ -146,3 +148,10 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         sum(row["_obs_id"] == name for row in cells) == 10
         for name in namespace["pbmc"].obs_names
     )
+    spec = charts[3].to_dict()
+    records = spec["datasets"][spec["layer"][0]["data"]["name"]]
+    np.testing.assert_array_equal(
+        np.array([row["_value"] for row in records]).reshape(10, 10),
+        namespace["pbmc"].uns["dendrogram_bulk_labels"]["correlation_matrix"],
+    )
+    assert [row["_column"] for row in records[:10]] == namespace["group_labels"]

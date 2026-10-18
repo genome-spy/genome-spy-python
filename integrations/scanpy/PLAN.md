@@ -364,7 +364,10 @@ It adds one chart module and small functions in the existing grouped data/tree
 modules, reusing access, scaling, palettes, feature ordering, labels and branches.
 The 250,000-value limit is checked before extraction; the 100k × 50 case tests
 rejection without data reads. Larger/chunked transport remains M05.d.
-The standalone `matrix` part of M05.b and `clustermap` in M05.c are next.
+The standalone `matrix` part of M05.b is delivered as a numeric-array preview,
+reusing numeric validation, linear color bounds, index slots and labels. Heatmap
+adds optional x/y zoom with aligned cell annotations and clipped tree branches.
+`clustermap` in M05.c is the next ready slice; larger transport remains M05.d.
 
 - M05.a: observation-level heatmap reuses source/group/slot access. Carry one
   explicit observation permutation through values, IDs, category strips, group
@@ -373,7 +376,11 @@ The standalone `matrix` part of M05.b and `clustermap` in M05.c are next.
   before rendering; grouped means are not a substitute for cell values.
 - M05.b: `_heatmap_chart.py` composes tiles, strips, brackets, guides and M04 trees.
   `matrix` accepts the supplied numeric matrix directly with explicit ticks,
-  labels, title, normalization and colorbar sizing.
+  labels, title, finite-range linear normalization and colorbar sizing. This
+  preview accepts resident numeric arrays/tables, preserves missing/masked cells
+  and rejects color objects, images, sparse/lazy data and mismatched tick counts.
+  Heatmap zoom defaults off; explicit zoom keeps strips, boundaries and tree leaves
+  aligned, hides offscreen labels, and hides partially visible gene brackets.
 - M05.c: `clustermap` computes requested row/column clustering in Python, honors
   supplied linkage and annotation colors, and routes supported clustering kwargs
   explicitly. Do not silently cluster a supplied ordering or densify an unrelated

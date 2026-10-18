@@ -1,0 +1,319 @@
+{
+  "versions": {
+    "scanpy": "1.11.5",
+    "numpy": "2.4.6",
+    "matplotlib": "3.11.2"
+  },
+  "display_dpi": 100,
+  "export_dpi": 150,
+  "input_sha256": "4174c5911adec0752af409365480ecba70cd0c393add37162ff2b9c6fca58a55",
+  "cases": {
+    "default": {
+      "values": [
+        [
+          -2.0,
+          0.0,
+          2.0
+        ],
+        [
+          1.0,
+          3.0,
+          5.0
+        ]
+      ],
+      "color_domain": [
+        -2.0,
+        5.0
+      ],
+      "plot_size": [
+        372.00000000000006,
+        248.00000000000003
+      ],
+      "xlabel": "",
+      "ylabel": "",
+      "title": "",
+      "x_labels": [
+        "\u22120.5",
+        "0.0",
+        "0.5",
+        "1.0",
+        "1.5",
+        "2.0",
+        "2.5"
+      ],
+      "y_labels": [
+        "\u22120.50",
+        "\u22120.25",
+        "0.00",
+        "0.25",
+        "0.50",
+        "0.75",
+        "1.00",
+        "1.25",
+        "1.50"
+      ],
+      "full_sha256": "b410d75e4cb6d50b50d174390472a8fc8938f1a54ee20714622fef06f13f8f13"
+    },
+    "labels": {
+      "values": [
+        [
+          -2.0,
+          0.0,
+          2.0
+        ],
+        [
+          1.0,
+          3.0,
+          5.0
+        ]
+      ],
+      "color_domain": [
+        -2.0,
+        5.0
+      ],
+      "plot_size": [
+        372.00000000000006,
+        248.00000000000003
+      ],
+      "xlabel": "Genes",
+      "ylabel": "Groups",
+      "title": "Supplied values",
+      "x_labels": [
+        "gene A",
+        "B",
+        "B"
+      ],
+      "y_labels": [
+        "group 2",
+        "group 1"
+      ],
+      "full_sha256": "73bf9c9a4d4f3a2b1d98d8a7d8fb65da721a23d52f06e6a7f227e478824eb7bd"
+    },
+    "constant": {
+      "values": [
+        [
+          7.0,
+          7.0,
+          7.0
+        ],
+        [
+          7.0,
+          7.0,
+          7.0
+        ]
+      ],
+      "color_domain": [
+        6.3,
+        7.7
+      ],
+      "plot_size": [
+        372.00000000000006,
+        248.00000000000003
+      ],
+      "xlabel": "Genes",
+      "ylabel": "Groups",
+      "title": "Supplied values",
+      "x_labels": [
+        "gene A",
+        "B",
+        "B"
+      ],
+      "y_labels": [
+        "group 2",
+        "group 1"
+      ],
+      "full_sha256": "f8ca3c768bad7ff3767f79d3ca0a33a4497f37d9e8e8135e8f1a9b36e7ffbbed"
+    },
+    "zero": {
+      "values": [
+        [
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "color_domain": [
+        -0.1,
+        0.1
+      ],
+      "plot_size": [
+        372.00000000000006,
+        248.00000000000003
+      ],
+      "xlabel": "",
+      "ylabel": "",
+      "title": "",
+      "x_labels": [
+        "\u22120.5",
+        "0.0",
+        "0.5",
+        "1.0",
+        "1.5",
+        "2.0",
+        "2.5"
+      ],
+      "y_labels": [
+        "\u22120.50",
+        "\u22120.25",
+        "0.00",
+        "0.25",
+        "0.50",
+        "0.75",
+        "1.00",
+        "1.25",
+        "1.50"
+      ],
+      "full_sha256": "94df14dd176611c69b8e17c538f231b70505e569a43bfa710621c97711afe78e"
+    },
+    "missing": {
+      "values": [
+        [
+          null,
+          0.0,
+          2.0
+        ],
+        [
+          1.0,
+          3.0,
+          5.0
+        ]
+      ],
+      "color_domain": [
+        0.0,
+        5.0
+      ],
+      "plot_size": [
+        372.00000000000006,
+        248.00000000000003
+      ],
+      "xlabel": "Genes",
+      "ylabel": "Groups",
+      "title": "Supplied values",
+      "x_labels": [
+        "gene A",
+        "B",
+        "B"
+      ],
+      "y_labels": [
+        "group 2",
+        "group 1"
+      ],
+      "full_sha256": "c958fe83a5026acafe4e79c7043e3bee8265eaf2dc2f758c2a4178819b68472e"
+    },
+    "masked": {
+      "values": [
+        [
+          -2.0,
+          null,
+          2.0
+        ],
+        [
+          null,
+          3.0,
+          5.0
+        ]
+      ],
+      "color_domain": [
+        -2.0,
+        5.0
+      ],
+      "plot_size": [
+        372.00000000000006,
+        248.00000000000003
+      ],
+      "xlabel": "Genes",
+      "ylabel": "Groups",
+      "title": "Supplied values",
+      "x_labels": [
+        "gene A",
+        "B",
+        "B"
+      ],
+      "y_labels": [
+        "group 2",
+        "group 1"
+      ],
+      "full_sha256": "c095ffb844889d464184928b0881b5f9b157ad1c40c78a45d3c483077ea0cf14"
+    },
+    "row": {
+      "values": [
+        [
+          -2.0,
+          0.0,
+          2.0
+        ]
+      ],
+      "color_domain": [
+        -2.0,
+        2.0
+      ],
+      "plot_size": [
+        372.00000000000006,
+        124.0
+      ],
+      "xlabel": "",
+      "ylabel": "",
+      "title": "",
+      "x_labels": [
+        "\u22120.5",
+        "0.0",
+        "0.5",
+        "1.0",
+        "1.5",
+        "2.0",
+        "2.5"
+      ],
+      "y_labels": [
+        "\u22120.50",
+        "\u22120.25",
+        "0.00",
+        "0.25",
+        "0.50"
+      ],
+      "full_sha256": "d987210e631830e5d3f5b5ea2bc9111c9cf7fe774d487dfa254f692470d676b5"
+    },
+    "column": {
+      "values": [
+        [
+          -2.0
+        ],
+        [
+          1.0
+        ]
+      ],
+      "color_domain": [
+        -2.0,
+        1.0
+      ],
+      "plot_size": [
+        154.0,
+        308.0
+      ],
+      "xlabel": "",
+      "ylabel": "",
+      "title": "",
+      "x_labels": [
+        "\u22120.5",
+        "0.0",
+        "0.5"
+      ],
+      "y_labels": [
+        "\u22120.50",
+        "\u22120.25",
+        "0.00",
+        "0.25",
+        "0.50",
+        "0.75",
+        "1.00",
+        "1.25",
+        "1.50"
+      ],
+      "full_sha256": "076c6c7b15ffe9e99772ca1bbed19eb7411da2e1bc386d1e9180b8c32e1a81da"
+    }
+  }
+}

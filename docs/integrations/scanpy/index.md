@@ -25,7 +25,7 @@ runs neighbors or UMAP analysis. A missing embedding produces an error asking
 you to compute it explicitly first.
 
 This development preview implements categorical/continuous 2D UMAP, plain dotplots
-and matrixplots, individual-cell heatmaps, standalone dendrograms and correlation matrices.
+and matrixplots, individual-cell heatmaps, supplied numeric matrices, standalone dendrograms and correlation matrices.
 Full public Scanpy plotting coverage is the destination; the inventory below
 records remaining work. Native plot builders remain planned.
 
@@ -231,7 +231,7 @@ DPR 1.5. The production adapter never imports upstream plotting or Matplotlib.
 ```python
 heatmap = gsc.pl.heatmap(
     pbmc, marker_genes, "bulk_labels", dendrogram=True,
-    standard_scale="var", cmap="viridis", width=400, height=450, show=False,
+    standard_scale="var", cmap="viridis", width=400, height=450, zoom=True, show=False,
 )
 heatmap.display(inline=True, controls=False)
 ```
@@ -252,7 +252,8 @@ means or changes AnnData.
 | `cmap`, `vmin`, `vmax`, `alpha`, `interpolation` | Native scheme (default viridis), numeric bounds, scalar opacity and nearest-neighbor tiles. Missing values keep their positions but are unpainted; all-missing colors error. Other interpolation, norm/vcenter, Matplotlib colormaps and unsupported imshow kwargs error by name. |
 | Category colors | Reuse saved AnnData colors or the shared Scanpy default palettes without writing them back. Numeric and multi-key strips use native category20, currently limited to 20 groups. |
 | `width`, `height`, `figsize` | Width/height control the tile area in logical pixels. Defaults follow Scanpy's gene-label size rules; figsize uses 100 pixels per inch with space reserved for strips/trees. Native text and outer layout differ from Matplotlib. The vertical color guide uses at most 400 pixels. |
-| `hover`, delivery | Default hover shows original cell ID/name, gene, group and displayed expression. Duplicate names use stable original-row IDs. Wheel navigation and brushing are not offered. Existing show/save/native-return rules apply; Matplotlib axes and figure-return options error. |
+| `zoom` | Defaults False. True enables wheel zoom and drag panning on both index axes. Strips, group boundaries, tree leaves and gene labels follow the visible cells/genes. Clip branches and strips at the plot extent; hide offscreen labels and gene brackets whose whole span is not visible. |
+| `hover`, delivery | Default hover shows original cell ID/name, gene, group and displayed expression. Duplicate names use stable original-row IDs. Brushing is not offered. Existing show/save/native-return rules apply; Matplotlib axes and figure-return options error. |
 
 This preview accepts **at most 250,000 cell–gene values**, counting repeated
 slots. Larger requests fail before expression extraction and ask for an explicit
@@ -273,6 +274,47 @@ tile/tree references at 100 display / 150 export DPI. Native checks at DPR 1.5
 allow 12/255 RGB paint differences for palette bins and browser rasterization;
 they preserve positions, group spans and branch paths without fitting images.
 Lato typography, native guide ticks and outer spacing are renderer differences.
+
+## Supplied matrix compatibility
+
+```python
+chart = gsc.pl.matrix(
+    values, xticks=genes, yticks=groups, xlabel="Genes", ylabel="Groups",
+    title="Supplied values", color_map="viridis", show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`matrix` displays the given resident 2D numeric NumPy/masked array, nested sequence
+or DataFrame directly. It does not access AnnData, aggregate values, reorder axes,
+or compute linkage. DataFrame index/column labels are used only when supplied as
+`yticks`/`xticks`, matching Scanpy's array conversion. Explicit tick labels must
+match the axis length; repeated names retain separate index slots.
+
+Colors use linear normalization over finite values, including negative values.
+Missing/masked entries stay blank; constant limits expand by 10% (or ±0.1 at
+zero), matching Scanpy's colorbar normalization. All-missing or infinite values
+fail clearly. `color_map=None` uses native viridis; native scheme names work,
+while Matplotlib colormap/image/axes objects, sparse/lazy sources and RGB images
+are unsupported. Unknown options fail rather than being ignored.
+
+`colorbar_shrink=0.5` sets the vertical guide length relative to the native tile
+area height. Default square cells fit inside a 400 × 400-pixel area; `width` and
+`height` explicitly size that area. Native fonts, automatic numeric tick density,
+outer layout and colorbar allocation differ from Matplotlib's figure layout.
+Titles and axis labels are supported. Default hover shows row, column and value;
+`hover=False` disables it. Existing `show`/`save` and native return/export rules
+apply. Matrix zoom and nonlinear normalization are not added by this preview.
+
+Eight frozen Scanpy figures retain values, color bounds, labels, complete charts
+and registered crops at 100 display / 150 export DPI. Native DPR 1.5 checks cover
+tile footprints, missing paint and palette-bin differences; separate checks
+exercise hover after resizing and offline HTML delivery. A resident 200 × 1,000
+float32 resource check retained all 200,000 values: warm preparation took 0.14 s,
+default formatted/validated JSON was 28.1 MB and took 12.0 s with allocation tracing, and tracked peak
+allocation including serialization was 344 MB. Browser first paint including
+dispatch took 10.3 s; paused hover was 113 ms. These local observations expose
+the current serialization cost; larger/chunked transport remains M05.d.
 
 ## Dendrograms and correlation matrices
 
@@ -438,14 +480,14 @@ Two notebooks run independently:
   customization with subsets, titles/frames, categorical order/palettes, an
   explicit Scanpy gene score and the eight-panel marker overview.
 - {download}`Expression plots <../../../integrations/scanpy/notebooks/scanpy_expression.ipynb>`:
-  marker dotplot, per-gene scaled matrixplot and individual-cell heatmap on
+  marker dotplot, per-gene scaled matrixplot, zoomable individual-cell heatmap and supplied matrix on
   `bulk_labels`, with aligned dendrograms and value hover.
 
 These adapt supported UMAP, dotplot, matrixplot and heatmap sections of Scanpy's
 [core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
 [advanced](https://scanpy.scverse.org/en/stable/tutorials/plotting/advanced.html)
 plotting tutorials. All expression examples reuse a tree explicitly computed in
-Python with `sc.tl.dendrogram`. Ranked-gene variants follow the remaining matrix work. The
+Python with `sc.tl.dendrogram`. Clustermap is next; ranked-gene variants follow it. The
 remaining tutorial plots and Matplotlib artist styling are not implemented yet.
 
 ### Native plot sizing
@@ -479,8 +521,8 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, dendrogram, correlation_matrix |
-| Matrices and ranked summaries | matrix, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, dendrogram, correlation_matrix |
+| Ranked summaries | rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap |
 | Other embeddings and PCA | scatter, embedding, tsne, pca, pca_scatter, diffmap, draw_graph, pca_loadings, pca_overview, pca_variance_ratio |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Diagnostics, ranking, matrices, simulation | clustermap, rank_genes_groups, ranking, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
@@ -489,7 +531,7 @@ remain visible. Function coverage and parameter coverage are separate.
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
 
-All entries except the six plotting previews and settings helpers remain required future integration
+All entries except the seven plotting previews and settings helpers remain required future integration
 work. Settings remain owned by Scanpy. The external.pl namespace is separate
 from this core inventory.
 
@@ -571,6 +613,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.umap
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.dotplot
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.matrix
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 

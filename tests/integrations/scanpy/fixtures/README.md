@@ -128,3 +128,23 @@ Full figures retain axes, titles and legends. Isolated marker crops use a known
 150/100 export/display ratio and supply an independent footprint oracle.
 Browser tests retain measured captures/overlays in their pytest output directory;
 they do not fit image alignment or alter source measurements.
+
+`matrix.json` and `matrix-*.png` retain eight original numeric-matrix cases:
+explicit/repeated labels, missing and masked cells, constant/zero limits, and
+single rows/columns. The generator calls Scanpy 1.11.5's direct matrix helper;
+artist inspection is confined to this development tool. Metadata includes input
+and complete-image hashes, stack versions, 100 display / 150 export DPI, values,
+color bounds and annotations. Browser checks retain full native captures and
+registered overlays without resizing/fitting.
+
+```sh
+uv run --no-sync python -m tests.integrations.scanpy.generate_matrix_references
+```
+
+`matrix-performance.json` records a resident 200 × 1,000 float32 numeric matrix
+(seed 0, exact NumPy recipe and versions retained), authored at 1,200 × 450 pixels.
+It records warm preparation, default formatted/validated JSON, peak tracked
+allocation including serialization, process RSS, browser first paint including
+dispatch, paused hover checked against the actual input tile, and JS heap. The
+small 0.8 MB array produces 28.1 MB formatted JSON; larger/chunked matrix transport
+remains M05.d. This single-machine observation is not a portable capacity limit.

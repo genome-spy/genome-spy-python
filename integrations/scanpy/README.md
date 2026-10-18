@@ -3,7 +3,7 @@
 Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
 [current compatibility guide](../../docs/integrations/scanpy/index.md).
 Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
-`gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.heatmap(...)`, `gsc.pl.dendrogram(...)` or
+`gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.heatmap(...)`, `gsc.pl.matrix(...)`, `gsc.pl.dendrogram(...)` or
 `gsc.pl.correlation_matrix(...)`.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
@@ -22,7 +22,8 @@ not in this workspace or the documentation:
 | [_correlation_chart.py](../../src/genome_spy/integrations/scanpy/_correlation_chart.py) | Native correlation tiles, numbers, labels, hover and optional tree. |
 | [_grouped_chart.py](../../src/genome_spy/integrations/scanpy/_grouped_chart.py) | Dotplot/matrixplot share index slots, labels, brackets, sizing, guides and attached-tree layout; correlation reuses index coordinates. |
 | [_matrixplot_chart.py](../../src/genome_spy/integrations/scanpy/_matrixplot_chart.py) | Native tiles, edge styling and summary hover; no AnnData access. |
-| [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles, category strips, boundaries and cell hover; reuses grouped labels/brackets and trees projected onto unequal group spans. |
+| [_matrix_chart.py](../../src/genome_spy/integrations/scanpy/_matrix_chart.py) | Supplied numeric tiles and native axes/color guide; reuses numeric validation, color bounds, index slots and labels without AnnData access. |
+| [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles, category strips, boundaries and cell hover; reuses grouped labels/brackets and trees projected onto unequal group spans, with optional aligned x/y zoom. |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
 | [_umap_chart.py](../../src/genome_spy/integrations/scanpy/_umap_chart.py) | Native points, axes, legends, labels, and panel composition. |
@@ -80,7 +81,7 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
   x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
   Existing coordinates are retained; gene scoring is an explicit Scanpy operation.
 - [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot, scaled
-  matrixplot, individual-cell heatmap, aligned dendrograms and value hover using the core tutorial
+  matrixplot, individual-cell heatmap with x/y zoom, supplied numeric matrix, aligned dendrograms and value hover using the core tutorial
   dictionary and existing `bulk_labels`. Scanpy computes the shared tree in Python
   from the dataset’s existing PCA representation. All three plots reuse the same data and markers.
 
@@ -121,6 +122,7 @@ uv run --no-sync python -m tests.integrations.scanpy.generate_dotplot_references
 uv run --no-sync python -m tests.integrations.scanpy.generate_matrixplot_references
 uv run --no-sync python -m tests.integrations.scanpy.generate_dendrogram_references
 uv run --no-sync python -m tests.integrations.scanpy.generate_heatmap_references
+uv run --no-sync python -m tests.integrations.scanpy.generate_matrix_references
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot dotplot --browser --output /tmp/dotplot.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --browser --output /tmp/matrixplot.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --dendrogram --browser --output /tmp/trees.json

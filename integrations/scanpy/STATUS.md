@@ -8,7 +8,7 @@ not delivery promises.
 ## Current position and next work
 
 **Available:** categorical/continuous 2D UMAP, dotplot/matrixplot and cell heatmaps with dendrograms,
-standalone dendrograms and correlation matrix development previews.
+supplied numeric matrices, standalone dendrograms and correlation matrix development previews.
 UMAP includes native sizing, optional hover/zoom, linked interval highlighting/count
 and Python subset retrieval. Dotplot includes index-scaled slots, grouped summaries,
 brackets, native size/color guides and optional summary hover. Matrixplot reuses
@@ -16,8 +16,10 @@ grouped access/means and native layout, with one-pass scaling, authoritative
 `values_df`, tiles and optional summary hover. Trees reuse `sc.tl.dendrogram`
 computation/results, with structural checks and native rule rendering.
 Heatmaps retain individual cells, shared marker/source/scaling helpers, unequal
-group spans, category strips and cell hover, with a 250,000-value limit.
-**Implemented families:** UMAP, dotplot, matrixplot, heatmap, dendrogram and correlation matrix (partial). Scanpy **1.11.5** is the only accepted version;
+group spans, category strips and cell hover, with a 250,000-value limit. Optional
+x/y zoom keeps their annotations aligned. Direct matrix plots reuse numeric
+validation, color bounds, index slots and labels without AnnData access.
+**Implemented families:** UMAP, dotplot, matrixplot, heatmap, matrix, dendrogram and correlation matrix (partial). Scanpy **1.11.5** is the only accepted version;
 bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibility.
 
 Implementation is in
@@ -28,11 +30,11 @@ remain independent of the optional scientific stack.
 
 Workflow notebooks are split into [UMAP](notebooks/scanpy_umap.ipynb) and
 [expression plots](notebooks/scanpy_expression.ipynb). Both run independently.
-UMAP keeps basic plotting, linked selection and customization together. Dotplot
-matrixplot and heatmap share the expression workflow’s data/marker setup.
+UMAP keeps basic plotting, linked selection and customization together. Dotplot,
+matrixplot and heatmap share the expression workflow’s data/marker setup; the
+supplied matrix displays the same stored group correlations.
 
-**Next ready slice: M05.b (`matrix`)**, followed by M05.c clustermap and M06 ranked
-summaries. Heatmap M05.a/b is verified for the bounded preview below; larger and
+**Next ready slice: M05.c clustermap**, followed by M06 ranked summaries. Heatmap M05.a/b is verified for the bounded preview below; larger and
 chunked tile transport remains M05.d.
 Dotplot brushing remains deferred until the
 plain-chart preview has user review; this delivery does not add it.
@@ -49,7 +51,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
-| M05 heatmap/matrix/clustermap | In progress; heatmap preview verified | Cell permutations, annotations, unequal tree attachment, 16 frozen charts, PBMC workflow and explicit resource envelope delivered. Standalone matrix, clustermap and larger/chunked tile transport remain. |
+| M05 heatmap/matrix/clustermap | In progress; heatmap/matrix previews verified | Cell permutations, annotations, unequal tree attachment, 16 frozen charts, PBMC workflow and explicit resource envelope delivered. Supplied numeric matrices and optional heatmap zoom are verified below. Clustermap and larger/chunked tile transport remain. |
 | M06 ranking/ranked summaries | Planned | Stored rank selection and reusable dot/matrix/heatmap wrappers. |
 | M07 embeddings/scatter/PCA | Planned | Shared 2D embeddings/alias/PCA diagnostics, then remaining UMAP options. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
@@ -527,11 +529,65 @@ Ruff formatting/lint and mypy pass. Broader tests, browser checks, benchmarks an
 the documentation build were not repeated for this documentation-only change.
 Notebook edits remain untouched; M05 and plan clearance are unchanged.
 
+## M05.b — supplied matrices and heatmap navigation
+
+The `matrix` preview displays a supplied numeric matrix directly. It keeps
+Scanpy's names/defaults except omitted Matplotlib `ax`, adding native hover and
+pixel dimensions. Resident numeric arrays, masked arrays, nested sequences and
+DataFrames retain value/row/column order; explicit repeated labels keep distinct
+index slots. Reuse is confined to existing numeric validation, color bounds,
+index encodings, text and style helpers; no new data module or analysis is added.
+See the [matrix contract](../../docs/integrations/scanpy/index.md#supplied-matrix-compatibility)
+for source, tick-count, color and layout limits.
+
+Heatmap `zoom=True` enables native x/y wheel zoom and drag panning. Shared live
+scale values project category strips, boundaries and unequal tree leaves.
+Offscreen gene/category labels disappear; branches and strips stop at the plot
+extent. Gene brackets are hidden unless their entire span is visible. Zoom
+defaults False, retaining the existing appearance and fixed navigation. No Core
+patch, Matplotlib runtime code or notebook interaction glue was added.
+
+Retained evidence:
+
+- [Matrix semantics/defaults/errors](../../tests/integrations/scanpy/test_matrix.py),
+  [original matrix cases](../../tests/integrations/scanpy/matrix_fixture.py),
+  [frozen references](../../tests/integrations/scanpy/fixtures/matrix.json) and
+  [browser checks](../../tests/integrations/scanpy/browser/test_matrix.py): eight
+  complete Scanpy charts and registered tile crops, missing/masked paint,
+  normalization, repeated labels, titles, axis labels, actual guide length,
+  hover after resizing and offline HTML.
+- [Heatmap browser checks](../../tests/integrations/scanpy/browser/test_heatmap.py):
+  twenty checks including all sixteen frozen chart cases, default fixed scales,
+  zoom/pan in both orientations, visible tree/label alignment and annotation clipping.
+- [Expression notebook](notebooks/scanpy_expression.ipynb) enables heatmap zoom
+  and adds a supplied matrix of Scanpy's stored group correlations. All five
+  code cells ran in a fresh live Jupyter kernel and their outputs were saved;
+  [workflow tests](../../tests/integrations/scanpy/test_notebooks.py) verify
+  unchanged supplied matrix values alongside the three expression charts.
+- [Matrix resource observation](../../tests/integrations/scanpy/fixtures/matrix-performance.json):
+  a resident 200 × 1,000 float32 matrix retains all 200,000 tiles. Warm preparation
+  took 0.14 s, default formatted/validated JSON with allocation tracing took 12.0 s and occupied 28.1 MB;
+  peak tracked allocation including JSON serialization was 344 MB. Browser first
+  paint including dispatch took 10.3 s, observed hover after a pointer pause
+  113 ms and JS heap 177 MB. These are local observations, not portable limits.
+  Matrix transport is linear in supplied values; larger/chunked transport remains M05.d.
+
+Validation: the full integration suite passed 455 checks, then all 75 matrix,
+heatmap and workflow checks passed after the final changes, including an added
+invalid-zoom case (456 distinct integration checks covered). All 20 heatmap and
+9 matrix browser checks passed across the targeted runs. Ruff formatting/lint
+and mypy pass. The full docs site, unrelated tests and other browser families
+were not rebuilt/rerun for this slice.
+
+M05.a/b previews are verified; M05 remains open for clustermap and transport.
+Clearance: **retain** the live plan/status and unique reference/resource evidence.
+The next ready item is M05.c; this preview does not close the full family.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. Six functions are available as partial previews; 42 plot/builder
+helpers. Seven functions are available as partial previews; 41 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -555,7 +611,7 @@ No placeholder functions are exported for planned work.
 | `heatmap` | Partial cell-level preview available | M05.a/b preview; larger transport M05.d; normalization/options M14 |
 | `highest_expr_genes` | Not implemented | M10 |
 | `highly_variable_genes` | Not implemented | M10 |
-| `matrix` | Not implemented | M05 |
+| `matrix` | Partial supplied-numeric preview available | M05.b preview; broader sources/layout M14; transport M05.d |
 | `matrixplot` | Partial preview available | M03 preview; trees M04; methods M13; normalization/options M14 |
 | `paga` | Not implemented | M11 |
 | `paga_adjacency` | Not implemented | M11 |
