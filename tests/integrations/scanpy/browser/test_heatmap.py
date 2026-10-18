@@ -3,7 +3,9 @@
 from io import BytesIO
 import json
 from pathlib import Path
+import re
 import warnings
+import xml.etree.ElementTree as ET
 
 import numpy as np
 from PIL import Image
@@ -15,6 +17,111 @@ from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata, heatma
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((FIXTURES / "heatmap.json").read_text())
+
+
+@pytest.mark.parametrize("swapped", [False, True])
+def test_zoom_moves_cell_annotations_and_tree(page, swapped):
+    chart = gsc.pl.heatmap(
+        make_heatmap_adata(),
+        {"First": ["g1", "g2"], "Last": ["g3"]},
+        "group",
+        dendrogram=True,
+        swap_axes=swapped,
+        zoom=True,
+        width=450,
+        height=300,
+        show=False,
+    )
+    bounds = render(page, chart)
+    before = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    canvas = page.locator("canvas").first.bounding_box()
+    page.mouse.move(canvas["x"] + bounds["x"] + 225, canvas["y"] + bounds["y"] + 150)
+    page.mouse.wheel(0, -300)
+    page.wait_for_timeout(180)
+    domains = page.evaluate(
+        "['heatmap-x','heatmap-y'].map(n=>api.getScaleResolutionByName(n).getDomain())"
+    )
+    assert domains[0][1] - domains[0][0] < (8 if swapped else 2)
+    assert domains[1][1] - domains[1][0] < (2 if swapped else 8)
+    after = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    assert before != after
+    root = ET.fromstring(after)
+    texts = {
+        element.text: [
+            float(value)
+            for value in re.search(r"translate\(([^)]+)\)", element.get("transform"))
+            .group(1)
+            .split()
+        ]
+        for element in root.iter()
+        if element.tag.endswith("text")
+        and element.text in {"A", "D", "g1", "g2", "g3", "First", "Last"}
+    }
+    # Gene labels outside the visible rows/columns must disappear after zooming.
+    assert "g2" in texts and "g1" not in texts and "g3" not in texts
+    assert "First" not in texts and "Last" not in texts
+    tree = next(
+        element for element in root.iter() if element.get("stroke") == "#555555"
+    )
+    edge = bounds["y"] if swapped else bounds["x"] + bounds["width"]
+    leaves = [
+        float(line.get("x" + endpoint if swapped else "y" + endpoint))
+        for line in tree
+        for endpoint in ("1", "2")
+        if abs(float(line.get("y" + endpoint if swapped else "x" + endpoint)) - edge)
+        < 1
+    ]
+    for group in ("A", "D"):
+        assert any(
+            abs(point - texts[group][0 if swapped else 1]) < 0.2 for point in leaves
+        ), (group, texts, leaves, bounds)
+    # The center tile keeps the same cell identity after zooming around the center.
+    px = canvas["x"] + bounds["x"] + bounds["width"] / 2
+    py = canvas["y"] + bounds["y"] + bounds["height"] / 2
+    page.mouse.move(px - 2, py - 2)
+    page.wait_for_timeout(450)
+    for dx in (0, 1, -1):
+        page.mouse.move(px + dx, py)
+        page.wait_for_timeout(80)
+        if page.locator("table.attributes").is_visible():
+            break
+    page.locator("table.attributes").wait_for(state="visible")
+    spec = chart.to_dict()
+    cell = spec["datasets"][spec["layer"][0]["data"]["name"]][4 * 3 + 1]
+    assert [
+        row.locator("td").inner_text().strip()
+        for row in page.locator("table.attributes tr").all()
+    ][:4] == [cell["_obs_id"], cell["_obs_label"], cell["_gene"], cell["_group"]]
+    # Panning changes the visible domain while the tree stays within the cell extent.
+    page.mouse.move(canvas["x"] + bounds["x"] + 225, canvas["y"] + bounds["y"] + 150)
+    page.mouse.down()
+    page.mouse.move(
+        canvas["x"] + bounds["x"] + 270, canvas["y"] + bounds["y"] + 180, steps=5
+    )
+    page.mouse.up()
+    page.wait_for_timeout(150)
+    assert (
+        page.evaluate(
+            "['heatmap-x','heatmap-y'].map(n=>api.getScaleResolutionByName(n).getDomain())"
+        )
+        != domains
+    )
+    panned = ET.fromstring(
+        page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    )
+    tree = next(
+        element for element in panned.iter() if element.get("stroke") == "#555555"
+    )
+    start, extent = (
+        (bounds["x"], bounds["width"]) if swapped else (bounds["y"], bounds["height"])
+    )
+    for line in tree:
+        for endpoint in ("1", "2"):
+            assert (
+                start - 1
+                <= float(line.get(("x" if swapped else "y") + endpoint))
+                <= start + extent + 1
+            )
 
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)

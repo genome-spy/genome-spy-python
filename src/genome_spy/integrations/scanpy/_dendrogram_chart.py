@@ -48,10 +48,11 @@ def tree_overlay(
     reverse: bool = False,
     size: float = 80,
     leaf_positions: list[float] | None = None,
+    leaf_projection: str | None = None,
 ) -> gs.LayerChart:
-    """Return branches from a tree, orientation and optional normalized leaf positions.
+    """Return branches from a tree, orientation and optional leaf positions.
 
-    Use supplied centers for unequal heatmap groups; otherwise align equal summary slots.
+    Use normalized centers or a browser projection for heatmaps; otherwise align summary slots.
     """
     # Recalculate positions in the browser so leaves stay aligned after resizing.
     n = len(tree.order)
@@ -71,6 +72,9 @@ def tree_overlay(
                     np.interp(record[field], np.arange(n) + 0.5, leaf_positions)
                 )
         leaf, leaf2 = "datum.leaf", "datum.leaf2"
+    if leaf_projection is not None:
+        leaf = leaf_projection.format(field="leaf")
+        leaf2 = leaf_projection.format(field="leaf2")
     rules = gs.Chart(records).mark_rule(
         color="#555555", size=1.5 * _PT, clip="never", tooltip=None
     )
@@ -97,6 +101,17 @@ def tree_overlay(
         y=gs.Y("_tree_y:Q").scale(None).axis(None),
         y2="_tree_y2:Q",
     )
+    if leaf_projection is not None:
+        channel = "x" if orientation in ("top", "bottom") else "y"
+        start, stop = f"datum._tree_{channel}", f"datum._tree_{channel}2"
+        rules = rules.transform_filter(
+            f"max({start}, {stop}) >= 0 && min({start}, {stop}) <= 1"
+        ).transform_calculate(
+            **{
+                f"_tree_{channel}": f"clamp({start}, 0, 1)",
+                f"_tree_{channel}2": f"clamp({stop}, 0, 1)",
+            }
+        )
     return (
         gs.layer(rules)
         .resolve_scale(x="excluded", y="excluded")

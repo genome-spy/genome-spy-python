@@ -52,7 +52,12 @@ def test_signature_retains_upstream_defaults_and_native_additions():
         assert (
             None if p.default is inspect.Parameter.empty else repr(p.default)
         ) == parameter["default"]
-    assert set(actual) - {p["name"] for p in upstream} == {"hover", "width", "height"}
+    assert set(actual) - {p["name"] for p in upstream} == {
+        "hover",
+        "zoom",
+        "width",
+        "height",
+    }
 
 
 @pytest.mark.parametrize("case", heatmap_cases())
@@ -292,6 +297,7 @@ def test_invalid_groups_fail_explicitly(adata, kind):
         ({"show_gene_labels": 1}, TypeError, "show_gene_labels"),
         ({"dendrogram": ""}, TypeError, "dendrogram"),
         ({"hover": "yes"}, TypeError, "hover"),
+        ({"zoom": "yes"}, TypeError, "zoom"),
     ],
 )
 def test_bad_options_fail_before_optional_import(monkeypatch, options, error, match):

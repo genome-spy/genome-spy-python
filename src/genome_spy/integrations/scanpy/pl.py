@@ -793,6 +793,7 @@ def heatmap(
     vcenter: float | None = None,
     norm: Any = None,
     hover: bool = True,
+    zoom: bool = False,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -831,6 +832,7 @@ def heatmap(
         vcenter: Nondefault values are unsupported.
         norm: Matplotlib normalization objects are unsupported.
         hover: Include cell ID, gene, group and expression tooltips.
+        zoom: Enable x/y wheel zoom and drag panning with aligned annotations.
         width: Native tile-area width in pixels.
         height: Native tile-area height in pixels.
         **kwds: Native cmap scheme, scalar alpha and interpolation="nearest".
@@ -858,7 +860,12 @@ def heatmap(
             raise NotImplementedError(f"{context}: {name} is unsupported.")
     if kwds.get("interpolation", "nearest") != "nearest":
         raise NotImplementedError(f"{context}: interpolation supports only 'nearest'.")
-    for name, value in {"log": log, "swap_axes": swap_axes, "hover": hover}.items():
+    for name, value in {
+        "log": log,
+        "swap_axes": swap_axes,
+        "hover": hover,
+        "zoom": zoom,
+    }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
     if show_gene_labels is not None and not isinstance(show_gene_labels, bool):
@@ -958,6 +965,7 @@ def heatmap(
         vmax=vmax,
         alpha=kwds.get("alpha", 1),
         hover=hover,
+        zoom=zoom,
         scaled=standard_scale is not None,
         width=width,
         height=height,

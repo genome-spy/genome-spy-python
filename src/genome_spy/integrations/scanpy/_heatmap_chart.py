@@ -45,6 +45,7 @@ def build_heatmap(
     vmax: float | None,
     alpha: float | None,
     hover: bool,
+    zoom: bool,
     scaled: bool,
     width: float | None,
     height: float | None,
@@ -108,6 +109,9 @@ def build_heatmap(
     )
     x = coordinate(gs.X, "_x", cells if swap_axes else genes, 0)
     y = coordinate(gs.Y, "_y", genes if swap_axes else cells, 0, reverse=True)
+    if zoom:
+        x = x.scale(zoom=True, name="heatmap-x")
+        y = y.scale(zoom=True, name="heatmap-y")
     # Only genes have ticks; individual cell rows remain unlabeled.
     if show_gene_labels:
         gene_axis = (y if swap_axes else x).axis(
@@ -170,19 +174,25 @@ def build_heatmap(
         )
     layers: list[gs.Chart | gs.LayerChart] = [tiles]
     if show_gene_labels:
-        layers.append(
-            _slot_labels(
-                list(values.columns.astype(str)),
-                y if swap_axes else x,
-                horizontal=not swap_axes,
-            )
+        labels = _slot_labels(
+            list(values.columns.astype(str)),
+            y if swap_axes else x,
+            horizontal=not swap_axes,
         )
+        if zoom:
+            labels = labels.transform_filter(
+                "inrange(heatmap_gene_origin + (datum.slot + 0.5) * heatmap_gene_step, [0, 1])"
+            )
+        layers.append(labels)
 
     # Category spans, labels and tree leaves follow the same cell permutation.
     intervals = prepared.intervals.copy()
     intervals["_start"] = intervals["start"] / cells
     intervals["_stop"] = intervals["stop"] / cells
     intervals["_center"] = intervals["center"] / cells
+    # Project cell boundaries through the live scale, including fractional centers.
+    channel = "x" if swap_axes else "y"
+    position = "heatmap_cell_origin + datum.{field} * heatmap_cell_step"
     group_labels = intervals["label"].tolist()
     group_color = gs.Color("label:N").scale(domain=group_labels)
     group_color = (
@@ -193,12 +203,31 @@ def build_heatmap(
     group_color = group_color.legend(None)
     if categorical:
         annotations = _category_strip(
-            intervals, group_color, groupby, swap_axes=swap_axes
+            intervals,
+            group_color,
+            groupby,
+            swap_axes=swap_axes,
+            position=position if zoom else None,
         )
         layers.append(annotations)
         boundaries = intervals.iloc[:-1]
         lines = gs.Chart(boundaries).mark_rule(color="black", size=PT, tooltip=None)
-        if swap_axes:
+        if zoom:
+            projected = position.format(field="stop")
+            if not swap_axes:
+                projected = f"1 - ({projected})"
+            lines = lines.transform_filter(f"inrange({projected}, [0, 1])")
+            lines = lines.transform_calculate(_boundary=projected)
+            lines = lines.encode(
+                **{
+                    channel: (gs.X if swap_axes else gs.Y)("_boundary:Q")
+                    .scale(None)
+                    .axis(None),
+                    "y" if swap_axes else "x": gs.value(0),
+                    "y2" if swap_axes else "x2": gs.value(1),
+                }
+            )
+        elif swap_axes:
             lines = lines.encode(
                 x=gs.X("_stop:Q").scale(None).axis(None), y=gs.value(0), y2=gs.value(1)
             )
@@ -208,17 +237,23 @@ def build_heatmap(
                 x=gs.value(0),
                 x2=gs.value(1),
             )
-        layers.append(
-            gs.layer(lines)
-            .resolve_scale(x="excluded", y="excluded")
-            .resolve_axis(x="excluded", y="excluded")
-        )
+        boundary_layer = gs.layer(lines).resolve_scale(x="excluded", y="excluded")
+        layers.append(boundary_layer.resolve_axis(x="excluded", y="excluded"))
 
     # Scanpy uses brackets above ordinary heatmaps and a gene strip when swapped.
     if feature_groups and not swap_axes:
-        layers.extend(
-            _brackets(feature_groups, x, swapped=False, rotation=rotation, end_band=0.8)
+        brackets = _brackets(
+            feature_groups, x, swapped=False, rotation=rotation, end_band=0.8
         )
+        if zoom:
+            brackets = [
+                chart.transform_filter(
+                    "heatmap_gene_origin + datum.start * heatmap_gene_step >= 0 && "
+                    "heatmap_gene_origin + (datum.end + 1) * heatmap_gene_step <= 1"
+                )
+                for chart in brackets
+            ]
+        layers.extend(brackets)
     elif feature_groups:
         marker_rows: list[dict[str, Any]] = []
         matched = {group.label for group in feature_groups}.issubset(group_labels)
@@ -239,7 +274,21 @@ def build_heatmap(
                 x=gs.value(1), x2=gs.value(1), y=y.field("_gene"), color=group_color
             )
         )
-        layers.append(markers)
+        if zoom:
+            markers = markers.transform_calculate(
+                _top="1 - clamp(heatmap_gene_origin + datum._gene * heatmap_gene_step, 0, 1)",
+                _bottom="1 - clamp(heatmap_gene_origin + (datum._gene + 1) * heatmap_gene_step, 0, 1)",
+            ).encode(
+                y=gs.Y("_top:Q").scale(None).axis(None),
+                y2="_bottom:Q",
+            )
+            layers.append(
+                gs.layer(markers)
+                .resolve_scale(x="excluded", y="excluded")
+                .resolve_axis(x="excluded", y="excluded")
+            )
+        else:
+            layers.append(markers)
     if tree is not None:
         layers.append(
             tree_overlay(
@@ -247,7 +296,8 @@ def build_heatmap(
                 orientation="top" if swap_axes else "right",
                 reverse=not swap_axes,
                 size=80 if swap_axes else 100,
-                leaf_positions=intervals["_center"].tolist(),
+                leaf_positions=intervals["center" if zoom else "_center"].tolist(),
+                leaf_projection=position if zoom else None,
             )
         )
     gene_space = (
@@ -261,7 +311,7 @@ def build_heatmap(
         top_space = 90
     elif feature_groups and not swap_axes:
         top_space = bracket_space(feature_groups)
-    return (
+    chart = (
         gs.layer(*layers)
         .properties(
             width=width,
@@ -282,17 +332,43 @@ def build_heatmap(
             layout={"anchor": "end", "direction": "vertical", "wrap": False},
         )
     )
+    if zoom:
+        # Move outside annotations with the cells and hide labels beyond the plot.
+        for name, axis in (("cell", channel), ("gene", "y" if swap_axes else "x")):
+            origin = f"scale('{axis}', 0)"
+            if axis == "y":
+                origin = f"1 - scale('{axis}', 0)"
+            chart = chart.add_params(
+                gs.param(f"heatmap_{name}_origin", expr=origin),
+                gs.param(f"heatmap_{name}_step", expr=f"bandwidth('{axis}')"),
+            )
+    return chart
 
 
 def _category_strip(
-    intervals: pd.DataFrame, color: gs.Color, title: str, *, swap_axes: bool
+    intervals: pd.DataFrame,
+    color: gs.Color,
+    title: str,
+    *,
+    swap_axes: bool,
+    position: str | None = None,
 ) -> gs.LayerChart:
     """Return category blocks, centered labels and a title outside the cell matrix.
 
     Use normalized group spans so the strip remains aligned after resizing.
     """
     strip = gs.Chart(intervals)
-    labels = gs.Chart(intervals)
+    if position is not None:
+        strip = strip.transform_calculate(
+            **{
+                f"_{field}": f"clamp({position.format(field=field)}, 0, 1)"
+                for field in ("start", "stop")
+            },
+            _center=position.format(field="center"),
+        )
+    labels = strip
+    if position is not None:
+        labels = labels.transform_filter("inrange(datum._center, [0, 1])")
     title_chart = gs.Chart([{"label": title}])
     label_space = max(map(len, intervals["label"])) * TICK * 0.65 + 40
     if swap_axes:
