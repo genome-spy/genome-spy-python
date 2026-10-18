@@ -36,6 +36,7 @@ darkblue darkgold darkgreen darkmulti darkred
 
 
 def native_scheme(value: Any, name: str, *, context: str = "gsc.pl.umap") -> str:
+    """Return a supported color scheme name in lowercase, rejecting other forms."""
     if not isinstance(value, str) or value.lower() not in _SCHEMES:
         raise NotImplementedError(
             f"{context}: {name} requires a GenomeSpy scheme name, such as "
@@ -45,6 +46,7 @@ def native_scheme(value: Any, name: str, *, context: str = "gsc.pl.umap") -> str
 
 
 def native_color(value: Any, name: str, *, context: str = "gsc.pl.umap") -> str:
+    """Return an opaque CSS color unchanged, or reject forms needing conversion."""
     # Let GenomeSpy parse colors; reject forms that need Matplotlib conversion.
     if isinstance(value, str):
         named = (
@@ -69,6 +71,10 @@ def color_bounds(
     context: str,
     expand_constant: bool = True,
 ) -> tuple[float, float, bool]:
+    """Return color limits and whether they were constant from values and overrides.
+
+    Ignore missing values and optionally widen constant limits for a colorbar.
+    """
     valid = values[np.isfinite(values)]
     if not valid.size:
         raise ValueError(f"{context}: colors need at least one finite value.")
@@ -105,6 +111,10 @@ class ColorData:
 def _bound(
     bound: Any, index: int, count: int, values: np.ndarray, default: float
 ) -> float:
+    """Resolve one panel's numeric bound from a scalar, list or percentile string.
+
+    Return default when unset, keeping multi-panel limits consistent with Scanpy.
+    """
     # A single bound applies to every panel; a list may set one per panel.
     if isinstance(bound, Sequence) and not isinstance(bound, str):
         if len(bound) not in (1, count):
@@ -129,6 +139,10 @@ def _bound(
 
 
 def _categorical(values: Any) -> pd.Categorical | None:
+    """Return ordered categories for label-like values, or None for numeric colors.
+
+    Preserve saved order; otherwise use Scanpy's string and boolean ordering.
+    """
     # Keep a saved category order instead of sorting it again.
     if isinstance(getattr(values, "dtype", None), pd.CategoricalDtype):
         return pd.Categorical(values).copy()
@@ -149,6 +163,10 @@ def _categorical(values: Any) -> pd.Categorical | None:
 def _palette(
     adata: Any, key: str, categories: pd.Index, palette: Any
 ) -> tuple[tuple[str, ...], str | None]:
+    """Return ordered CSS colors or a scheme name for the requested categories.
+
+    Use the supplied palette, saved AnnData colors or Scanpy defaults, in that order.
+    """
     count = len(categories)
     if isinstance(palette, str):
         return (), native_scheme(palette, "palette")
@@ -206,6 +224,10 @@ def categorical_colors(
     na_color: str,
     na_in_legend: bool,
 ) -> ColorData:
+    """Return labels, colors and legend entries for a panel's categories.
+
+    Apply groups and masks without changing the remaining groups' assigned colors.
+    """
     # Resolve colors before hiding groups so the remaining groups keep their colors.
     categories = values.categories
     original, scheme = (
@@ -277,6 +299,10 @@ def continuous_colors(
     count: int,
     colorbar: bool,
 ) -> ColorData:
+    """Return copied numeric colors, bounds and scheme for one panel.
+
+    Apply masks and panel-specific limits without changing the source values.
+    """
     # Use a copy so masking colors never changes the source expression values.
     if isinstance(values, pd.Series):
         values = values.to_numpy(na_value=np.nan)
@@ -330,6 +356,7 @@ class UMAPStyle:
 
 
 def _number(value: Any, name: str, *, minimum: float = 0) -> float:
+    """Return a checked UMAP number, retaining its existing True/False handling."""
     # Keep UMAP's existing treatment of True and False as 1 and 0.
     return number(
         float(value) if isinstance(value, bool) else value,
@@ -340,6 +367,7 @@ def _number(value: Any, name: str, *, minimum: float = 0) -> float:
 
 
 def _font_size(value: float | str | None) -> float:
+    """Convert a numeric or named legend font size to pixels, using Scanpy defaults."""
     sizes = {
         "xx-small": 5.79,
         "x-small": 6.94,
@@ -373,6 +401,10 @@ def umap_style(
     linewidth: Any,
     na_color: Any,
 ) -> UMAPStyle:
+    """Return native UMAP settings from plot options, using explicit defaults.
+
+    Validate appearance separately from data so chart building needs no global style.
+    """
     if isinstance(ncols, bool) or not isinstance(ncols, Integral) or ncols < 1:
         raise ValueError("gsc.pl.umap: ncols must be a positive integer.")
     opacity = _number(1 if alpha is None else alpha, "alpha")

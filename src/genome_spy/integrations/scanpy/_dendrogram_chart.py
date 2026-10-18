@@ -15,6 +15,10 @@ Orientation = Literal["top", "bottom", "left", "right"]
 
 
 def tree_records(tree: DendrogramData) -> list[dict[str, float]]:
+    """Turn stored tree branches into line segments with one position per group.
+
+    Return endpoint rows that GenomeSpy can draw without calculating a tree.
+    """
     # Convert Scanpy's ten-unit leaf spacing into one slot per group.
     return [
         {
@@ -29,6 +33,7 @@ def tree_records(tree: DendrogramData) -> list[dict[str, float]]:
 
 
 def distance_domain(tree: DendrogramData) -> list[float]:
+    """Return padded distance limits from tree heights, including a zero-height tree."""
     high = float(tree.dcoord.max())
     return [-0.05 * high, 1.05 * high] if high else [-0.055, 0.055]
 
@@ -41,7 +46,10 @@ def tree_overlay(
     reverse: bool = False,
     size: float = 80,
 ) -> gs.LayerChart:
-    """Place branches beside the same fixed index slots used by summary marks."""
+    """Return a branch layer beside matrix positions from a tree and layout options.
+
+    Keep its coordinates separate so it aligns on resize without stretching cells.
+    """
     # Recalculate positions in the browser so leaves stay aligned after resizing.
     n = len(tree.order)
     maximum = float(tree.dcoord.max()) or 1
@@ -90,6 +98,10 @@ def build_dendrogram(
     width: float | None,
     height: float | None,
 ) -> gs.TopLevelSpec:
+    """Return a standalone chart from prepared tree data, orientation and size.
+
+    Draw stored branches and optional labels without computing linkage.
+    """
     context = "gsc.pl.dendrogram"
     width = number(300 if width is None else width, "width", context=context)
     height = number(300 if height is None else height, "height", context=context)

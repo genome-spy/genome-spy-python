@@ -18,6 +18,7 @@ from genome_spy.integrations.scanpy._style import POINTS_TO_PIXELS, UMAPStyle
 
 
 def coordinate_domain(values: np.ndarray, margin: float) -> tuple[float, float]:
+    """Return coordinate limits with the requested margin, widening constant values."""
     low, high = float(values.min()), float(values.max())
     if low == high:
         padding = abs(low) * 0.05 or 0.05
@@ -35,6 +36,10 @@ def _coordinate(
     *,
     horizontal: bool,
 ) -> gs.X | gs.Y:
+    """Return an x or y encoding from a panel's coordinates and style.
+
+    Set fixed initial limits and optional zoom so the stored embedding is retained.
+    """
     channel = gs.X if horizontal else gs.Y
     margin = style.xmargin if horizontal else style.ymargin
     result = channel(f"{field}:Q").scale(
@@ -58,6 +63,10 @@ def _coordinate(
 
 
 def _legend(panel: Panel, style: UMAPStyle) -> gs.Legend | None:
+    """Return the panel's category legend or colorbar from its data and style.
+
+    Return None when the requested placement does not use an external guide.
+    """
     if panel.categorical:
         if panel.key is None or style.legend_loc != "right margin":
             return None
@@ -91,6 +100,10 @@ def _legend(panel: Panel, style: UMAPStyle) -> gs.Legend | None:
 
 
 def _color(panel: Panel, index: int, style: UMAPStyle) -> gs.Color:
+    """Return a color encoding and guide from a prepared panel and its table index.
+
+    Keep category palettes, numeric ranges and constant-value colors faithful.
+    """
     color = gs.Color(f"_color_{index}:N" if panel.categorical else f"_color_{index}:Q")
     color = color.scale(
         type="ordinal" if panel.categorical else "linear",
@@ -125,6 +138,10 @@ def _panel(
     zoom: bool,
     selection: gs.Parameter | None,
 ) -> gs.TopLevelSpec:
+    """Return one UMAP panel from prepared cells, panel settings and style.
+
+    Draw points, missing values and labels in order, adding only requested interactions.
+    """
     table = prepared.table
     x_field, y_field = [f"_coord_{d}" for d in panel.dimensions]
     x = _coordinate(
@@ -243,6 +260,10 @@ def _panel(
 def _compose(
     charts: list[gs.TopLevelSpec], style: UMAPStyle, *, share_coordinates: bool
 ) -> gs.TopLevelSpec:
+    """Arrange panel charts into rows using the supplied size and spacing settings.
+
+    Return one chart, sharing coordinates only when requested and keeping colors separate.
+    """
     if len(charts) == 1:
         return charts[0]
     position: Literal["shared", "independent"] = (
@@ -277,6 +298,10 @@ def build_umap(
     zoom: bool,
     selection: gs.Parameter | None = None,
 ) -> gs.TopLevelSpec:
+    """Return a composed UMAP chart from prepared data, style and interaction options.
+
+    Share zoom for matching coordinates and add the linked brush count when requested.
+    """
     if selection is not None:
         validate_brush(prepared)
     charts = [

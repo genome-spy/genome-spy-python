@@ -18,6 +18,10 @@ def point_interactions(
     opacity: float,
     stroke_opacity: float,
 ) -> gs.Chart:
+    """Return a point chart with requested hover and brush highlighting applied.
+
+    Use the panel's prepared fields and shared selection without dropping cells.
+    """
     if hover:
         x, y = panel.dimensions
         chart = chart.encode(
@@ -45,6 +49,7 @@ def point_interactions(
 
 
 def validate_brush(prepared: PreparedUMAP) -> None:
+    """Check prepared panels use the same coordinate pair; raise if linking is unsafe."""
     if len({panel.dimensions for panel in prepared.panels}) != 1:
         raise NotImplementedError(
             "gsc.pl.umap: linked brushing requires the same dimensions in all panels."
@@ -57,6 +62,10 @@ def with_brush_count(
     style: UMAPStyle,
     selection: gs.Parameter,
 ) -> gs.TopLevelSpec:
+    """Return the UMAP chart with a count row driven by the supplied brush.
+
+    Count prepared cells in the browser using the same bounds as point highlighting.
+    """
     x, y = [f"_coord_{d}" for d in prepared.panels[0].dimensions]
     name = selection.name
     # Match the shader's lower-inclusive, upper-exclusive point membership.
@@ -89,6 +98,10 @@ def with_brush_count(
 def brush_owner(
     chart: gs.Chart | gs.LayerChart, selection: gs.Parameter
 ) -> gs.Chart | gs.LayerChart:
+    """Return the first panel with control of the supplied shared brush.
+
+    Write to the outer selection so the other panels and count see the same value.
+    """
     # Other panels only observe the shared value.
     return chart.add_params(
         selection.copy(name=selection.name, push="outer")

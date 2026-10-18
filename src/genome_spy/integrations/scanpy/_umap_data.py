@@ -47,6 +47,10 @@ class PreparedUMAP:
 def dimensions_for(
     components: Any, dimensions: Any, count: int
 ) -> list[tuple[int, int]]:
+    """Return zero-based coordinate pairs from component options and column count.
+
+    Convert Scanpy's one-based component strings and reject unavailable columns.
+    """
     pairs: Any
     if components is not None and dimensions is not None:
         raise ValueError(
@@ -85,6 +89,10 @@ def dimensions_for(
 
 
 def draw_order(values: np.ndarray, *, categorical: bool, sort: bool) -> np.ndarray:
+    """Return row positions in Scanpy's painting order for the supplied color values.
+
+    Match Scanpy's order for missing values and ties so overlapping points agree.
+    """
     if not sort:
         return np.arange(len(values))
     if categorical:
@@ -96,6 +104,10 @@ def draw_order(values: np.ndarray, *, categorical: bool, sort: bool) -> np.ndarr
 def _expression(
     adata: Any, key: str, use_raw: bool, layer: str | None, symbols: str | None
 ) -> tuple[Any, str]:
+    """Return a copied observation or gene vector and its source label from AnnData.
+
+    Resolve symbols and raw/layer choices using Scanpy's UMAP lookup rules.
+    """
     if key in adata.obs:
         if list(adata.obs.columns).count(key) != 1:
             raise ValueError(f"gsc.pl.umap: observation field {key!r} is ambiguous.")
@@ -137,6 +149,10 @@ def _expression(
 def _panel_inputs(
     adata: Any, color: Any, components: Any, dimensions: Any, marker: Any
 ) -> list[tuple[Any, tuple[int, int], str]]:
+    """Return each panel's color key, coordinate pair and marker from plot options.
+
+    Require stored UMAP coordinates and expand options using Scanpy's list rules.
+    """
     basis = "umap" if "umap" in adata.obsm else "X_umap"
     if basis not in adata.obsm:
         raise ValueError(
@@ -175,6 +191,10 @@ def _panel_inputs(
 def _observations(
     adata: Any, pairs: list[tuple[int, int]], obs_id: str | None
 ) -> pd.DataFrame:
+    """Return requested UMAP columns and cell IDs as a table in observation order.
+
+    Read no expression and keep duplicate cell names distinct for linked panels.
+    """
     basis = "umap" if "umap" in adata.obsm else "X_umap"
     needed = sorted({dimension for pair in pairs for dimension in pair})
     # Read coordinates without rejecting unrelated duplicate gene names.
@@ -216,6 +236,10 @@ def _observations(
 
 
 def _mask(adata: Any, mask: Any) -> np.ndarray | None:
+    """Return a checked cell mask from an obs key or vector, or None when unset.
+
+    Require AnnData's row order so hiding colors cannot target the wrong cells.
+    """
     if mask is None:
         return None
     if isinstance(mask, str):
@@ -236,6 +260,7 @@ def _mask(adata: Any, mask: Any) -> np.ndarray | None:
 
 
 def _sizes(size: Any, count: int) -> np.ndarray:
+    """Return checked scalar or per-cell areas for count cells, using Scanpy's default."""
     values = np.asarray(120000 / count if size is None else size, dtype=float)
     if values.ndim > 1 or (values.ndim == 1 and values.shape != (count,)):
         raise ValueError("gsc.pl.umap: size must be scalar or one per observation.")
@@ -245,6 +270,7 @@ def _sizes(size: Any, count: int) -> np.ndarray:
 
 
 def _title(title: Any, key: str | None, index: int) -> str | None:
+    """Return a panel title from a string or list, falling back to its color key."""
     if title is None:
         return key
     if isinstance(title, str):
@@ -283,6 +309,11 @@ def prepare_umap(
     obs_id: str | None,
     colorbar_loc: str | None,
 ) -> PreparedUMAP:
+    """Return a shared cell table and panel settings from AnnData and UMAP options.
+
+    Read existing coordinates and selected colors, preserving cell identity and
+    Scanpy draw order without changing AnnData or computing an embedding.
+    """
     from anndata import AnnData
 
     if not isinstance(adata, AnnData):

@@ -20,6 +20,10 @@ _Bound = float | str | Sequence[float | str | None] | None
 
 
 def _require_scanpy(context: str = "gsc.pl.umap") -> Any:
+    """Return the supported Scanpy module, or raise an error naming the plotting call.
+
+    Delay the optional import until a plot is requested to keep base imports light.
+    """
     try:
         installed = version("scanpy")
     except PackageNotFoundError as error:
@@ -39,6 +43,10 @@ def _require_scanpy(context: str = "gsc.pl.umap") -> Any:
 def _check_kwargs(
     options: Mapping[str, Any], allowed: set[str], *, context: str
 ) -> None:
+    """Check forwarded options against allowed names; raise a contextual error if invalid.
+
+    Reject Matplotlib-only options explicitly rather than silently dropping them.
+    """
     for name in ("ax", "return_fig"):
         if name in options:
             raise TypeError(
@@ -52,7 +60,7 @@ def _check_kwargs(
 
 
 def _prepare_plot(show: bool | None, save: str | bool | None, *, context: str) -> Any:
-    """Validate shared display options before loading the optional dependency."""
+    """Check show/save and return Scanpy, rejecting automatic image saving early."""
     if show is not None and not isinstance(show, bool):
         raise TypeError(f"{context}: show must be boolean or None.")
     if save is not None and save is not False:
@@ -70,6 +78,10 @@ def _prepare_plot(show: bool | None, save: str | bool | None, *, context: str) -
 def _finish_plot(
     chart: TopLevelSpec, show: bool | None, sc: Any
 ) -> TopLevelSpec | None:
+    """Use show or Scanpy's setting to display the chart or return it.
+
+    Displaying returns None so a notebook does not produce a second chart output.
+    """
     should_show = sc.settings.autoshow if show is None else show
     if should_show:
         chart.display()

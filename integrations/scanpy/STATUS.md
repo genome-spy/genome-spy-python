@@ -460,6 +460,14 @@ specifications are unchanged. Browser checks, resource benchmarks and the full
 documentation site were not rerun for this behavior-preserving edit. Notebook
 edits remain outside the change. M05 remains next; no plan is newly clearable.
 
+Helper docstrings (October 18): all 71 internal plotting helpers now have concise
+descriptions of their purpose, inputs and result, with reasons for non-obvious
+choices. The longest is 34 words; public API documentation is unchanged.
+Syntax-tree comparison confirms only docstrings changed. All 66 contract tests,
+Ruff formatting/lint and mypy pass. Broader tests, browser checks, benchmarks and
+the documentation build were not repeated for this documentation-only change.
+Notebook edits remain untouched; M05 and plan clearance are unchanged.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50

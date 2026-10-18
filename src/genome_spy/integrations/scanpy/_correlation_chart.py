@@ -35,6 +35,11 @@ def build_correlation_matrix(
     height: float | None,
     figsize: tuple[float, float] | None,
 ) -> gs.TopLevelSpec:
+    """Return a correlation chart from prepared tree data and appearance options.
+
+    Keep tiles, labels, optional numbers and branches in the same group order;
+    use stored correlations rather than computing them during rendering.
+    """
     context = "gsc.pl.correlation_matrix"
     n = len(tree.order)
     if figsize is not None:

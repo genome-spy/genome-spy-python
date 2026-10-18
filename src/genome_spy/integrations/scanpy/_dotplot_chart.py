@@ -31,7 +31,10 @@ if TYPE_CHECKING:
 def dot_size_scale(
     fractions: np.ndarray, dot_min: float | None, dot_max: float | None, smallest: float
 ) -> tuple[list[float], list[float], list[float]]:
-    """Map exact percentage values to areas, including clipped power scaling."""
+    """Return percentage positions, dot areas and legend ticks from cell fractions.
+
+    Apply Scanpy's clipping and size curve once so dots and legend symbols agree.
+    """
     smallest = number(smallest, "smallest_dot", context="gsc.pl.dotplot")
     if smallest > 200:
         raise ValueError(
@@ -95,6 +98,11 @@ def build_dotplot(
     figsize: tuple[float, float] | None,
     tree: DendrogramData | None = None,
 ) -> gs.TopLevelSpec:
+    """Build a native dotplot from displayed colors, cell fractions and marker groups.
+
+    Return a chart with shared grouped layout, optional tree and summary hover;
+    this step reads no AnnData and computes no expression statistics.
+    """
     rows, columns = colors.shape
     scheme = native_scheme(
         "viridis" if cmap is None else cmap, "cmap", context="gsc.pl.dotplot"

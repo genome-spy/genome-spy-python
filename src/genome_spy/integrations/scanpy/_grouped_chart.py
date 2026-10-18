@@ -24,6 +24,10 @@ if TYPE_CHECKING:
 def coordinate(
     channel: Any, field: str, count: int, padding: float, *, reverse: bool = False
 ) -> Any:
+    """Return an index position encoding from a field, count and outer padding.
+
+    Use integer positions so repeated labels remain separate and layers align.
+    """
     return (
         channel(f"{field}:I")
         .scale(
@@ -37,6 +41,10 @@ def coordinate(
 
 
 def _slot_labels(labels: list[str], coordinate: Any, *, horizontal: bool) -> gs.Chart:
+    """Return a text layer placing labels at the supplied row or column positions.
+
+    Separate text avoids merging repeated names into a single axis tick.
+    """
     table = [{"slot": i, "label": label} for i, label in enumerate(labels)]
     if horizontal:
         return (
@@ -75,6 +83,10 @@ def _brackets(
     swapped: bool,
     rotation: float | None,
 ) -> list[gs.Chart]:
+    """Return rule and text layers for marker groups at the supplied positions.
+
+    Match bracket spans and label placement in either plot orientation.
+    """
     # Place brackets by gene position so repeated names stay separate.
     table = [
         {
@@ -185,6 +197,10 @@ def plot_dimensions(
     figsize: tuple[float, float] | None,
     context: str,
 ) -> tuple[float, float]:
+    """Return plot width and height from table shape and optional size overrides.
+
+    Convert figsize to pixels while reserving space for guides.
+    """
     if figsize is not None:
         if width is not None or height is not None:
             raise TypeError(
@@ -213,6 +229,10 @@ def plot_dimensions(
 def summary_records(
     colors: pd.DataFrame, *, swap_axes: bool, context: str
 ) -> pd.DataFrame:
+    """Turn a displayed summary matrix into rows for plotting and hover.
+
+    Return positions, gene/group labels and values, keeping repeated genes separate.
+    """
     xlabels, ylabels = [str(v) for v in colors.columns], [str(v) for v in colors.index]
     groups = xlabels if swap_axes else ylabels
     if len(set(groups)) != len(groups):
@@ -233,12 +253,14 @@ def summary_records(
 
 
 def bracket_space(groups: tuple[FeatureGroup, ...]) -> float:
+    """Estimate space in pixels for marker-group labels so they clear the plot."""
     return max((len(g.label) for g in groups), default=0) * _TICK * 0.65 + 12
 
 
 def guide_offset(
     groups: tuple[FeatureGroup, ...], *, swap_axes: bool, tree: bool = False
 ) -> float:
+    """Return guide spacing in pixels, allowing for marker brackets and a tree."""
     return (
         12
         + (bracket_space(groups) if groups and swap_axes else 0)
@@ -253,6 +275,10 @@ def color_legend(
     swap_axes: bool,
     tree: bool = False,
 ) -> gs.Legend:
+    """Return a color guide from its title and neighboring bracket/tree layout.
+
+    Keep dotplot and matrixplot guides consistent and clear of annotations.
+    """
     return gs.Legend(
         title=title.replace("\n", " ") if title else title,
         orient="right",
@@ -266,6 +292,10 @@ def color_legend(
 def grouped_axes(
     rows: int, columns: int, *, xpadding: float, ypadding: float
 ) -> tuple[Any, Any]:
+    """Return x/y encodings from table shape and padding, with fixed index ticks.
+
+    Reverse row positions so the first matrix row appears at the top.
+    """
     axes = []
     for channel, field, count, padding, reverse in [
         (gs.X, "_x", columns, xpadding, False),
@@ -300,6 +330,10 @@ def finish_grouped_chart(
     frame_width: float,
     tree: DendrogramData | None = None,
 ) -> gs.TopLevelSpec:
+    """Combine summary marks, table labels and optional brackets/tree into a chart.
+
+    Use the supplied axes and size to align layers and leave room for annotations.
+    """
     xlabels, ylabels = [str(v) for v in colors.columns], [str(v) for v in colors.index]
     # Draw labels separately so repeated names do not collapse into one axis tick.
     layers: list[gs.Chart | gs.LayerChart] = [

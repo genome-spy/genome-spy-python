@@ -37,6 +37,10 @@ def _feature_slots(
     labels: Sequence[str] | None,
     positions: Sequence[tuple[int, int]] | None,
 ) -> tuple[list[str], tuple[FeatureGroup, ...]]:
+    """Turn gene names or a marker dictionary into ordered names and bracket spans.
+
+    Keep repeated names so each requested occurrence has its own plot position.
+    """
     groups = []
     names: list[str]
     # A marker dictionary sets both gene order and bracket positions.
@@ -94,6 +98,10 @@ def _feature_slots(
 
 
 def _categories(frame: pd.DataFrame, keys: list[str]) -> pd.Categorical:
+    """Return ordered groups from the table's groupby columns.
+
+    Combine multiple labels without creating groups that have no cells.
+    """
     if len(keys) == 1:
         values = frame[keys[0]]
         return pd.Categorical(values)
@@ -133,7 +141,11 @@ def grouped_expression(
     var_group_labels: Sequence[str] | None = None,
     var_group_positions: Sequence[tuple[int, int]] | None = None,
 ) -> GroupedExpression:
-    """Read selected values once; preserve observation order and repeated slots."""
+    """Read requested AnnData values into a separate table with groups on its index.
+
+    Return that table and marker brackets, keeping cell order and repeated genes
+    without changing AnnData or loading the full expression matrix.
+    """
     from anndata import AnnData
     from scanpy.get import obs_df
 
@@ -226,6 +238,7 @@ def grouped_expression(
 
 
 def _cutoff(value: float) -> None:
+    """Check an expression cutoff; raise for invalid values, allowing negatives."""
     number(
         value, "expression_cutoff", context="Grouped plotting", minimum=-float("inf")
     )
@@ -234,7 +247,11 @@ def _cutoff(value: float) -> None:
 def group_means(
     values: pd.DataFrame, *, expression_cutoff: float | None = None
 ) -> pd.DataFrame:
-    """Average observed groups; optionally include only values above a cutoff."""
+    """Return group means from cell values indexed by group, skipping missing data.
+
+    With a cutoff, average only expressing cells and fill empty means with zero,
+    matching Scanpy's mean_only_expressed behavior.
+    """
     if expression_cutoff is not None:
         _cutoff(expression_cutoff)
         values = values.where(values > expression_cutoff)
@@ -246,7 +263,11 @@ def group_means(
 def expression_fractions(
     values: pd.DataFrame, *, expression_cutoff: float = 0.0
 ) -> pd.DataFrame:
-    """Use Scanpy's comparison/count denominator, including implicit zeros."""
+    """Return each group's fraction of cell values strictly above the cutoff.
+
+    Use Scanpy's comparison and count rules so zeros and missing values contribute
+    to the denominator in the same way.
+    """
     _cutoff(expression_cutoff)
     # Count values strictly above the cutoff, including zeros in the denominator.
     expressed = values > expression_cutoff
@@ -257,7 +278,10 @@ def expression_fractions(
 def scale_means(
     means: pd.DataFrame, standard_scale: Literal["var", "group"] | None
 ) -> pd.DataFrame:
-    """Min–max scale aggregated means; zero-range entries become zero."""
+    """Return means scaled to 0–1 by gene or group, or copied when scaling is off.
+
+    Set constant ranges to zero to match Scanpy's plotting normalization.
+    """
     if standard_scale is None:
         return means.copy()
     if standard_scale not in ("var", "group"):
@@ -278,7 +302,11 @@ def matrixplot_statistics(
     categories_order: Sequence[str] | None,
     swap_axes: bool,
 ) -> pd.DataFrame:
-    """Scale computed means once; supplied tables retain their values and order."""
+    """Return the displayed matrix from grouped cell values or supplied means.
+
+    Scale computed means once, preserve supplied values, and transpose if requested
+    so chart construction receives the final row and column order.
+    """
     # Supplied means replace computed means and must not be scaled again.
     if values_df is not None:
         if not isinstance(values_df, pd.DataFrame):
@@ -320,7 +348,11 @@ def dotplot_statistics(
     dot_color_df: pd.DataFrame | None,
     swap_axes: bool,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return displayed colors/fractions, including the pinned render-time scaling."""
+    """Return displayed color values and cell fractions from grouped cell values.
+
+    Honor supplied colors, expressed-only means and Scanpy's scaling order;
+    transpose both tables together when axes are swapped.
+    """
     # Dot sizes always describe the cells, even when colors are supplied.
     fractions = expression_fractions(values, expression_cutoff=expression_cutoff)
     if fractions.empty:

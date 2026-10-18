@@ -48,6 +48,11 @@ def build_matrixplot(
     figsize: tuple[float, float] | None,
     tree: DendrogramData | None = None,
 ) -> gs.TopLevelSpec:
+    """Build a native tile chart from displayed means and marker groups.
+
+    Return the shared grouped layout with optional tree and summary hover, without
+    reading AnnData or recomputing means.
+    """
     context = "gsc.pl.matrixplot"
     rows, columns = colors.shape
     scheme = native_scheme("viridis" if cmap is None else cmap, "cmap", context=context)

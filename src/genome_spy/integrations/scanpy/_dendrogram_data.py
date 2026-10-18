@@ -31,6 +31,10 @@ class DendrogramData:
 def _grouping(
     adata: Any, groupby: str | Sequence[str]
 ) -> tuple[list[str], pd.Categorical]:
+    """Check AnnData's grouping columns and return their keys and ordered groups.
+
+    Require categorical columns with distinct labels and at least two observed groups.
+    """
     from anndata import AnnData
 
     if not isinstance(adata, AnnData):
@@ -67,6 +71,10 @@ def _grouping(
 
 
 def _compute_dendrogram(adata: Any, keys: list[str]) -> Any:
+    """Return a Scanpy tree result for the grouping keys without saving it in AnnData.
+
+    Require existing dense data so plotting cannot fit PCA or make sparse X dense.
+    """
     import scanpy as sc
 
     # Choose an existing representation so Scanpy cannot silently fit PCA.
@@ -99,7 +107,11 @@ def _compute_dendrogram(adata: Any, keys: list[str]) -> Any:
 def prepare_dendrogram(
     adata: Any, groupby: str | Sequence[str], key: str | None = None
 ) -> DendrogramData:
-    """Read a detached Scanpy result; delegate missing trees without cache writes."""
+    """Return copied tree data for AnnData's groups from a stored or new Scanpy result.
+
+    Check its structure and align labels without recomputing stored results or
+    changing AnnData.
+    """
     keys, groups = _grouping(adata, groupby)
     if key is not None and (not isinstance(key, str) or not key):
         raise TypeError("Dendrogram: dendrogram_key must be a nonempty string or None.")
@@ -165,6 +177,10 @@ def prepare_dendrogram(
 def attached_dendrogram(
     adata: Any, groupby: str | Sequence[str], option: bool | str, count: int
 ) -> DendrogramData | None:
+    """Return tree data for the requested grouped plot, or None when not attached.
+
+    Interpret the boolean or stored-result key and match Scanpy's small-group rule.
+    """
     if option is False:
         return None
     if not (option is True or isinstance(option, str) and option):
@@ -190,7 +206,10 @@ def reorder_grouped(
     *,
     swapped: bool,
 ) -> tuple[pd.DataFrame, tuple[FeatureGroup, ...], list[int]]:
-    """Carry one leaf and optional marker-block permutation through all summaries."""
+    """Reorder a summary table and matching marker brackets to follow a tree.
+
+    Return both plus gene positions so dot sizes can follow the same ordering.
+    """
     # Put groups on rows temporarily so both plot orientations use the same order.
     table = colors.T if swapped else colors
     table = table.loc[list(tree.order)]
