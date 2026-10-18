@@ -4,13 +4,16 @@ from __future__ import annotations
 
 from math import isfinite
 from numbers import Real
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+
+if TYPE_CHECKING:
+    from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 
 _PT = 100 / 72
 _FONT = "Lato"
@@ -263,8 +266,22 @@ def bracket_space(groups: tuple[FeatureGroup, ...]) -> float:
     return max((len(g.label) for g in groups), default=0) * _TICK * 0.65 + 12
 
 
+def guide_offset(
+    groups: tuple[FeatureGroup, ...], *, swap_axes: bool, tree: bool = False
+) -> float:
+    return (
+        12
+        + (bracket_space(groups) if groups and swap_axes else 0)
+        + (88 if tree and not swap_axes else 0)
+    )
+
+
 def color_legend(
-    title: str | None, groups: tuple[FeatureGroup, ...], *, swap_axes: bool
+    title: str | None,
+    groups: tuple[FeatureGroup, ...],
+    *,
+    swap_axes: bool,
+    tree: bool = False,
 ) -> gs.Legend:
     return gs.Legend(
         title=title.replace("\n", " ") if title else title,
@@ -272,7 +289,7 @@ def color_legend(
         direction="horizontal",
         gradientLength=150,
         gradientThickness=15,
-        offset=bracket_space(groups) + 12 if groups and swap_axes else 12,
+        offset=guide_offset(groups, swap_axes=swap_axes, tree=tree),
     )
 
 
@@ -311,9 +328,10 @@ def finish_grouped_chart(
     width: float,
     height: float,
     frame_width: float,
+    tree: DendrogramData | None = None,
 ) -> gs.TopLevelSpec:
     xlabels, ylabels = [str(v) for v in colors.columns], [str(v) for v in colors.index]
-    layers = [
+    layers: list[gs.Chart | gs.LayerChart] = [
         marks,
         _slot_labels(xlabels, x.axis(None), horizontal=True),
         _slot_labels(ylabels, y.axis(None), horizontal=False),
@@ -324,14 +342,37 @@ def finish_grouped_chart(
                 groups, y if swap_axes else x, swapped=swap_axes, rotation=rotation
             )
         )
+    if tree is not None:
+        from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
+
+        padding = (
+            x.to_dict()["scale"]["paddingOuter"]
+            if swap_axes
+            else y.to_dict()["scale"]["paddingOuter"]
+        )
+        layers.append(
+            tree_overlay(
+                tree,
+                orientation="top" if swap_axes else "right",
+                padding=padding,
+                reverse=not swap_axes,
+            )
+        )
     space = bracket_space(groups)
+    top_space = (
+        98
+        if tree is not None and swap_axes
+        else space
+        if groups and not swap_axes
+        else 10
+    )
     chart = gs.layer(*layers).properties(
         width=width,
         height=height,
         padding={
             "left": max(map(len, ylabels)) * _TICK * 0.65 + 12,
             "bottom": max(map(len, xlabels)) * _TICK * 0.65 + 12,
-            "top": space if groups and not swap_axes else 10,
+            "top": top_space,
             "right": 10,
         },
     )
@@ -341,7 +382,7 @@ def finish_grouped_chart(
                 title,
                 font=_FONT,
                 fontSize=12 * _PT,
-                offset=space + 10 if groups and not swap_axes else 10,
+                offset=top_space + 10 if top_space > 10 else 10,
             )
         )
     return chart.configure_view(

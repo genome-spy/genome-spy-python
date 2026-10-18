@@ -225,7 +225,6 @@ def test_no_analysis_or_mutation_and_chart_is_a_snapshot(adata, monkeypatch):
     [
         ({"ax": None}, TypeError, "ax"),
         ({"return_fig": False}, TypeError, "return_fig"),
-        ({"dendrogram": True}, NotImplementedError, "dendrogram"),
         ({"norm": object()}, NotImplementedError, "norm"),
         ({"vcenter": 0}, NotImplementedError, "vcenter"),
         ({"save": "dots.png"}, NotImplementedError, "save"),

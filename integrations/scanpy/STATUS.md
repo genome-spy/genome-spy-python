@@ -7,13 +7,15 @@ not delivery promises.
 
 ## Current position and next work
 
-**Available:** categorical/continuous 2D UMAP, plain dotplot and matrixplot development previews.
+**Available:** categorical/continuous 2D UMAP, dotplot/matrixplot with dendrograms,
+standalone dendrograms and correlation matrix development previews.
 UMAP includes native sizing, optional hover/zoom, linked interval highlighting/count
 and Python subset retrieval. Dotplot includes index-scaled slots, grouped summaries,
 brackets, native size/color guides and optional summary hover. Matrixplot reuses
 grouped access/means and native layout, with one-pass scaling, authoritative
-`values_df`, tiles and optional summary hover.
-**Implemented families:** UMAP, dotplot and matrixplot (partial). Scanpy **1.11.5** is the only accepted version;
+`values_df`, tiles and optional summary hover. Trees use Python group profiles,
+correlation and linkage, with verified cache reuse and native rule rendering.
+**Implemented families:** UMAP, dotplot, matrixplot, dendrogram and correlation matrix (partial). Scanpy **1.11.5** is the only accepted version;
 bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibility.
 
 Implementation is in
@@ -28,10 +30,9 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot
 and matrixplot share the expression workflow’s data/marker setup; heatmaps will
 join it when implemented.
 
-**Next ready slice: M04.a/b**, validate stored dendrogram results and compute
-missing group profiles/linkage locally under the representation guard. Then
-render standalone trees/correlation and attach aligned trees to dotplot and
-matrixplot (M04.c/d). Heatmaps follow in M05 and ranked summaries in M06.
+**Next ready slice: M05.a/b**, observation-level heatmap preparation and native
+tiles/annotations using the shared grouping and tree helpers. Matrix/clustermap
+follow within M05, then ranked summaries in M06.
 Dotplot brushing remains deferred until the
 plain-chart preview has user review; this delivery does not add it.
 
@@ -46,7 +47,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M01 UMAP/linked preview | Closed (preview only) | Runtime modules, dedicated PBMC UMAP notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
 | M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
-| M04 trees/correlation | Planned | Python computation/cache policy, shared rule layout, standalone and attached trees. No native tree capability blocker. |
+| M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Guarded Python computation, cache verification, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and sparse resource observation below. Later-family attachments and broader cache provenance remain assigned. |
 | M05 heatmap/matrix/clustermap | Planned | Observation permutations, annotations, clustering contracts and large tile policy. |
 | M06 ranking/ranked summaries | Planned | Stored rank selection and reusable dot/matrix/heatmap wrappers. |
 | M07 embeddings/scatter/PCA | Planned | Shared 2D embeddings/alias/PCA diagnostics, then remaining UMAP options. |
@@ -286,11 +287,79 @@ Jupyter kernel with three successful code cells and both plots visible.
 The full documentation site, unrelated suites and unchanged UMAP browser tests
 were not rerun for this slice.
 
+## M04.a–d dendrogram and correlation preview
+
+Runtime: [Python profiles/cache/permutations](../../src/genome_spy/integrations/scanpy/_dendrogram_data.py),
+[native tree rules](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py),
+[correlation tiles](../../src/genome_spy/integrations/scanpy/_correlation_chart.py)
+and [public entry points](../../src/genome_spy/integrations/scanpy/pl.py).
+Group means reuse the existing statistics helper; dotplot and matrixplot use one
+leaf and matching marker-block permutation. Native formula transforms project
+stored branch coordinates into the same index slots at the current plot size.
+No local Core patch, upstream plotting call or prototype import is involved.
+
+Missing trees compute locally with Pearson group correlations, complete linkage
+and SciPy leaf geometry, without cache writes. Defaults use resident X for small
+feature spaces or existing X_pca otherwise. Sparse profiles aggregate before
+densifying group-by-feature values. Missing PCA errors before analysis can run.
+Stored trees validate grouping, labels, linkage, leaf/branch geometry and current
+correlations; valid geometry is copied exactly without recomputing linkage.
+Reordered categories are aligned by labels. Stale/unverifiable caches error
+without overwrite. The notebook explicitly computes one Scanpy tree from
+packaged PBMC PCA coordinates and reuses it in both expression plots.
+
+Standalone trees support four orientations and label removal; correlation plots
+support optional trees/numbers, native colors, numeric bounds and summary hover.
+Grouped trees attach for more than two groups, matching Scanpy. Grouped wheel
+navigation remains disabled; resizing preserves leaf-to-row/column alignment.
+Native fonts, palette interpolation and outer layout remain documented renderer
+differences. The [user contract](../../docs/integrations/scanpy/index.md#dendrograms-and-correlation-matrices)
+records exact options and boundaries.
+
+Evidence:
+
+- [51 semantic/contract checks](../../tests/integrations/scanpy/test_dendrogram.py)
+  include hand correlations, frozen Python results, ties, identical profiles,
+  custom correlation/linkage, optimal ordering, multi-key groups, cache errors,
+  immutability, sparse arrays/matrices, views, backed resident PCA and no-analysis
+  guards. Both summary families cover supplied values and marker-block ordering.
+- [Eight numerical and twelve complete chart references](../../tests/integrations/scanpy/fixtures/dendrogram.json)
+  use [original MIT inputs](../../tests/integrations/scanpy/dendrogram_fixture.py)
+  and an [explicit generator](../../tests/integrations/scanpy/generate_dendrogram_references.py).
+  Metadata retains input/image hashes, versions, 100/150 display/export DPI,
+  axes, labels and exact upstream branch paths. No real dataset or upstream code
+  is copied into these fixtures.
+- [25 browser checks](../../tests/integrations/scanpy/browser/test_dendrogram.py)
+  cover all complete reference charts, registered branch painting, labels,
+  correlation paint/numbers, post-reorder hover, swaps, resize, wheel stability
+  and offline HTML. Full captures and registered overlays remain in pytest output.
+- The [resource observation](../../tests/integrations/scanpy/fixtures/dendrogram-performance.json)
+  uses 100,000 cells × 20,000 sparse genes, 40 selected genes, 50 groups and
+  20 existing PCA components. Only the selected 100,000 × 40 table densifies.
+  The chart carries 2,000 tiles plus the tree in 155 KB JSON. Cold preparation
+  took 3.27 s, validated serialization 0.36 s, peak tracked Python allocations
+  149 MB and process RSS 525 MB. Chromium first paint took 1.50 s, observed hover
+  192 ms after the tooltip pause (including a one-pixel probe), and live JS heap
+  10.6 MB. These are single-machine observations, not portable timing limits.
+
+Validation (October 18): all 335 integration checks and 66 grouped/tree browser
+checks pass. Ruff formatting/lint and mypy pass. The expression notebook ran in
+a fresh live Jupyter kernel, saved three successful code cells, and both attached
+trees were inspected. The full documentation site, unrelated suites and unchanged
+UMAP browser checks were not rerun.
+
+Remaining work: Scanpy 1.11.5 omits n_pcs/var_names/source details from tree caches;
+unverifiable nonstandard caches currently error. Store a component subset in an
+explicit obsm key to make that source verifiable. M14 owns broader provenance,
+normalization/kwargs, typography and export closure. M05/M08/M09 own attachment
+to their new families; M13 owns builder methods. M04 closes only this stated
+preview. M05 is next; no working document is newly eligible for clearance.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. Two functions are available as partial previews; 46 plot/builder
+helpers. Five functions are available as partial previews; 43 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -301,8 +370,8 @@ No placeholder functions are exported for planned work.
 | `MatrixPlot` | Not implemented | M13 (after M03/M04) |
 | `StackedViolin` | Not implemented | M13 (after M08) |
 | `clustermap` | Not implemented | M05 |
-| `correlation_matrix` | Not implemented | M04 |
-| `dendrogram` | Not implemented | M04 |
+| `correlation_matrix` | Partial preview available | M04 preview; normalization/options M14 |
+| `dendrogram` | Partial preview available | M04 preview; broader cache provenance M14 |
 | `diffmap` | Not implemented | M07 |
 | `dotplot` | Partial plain-chart preview; limits above | M02; trees M04; methods M13 |
 | `dpt_groups_pseudotime` | Not implemented | M11 |
@@ -368,9 +437,16 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Matrixplot parameter group | Current support | Completion owner |
 | --- | --- | --- |
 | Grouped source/categories/repeated slots, log/means/scaling, supplied values_df, native tiles/guides/edges/hover | Tested preview; exact forms in user contract | M03 preview retained |
-| Dendrogram ordering/attachment and compatible cached trees | Nondefault dendrogram rejects | M04 |
+| Dendrogram ordering/attachment and compatible cached trees | Verified leaf/marker reordering and native branches | M04 preview retained; broader cache provenance M14 |
 | MatrixPlot builder, semantic styling/legend chains | Not implemented | M13 |
 | norm/vcenter, remaining pcolor kwargs, backed/lazy/sparse arrays and image export | Explicit restrictions/errors | M14.c |
+
+| Tree/correlation parameter group | Current support | Completion owner |
+| --- | --- | --- |
+| Categorical groups, guarded local computation, compatible stored results, four orientations, labels, attached dot/matrix trees and correlation numbers/hover | Tested preview; exact forms in user contract | M04 preview retained |
+| Cache sources absent from upstream metadata (n_pcs, var_names, use_raw) | Unverifiable cases error; explicit all-component obsm source supported | M14.c |
+| Heatmap, violin/stacked and tracks attachments | Shared tree helpers available; parent families unimplemented | M05/M08/M09 |
+| Correlation norm/vcenter, remaining imshow kwargs, typography and image export | Explicit restrictions/errors | M14.c |
 
 | Builder surface (all three classes) | Current state | Completion evidence required |
 | --- | --- | --- |
@@ -382,7 +458,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 
 ## Native capability ledger
 
-Audit: bundled Core/schema **1.0.0**, rechecked October 18 for native matrixplot rectangles/index slots. Native marks are rect, point,
+Audit: bundled Core/schema **1.0.0**, rechecked October 18 for native rules,
+formula transforms, excluded scales/axes and tree alignment. Native marks are rect, point,
 rule, tick, text, link and arrow. Recheck the installed API before implementing
 an affected slice; upcoming releases are triggers to investigate, not assumptions.
 
@@ -394,7 +471,7 @@ an affected slice; upcoming releases are triggers to investigate, not assumption
 | C04 | No dedicated line/path mark in bundled mark inventory | Series/graph/path M11 | Verify native rule/link segments can preserve required semantics; otherwise upstream released capability |
 | C05 | Font/outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
 | C06 | Faceting/composition improvement announced, not adopted | UMAP and repeated panel layout | Released version/schema; recheck plot/gap/axis zoom and brush scope/count |
-| C07 | Python linkage + native rule branches are available | Trees M04 | No renderer blocker; implement shared computation/layout and alignment checks |
+| C07 | Python linkage + native rule branches verified | Trees M04 delivered; later families M05/M08/M09 | Shared geometry projects into fixed index slots; standalone/attached resize and registered path checks pass. Recheck alignment for later families/navigation. |
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots and both orientations verified; extend checks with later families and any navigation support |
 
 Python computation alone does not close a renderer gap. Local Core patches are

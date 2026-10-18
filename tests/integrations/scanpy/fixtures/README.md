@@ -47,6 +47,21 @@ Native browser checks retain complete captures and registered overlays at DPR 1.
 uv run --no-sync python -m tests.integrations.scanpy.generate_matrixplot_references
 ```
 
+`dendrogram.json` freezes eight numerical tree computations and twelve complete
+charts/crops from the original MIT `dendrogram_fixture.py` inputs. Numerical
+cases cover default correlations/linkage, missing observations, multiple keys,
+existing PCA, custom correlation/linkage, optimal ordering, ties and identical
+profiles. Charts cover all standalone orientations, dot/matrix attachments in
+both orientations, matching marker blocks and correlation trees/numbers.
+The manifest retains source/image hashes, versions, 100/150 display/export DPI,
+axes, labels, exact branch paths and correlation values. Registered native tests
+compare branch paint and complete annotations at DPR 1.5; captures and overlays
+are written to pytest output, with no image fitting.
+
+```sh
+uv run --no-sync python -m tests.integrations.scanpy.generate_dendrogram_references
+```
+
 `dotplot-performance.json` records the October 17 sparse 100,000-cell ×
 20,000-gene check: only 40 requested columns densify; the chart carries 50 × 40
 summary dots. Cold preparation includes optional imports; browser first paint
@@ -66,6 +81,17 @@ October 18 native tile observation, including preparation allocations, RSS,
 payload, browser first paint, hover response and live JS heap. Timings are
 single-machine observations; sparse densification remains restricted to the
 100,000 × 40 selected columns.
+
+`dendrogram-performance.json` adds a tree to that matrixplot workload using an
+existing 100,000 × 20 float32 PCA representation. It records the same allocation,
+payload, rendering, hover and heap measurements; tree computation does not
+materialize the full expression matrix. The chart has 50 groups and 2,000 tiles.
+Correlation/linkage costs grow with group count; this is a tested workload,
+not an arbitrary-group-count performance promise.
+
+```sh
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --dendrogram --browser --output /tmp/trees.json
+```
 
 The original synthetic input lives in `tests/integrations/scanpy/fixture_data.py` and is covered
 by this project's MIT license. No real datasets, benchmark implementations,

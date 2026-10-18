@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
     from genome_spy import Parameter, TopLevelSpec
 
-__all__ = ["dotplot", "matrixplot", "umap"]
+__all__ = ["correlation_matrix", "dendrogram", "dotplot", "matrixplot", "umap"]
 
 _Bound = float | str | Sequence[float | str | None] | None
 
@@ -391,7 +391,8 @@ def dotplot(
             Width includes a fixed 150-pixel guide allowance; height sizes the
             plot area. Labels and renderer padding add space. Cannot be combined
             with width or height. No Matplotlib settings are consulted.
-        dendrogram: Only False is supported until tree attachment is implemented.
+        dendrogram: Attach a locally computed or validated cached group tree.
+            True uses the default cache key; a string selects another key.
         gene_symbols: Variable annotation column for symbol lookup.
         var_group_positions: Inclusive feature-slot bracket endpoints.
         var_group_labels: Bracket labels; mappings already supply these.
@@ -437,8 +438,11 @@ def dotplot(
         raise TypeError(
             f"gsc.pl.dotplot: unsupported option(s): {', '.join(sorted(unknown))}."
         )
+    if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
+        raise TypeError(
+            "gsc.pl.dotplot: dendrogram must be False, True, or a nonempty cache key."
+        )
     for name, rejected in {
-        "dendrogram": dendrogram is not False,
         "save": save is not None and save is not False,
         "vcenter": vcenter is not None,
         "norm": norm is not None,
@@ -464,6 +468,10 @@ def dotplot(
         raise NotImplementedError(
             "gsc.pl.dotplot: automatic image saving is unsupported; use save=False."
         )
+    from genome_spy.integrations.scanpy._dendrogram_data import (
+        attached_dendrogram,
+        reorder_grouped,
+    )
     from genome_spy.integrations.scanpy._grouped_data import (
         dotplot_statistics,
         grouped_expression,
@@ -491,10 +499,22 @@ def dotplot(
         dot_color_df=dot_color_df,
         swap_axes=bool(swap_axes),
     )
+    feature_groups = prepared.feature_groups
+    count = colors.shape[1] if swap_axes else colors.shape[0]
+    tree = attached_dendrogram(adata, groupby, dendrogram, count)
+    if tree is not None:
+        colors, feature_groups, slots = reorder_grouped(
+            tree, colors, feature_groups, swapped=bool(swap_axes)
+        )
+        fractions = (
+            fractions.loc[:, list(tree.order)].iloc[slots, :]
+            if swap_axes
+            else fractions.loc[list(tree.order)].iloc[:, slots]
+        )
     chart = build_dotplot(
         colors,
         fractions,
-        prepared.feature_groups,
+        feature_groups,
         swap_axes=bool(swap_axes),
         title=title,
         colorbar_title=colorbar_title,
@@ -513,6 +533,7 @@ def dotplot(
         width=width,
         height=height,
         figsize=figsize,
+        tree=tree,
     )
     if sc.settings.autoshow if show is None else show:
         chart.display()
@@ -570,7 +591,7 @@ def matrixplot(
         figsize: Native layout budget in inches at 100 logical pixels/inch.
             Width includes a 150-pixel guide allowance; height sizes the plot
             area. Labels and padding add space. Conflicts with width/height.
-        dendrogram: Only False until tree attachment in M04.
+        dendrogram: True or a cache key attaches a Python-computed group tree.
         title: Plot title.
         cmap: GenomeSpy color scheme name; None uses viridis.
         colorbar_title: Color guide title; None removes its title.
@@ -627,8 +648,11 @@ def matrixplot(
             f"{context}: unsupported option(s): {', '.join(sorted(unknown))}. "
             "Use scalar edgecolor and linewidth for tile edges."
         )
+    if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
+        raise TypeError(
+            "gsc.pl.matrixplot: dendrogram must be False, True, or a nonempty cache key."
+        )
     for name, rejected in {
-        "dendrogram": dendrogram is not False,
         "save": save is not None and save is not False,
         "vcenter": vcenter is not None,
         "norm": norm is not None,
@@ -647,6 +671,10 @@ def matrixplot(
         raise NotImplementedError(
             f"{context}: automatic image saving is unsupported; use save=False."
         )
+    from genome_spy.integrations.scanpy._dendrogram_data import (
+        attached_dendrogram,
+        reorder_grouped,
+    )
     from genome_spy.integrations.scanpy._grouped_data import (
         grouped_expression,
         matrixplot_statistics,
@@ -673,9 +701,16 @@ def matrixplot(
         categories_order=categories_order,
         swap_axes=swap_axes,
     )
+    feature_groups = prepared.feature_groups
+    count = colors.shape[1] if swap_axes else colors.shape[0]
+    tree = attached_dendrogram(adata, groupby, dendrogram, count)
+    if tree is not None:
+        colors, feature_groups, _ = reorder_grouped(
+            tree, colors, feature_groups, swapped=bool(swap_axes)
+        )
     chart = build_matrixplot(
         colors,
-        prepared.feature_groups,
+        feature_groups,
         swap_axes=swap_axes,
         title=title,
         colorbar_title=colorbar_title,
@@ -689,6 +724,212 @@ def matrixplot(
         value_title="Value"
         if values_df is not None
         else "Mean expression" + (" (scaled)" if standard_scale is not None else ""),
+        width=width,
+        height=height,
+        figsize=figsize,
+        tree=tree,
+    )
+    if sc.settings.autoshow if show is None else show:
+        chart.display()
+        return None
+    return chart
+
+
+def dendrogram(
+    adata: AnnData,
+    groupby: str,
+    *,
+    dendrogram_key: str | None = None,
+    orientation: Literal["top", "bottom", "left", "right"] = "top",
+    remove_labels: bool = False,
+    show: bool | None = None,
+    save: str | bool | None = None,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Render group linkage computed in Python with native GenomeSpy rules.
+
+    Validate a stored Scanpy tree or compute a detached local tree from group
+    profiles. Default computation uses resident X for small matrices, otherwise
+    existing X_pca. Plotting never fits PCA, writes a cache or invokes Scanpy
+    plotting. Cached correlations must match the current representation.
+
+    Args:
+        adata: AnnData with categorical groups and an existing representation.
+        groupby: Categorical observation key; categorical key sequences also work.
+        dendrogram_key: Stored uns key, default dendrogram_<groupby>.
+            Missing keys compute locally without writing to AnnData.
+        orientation: Top, bottom, left or right tree orientation.
+        remove_labels: Hide leaf labels while preserving leaf geometry.
+        show: Display once, return chart when False, or use Scanpy autoshow.
+        save: Only inactive None/False; use native chart HTML/JSON saving.
+        width: Native plot-area width in logical pixels, default 300.
+        height: Native plot-area height in logical pixels, default 300.
+
+    Returns:
+        A detached native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If Scanpy 1.11.5 is unavailable.
+        TypeError: If options or representation storage are unsupported.
+        ValueError: If groups, profiles, cache or dimensions are invalid.
+        NotImplementedError: If image saving is requested.
+
+    Example:
+        >>> chart = gsc.pl.dendrogram(pbmc, "bulk_labels", show=False)
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.dendrogram"
+    if orientation not in ("top", "bottom", "left", "right"):
+        raise ValueError(f"{context}: orientation must be top, bottom, left or right.")
+    if not isinstance(remove_labels, bool):
+        raise TypeError(f"{context}: remove_labels must be boolean.")
+    if show is not None and not isinstance(show, bool):
+        raise TypeError(f"{context}: show must be boolean or None.")
+    if save is not None and save is not False:
+        raise NotImplementedError(
+            f"{context}: save supports only None/False; use native chart.save for HTML/JSON."
+        )
+    sc = _require_scanpy(context)
+    if sc.settings.autosave and save is None:
+        raise NotImplementedError(
+            f"{context}: automatic image saving is unsupported; use save=False."
+        )
+    from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
+    from genome_spy.integrations.scanpy._dendrogram_chart import build_dendrogram
+
+    tree = prepare_dendrogram(adata, groupby, dendrogram_key)
+    chart = build_dendrogram(
+        tree,
+        orientation=orientation,
+        remove_labels=remove_labels,
+        width=width,
+        height=height,
+    )
+    if sc.settings.autoshow if show is None else show:
+        chart.display()
+        return None
+    return chart
+
+
+def correlation_matrix(
+    adata: AnnData,
+    groupby: str,
+    *,
+    show_correlation_numbers: bool = False,
+    dendrogram: bool | str | None = None,
+    figsize: tuple[float, float] | None = None,
+    show: bool | None = None,
+    save: str | bool | None = None,
+    vmin: float | None = None,
+    vmax: float | None = None,
+    vcenter: float | None = None,
+    norm: Any = None,
+    hover: bool = True,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot Python-computed group correlations with an optional aligned tree.
+
+    Reuses the dendrogram profile/cache policy and returns native tiles, labels,
+    numbers and rules. Correlations come from the tree's representation, not the
+    selected markers of a dotplot or matrixplot. No embedding, PCA, gene ranking
+    or cache writes run.
+
+    Args:
+        adata: AnnData with categorical groups and an existing representation.
+        groupby: Categorical observation key.
+        show_correlation_numbers: Label each tile with two decimal places.
+        dendrogram: None/True attaches a left tree and orders both axes by leaves.
+            A string selects its cache key. False retains category order without
+            drawing the tree; correlations still use the tree computation.
+        figsize: Native budget in inches at 100 logical pixels/inch, subtracting
+            180 pixels for an attached tree and 20 for the color guide. Labels
+            and padding add space. Conflicts with width/height.
+        show: Display once, return chart when False, or use Scanpy autoshow.
+        save: Only inactive None/False; use native chart HTML/JSON saving.
+        vmin: Numeric lower color bound; defaults to -1 if both bounds are absent.
+        vmax: Numeric upper color bound; defaults to 1 if both bounds are absent.
+        vcenter: Reserved; nondefault values error.
+        norm: Reserved; Matplotlib normalization objects error.
+        hover: Show the row group, column group and exact correlation.
+        width: Tile plot-area width, default 60 logical pixels per group.
+        height: Tile plot-area height, default 60 logical pixels per group.
+        **kwds: Native cmap, scalar edgecolors and linewidth. Default colors
+            use reversed native redblue for negative-blue/positive-red values.
+            Edges are black at 0.01 points, hidden above 30 groups.
+
+    Returns:
+        A detached native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If Scanpy 1.11.5 is unavailable.
+        TypeError: If options or representation storage are unsupported.
+        ValueError: If groups, profiles, cache or dimensions are invalid.
+        NotImplementedError: If a rendering option is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.correlation_matrix(
+        ...     pbmc, "bulk_labels", show_correlation_numbers=True, show=False
+        ... )
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.correlation_matrix"
+    for name in ("ax", "return_fig"):
+        if name in kwds:
+            raise TypeError(
+                f"{context}: {name} is omitted; use show=False and the native chart."
+            )
+    unknown = kwds.keys() - {"cmap", "edgecolors", "linewidth"}
+    if unknown:
+        raise TypeError(
+            f"{context}: unsupported option(s): {', '.join(sorted(unknown))}."
+        )
+    for name, rejected in {
+        "save": save is not None and save is not False,
+        "vcenter": vcenter is not None,
+        "norm": norm is not None,
+    }.items():
+        if rejected:
+            raise NotImplementedError(f"{context}: {name} is not supported yet.")
+    for name, value in {
+        "show_correlation_numbers": show_correlation_numbers,
+        "hover": hover,
+    }.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    if show is not None and not isinstance(show, bool):
+        raise TypeError(f"{context}: show must be boolean or None.")
+    if dendrogram is not None and (
+        not isinstance(dendrogram, (bool, str)) or dendrogram == ""
+    ):
+        raise TypeError(
+            f"{context}: dendrogram must be None, False, True or a nonempty cache key."
+        )
+    sc = _require_scanpy(context)
+    if sc.settings.autosave and save is None:
+        raise NotImplementedError(
+            f"{context}: automatic image saving is unsupported; use save=False."
+        )
+    from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
+    from genome_spy.integrations.scanpy._correlation_chart import (
+        build_correlation_matrix,
+    )
+
+    tree = prepare_dendrogram(
+        adata, groupby, dendrogram if isinstance(dendrogram, str) else None
+    )
+    chart = build_correlation_matrix(
+        tree,
+        dendrogram=dendrogram is not False,
+        numbers=show_correlation_numbers,
+        cmap=kwds.get("cmap"),
+        edgecolors=kwds.get("edgecolors"),
+        linewidth=kwds.get("linewidth", 0.01),
+        vmin=vmin,
+        vmax=vmax,
+        hover=hover,
         width=width,
         height=height,
         figsize=figsize,

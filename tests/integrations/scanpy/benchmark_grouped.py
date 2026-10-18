@@ -21,6 +21,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--browser", action="store_true")
     parser.add_argument("--plot", choices=("dotplot", "matrixplot"), default="dotplot")
+    parser.add_argument("--dendrogram", action="store_true")
     args = parser.parse_args()
     import anndata as ad
     import numpy as np
@@ -46,6 +47,8 @@ def main() -> None:
         ),
     )
     adata.var_names = [f"g{i}" for i in range(genes)]
+    if args.dendrogram:
+        adata.obsm["X_pca"] = rng.standard_normal((cells, 20), dtype=np.float32)
     original, shapes = sparse.csr_matrix.toarray, []
 
     def selected_only(matrix, *positional, **kwargs):
@@ -64,6 +67,7 @@ def main() -> None:
             show=False,
             width=1400,
             height=1600,
+            dendrogram=args.dendrogram,
         )
     finally:
         sparse.csr_matrix.toarray = original
@@ -90,6 +94,8 @@ def main() -> None:
             "selected_genes": markers,
             "groups": groups,
             "summary_marks": markers * groups,
+            "dendrogram": args.dendrogram,
+            "resident_pca_components": 20 if args.dendrogram else None,
         },
         "densified_shapes": shapes,
         "seconds": {

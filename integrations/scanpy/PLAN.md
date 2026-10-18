@@ -105,7 +105,7 @@ with many switches, a registry, or a general adapter framework.
 | Grouped expression tables | `sc.get.obs_df` when its lookup/duplicate semantics match | numeric bins, multi-key groups, repeated display slots, masks and exact permutations |
 | Group summaries | Public `sc.get.aggregate` only for proven-equivalent statistics | strict expression thresholds, denominator, missing values, log/scaling order, sparse implicit zeros |
 | Stored gene rankings | `sc.get.rank_genes_groups_df` and stored params | strict filters, group/feature slots, rank-metric colors, expression-size statistics |
-| Trees | Compatible `uns` results; public `sc.tl.dendrogram` under the computation policy | cache validation, representation guard, branch coordinates, orientation and alignment |
+| Trees | Compatible `uns` results; public pandas correlation and SciPy linkage/layout | guarded group profiles, cache validation, shared permutations, orientation and alignment |
 | Distributions/graphs | Suitable public SciPy/Scanpy numerical functions | pinned KDE normalization, graph layout inputs, native chart geometry and order |
 
 UMAP uses public AnnData `obs_vector`, because `sc.get.obs_df` has different
@@ -296,7 +296,12 @@ Acceptance: shared access/mean code is used, table values and ordering are exact
 and tile/guide geometry matches measured references. Trees complete in M04;
 builder styling completes in M13.
 
-### M04 — dendrogram and correlation
+### M04 — dendrogram and correlation (preview closed)
+
+M04.a–d are verified for standalone trees/correlation and dotplot/matrixplot
+attachments; see [scope and evidence](STATUS.md#m04ad-dendrogram-and-correlation-preview).
+Later-family attachments remain with M05/M08/M09. This does not close broader
+cache provenance, normalization, kwargs or export compatibility in M14.
 
 - M04.a: validate supplied `uns[dendrogram_key]` grouping, linkage, category order,
   correlations and leaf order. Cover multi-key groups, missing/constant profiles,
@@ -307,6 +312,13 @@ builder styling completes in M13.
   representation resolver would fit missing PCA. Require an existing matching
   representation or explicit upstream preparation; no silent PCA/embedding fit.
   Keep automatic plot-derived results local, with no new AnnData cache writes.
+  The delivered implementation reuses grouped means, public pandas correlation,
+  and SciPy complete linkage/layout. It avoids Scanpy's representation resolver
+  and mutation path. Sparse profiles densify only the group-by-feature aggregate.
+  Compatible stored correlations are checked against current profiles while
+  preserving cached linkage and geometry. Upstream caches omit n_pcs/var_names/
+  source details; unverifiable cases currently error. Explicit obsm sources using
+  all components are supported; M14 owns broader cache provenance.
 - M04.c: a focused tree layout helper feeds native rule marks for top/right/left/
   bottom orientation. Use the same group permutation for dots, tiles, labels,
   brackets, totals and leaf centers. Implement standalone `dendrogram` labels and
@@ -314,6 +326,10 @@ builder styling completes in M13.
 - M04.d: attach to dotplot/matrixplot and later heatmap/tracks/stacked violin;
   supplied coordinates/order are retained. Compare all orientations, ties, swaps
   and resize behavior. Pan/zoom cannot detach a tree from its rows/columns.
+  Dot/matrix trees now use native rule geometry projected into fixed index slots,
+  with excluded scales/axes. Grouped navigation remains disabled; summary hover
+  and resize alignment are verified. No Core changes or prototype geometry are
+  required. Reuse these helpers when each later family is implemented.
 
 Targets: `gsc.pl.dotplot(pbmc, markers, "louvain", dendrogram=True, show=False)`
 and `gsc.pl.dendrogram(pbmc, "louvain", show=False)`.

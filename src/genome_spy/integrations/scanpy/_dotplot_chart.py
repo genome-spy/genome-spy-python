@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
@@ -11,15 +11,18 @@ import genome_spy as gs
 from genome_spy.integrations.scanpy._colors import native_scheme
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._grouped_chart import (
-    bracket_space,
     color_bounds,
     color_legend,
     finish_grouped_chart,
     grouped_axes,
+    guide_offset,
     number,
     plot_dimensions,
     summary_records,
 )
+
+if TYPE_CHECKING:
+    from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 
 _PT = 100 / 72
 
@@ -83,6 +86,7 @@ def build_dotplot(
     width: float | None,
     height: float | None,
     figsize: tuple[float, float] | None,
+    tree: DendrogramData | None = None,
 ) -> gs.TopLevelSpec:
     rows, columns = colors.shape
     scheme = native_scheme(
@@ -122,9 +126,7 @@ def build_dotplot(
         # Scanpy freezes dot colors before its colorbar expands constant bounds.
         table["_paint"] = low
     x, y = grouped_axes(rows, columns, xpadding=0.3, ypadding=0.5)
-    guide_offset = (
-        bracket_space(feature_groups) + 12 if feature_groups and swap_axes else 12
-    )
+    offset = guide_offset(feature_groups, swap_axes=swap_axes, tree=tree is not None)
     dots = (
         gs.Chart(table)
         .transform_filter("isValid(datum._mean) && isValid(datum._percent)")
@@ -147,7 +149,14 @@ def build_dotplot(
                 clamp=True,
                 scheme=scheme,
             )
-            .legend(color_legend(colorbar_title, feature_groups, swap_axes=swap_axes)),
+            .legend(
+                color_legend(
+                    colorbar_title,
+                    feature_groups,
+                    swap_axes=swap_axes,
+                    tree=tree is not None,
+                )
+            ),
             size=gs.Size("_percent:Q")
             .scale(type="ordinal", domain=domain, range=areas)
             .legend(
@@ -160,7 +169,7 @@ def build_dotplot(
                     symbolFillColor="gray",
                     symbolStrokeColor="black",
                     symbolStrokeWidth=linewidth * _PT,
-                    offset=guide_offset,
+                    offset=offset,
                 )
             ),
         )
@@ -189,4 +198,5 @@ def build_dotplot(
         width=width,
         height=height,
         frame_width=0.8,
+        tree=tree,
     )

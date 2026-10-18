@@ -160,7 +160,6 @@ def test_no_plotting_analysis_mutation_or_fraction_computation(adata, monkeypatc
     [
         ({"ax": None}, TypeError, "ax"),
         ({"return_fig": False}, TypeError, "return_fig"),
-        ({"dendrogram": True}, NotImplementedError, "dendrogram"),
         ({"norm": object()}, NotImplementedError, "norm"),
         ({"vcenter": 0}, NotImplementedError, "vcenter"),
         ({"save": "tiles.png"}, NotImplementedError, "save"),

@@ -3,7 +3,8 @@
 Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
 [current compatibility guide](../../docs/integrations/scanpy/index.md).
 Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
-`gsc.pl.dotplot(...)` or `gsc.pl.matrixplot(...)`.
+`gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.dendrogram(...)` or
+`gsc.pl.correlation_matrix(...)`.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
 The implementation lives in the installable [source package](../../src/genome_spy/integrations/scanpy/),
@@ -16,6 +17,9 @@ not in this workspace or the documentation:
 | [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared raw/layer resolution and resident-expression checks, reused by UMAP and grouped data. |
 | [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Detached grouped values, feature slots/brackets, means, expression fractions and min–max scaling; no chart authoring. |
 | [_colors.py](../../src/genome_spy/integrations/scanpy/_colors.py) | Shared native scheme and opaque CSS color validation. |
+| [_dendrogram_data.py](../../src/genome_spy/integrations/scanpy/_dendrogram_data.py) | Python group profiles/correlations/linkage, cache verification and shared leaf/marker permutations. |
+| [_dendrogram_chart.py](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py) | Native rule branches for standalone and attached trees; no clustering. |
+| [_correlation_chart.py](../../src/genome_spy/integrations/scanpy/_correlation_chart.py) | Native correlation tiles, numbers, labels, hover and optional tree. |
 | [_grouped_chart.py](../../src/genome_spy/integrations/scanpy/_grouped_chart.py) | Shared native index slots, labels, brackets, sizing and color guides. |
 | [_matrixplot_chart.py](../../src/genome_spy/integrations/scanpy/_matrixplot_chart.py) | Native tiles, edge styling and summary hover; no AnnData access. |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
@@ -42,7 +46,8 @@ palettes and Scanpy's public default palette lists, go directly to native scales
 GenomeSpy maps continuous values and draws the guides. Plotting retains source
 measurements; it does not compute embeddings, rankings, or new scientific results.
 
-UMAP, plain dotplots and matrixplots are currently implemented. Each future family
+UMAP, dotplots/matrixplots with dendrograms, standalone trees and correlation
+matrices are currently implemented as previews. Each future family
 gets its own chart module and reuses compatible AnnData access, category/color handling, and
 plotting computations. A separate data module per family is optional: add one
 only when that family needs distinct preparation that merits its own module.
@@ -64,8 +69,9 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
   x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
   Existing coordinates are retained; gene scoring is an explicit Scanpy operation.
 - [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot, scaled
-  matrixplot and summary hover using the core tutorial dictionary and existing
-  `bulk_labels`. Heatmaps will reuse this data and marker setup when implemented.
+  matrixplot, aligned dendrograms and summary hover using the core tutorial
+  dictionary and existing `bulk_labels`. Scanpy computes the shared tree in Python
+  from the dataset’s existing PCA representation. Heatmaps will reuse this data and marker setup when implemented.
 
 These adapt supported portions of the official core and advanced tutorials.
 Keep related examples together within each workflow, without placeholder cells
@@ -102,8 +108,10 @@ uv run --no-sync python -m tests.integrations.scanpy.generate_references --help
 uv run --no-sync python -m tests.integrations.scanpy.generate_grouped_references
 uv run --no-sync python -m tests.integrations.scanpy.generate_dotplot_references
 uv run --no-sync python -m tests.integrations.scanpy.generate_matrixplot_references
+uv run --no-sync python -m tests.integrations.scanpy.generate_dendrogram_references
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot dotplot --browser --output /tmp/dotplot.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --browser --output /tmp/matrixplot.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --dendrogram --browser --output /tmp/trees.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark --help
 ```
 

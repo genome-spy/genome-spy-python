@@ -96,6 +96,14 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     run_notebook(NOTEBOOKS / "scanpy_expression.ipynb", namespace)
     assert charts == [namespace["dotplot"], namespace["matrixplot"]]
     assert namespace["pbmc"].shape == (700, 765)
+    order = namespace["pbmc"].uns["dendrogram_bulk_labels"]["categories_ordered"]
+    for chart in charts:
+        chart_spec = chart.to_dict()
+        values = chart_spec["datasets"][chart_spec["layer"][0]["data"]["name"]]
+        assert list(dict.fromkeys(row["_group"] for row in values)) == list(order)
+        tree = chart_spec["layer"][-1]["layer"][0]
+        assert tree["mark"]["type"] == "rule"
+        assert len(chart_spec["datasets"][tree["data"]["name"]]) == 3 * (len(order) - 1)
     spec = charts[0].to_dict()
     dot = points(spec)
     assert len(spec["datasets"][dot["data"]["name"]]) == 100

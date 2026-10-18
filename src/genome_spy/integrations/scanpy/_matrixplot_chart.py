@@ -1,6 +1,8 @@
 """Native matrixplot tiles on shared grouped-expression slots and guides."""
 
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 
@@ -16,6 +18,9 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     summary_records,
 )
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+
+if TYPE_CHECKING:
+    from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 
 
 def build_matrixplot(
@@ -36,6 +41,7 @@ def build_matrixplot(
     width: float | None,
     height: float | None,
     figsize: tuple[float, float] | None,
+    tree: DendrogramData | None = None,
 ) -> gs.TopLevelSpec:
     context = "gsc.pl.matrixplot"
     rows, columns = colors.shape
@@ -87,7 +93,14 @@ def build_matrixplot(
                 clamp=True,
                 scheme=scheme,
             )
-            .legend(color_legend(colorbar_title, feature_groups, swap_axes=swap_axes)),
+            .legend(
+                color_legend(
+                    colorbar_title,
+                    feature_groups,
+                    swap_axes=swap_axes,
+                    tree=tree is not None,
+                )
+            ),
         )
     )
     if hover:
@@ -110,4 +123,5 @@ def build_matrixplot(
         width=width,
         height=height,
         frame_width=1.5,
+        tree=tree,
     )
