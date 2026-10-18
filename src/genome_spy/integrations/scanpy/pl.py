@@ -70,7 +70,8 @@ def _prepare_plot(show: bool | None, save: str | bool | None, *, context: str) -
 def _finish_plot(
     chart: TopLevelSpec, show: bool | None, sc: Any
 ) -> TopLevelSpec | None:
-    if sc.settings.autoshow if show is None else show:
+    should_show = sc.settings.autoshow if show is None else show
+    if should_show:
         chart.display()
         return None
     return chart
@@ -219,6 +220,7 @@ def umap(
         >>> chart = gsc.pl.umap(adata, color=["cell_type", "MS4A1"], show=False)
         >>> chart.save("umap.html", inline=True)
     """
+    # Accept Scanpy defaults, but reject options we cannot render faithfully.
     unsupported = {
         "edges": edges is not False,
         "edges_width": edges_width != 0.1,
@@ -239,6 +241,8 @@ def umap(
         "outline_width": outline_width != (0.3, 0.05),
         "outline_color": outline_color != ("black", "white"),
     }
+
+    # Linked panels must share one brush over the same two coordinates.
     if selection is not None:
         from genome_spy import Parameter
 
@@ -271,6 +275,8 @@ def umap(
         {"s", "alpha", "edgecolor", "edgecolors", "linewidth", "linewidths"},
         context="gsc.pl.umap",
     )
+
+    # Resolve alternate argument names before reading data.
     for left, right in [("edgecolor", "edgecolors"), ("linewidth", "linewidths")]:
         if left in kwargs and right in kwargs:
             raise TypeError(f"gsc.pl.umap: pass only one of {left} and {right}.")
@@ -282,6 +288,8 @@ def umap(
         raise ValueError("gsc.pl.umap: cannot specify both color_map and cmap.")
     if groups is not None and mask_obs is not None:
         raise ValueError("gsc.pl.umap: groups and mask_obs are incompatible.")
+
+    # Check basic options before loading the optional Scanpy dependency.
     for name, dimension in {"width": width, "height": height}.items():
         if dimension is not None and (
             isinstance(dimension, bool)
@@ -307,6 +315,7 @@ def umap(
     from genome_spy.integrations.scanpy._umap_chart import build_umap
     from genome_spy.integrations.scanpy._style import umap_style
 
+    # Read existing coordinates and colors without running analysis.
     prepared = prepare_umap(
         adata,
         color=color,
@@ -330,6 +339,8 @@ def umap(
         obs_id=obs_id,
         colorbar_loc=colorbar_loc,
     )
+
+    # Keep appearance separate from the selected data.
     style = umap_style(
         count=len(prepared.panels),
         width=width,
@@ -450,6 +461,7 @@ def dotplot(
         >>> chart = gsc.pl.dotplot(pbmc, ["CD79A", "CD3D"], "louvain", show=False)
         >>> chart.save("markers.html", inline=True)
     """
+    # Reject unsupported options before reading AnnData.
     _check_kwargs(kwds, {"linewidth"}, context="gsc.pl.dotplot")
     if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
         raise TypeError(
@@ -485,6 +497,7 @@ def dotplot(
     )
     from genome_spy.integrations.scanpy._dotplot_chart import build_dotplot
 
+    # Read only the requested genes and group labels.
     prepared = grouped_expression(
         adata,
         var_names,
@@ -498,6 +511,8 @@ def dotplot(
         var_group_positions=var_group_positions,
         var_group_labels=var_group_labels,
     )
+
+    # Dot color and area use different summaries of the same cells.
     colors, fractions = dotplot_statistics(
         prepared.values,
         expression_cutoff=expression_cutoff,
@@ -506,6 +521,8 @@ def dotplot(
         dot_color_df=dot_color_df,
         swap_axes=bool(swap_axes),
     )
+
+    # Keep colors, sizes and marker brackets in the tree's leaf order.
     feature_groups = prepared.feature_groups
     count = colors.shape[1] if swap_axes else colors.shape[0]
     tree = attached_dendrogram(adata, groupby, dendrogram, count)
@@ -518,6 +535,11 @@ def dotplot(
             if swap_axes
             else fractions.loc[list(tree.order)].iloc[:, slots]
         )
+
+    # Describe the displayed values accurately when means are replaced or scaled.
+    value_title = "Color value" if dot_color_df is not None else "Mean expression"
+    if standard_scale is not None:
+        value_title += " (scaled)"
     chart = build_dotplot(
         colors,
         fractions,
@@ -533,8 +555,7 @@ def dotplot(
         dot_max=dot_max,
         smallest_dot=smallest_dot,
         hover=hover,
-        value_title=("Color value" if dot_color_df is not None else "Mean expression")
-        + (" (scaled)" if standard_scale is not None else ""),
+        value_title=value_title,
         linewidth=kwds.get("linewidth", 0.2),
         rotation=var_group_rotation,
         width=width,
@@ -641,6 +662,7 @@ def matrixplot(
         >>> chart.display(inline=True)
     """
     context = "gsc.pl.matrixplot"
+    # Reject unsupported options before reading AnnData.
     _check_kwargs(kwds, {"edgecolor", "linewidth"}, context="gsc.pl.matrixplot")
     if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
         raise TypeError(
@@ -668,6 +690,7 @@ def matrixplot(
     )
     from genome_spy.integrations.scanpy._matrixplot_chart import build_matrixplot
 
+    # Supplied means replace expression values, so do not log-transform them.
     prepared = grouped_expression(
         adata,
         var_names,
@@ -681,6 +704,8 @@ def matrixplot(
         var_group_positions=var_group_positions,
         var_group_labels=var_group_labels,
     )
+
+    # Compute means once, or keep the user's supplied summary table.
     colors = matrixplot_statistics(
         prepared.values,
         standard_scale=standard_scale,
@@ -688,6 +713,8 @@ def matrixplot(
         categories_order=categories_order,
         swap_axes=swap_axes,
     )
+
+    # Move the group rows and matching marker brackets together.
     feature_groups = prepared.feature_groups
     count = colors.shape[1] if swap_axes else colors.shape[0]
     tree = attached_dendrogram(adata, groupby, dendrogram, count)
@@ -695,6 +722,11 @@ def matrixplot(
         colors, feature_groups, _ = reorder_grouped(
             tree, colors, feature_groups, swapped=bool(swap_axes)
         )
+
+    # Supplied values keep their meaning even when standard_scale is requested.
+    value_title = "Value" if values_df is not None else "Mean expression"
+    if values_df is None and standard_scale is not None:
+        value_title += " (scaled)"
     chart = build_matrixplot(
         colors,
         feature_groups,
@@ -708,9 +740,7 @@ def matrixplot(
         linewidth=kwds.get("linewidth", 0.1),
         rotation=var_group_rotation,
         hover=hover,
-        value_title="Value"
-        if values_df is not None
-        else "Mean expression" + (" (scaled)" if standard_scale is not None else ""),
+        value_title=value_title,
         width=width,
         height=height,
         figsize=figsize,
@@ -773,6 +803,7 @@ def dendrogram(
     from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
     from genome_spy.integrations.scanpy._dendrogram_chart import build_dendrogram
 
+    # Reuse a stored tree; only a missing result is computed by Scanpy.
     tree = prepare_dendrogram(adata, groupby, dendrogram_key)
     chart = build_dendrogram(
         tree,
@@ -849,6 +880,7 @@ def correlation_matrix(
         >>> chart.display(inline=True)
     """
     context = "gsc.pl.correlation_matrix"
+    # Reject unsupported options before reading AnnData.
     _check_kwargs(
         kwds, {"cmap", "edgecolors", "linewidth"}, context="gsc.pl.correlation_matrix"
     )
@@ -876,6 +908,7 @@ def correlation_matrix(
         build_correlation_matrix,
     )
 
+    # The Scanpy tree result also supplies the correlations, even without branches.
     tree = prepare_dendrogram(
         adata, groupby, dendrogram if isinstance(dendrogram, str) else None
     )

@@ -448,6 +448,18 @@ and unrelated tests were not repeated; the live notebooks and existing notebook
 edits were untouched. M05 remains next and no working plan is newly eligible for
 clearance.
 
+Readability pass (October 18): short, plain-language comments now separate option
+checks, selected-data access, summary calculations, ordering and chart assembly.
+They explain choices such as stable cell IDs, repeated genes, scaling order and
+tree alignment. Nested choices for legend columns, bracket rotation, plot spacing,
+palette defaults and display handling use ordinary statements; supplied matrix
+means return early instead of enclosing the computed-means path in an else block.
+No helper, module, dependency or public option was added.
+All 371 integration tests, Ruff formatting/lint and mypy pass; 44 complete chart
+specifications are unchanged. Browser checks, resource benchmarks and the full
+documentation site were not rerun for this behavior-preserving edit. Notebook
+edits remain outside the change. M05 remains next; no plan is newly clearable.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50

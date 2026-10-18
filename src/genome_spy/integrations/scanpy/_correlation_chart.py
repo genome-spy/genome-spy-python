@@ -64,9 +64,11 @@ def build_correlation_matrix(
         "black" if no_edge else native_color(edgecolors, "edgecolors", context=context)
     )
     linewidth = number(linewidth, "linewidth", context=context)
+    # Both matrix axes must follow the same leaf order when a tree is shown.
     labels = list(tree.order if dendrogram else tree.categories)
     index = [tree.categories.index(label) for label in labels]
     values = tree.correlation[np.ix_(index, index)]
+    # Scanpy uses the full correlation range unless the user supplies a bound.
     low, high, _ = color_bounds(
         values,
         -1 if vmin is None and vmax is None else vmin,
@@ -125,6 +127,7 @@ def build_correlation_matrix(
                 gs.Tooltip("_correlation:Q", title="Correlation", format=".4g"),
             ]
         )
+    # Reuse the tile positions for labels so they cannot drift from their groups.
     label_table = [{"slot": i, "label": str(label)} for i, label in enumerate(labels)]
     top_labels = (
         gs.Chart(label_table)

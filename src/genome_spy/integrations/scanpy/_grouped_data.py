@@ -39,6 +39,7 @@ def _feature_slots(
 ) -> tuple[list[str], tuple[FeatureGroup, ...]]:
     groups = []
     names: list[str]
+    # A marker dictionary sets both gene order and bracket positions.
     if isinstance(var_names, Mapping):
         if labels is not None or positions is not None:
             raise TypeError(
@@ -110,7 +111,7 @@ def _categories(frame: pd.DataFrame, keys: list[str]) -> pd.Categorical:
         raise TypeError(
             "Grouped plotting: multiple groupby keys require string categories."
         ) from error
-    # Sort observed combinations by category codes without expanding their product.
+    # Keep category order without inventing groups that have no cells.
     combinations = frame[keys].drop_duplicates().sort_values(keys)
     order = combinations.astype(object).agg("_".join, axis=1)
     if not order.is_unique:
@@ -163,6 +164,8 @@ def grouped_expression(
             raise ValueError(
                 f"Grouped plotting: groupby {key!r} is missing from observations."
             )
+
+    # Check expression storage only when the requested values include genes.
     use_raw = resolve_use_raw(adata, use_raw, layer, context="Grouped plotting")
     if any(name not in adata.obs for name in names):
         from scipy.sparse import sparray
@@ -175,6 +178,8 @@ def grouped_expression(
                 "Grouped plotting: Scanpy 1.11.5 obs_df does not support sparse arrays; "
                 "use an in-memory CSR/CSC matrix for the selected representation."
             )
+
+    # Read each requested column once; restore repeated genes below.
     columns = [key for key in keys if key != adata.obs.index.name]
     frame = obs_df(
         adata,
@@ -183,10 +188,13 @@ def grouped_expression(
         layer=layer,
         gene_symbols=gene_symbols,
     )
-    # Sanitize only the detached table, never AnnData or its saved palettes.
+
+    # Convert strings on this separate table so AnnData stays unchanged.
     adata.strings_to_categoricals(frame)
     if adata.obs.index.name in keys:
         frame = frame.reset_index()
+
+    # Scanpy groups numeric annotations into bins rather than one group per value.
     if len(keys) == 1 and pd.api.types.is_numeric_dtype(frame[keys[0]]):
         if (
             isinstance(num_categories, bool)
@@ -201,9 +209,13 @@ def grouped_expression(
         groups = _categories(frame, keys)
     if categories_order is not None:
         groups = groups.reorder_categories(list(categories_order))
+
+    # Repeated genes keep separate positions in the final plot.
     table = frame.loc[:, names].copy()
     table.index = pd.CategoricalIndex(groups, name="_".join(keys))
     numeric = numeric_values(table, context="Grouped plotting: expression")
+
+    # Scanpy applies log1p to cell values before computing group means.
     if log:
         if np.any(numeric <= -1):
             raise ValueError(
@@ -226,7 +238,7 @@ def group_means(
     if expression_cutoff is not None:
         _cutoff(expression_cutoff)
         values = values.where(values > expression_cutoff)
-    # Scanpy's plotting means skip NaN; get.aggregate does not.
+    # Match Scanpy's plotting means, which skip missing values.
     means = values.groupby(level=0, observed=True).mean()
     return means if expression_cutoff is None else means.fillna(0)
 
@@ -236,7 +248,7 @@ def expression_fractions(
 ) -> pd.DataFrame:
     """Use Scanpy's comparison/count denominator, including implicit zeros."""
     _cutoff(expression_cutoff)
-    # count_nonzero would count negatives and values below the cutoff.
+    # Count values strictly above the cutoff, including zeros in the denominator.
     expressed = values > expression_cutoff
     groups = expressed.groupby(level=0, observed=True)
     return groups.sum() / groups.count()
@@ -252,7 +264,7 @@ def scale_means(
         raise ValueError(
             "Grouped plotting: standard_scale must be 'var', 'group', or None."
         )
-    # pp.scale computes z-scores rather than plotting's min–max scaling.
+    # Plot scaling maps each range to 0–1; sc.pp.scale would change the meaning.
     axis = 0 if standard_scale == "var" else 1
     shifted = means.sub(means.min(axis=axis), axis=1 - axis)
     return shifted.div(shifted.max(axis=axis), axis=1 - axis).fillna(0)
@@ -267,17 +279,8 @@ def matrixplot_statistics(
     swap_axes: bool,
 ) -> pd.DataFrame:
     """Scale computed means once; supplied tables retain their values and order."""
-    if values_df is None:
-        means = group_means(values)
-        if means.empty:
-            raise ValueError("gsc.pl.matrixplot: no observed groups to plot.")
-        if len(means) != len(values.index.categories):
-            raise ValueError(
-                "gsc.pl.matrixplot: unused categories have no statistics; "
-                "remove unused categories explicitly before plotting."
-            )
-        means = scale_means(means, standard_scale)
-    else:
+    # Supplied means replace computed means and must not be scaled again.
+    if values_df is not None:
         if not isinstance(values_df, pd.DataFrame):
             raise TypeError("gsc.pl.matrixplot: values_df must be a pandas DataFrame.")
         if (
@@ -293,6 +296,18 @@ def matrixplot_statistics(
         numeric_values(means, context="gsc.pl.matrixplot: values_df")
         if categories_order is not None:
             means = means.loc[list(categories_order)]
+        return means.T if swap_axes else means
+
+    # Only observed groups have means; empty categories need an explicit cleanup.
+    means = group_means(values)
+    if means.empty:
+        raise ValueError("gsc.pl.matrixplot: no observed groups to plot.")
+    if len(means) != len(values.index.categories):
+        raise ValueError(
+            "gsc.pl.matrixplot: unused categories have no statistics; "
+            "remove unused categories explicitly before plotting."
+        )
+    means = scale_means(means, standard_scale)
     return means.T if swap_axes else means
 
 
@@ -306,6 +321,7 @@ def dotplot_statistics(
     swap_axes: bool,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Return displayed colors/fractions, including the pinned render-time scaling."""
+    # Dot sizes always describe the cells, even when colors are supplied.
     fractions = expression_fractions(values, expression_cutoff=expression_cutoff)
     if fractions.empty:
         raise ValueError("gsc.pl.dotplot: no observed groups to plot.")
@@ -314,6 +330,8 @@ def dotplot_statistics(
             "gsc.pl.dotplot: unused categories have no statistics; "
             "remove unused categories explicitly before plotting."
         )
+
+    # Supplied colors skip the first scaling pass, as in Scanpy.
     if dot_color_df is None:
         colors = group_means(
             values,
@@ -330,7 +348,7 @@ def dotplot_statistics(
             raise ValueError(
                 "gsc.pl.dotplot: dot_color_df needs exactly the plotted group/feature labels."
             )
-        # Repeated slots share the first supplied column, as in Scanpy 1.11.5.
+        # Repeated genes share the first supplied column, as in Scanpy 1.11.5.
         unique = dot_color_df.loc[:, ~dot_color_df.columns.duplicated()]
         colors = unique.loc[fractions.index, fractions.columns].copy()
         numeric_values(colors, context="gsc.pl.dotplot: dot_color_df")

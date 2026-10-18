@@ -54,10 +54,16 @@ def dot_size_scale(
             "For all-zero fractions, set dot_max=1 explicitly."
         )
     difference = high - low
-    step = 0.1 if 0.3 < difference <= 0.6 else 0.05 if difference <= 0.3 else 0.2
+    # Match Scanpy's spacing between percentage labels.
+    if difference <= 0.3:
+        step = 0.05
+    elif difference <= 0.6:
+        step = 0.1
+    else:
+        step = 0.2
     ticks = np.arange(high, low, -step)[::-1]
     ticks = np.round(ticks * 100, 10) / 100
-    # Explicit lookup keeps the clipped power mapping identical in dots and guides.
+    # Use the same percentage-to-area lookup for dots and legend symbols.
     domain = np.unique(np.concatenate([fractions[np.isfinite(fractions)], ticks]))
     areas = smallest + ((np.clip(domain, low, high) - low) / difference) ** 1.5 * (
         200 - smallest
@@ -114,6 +120,7 @@ def build_dotplot(
     }.items():
         if value is not None and not isinstance(value, str):
             raise TypeError(f"gsc.pl.dotplot: {name} must be a string or None.")
+    # Calculate both scales before drawing so the dots and guides agree.
     values = colors.to_numpy(dtype=float, na_value=np.nan)
     low, high, constant_color = color_bounds(
         values, vmin, vmax, context="gsc.pl.dotplot"
@@ -176,8 +183,9 @@ def build_dotplot(
         )
     )
     if smallest_dot == 0:
-        # A zero-area dot must not leave a stroke-only picking/raster footprint.
+        # A zero-area dot must not leave a visible or hoverable outline.
         dots = dots.transform_filter(f"datum._percent > {100 * (dot_min or 0)}")
+    # Hover reports the actual percentage, even when dot sizes are clipped.
     if hover:
         dots = dots.encode(
             tooltip=[

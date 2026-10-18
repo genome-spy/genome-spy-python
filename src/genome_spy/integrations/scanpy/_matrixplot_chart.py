@@ -76,6 +76,7 @@ def build_matrixplot(
         vmax,
         context=context,
     )
+    # Tiles fill their slots; missing means leave an empty slot with its label.
     x, y = grouped_axes(rows, columns, xpadding=0, ypadding=0)
     tiles = (
         gs.Chart(summary_records(colors, swap_axes=swap_axes, context=context))
@@ -116,6 +117,7 @@ def build_matrixplot(
                 gs.Tooltip("_mean:Q", title=value_title, format=".4g"),
             ]
         )
+    # Reuse the dotplot's labels, marker brackets, guides and tree placement.
     return finish_grouped_chart(
         tiles,
         colors,

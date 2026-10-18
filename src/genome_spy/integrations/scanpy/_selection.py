@@ -68,6 +68,7 @@ def selection_mask(
     coordinates = np.asarray(embedding[:, list(dimensions)])
     if not np.isfinite(coordinates).all():
         raise ValueError("selection_mask: coordinates must be finite.")
+    # No brush, or a brush missing either axis, means no selected cells.
     mask: NDArray[np.bool_] = np.zeros(adata.n_obs, dtype=bool)
     if snapshot is None:
         return mask
@@ -96,6 +97,7 @@ def selection_mask(
                 "selection_mask: bounds must be ordered finite number pairs."
             )
         ranges.append((float(bound[0]), float(bound[1])))
+    # Match the chart: include the lower edge and exclude the upper edge.
     x, y = coordinates.T
     mask = (
         (x >= ranges[0][0])

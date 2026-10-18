@@ -75,7 +75,7 @@ def _brackets(
     swapped: bool,
     rotation: float | None,
 ) -> list[gs.Chart]:
-    # Keep index spans half-open while retaining Scanpy's asymmetric bracket ends.
+    # Place brackets by gene position so repeated names stay separate.
     table = [
         {
             "start": group.start,
@@ -106,9 +106,12 @@ def _brackets(
         y2Offset=0 if swapped else -4,
     )
     if rotation is None:
-        rotation = (
-            270 if swapped else 90 if any(len(g.label) > 4 for g in groups) else 0
-        )
+        # Long labels need rotation to clear neighboring brackets.
+        rotation = 0
+        if swapped:
+            rotation = 270
+        elif any(len(g.label) > 4 for g in groups):
+            rotation = 90
     text = gs.Chart(table).mark_text(
         font=_FONT,
         size=_TICK,
@@ -189,6 +192,7 @@ def plot_dimensions(
             )
         if len(figsize) != 2:
             raise ValueError(f"{context}: figsize needs (width, height) inches.")
+        # The overall figure width also includes space for the guides.
         width = number(figsize[0], "figsize width", context=context) * 100 - 150
         height = number(figsize[1], "figsize height", context=context) * 100
     width = (
@@ -213,6 +217,7 @@ def summary_records(
     groups = xlabels if swap_axes else ylabels
     if len(set(groups)) != len(groups):
         raise ValueError(f"{context}: group labels collide when serialized as strings.")
+    # Use positions so repeated gene names remain distinct chart entries.
     yy, xx = np.indices(colors.shape)
     return pd.DataFrame(
         {
@@ -296,6 +301,7 @@ def finish_grouped_chart(
     tree: DendrogramData | None = None,
 ) -> gs.TopLevelSpec:
     xlabels, ylabels = [str(v) for v in colors.columns], [str(v) for v in colors.index]
+    # Draw labels separately so repeated names do not collapse into one axis tick.
     layers: list[gs.Chart | gs.LayerChart] = [
         marks,
         _slot_labels(xlabels, x.axis(None), horizontal=True),
@@ -307,6 +313,8 @@ def finish_grouped_chart(
                 groups, y if swap_axes else x, swapped=swap_axes, rotation=rotation
             )
         )
+
+    # Tree leaves must use the same row or column spacing as the matrix.
     if tree is not None:
         padding = (
             x.to_dict()["scale"]["paddingOuter"]
@@ -321,14 +329,13 @@ def finish_grouped_chart(
                 reverse=not swap_axes,
             )
         )
-    space = bracket_space(groups)
-    top_space = (
-        90
-        if tree is not None and swap_axes
-        else space
-        if groups and not swap_axes
-        else 10
-    )
+
+    # Leave room above the plot for either a tree or marker brackets.
+    top_space = 10.0
+    if tree is not None and swap_axes:
+        top_space = 90
+    elif groups and not swap_axes:
+        top_space = bracket_space(groups)
     chart = gs.layer(*layers).properties(
         width=width,
         height=height,

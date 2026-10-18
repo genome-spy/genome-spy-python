@@ -51,7 +51,7 @@ def _grouping(
             )
     groups = _categories(adata.obs, keys)
     if len(keys) > 1:
-        # Scanpy's tree computation sorts joined categories lexically.
+        # Scanpy sorts combined group labels alphabetically when computing trees.
         groups = groups.reorder_categories(sorted(groups.categories))
     if len(groups.categories) < 2:
         raise ValueError("Dendrogram: at least two observed categories are required.")
@@ -69,6 +69,7 @@ def _grouping(
 def _compute_dendrogram(adata: Any, keys: list[str]) -> Any:
     import scanpy as sc
 
+    # Choose an existing representation so Scanpy cannot silently fit PCA.
     use_rep = "X" if adata.n_vars <= sc.settings.N_PCS else "X_pca"
     if use_rep == "X_pca" and use_rep not in adata.obsm:
         raise ValueError(
@@ -102,12 +103,14 @@ def prepare_dendrogram(
     keys, groups = _grouping(adata, groupby)
     if key is not None and (not isinstance(key, str) or not key):
         raise TypeError("Dendrogram: dendrogram_key must be a nonempty string or None.")
+    # A stored tree is a snapshot; do not recompute it to check whether it is fresh.
     key = key or f"dendrogram_{'_'.join(keys)}"
     result = adata.uns[key] if key in adata.uns else _compute_dendrogram(adata, keys)
     message = f"Dendrogram: cache {key!r} is malformed or incompatible with the groups; recompute sc.tl.dendrogram explicitly."
     try:
         if not isinstance(result, Mapping) or list(result["groupby"]) != keys:
             raise ValueError(message)
+        # Match by label so changing category order does not attach the wrong leaves.
         labels = list(map(str, result["categories_ordered"]))
         indices = np.asarray(result["categories_idx_ordered"])
         n = len(groups.categories)
@@ -119,6 +122,7 @@ def prepare_dendrogram(
         categories = [None] * n
         for i, label in zip(indices, labels, strict=True):
             categories[i] = current[label]
+        # Check stored arrays without rebuilding the tree or reading expression.
         linkage = np.array(result["linkage"], dtype=float, copy=True)
         if linkage.shape != (n - 1, 4) or not hierarchy.is_valid_linkage(linkage):
             raise ValueError(message)
@@ -146,6 +150,7 @@ def prepare_dendrogram(
             raise ValueError(message)
     except (KeyError, TypeError, ValueError, IndexError) as error:
         raise ValueError(message) from error
+    # Correlation rows and columns must follow the current category order.
     positions = [categories.index(value) for value in groups.categories]
     return DendrogramData(
         tuple(groups.categories),
@@ -186,9 +191,11 @@ def reorder_grouped(
     swapped: bool,
 ) -> tuple[pd.DataFrame, tuple[FeatureGroup, ...], list[int]]:
     """Carry one leaf and optional marker-block permutation through all summaries."""
+    # Put groups on rows temporarily so both plot orientations use the same order.
     table = colors.T if swapped else colors
     table = table.loc[list(tree.order)]
     slots = list(range(table.shape[1]))
+    # Reorder marker blocks only when their labels match the cell groups.
     if groups and set(g.label for g in groups) == set(tree.order):
         slots, ordered = [], []
         for category in tree.order:

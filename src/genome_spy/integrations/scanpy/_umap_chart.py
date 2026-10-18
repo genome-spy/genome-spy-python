@@ -45,17 +45,15 @@ def _coordinate(
     )
     if zoom:
         result = result.scale(name=f"umap-{'x' if horizontal else 'y'}-{dimension}")
-    return (
-        result.axis(
-            title=f"UMAP{dimension + 1}",
-            ticks=False,
-            labels=False,
-            domain=False,
-            titleFontSize=style.axis_fontsize,
-            titleFont=style.font,
-        )
-        if style.frameon
-        else result.axis(None)
+    if not style.frameon:
+        return result.axis(None)
+    return result.axis(
+        title=f"UMAP{dimension + 1}",
+        ticks=False,
+        labels=False,
+        domain=False,
+        titleFontSize=style.axis_fontsize,
+        titleFont=style.font,
     )
 
 
@@ -64,11 +62,17 @@ def _legend(panel: Panel, style: UMAPStyle) -> gs.Legend | None:
         if panel.key is None or style.legend_loc != "right margin":
             return None
         count = len(panel.legend_values)
+        # Add columns only when a single column would make the legend too tall.
+        columns = 1
+        if count > 30:
+            columns = 3
+        elif count > 14:
+            columns = 2
         return gs.Legend(
             title=None,
             orient="right",
             values=list(panel.legend_values),
-            columns=1 if count <= 14 else 2 if count <= 30 else 3,
+            columns=columns,
             symbolSize=36 * POINTS_TO_PIXELS**2,
             symbolOpacity=style.alpha,
             labelLimit=1000,
@@ -139,6 +143,7 @@ def _panel(
         zoom,
         horizontal=False,
     )
+    # Scanpy uses square points for size; GenomeSpy uses square pixels.
     maximum_size = max(1.0, float(table[f"_size_{index}"].max()))
     diameter = POINTS_TO_PIXELS * (0.5 if panel.marker == "." else 1)
     points = (
@@ -179,7 +184,7 @@ def _panel(
     )
     colored = points.encode(color=_color(panel, index, style))
     layers: list[gs.TopLevelSpec] = []
-    # Missing quantitative values cannot enter a native numeric color scale.
+    # Draw missing values separately because numeric color scales cannot color them.
     separate_missing = (
         panel.scheme is not None and table[f"_value_{index}"].isna().any()
     )
@@ -191,6 +196,7 @@ def _panel(
         )
         colored = colored.transform_filter(f"isValid(datum._value_{index})")
     layers.append(colored)
+    # Place each group label at the middle of its cells, as Scanpy does.
     if panel.categorical and style.legend_loc == "on data":
         labels = [
             {
@@ -213,6 +219,7 @@ def _panel(
     result = (gs.layer(*layers) if len(layers) > 1 else colored).properties(
         width=style.width, height=style.height
     )
+    # Only the first panel edits the brush; other panels show its selection.
     if selection is not None and index == 0:
         result = brush_owner(result, selection)
     if panel.title:
@@ -276,6 +283,7 @@ def build_umap(
         _panel(prepared, panel, i, style, hover=hover, zoom=zoom, selection=selection)
         for i, panel in enumerate(prepared.panels)
     ]
+    # Share zoom only when the panels show the same coordinate pair.
     share_coordinates = zoom and len({p.dimensions for p in prepared.panels}) == 1
     chart = _compose(charts, style, share_coordinates=share_coordinates)
     return (

@@ -15,6 +15,7 @@ Orientation = Literal["top", "bottom", "left", "right"]
 
 
 def tree_records(tree: DendrogramData) -> list[dict[str, float]]:
+    # Convert Scanpy's ten-unit leaf spacing into one slot per group.
     return [
         {
             "leaf": float(leaves[i] / 10),
@@ -41,6 +42,7 @@ def tree_overlay(
     size: float = 80,
 ) -> gs.LayerChart:
     """Place branches beside the same fixed index slots used by summary marks."""
+    # Recalculate positions in the browser so leaves stay aligned after resizing.
     n = len(tree.order)
     maximum = float(tree.dcoord.max()) or 1
     leaf = f"(datum.leaf + {padding}) / {n + 2 * padding}"
@@ -61,6 +63,7 @@ def tree_overlay(
         xpos, x2pos = leaf, leaf2
         ypos = f"{side} ({distance}) / height"
         y2pos = f"{side} ({distance2}) / height"
+    # Branches sit outside the matrix and must not change its scale or axes.
     rules = rules.transform_calculate(
         _tree_x=xpos,
         _tree_x2=x2pos,
@@ -95,6 +98,7 @@ def build_dendrogram(
     n = len(tree.order)
     margin = (n - 1) * 0.05
     domain = [0.5 - margin, n - 0.5 + margin]
+    # The orientation decides which axis holds the leaves and which holds distance.
     horizontal = orientation in ("top", "bottom")
     leaf = (
         (gs.X if horizontal else gs.Y)("leaf:Q")
@@ -121,6 +125,7 @@ def build_dendrogram(
         rules = rules.encode(y=leaf, y2="leaf2:Q", x=distance, x2="distance2:Q")
     layers = [rules]
     padding = {"left": 10.0, "right": 10.0, "top": 10.0, "bottom": 10.0}
+    # Put labels on the leaf side and reserve room for their full length.
     if not remove_labels:
         labels = gs.Chart(
             [

@@ -19,7 +19,7 @@ POINTS_TO_PIXELS = 100 / 72
 GROUPED_FONT_SIZE = 10 * 0.833 * POINTS_TO_PIXELS
 
 
-# Scheme names shipped by the bundled GenomeSpy/Vega runtime.
+# Color scheme names supported by the bundled GenomeSpy version.
 _SCHEMES = frozenset(
     """
 accent category10 category20 category20b category20c dark2 observable10 paired
@@ -45,7 +45,7 @@ def native_scheme(value: Any, name: str, *, context: str = "gsc.pl.umap") -> str
 
 
 def native_color(value: Any, name: str, *, context: str = "gsc.pl.umap") -> str:
-    # Keep parsing in GenomeSpy; exclude Matplotlib forms and entry alpha.
+    # Let GenomeSpy parse colors; reject forms that need Matplotlib conversion.
     if isinstance(value, str):
         named = (
             value.isalpha()
@@ -85,6 +85,7 @@ def color_bounds(
     if low > high:
         raise ValueError(f"{context}: vmin cannot exceed vmax.")
     constant = low == high
+    # A constant color range still needs visible space on the colorbar.
     if constant and expand_constant:
         delta = abs(low) * 0.1 or 0.1
         low, high = low - delta, high + delta
@@ -104,6 +105,7 @@ class ColorData:
 def _bound(
     bound: Any, index: int, count: int, values: np.ndarray, default: float
 ) -> float:
+    # A single bound applies to every panel; a list may set one per panel.
     if isinstance(bound, Sequence) and not isinstance(bound, str):
         if len(bound) not in (1, count):
             raise ValueError(
@@ -127,6 +129,7 @@ def _bound(
 
 
 def _categorical(values: Any) -> pd.Categorical | None:
+    # Keep a saved category order instead of sorting it again.
     if isinstance(getattr(values, "dtype", None), pd.CategoricalDtype):
         return pd.Categorical(values).copy()
     if pd.api.types.is_bool_dtype(values.dtype):
@@ -150,6 +153,7 @@ def _palette(
     if isinstance(palette, str):
         return (), native_scheme(palette, "palette")
     if isinstance(palette, Mapping):
+        # Named colors follow category order, not dictionary order.
         try:
             selected = [palette[c] for c in categories]
         except KeyError as error:
@@ -174,21 +178,20 @@ def _palette(
     else:
         import scanpy as sc
 
+        # Reuse saved colors before choosing the smallest Scanpy palette that fits.
         cached = adata.uns.get(f"{key}_colors", ())
-        # Reuse public Scanpy palette values, without invoking color utilities.
-        defaults = [
-            sc.pl.palettes.vega_10,
-            sc.pl.palettes.default_20,
-            sc.pl.palettes.default_28,
-            sc.pl.palettes.default_102,
-        ]
-        selected = (
-            cached[:count]
-            if len(cached) >= count
-            else next(
+        if len(cached) >= count:
+            selected = cached[:count]
+        else:
+            defaults = [
+                sc.pl.palettes.vega_10,
+                sc.pl.palettes.default_20,
+                sc.pl.palettes.default_28,
+                sc.pl.palettes.default_102,
+            ]
+            selected = next(
                 (p[:count] for p in defaults if len(p) >= count), ["grey"] * count
             )
-        )
     return tuple(native_color(c, "palette") for c in selected), None
 
 
@@ -203,6 +206,7 @@ def categorical_colors(
     na_color: str,
     na_in_legend: bool,
 ) -> ColorData:
+    # Resolve colors before hiding groups so the remaining groups keep their colors.
     categories = values.categories
     original, scheme = (
         _palette(adata, key, categories, palette) if key is not None else ((), None)
@@ -215,6 +219,7 @@ def categorical_colors(
     if mask is not None:
         values[~mask] = np.nan
 
+    # Labels become strings in the browser and must still identify distinct groups.
     names = tuple(str(category) for category in values.categories)
     if len(set(names)) != len(names):
         raise ValueError(
@@ -227,6 +232,7 @@ def categorical_colors(
     )
     legend_values = names
     missing = pd.isna(values)
+    # Missing cells get their own color without becoming an ordinary category.
     if missing.any() or key is None:
         if "NA" in names:
             raise NotImplementedError(
@@ -271,6 +277,7 @@ def continuous_colors(
     count: int,
     colorbar: bool,
 ) -> ColorData:
+    # Use a copy so masking colors never changes the source expression values.
     if isinstance(values, pd.Series):
         values = values.to_numpy(na_value=np.nan)
     values = np.asarray(values).copy()
@@ -284,6 +291,7 @@ def continuous_colors(
         raise ValueError(
             "gsc.pl.umap: continuous colors require finite values and at least one nonmissing value."
         )
+    # Resolve per-panel or percentile bounds before choosing the native color scale.
     low = _bound(vmin, index, count, values, float(np.nanmin(values)))
     high = _bound(vmax, index, count, values, float(np.nanmax(values)))
     low, high, _ = color_bounds(
@@ -322,7 +330,7 @@ class UMAPStyle:
 
 
 def _number(value: Any, name: str, *, minimum: float = 0) -> float:
-    # Retain UMAP's existing boolean-scalar coercion.
+    # Keep UMAP's existing treatment of True and False as 1 and 0.
     return number(
         float(value) if isinstance(value, bool) else value,
         name,

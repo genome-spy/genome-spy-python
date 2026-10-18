@@ -55,6 +55,7 @@ def dimensions_for(
     if components == "all":
         pairs = list(combinations(range(count), 2))
     elif components is not None:
+        # Scanpy's component strings count from one; array columns count from zero.
         entries = [components] if isinstance(components, str) else components
         try:
             pairs = [tuple(int(x) - 1 for x in pair.split(",")) for pair in entries]
@@ -104,6 +105,7 @@ def _expression(
             )
         return adata.obs[key].copy(), f"obs[{key!r}]"
     resolved = key
+    # Match symbols against var before looking up the gene in the chosen source.
     if symbols is not None and key not in adata.var_names:
         if symbols not in adata.var or list(adata.var.columns).count(symbols) != 1:
             raise ValueError(
@@ -145,12 +147,15 @@ def _panel_inputs(
     keys = [keys] if keys is None or isinstance(keys, str) else list(keys)
     if not keys or any(key is not None and not isinstance(key, str) for key in keys):
         raise ValueError("gsc.pl.umap: color must contain observation or gene keys.")
+
+    # components combines every color with every pair; dimensions pairs the lists.
     if components is not None:
         combinations = list(product(keys, pairs))
         keys = [key for key, _ in combinations]
         pairs = [pair for _, pair in combinations]
     markers = marker
     markers = [markers] if isinstance(markers, str) else list(markers)
+    # One value can serve every panel, but longer lists must agree in length.
     count = max(len(keys), len(pairs), len(markers))
     if any(len(values) not in (1, count) for values in (keys, pairs, markers)):
         raise ValueError(
@@ -172,7 +177,7 @@ def _observations(
 ) -> pd.DataFrame:
     basis = "umap" if "umap" in adata.obsm else "X_umap"
     needed = sorted({dimension for pair in pairs for dimension in pair})
-    # obs_df rejects unrelated duplicate genes even for coordinate-only requests.
+    # Read coordinates without rejecting unrelated duplicate gene names.
     coordinates = from_anndata(
         adata, obs=[], obsm_keys=[(basis, dimension) for dimension in needed]
     )
@@ -184,6 +189,8 @@ def _observations(
     )
     if not np.isfinite(table.to_numpy()).all():
         raise ValueError("gsc.pl.umap: coordinates must be finite.")
+
+    # Linked panels need distinct IDs even when observation names are repeated.
     if obs_id is None:
         ids = adata.obs_names.to_numpy().copy()
         if not adata.obs_names.is_unique:
@@ -217,6 +224,7 @@ def _mask(adata: Any, mask: Any) -> np.ndarray | None:
                 f"gsc.pl.umap: mask_obs field {mask!r} is missing or ambiguous."
             )
         mask = adata.obs[mask]
+    # A labeled mask must already follow the same cells in the same order.
     if isinstance(mask, pd.Series) and not mask.index.equals(adata.obs_names):
         raise ValueError("gsc.pl.umap: mask_obs index must match observation order.")
     mask = np.asarray(mask)
@@ -281,6 +289,7 @@ def prepare_umap(
         raise TypeError("gsc.pl.umap: expected AnnData.")
     if adata.n_obs == 0:
         raise ValueError("gsc.pl.umap: at least one observation is required.")
+    # All panels share the original coordinates and observation IDs.
     use_raw = resolve_use_raw(adata, use_raw, layer, context="gsc.pl.umap")
     inputs = _panel_inputs(adata, color, components, dimensions, marker)
     table = _observations(adata, [dimensions for _, dimensions, _ in inputs], obs_id)
@@ -291,12 +300,15 @@ def prepare_umap(
     panels = []
 
     for index, (key, dimensions, marker) in enumerate(inputs):
+        # Read each color field once even when several panels use it.
         if key is None:
             values, source = pd.Categorical([None] * len(adata)), "none"
         else:
             if key not in extracted:
                 extracted[key] = _expression(adata, key, use_raw, layer, gene_symbols)
             values, source = extracted[key]
+
+        # Categories need ordered labels; numeric values need continuous bounds.
         categorical = _categorical(values)
         if categorical is not None:
             colors = categorical_colors(
@@ -321,12 +333,15 @@ def prepare_umap(
                 colorbar=colorbar_loc is not None,
             )
 
+        # Keep missing values for hover while giving them a named palette color.
         table[f"_value_{index}"] = colors.values
         table[f"_color_{index}"] = colors.values
         if colors.categorical:
             table[f"_color_{index}"] = [
                 "NA" if pd.isna(value) else value for value in colors.values
             ]
+
+        # Store draw order separately so rows and cell IDs stay aligned.
         order = draw_order(
             colors.values, categorical=colors.categorical, sort=sort_order
         )
@@ -334,7 +349,7 @@ def prepare_umap(
         rank[order] = np.arange(len(order))
         table[f"_order_{index}"] = rank
         table[f"_size_{index}"] = size
-        # Preserve Scanpy 1.11.5's size-vector carry between panels.
+        # Scanpy 1.11.5 carries the reordered size vector into the next panel.
         if size.ndim == 1:
             size = size[order]
         panels.append(

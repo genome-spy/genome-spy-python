@@ -48,6 +48,7 @@ def resolve_use_raw(
         raise ValueError(f"{context}: use_raw=True and layer are incompatible.")
     if requested is True and adata.raw is None:
         raise ValueError(f"{context}: use_raw=True requires adata.raw.")
+    # An explicit layer takes priority over the default raw matrix.
     if requested is None:
         return adata.raw is not None and layer is None
     return requested
@@ -62,7 +63,7 @@ def require_resident_expression(
 
     if layer is not None and layer not in adata.layers:
         raise ValueError(f"{context}: layer {layer!r} is missing.")
-    # Accessing X on a backed view can load an unnecessarily wide slice.
+    # Reading X from a disk-backed view can load many unrequested genes.
     if adata.isbacked:
         raise TypeError(
             f"{context}: backed/lazy expression is not supported yet; "
