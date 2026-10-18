@@ -20,7 +20,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--browser", action="store_true")
-    parser.add_argument("--plot", choices=("dotplot", "matrixplot"), default="dotplot")
+    parser.add_argument(
+        "--plot", choices=("dotplot", "matrixplot", "heatmap"), default="dotplot"
+    )
     parser.add_argument("--dendrogram", action="store_true")
     args = parser.parse_args()
     import anndata as ad
@@ -32,6 +34,8 @@ def main() -> None:
 
     rng = np.random.default_rng(0)
     cells, genes, markers, groups = 100_000, 20_000, 40, 50
+    if args.plot == "heatmap":
+        cells, markers = 5_000, 50
     matrix = sparse.coo_matrix(
         (
             rng.random(cells * 10, dtype=np.float32),
@@ -93,7 +97,8 @@ def main() -> None:
             "genes": genes,
             "selected_genes": markers,
             "groups": groups,
-            "summary_marks": markers * groups,
+            "summary_marks": markers * groups if args.plot != "heatmap" else None,
+            "expression_tiles": cells * markers if args.plot == "heatmap" else None,
             "dendrogram": args.dendrogram,
             "resident_pca_components": 20 if args.dendrogram else None,
         },
@@ -149,6 +154,8 @@ def main() -> None:
                 + bounds["y"]
                 + (0.5 + ypad) / (groups + 2 * ypad) * bounds["height"]
             )
+            if args.plot == "heatmap":
+                py = canvas["y"] + bounds["y"] + bounds["height"] / 2
             page.mouse.move(px - 2, py - 2)
             page.wait_for_timeout(450)
             start = perf_counter()
@@ -161,7 +168,8 @@ def main() -> None:
             hover_elapsed = perf_counter() - start
             assert (
                 page.locator("table.attributes tr")
-                .first.locator("td")
+                .nth(2 if args.plot == "heatmap" else 0)
+                .locator("td")
                 .inner_text()
                 .strip()
                 == "g0"

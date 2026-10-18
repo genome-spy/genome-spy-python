@@ -14,7 +14,14 @@ if TYPE_CHECKING:
 
     from genome_spy import Parameter, TopLevelSpec
 
-__all__ = ["correlation_matrix", "dendrogram", "dotplot", "matrixplot", "umap"]
+__all__ = [
+    "correlation_matrix",
+    "dendrogram",
+    "dotplot",
+    "heatmap",
+    "matrixplot",
+    "umap",
+]
 
 _Bound = float | str | Sequence[float | str | None] | None
 
@@ -757,6 +764,204 @@ def matrixplot(
         height=height,
         figsize=figsize,
         tree=tree,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def heatmap(
+    adata: AnnData,
+    var_names: str | Sequence[str] | Mapping[str, str | Sequence[str]],
+    groupby: str | Sequence[str],
+    *,
+    use_raw: bool | None = None,
+    log: bool = False,
+    num_categories: int = 7,
+    dendrogram: bool | str = False,
+    gene_symbols: str | None = None,
+    var_group_positions: Sequence[tuple[int, int]] | None = None,
+    var_group_labels: Sequence[str] | None = None,
+    var_group_rotation: float | None = None,
+    layer: str | None = None,
+    standard_scale: Literal["var", "obs"] | None = None,
+    swap_axes: bool = False,
+    show_gene_labels: bool | None = None,
+    show: bool | None = None,
+    save: str | bool | None = None,
+    figsize: tuple[float, float] | None = None,
+    vmin: float | None = None,
+    vmax: float | None = None,
+    vcenter: float | None = None,
+    norm: Any = None,
+    hover: bool = True,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot individual cells' expression with Scanpy-compatible ordering.
+
+    Description:
+        Read selected values using Scanpy's public getter. Apply log1p and
+        optional cell/gene scaling before sorting cells by category. Render
+        native tiles, category strips, marker annotations and optional stored
+        dendrograms. Colors use cell values; embeddings and rankings are not rerun.
+        This preview supports at most 250,000 cell–gene values and rejects
+        larger requests before extraction; subset explicitly to plot more data.
+
+    Args:
+        adata: Annotated expression data.
+        var_names: Gene keys or a marker dictionary; repeated genes retain slots.
+        groupby: Observation annotation or annotations defining cell order.
+        use_raw: Use raw by default when available and no layer is requested.
+        log: Apply log1p to cell values before scaling and sorting.
+        num_categories: Number of bins for a numeric grouping column.
+        dendrogram: Attach a tree, optionally naming its stored result.
+        gene_symbols: Variable annotation containing the requested symbols.
+        var_group_positions: Inclusive gene positions for marker annotations.
+        var_group_labels: Labels for those marker annotations.
+        var_group_rotation: Rotation of marker labels above an ordinary heatmap.
+        layer: Expression layer; incompatible with explicit use_raw=True.
+        standard_scale: Scale values to 0–1 per gene ("var") or cell ("obs").
+        swap_axes: Place cells on x and genes on y.
+        show_gene_labels: Default to showing labels for at most 50 genes.
+        show: Display according to Scanpy's autoshow when unset.
+        save: Only None/False; use the returned chart's HTML/JSON export.
+        figsize: Compatible overall size in inches; native dimensions use pixels.
+        vmin: Lower continuous color bound.
+        vmax: Upper continuous color bound.
+        vcenter: Nondefault values are unsupported.
+        norm: Matplotlib normalization objects are unsupported.
+        hover: Include cell ID, gene, group and expression tooltips.
+        width: Native tile-area width in pixels.
+        height: Native tile-area height in pixels.
+        **kwds: Native cmap scheme, scalar alpha and interpolation="nearest".
+
+    Returns:
+        A native chart for show=False, otherwise displays it and returns None.
+
+    Raises:
+        ImportError: If the optional Scanpy version is unavailable.
+        TypeError: If an option, source or forwarded keyword is unsupported.
+        ValueError: If values, groups, labels, bounds or plot size are invalid.
+        NotImplementedError: If normalization or interpolation is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.heatmap(
+        ...     pbmc, ["CD79A", "CD3D"], "bulk_labels", show=False
+        ... )
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.heatmap"
+    # Validate options before loading data or the optional scientific stack.
+    _check_kwargs(kwds, {"cmap", "alpha", "interpolation"}, context=context)
+    for name, value in {"vcenter": vcenter, "norm": norm}.items():
+        if value is not None:
+            raise NotImplementedError(f"{context}: {name} is unsupported.")
+    if kwds.get("interpolation", "nearest") != "nearest":
+        raise NotImplementedError(f"{context}: interpolation supports only 'nearest'.")
+    for name, value in {"log": log, "swap_axes": swap_axes, "hover": hover}.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    if show_gene_labels is not None and not isinstance(show_gene_labels, bool):
+        raise TypeError(f"{context}: show_gene_labels must be boolean or None.")
+    if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
+        raise TypeError(f"{context}: dendrogram must be False, True or a nonempty key.")
+    if standard_scale not in (None, "var", "obs"):
+        raise ValueError(f"{context}: standard_scale must be 'var', 'obs' or None.")
+    sc = _prepare_plot(show, save, context=context)
+    import numpy as np
+    import pandas as pd
+    from genome_spy.integrations.scanpy._grouped_data import (
+        MAX_HEATMAP_VALUES,
+        grouped_expression,
+        heatmap_values,
+    )
+    from genome_spy.integrations.scanpy._dendrogram_data import (
+        prepare_dendrogram,
+        reorder_features,
+    )
+    from genome_spy.integrations.scanpy._heatmap_chart import build_heatmap
+    from genome_spy.integrations.scanpy._style import _palette
+
+    # Reuse expression access without replacing cells with group means.
+    selected = grouped_expression(
+        adata,
+        var_names,
+        groupby,
+        use_raw=use_raw,
+        log=log,
+        num_categories=num_categories,
+        gene_symbols=gene_symbols,
+        layer=layer,
+        var_group_positions=var_group_positions,
+        var_group_labels=var_group_labels,
+        value_limit=MAX_HEATMAP_VALUES,
+    )
+    categories = selected.values.index.categories
+    # Heatmap attaches two-group trees too, unlike dotplot and matrixplot.
+    tree = None
+    if dendrogram is not False and len(categories) > 1:
+        tree = prepare_dendrogram(
+            adata, groupby, dendrogram if isinstance(dendrogram, str) else None
+        )
+    feature_groups = selected.feature_groups
+    values = selected.values
+    slots = None
+    if tree is not None:
+        feature_groups, slots = reorder_features(tree, feature_groups, values.shape[1])
+    prepared = heatmap_values(
+        values,
+        standard_scale=standard_scale,
+        category_order=tree.order if tree else None,
+        feature_order=slots,
+    )
+
+    # Saved category colors stay tied to labels even after tree reordering.
+    palette: tuple[str, ...] = ()
+    palette_scheme = None
+    if (
+        isinstance(groupby, str)
+        and groupby in adata.obs
+        and isinstance(adata.obs[groupby].dtype, pd.CategoricalDtype)
+    ):
+        original, _ = _palette(adata, groupby, categories, None)
+        lookup = dict(zip(map(str, categories), original, strict=True))
+        palette = tuple(lookup[label] for label in prepared.intervals["label"])
+    else:
+        if len(categories) > 20:
+            raise NotImplementedError(
+                f"{context}: automatic numeric/multi-key strip colors support at most 20 groups."
+            )
+        palette_scheme = "category20"
+
+    # Use original row positions to keep duplicate observation names distinct.
+    names = adata.obs_names.to_numpy().copy()
+    ids = (
+        names
+        if adata.obs_names.is_unique
+        else np.array([f"row-{i}" for i in range(len(adata))])
+    )
+    positions = prepared.observation_positions
+    chart = build_heatmap(
+        prepared,
+        feature_groups,
+        names[positions],
+        ids[positions],
+        groupby=groupby if isinstance(groupby, str) else "_".join(groupby),
+        palette=palette,
+        palette_scheme=palette_scheme,
+        tree=tree,
+        swap_axes=swap_axes,
+        show_gene_labels=show_gene_labels,
+        rotation=var_group_rotation,
+        cmap=kwds.get("cmap", "viridis"),
+        vmin=vmin,
+        vmax=vmax,
+        alpha=kwds.get("alpha", 1),
+        hover=hover,
+        scaled=standard_scale is not None,
+        width=width,
+        height=height,
+        figsize=figsize,
     )
     return _finish_plot(chart, show, sc)
 

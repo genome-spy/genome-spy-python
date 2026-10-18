@@ -2,6 +2,8 @@
 
 from typing import Literal
 
+import numpy as np
+
 import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 from genome_spy.integrations.scanpy._data import number
@@ -45,10 +47,11 @@ def tree_overlay(
     padding: float = 0,
     reverse: bool = False,
     size: float = 80,
+    leaf_positions: list[float] | None = None,
 ) -> gs.LayerChart:
-    """Return a branch layer beside matrix positions from a tree and layout options.
+    """Return branches from a tree, orientation and optional normalized leaf positions.
 
-    Keep its coordinates separate so it aligns on resize without stretching cells.
+    Use supplied centers for unequal heatmap groups; otherwise align equal summary slots.
     """
     # Recalculate positions in the browser so leaves stay aligned after resizing.
     n = len(tree.order)
@@ -57,7 +60,18 @@ def tree_overlay(
     leaf2 = leaf.replace("datum.leaf", "datum.leaf2")
     distance = f"datum.distance / {maximum} * {size}"
     distance2 = distance.replace("datum.distance", "datum.distance2")
-    rules = gs.Chart(tree_records(tree)).mark_rule(
+    records = tree_records(tree)
+    # Heatmap groups have unequal sizes, unlike summary rows.
+    if leaf_positions is not None:
+        if len(leaf_positions) != n:
+            raise ValueError("Tree leaf positions must match the number of groups.")
+        for record in records:
+            for field in ("leaf", "leaf2"):
+                record[field] = float(
+                    np.interp(record[field], np.arange(n) + 0.5, leaf_positions)
+                )
+        leaf, leaf2 = "datum.leaf", "datum.leaf2"
+    rules = gs.Chart(records).mark_rule(
         color="#555555", size=1.5 * _PT, clip="never", tooltip=None
     )
     if orientation in ("right", "left"):

@@ -14,7 +14,7 @@ from genome_spy.integrations.scanpy._grouped_data import (
     expression_fractions,
     grouped_expression,
     group_means,
-    scale_means,
+    scale_values,
 )
 from tests.integrations.scanpy.grouped_fixture import grouped_cases, make_grouped_adata
 
@@ -56,8 +56,8 @@ def test_means_fractions_and_scaling_have_independent_denominators(adata):
     np.testing.assert_allclose(
         expression_fractions(table, expression_cutoff=-0.5), [[2 / 3, 1, 1], [1, 1, 1]]
     )
-    np.testing.assert_allclose(scale_means(means, "var"), [[1, 0, 0], [0, 1, 0]])
-    np.testing.assert_allclose(scale_means(means, "group"), [[0, 0, 1], [0, 2 / 7, 1]])
+    np.testing.assert_allclose(scale_values(means, "var"), [[1, 0, 0], [0, 1, 0]])
+    np.testing.assert_allclose(scale_values(means, "group"), [[0, 0, 1], [0, 2 / 7, 1]])
     np.testing.assert_allclose(means, [[1, 1, 4], [0.5, 1.5, 4]])
 
 
@@ -356,7 +356,7 @@ def test_nonfinite_values_and_undefined_logs_fail_clearly(adata):
         grouped_expression(adata, "g1", "group", use_raw=False, log=True)
     table = grouped_expression(adata, "g1", "group", use_raw=False).values
     with pytest.raises(ValueError, match="standard_scale"):
-        scale_means(group_means(table), "invalid")
+        scale_values(group_means(table), "invalid")
 
 
 def test_large_sparse_preparation_has_bounded_selected_column_memory(monkeypatch):
@@ -409,7 +409,7 @@ def test_grouped_results_match_the_frozen_scanpy_1_11_5_oracle(adata, name, opti
     scale = options.pop("standard_scale", None)
     arguments = {"var_names": ["g1", "g2", "g3"], "groupby": "group", **options}
     result = grouped_expression(adata, **arguments)
-    means = scale_means(
+    means = scale_values(
         group_means(
             result.values, expression_cutoff=cutoff if only_expressed else None
         ),

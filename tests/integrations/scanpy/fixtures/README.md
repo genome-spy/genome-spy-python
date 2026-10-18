@@ -104,6 +104,26 @@ and ordinary tests never recover plot inputs from them. Duplicate coordinates
 and names are not used to join observations. The UMAP compatibility guide
 documents the observable 1.11.5 size-vector behavior across multiple panels.
 
+`heatmap.json` freezes 16 complete Scanpy 1.11.5 cell heatmaps and plot-area crops
+from original MIT inputs. Unequal categories and distinct values within each
+group expose row-order mistakes. Cases cover log/scaling, swaps, marker brackets
+and strips, trees/matching marker blocks, missing/constant values, numeric bins,
+multiple keys, single groups and hidden labels. Metadata retains input/image
+hashes, values, group ticks, branch paths and 100/150 display/export DPI.
+Native browser checks at DPR 1.5 retain full charts and registered overlays,
+allowing 12/255 RGB for palette bins/rasterization without fitting images.
+
+`heatmap-performance.json` observes the 250,000-value preview envelope on a
+5,000-cell × 50-marker request from 20,000 sparse genes. It records selected-only
+densification, Python allocations/RSS, payload, browser paint, hover and heap.
+The 100,000-cell × 50-marker semantic test rejects before expression extraction;
+there is no automatic downsampling. Larger/chunked transport is deferred in M05.d.
+
+```sh
+uv run --no-sync python -m tests.integrations.scanpy.generate_heatmap_references
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot heatmap --browser --output /tmp/heatmap.json
+```
+
 Full figures retain axes, titles and legends. Isolated marker crops use a known
 150/100 export/display ratio and supply an independent footprint oracle.
 Browser tests retain measured captures/overlays in their pytest output directory;

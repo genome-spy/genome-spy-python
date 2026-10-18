@@ -94,7 +94,11 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     )
     namespace = {}
     run_notebook(NOTEBOOKS / "scanpy_expression.ipynb", namespace)
-    assert charts == [namespace["dotplot"], namespace["matrixplot"]]
+    assert charts == [
+        namespace["dotplot"],
+        namespace["matrixplot"],
+        namespace["heatmap"],
+    ]
     assert namespace["pbmc"].shape == (700, 765)
     order = namespace["pbmc"].uns["dendrogram_bulk_labels"]["categories_ordered"]
     for chart in charts:
@@ -131,3 +135,14 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         for name in gene:
             values = [row["_mean"] for row in records if row["_gene"] == name]
             assert min(values) == 0 and max(values) == 1
+    spec = charts[2].to_dict()
+    tiles = spec["layer"][0]
+    cells = spec["datasets"][tiles["data"]["name"]]
+    assert len(cells) == 700 * 10
+    assert len({row["_obs_id"] for row in cells}) == 700
+    assert tiles["encoding"]["color"]["scale"]["domain"] == [0, 1]
+    assert tiles["encoding"]["tooltip"][-1]["title"] == "Expression (scaled)"
+    assert all(
+        sum(row["_obs_id"] == name for row in cells) == 10
+        for name in namespace["pbmc"].obs_names
+    )

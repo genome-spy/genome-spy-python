@@ -32,6 +32,16 @@ class GroupedExpression:
     feature_groups: tuple[FeatureGroup, ...]
 
 
+MAX_HEATMAP_VALUES = 250_000
+
+
+@dataclass(frozen=True, slots=True)
+class HeatmapData:
+    values: pd.DataFrame
+    observation_positions: np.ndarray
+    intervals: pd.DataFrame
+
+
 def _feature_slots(
     var_names: str | Sequence[str] | Mapping[str, str | Sequence[str]],
     labels: Sequence[str] | None,
@@ -140,11 +150,12 @@ def grouped_expression(
     categories_order: Sequence[Any] | None = None,
     var_group_labels: Sequence[str] | None = None,
     var_group_positions: Sequence[tuple[int, int]] | None = None,
+    value_limit: int | None = None,
 ) -> GroupedExpression:
-    """Read requested AnnData values into a separate table with groups on its index.
+    """Return requested AnnData values in a separate grouped table with marker brackets.
 
-    Return that table and marker brackets, keeping cell order and repeated genes
-    without changing AnnData or loading the full expression matrix.
+    Preserve cell order and repeated genes; value_limit rejects oversized requests
+    before expression access, without changing AnnData.
     """
     from anndata import AnnData
     from scanpy.get import obs_df
@@ -158,6 +169,12 @@ def grouped_expression(
     names, feature_groups = _feature_slots(
         var_names, var_group_labels, var_group_positions
     )
+    # Stop oversized heatmaps before selecting or copying expression columns.
+    if value_limit is not None and adata.n_obs * len(names) > value_limit:
+        raise ValueError(
+            f"gsc.pl.heatmap: at most {value_limit:,} cell–gene values are supported; "
+            "subset cells or genes explicitly before plotting. No values were loaded."
+        )
     keys = [groupby] if isinstance(groupby, str) else list(groupby)
     if (
         not keys
@@ -275,22 +292,22 @@ def expression_fractions(
     return groups.sum() / groups.count()
 
 
-def scale_means(
-    means: pd.DataFrame, standard_scale: Literal["var", "group"] | None
+def scale_values(
+    values: pd.DataFrame, standard_scale: Literal["var", "group"] | None
 ) -> pd.DataFrame:
-    """Return means scaled to 0–1 by gene or group, or copied when scaling is off.
+    """Return table values scaled to 0–1 by column or row, or copied when off.
 
-    Set constant ranges to zero to match Scanpy's plotting normalization.
+    Use 'var' for columns and 'group' for rows; constant ranges become zero.
     """
     if standard_scale is None:
-        return means.copy()
+        return values.copy()
     if standard_scale not in ("var", "group"):
         raise ValueError(
             "Grouped plotting: standard_scale must be 'var', 'group', or None."
         )
     # Plot scaling maps each range to 0–1; sc.pp.scale would change the meaning.
     axis = 0 if standard_scale == "var" else 1
-    shifted = means.sub(means.min(axis=axis), axis=1 - axis)
+    shifted = values.sub(values.min(axis=axis), axis=1 - axis)
     return shifted.div(shifted.max(axis=axis), axis=1 - axis).fillna(0)
 
 
@@ -335,7 +352,7 @@ def matrixplot_statistics(
             "gsc.pl.matrixplot: unused categories have no statistics; "
             "remove unused categories explicitly before plotting."
         )
-    means = scale_means(means, standard_scale)
+    means = scale_values(means, standard_scale)
     return means.T if swap_axes else means
 
 
@@ -369,7 +386,7 @@ def dotplot_statistics(
             values,
             expression_cutoff=expression_cutoff if mean_only_expressed else None,
         )
-        colors = scale_means(colors, standard_scale)
+        colors = scale_values(colors, standard_scale)
     else:
         if not isinstance(dot_color_df, pd.DataFrame):
             raise TypeError("gsc.pl.dotplot: dot_color_df must be a pandas DataFrame.")
@@ -387,4 +404,68 @@ def dotplot_statistics(
     if swap_axes:
         colors, fractions = colors.T, fractions.T
     # Scanpy also scales the displayed table after a possible transpose.
-    return scale_means(colors, standard_scale), fractions
+    return scale_values(colors, standard_scale), fractions
+
+
+def heatmap_values(
+    values: pd.DataFrame,
+    *,
+    standard_scale: Literal["var", "obs"] | None,
+    category_order: Sequence[Any] | None = None,
+    feature_order: Sequence[int] | None = None,
+) -> HeatmapData:
+    """Return ordered cell values, original row positions and group spans.
+
+    Scale before sorting so every annotation can follow one explicit permutation.
+    """
+    if values.index.isna().any():
+        raise ValueError(
+            "gsc.pl.heatmap: missing groups are unsupported; label or filter them explicitly."
+        )
+    counts = values.index.value_counts(sort=False)
+    if (counts == 0).any():
+        raise ValueError(
+            "gsc.pl.heatmap: remove unused categories explicitly before plotting."
+        )
+
+    # Heatmap calls row scaling 'obs'; summary plots call the same operation 'group'.
+    scale = "group" if standard_scale == "obs" else standard_scale
+    scaled = scale_values(values, scale)
+    # Scanpy scales across all requested genes before marker blocks can omit any.
+    if feature_order is not None:
+        scaled = scaled.iloc[:, list(feature_order)]
+    if scaled.size > MAX_HEATMAP_VALUES:
+        raise ValueError(
+            "gsc.pl.heatmap: reordered marker blocks exceed the 250,000-value limit; subset markers explicitly."
+        )
+    if category_order is not None:
+        scaled.index = scaled.index.reorder_categories(
+            list(category_order), ordered=True
+        )
+    if len(counts) > 1:
+        positions = (
+            pd.Series(np.arange(len(values)), index=scaled.index)
+            .sort_index()
+            .to_numpy()
+        )
+    else:
+        positions = np.arange(len(values))
+    scaled = scaled.iloc[positions]
+
+    # Scanpy places strip labels and tree leaves half a row beyond the block center.
+    counts = scaled.index.value_counts(sort=False)
+    stops = counts.cumsum().to_numpy()
+    starts = stops - counts.to_numpy()
+    intervals = pd.DataFrame(
+        {
+            "label": [str(label) for label in counts.index],
+            "start": starts,
+            "stop": stops,
+            "center": (starts + stops) / 2 + 0.5,
+        }
+    )
+    if not intervals["label"].is_unique:
+        raise ValueError(
+            "gsc.pl.heatmap: group labels collide when converted to strings."
+        )
+    return HeatmapData(scaled, positions, intervals)

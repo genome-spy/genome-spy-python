@@ -10,7 +10,7 @@ import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy._grouped_data import (
     expression_fractions,
     group_means,
-    scale_means,
+    scale_values,
 )
 from tests.integrations.scanpy.fixture_data import make_adata
 from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
@@ -109,7 +109,7 @@ def test_aggregate_is_not_the_plotting_mean_or_expression_fraction():
 
 def test_plotting_standard_scale_is_not_scanpy_preprocessing_scale():
     values = pd.DataFrame({"g": [1.0, 3.0, 5.0]})
-    assert scale_means(values, "var")["g"].tolist() == [0, 0.5, 1]
+    assert scale_values(values, "var")["g"].tolist() == [0, 0.5, 1]
     np.testing.assert_allclose(
         sc.pp.scale(values.to_numpy(), copy=True).ravel(), [-1, 0, 1]
     )

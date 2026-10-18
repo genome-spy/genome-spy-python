@@ -213,7 +213,19 @@ def reorder_grouped(
     # Put groups on rows temporarily so both plot orientations use the same order.
     table = colors.T if swapped else colors
     table = table.loc[list(tree.order)]
-    slots = list(range(table.shape[1]))
+    groups, slots = reorder_features(tree, groups, table.shape[1])
+    table = table.iloc[:, slots]
+    return table.T if swapped else table, groups, slots
+
+
+def reorder_features(
+    tree: DendrogramData, groups: tuple[FeatureGroup, ...], count: int
+) -> tuple[tuple[FeatureGroup, ...], list[int]]:
+    """Return marker brackets and gene positions in matching tree order.
+
+    Share the same feature ordering across summary plots and cell heatmaps.
+    """
+    slots = list(range(count))
     # Reorder marker blocks only when their labels match the cell groups.
     if groups and set(g.label for g in groups) == set(tree.order):
         slots, ordered = [], []
@@ -222,6 +234,5 @@ def reorder_grouped(
             start = len(slots)
             slots.extend(range(group.start, group.end + 1))
             ordered.append(FeatureGroup(group.label, start, len(slots) - 1))
-        table = table.iloc[:, slots]
         groups = tuple(ordered)
-    return table.T if swapped else table, groups, slots
+    return groups, slots

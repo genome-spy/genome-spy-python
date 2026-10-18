@@ -7,7 +7,7 @@ not delivery promises.
 
 ## Current position and next work
 
-**Available:** categorical/continuous 2D UMAP, dotplot/matrixplot with dendrograms,
+**Available:** categorical/continuous 2D UMAP, dotplot/matrixplot and cell heatmaps with dendrograms,
 standalone dendrograms and correlation matrix development previews.
 UMAP includes native sizing, optional hover/zoom, linked interval highlighting/count
 and Python subset retrieval. Dotplot includes index-scaled slots, grouped summaries,
@@ -15,7 +15,9 @@ brackets, native size/color guides and optional summary hover. Matrixplot reuses
 grouped access/means and native layout, with one-pass scaling, authoritative
 `values_df`, tiles and optional summary hover. Trees reuse `sc.tl.dendrogram`
 computation/results, with structural checks and native rule rendering.
-**Implemented families:** UMAP, dotplot, matrixplot, dendrogram and correlation matrix (partial). Scanpy **1.11.5** is the only accepted version;
+Heatmaps retain individual cells, shared marker/source/scaling helpers, unequal
+group spans, category strips and cell hover, with a 250,000-value limit.
+**Implemented families:** UMAP, dotplot, matrixplot, heatmap, dendrogram and correlation matrix (partial). Scanpy **1.11.5** is the only accepted version;
 bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibility.
 
 Implementation is in
@@ -27,12 +29,11 @@ remain independent of the optional scientific stack.
 Workflow notebooks are split into [UMAP](notebooks/scanpy_umap.ipynb) and
 [expression plots](notebooks/scanpy_expression.ipynb). Both run independently.
 UMAP keeps basic plotting, linked selection and customization together. Dotplot
-and matrixplot share the expression workflow’s data/marker setup; heatmaps will
-join it when implemented.
+matrixplot and heatmap share the expression workflow’s data/marker setup.
 
-**Next ready slice: M05.a/b**, observation-level heatmap preparation and native
-tiles/annotations using the shared grouping and tree helpers. Matrix/clustermap
-follow within M05, then ranked summaries in M06.
+**Next ready slice: M05.b (`matrix`)**, followed by M05.c clustermap and M06 ranked
+summaries. Heatmap M05.a/b is verified for the bounded preview below; larger and
+chunked tile transport remains M05.d.
 Dotplot brushing remains deferred until the
 plain-chart preview has user review; this delivery does not add it.
 
@@ -48,7 +49,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
-| M05 heatmap/matrix/clustermap | Planned | Observation permutations, annotations, clustering contracts and large tile policy. |
+| M05 heatmap/matrix/clustermap | In progress; heatmap preview verified | Cell permutations, annotations, unequal tree attachment, 16 frozen charts, PBMC workflow and explicit resource envelope delivered. Standalone matrix, clustermap and larger/chunked tile transport remain. |
 | M06 ranking/ranked summaries | Planned | Stored rank selection and reusable dot/matrix/heatmap wrappers. |
 | M07 embeddings/scatter/PCA | Planned | Shared 2D embeddings/alias/PCA diagnostics, then remaining UMAP options. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
@@ -381,6 +382,64 @@ M05/M08/M09 own attachment
 to their new families; M13 owns builder methods. M04 closes only this stated
 preview. M05 is next; no working document is newly eligible for clearance.
 
+## M05.a/b cell heatmap preview
+
+Runtime: [public heatmap](../../src/genome_spy/integrations/scanpy/pl.py),
+[shared data preparation](../../src/genome_spy/integrations/scanpy/_grouped_data.py)
+and [native chart](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py).
+Reuses the public Scanpy getter, source/storage validation, min–max operation,
+palettes, marker-block permutations, labels/brackets and M04 rule branches.
+No separate data module, dependency, upstream plotting or Core patch was added.
+
+One explicit observation permutation carries cell values and stable original-row
+IDs into category strips, boundaries and unequal tree spans. Scaling happens on
+individual cells, before sorting, with log1p first. Both orientations retain
+repeated gene positions. Ordinary marker annotations are brackets; swapped ones
+are a colored strip, matching Scanpy. Gene labels default off above 50 slots.
+Stored trees require no recomputation; missing trees use the existing guarded
+public Scanpy path. Heatmap attaches two-group trees, unlike dot/matrix summaries.
+The native projection preserves Scanpy's half-row strip-label/leaf placement.
+
+Evidence:
+
+- [Semantic/API tests](../../tests/integrations/scanpy/test_heatmap.py) include hand
+  scaling, a single getter call, raw/layer/symbol access, original cell IDs,
+  repeated genes, sparse views/selected-only densification, unchanged analysis
+  and data, missing/unused categories, two-group trees and explicit option errors.
+- [16 complete Scanpy figures and manifest](../../tests/integrations/scanpy/fixtures/heatmap.json)
+  use original MIT inputs with unequal groups and distinct values within groups.
+  The [explicit generator](../../tests/integrations/scanpy/generate_heatmap_references.py)
+  retains hashes, versions, 100/150 display/export DPI, values, label slots,
+  group ticks and exact branch paths. No real dataset or upstream source is copied.
+- [18 heatmap browser checks](../../tests/integrations/scanpy/browser/test_heatmap.py)
+  register tiles and branches, retain full captures/overlays, and observe original
+  cell hover after tree ordering, both orientations, resizing, wheel stability
+  and offline HTML. Palette paint tolerance is 12/255 RGB for native bins and
+  browser rasterization; typography and outer layout remain documented differences.
+- The [resource observation](../../tests/integrations/scanpy/fixtures/heatmap-performance.json)
+  tests 5,000 cells × 50 markers from 20,000 sparse genes: only the requested
+  5,000 × 50 values densify. Preparation took 3.23 s, validated JSON 2.65 s,
+  tracked Python allocations peaked at 114 MB and process RSS at 675 MB. The
+  250,000 tiles serialize to 26.2 MB; Chromium first paint including dispatch
+  took 16.2 s, observed hover 96 ms after the pointer pause, and JS heap 168 MB.
+  These are local observations. Requests above 250,000 cell–gene values error
+  before extraction; the 100,000 × 50 test proves no expression read occurs.
+
+The expression notebook ran all four code cells in a fresh live Jupyter kernel,
+saved successful outputs and was inspected. It uses all 700 packaged PBMC cells,
+the existing marker dictionary and the explicitly computed shared Scanpy tree.
+The [maintained contract](../../docs/integrations/scanpy/index.md#heatmap-compatibility)
+records palette, missing-group, storage, normalization and size limits.
+Validation: the 418-check integration suite and all 104 browser checks passed.
+The final 44-check heatmap rerun also covers scaling before a tree's marker subset
+and gene-only ticks, bringing distinct integration checks to 421. All 18 heatmap
+browser checks were repeated after final guide/tick placement. The shared scaling
+helper is now named scale_values to reflect its cell and summary callers; the
+data/reuse regression checks pass too. Ruff formatting/lint and mypy pass.
+The full documentation site and unrelated test suites were not rebuilt.
+M05 stays open for matrix/clustermap and larger/chunked transport. No working
+plan is newly eligible for clearance; unrelated notebook edits remain unstaged.
+
 ## Computation reuse audit
 
 October 18: traced UMAP, dotplot and matrixplot through their data, statistic,
@@ -472,7 +531,7 @@ Notebook edits remain untouched; M05 and plan clearance are unchanged.
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. Five functions are available as partial previews; 43 plot/builder
+helpers. Six functions are available as partial previews; 42 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -493,7 +552,7 @@ No placeholder functions are exported for planned work.
 | `embedding` | Not implemented | M07 |
 | `embedding_density` | Not implemented | M12 |
 | `filter_genes_dispersion` | Not implemented; legacy | M10 |
-| `heatmap` | Not implemented | M05 |
+| `heatmap` | Partial cell-level preview available | M05.a/b preview; larger transport M05.d; normalization/options M14 |
 | `highest_expr_genes` | Not implemented | M10 |
 | `highly_variable_genes` | Not implemented | M10 |
 | `matrix` | Not implemented | M05 |
@@ -559,7 +618,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Categorical groups, guarded local computation, compatible stored results, four orientations, labels, attached dot/matrix trees and correlation numbers/hover | Tested preview; exact forms in user contract | M04 preview retained |
 | Stored n_pcs/var_names/use_raw/custom-method results | Render the stored Scanpy snapshot without source reconstruction; users recompute after input changes | Maintained Scanpy cache contract |
 | Automatic sparse/backed/lazy tree computation | Explicit Scanpy 1.11.5 limits; use a stored result or resident dense representation | M14.c upstream access review |
-| Heatmap, violin/stacked and tracks attachments | Shared tree helpers available; parent families unimplemented | M05/M08/M09 |
+| Heatmap attachment | Verified unequal cell-group spans in both orientations, including two groups | M05.a/b preview retained |
+| Violin/stacked and tracks attachments | Shared tree helpers available; parent families unimplemented | M08/M09 |
 | Correlation norm/vcenter, remaining imshow kwargs, typography and image export | Explicit restrictions/errors | M14.c |
 
 | Builder surface (all three classes) | Current state | Completion evidence required |
@@ -585,7 +645,7 @@ an affected slice; upcoming releases are triggers to investigate, not assumption
 | C04 | No dedicated line/path mark in bundled mark inventory | Series/graph/path M11 | Verify native rule/link segments can preserve required semantics; otherwise upstream released capability |
 | C05 | Font/outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
 | C06 | Faceting/composition improvement announced, not adopted | UMAP and repeated panel layout | Released version/schema; recheck plot/gap/axis zoom and brush scope/count |
-| C07 | Python linkage + native rule branches verified | Trees M04 delivered; later families M05/M08/M09 | Shared geometry projects into fixed index slots; standalone/attached resize and registered path checks pass. Recheck alignment for later families/navigation. |
+| C07 | Python linkage + native rule branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Shared geometry projects into equal summary slots or unequal cell-group centers; standalone/attached resize and registered path checks pass. Recheck later families/navigation. |
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots and both orientations verified; extend checks with later families and any navigation support |
 
 Python computation alone does not close a renderer gap. Local Core patches are

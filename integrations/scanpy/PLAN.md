@@ -357,6 +357,15 @@ in M14, not an excuse to declare full automatic compatibility.
 
 ### M05 — heatmap, matrix and clustermap
 
+Heatmap M05.a/b is delivered as a bounded preview; see the
+[status record](STATUS.md#m05ab-cell-heatmap-preview) and maintained
+[heatmap contract](../../docs/integrations/scanpy/index.md#heatmap-compatibility).
+It adds one chart module and small functions in the existing grouped data/tree
+modules, reusing access, scaling, palettes, feature ordering, labels and branches.
+The 250,000-value limit is checked before extraction; the 100k × 50 case tests
+rejection without data reads. Larger/chunked transport remains M05.d.
+The standalone `matrix` part of M05.b and `clustermap` in M05.c are next.
+
 - M05.a: observation-level heatmap reuses source/group/slot access. Carry one
   explicit observation permutation through values, IDs, category strips, group
   intervals, labels and trees. Test category ties, missing groups, repeated gene

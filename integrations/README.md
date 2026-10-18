@@ -7,7 +7,7 @@ dependencies, a compatibility contract, and tested upstream versions.
 
 | Integration | Implementation | Progress | Development workspace | User guide |
 | --- | --- | --- | --- | --- |
-| Scanpy (five plotting previews) | [Python package](../src/genome_spy/integrations/scanpy/) | [Status and next work](scanpy/STATUS.md) | [Plan and notebooks](scanpy/README.md) | [Compatibility guide](../docs/integrations/scanpy/index.md) |
+| Scanpy (six plotting previews) | [Python package](../src/genome_spy/integrations/scanpy/) | [Status and next work](scanpy/STATUS.md) | [Plan and notebooks](scanpy/README.md) | [Compatibility guide](../docs/integrations/scanpy/index.md) |
 
 Use these locations for each integration:
 

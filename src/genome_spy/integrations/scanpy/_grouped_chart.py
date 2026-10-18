@@ -82,6 +82,7 @@ def _brackets(
     *,
     swapped: bool,
     rotation: float | None,
+    end_band: float = 0.7,
 ) -> list[gs.Chart]:
     """Return rule and text layers for marker groups at the supplied positions.
 
@@ -105,9 +106,13 @@ def _brackets(
         clip="never",
         tooltip=None,
         xOffset=4 if swapped else 0,
-        x2Offset=4 if swapped else gs.expr("-0.3 * bandwidth('x') * width"),
+        x2Offset=4
+        if swapped
+        else gs.expr(f"{end_band - 1:g} * bandwidth('x') * width"),
         yOffset=0 if swapped else -4,
-        y2Offset=gs.expr("-0.3 * bandwidth('y') * height") if swapped else -4,
+        y2Offset=gs.expr(f"{end_band - 1:g} * bandwidth('y') * height")
+        if swapped
+        else -4,
     )
     caps = gs.Chart(table).mark_rule(
         color="black",
@@ -150,7 +155,7 @@ def _brackets(
             x2=gs.value(1),
         )
         right = left.encode(
-            y=coordinate.field("end").band(0.7), y2=gs.Y2("end:I").band(0.7)
+            y=coordinate.field("end").band(end_band), y2=gs.Y2("end:I").band(end_band)
         )
         text = text.encode(
             y=coordinate.field("slot").band(0),
@@ -174,7 +179,7 @@ def _brackets(
             y2=gs.value(1),
         )
         right = left.encode(
-            x=coordinate.field("end").band(0.7), x2=gs.X2("end:I").band(0.7)
+            x=coordinate.field("end").band(end_band), x2=gs.X2("end:I").band(end_band)
         )
         text = text.encode(
             x=coordinate.field("slot").band(0),
