@@ -45,6 +45,17 @@ def test_registered_branches_and_complete_charts(page, tmp_path, case):
     width, height = bounds["width"], bounds["height"]
     n = 4
     swapped = options.get("swap_axes", False)
+    maximum = (
+        max(
+            (
+                point[1 if swapped else 0]
+                for path in reference["tree_paths"]
+                for point in path
+            ),
+            default=1,
+        )
+        or 1
+    )
 
     def project(point):
         x, y = point
@@ -54,21 +65,12 @@ def test_registered_branches_and_complete_charts(page, tmp_path, case):
                 1 - (y - yd[0]) / (yd[1] - yd[0])
             ) * height
         if family == "correlation_matrix":
-            low, high = sorted(reference["tree_x_domain"])
-            return left - 8 - (x - low) / (
-                high - low
-            ) * 180, top + height - y / n * height
+            return left - x / maximum * 180, top + height - y / n * height
         if swapped:
-            low, high = sorted(reference["tree_y_domain"])
             pad = 0.3 if family == "dotplot" else 0
-            return left + (x + pad) / (n + 2 * pad) * width, top - 8 - (y - low) / (
-                high - low
-            ) * 80
-        low, high = sorted(reference["tree_x_domain"])
+            return left + (x + pad) / (n + 2 * pad) * width, top - y / maximum * 80
         pad = 0.5 if family == "dotplot" else 0
-        return left + width + 8 + (x - low) / (high - low) * 80, top + (y + pad) / (
-            n + 2 * pad
-        ) * height
+        return left + width + x / maximum * 80, top + (y + pad) / (n + 2 * pad) * height
 
     for path in reference["tree_paths"]:
         for start, end in zip(path[:-1], path[1:], strict=True):
@@ -145,7 +147,7 @@ def test_tree_alignment_survives_resizing_and_wheel(page, family, swapped, size)
     assert (
         page.evaluate("async () => (await api.imageExport.svg()).blob.text()") == before
     )
-    # Endpoints at distance zero land at the same centers as summary marks.
+    # Leaves meet the plot edge at the same centers as summary marks.
     svg = page.evaluate("""async () => {
         const text=await (await api.imageExport.svg()).blob.text();
         const host=document.createElement('div');host.innerHTML=text;
@@ -158,8 +160,11 @@ def test_tree_alignment_survives_resizing_and_wheel(page, family, swapped, size)
     targets = (np.arange(4) + 0.5 + pad) / (4 + 2 * pad) * bounds[
         "width" if swapped else "height"
     ] + bounds["x" if swapped else "y"]
-    for position in targets:
-        assert np.abs(points[:, axis] - position).min() < 1.5
+    edge = bounds["y"] if swapped else bounds["x"] + bounds["width"]
+    # SVG coordinates are rounded while layout bounds retain subpixel values.
+    leaves = points[np.isclose(points[:, 1 - axis], edge, atol=0.5)]
+    assert leaves.shape == (4, 2), (edge, points.tolist(), bounds)
+    np.testing.assert_allclose(sorted(leaves[:, axis]), targets, atol=0.5)
 
 
 def test_correlation_hover_palette_direction_and_offline_output(page, tmp_path):

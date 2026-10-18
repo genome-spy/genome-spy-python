@@ -245,6 +245,7 @@ Broader cache provenance is tracked in M14.
 | Correlation size/delivery | Default tile area is 60 pixels per group in each direction; width/height override it. Figsize uses a 100-pixels/inch budget, subtracting 180 pixels for a tree and 20 for the guide. Labels and padding add space. Existing show/save/native-return rules apply; ax is omitted. |
 
 Attached trees reserve an 80-pixel branch region; correlation trees use 180.
+Zero-distance leaves meet the matrix edge without a gap or distance-axis padding.
 Native dataflow projections follow the plot dimensions and fixed index-slot
 padding. Grouped navigation stays disabled, so wheel gestures cannot separate
 branches from their rows/columns. Summary hover remains available. Distances,

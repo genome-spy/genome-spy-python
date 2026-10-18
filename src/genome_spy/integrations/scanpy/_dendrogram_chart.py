@@ -37,10 +37,10 @@ def tree_overlay(
 ) -> gs.LayerChart:
     """Place branches beside the same fixed index slots used by summary marks."""
     n = len(tree.order)
-    low, high = distance_domain(tree)
+    maximum = float(tree.dcoord.max()) or 1
     leaf = f"(datum.leaf + {padding}) / {n + 2 * padding}"
     leaf2 = leaf.replace("datum.leaf", "datum.leaf2")
-    distance = f"(datum.distance - ({low})) / {high - low} * {size} + 8"
+    distance = f"datum.distance / {maximum} * {size}"
     distance2 = distance.replace("datum.distance", "datum.distance2")
     rules = gs.Chart(tree_records(tree)).mark_rule(
         color="#555555", size=1.5 * _PT, clip="never", tooltip=None

@@ -272,7 +272,7 @@ def guide_offset(
     return (
         12
         + (bracket_space(groups) if groups and swap_axes else 0)
-        + (88 if tree and not swap_axes else 0)
+        + (80 if tree and not swap_axes else 0)
     )
 
 
@@ -360,7 +360,7 @@ def finish_grouped_chart(
         )
     space = bracket_space(groups)
     top_space = (
-        98
+        90
         if tree is not None and swap_axes
         else space
         if groups and not swap_axes

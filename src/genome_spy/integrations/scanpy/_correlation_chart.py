@@ -168,7 +168,7 @@ def build_correlation_matrix(
             width=width,
             height=height,
             padding={
-                "left": 198 if dendrogram else 10,
+                "left": 190 if dendrogram else 10,
                 "top": space,
                 "right": space,
                 "bottom": 10,

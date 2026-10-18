@@ -348,6 +348,15 @@ a fresh live Jupyter kernel, saved three successful code cells, and both attache
 trees were inspected. The full documentation site, unrelated suites and unchanged
 UMAP browser checks were not rerun.
 
+Spacing correction (October 18): attached leaves now meet the matrix boundary.
+Removed the fixed gap and distance-axis padding from shared tree overlays;
+standalone tree domains are unchanged. Guide and outer padding follow the
+smaller occupied region. Browser checks require leaf endpoints at the plot edge
+and group centers in both orientations and sizes. All 25 tree browser checks and
+53 tree/workflow checks pass, as do Ruff formatting/lint. The expression notebook
+was restarted, rerun and inspected. Resource measurements and unrelated suites
+were not repeated for this layout adjustment; M05 remains next.
+
 Remaining work: Scanpy 1.11.5 omits n_pcs/var_names/source details from tree caches;
 unverifiable nonstandard caches currently error. Store a component subset in an
 explicit obsm key to make that source verifiable. M14 owns broader provenance,
