@@ -235,6 +235,7 @@ def group_means(
     if expression_cutoff is not None:
         _cutoff(expression_cutoff)
         values = values.where(values > expression_cutoff)
+    # Scanpy's plotting means skip NaN; get.aggregate does not.
     means = values.groupby(level=0, observed=True).mean()
     return means if expression_cutoff is None else means.fillna(0)
 
@@ -244,6 +245,7 @@ def expression_fractions(
 ) -> pd.DataFrame:
     """Use Scanpy's comparison/count denominator, including implicit zeros."""
     _cutoff(expression_cutoff)
+    # count_nonzero would count negatives and values below the cutoff.
     expressed = values > expression_cutoff
     groups = expressed.groupby(level=0, observed=True)
     return groups.sum() / groups.count()
@@ -259,6 +261,7 @@ def scale_means(
         raise ValueError(
             "Grouped plotting: standard_scale must be 'var', 'group', or None."
         )
+    # pp.scale computes z-scores rather than plotting's min–max scaling.
     axis = 0 if standard_scale == "var" else 1
     shifted = means.sub(means.min(axis=axis), axis=1 - axis)
     return shifted.div(shifted.max(axis=axis), axis=1 - axis).fillna(0)

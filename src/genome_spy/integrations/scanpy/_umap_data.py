@@ -172,6 +172,7 @@ def _observations(
 ) -> pd.DataFrame:
     basis = "umap" if "umap" in adata.obsm else "X_umap"
     needed = sorted({dimension for pair in pairs for dimension in pair})
+    # obs_df rejects unrelated duplicate genes even for coordinate-only requests.
     coordinates = from_anndata(
         adata, obs=[], obsm_keys=[(basis, dimension) for dimension in needed]
     )

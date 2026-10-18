@@ -45,6 +45,37 @@ JSON or interactive HTML. The reproducible reference environment is the
 scanpy-test dependency group and uv.lock; exact scientific-stack versions are
 also recorded in the reference manifest.
 
+## Reusing Scanpy computations
+
+The integration reuses public data access and computation methods where their
+semantics match the plot:
+
+| Plot | Reused methods/results | Native preparation retained |
+| --- | --- | --- |
+| UMAP | Existing `obsm` coordinates; public AnnData `obs_vector`/`raw.obs_vector`; Scanpy's public palette lists | Masks, draw order, component selection, stable IDs and native color/size/guide mapping. No embedding computation. |
+| Dotplot | Public `sc.get.obs_df`, including selected raw/layer/symbol lookup; AnnData categorization on the detached table | Shared pandas means, strict-cutoff fractions and plotting min–max scaling. Native marks and guides use those results. |
+| Matrixplot | The same getter, categorization and shared grouped means/scaling; supplied `values_df` remains authoritative | Plot ordering, repeated slots and native tile/guide mapping. No expression-fraction computation. |
+| Dendrograms | Stored `sc.tl.dendrogram` results, or that public method for a missing tree | Structural checks, shared leaf permutations and native branch rendering. |
+
+Scanpy 1.11.5 has no public standalone dotplot/matrixplot preparation method.
+Their calculations live in the Matplotlib plotting classes; their common private
+preparer also sanitizes the caller's AnnData. The adapter uses the documented
+[`sc.get.obs_df` plus pandas grouping recipe](https://scanpy.readthedocs.io/en/1.11.x/generated/scanpy.get.obs_df.html)
+without constructing those classes or calling private plotting helpers.
+
+`sc.get.aggregate` is not equivalent to these plots: its means propagate NaN,
+while the plotting means skip it. Its `count_nonzero` also counts negatives and
+values below `expression_cutoff`. Likewise, `sc.pp.scale` computes z-scores,
+whereas plotting's `standard_scale` is min–max scaling. Retain the small shared
+pandas/NumPy operations rather than adding conversions or changing statistics.
+Plot `log=True` applies NumPy `log1p` to the selected table, just as Scanpy's
+grouped plotting preparer does; it does not preprocess or mutate AnnData.
+
+UMAP uses AnnData vector access, as Scanpy's embedding code does. Forcing it
+through `sc.get.obs_df` would change raw-symbol lookup and reject unrelated
+duplicate variable labels, even for coordinate-only requests. Native color
+mapping also avoids Scanpy's private Matplotlib color/palette mutation helpers.
+
 ## UMAP compatibility
 
 The native function retains the effective Scanpy UMAP parameter names and

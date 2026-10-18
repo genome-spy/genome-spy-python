@@ -39,6 +39,9 @@ raw symbol lookup differ from UMAP's behavior. Grouped plots use that public
 getter directly, with only selected unique keys. Public AnnData string conversion
 operates on the detached table, preserving category order without mutating AnnData.
 Grouped statistics are independently tested before adding the dotplot chart.
+The [computation reuse audit](../../docs/integrations/scanpy/index.md#reusing-scanpy-computations)
+records which public methods are used and why aggregate/scale or plotting-class
+shortcuts would change semantics or ownership.
 
 There are no Matplotlib imports, figure creation, global style reads, or Python
 colormap sampling in the adapter. CSS palette values, including saved AnnData

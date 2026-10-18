@@ -105,7 +105,7 @@ unwanted analysis/mutation at the call boundary and honor their stored results.
 | --- | --- | --- |
 | Observation/embedding projection | Existing `genome_spy.anndata` and public AnnData vector/indexing APIs | raw/layer choice, symbol resolution, selected columns, per-call order/identity |
 | Grouped expression tables | `sc.get.obs_df` when its lookup/duplicate semantics match | numeric bins, multi-key groups, repeated display slots, masks and exact permutations |
-| Group summaries | Public `sc.get.aggregate` only for proven-equivalent statistics | strict expression thresholds, denominator, missing values, log/scaling order, sparse implicit zeros |
+| Group summaries | Shared pandas summaries over `sc.get.obs_df` output, as in Scanpy's documented recipe | aggregate mean/count_nonzero and pp.scale are not equivalent to plotting means/fractions/min–max scaling; retain the small tested operations |
 | Stored gene rankings | `sc.get.rank_genes_groups_df` and stored params | strict filters, group/feature slots, rank-metric colors, expression-size statistics |
 | Trees | Stored `sc.tl.dendrogram` results; the same public method for missing trees | structural validation, no-hidden-PCA guard, shared permutations, orientation and alignment |
 | Distributions/graphs | Suitable public SciPy/Scanpy numerical functions | pinned KDE normalization, graph layout inputs, native chart geometry and order |
@@ -115,6 +115,10 @@ raw-symbol and duplicate-label behavior. Do not force a single accessor onto
 families with different lookup semantics. Do not call upstream plotting, inspect
 rendered artists, import benchmark scripts, or promote prototype geometry as
 runtime preparation. Source and dataset provenance are reviewed before reuse.
+The [Scanpy 1.11.5 reuse audit](../../docs/integrations/scanpy/index.md#reusing-scanpy-computations)
+and [delegation/counterexample tests](../../tests/integrations/scanpy/test_upstream_reuse.py)
+make these boundaries explicit. Recheck them when adding support for a version
+that exposes suitable public plotting-preparation methods.
 
 ### Shared semantic requirements
 

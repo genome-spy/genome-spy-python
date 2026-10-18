@@ -381,6 +381,37 @@ M05/M08/M09 own attachment
 to their new families; M13 owns builder methods. M04 closes only this stated
 preview. M05 is next; no working document is newly eligible for clearance.
 
+## Computation reuse audit
+
+October 18: traced UMAP, dotplot and matrixplot through their data, statistic,
+color and chart modules against Scanpy 1.11.5's getters, aggregation, preprocessing
+and plotting source. No further safe public-method replacements were found.
+Grouped data already uses `sc.get.obs_df` once for unique selected keys and
+AnnData categorization on its detached table. UMAP already uses public AnnData
+vectors, existing embedding coordinates, the shared projection helper and public
+Scanpy palette lists. It never computes embeddings.
+
+The [maintained reuse contract](../../docs/integrations/scanpy/index.md#reusing-scanpy-computations)
+records deliberate limits: get.aggregate's NaN propagation/nonzero counts differ
+from plotting means/strict-cutoff fractions; pp.scale's z-scores differ from plot
+min–max scaling. Grouped plots share the same small pandas/NumPy operations as
+Scanpy's documented getter/grouping recipe. Upstream plot constructors use a
+private preparer that sanitizes AnnData; MatrixPlot's defaults also read
+Matplotlib rcParams. They are not standalone public preparation APIs.
+
+[Nine reuse checks](../../tests/integrations/scanpy/test_upstream_reuse.py) assert
+that public getters are called once and their returned values reach both plot
+families/UMAP panels, with correct source choices and unchanged coordinates.
+Executable counterexamples retain the aggregation/scaling differences above.
+Existing sparse, mutation, raw/symbol, threshold, normalization-order and frozen
+reference checks remain the numerical oracles. Runtime changes are four brief
+comments explaining the retained boundaries; no algorithms or charts changed.
+
+All 238 targeted data/plot/reference tests, Ruff formatting/lint and mypy pass. Browser,
+performance and live notebook runs were not repeated for this audit because
+runtime behavior is unchanged. M05 remains next; no working plan is eligible
+for clearance and existing notebook edits/outputs remain outside this change.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
