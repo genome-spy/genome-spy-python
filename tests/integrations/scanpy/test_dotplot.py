@@ -271,9 +271,7 @@ def test_nullable_missing_group_statistic_retains_its_slot(adata):
     assert data["_mean"].iloc[1] == 0.5 and data["_percent"].iloc[1] == 50
 
 
-def test_native_dimensions_figsize_and_display_modes(adata, monkeypatch):
-    from genome_spy.chart import TopLevelSpec
-
+def test_native_dimensions_and_figsize(adata):
     for options, expected in [
         ({}, (111, 70)),
         ({"width": 400, "height": 200}, (400, 200)),
@@ -281,19 +279,6 @@ def test_native_dimensions_figsize_and_display_modes(adata, monkeypatch):
     ]:
         spec = chart(adata, **options).to_dict()
         assert (spec["width"], spec["height"]) == expected
-    displayed = []
-    monkeypatch.setattr(TopLevelSpec, "display", lambda self: displayed.append(self))
-    assert gsc.pl.dotplot(adata, "g2", "group", use_raw=False, show=True) is None
-    assert len(displayed) == 1
-    monkeypatch.setattr(sc.settings, "_autoshow", False)
-    assert gsc.pl.dotplot(adata, "g2", "group", use_raw=False, show=None) is not None
-    monkeypatch.setattr(sc.settings, "_autosave", True)
-    with pytest.raises(NotImplementedError, match="automatic image saving"):
-        gsc.pl.dotplot(adata, "g2", "group", use_raw=False, show=False)
-    assert (
-        gsc.pl.dotplot(adata, "g2", "group", use_raw=False, show=False, save=False)
-        is not None
-    )
 
 
 def test_default_raw_lookup_and_selected_sparse_columns(adata, monkeypatch):

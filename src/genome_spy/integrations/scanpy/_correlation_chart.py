@@ -6,17 +6,18 @@ import numpy as np
 
 import genome_spy as gs
 from genome_spy.schema.core import SchemeParams
-from genome_spy.integrations.scanpy._colors import native_color, native_scheme
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
-from genome_spy.integrations.scanpy._grouped_chart import (
-    _FONT,
-    _PT,
-    _TICK,
+from genome_spy.integrations.scanpy._data import number
+from genome_spy.integrations.scanpy._style import (
+    FONT as _FONT,
+    POINTS_TO_PIXELS as _PT,
+    GROUPED_FONT_SIZE as _TICK,
     color_bounds,
-    coordinate,
-    number,
+    native_color,
+    native_scheme,
 )
+from genome_spy.integrations.scanpy._grouped_chart import coordinate
 
 
 def build_correlation_matrix(

@@ -8,23 +8,24 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._colors import native_scheme
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._grouped_chart import (
-    color_bounds,
     color_legend,
     finish_grouped_chart,
     grouped_axes,
     guide_offset,
-    number,
     plot_dimensions,
     summary_records,
+)
+from genome_spy.integrations.scanpy._style import (
+    POINTS_TO_PIXELS as _PT,
+    color_bounds,
+    native_scheme,
 )
 
 if TYPE_CHECKING:
     from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
-
-_PT = 100 / 72
 
 
 def dot_size_scale(

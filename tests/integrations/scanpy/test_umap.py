@@ -275,16 +275,6 @@ def test_sizes_include_physical_units_and_marker_path(adata, marker, factor):
     )
 
 
-def test_show_obeys_autoshow_and_displays_once(adata, monkeypatch):
-    displayed = []
-    monkeypatch.setattr(gs.TopLevelSpec, "display", lambda self: displayed.append(self))
-    monkeypatch.setattr(sc.settings, "_autoshow", True)
-    assert gsc.pl.umap(adata) is None
-    assert len(displayed) == 1
-    assert isinstance(gsc.pl.umap(adata, show=False), gs.TopLevelSpec)
-    assert len(displayed) == 1
-
-
 def test_backed_metadata_and_resident_embedding_work(adata, tmp_path, monkeypatch):
     import anndata as ad
 

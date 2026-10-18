@@ -4,7 +4,12 @@ from typing import Literal
 
 import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
-from genome_spy.integrations.scanpy._grouped_chart import _FONT, _PT, _TICK, number
+from genome_spy.integrations.scanpy._data import number
+from genome_spy.integrations.scanpy._style import (
+    FONT as _FONT,
+    POINTS_TO_PIXELS as _PT,
+    GROUPED_FONT_SIZE as _TICK,
+)
 
 Orientation = Literal["top", "bottom", "left", "right"]
 

@@ -36,6 +36,46 @@ def _require_scanpy(context: str = "gsc.pl.umap") -> Any:
     return scanpy
 
 
+def _check_kwargs(
+    options: Mapping[str, Any], allowed: set[str], *, context: str
+) -> None:
+    for name in ("ax", "return_fig"):
+        if name in options:
+            raise TypeError(
+                f"{context}: {name} is omitted; use show=False and the native chart."
+            )
+    unknown = options.keys() - allowed
+    if unknown:
+        raise TypeError(
+            f"{context}: unsupported option(s): {', '.join(sorted(unknown))}."
+        )
+
+
+def _prepare_plot(show: bool | None, save: str | bool | None, *, context: str) -> Any:
+    """Validate shared display options before loading the optional dependency."""
+    if show is not None and not isinstance(show, bool):
+        raise TypeError(f"{context}: show must be boolean or None.")
+    if save is not None and save is not False:
+        raise NotImplementedError(
+            f"{context}: save supports only None/False; use native chart.save for HTML/JSON."
+        )
+    sc = _require_scanpy(context)
+    if sc.settings.autosave and save is None:
+        raise NotImplementedError(
+            f"{context}: automatic image saving is unsupported; use save=False."
+        )
+    return sc
+
+
+def _finish_plot(
+    chart: TopLevelSpec, show: bool | None, sc: Any
+) -> TopLevelSpec | None:
+    if sc.settings.autoshow if show is None else show:
+        chart.display()
+        return None
+    return chart
+
+
 def umap(
     adata: AnnData,
     *,
@@ -198,7 +238,6 @@ def umap(
         "add_outline": add_outline not in (False, None),
         "outline_width": outline_width != (0.3, 0.05),
         "outline_color": outline_color != ("black", "white"),
-        "save": save is not None and save is not False,
     }
     if selection is not None:
         from genome_spy import Parameter
@@ -221,24 +260,17 @@ def umap(
                 "gsc.pl.umap: selection push and initial value are not supported; "
                 "the adapter owns the shared brush scope."
             )
-    for name in ("ax", "return_fig"):
-        if name in kwargs:
-            raise TypeError(
-                f"gsc.pl.umap: {name} is omitted from the native API. "
-                "Use show=False and the returned GenomeSpy chart."
-            )
     for name, rejected in unsupported.items():
         if rejected:
             raise NotImplementedError(
                 f"gsc.pl.umap (Scanpy 1.11.5): {name} is not supported yet. "
                 "See the Scanpy integration support table."
             )
-    aliases = {"s", "alpha", "edgecolor", "edgecolors", "linewidth", "linewidths"}
-    unknown = kwargs.keys() - aliases
-    if unknown:
-        raise TypeError(
-            f"gsc.pl.umap: unknown option(s): {', '.join(sorted(unknown))}."
-        )
+    _check_kwargs(
+        kwargs,
+        {"s", "alpha", "edgecolor", "edgecolors", "linewidth", "linewidths"},
+        context="gsc.pl.umap",
+    )
     for left, right in [("edgecolor", "edgecolors"), ("linewidth", "linewidths")]:
         if left in kwargs and right in kwargs:
             raise TypeError(f"gsc.pl.umap: pass only one of {left} and {right}.")
@@ -268,18 +300,12 @@ def umap(
     }.items():
         if not isinstance(option, bool):
             raise TypeError(f"gsc.pl.umap: {name} must be boolean.")
-    for name, nullable in {"show": show, "frameon": frameon}.items():
-        if nullable is not None and not isinstance(nullable, bool):
-            raise TypeError(f"gsc.pl.umap: {name} must be boolean or None.")
-    sc = _require_scanpy()
-    if sc.settings.autosave and save is None:
-        raise NotImplementedError(
-            "gsc.pl.umap: automatic image saving is not supported yet; "
-            "use save=False and chart.save('umap.html', inline=True)."
-        )
+    if frameon is not None and not isinstance(frameon, bool):
+        raise TypeError("gsc.pl.umap: frameon must be boolean or None.")
+    sc = _prepare_plot(show, save, context="gsc.pl.umap")
     from genome_spy.integrations.scanpy._umap_data import prepare_umap
     from genome_spy.integrations.scanpy._umap_chart import build_umap
-    from genome_spy.integrations.scanpy._umap_style import umap_style
+    from genome_spy.integrations.scanpy._style import umap_style
 
     prepared = prepare_umap(
         adata,
@@ -321,11 +347,7 @@ def umap(
         na_color=na_color,
     )
     chart = build_umap(prepared, style, hover=hover, zoom=zoom, selection=selection)
-    should_show = sc.settings.autoshow if show is None else show
-    if should_show:
-        chart.display()
-        return None
-    return chart
+    return _finish_plot(chart, show, sc)
 
 
 def dotplot(
@@ -428,22 +450,12 @@ def dotplot(
         >>> chart = gsc.pl.dotplot(pbmc, ["CD79A", "CD3D"], "louvain", show=False)
         >>> chart.save("markers.html", inline=True)
     """
-    for name in ("ax", "return_fig"):
-        if name in kwds:
-            raise TypeError(
-                f"gsc.pl.dotplot: {name} is omitted; use show=False and the native chart."
-            )
-    unknown = kwds.keys() - {"linewidth"}
-    if unknown:
-        raise TypeError(
-            f"gsc.pl.dotplot: unsupported option(s): {', '.join(sorted(unknown))}."
-        )
+    _check_kwargs(kwds, {"linewidth"}, context="gsc.pl.dotplot")
     if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
         raise TypeError(
             "gsc.pl.dotplot: dendrogram must be False, True, or a nonempty cache key."
         )
     for name, rejected in {
-        "save": save is not None and save is not False,
         "vcenter": vcenter is not None,
         "norm": norm is not None,
     }.items():
@@ -456,18 +468,13 @@ def dotplot(
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"gsc.pl.dotplot: {name} must be boolean.")
-    for name, nullable in {"show": show, "swap_axes": swap_axes}.items():
-        if nullable is not None and not isinstance(nullable, bool):
-            raise TypeError(f"gsc.pl.dotplot: {name} must be boolean or None.")
+    if swap_axes is not None and not isinstance(swap_axes, bool):
+        raise TypeError("gsc.pl.dotplot: swap_axes must be boolean or None.")
     if standard_scale not in (None, "var", "group"):
         raise ValueError(
             "gsc.pl.dotplot: standard_scale must be 'var', 'group', or None."
         )
-    sc = _require_scanpy("gsc.pl.dotplot")
-    if sc.settings.autosave and save is None:
-        raise NotImplementedError(
-            "gsc.pl.dotplot: automatic image saving is unsupported; use save=False."
-        )
+    sc = _prepare_plot(show, save, context="gsc.pl.dotplot")
     from genome_spy.integrations.scanpy._dendrogram_data import (
         attached_dendrogram,
         reorder_grouped,
@@ -535,10 +542,7 @@ def dotplot(
         figsize=figsize,
         tree=tree,
     )
-    if sc.settings.autoshow if show is None else show:
-        chart.display()
-        return None
-    return chart
+    return _finish_plot(chart, show, sc)
 
 
 def matrixplot(
@@ -637,23 +641,12 @@ def matrixplot(
         >>> chart.display(inline=True)
     """
     context = "gsc.pl.matrixplot"
-    for name in ("ax", "return_fig"):
-        if name in kwds:
-            raise TypeError(
-                f"{context}: {name} is omitted; use show=False and the native chart."
-            )
-    unknown = kwds.keys() - {"edgecolor", "linewidth"}
-    if unknown:
-        raise TypeError(
-            f"{context}: unsupported option(s): {', '.join(sorted(unknown))}. "
-            "Use scalar edgecolor and linewidth for tile edges."
-        )
+    _check_kwargs(kwds, {"edgecolor", "linewidth"}, context="gsc.pl.matrixplot")
     if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
         raise TypeError(
             "gsc.pl.matrixplot: dendrogram must be False, True, or a nonempty cache key."
         )
     for name, rejected in {
-        "save": save is not None and save is not False,
         "vcenter": vcenter is not None,
         "norm": norm is not None,
     }.items():
@@ -662,15 +655,9 @@ def matrixplot(
     for name, value in {"log": log, "swap_axes": swap_axes, "hover": hover}.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
-    if show is not None and not isinstance(show, bool):
-        raise TypeError(f"{context}: show must be boolean or None.")
     if standard_scale not in (None, "var", "group"):
         raise ValueError(f"{context}: standard_scale must be 'var', 'group', or None.")
-    sc = _require_scanpy(context)
-    if sc.settings.autosave and save is None:
-        raise NotImplementedError(
-            f"{context}: automatic image saving is unsupported; use save=False."
-        )
+    sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._dendrogram_data import (
         attached_dendrogram,
         reorder_grouped,
@@ -729,10 +716,7 @@ def matrixplot(
         figsize=figsize,
         tree=tree,
     )
-    if sc.settings.autoshow if show is None else show:
-        chart.display()
-        return None
-    return chart
+    return _finish_plot(chart, show, sc)
 
 
 def dendrogram(
@@ -785,17 +769,7 @@ def dendrogram(
         raise ValueError(f"{context}: orientation must be top, bottom, left or right.")
     if not isinstance(remove_labels, bool):
         raise TypeError(f"{context}: remove_labels must be boolean.")
-    if show is not None and not isinstance(show, bool):
-        raise TypeError(f"{context}: show must be boolean or None.")
-    if save is not None and save is not False:
-        raise NotImplementedError(
-            f"{context}: save supports only None/False; use native chart.save for HTML/JSON."
-        )
-    sc = _require_scanpy(context)
-    if sc.settings.autosave and save is None:
-        raise NotImplementedError(
-            f"{context}: automatic image saving is unsupported; use save=False."
-        )
+    sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
     from genome_spy.integrations.scanpy._dendrogram_chart import build_dendrogram
 
@@ -807,10 +781,7 @@ def dendrogram(
         width=width,
         height=height,
     )
-    if sc.settings.autoshow if show is None else show:
-        chart.display()
-        return None
-    return chart
+    return _finish_plot(chart, show, sc)
 
 
 def correlation_matrix(
@@ -878,18 +849,10 @@ def correlation_matrix(
         >>> chart.display(inline=True)
     """
     context = "gsc.pl.correlation_matrix"
-    for name in ("ax", "return_fig"):
-        if name in kwds:
-            raise TypeError(
-                f"{context}: {name} is omitted; use show=False and the native chart."
-            )
-    unknown = kwds.keys() - {"cmap", "edgecolors", "linewidth"}
-    if unknown:
-        raise TypeError(
-            f"{context}: unsupported option(s): {', '.join(sorted(unknown))}."
-        )
+    _check_kwargs(
+        kwds, {"cmap", "edgecolors", "linewidth"}, context="gsc.pl.correlation_matrix"
+    )
     for name, rejected in {
-        "save": save is not None and save is not False,
         "vcenter": vcenter is not None,
         "norm": norm is not None,
     }.items():
@@ -901,19 +864,13 @@ def correlation_matrix(
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
-    if show is not None and not isinstance(show, bool):
-        raise TypeError(f"{context}: show must be boolean or None.")
     if dendrogram is not None and (
         not isinstance(dendrogram, (bool, str)) or dendrogram == ""
     ):
         raise TypeError(
             f"{context}: dendrogram must be None, False, True or a nonempty cache key."
         )
-    sc = _require_scanpy(context)
-    if sc.settings.autosave and save is None:
-        raise NotImplementedError(
-            f"{context}: automatic image saving is unsupported; use save=False."
-        )
+    sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
     from genome_spy.integrations.scanpy._correlation_chart import (
         build_correlation_matrix,
@@ -936,7 +893,4 @@ def correlation_matrix(
         height=height,
         figsize=figsize,
     )
-    if sc.settings.autoshow if show is None else show:
-        chart.display()
-        return None
-    return chart
+    return _finish_plot(chart, show, sc)

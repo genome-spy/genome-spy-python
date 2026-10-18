@@ -100,6 +100,13 @@ artificial. A family-specific data module is optional. Avoid a universal prepare
 with many switches, a registry, or a general adapter framework.
 Prefer public Scanpy computations over reproducing their algorithms; guard
 unwanted analysis/mutation at the call boundary and honor their stored results.
+The [source map](README.md#scanpy-integration-workspace) identifies shared owners:
+data validation/source selection in `_data`, native presentation in `_style`,
+grouped extraction/statistics and layout in `_grouped_data`/`_grouped_chart`,
+and tree preparation/rendering in the dendrogram modules. Common display/options
+handling remains alongside the public functions in `pl.py`. Add capabilities
+to these helpers when semantics match; keep genuine plot-specific differences
+local rather than introducing a universal preparer or per-plot copies.
 
 | Concern | Reuse first | Independently implement/test where needed |
 | --- | --- | --- |

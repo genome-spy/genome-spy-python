@@ -15,6 +15,59 @@ import genome_spy.integrations.scanpy as gsc
 FIXTURES = Path(__file__).with_name("fixtures")
 
 
+@pytest.mark.parametrize("family", pl.__all__)
+@pytest.mark.parametrize(
+    "show,autoshow", [(False, True), (True, False), (None, True), (None, False)]
+)
+def test_all_plots_share_native_display_and_autosave_rules(
+    monkeypatch, family, show, autoshow
+):
+    sc = pytest.importorskip("scanpy")
+    from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata
+
+    a = make_tree_adata()
+    a.obsm["X_umap"] = a.X[:, :2].copy()
+    options = {"color": "group"} if family == "umap" else {"groupby": "group"}
+    if family in ("dotplot", "matrixplot"):
+        options["var_names"] = ["g1", "g2"]
+    monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
+    monkeypatch.setattr(sc.settings, "_autosave", False)
+    displayed = []
+    monkeypatch.setattr(gs.TopLevelSpec, "display", lambda self: displayed.append(self))
+    result = getattr(pl, family)(a, show=show, **options)
+    should_show = autoshow if show is None else show
+    if should_show:
+        assert result is None and len(displayed) == 1
+    else:
+        assert isinstance(result, gs.TopLevelSpec) and not displayed
+    monkeypatch.setattr(sc.settings, "_autosave", True)
+    with pytest.raises(NotImplementedError, match="automatic image saving"):
+        getattr(pl, family)(a, show=False, **options)
+    assert isinstance(
+        getattr(pl, family)(a, show=False, save=False, **options), gs.TopLevelSpec
+    )
+
+
+@pytest.mark.parametrize("family", pl.__all__)
+@pytest.mark.parametrize(
+    "options,error",
+    [({"show": 1}, TypeError), ({"save": "figure.png"}, NotImplementedError)],
+)
+def test_shared_display_validation_precedes_optional_imports(
+    monkeypatch, family, options, error
+):
+    monkeypatch.setattr(pl, "_require_scanpy", lambda *a: pytest.fail("Loaded Scanpy"))
+    args = (object(),)
+    if family in ("dotplot", "matrixplot"):
+        args += (["g1"], "group")
+    elif family != "umap":
+        args += ("group",)
+    with pytest.raises(
+        error, match=f"gsc.pl.{family}.*{'show' if 'show' in options else 'save'}"
+    ):
+        getattr(pl, family)(*args, **options)
+
+
 @pytest.mark.parametrize(
     "namespace",
     ["genome_spy", "genome_spy.integrations", "genome_spy.integrations.scanpy"],

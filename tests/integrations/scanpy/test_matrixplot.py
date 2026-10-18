@@ -265,9 +265,7 @@ def test_missing_cells_constant_color_and_unused_categories(adata):
         chart(adata)
 
 
-def test_dimensions_edges_hover_and_display(adata, monkeypatch):
-    from genome_spy.chart import TopLevelSpec
-
+def test_dimensions_edges_and_hover(adata):
     for options, expected in [
         ({}, (111, 70)),
         ({"swap_axes": True}, (70, 111)),
@@ -281,13 +279,3 @@ def test_dimensions_edges_hover_and_display(adata, monkeypatch):
     assert tiles["mark"]["strokeOpacity"] == 0
     assert tiles["mark"]["strokeWidth"] == pytest.approx(2 * 100 / 72)
     assert tiles["mark"]["tooltip"] is None and "tooltip" not in tiles["encoding"]
-    displayed = []
-    monkeypatch.setattr(TopLevelSpec, "display", lambda self: displayed.append(self))
-    assert gsc.pl.matrixplot(adata, "g2", "group", use_raw=False, show=True) is None
-    assert len(displayed) == 1
-    monkeypatch.setattr(sc.settings, "_autoshow", False)
-    assert gsc.pl.matrixplot(adata, "g2", "group", use_raw=False, show=None) is not None
-    monkeypatch.setattr(sc.settings, "_autosave", True)
-    with pytest.raises(NotImplementedError, match="automatic image saving"):
-        chart(adata)
-    assert chart(adata, save=False) is not None

@@ -5,13 +5,15 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from collections import Counter
 from dataclasses import dataclass
-from numbers import Integral, Real
+from numbers import Integral
 from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
 
 from genome_spy.integrations.scanpy._data import (
+    number,
+    numeric_values,
     require_resident_expression,
     resolve_use_raw,
 )
@@ -201,19 +203,7 @@ def grouped_expression(
         groups = groups.reorder_categories(list(categories_order))
     table = frame.loc[:, names].copy()
     table.index = pd.CategoricalIndex(groups, name="_".join(keys))
-    if not all(
-        pd.api.types.is_numeric_dtype(dtype)
-        and not pd.api.types.is_complex_dtype(dtype)
-        for dtype in table.dtypes
-    ):
-        raise TypeError(
-            "Grouped plotting: expression values must be real numeric values."
-        )
-    numeric = table.to_numpy(dtype=float, na_value=np.nan)
-    if np.isinf(numeric).any():
-        raise ValueError(
-            "Grouped plotting: expression values must be finite or missing."
-        )
+    numeric = numeric_values(table, context="Grouped plotting: expression")
     if log:
         if np.any(numeric <= -1):
             raise ValueError(
@@ -224,8 +214,9 @@ def grouped_expression(
 
 
 def _cutoff(value: float) -> None:
-    if isinstance(value, bool) or not isinstance(value, Real) or not np.isfinite(value):
-        raise ValueError("Grouped plotting: expression_cutoff must be a finite number.")
+    number(
+        value, "expression_cutoff", context="Grouped plotting", minimum=-float("inf")
+    )
 
 
 def group_means(
@@ -299,16 +290,7 @@ def matrixplot_statistics(
                 "labels and repeated feature slots, with unique group labels."
             )
         means = values_df.copy()
-        if not all(
-            pd.api.types.is_numeric_dtype(dtype)
-            and not pd.api.types.is_complex_dtype(dtype)
-            for dtype in means.dtypes
-        ):
-            raise TypeError("gsc.pl.matrixplot: values_df values must be real numbers.")
-        if np.isinf(means.to_numpy(dtype=float, na_value=np.nan)).any():
-            raise ValueError(
-                "gsc.pl.matrixplot: values_df values must be finite or missing."
-            )
+        numeric_values(means, context="gsc.pl.matrixplot: values_df")
         if categories_order is not None:
             means = means.loc[list(categories_order)]
     return means.T if swap_axes else means
@@ -351,16 +333,7 @@ def dotplot_statistics(
         # Repeated slots share the first supplied column, as in Scanpy 1.11.5.
         unique = dot_color_df.loc[:, ~dot_color_df.columns.duplicated()]
         colors = unique.loc[fractions.index, fractions.columns].copy()
-        if not all(
-            pd.api.types.is_numeric_dtype(dtype)
-            and not pd.api.types.is_complex_dtype(dtype)
-            for dtype in colors.dtypes
-        ):
-            raise TypeError("gsc.pl.dotplot: dot_color_df values must be real numbers.")
-        if np.isinf(colors.to_numpy(dtype=float, na_value=np.nan)).any():
-            raise ValueError(
-                "gsc.pl.dotplot: dot_color_df values must be finite or missing."
-            )
+        numeric_values(colors, context="gsc.pl.dotplot: dot_color_df")
     if swap_axes:
         colors, fractions = colors.T, fractions.T
     # Scanpy also scales the displayed table after a possible transpose.

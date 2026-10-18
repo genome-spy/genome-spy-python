@@ -14,7 +14,7 @@ from genome_spy.integrations.scanpy._umap_interactions import (
     validate_brush,
     with_brush_count,
 )
-from genome_spy.integrations.scanpy._umap_style import POINTS_TO_PIXELS, UMAPStyle
+from genome_spy.integrations.scanpy._style import POINTS_TO_PIXELS, UMAPStyle
 
 
 def coordinate_domain(values: np.ndarray, margin: float) -> tuple[float, float]:

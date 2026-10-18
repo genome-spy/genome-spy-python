@@ -1,8 +1,42 @@
-"""Shared expression-source checks for Scanpy plotting inputs."""
+"""Shared numeric-table validation and AnnData source checks for plotting."""
 
 from __future__ import annotations
 
-from typing import Any
+from math import isfinite
+from numbers import Real
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import numpy as np
+    import pandas as pd
+
+
+def number(value: Any, name: str, *, context: str, minimum: float = 0) -> float:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, Real)
+        or not isfinite(value)
+        or value < minimum
+    ):
+        raise ValueError(f"{context}: {name} must be a finite number >= {minimum}.")
+    return float(value)
+
+
+def numeric_values(table: pd.DataFrame, *, context: str) -> np.ndarray:
+    """Validate a numeric table and return its values without replacing its labels."""
+    import numpy as np
+    import pandas as pd
+
+    if not all(
+        pd.api.types.is_numeric_dtype(dtype)
+        and not pd.api.types.is_complex_dtype(dtype)
+        for dtype in table.dtypes
+    ):
+        raise TypeError(f"{context}: values must be real numbers.")
+    values: np.ndarray = table.to_numpy(dtype=float, na_value=np.nan)
+    if np.isinf(values).any():
+        raise ValueError(f"{context}: values must be finite or missing.")
+    return values
 
 
 def resolve_use_raw(

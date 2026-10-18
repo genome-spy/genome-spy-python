@@ -13,19 +13,17 @@ not in this workspace or the documentation:
 | Source | Responsibility |
 | --- | --- |
 | [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
-| [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public plotting signatures, compatibility validation, optional dependency/version check, and display/return behavior. |
-| [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared raw/layer resolution and resident-expression checks, reused by UMAP and grouped data. |
+| [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public signatures and plot-specific validation; common kwargs checks, optional dependency/version setup and native display/save handling. |
+| [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared scalar/numeric-table validation, raw/layer resolution and resident-expression checks; reused by preparation and chart modules. |
 | [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Detached grouped values, feature slots/brackets, means, expression fractions and min–max scaling; no chart authoring. |
-| [_colors.py](../../src/genome_spy/integrations/scanpy/_colors.py) | Shared native scheme and opaque CSS color validation. |
+| [_style.py](../../src/genome_spy/integrations/scanpy/_style.py) | Shared schemes, CSS colors, continuous color bounds, fonts and point units for every plot; categorical/continuous preparation and explicit UMAP style settings live here too. |
 | [_dendrogram_data.py](../../src/genome_spy/integrations/scanpy/_dendrogram_data.py) | Read stored Scanpy results, delegate missing trees to sc.tl.dendrogram and share leaf/marker permutations. |
 | [_dendrogram_chart.py](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py) | Native rule branches for standalone and attached trees; no clustering. |
 | [_correlation_chart.py](../../src/genome_spy/integrations/scanpy/_correlation_chart.py) | Native correlation tiles, numbers, labels, hover and optional tree. |
-| [_grouped_chart.py](../../src/genome_spy/integrations/scanpy/_grouped_chart.py) | Shared native index slots, labels, brackets, sizing and color guides. |
+| [_grouped_chart.py](../../src/genome_spy/integrations/scanpy/_grouped_chart.py) | Dotplot/matrixplot share index slots, labels, brackets, sizing, guides and attached-tree layout; correlation reuses index coordinates. |
 | [_matrixplot_chart.py](../../src/genome_spy/integrations/scanpy/_matrixplot_chart.py) | Native tiles, edge styling and summary hover; no AnnData access. |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
-| [_umap_colors.py](../../src/genome_spy/integrations/scanpy/_umap_colors.py) | Category order, CSS palette values, numeric bounds, and native scheme validation. |
-| [_umap_style.py](../../src/genome_spy/integrations/scanpy/_umap_style.py) | Explicit native presentation defaults and scalar style validation. |
 | [_umap_chart.py](../../src/genome_spy/integrations/scanpy/_umap_chart.py) | Native points, axes, legends, labels, and panel composition. |
 | [_umap_interactions.py](../../src/genome_spy/integrations/scanpy/_umap_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
 | [_selection.py](../../src/genome_spy/integrations/scanpy/_selection.py) | Pure interval-to-observation membership for Python subset retrieval. |
@@ -63,6 +61,15 @@ needs with small functions, without building a general adapter framework. Keep
 shared functions focused on equivalent semantics, including raw/layer selection,
 ordering, thresholds, and normalization. Review basic plot reproduction before
 adding interactions.
+
+The shared helpers above have current callers; they are not a general adapter
+framework. Keep differing semantics explicit: UMAP and grouped expression use
+different lookups, dotplot and matrixplot scale at different stages, and their
+layouts differ from standalone trees/correlation matrices. Reuse those common
+parts directly when heatmap and later families arrive. A chart module per family
+does not imply a separate validator, color system, data accessor or tree layout.
+Heatmaps will need their own observation permutation and unequal group centers;
+the current equal-slot tree projection does not already cover that layout.
 
 ## Plotting workflows
 

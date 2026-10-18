@@ -7,17 +7,22 @@ from typing import TYPE_CHECKING, Any
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._colors import native_color, native_scheme
+from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._grouped_chart import (
-    color_bounds,
     color_legend,
     finish_grouped_chart,
     grouped_axes,
-    number,
     plot_dimensions,
     summary_records,
 )
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+
+from genome_spy.integrations.scanpy._style import (
+    POINTS_TO_PIXELS as _PT,
+    color_bounds,
+    native_color,
+    native_scheme,
+)
 
 if TYPE_CHECKING:
     from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
@@ -78,7 +83,7 @@ def build_matrixplot(
         .mark_rect(
             stroke=stroke,
             strokeOpacity=0 if no_edge else 1,
-            strokeWidth=linewidth * 100 / 72,
+            strokeWidth=linewidth * _PT,
             tooltip={"handler": "default"} if hover else None,
         )
         .encode(

@@ -356,9 +356,7 @@ def test_invalid_render_options_fail_before_dependencies(
         getattr(gsc.pl, family)(object(), "group", show=False, **options)
 
 
-def test_correlations_numbers_native_defaults_and_display_modes(monkeypatch):
-    from genome_spy.chart import TopLevelSpec
-
+def test_correlation_numbers_and_native_defaults():
     a = make_tree_adata()
     spec = gsc.pl.correlation_matrix(
         a, "group", show_correlation_numbers=True, show=False
@@ -368,8 +366,3 @@ def test_correlations_numbers_native_defaults_and_display_modes(monkeypatch):
     assert color["scheme"] == {"name": "redblue", "extent": [1, 0]}
     assert not color.get("reverse", False)
     assert spec["layer"][3]["mark"]["type"] == "text"
-    displayed = []
-    monkeypatch.setattr(TopLevelSpec, "display", lambda self: displayed.append(self))
-    for family in ("dendrogram", "correlation_matrix"):
-        assert getattr(gsc.pl, family)(a, "group", show=True) is None
-    assert len(displayed) == 2

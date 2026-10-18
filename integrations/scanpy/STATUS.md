@@ -142,7 +142,7 @@ checks; the chart delivery below supplies separate browser/workflow evidence.
 Runtime: [public callable](../../src/genome_spy/integrations/scanpy/pl.py),
 [pure displayed statistics](../../src/genome_spy/integrations/scanpy/_grouped_data.py),
 [native chart](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py), and
-[shared color validation](../../src/genome_spy/integrations/scanpy/_colors.py).
+[shared color validation](../../src/genome_spy/integrations/scanpy/_style.py).
 Chart construction takes detached tables, not AnnData. It uses released points,
 rules and text; no Core patches, custom polygon recipes or benchmark imports.
 
@@ -411,6 +411,42 @@ All 238 targeted data/plot/reference tests, Ruff formatting/lint and mypy pass. 
 performance and live notebook runs were not repeated for this audit because
 runtime behavior is unchanged. M05 remains next; no working plan is eligible
 for clearance and existing notebook edits/outputs remain outside this change.
+
+## Internal helper reuse audit
+
+October 18: traced current callers across all five plotting previews. Dotplot and
+matrixplot already share expression access, statistics, feature slots, labels,
+brackets, guides and attached trees. Consolidated the remaining repeated rules:
+
+- [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) owns scalar and
+  numeric-table validation alongside source/storage checks. Selected expression
+  and supplied summary tables share validation without replacing their labels.
+- [_style.py](../../src/genome_spy/integrations/scanpy/_style.py) owns native colors,
+  continuous bounds, fonts and point units. It combines the three former color
+  and UMAP style modules; its shared rules serve every current chart family.
+- [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) shares kwargs checking,
+  optional dependency setup, display and save handling. Signatures and
+  family-specific validation remain explicit.
+- Tree rendering no longer imports the grouped chart just for fonts and number
+  validation, removing that circular chart dependency. Each family retains its
+  own native chart construction.
+
+The package has 15 modules, down from 17, with no new public API, dependency or
+adapter framework. The [source map](README.md#scanpy-integration-workspace) records
+each owner. UMAP/grouped lookup and dotplot/matrixplot scaling remain separate
+where Scanpy semantics differ. Heatmaps can reuse selected data, feature slots
+and branches but still need observation permutations and unequal group centers;
+the current equal-slot projection is not a complete heatmap layout.
+
+Validation: all **371 integration checks** (including both workflows), **86 browser
+checks**, Ruff formatting/lint and mypy pass. Common display/save checks now cover
+all five families together. Before/after comparisons of 44 complete serialized
+charts retain every value except a custom matrixplot stroke width rounded by
+4.4e-16 logical pixels after sharing the point-unit constant. No data or visual
+behavior change was observed. Resource measurements, the full documentation site
+and unrelated tests were not repeated; the live notebooks and existing notebook
+edits were untouched. M05 remains next and no working plan is newly eligible for
+clearance.
 
 ## Public callable coverage
 

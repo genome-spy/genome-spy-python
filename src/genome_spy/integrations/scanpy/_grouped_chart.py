@@ -2,33 +2,23 @@
 
 from __future__ import annotations
 
-from math import isfinite
-from numbers import Real
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+from genome_spy.integrations.scanpy._data import number
+from genome_spy.integrations.scanpy._style import (
+    FONT as _FONT,
+    POINTS_TO_PIXELS as _PT,
+    GROUPED_FONT_SIZE as _TICK,
+)
 
 if TYPE_CHECKING:
     from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
-
-_PT = 100 / 72
-_FONT = "Lato"
-_TICK = 10 * 0.833 * _PT
-
-
-def number(value: Any, name: str, *, context: str, minimum: float = 0) -> float:
-    if (
-        isinstance(value, bool)
-        or not isinstance(value, Real)
-        or not isfinite(value)
-        or value < minimum
-    ):
-        raise ValueError(f"{context}: {name} must be a finite number >= {minimum}.")
-    return float(value)
 
 
 def coordinate(
@@ -216,31 +206,6 @@ def plot_dimensions(
     return width, height
 
 
-def color_bounds(
-    values: np.ndarray, vmin: float | None, vmax: float | None, *, context: str
-) -> tuple[float, float, bool]:
-    valid = values[np.isfinite(values)]
-    if not valid.size:
-        raise ValueError(f"{context}: colors need at least one finite value.")
-    low = (
-        float(valid.min())
-        if vmin is None
-        else number(vmin, "vmin", minimum=-float("inf"), context=context)
-    )
-    high = (
-        float(valid.max())
-        if vmax is None
-        else number(vmax, "vmax", minimum=-float("inf"), context=context)
-    )
-    if low > high:
-        raise ValueError(f"{context}: vmin cannot exceed vmax.")
-    constant = low == high
-    if constant:
-        delta = abs(low) * 0.1 or 0.1
-        low, high = low - delta, high + delta
-    return low, high, constant
-
-
 def summary_records(
     colors: pd.DataFrame, *, swap_axes: bool, context: str
 ) -> pd.DataFrame:
@@ -343,8 +308,6 @@ def finish_grouped_chart(
             )
         )
     if tree is not None:
-        from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
-
         padding = (
             x.to_dict()["scale"]["paddingOuter"]
             if swap_axes
