@@ -52,10 +52,16 @@ ledger and remove it through the clearance process below.
 A preview can close a deliberately limited slice. It cannot close a full-family
 milestone whose required parameters or builder methods remain missing. Status
 must distinguish function availability, parameter coverage, and method coverage.
+Keep current states and the next-work queue in STATUS; PLAN owns scope and
+acceptance criteria. Retained checkpoints describe evidence at their commit,
+not another active queue. Remove obsolete forecasts when updating the ledger.
 Every implementation change updates the relevant ledger row, acceptance evidence,
 remaining limits, and next item. Record a commit/PR or stable source/test links;
 long console logs do not belong in the plan. Do not mark future work verified
-because a prototype or a different plot passed.
+because a prototype or a different plot passed. Missing required verification
+keeps a slice Implemented; moving an unmet gate to a later milestone does not
+verify it. Reuse earlier evidence only with an explicit account of the unchanged
+code path and covered workload.
 
 ## Clearance and retention
 

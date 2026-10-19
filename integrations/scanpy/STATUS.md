@@ -48,17 +48,53 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot,
 matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
-Supplied matrices reserve long-label space once, including when axis titles are
-present. The layout regression passed **15 matrix browser checks** and **30
-matrix/workflow Python checks**, plus Ruff and mypy. The expression notebook was
-reloaded from disk and all five code cells rerun in the visible Jupyter tab;
-all four charts rendered with the corrected matrix placement. No plan clearance
-changes follow from this fix.
+The current canonical workflows each contain thirteen code cells: UMAP/shared
+embeddings/scatter, and expression/ranked plots. Public availability does not mean
+all slice gates or full-family compatibility are closed.
 
-**Next ready slice: M07.c PCA loadings, variance and overview diagnostics.** M06.a–d have a stored-result preview; larger and
-chunked tile transport remains M05.d.
-Dotplot brushing remains deferred until the
-plain-chart preview has user review; this delivery does not add it.
+### Current work queue
+
+**Next feature: M07.c, starting with stored PCA loadings.** The
+[loadings increment and acceptance cases](PLAN.md#m07--embeddings-scatter-and-pca)
+are ready; variance and overview follow it. Required verification of existing
+previews remains open independently:
+
+| Slice | Lifecycle state | Commit/evidence | Remaining work before Verified/Closed |
+| --- | --- | --- | --- |
+| M06.a–d stored ranking | Implemented | `2800f23`, `f043299`; [checks and observations](#m06ac-stored-ranking-preview) | Record resource evidence for the new rank-label renderer; document whether unchanged parent dot/matrix/heatmap resource workloads cover the ranked wrappers. Do not substitute the older parent run without that assessment. |
+| M07.a shared embeddings | Implemented | `39b4d7d`; [checks and Python measurement](#review-follow-up-and-m07a-shared-2d-embeddings) | Close resource gate 4 with a representative multi-panel browser workload or an explicit UMAP-baseline reuse assessment: covered paths/workload, machine/runtime, render/interaction latency, retained memory and supported envelope. |
+| M07.b scatter | Implemented | `0fdcc02`; [checks and Python measurement](#m07b-scatter) | Complete the same browser resource gate for cell and gene orientations, including a realistic multi-panel case. |
+| M07.c loadings increment | Ready; not implemented | Pinned signature in [API inventory](../../tests/integrations/scanpy/fixtures/api.json); acceptance in PLAN | Implement stored loadings, then complete all five gates. Variance/overview remain planned within M07.c. |
+| M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
+| M05.f category-strip hover | Blocked | C10; [Core adoption and recheck](#m05f-category-strip-tooltips--blocked-on-a-released-core-fix) | Adopt a released Core fix and pass the three expected-failure cases plus navigation/workflow checks. |
+
+M07.d/M14 retain the explicitly unsupported options; dotplot brushing remains
+deferred pending review. **Clearance: retain; no working document is eligible for removal.**
+Delivery records below describe evidence at each implementation checkpoint;
+their test counts, notebook sizes and resource observations are not current totals.
+
+## Milestones
+
+States apply to the stated scope; a closed preview is not a closed full family.
+The completed structural update is M00.c/d, not a new plotting milestone.
+
+| Milestone | State | Delivered evidence or remaining work |
+| --- | --- | --- |
+| M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, sole integration namespace, source/test/workflow layout, full inventory and shared lifecycle exist. Initial relocation is `d148721`; current verification below. |
+| M01 UMAP/linked preview | Closed (preview only) | Runtime modules, dedicated PBMC UMAP notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
+| M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
+| M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
+| M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
+| M05 heatmap/matrix/clustermap | In progress; bounded previews verified | Heatmap/matrix/clustermap and shared grid interactions have linked evidence below. M05.d is Planned; usable strip hover M05.f is Blocked on C10. Broader kwargs/delivery remain M14. |
+| M06 ranking/ranked summaries | Implemented; resource verification pending | M06.a–d runtime, semantic/chart/workflow checks exist; gate 4 remains in the current queue. Compatibility limits remain M14; native builders remain M13. |
+| M07 embeddings/scatter/PCA | In progress | M07.a/b are Implemented with resource gates open; M07.c loadings is Ready and later diagnostics/options are Planned. See the current queue for evidence and remaining gates. |
+| M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
+| M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
+| M10 QC diagnostics | Planned | Highest expression, variable genes, legacy dispersion and Scrublet distributions. |
+| M11 trajectories/graphs/series | Planned | Stored DPT/PAGA, graph layouts, series/simulation, return/side-effect contracts; evaluate C04 paths. |
+| M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
+| M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
+| M14 compatibility/docs/release | Planned | Close parameters/capabilities, versions/exports, designed workflow publication and full API evidence. |
 
 ## M05.e shared grid interactions
 
@@ -122,8 +158,7 @@ repeated for this direction-only follow-up.
 
 The full unrelated repository suites and documentation build were not rerun.
 Existing fixed-chart previews and M05.d transport limits remain applicable.
-No plan becomes eligible for clearance from this additional interaction slice;
-M05.c clustermap remains next.
+No plan becomes eligible for clearance from this additional interaction slice.
 
 Native ruler follow-up (October 19): dotplot `highlight=True` now adds one
 `gs.ruler` parameter with `encodings=["x", "y"]` and `display="center"`.
@@ -137,7 +172,7 @@ The expression notebook was reloaded
 and all five code cells rerun in Jupyter; all four charts rendered successfully.
 Local matrix zoom experiments were preserved, with the tracked workflow's zoom
 settings validated separately. Band shading remains limited by C09 below;
-no Core patch is used. M05.c remains next and no plan is eligible for clearance.
+no Core patch is used. No plan is eligible for clearance.
 
 ## M05.f category-strip tooltips — blocked on a released Core fix
 
@@ -164,8 +199,8 @@ The unrelated full Python suite and documentation build were not rerun.
 
 Clearance: retain. M14 owns adopting a released Core containing #587; then rerun
 the three strip cases before/after navigation, remove expected failures and the
-known-limit notices, and verify the PBMC notebook. M07.b is the next independent
-slice. This records a native capability blocker, not a completed hover feature.
+known-limit notices, and verify the PBMC notebook. This records a native
+capability blocker, not a completed hover feature.
 
 ## M06.a–c stored ranking preview
 
@@ -189,7 +224,7 @@ Evidence: [ranking tests](../../tests/integrations/scanpy/test_ranked.py),
 and their [generator](../../tests/integrations/scanpy/generate_ranked_references.py).
 Registered SVG anchors, titles, axes, hover, offline HTML and reused y navigation
 are checked. Generated figures, captures and overlays remain outside Git.
-The [expression workflow](notebooks/scanpy_expression.ipynb) now has ten code cells
+At this checkpoint, the [expression workflow](notebooks/scanpy_expression.ipynb) had ten code cells
 and nine charts on packaged PBMC data, including stored logreg scores and all
 three ranked expression variants. Existing local plot settings are preserved.
 All ten cells completed in the live Jupyter notebook. The full non-browser
@@ -212,7 +247,8 @@ presentation limits. M08/M09 own ranked distributions/tracks. No plan is cleared
 
 ## M06.d stored statistic colors
 
-Verified preview: `rank_genes_groups_dotplot` and `rank_genes_groups_matrixplot`
+Implemented preview (`f043299`; resource gate pending):
+`rank_genes_groups_dotplot` and `rank_genes_groups_matrixplot`
 accept all six pinned `values_to_plot` options: scores, logfoldchanges, pvals,
 pvals_adj, log10_pvals and log10_pvals_adj. The log variants use −log10(p).
 The new preparation helper reuses stored-result validation, the public Scanpy
@@ -254,9 +290,9 @@ read four expression columns and send 32 summaries; the full matrix is never
 densified. The earlier resource benchmark was not repeated. The unrelated full
 repository suites and documentation build were not rerun.
 
-Clearance: retain the live plan and status. M06's preview is verified; M13 retains
-builders and M14 the named compatibility limits. M07.b scatter is
-the next ready slice. No working plan is cleared.
+Clearance: retain the live plan and status. Semantic/chart/workflow checks passed;
+M06 resource closure remains in the current queue. M13 retains builders and M14
+the named compatibility limits. No working plan is cleared.
 
 ## Review follow-up and M07.a shared 2D embeddings
 
@@ -269,8 +305,9 @@ the statistic pairs needed for other groups. No cache is shared across calls.
 The metadata path retains raw/layer/symbol validation, categories and duplicate
 slots. Getter-count and cross-group-value regression tests cover both changes.
 
-M07.a generalizes the three UMAP modules in place to `_embedding_data.py`,
-`_embedding_chart.py` and `_embedding_interactions.py`, with shared styles.
+Implemented in `39b4d7d` (resource gate pending): M07.a generalizes the three UMAP
+modules in place to `_embedding_data.py`, `_embedding_chart.py` and
+`_embedding_interactions.py`, with shared styles.
 `embedding`, `tsne`, `diffmap`, `draw_graph`, `pca` and `pca_scatter` add six public
 entries; the alias is the same function as pca. A small effective-signature helper
 keeps Scanpy's shared defaults visible without copying every parameter list.
@@ -286,7 +323,7 @@ explicit layout or saved draw_graph params. Missing/malformed coordinates or
 required metadata error. Three-dimensional plots, edges/arrows and remaining
 UMAP options remain M07.d/M14; PCA diagnostic plots remain M07.c.
 
-The [UMAP notebook](notebooks/scanpy_umap.ipynb) now has eleven code cells. New
+At this checkpoint, the [UMAP notebook](notebooks/scanpy_umap.ipynb) had eleven code cells. New
 PCA panels reuse packaged coordinates; a separate explicit Scanpy cell computes
 t-SNE with the saved PCA representation and random_state=0. All eleven cells
 completed in the existing Jupyter session and both examples were visually checked.
@@ -314,14 +351,14 @@ took 10.237 s and produced 26,797,446 bytes, with 249.39 MiB peak traced Python
 allocation. Input construction is excluded. This is a local observation, not a
 capacity guarantee; large-data transport remains M05.d.
 
-Clearance: retain the live plan and status. M07.a's bounded preview is delivered;
-M07.b scatter is next. Existing family/renderer limits retain their named owners.
-No working plan becomes eligible for clearance from this slice.
+Clearance: retain. M07.a remains Implemented until its browser resource gate
+passes; functionality and the measurements above are retained evidence, not full
+verification. Existing family/renderer limits retain their named owners.
 
 ## M07.b scatter
 
-Verified bounded preview: `gsc.pl.scatter` retains pinned Scanpy's separate
-signature and supports observation/gene x/y coordinates, exact X_ basis lookup,
+Implemented in `0fdcc02` (resource gate pending): `gsc.pl.scatter` retains pinned
+Scanpy's separate signature and supports observation/gene x/y coordinates, exact X_ basis lookup,
 per-axis x/y/color layers, categorical/numeric/literal colors and multiple panels.
 It uses public AnnData vector access, existing embedding identity/panel fields,
 color/style helpers and the same point renderer. No second scatter chart module,
@@ -359,8 +396,9 @@ A seed-17 local metadata scatter over sparse 100,000-cell × 20,000-gene AnnData
 prepared in **0.047 s**, serialized validated JSON in **8.420 s**, and produced
 **23,714,299 bytes**, with **241.85 MiB** peak traced Python allocation. Source
 construction is excluded; expression was not read. This is a local observation,
-not a capacity guarantee. The large chart was not measured in a browser; broader
-transport/performance remains M05.d. Generated media remains outside Git.
+not a capacity guarantee. The large chart was not measured in a browser; that
+missing verification remains M07.b. M05.d covers larger/chunked tile transport.
+Generated media remains outside Git.
 
 Limits: only finite numeric coordinates, resident expression, scalar sizes and
 dot/circle markers. On-data labels, manual margins, stored highlights, 3D,
@@ -371,31 +409,10 @@ Native guide ticks, typography and automatic panel spacing are not pixel-identic
 to Matplotlib. Scatter does not yet expose linked brushing/Python membership.
 
 Clearance: retain the live plan/status and permanent tests/reference provenance.
-M07.b's bounded preview is delivered; M07.c PCA diagnostics is next. No working
+M07.b remains Implemented until its browser resource gate passes. No working
 plan becomes eligible for removal, and full-family closure is not claimed.
 
-## Milestones
-
-States apply to the stated scope; a closed preview is not a closed full family.
-The completed structural update is M00.c/d, not a new plotting milestone.
-
-| Milestone | State | Delivered evidence or remaining work |
-| --- | --- | --- |
-| M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, sole integration namespace, source/test/workflow layout, full inventory and shared lifecycle exist. Initial relocation is `d148721`; current verification below. |
-| M01 UMAP/linked preview | Closed (preview only) | Runtime modules, dedicated PBMC UMAP notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
-| M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
-| M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
-| M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
-| M05 heatmap/matrix/clustermap | In progress; three bounded previews delivered | Heatmap/matrix/shared interactions and clustermap values, masks, two Python trees, annotation tracks, native hover and PBMC workflow are covered below. Larger/chunked transport remains M05.d; broader kwargs and native delivery remain M14. |
-| M06 ranking/ranked summaries | Verified preview; compatibility limits retained | M06.a–d select stored ranks, reuse dot/matrix/heatmap charts and color summary plots with six saved statistics. Nonfinite/missing-pair behavior and filtered score panels remain M14; native builders remain M13. |
-| M07 embeddings/scatter/PCA | In progress; M07.a shared 2D and M07.b scatter previews delivered | Generic/named bases and cell/gene scatter share points, colors, styling, hover and zoom. Separate scatter orientation/layer rules are retained. PCA diagnostics M07.c is next; remaining options M07.d stay open. |
-| M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
-| M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
-| M10 QC diagnostics | Planned | Highest expression, variable genes, legacy dispersion and Scrublet distributions. |
-| M11 trajectories/graphs/series | Planned | Stored DPT/PAGA, graph layouts, series/simulation, return/side-effect contracts; evaluate C04 paths. |
-| M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
-| M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains delivered with their parent families; method ledger below. |
-| M14 compatibility/docs/release | Planned | Close parameters/capabilities, versions/exports, designed workflow publication and full API evidence. |
+## M01 retained delivery evidence
 
 The M01 preview is recorded in `a536bf6` and `ecd27c8` with earlier implementation
 history in Git. Its retained evidence is:
@@ -567,7 +584,7 @@ M14; trees remain M04; `DotPlot` and supplied `dot_size_df`/style chains remain 
 No unimplemented option is silently ignored. C08's dotplot slot handling is
 verified with native text labels; other grouped families still need their checks.
 
-M02 is closed only for this plain-chart preview. M03 is ready. The maintained
+M02 is closed only for this plain-chart preview. The maintained
 source, notebook, tests, references and compatibility contract are retained;
 there is no per-slice working plan to clear and no research artifacts are deleted.
 
@@ -701,7 +718,7 @@ smaller occupied region. Browser checks require leaf endpoints at the plot edge
 and group centers in both orientations and sizes. All 25 tree browser checks and
 53 tree/workflow checks pass, as do Ruff formatting/lint. The expression notebook
 was restarted, rerun and inspected. Resource measurements and unrelated suites
-were not repeated for this layout adjustment; M05 remains next.
+were not repeated for this layout adjustment.
 
 Computation simplification (October 18): removed the independent profile,
 correlation and linkage path and computation-based cache checks. Public Scanpy
@@ -719,7 +736,7 @@ rerun; the open live notebook kernel was not restarted for this refactor.
 Remaining work: M14 owns normalization/kwargs, typography and export closure.
 M05/M08/M09 own attachment
 to their new families; M13 owns builder methods. M04 closes only this stated
-preview. M05 is next; no working document is newly eligible for clearance.
+preview. No working document is newly eligible for clearance.
 
 ## M05.a/b cell heatmap preview
 
@@ -776,7 +793,7 @@ browser checks were repeated after final guide/tick placement. The shared scalin
 helper is now named scale_values to reflect its cell and summary callers; the
 data/reuse regression checks pass too. Ruff formatting/lint and mypy pass.
 The full documentation site and unrelated test suites were not rebuilt.
-M05 stays open for matrix/clustermap and larger/chunked transport. No working
+This checkpoint covered heatmaps; later matrix/clustermap evidence is separate. No working
 plan is newly eligible for clearance; unrelated notebook edits remain unstaged.
 
 ## Computation reuse audit
@@ -807,7 +824,7 @@ comments explaining the retained boundaries; no algorithms or charts changed.
 
 All 238 targeted data/plot/reference tests, Ruff formatting/lint and mypy pass. Browser,
 performance and live notebook runs were not repeated for this audit because
-runtime behavior is unchanged. M05 remains next; no working plan is eligible
+runtime behavior is unchanged. No working plan is eligible
 for clearance and existing notebook edits/outputs remain outside this change.
 
 ## Internal helper reuse audit
@@ -843,7 +860,7 @@ charts retain every value except a custom matrixplot stroke width rounded by
 4.4e-16 logical pixels after sharing the point-unit constant. No data or visual
 behavior change was observed. Resource measurements, the full documentation site
 and unrelated tests were not repeated; the live notebooks and existing notebook
-edits were untouched. M05 remains next and no working plan is newly eligible for
+edits were untouched. No working plan is newly eligible for
 clearance.
 
 Readability pass (October 18): short, plain-language comments now separate option
@@ -856,7 +873,7 @@ No helper, module, dependency or public option was added.
 All 371 integration tests, Ruff formatting/lint and mypy pass; 44 complete chart
 specifications are unchanged. Browser checks, resource benchmarks and the full
 documentation site were not rerun for this behavior-preserving edit. Notebook
-edits remain outside the change. M05 remains next; no plan is newly clearable.
+edits remain outside the change. No plan is newly clearable.
 
 Helper docstrings (October 18): all 71 internal plotting helpers now have concise
 descriptions of their purpose, inputs and result, with reasons for non-obvious
@@ -917,9 +934,14 @@ invalid-zoom case (456 distinct integration checks covered). All 20 heatmap and
 and mypy pass. The full docs site, unrelated tests and other browser families
 were not rebuilt/rerun for this slice.
 
-M05.a/b previews are verified; M05 remains open for clustermap and transport.
-Clearance: **retain** the live plan/status and unique reference/resource evidence.
-The next ready item is M05.c; this preview does not close the full family.
+M05.a/b previews are verified within their stated budgets; later clustermap and
+transport work have separate records. Clearance: **retain** the live plan/status
+and unique reference/resource evidence; the full family remains open.
+
+Layout follow-up (`fa8d46b`): supplied matrices reserve long-label space once,
+including with axis titles. All 15 matrix browser and 30 matrix/workflow checks
+passed, plus Ruff/mypy. At that checkpoint, the expression notebook's five cells
+and four charts were rerun and inspected. No clearance changed.
 
 ## M05.c — clustermap preview
 
@@ -993,8 +1015,8 @@ The notebook's existing local `zoom=False` experiments differ from the canonical
 workflow's `zoom=True` assertions; canonical cells were checked in a temporary
 copy, while the live notebook retained those experiments and rendered five charts.
 The full unrelated repository suites and documentation build were not rerun.
-M05 remains open for M05.d transport and M14 option closure. M06 stored-ranking
-selection and ranked summary wrappers are next; no plan is eligible for clearance.
+M05 remains open for M05.d transport, M05.f strip hover and M14 option closure.
+No plan is eligible for clearance.
 
 Navigation follow-up (2026-10-19): clustermap reuses the shared `zoom` and
 `show_values` helpers. `zoom=True` keeps x fixed; `zoom="xy"` navigates both axes.
@@ -1009,7 +1031,7 @@ tooltip access and offline rendering. All six expression notebook cells ran in
 the existing Jupyter session; close zoom and panning were observed on the 700-cell
 example. Local zoom experiments in other cells remain intact. No Core patch or
 new clustering/data access runs during interaction. The unrelated full repository
-suite and documentation build were not rerun. M06 remains next; no plans cleared.
+suite and documentation build were not rerun. No plans were cleared.
 
 Native legend follow-up (2026-10-19): the observation strip's own ordinal color
 encoding generates its legend through `gs.Legend`; no custom legend marks or
@@ -1081,10 +1103,10 @@ No placeholder functions are exported for planned work.
 | `paga_compare` | Not implemented | M11 |
 | `paga_path` | Not implemented | M11 |
 | `pca` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
-| `pca_loadings` | Not implemented | M07 |
-| `pca_overview` | Not implemented | M07 |
+| `pca_loadings` | Ready to implement | M07.c loadings increment |
+| `pca_overview` | Not implemented | M07.c; after loadings/variance |
 | `pca_scatter` | Alias of the shared pca preview | M07.a; same limits as pca |
-| `pca_variance_ratio` | Not implemented | M07 |
+| `pca_variance_ratio` | Not implemented | M07.c; after loadings |
 | `rank_genes_groups` | Preview: stored score panels | M06.a–c; filtered/nonfinite panels and presentation debt M14 |
 | `rank_genes_groups_dotplot` | Preview: expression/statistic colors and expression fractions | M06.a–d; compatibility limits M14, builder M13 |
 | `rank_genes_groups_heatmap` | Preview: individual-cell expression | M06.a–c; shares parent heatmap limits |
@@ -1190,8 +1212,16 @@ research; only reviewed numerical ideas or evidence may be reused with provenanc
 
 ## Plan clearance ledger
 
-No research artifacts are deleted by this roadmap update. Paths below can be
-absent in a fresh clone; active delivery depends only on tracked files.
+Lifecycle reconciliation (2026-10-19): removed superseded forecasts, linked the
+latest delivery commits, and corrected premature Verified claims for M06/M07.
+Required browser resource evidence stays with the originating slices; it was
+not completed by the scatter implementation or deferred to tile transport.
+No acceptance gate was waived and no research/working plan was cleared.
+
+No research artifacts are deleted by this update. Paths below can be absent in
+a fresh clone; active delivery depends only on tracked files. The ignored
+historical plan already links to the tracked roadmap and remains archival;
+its old namespace/color proposals are not current policy.
 
 | Artifact | Role and clearance state | What permits clearing |
 | --- | --- | --- |

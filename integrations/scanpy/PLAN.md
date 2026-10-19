@@ -4,6 +4,8 @@ The destination is the full public `scanpy.pl` plotting surface at the supported
 Scanpy version. This is a delivery roadmap, not a claim that those plots already
 exist. Read [STATUS.md](STATUS.md) for implemented behavior, the next slice,
 blockers, the 50-entry inventory, validation evidence, and clearance decisions.
+Its [current queue](STATUS.md#current-work-queue) is the sole next-work list;
+this plan defines deliverables and acceptance criteria.
 The [shared lifecycle](../README.md#plan-lifecycle) defines milestone states and
 when working plans can be cleared. Update the status ledger with each slice.
 
@@ -234,9 +236,9 @@ Python `selection_mask` through the ordinary widget. Use the dedicated PBMC
 UMAP notebook and frozen semantic/complete-chart/browser/resource checks as
 evidence. Its order is basic plotting, linked selection, then customization.
 
-Acceptance: preserve supplied coordinates and independent per-panel color scales;
-plain-drag brush example, clear, coincident cells and half-open membership agree
-in the chart and Python. No local Core patch or notebook connection task.
+Acceptance: preserve supplied coordinates and independent per-panel color scales.
+With zoom enabled, Shift-drag brushing, clearing, coincident cells and half-open
+membership agree in the chart and Python. No local Core patch or notebook connection task.
 This closes a preview only. Remaining normalization, overlays, fonts, 3D,
 backed expression, and broader selection modes stay in M07/M14.
 
@@ -373,7 +375,7 @@ y-only by default, with both axes explicitly available.
 Shared grid interactions are M05.e below. M05.c has a bounded clustermap preview
 with public SciPy or supplied linkage, ordered annotation tracks and shared
 tiles/branches; see its [status evidence](STATUS.md#m05c--clustermap-preview).
-Larger transport remains M05.d; M06 stored ranking and ranked summaries are next.
+Larger transport remains M05.d; stored ranking and ranked summaries belong to M06.
 
 - M05.a: observation-level heatmap reuses source/group/slot access. Carry one
   explicit observation permutation through values, IDs, category strips, group
@@ -387,8 +389,8 @@ Larger transport remains M05.d; M06 stored ranking and ranked summaries are next
   and rejects color objects, images, sparse/lazy data and mismatched tick counts.
   Heatmap zoom defaults off; explicit zoom keeps strips, boundaries and tree leaves
   aligned, hides offscreen labels, and hides partially visible gene brackets.
-  Native tooltips identify annotation-strip categories in both orientations;
-  the existing `hover` flag controls tiles and category strips together.
+  M05.f owns usable native annotation-strip tooltips in both orientations after
+  adopting its released Core fix; the existing hover flag already configures them.
 - M05.c: `clustermap` computes requested row/column clustering in Python, honors
   supplied linkage and annotation colors, and routes supported clustering kwargs
   explicitly. Do not silently cluster a supplied ordering or densify an unrelated
@@ -400,7 +402,8 @@ Larger transport remains M05.d; M06 stored ranking and ranked summaries are next
   maintained contract, with broader options assigned to M14. Do not claim the
   full clustermap family closed from this preview.
   Observation category strips retain names/order/palettes and use their own native
-  categorical legend and hover tooltips; explicit CSS tracks do not invent category names.
+  categorical legend; usable native strip hover remains M05.f. Explicit CSS
+  tracks do not invent category names.
 - M05.d: test chunked selected-column access and a 100k-cell × 50-marker heatmap;
   record payload/render/memory limits and an explicit over-budget policy. Compare
   complete PBMC tutorial heatmaps with registered strips/tree/label alignment.
@@ -465,16 +468,16 @@ are deliberately assigned to M08/M09 until their parent chart exists.
 
 ### M07 — embeddings, scatter and PCA
 
-M07.a now has a shared stored-2D preview. The UMAP modules were generalized in
-place; named wrappers, generic bases, PCA variance labels and selection retrieval
-share the existing data/chart/style/interaction path. M07.b now adds the bounded
-cell/gene scatter preview below; M07.c PCA diagnostics is next.
+Named embeddings, generic bases, PCA variance labels, selection retrieval and
+scatter share the existing data/chart/style/interaction path. Slice states,
+commit evidence and unmet verification gates live in the
+[status ledger](STATUS.md#current-work-queue).
 
 - M07.a: extract reusable embedding authoring/access from UMAP for `embedding`,
   `tsne`, `diffmap`, `draw_graph`, `pca` and alias `pca_scatter`. Resolve basis/layout
   names, components/dimensions and explained-variance labels from stored results.
   Missing coordinates error; no neighbors, PCA, t-SNE or force layout rerun.
-- M07.b (implemented preview; [evidence](STATUS.md#m07b-scatter)): `scatter` x/y/basis selection, observation versus variable
+- M07.b ([contract and evidence](STATUS.md#m07b-scatter)): `scatter` x/y/basis selection, observation versus variable
   orientation, per-axis `layers`, labels, palettes and multiple colors. Share
   point/color code while preserving its distinct signature/lookup behavior.
   Public AnnData vector access reads each selected source once without a full
@@ -486,7 +489,12 @@ cell/gene scatter preview below; M07.c PCA diagnostics is next.
   options remain M07.d/M14; the preview does not close the whole family.
 - M07.c: PCA loadings/variance/overview consume stored loadings and variance data;
   preserve component order, `include_lowest`, `n_points`, `n_pcs`, logarithmic
-  axes, labels and overview panel composition. Verify the pca_scatter alias target.
+  axes, labels and overview panel composition. Start with a loadings increment:
+  `gsc.pl.pca_loadings(pbmc, components="1,2", include_lowest=True, n_points=20, show=False)`.
+  Reuse the ranking renderer where equivalent. Test supplied `varm["PCs"]` and
+  gene labels, reversed components, signed/tied loadings, omitted lower ranks,
+  limits and missing results; never run PCA. Then add variance and overview.
+  The pca_scatter alias belongs to M07.a's existing signature/identity evidence.
 - M07.d: complete 2D options currently rejected by UMAP: graph/arrow overlays,
   scale factor, supported marker/style forms, outlines, colorbar positions,
   numeric normalization/center/callable bounds and missing-category schemes.
