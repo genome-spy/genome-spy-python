@@ -68,6 +68,12 @@ def _check_kwargs(
         )
 
 
+def _check_grid_zoom(zoom: bool | Literal["xy"], *, context: str) -> None:
+    """Reject invalid grid zoom modes before importing Scanpy or reading data."""
+    if not isinstance(zoom, bool) and not (isinstance(zoom, str) and zoom == "xy"):
+        raise TypeError(f"{context}: zoom must be False, True (y only), or 'xy'.")
+
+
 def _prepare_plot(show: bool | None, save: str | bool | None, *, context: str) -> Any:
     """Check show/save and return Scanpy, rejecting automatic image saving early."""
     if show is not None and not isinstance(show, bool):
@@ -417,7 +423,7 @@ def dotplot(
     dot_min: float | None = None,
     smallest_dot: float = 0.0,
     hover: bool = True,
-    zoom: bool = False,
+    zoom: bool | Literal["xy"] = False,
     highlight: bool = False,
     width: float | None = None,
     height: float | None = None,
@@ -467,7 +473,7 @@ def dotplot(
         dot_min: Lower clipped fraction, default zero.
         smallest_dot: Minimum dot area in points squared; maximum is 200.
         hover: Show gene, group, displayed color value and expressing percentage.
-        zoom: Enable x/y wheel zoom and drag panning with aligned annotations.
+        zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         highlight: Highlight the row and column of the hovered dot.
         width: Native plot-area width in logical pixels, default 37 per column.
         height: Native plot-area height in logical pixels, default 35 per row.
@@ -502,7 +508,6 @@ def dotplot(
         "log": log,
         "mean_only_expressed": mean_only_expressed,
         "hover": hover,
-        "zoom": zoom,
         "highlight": highlight,
     }.items():
         if not isinstance(value, bool):
@@ -513,6 +518,7 @@ def dotplot(
         raise ValueError(
             "gsc.pl.dotplot: standard_scale must be 'var', 'group', or None."
         )
+    _check_grid_zoom(zoom, context="gsc.pl.dotplot")
     sc = _prepare_plot(show, save, context="gsc.pl.dotplot")
     from genome_spy.integrations.scanpy._dendrogram_data import (
         attached_dendrogram,
@@ -624,7 +630,7 @@ def matrixplot(
     vcenter: float | None = None,
     norm: Any = None,
     hover: bool = True,
-    zoom: bool = False,
+    zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
     width: float | None = None,
     height: float | None = None,
@@ -670,7 +676,7 @@ def matrixplot(
         vcenter: Reserved; nondefault values error.
         norm: Reserved; Matplotlib normalization objects error.
         hover: Show gene, group and displayed mean or supplied value.
-        zoom: Enable x/y wheel zoom and drag panning with aligned annotations.
+        zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         show_values: Show plotted values to two decimals when cells have enough room.
         width: Plot-area logical pixels, default 37 per feature column.
         height: Plot-area logical pixels, default 35 per group row.
@@ -711,13 +717,13 @@ def matrixplot(
         "log": log,
         "swap_axes": swap_axes,
         "hover": hover,
-        "zoom": zoom,
         "show_values": show_values,
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
     if standard_scale not in (None, "var", "group"):
         raise ValueError(f"{context}: standard_scale must be 'var', 'group', or None.")
+    _check_grid_zoom(zoom, context=context)
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._dendrogram_data import (
         attached_dendrogram,
@@ -815,7 +821,7 @@ def heatmap(
     vcenter: float | None = None,
     norm: Any = None,
     hover: bool = True,
-    zoom: bool = False,
+    zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
     width: float | None = None,
     height: float | None = None,
@@ -855,7 +861,7 @@ def heatmap(
         vcenter: Nondefault values are unsupported.
         norm: Matplotlib normalization objects are unsupported.
         hover: Include cell ID, gene, group and expression tooltips.
-        zoom: Enable x/y wheel zoom and drag panning with aligned annotations.
+        zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         show_values: Show plotted values to two decimals when cells have enough room.
         width: Native tile-area width in pixels.
         height: Native tile-area height in pixels.
@@ -889,7 +895,6 @@ def heatmap(
         "swap_axes": swap_axes,
         "hover": hover,
         "show_values": show_values,
-        "zoom": zoom,
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
@@ -899,6 +904,7 @@ def heatmap(
         raise TypeError(f"{context}: dendrogram must be False, True or a nonempty key.")
     if standard_scale not in (None, "var", "obs"):
         raise ValueError(f"{context}: standard_scale must be 'var', 'obs' or None.")
+    _check_grid_zoom(zoom, context=context)
     sc = _prepare_plot(show, save, context=context)
     import numpy as np
     import pandas as pd
@@ -1013,7 +1019,7 @@ def matrix(
     show: bool | None = None,
     save: bool | str | None = None,
     hover: bool = True,
-    zoom: bool = False,
+    zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
     width: float | None = None,
     height: float | None = None,
@@ -1038,7 +1044,7 @@ def matrix(
         show: Display according to Scanpy's autoshow when unset.
         save: Only None/False; use the returned chart's HTML/JSON export.
         hover: Include row, column and numeric value tooltips.
-        zoom: Enable x/y wheel zoom and drag panning with aligned annotations.
+        zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         show_values: Show plotted values to two decimals when cells have enough room.
         width: Native tile-area width in pixels.
         height: Native tile-area height in pixels.
@@ -1061,11 +1067,11 @@ def matrix(
     context = "gsc.pl.matrix"
     for name, value in {
         "hover": hover,
-        "zoom": zoom,
         "show_values": show_values,
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
+    _check_grid_zoom(zoom, context=context)
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._matrix_chart import build_matrix
 

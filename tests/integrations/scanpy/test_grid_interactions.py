@@ -46,7 +46,7 @@ def test_grid_options_are_keyword_only_and_off_by_default(family):
     )
     for axis in ("x", "y"):
         assert plain_mark["encoding"][axis]["scale"]["zoom"] is False
-        assert active_mark["encoding"][axis]["scale"]["zoom"] is True
+        assert active_mark["encoding"][axis]["scale"]["zoom"] is (axis == "y")
     for channel in ("color", "size"):
         if channel in plain_mark["encoding"]:
             assert plain_mark["encoding"][channel] == active_mark["encoding"][channel]
@@ -64,7 +64,7 @@ def test_invalid_interaction_options_fail_before_loading_scanpy(
     )
     monkeypatch.setattr(gsc.pl, "_require_scanpy", lambda: pytest.fail("Loaded Scanpy"))
     arguments = (object(),) if family == "matrix" else (object(), ["g1"], "group")
-    with pytest.raises(TypeError, match=f"{option} must be boolean"):
+    with pytest.raises(TypeError, match=f"{option} must be"):
         getattr(gsc.pl, family)(*arguments, **{option: "yes"})
 
 
@@ -111,3 +111,18 @@ def test_highlight_uses_slots_and_remains_available_without_tooltips():
     assert "grid_hover.datum._x" in spec["layer"][0]["transform"][0]["expr"]
     assert "grid_hover.datum._y" in spec["layer"][1]["transform"][0]["expr"]
     assert all(layer["mark"]["tooltip"] is None for layer in spec["layer"][:2])
+
+
+@pytest.mark.parametrize("family", ["dotplot", "matrixplot", "heatmap", "matrix"])
+def test_grid_can_explicitly_enable_both_axes(family):
+    spec = grid_chart(family, zoom="xy").to_dict()
+    mark = next(m for m in leaf_marks(spec) if "color" in m.get("encoding", {}))
+    for axis in ("x", "y"):
+        assert mark["encoding"][axis]["scale"]["zoom"] is True
+
+
+@pytest.mark.parametrize("invalid", [None, 0, 1, "x", "y", [], {}])
+def test_zoom_rejects_other_modes_before_optional_dependencies(monkeypatch, invalid):
+    monkeypatch.setattr(gsc.pl, "_require_scanpy", lambda: pytest.fail("Loaded Scanpy"))
+    with pytest.raises(TypeError, match="zoom must be False, True.*or 'xy'"):
+        gsc.pl.matrix(object(), zoom=invalid)

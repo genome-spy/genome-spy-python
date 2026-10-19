@@ -1,7 +1,7 @@
 """Native tiles for a supplied numeric matrix, without AnnData computations."""
 
 from collections.abc import Collection
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -35,7 +35,7 @@ def build_matrix(
     colorbar_shrink: float,
     color_map: Any,
     hover: bool,
-    zoom: bool,
+    zoom: bool | Literal["xy"],
     show_values: bool,
     width: float | None,
     height: float | None,
@@ -156,9 +156,9 @@ def build_matrix(
         with_values(tiles, "_value") if show_values else tiles
     ]
     if xticks is not None:
-        layers.append(_slot_labels(xlabels, axes[0], horizontal=True, zoom=zoom))
+        layers.append(_slot_labels(xlabels, axes[0], horizontal=True, zoom=bool(zoom)))
     if yticks is not None:
-        layers.append(_slot_labels(ylabels, axes[1], horizontal=False, zoom=zoom))
+        layers.append(_slot_labels(ylabels, axes[1], horizontal=False, zoom=bool(zoom)))
     chart = gs.layer(*layers).properties(
         width=width,
         height=height,
@@ -171,7 +171,7 @@ def build_matrix(
     )
     if title is not None:
         chart = chart.properties(title=gs.title(title, font=FONT, fontSize=12 * PT))
-    chart = with_navigation(chart, enabled=zoom)
+    chart = with_navigation(chart, enabled=bool(zoom))
     return chart.configure_view(stroke="black", strokeWidth=0.8 * PT).configure_legend(
         labelFont=FONT,
         labelFontSize=TICK,

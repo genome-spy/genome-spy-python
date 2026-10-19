@@ -54,6 +54,47 @@ def pointer(page, bounds, x=0.5, y=0.5):
     return px, py
 
 
+@pytest.mark.parametrize("family", ["dotplot", "matrixplot", "heatmap", "matrix"])
+def test_default_zoom_and_pan_change_only_y(page, family):
+    common = dict(zoom=True, width=180, height=90, show=False)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        if family == "matrix":
+            chart = gsc.pl.matrix(
+                np.arange(12).reshape(4, 3), show_values=True, **common
+            )
+        else:
+            chart = getattr(gsc.pl, family)(
+                make_heatmap_adata(),
+                ["g1", "g2", "g3"],
+                "group",
+                **(
+                    {"highlight": True}
+                    if family == "dotplot"
+                    else {"show_values": True}
+                ),
+                **common,
+            )
+    bounds = render(page, chart)
+    domains = f"['{family}-x','{family}-y'].map(n=>api.getScaleResolutionByName(n).getDomain())"
+    before = page.evaluate(domains)
+    px, py = pointer(page, bounds)
+    page.mouse.wheel(0, -800)
+    page.wait_for_timeout(180)
+    zoomed = page.evaluate(domains)
+    assert zoomed[0] == before[0]
+    assert zoomed[1][1] - zoomed[1][0] < before[1][1] - before[1][0]
+    if family == "heatmap":
+        assert value_texts(svg_root(page))
+    page.mouse.down()
+    page.mouse.move(px + 25, py + 15, steps=5)
+    page.mouse.up()
+    page.wait_for_timeout(150)
+    panned = page.evaluate(domains)
+    assert panned[0] == before[0]
+    assert panned[1] != zoomed[1]
+
+
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
 @pytest.mark.parametrize("swapped", [False, True])
 def test_enabling_navigation_keeps_initial_pixels(page, family, swapped):
@@ -142,7 +183,7 @@ def test_dense_values_appear_after_zoom_and_do_not_block_hover(page, family, tmp
     from anndata import AnnData
 
     values = np.random.default_rng(41).uniform(0, 4, size=(30, 30))
-    common = dict(width=180, height=180, zoom=True, show_values=True, show=False)
+    common = dict(width=180, height=180, zoom="xy", show_values=True, show=False)
     if family == "matrix":
         chart = gsc.pl.matrix(values, **common)
     else:
@@ -252,7 +293,7 @@ def test_summary_zoom_and_pan_keep_tree_leaves_and_labels_aligned(
             "group",
             dendrogram=True,
             swap_axes=swapped,
-            zoom=True,
+            zoom="xy",
             width=360,
             height=260,
             show=False,
@@ -306,7 +347,7 @@ def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
             "group",
             swap_axes=swapped,
             highlight=True,
-            zoom=True,
+            zoom="xy",
             hover=hover,
             width=360,
             height=260,

@@ -17,7 +17,7 @@ grouped access/means and native layout, with one-pass scaling, authoritative
 computation/results, with structural checks and native rule rendering.
 Heatmaps retain individual cells, shared marker/source/scaling helpers, unequal
 group spans, category strips and cell hover, with a 250,000-value limit. Optional
-x/y zoom keeps their annotations aligned. All four expression grids now offer
+zoom keeps their annotations aligned. All four expression grids now offer
 shared optional zoom; tile families offer fitted values, and dotplot offers
 hover row/column highlighting (M05.e below). Direct matrix plots reuse numeric
 validation, color bounds, index slots and labels without AnnData access.
@@ -49,6 +49,8 @@ palette contrast and slot-based hover bands. Existing grouped labels/brackets
 and tree rendering serve all applicable families. Dotplot gains `zoom` and
 `highlight`; matrixplot/matrix gain `zoom` and `show_values`; heatmap gains
 `show_values` and uses the shared navigation. All new options default False.
+`zoom=True` now uses y-only wheel zoom and drag panning; `zoom="xy"` enables
+both axes. This keeps gene columns fixed while exploring long expression grids.
 
 The [expression notebook](notebooks/scanpy_expression.ipynb) enables the new
 options on the packaged PBMC data. Text displays plotted/scaled values to two
@@ -64,8 +66,8 @@ opacity over white. No Core bundle is patched.
 Evidence: [shared behavior tests](../../tests/integrations/scanpy/test_grid_interactions.py),
 [observed browser tests](../../tests/integrations/scanpy/browser/test_grid_interactions.py),
 [public getter reuse checks](../../tests/integrations/scanpy/test_upstream_reuse.py) and
-[workflow execution](../../tests/integrations/scanpy/test_notebooks.py). All **476
-Python integration checks**, **18 new interaction browser checks** and **70 existing
+[workflow execution](../../tests/integrations/scanpy/test_notebooks.py). The initial
+shared-interaction implementation (`d5f7586`) passed all **476 Python integration checks**, **18 new interaction browser checks** and **70 existing
 affected-family browser checks** pass. The final focused rerun passed 31 checks.
 Ruff formatting/lint and mypy pass. The expression notebook completed all five
 code cells in its existing Jupyter session; the kernel is idle. All four PBMC
@@ -79,7 +81,7 @@ sizes and paints agree with navigation disabled. Raster differences are limited
 to native antialiased mark edges; the existing frozen-reference overlays remain
 covered. Generated screenshots stay under temporary/ignored directories.
 
-Local resource observation: a resident float64 100 × 500 matrix, seed 17, uniform
+Earlier x/y resource observation (before `zoom=True` became y-only): a resident float64 100 × 500 matrix, seed 17, uniform
 values in [-1, 1], `zoom=True, show_values=True`, 600 × 450 logical pixels. With
 allocation tracing, preparation took 3.38 s and serialization 3.91 s; peak tracked
 Python allocation was 38.8 MiB. Compact JSON was 3.77 MB with exactly one dataset
@@ -87,6 +89,15 @@ and 50,000 measurement records. Chromium 156.0.8078.4 rendered in 4.11 s, report
 110.6 MiB JS heap, and observed zoom dispatch/domain change took 400 ms. Paused
 hover took 103 ms and succeeded. Other tests were running concurrently; these
 are local observations, not portable performance limits.
+
+Y-only navigation follow-up (October 19): all **293 targeted Python checks** and
+**42 browser checks** pass, with Ruff formatting/lint and mypy clean. The new
+observed tests confirm that `zoom=True` keeps x fixed during wheel zoom and drag
+panning for all four grid families, including fitted heatmap values. The existing
+two-axis annotation/hover tests now request `zoom="xy"` explicitly. The expression
+notebook was rerun successfully in its existing session: five completed cells,
+one idle kernel. The full integration suite and resource benchmark were not
+repeated for this direction-only follow-up.
 
 The full unrelated repository suites and documentation build were not rerun.
 Existing fixed-chart previews and M05.d transport limits remain applicable.
@@ -596,7 +607,8 @@ index encodings, text and style helpers; no new data module or analysis is added
 See the [matrix contract](../../docs/integrations/scanpy/index.md#supplied-matrix-compatibility)
 for source, tick-count, color and layout limits.
 
-Heatmap `zoom=True` enables native x/y wheel zoom and drag panning. Shared live
+Heatmap `zoom=True` enables native y-only wheel zoom and drag panning;
+`zoom="xy"` enables both axes. Shared live
 scale values project category strips, boundaries and unequal tree leaves.
 Offscreen gene/category labels disappear; branches and strips stop at the plot
 extent. Gene brackets are hidden unless their entire span is visible. Zoom

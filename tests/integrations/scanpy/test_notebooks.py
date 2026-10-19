@@ -141,7 +141,8 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     spec = charts[2].to_dict()
     tiles = points(spec)
     cells = spec["datasets"][spec["layer"][0]["data"]["name"]]
-    assert all(tiles["encoding"][axis]["scale"]["zoom"] is True for axis in ("x", "y"))
+    assert tiles["encoding"]["x"]["scale"]["zoom"] is False
+    assert tiles["encoding"]["y"]["scale"]["zoom"] is True
     assert len(cells) == 700 * 10
     assert len({row["_obs_id"] for row in cells}) == 700
     assert tiles["encoding"]["color"]["scale"]["domain"] == [0, 1]
@@ -164,6 +165,6 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         text = grid["layer"][1]["layer"][0]
         assert text["mark"]["fitToBand"] is True
         assert all(
-            grid["layer"][0]["encoding"][axis]["scale"]["zoom"] is True
+            grid["layer"][0]["encoding"][axis]["scale"]["zoom"] is (axis == "y")
             for axis in ("x", "y")
         )

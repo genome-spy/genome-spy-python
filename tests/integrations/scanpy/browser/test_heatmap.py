@@ -27,7 +27,7 @@ def test_zoom_moves_cell_annotations_and_tree(page, swapped):
         "group",
         dendrogram=True,
         swap_axes=swapped,
-        zoom=True,
+        zoom="xy",
         width=450,
         height=300,
         show=False,

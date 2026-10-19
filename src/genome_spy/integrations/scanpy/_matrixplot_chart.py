@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import pandas as pd
 
@@ -43,7 +43,7 @@ def build_matrixplot(
     linewidth: float,
     rotation: float | None,
     hover: bool,
-    zoom: bool,
+    zoom: bool | Literal["xy"],
     show_values: bool,
     value_title: str,
     width: float | None,
@@ -140,5 +140,5 @@ def build_matrixplot(
         height=height,
         frame_width=1.5,
         tree=tree,
-        zoom=zoom,
+        zoom=bool(zoom),
     )

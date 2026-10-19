@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -91,7 +91,7 @@ def build_dotplot(
     dot_max: float | None,
     smallest_dot: float,
     hover: bool,
-    zoom: bool,
+    zoom: bool | Literal["xy"],
     highlight: bool,
     value_title: str,
     linewidth: float,
@@ -234,7 +234,7 @@ def build_dotplot(
         height=height,
         frame_width=0.8,
         tree=tree,
-        zoom=zoom,
+        zoom=bool(zoom),
     )
     if highlight:
         chart = chart.add_params(

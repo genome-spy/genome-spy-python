@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -51,7 +51,7 @@ def build_heatmap(
     vmax: float | None,
     alpha: float | None,
     hover: bool,
-    zoom: bool,
+    zoom: bool | Literal["xy"],
     show_values: bool,
     scaled: bool,
     width: float | None,
@@ -185,7 +185,7 @@ def build_heatmap(
             list(values.columns.astype(str)),
             y if swap_axes else x,
             horizontal=not swap_axes,
-            zoom=zoom,
+            zoom=bool(zoom),
         )
         layers.append(labels)
 
@@ -248,7 +248,12 @@ def build_heatmap(
     # Scanpy uses brackets above ordinary heatmaps and a gene strip when swapped.
     if feature_groups and not swap_axes:
         brackets = _brackets(
-            feature_groups, x, swapped=False, rotation=rotation, end_band=0.8, zoom=zoom
+            feature_groups,
+            x,
+            swapped=False,
+            rotation=rotation,
+            end_band=0.8,
+            zoom=bool(zoom),
         )
         layers.extend(brackets)
     elif feature_groups:
@@ -329,7 +334,7 @@ def build_heatmap(
             layout={"anchor": "end", "direction": "vertical", "wrap": False},
         )
     )
-    return with_navigation(chart, enabled=zoom)
+    return with_navigation(chart, enabled=bool(zoom))
 
 
 def _category_strip(

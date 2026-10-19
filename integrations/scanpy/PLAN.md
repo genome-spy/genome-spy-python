@@ -368,7 +368,8 @@ The 250,000-value limit is checked before extraction; the 100k × 50 case tests
 rejection without data reads. Larger/chunked transport remains M05.d.
 The standalone `matrix` part of M05.b is delivered as a numeric-array preview,
 reusing numeric validation, linear color bounds, index slots and labels. Heatmap
-adds optional x/y zoom with aligned cell annotations and clipped tree branches.
+adds optional zoom with aligned cell annotations and clipped tree branches;
+y-only by default, with both axes explicitly available.
 Shared grid interactions are M05.e below. `clustermap` in M05.c is the next ready slice; larger transport remains M05.d.
 
 - M05.a: observation-level heatmap reuses source/group/slot access. Carry one
@@ -396,6 +397,8 @@ Shared grid interactions are M05.e below. `clustermap` in M05.c is the next read
   matrixplot, matrix and dotplot. Offer opt-in fitted two-decimal values on the
   three tile families and hover row/column bands on dotplot. Preserve plotted
   values, repeated slots, color limits, dot sizes, guides and default appearance.
+  `zoom=True` uses y-only navigation; explicit `zoom="xy"` enables both axes,
+  and `zoom=False` disables navigation. Test locked x domains during y zoom/pan.
   Reuse the prepared tables; interactions must not call Scanpy or extract data.
   Observe dense overview/zoomed text, native contrast including opacity/clipping,
   tooltip access, normal/swapped tree alignment while panning, duplicate-slot

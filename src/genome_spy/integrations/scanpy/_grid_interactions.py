@@ -1,17 +1,21 @@
 """Native navigation, value labels and hover bands for the expression grids."""
 
-from typing import Any
+from typing import Any, Literal
 
 import genome_spy as gs
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._style import FONT
 
 
-def zoom_axes(x: Any, y: Any, *, enabled: bool, name: str) -> tuple[Any, Any]:
-    """Return the supplied index axes with named zoom scales when requested."""
+def zoom_axes(
+    x: Any, y: Any, *, enabled: bool | Literal["xy"], name: str
+) -> tuple[Any, Any]:
+    """Enable y navigation by default, or both named index axes for 'xy'."""
     if not enabled:
         return x, y
-    return x.scale(zoom=True, name=f"{name}-x"), y.scale(zoom=True, name=f"{name}-y")
+    return x.scale(zoom=enabled == "xy", name=f"{name}-x"), y.scale(
+        zoom=True, name=f"{name}-y"
+    )
 
 
 def slot_position(axis: str, value: str) -> str:
