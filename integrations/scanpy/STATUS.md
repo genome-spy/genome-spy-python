@@ -52,7 +52,8 @@ plain-chart preview has user review; this delivery does not add it.
 
 Verified (interaction preview): [_grid_interactions.py](../../src/genome_spy/integrations/scanpy/_grid_interactions.py)
 shares live index positions, annotation visibility, fitted value text/native
-palette contrast and slot-based hover bands. Existing grouped labels/brackets
+palette contrast. Dotplot uses a native two-axis crosshair ruler. Existing grouped
+labels/brackets
 and tree rendering serve all applicable families. Dotplot gains `zoom` and
 `highlight`; matrixplot/matrix gain `zoom` and `show_values`; heatmap gains
 `show_values` and uses the shared navigation. All new options default False.
@@ -62,7 +63,8 @@ both axes. This keeps gene columns fixed while exploring long expression grids.
 The [expression notebook](notebooks/scanpy_expression.ipynb) enables the new
 options on the packaged PBMC data. Text displays plotted/scaled values to two
 decimals, preserves native tooltips and omits missing cells. Highlighting retains
-duplicate gene slots and clears on leaving the dot. Dot sizes and guides remain
+duplicate gene slots, tracks gaps between dots and clears on leaving the plot.
+Dot sizes and guides remain
 fixed under navigation. There is one serialized measurement table per chart;
 no extra Scanpy analysis or data extraction is introduced.
 
@@ -110,6 +112,20 @@ The full unrelated repository suites and documentation build were not rerun.
 Existing fixed-chart previews and M05.d transport limits remain applicable.
 No plan becomes eligible for clearance from this additional interaction slice;
 M05.c clustermap remains next.
+
+Native ruler follow-up (October 19): dotplot `highlight=True` now adds one
+`gs.ruler` parameter with `encodings=["x", "y"]` and `display="center"`.
+The old hover selection, two background layers and their slot tables/filter
+helper are removed. The crosshair snaps to row/column centers, including gaps,
+without changing plotted values, tooltips, dot footprints or guides. Browser
+checks cover both orientations, repeated labels, zoomed positions, clearing,
+initial appearance and standalone HTML. All **89 focused Python/workflow checks**
+and **23 grid browser checks** pass, with Ruff formatting/lint and mypy clean.
+The expression notebook was reloaded
+and all five code cells rerun in Jupyter; all four charts rendered successfully.
+Local matrix zoom experiments were preserved, with the tracked workflow's zoom
+settings validated separately. Band shading remains limited by C09 below;
+no Core patch is used. M05.c remains next and no plan is eligible for clearance.
 
 ## Milestones
 
@@ -803,6 +819,7 @@ an affected slice; upcoming releases are triggers to investigate, not assumption
 | C06 | Faceting/composition improvement announced, not adopted | UMAP and repeated panel layout | Released version/schema; recheck plot/gap/axis zoom and brush scope/count |
 | C07 | Python linkage + native rule branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Shared geometry projects into equal summary slots or unequal cell-group centers; standalone/attached resize and registered path checks pass. M05.e verifies grouped and heatmap navigation; recheck later families. |
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots, both orientations, optional zoom and duplicate-slot highlighting verified; extend checks with later families |
+| C09 | Native band rulers fail during initial WebGL rendering with no cursor coordinate; center/line rulers render successfully | Optional shaded row/column guides | Use a native center crosshair now. Temporary browser diagnostics reproduced the band initialization failure with default styling and a single ruler; revisit after an upstream fix/released runtime upgrade. No seeded cursor or local Core patch. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental

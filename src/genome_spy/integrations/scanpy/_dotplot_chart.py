@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._grid_interactions import zoom_axes, hover_bands
+from genome_spy.integrations.scanpy._grid_interactions import zoom_axes
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._grouped_chart import (
@@ -207,22 +207,8 @@ def build_dotplot(
                 gs.Tooltip("_percent:Q", title="Expressing cells (%)", format=".1f"),
             ]
         )
-    marks = [dots]
-    if highlight:
-        # Only dots own picking; bands follow their row/column without intercepting hover.
-        dots = dots.add_params(
-            gs.selection_point(
-                "grid_hover",
-                on="mouseover",
-                clear="mouseout",
-                toggle=False,
-                persist=False,
-                push="outer",
-            )
-        )
-        marks = [*hover_bands(rows, columns, x, y), dots]
     chart = finish_grouped_chart(
-        marks,
+        [dots],
         colors,
         feature_groups,
         x,
@@ -237,9 +223,17 @@ def build_dotplot(
         zoom=bool(zoom),
     )
     if highlight:
+        # The plot container owns the ruler so it also tracks gaps between dots.
         chart = chart.add_params(
-            gs.param(
-                "grid_hover", value={"type": "single", "datum": None, "uniqueId": None}
+            gs.ruler(
+                "grid_cursor",
+                encodings=["x", "y"],
+                display="center",
+                extent="view",
+                persist=False,
+                mark=gs.RulerMarkConfig(
+                    stroke="#4682b4", opacity=0.55, strokeWidth=1, zindex=0
+                ),
             )
         )
     return chart

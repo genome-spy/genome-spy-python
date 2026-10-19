@@ -97,20 +97,31 @@ def test_value_marks_share_one_source_and_keep_plotted_values(family):
     )
 
 
-def test_highlight_uses_slots_and_remains_available_without_tooltips():
+def test_highlight_uses_native_ruler_without_extra_marks_or_data():
+    plain = grid_chart("dotplot", hover=False).to_dict()
     spec = grid_chart("dotplot", highlight=True, hover=False).to_dict()
-    dots = spec["layer"][2]
+    dots = spec["layer"][0]
     assert dots["mark"]["type"] == "point" and dots["mark"]["tooltip"] is None
-    assert dots["params"][0]["select"] == {
-        "type": "point",
-        "on": "mouseover",
-        "clear": "mouseout",
-        "toggle": False,
-    }
-    assert dots["params"][0]["push"] == "outer"
-    assert "grid_hover.datum._x" in spec["layer"][0]["transform"][0]["expr"]
-    assert "grid_hover.datum._y" in spec["layer"][1]["transform"][0]["expr"]
-    assert all(layer["mark"]["tooltip"] is None for layer in spec["layer"][:2])
+    assert spec["params"] == [
+        {
+            "name": "grid_cursor",
+            "persist": False,
+            "ruler": {
+                "encodings": ["x", "y"],
+                "display": "center",
+                "extent": "view",
+                "mark": {
+                    "stroke": "#4682b4",
+                    "opacity": 0.55,
+                    "strokeWidth": 1,
+                    "zindex": 0,
+                },
+            },
+        }
+    ]
+    assert spec["datasets"] == plain["datasets"]
+    del spec["params"]
+    assert spec == plain
 
 
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot", "heatmap", "matrix"])

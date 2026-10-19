@@ -159,7 +159,10 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     )
     assert [row["_column"] for row in records[:10]] == namespace["group_labels"]
 
-    assert any(p["name"] == "grid_hover" for p in charts[0].to_dict()["params"])
+    rulers = [p for p in charts[0].to_dict()["params"] if "ruler" in p]
+    assert len(rulers) == 1
+    assert rulers[0]["ruler"]["encodings"] == ["x", "y"]
+    assert rulers[0]["ruler"]["display"] == "center"
     for chart in charts[1:]:
         grid = chart.to_dict()["layer"][0]
         text = grid["layer"][1]["layer"][0]

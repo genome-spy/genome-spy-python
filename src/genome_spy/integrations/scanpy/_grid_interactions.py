@@ -1,4 +1,4 @@
-"""Native navigation, value labels and hover bands for the expression grids."""
+"""Native navigation and value labels for the expression grids."""
 
 from typing import Any, Literal
 
@@ -109,26 +109,3 @@ def with_values(tiles: gs.Chart, field: str, *, alpha: float = 1) -> gs.LayerCha
         .properties(data=data, transform=transforms)
         .add_params(gs.param("grid_palette", expr=palette))
     )
-
-
-def hover_bands(rows: int, columns: int, x: Any, y: Any) -> list[gs.Chart]:
-    """Return a row and column background driven by the hovered integer slots."""
-    layers = []
-    for axis, count, coordinate in (("x", columns, x), ("y", rows, y)):
-        chart = (
-            gs.Chart([{"slot": slot, "stop": slot + 1} for slot in range(count)])
-            .transform_filter(
-                f"grid_hover.datum && datum.slot == grid_hover.datum._{axis}"
-            )
-            .mark_rect(color="#4682b4", opacity=0.12, tooltip=None)
-            .encode(
-                **{
-                    axis: coordinate.field("slot").band(0),
-                    f"{axis}2": (gs.X2 if axis == "x" else gs.Y2)("stop:I").band(0),
-                    "y" if axis == "x" else "x": gs.value(0),
-                    "y2" if axis == "x" else "x2": gs.value(1),
-                }
-            )
-        )
-        layers.append(chart)
-    return layers

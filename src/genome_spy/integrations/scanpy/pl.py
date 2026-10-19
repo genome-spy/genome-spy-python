@@ -474,7 +474,7 @@ def dotplot(
         smallest_dot: Minimum dot area in points squared; maximum is 200.
         hover: Show gene, group, displayed color value and expressing percentage.
         zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
-        highlight: Highlight the row and column of the hovered dot.
+        highlight: Mark the row and column under the pointer with a native ruler.
         width: Native plot-area width in logical pixels, default 37 per column.
         height: Native plot-area height in logical pixels, default 35 per row.
         **kwds: Only scalar linewidth is supported; other scatter options error.

@@ -43,6 +43,17 @@ def position(element):
     ]
 
 
+def ruler_lines(root):
+    """Read the visible native crosshair lines from an exported chart."""
+    return [
+        line
+        for group in root.iter()
+        if group.get("stroke") == "#4682b4"
+        for line in group
+        if line.tag.endswith("line")
+    ]
+
+
 def pointer(page, bounds, x=0.5, y=0.5):
     """Move inside a plot using fractions of its logical extent."""
     canvas = page.locator("canvas").first.bounding_box()
@@ -111,6 +122,7 @@ def test_enabling_navigation_keeps_initial_pixels(page, family, swapped):
                 width=360,
                 height=260,
                 show=False,
+                **({"highlight": zoom} if family == "dotplot" else {}),
             )
         target = page.context.new_page()
         try:
@@ -335,9 +347,10 @@ def test_summary_zoom_and_pan_keep_tree_leaves_and_labels_aligned(
     )
 
 
-@pytest.mark.parametrize("swapped,hover", [(False, True), (True, True), (False, False)])
+@pytest.mark.parametrize("swapped", [False, True])
+@pytest.mark.parametrize("hover", [False, True])
 def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
-    page, swapped, hover
+    page, swapped, hover, tmp_path
 ):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
@@ -354,34 +367,42 @@ def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
             show=False,
         )
     bounds = render(page, chart)
-    assert page.evaluate("api.getParam('grid_hover').getValue().datum") is None
+    coordinates = (
+        "['x','y'].map(axis => api.getParam('grid_cursor').getValue().values[axis])"
+    )
+    assert page.evaluate(coordinates) == [None, None]
     # The two g2 slots have the same label but must select different columns/rows.
     for slot in (0, 1):
         column, row = (0, slot) if swapped else (slot, 0)
         columns, rows = (4, 3) if swapped else (3, 4)
         pointer(page, bounds, (column + 0.8) / (columns + 0.6), (row + 1) / (rows + 1))
         page.wait_for_timeout(100)
-        selected = page.evaluate("api.getParam('grid_hover').getValue().datum")
-        assert (
-            selected["_gene"] == "g2"
-            and selected["_x"] == column
-            and selected["_y"] == row
-        )
+        assert page.evaluate(coordinates) == [column, row]
         root = svg_root(page)
-        bands = [
-            rect
-            for group in root.iter()
-            if group.get("fill") == "#4682b4"
-            for rect in group
-            if rect.tag.endswith("rect")
-        ]
-        assert len(bands) == 2
-        assert float(bands[0].get("width")) == pytest.approx(
-            bounds["width"] / (columns + 0.6), abs=1
+        guides = ruler_lines(root)
+        assert len(guides) == 2
+        vertical, horizontal = guides
+        x = bounds["x"] + (column + 0.8) / (columns + 0.6) * bounds["width"]
+        y = bounds["y"] + (row + 1) / (rows + 1) * bounds["height"]
+        assert [float(vertical.get(k)) for k in ("x1", "x2")] == pytest.approx(
+            [x, x], abs=1
         )
-        assert float(bands[1].get("height")) == pytest.approx(
-            bounds["height"] / (rows + 1), abs=1
+        assert sorted(float(vertical.get(k)) for k in ("y1", "y2")) == pytest.approx(
+            [bounds["y"], bounds["y"] + bounds["height"]], abs=1
         )
+        assert [float(horizontal.get(k)) for k in ("y1", "y2")] == pytest.approx(
+            [y, y], abs=1
+        )
+        assert sorted(float(horizontal.get(k)) for k in ("x1", "x2")) == pytest.approx(
+            [bounds["x"], bounds["x"] + bounds["width"]], abs=1
+        )
+        # Rulers track the whole slot, even away from any hoverable dot.
+        pointer(
+            page, bounds, (column + 0.4) / (columns + 0.6), (row + 0.6) / (rows + 1)
+        )
+        page.wait_for_timeout(100)
+        assert page.evaluate(coordinates) == [column, row]
+        assert not page.locator("table.attributes").is_visible()
     px, py = pointer(
         page, bounds, (column + 0.8) / (columns + 0.6), (row + 1) / (rows + 1)
     )
@@ -417,13 +438,26 @@ def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
     for dx in (0, 1, -1):
         page.mouse.move(px + dx, py)
         page.wait_for_timeout(100)
-        selected = page.evaluate("api.getParam('grid_hover').getValue().datum")
-        if selected is not None:
+        selected = page.evaluate(coordinates)
+        if selected == [column, row]:
             break
-    assert selected["_x"] == column and selected["_y"] == row
+    assert selected == [column, row]
+    canvas = page.locator("canvas").first.bounding_box()
+    vertical, horizontal = ruler_lines(svg_root(page))
+    assert float(vertical.get("x1")) == pytest.approx(px - canvas["x"], abs=1)
+    assert float(horizontal.get("y1")) == pytest.approx(py - canvas["y"], abs=1)
     page.mouse.move(1, 1)
     page.wait_for_timeout(100)
-    assert page.evaluate("api.getParam('grid_hover').getValue().datum") is None
-    assert not [
-        e for e in svg_root(page).iter() if e.get("fill") == "#4682b4" and len(e)
-    ]
+    assert page.evaluate(coordinates) == [None, None]
+    assert not ruler_lines(svg_root(page))
+    if not hover:
+        output = tmp_path / "dotplot-rulers.html"
+        chart.save(output, inline=True, controls=False)
+        page.goto(output.as_uri())
+        page.locator("canvas").wait_for(state="visible")
+        before = np.asarray(Image.open(BytesIO(page.screenshot()))).astype(int)
+        pointer(page, bounds, 0.5, 0.5)
+        page.wait_for_timeout(100)
+        after = np.asarray(Image.open(BytesIO(page.screenshot()))).astype(int)
+        assert (np.abs(after - before).max(axis=2) > 10).sum() > 200
+        assert page.locator(".message-box").count() == 0

@@ -395,14 +395,15 @@ Shared grid interactions are M05.e below. `clustermap` in M05.c is the next read
 - M05.e (verified interaction preview; [evidence](STATUS.md#m05e-shared-grid-interactions)):
   share index navigation and live annotation projection across heatmap,
   matrixplot, matrix and dotplot. Offer opt-in fitted two-decimal values on the
-  three tile families and hover row/column bands on dotplot. Preserve plotted
+  three tile families and a native row/column crosshair ruler on dotplot. Preserve plotted
   values, repeated slots, color limits, dot sizes, guides and default appearance.
   `zoom=True` uses y-only navigation; explicit `zoom="xy"` enables both axes,
   and `zoom=False` disables navigation. Test locked x domains during y zoom/pan.
   Reuse the prepared tables; interactions must not call Scanpy or extract data.
   Observe dense overview/zoomed text, native contrast including opacity/clipping,
   tooltip access, normal/swapped tree alignment while panning, duplicate-slot
-  highlighting and clearing. Run the packaged-PBMC expression notebook and record
+  highlighting, gaps between dots, clearing on plot leave and standalone HTML.
+  Run the packaged-PBMC expression notebook and record
   a realistic allocation/payload/browser observation. Keep native API limitations
   and remaining large-data transport debt explicit.
 

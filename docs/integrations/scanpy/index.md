@@ -176,7 +176,7 @@ ranking, palette write, or cached-result mutation occurs.
 | `cmap`, `vmin`, `vmax` | Native schemes (default `Reds` selects Vega `reds`) and finite numeric bounds. Constant bounds paint the first palette color; the guide expands by 10%, or ±0.1 at zero, matching Scanpy's precomputed dot colors. Missing values are omitted from painting without removing their slots; infinities and all-missing colors error. |
 | `title`, `colorbar_title`, `size_title`, `var_group_*` | Native labels, bracket rules and size/color guides. Mapping features supply brackets directly. Scalar `linewidth` styles dot edges. |
 | `width`, `height` | Plot-area logical pixels; defaults are 37 pixels per feature column and 35 per group row, exchanged with the axes. Labels and guides add space. |
-| `zoom`, `highlight` | Both default False. `zoom=True` enables y-only navigation; `zoom="xy"` enables both axes. Zoom/panning retain aligned labels and tree branches; hovering a dot shades its row and column when highlighting is enabled. Dot sizes and both guides keep their original mapping. Repeated labels retain separate integer slots. |
+| `zoom`, `highlight` | Both default False. `zoom=True` enables y-only navigation; `zoom="xy"` enables both axes. Zoom/panning retain aligned labels and tree branches; highlighting uses a native crosshair ruler at the row and column centers under the pointer, including gaps between dots. Dot sizes and both guides keep their original mapping. Repeated labels retain separate integer slots. |
 | `hover` | Enabled by default. Tooltips show gene, group, displayed mean/color value and actual expressing-cell percentage, before dot-size clipping. Use `hover=False` to disable them. Scaled means and supplied color values are labeled explicitly. |
 | `figsize` | Explicit native layout budget at 100 logical pixels/inch: subtract a fixed 150-pixel guide allowance from width; height sizes the plot area. Labels and renderer padding add space, so this does not fix the outer canvas dimensions. Conflicts with `width`/`height` error. |
 | `show`, `save`, `ax`, `return_fig` | Same native return/display/export boundary as UMAP. No Axes dictionaries or fake builders. |
@@ -253,7 +253,9 @@ no text. Black/white contrast uses the native palette sampled at 256 bins,
 clamped color bounds and tile opacity over white. Sampling runs in GenomeSpy;
 there is no Python colormap implementation.
 
-`highlight` shades the hovered dot's row and column and clears on leaving the dot.
+`highlight` uses a native two-axis ruler to mark the row and column centers under
+the pointer, including gaps between dots, and clears on leaving the plot. Its
+crosshair stays inside the plot and adds no background datasets or hover selections.
 It works independently of `hover`; no brush or individual-cell selection is
 implied by grouped summaries. Integer slots preserve repeated gene labels.
 Zooming changes positions while keeping the dot percentage-to-area mapping,
