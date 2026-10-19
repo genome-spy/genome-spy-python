@@ -14,6 +14,8 @@ workflow tests and Ruff checks pass. Local notebook edits remain unchanged.
 
 **Available:** categorical/continuous 2D UMAP, dotplot/matrixplot and cell heatmaps with dendrograms,
 supplied numeric matrices, clustermaps, standalone dendrograms and correlation matrix development previews.
+Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
+reuse Scanpy's public result getter and the existing expression plot functions.
 UMAP includes native sizing, optional hover/zoom, linked interval highlighting/count
 and Python subset retrieval. Dotplot includes index-scaled slots, grouped summaries,
 brackets, native size/color guides and optional summary hover. Matrixplot reuses
@@ -30,7 +32,7 @@ Clustermap adds individual-cell/gene clustering using public SciPy linkage or
 supplied trees, ordered CSS annotation tracks and native hover, with explicit
 tile and pairwise-distance limits. It shares numeric tiles and tree geometry
 rather than constructing Seaborn/Matplotlib objects.
-**Implemented families:** UMAP, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram and correlation matrix (partial). Scanpy **1.11.5** is the only accepted version;
+**Available public entries: 13**, including the stored-ranking previews below. Scanpy **1.11.5** is the only accepted version;
 bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibility.
 
 Implementation is in
@@ -52,7 +54,7 @@ reloaded from disk and all five code cells rerun in the visible Jupyter tab;
 all four charts rendered with the corrected matrix placement. No plan clearance
 changes follow from this fix.
 
-**Next ready slice: M06.a–c stored rankings and ranked summaries.** M05.c now has a bounded plain-chart preview; larger and
+**Next ready slice: M06.d rank-statistic colors.** M06.a–c have a stored-result preview; larger and
 chunked tile transport remains M05.d.
 Dotplot brushing remains deferred until the
 plain-chart preview has user review; this delivery does not add it.
@@ -161,8 +163,51 @@ The unrelated full Python suite and documentation build were not rerun.
 
 Clearance: retain. M14 owns adopting a released Core containing #587; then rerun
 the three strip cases before/after navigation, remove expected failures and the
-known-limit notices, and verify the PBMC notebook. M06 remains the next independent
+known-limit notices, and verify the PBMC notebook. M06.d remains the next independent
 slice. This records a native capability blocker, not a completed hover feature.
+
+## M06.a–c stored ranking preview
+
+Implemented: `ranking`, `rank_genes_groups`, and ranked dotplot/matrixplot/heatmap.
+The expression wrappers make one public `sc.get.rank_genes_groups_df` request for
+the selected rank lists, preserving their order, tail selection, repeated slots,
+symbols and strict fold-change filtering. They call the existing expression plot
+entry points; summaries, raw/layer access, trees and interactions are shared.
+No ranking or embedding analysis runs, and cached results are not modified.
+
+Native rank panels share one text/axis renderer. `rank_genes_groups` reads only
+stored names/scores; symbols honor the stored raw/var choice. `ranking` handles
+supplied columns/dictionaries, dense array indices, log scores and extreme-rank
+gaps. Missing/nonfinite score labels error; filtered marker lists are supported
+by the expression wrappers. Native font, tick density and outer layout differ
+from Matplotlib. Metric colors remain explicit unsupported options until M06.d.
+
+Evidence: [ranking tests](../../tests/integrations/scanpy/test_ranked.py),
+[native browser checks](../../tests/integrations/scanpy/browser/test_ranked.py),
+[four frozen complete-panel cases](../../tests/integrations/scanpy/fixtures/ranked.json)
+and their [generator](../../tests/integrations/scanpy/generate_ranked_references.py).
+Registered SVG anchors, titles, axes, hover, offline HTML and reused y navigation
+are checked. Generated figures, captures and overlays remain outside Git.
+The [expression workflow](notebooks/scanpy_expression.ipynb) now has ten code cells
+and nine charts on packaged PBMC data, including stored logreg scores and all
+three ranked expression variants. Existing local plot settings are preserved.
+All ten cells completed in the live Jupyter notebook. The full non-browser
+integration run passed **606 checks**; after consolidating rank access into one
+getter request, **156 focused API/ranking/workflow checks** passed. All **eight
+ranking browser checks** and the final **47 ranking checks** pass, as do Ruff
+formatting/lint and mypy. The unrelated full
+repository suite and documentation build were not rerun.
+
+A seed-17 float32 sparse 100,000-cell × 20,000-gene observation with 100,000 random
+samples selected four unique genes in eight marker slots and serialized 32 summary
+records (8,937 compact JSON bytes). Cold preparation took 3.748 s, first serialization
+1.996 s, and peak traced Python
+allocation was 89.38 MiB, including optional imports and schema validation.
+Tests enforce selected-column densification and reject oversized cell heatmaps
+before expression access. These are local observations, not portable limits.
+
+Clearance: retain. M06.d is next; M14 retains filtered score-panel and native
+presentation limits. M08/M09 own ranked distributions/tracks. No plan is cleared.
 
 ## Milestones
 
@@ -177,7 +222,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
 | M05 heatmap/matrix/clustermap | In progress; three bounded previews delivered | Heatmap/matrix/shared interactions and clustermap values, masks, two Python trees, annotation tracks, native hover and PBMC workflow are covered below. Larger/chunked transport remains M05.d; broader kwargs and native delivery remain M14. |
-| M06 ranking/ranked summaries | Planned | Stored rank selection and reusable dot/matrix/heatmap wrappers. |
+| M06 ranking/ranked summaries | In progress; stored-result preview delivered | M06.a–c select stored ranks and reuse dot/matrix/heatmap charts. M06.d statistic colors remain next; native builders remain M13. |
 | M07 embeddings/scatter/PCA | Planned | Shared 2D embeddings/alias/PCA diagnostics, then remaining UMAP options. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
@@ -875,14 +920,14 @@ No placeholder functions are exported for planned work.
 | `pca_overview` | Not implemented | M07 |
 | `pca_scatter` | Not implemented; pca alias | M07 |
 | `pca_variance_ratio` | Not implemented | M07 |
-| `rank_genes_groups` | Not implemented | M06 |
-| `rank_genes_groups_dotplot` | Not implemented | M06 |
-| `rank_genes_groups_heatmap` | Not implemented | M06 |
-| `rank_genes_groups_matrixplot` | Not implemented | M06 |
+| `rank_genes_groups` | Preview: stored score panels | M06.a–c; filtered/nonfinite panels and presentation debt M14 |
+| `rank_genes_groups_dotplot` | Preview: expression colors and fractions | M06.a–c; statistic colors M06.d, builder M13 |
+| `rank_genes_groups_heatmap` | Preview: individual-cell expression | M06.a–c; shares parent heatmap limits |
+| `rank_genes_groups_matrixplot` | Preview: expression means | M06.a–c; statistic colors M06.d, builder M13 |
 | `rank_genes_groups_stacked_violin` | Not implemented | M08; rank access M06 |
 | `rank_genes_groups_tracksplot` | Not implemented | M09; rank access M06 |
 | `rank_genes_groups_violin` | Not implemented | M08; rank access M06 |
-| `ranking` | Not implemented | M06 |
+| `ranking` | Preview: supplied score attributes/dictionaries | M06.c; shared native rank labels, dense indices only |
 | `scatter` | Not implemented | M07 |
 | `scrublet_score_distribution` | Not implemented | M10 |
 | `set_rcParams_defaults` | External: use Scanpy | Renderer exception, M00 |

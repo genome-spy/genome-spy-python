@@ -436,6 +436,11 @@ large inputs have a measured policy without hidden downsampling/aggregation.
 
 ### M06 — ranking and ranked summary plots
 
+M06.a–c now have a stored-result preview: ranking/score labels and expression-color
+wrappers are implemented. M06.d metric colors are next. Filtered marker lists
+work; nonfinite/missing score-panel labels currently error. Track this limit and
+native typography/guide differences in M14 rather than claiming full-family closure.
+
 - M06.a: read the requested stored `rank_genes_groups` key and params, validate
   groups/method/source fields and filtered results, then use public
   `sc.get.rank_genes_groups_df` where equivalent. Never run ranking to fill gaps.

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Collection, Mapping, Sequence
+from collections.abc import Callable, Collection, Mapping, Sequence
 from importlib.metadata import PackageNotFoundError, version
 from math import isfinite
 from numbers import Real
@@ -23,6 +23,11 @@ __all__ = [
     "heatmap",
     "matrix",
     "matrixplot",
+    "ranking",
+    "rank_genes_groups",
+    "rank_genes_groups_dotplot",
+    "rank_genes_groups_matrixplot",
+    "rank_genes_groups_heatmap",
     "umap",
 ]
 
@@ -1388,3 +1393,468 @@ def correlation_matrix(
         figsize=figsize,
     )
     return _finish_plot(chart, show, sc)
+
+
+def ranking(
+    adata: AnnData,
+    attr: Literal["var", "obs", "uns", "varm", "obsm"],
+    keys: str | Sequence[str],
+    *,
+    dictionary: str | None = None,
+    indices: Sequence[int] | None = None,
+    labels: str | Sequence[str] | None = None,
+    color: Any = "black",
+    n_points: int = 30,
+    log: bool = False,
+    include_lowest: bool = False,
+    show: bool | None = None,
+    hover: bool = True,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Plot ranked labels from scores already stored in AnnData.
+
+    Reads supplied attributes or nested dictionaries without computing analysis.
+    Native text panels preserve Scanpy's score sorting and extreme-rank gap.
+
+    Args:
+        adata: AnnData containing the scores.
+        attr: Attribute containing score columns or a dictionary.
+        keys: Score names, or an array key when selecting indices.
+        dictionary: Nested dictionary key within the attribute.
+        indices: Array columns to display as separate panels.
+        labels: Labels per score row, a numbered prefix, or automatic labels.
+        color: Opaque native CSS text color.
+        n_points: Rank count; Scanpy includes one extra label without include_lowest.
+        log: Take the natural logarithm of positive scores before sorting.
+        include_lowest: Show high and low scores with a gap when ranks are omitted.
+        show: Display once, or return the native chart when False.
+        hover: Show the label, score and zero-based rank in native tooltips.
+        width: Native width per panel, default 300 logical pixels.
+        height: Native height per panel, default 300 logical pixels.
+
+    Returns:
+        A native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        ValueError: If scores, labels, counts or dimensions are invalid.
+        NotImplementedError: If the color needs Matplotlib conversion.
+
+    Example:
+        >>> chart = gsc.pl.ranking(adata, "varm", "PCs", indices=[0, 1], show=False)
+    """
+    context = "gsc.pl.ranking"
+    for name, value in {
+        "log": log,
+        "include_lowest": include_lowest,
+        "hover": hover,
+    }.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    sc = _prepare_plot(show, False, context=context)
+    from genome_spy.integrations.scanpy._ranked_data import attribute_rank_panels
+    from genome_spy.integrations.scanpy._ranking_chart import build_ranking
+
+    panels = attribute_rank_panels(
+        adata,
+        attr,
+        keys,
+        dictionary=dictionary,
+        indices=indices,
+        labels=labels,
+        n_points=n_points,
+        log=log,
+        include_lowest=include_lowest,
+    )
+    columns = len(panels) if len(panels) <= 5 else (len(panels) + 1) // 2
+    chart = build_ranking(
+        panels,
+        ncols=columns,
+        sharey=False,
+        fontsize=8,
+        color=color,
+        hover=hover,
+        width=width,
+        height=height,
+        context=context,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def rank_genes_groups(
+    adata: AnnData,
+    groups: str | Sequence[str] | None = None,
+    *,
+    n_genes: int = 20,
+    gene_symbols: str | None = None,
+    key: str | None = "rank_genes_groups",
+    fontsize: int = 8,
+    ncols: int = 4,
+    sharey: bool = True,
+    show: bool | None = None,
+    save: bool | None = None,
+    hover: bool = True,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot gene labels at their stored differential-expression rank and score.
+
+    Uses existing results only; neither analysis nor expression extraction runs.
+    Group titles, requested order, score bounds and shared-y behavior follow Scanpy.
+
+    Args:
+        adata: AnnData with stored rank_genes_groups results.
+        groups: Ranked groups to show, in the requested order.
+        n_genes: Positive number of stored ranks per group.
+        gene_symbols: Annotation column in the ranking's raw or variable source.
+        key: Stored result key.
+        fontsize: Gene-label font size in points.
+        ncols: Maximum panel columns.
+        sharey: Use common score bounds across panels.
+        show: Display once, return chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Show gene label, score and zero-based rank.
+        width: Native width per panel, default 300 logical pixels.
+        height: Native height per panel, default 300 logical pixels.
+        **kwds: The n_panels_per_row alias for ncols; other options error.
+
+    Returns:
+        A native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        TypeError: If forwarded options or flags are invalid.
+        ValueError: If stored results, names or score values are invalid.
+        NotImplementedError: If saving requests Matplotlib output.
+
+    Example:
+        >>> chart = gsc.pl.rank_genes_groups(pbmc, n_genes=5, show=False)
+    """
+    context = "gsc.pl.rank_genes_groups"
+    _check_kwargs(kwds, {"n_panels_per_row"}, context=context)
+    for name, value in {"sharey": sharey, "hover": hover}.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._ranked_data import _count, gene_rank_panels
+    from genome_spy.integrations.scanpy._ranking_chart import build_ranking
+
+    columns = _count(kwds.get("n_panels_per_row", ncols), "ncols", context=context)
+    panels = gene_rank_panels(
+        adata, groups, key=key, n_genes=n_genes, gene_symbols=gene_symbols
+    )
+    chart = build_ranking(
+        panels,
+        ncols=columns,
+        sharey=sharey,
+        fontsize=fontsize,
+        color="black",
+        hover=hover,
+        width=width,
+        height=height,
+        context=context,
+        headroom=0.3,
+        ylabel="score",
+        bottom_labels=True,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def _ranked_expression(
+    plot: Callable[..., TopLevelSpec | None],
+    adata: AnnData,
+    groups: Any,
+    *,
+    n_genes: int | None,
+    groupby: str | None,
+    values_to_plot: str | None,
+    var_names: Any,
+    gene_symbols: str | None,
+    min_logfoldchange: float | None,
+    key: str | None,
+    show: bool | None,
+    save: bool | None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Select stored marker slots once, then delegate to an existing expression plot."""
+    context = f"gsc.pl.rank_genes_groups_{plot.__name__}"
+    if "ax" in kwds or "return_fig" in kwds:
+        _check_kwargs(kwds, set(), context=context)
+    if values_to_plot is not None:
+        raise NotImplementedError(
+            f"{context}: values_to_plot is not supported yet; use the parent plot with an explicitly supplied statistic table."
+        )
+    if "dot_color_df" in kwds or "values_df" in kwds:
+        raise TypeError(f"{context}: use the parent plot for supplied summary tables.")
+    _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._ranked_data import ranked_features
+
+    markers, grouping = ranked_features(
+        adata,
+        groups,
+        n_genes=n_genes,
+        groupby=groupby,
+        var_names=var_names,
+        gene_symbols=gene_symbols,
+        min_logfoldchange=min_logfoldchange,
+        key=key,
+        context=context,
+    )
+    kwds.setdefault("dendrogram", True)
+    return plot(
+        adata,
+        markers,
+        grouping,
+        gene_symbols=gene_symbols,
+        show=show,
+        save=save,
+        **kwds,
+    )
+
+
+def rank_genes_groups_dotplot(
+    adata: AnnData,
+    groups: str | Sequence[str] | None = None,
+    *,
+    n_genes: int | None = None,
+    groupby: str | None = None,
+    values_to_plot: Literal[
+        "scores",
+        "logfoldchanges",
+        "pvals",
+        "pvals_adj",
+        "log10_pvals",
+        "log10_pvals_adj",
+    ]
+    | None = None,
+    var_names: Sequence[str] | Mapping[str, Sequence[str]] | None = None,
+    gene_symbols: str | None = None,
+    min_logfoldchange: float | None = None,
+    key: str | None = None,
+    show: bool | None = None,
+    save: bool | None = None,
+    hover: bool = True,
+    zoom: bool | Literal["xy"] = False,
+    highlight: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot stored ranked genes through the existing native dotplot.
+
+    Selects top or tail genes with Scanpy's public getter. Dot colors and sizes
+    remain group mean expression and expressing-cell fractions.
+
+    Args:
+        adata: AnnData containing stored rankings and expression.
+        groups: Rank lists to select; does not filter expression groups or cells.
+        n_genes: Genes per list, default 10; negative selects the stored tail.
+        groupby: Expression grouping key, default the ranking's groupby.
+        values_to_plot: Reserved; metric colors are not supported yet.
+        var_names: Explicit markers instead of n_genes, retaining repeated slots.
+        gene_symbols: Variable annotation used for gene labels and lookup.
+        min_logfoldchange: Strict lower stored log-fold-change threshold.
+        key: Stored ranking key, default rank_genes_groups.
+        show: Display once, return chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Enable the parent plot's native summary tooltips.
+        zoom: True navigates y only; "xy" navigates both axes.
+        highlight: Enable the native row/column ruler.
+        width: Parent plot width in logical pixels.
+        height: Parent plot height in logical pixels.
+        **kwds: Existing dotplot options; dendrogram defaults True.
+
+    Returns:
+        A native dotplot when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        ValueError: If stored rankings or gene-selection options are invalid.
+        TypeError: If forwarded options are unsupported.
+        NotImplementedError: If metric colors or renderer options are unsupported.
+
+    Example:
+        >>> chart = gsc.pl.rank_genes_groups_dotplot(pbmc, n_genes=3, show=False)
+    """
+    return _ranked_expression(
+        dotplot,
+        adata,
+        groups,
+        n_genes=n_genes,
+        groupby=groupby,
+        values_to_plot=values_to_plot,
+        var_names=var_names,
+        gene_symbols=gene_symbols,
+        min_logfoldchange=min_logfoldchange,
+        key=key,
+        show=show,
+        save=save,
+        hover=hover,
+        zoom=zoom,
+        highlight=highlight,
+        width=width,
+        height=height,
+        **kwds,
+    )
+
+
+def rank_genes_groups_matrixplot(
+    adata: AnnData,
+    groups: str | Sequence[str] | None = None,
+    *,
+    n_genes: int | None = None,
+    groupby: str | None = None,
+    values_to_plot: Literal[
+        "scores",
+        "logfoldchanges",
+        "pvals",
+        "pvals_adj",
+        "log10_pvals",
+        "log10_pvals_adj",
+    ]
+    | None = None,
+    var_names: Sequence[str] | Mapping[str, Sequence[str]] | None = None,
+    gene_symbols: str | None = None,
+    min_logfoldchange: float | None = None,
+    key: str | None = None,
+    show: bool | None = None,
+    save: bool | None = None,
+    hover: bool = True,
+    zoom: bool | Literal["xy"] = False,
+    show_values: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot stored ranked genes through the existing native matrixplot.
+
+    Reuses ranked marker selection and the parent plot's means, scaling and trees.
+
+    Args:
+        adata: AnnData containing stored rankings and expression.
+        groups: Rank lists to select; does not filter expression groups or cells.
+        n_genes: Genes per list, default 10; negative selects the stored tail.
+        groupby: Expression grouping key, default the ranking's groupby.
+        values_to_plot: Reserved; metric colors are not supported yet.
+        var_names: Explicit markers instead of n_genes.
+        gene_symbols: Variable annotation used for gene labels and lookup.
+        min_logfoldchange: Strict lower stored log-fold-change threshold.
+        key: Stored ranking key, default rank_genes_groups.
+        show: Display once, return chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Enable the parent plot's native summary tooltips.
+        zoom: True navigates y only; "xy" navigates both axes.
+        show_values: Show fitted plotted values when tiles have room.
+        width: Parent plot width in logical pixels.
+        height: Parent plot height in logical pixels.
+        **kwds: Existing matrixplot options; dendrogram defaults True.
+
+    Returns:
+        A native matrixplot when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        ValueError: If stored rankings or gene-selection options are invalid.
+        TypeError: If forwarded options are unsupported.
+        NotImplementedError: If metric colors or renderer options are unsupported.
+
+    Example:
+        >>> chart = gsc.pl.rank_genes_groups_matrixplot(pbmc, n_genes=3, show=False)
+    """
+    return _ranked_expression(
+        matrixplot,
+        adata,
+        groups,
+        n_genes=n_genes,
+        groupby=groupby,
+        values_to_plot=values_to_plot,
+        var_names=var_names,
+        gene_symbols=gene_symbols,
+        min_logfoldchange=min_logfoldchange,
+        key=key,
+        show=show,
+        save=save,
+        hover=hover,
+        zoom=zoom,
+        show_values=show_values,
+        width=width,
+        height=height,
+        **kwds,
+    )
+
+
+def rank_genes_groups_heatmap(
+    adata: AnnData,
+    groups: str | Sequence[str] | None = None,
+    *,
+    n_genes: int | None = None,
+    groupby: str | None = None,
+    gene_symbols: str | None = None,
+    var_names: Sequence[str] | Mapping[str, Sequence[str]] | None = None,
+    min_logfoldchange: float | None = None,
+    key: str | None = None,
+    show: bool | None = None,
+    save: bool | None = None,
+    hover: bool = True,
+    zoom: bool | Literal["xy"] = False,
+    show_values: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot stored ranked genes through the existing individual-cell heatmap.
+
+    Reuses ranked marker selection and all parent heatmap data and chart helpers.
+
+    Args:
+        adata: AnnData containing stored rankings and expression.
+        groups: Rank lists to select; does not filter expression groups or cells.
+        n_genes: Genes per list, default 10; negative selects the stored tail.
+        groupby: Expression grouping key, default the ranking's groupby.
+        gene_symbols: Variable annotation used for gene labels and lookup.
+        var_names: Explicit markers instead of n_genes.
+        min_logfoldchange: Strict lower stored log-fold-change threshold.
+        key: Stored ranking key, default rank_genes_groups.
+        show: Display once, return chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Enable native cell tooltips.
+        zoom: True navigates y only; "xy" navigates both axes.
+        show_values: Show fitted plotted values when tiles have room.
+        width: Parent heatmap width in logical pixels.
+        height: Parent heatmap height in logical pixels.
+        **kwds: Existing heatmap options; dendrogram defaults True.
+
+    Returns:
+        A native heatmap when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        ValueError: If stored rankings or gene-selection options are invalid.
+        TypeError: If forwarded options are unsupported.
+        NotImplementedError: If renderer options are unsupported.
+
+    Example:
+        >>> chart = gsc.pl.rank_genes_groups_heatmap(pbmc, n_genes=3, show=False)
+    """
+    return _ranked_expression(
+        heatmap,
+        adata,
+        groups,
+        n_genes=n_genes,
+        groupby=groupby,
+        values_to_plot=None,
+        var_names=var_names,
+        gene_symbols=gene_symbols,
+        min_logfoldchange=min_logfoldchange,
+        key=key,
+        show=show,
+        save=save,
+        hover=hover,
+        zoom=zoom,
+        show_values=show_values,
+        width=width,
+        height=height,
+        **kwds,
+    )

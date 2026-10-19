@@ -11,6 +11,17 @@ to ignored `tmp/scanpy-references/<family>/`. UMAP's `--output` override instead
 places both metadata and images in the supplied directory. References to retained
 figures below mean reproducible local/CI exports, not tracked PNG files.
 
+`ranked.json` freezes four complete ranking/score-panel cases from the original
+`ranked_fixture.py`: common/separate score bounds, supplied log scores and extreme
+rank gaps. It records exact labels, score positions, domains, titles, axis labels,
+font sizes and display/export DPI. Native SVG anchors and registered overlays are
+checked at DPR 1.5; native Lato and automatic tick density differ from Matplotlib.
+Only the JSON and generator are tracked. Refresh explicitly with:
+
+```sh
+uv run --no-sync python -m tests.integrations.scanpy.generate_ranked_references
+```
+
 Metadata is refreshed explicitly with `uv run --group scanpy-test python -m tests.integrations.scanpy.generate_references`.
 The environment is locked in `uv.lock`; `umap.json` records exact scientific
 versions, export/display DPI, checksums, source positions and rendered values.

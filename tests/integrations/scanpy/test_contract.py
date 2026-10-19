@@ -15,7 +15,7 @@ import genome_spy.integrations.scanpy as gsc
 FIXTURES = Path(__file__).with_name("fixtures")
 
 
-@pytest.mark.parametrize("family", pl.__all__)
+@pytest.mark.parametrize("family", [name for name in pl.__all__ if name != "ranking"])
 @pytest.mark.parametrize(
     "show,autoshow", [(False, True), (True, False), (None, True), (None, False)]
 )
@@ -34,6 +34,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         options = {"obs_keys": "group"}
     if family in ("dotplot", "matrixplot", "heatmap"):
         options["var_names"] = ["g1", "g2"]
+    if family.startswith("rank_genes_groups"):
+        from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
+
+        a, options = make_ranked_adata(), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -52,7 +56,7 @@ def test_all_plots_share_native_display_and_autosave_rules(
     )
 
 
-@pytest.mark.parametrize("family", pl.__all__)
+@pytest.mark.parametrize("family", [name for name in pl.__all__ if name != "ranking"])
 @pytest.mark.parametrize(
     "options,error",
     [({"show": 1}, TypeError), ({"save": "figure.png"}, NotImplementedError)],
@@ -64,7 +68,9 @@ def test_shared_display_validation_precedes_optional_imports(
     args = (object(),)
     if family in ("dotplot", "matrixplot", "heatmap"):
         args += (["g1"], "group")
-    elif family not in ("umap", "matrix", "clustermap"):
+    elif family not in ("umap", "matrix", "clustermap") and not family.startswith(
+        "rank_genes_groups"
+    ):
         args += ("group",)
     with pytest.raises(
         error, match=f"gsc.pl.{family}.*{'show' if 'show' in options else 'save'}"

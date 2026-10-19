@@ -26,7 +26,8 @@ you to compute it explicitly first.
 
 This development preview implements categorical/continuous 2D UMAP, plain dotplots
 and matrixplots, individual-cell heatmaps, supplied numeric matrices, clustermaps,
-standalone dendrograms and correlation matrices.
+standalone dendrograms, correlation matrices, stored rank/score panels and ranked
+dotplot/matrixplot/heatmap wrappers.
 Full public Scanpy plotting coverage is the destination; the inventory below
 records remaining work. Native plot builders remain planned.
 
@@ -59,6 +60,7 @@ semantics match the plot:
 | Heatmap | The same getter, categorization, min–max operation, native palettes, marker ordering and tree branches | Cell values and original row positions, category spans and shared annotation alignment. No group means or downsampling. |
 | Dendrograms | Stored `sc.tl.dendrogram` results, or that public method for a missing tree | Structural checks, shared leaf permutations and native branch rendering. |
 | Clustermap | Public SciPy `linkage`/`dendrogram(no_plot=True)`, as used by Scanpy/Seaborn, or supplied linkage | Detached pandas normalization, bounded source access, color-track alignment and shared numeric tiles/tree rendering. No group-profile tree is substituted for cell/gene clustering. |
+| Ranked summaries | Public `sc.get.rank_genes_groups_df` and stored ranking metadata; existing dotplot, matrixplot and heatmap entry points | Ordered marker slots, strict stored fold-change filtering and clear missing-result errors. No ranking is run or cached data repaired. |
 
 Scanpy 1.11.5 has no public standalone dotplot/matrixplot preparation method.
 Their calculations live in the Matplotlib plotting classes; their common private
@@ -409,6 +411,44 @@ reading expression; no silent sampling, aggregation or full unrelated matrix
 densification occurs. The expression notebook uses all 700 packaged PBMC cells
 and the same ten marker genes.
 
+## Stored rankings and ranked expression plots
+
+Scanpy owns differential-expression analysis. The packaged PBMC object already
+has a `rank_genes_groups` result; plotting reads it directly:
+
+```python
+pbmc = sc.datasets.pbmc68k_reduced()
+scores = gsc.pl.rank_genes_groups(pbmc, n_genes=5, show=False)
+dots = gsc.pl.rank_genes_groups_dotplot(pbmc, n_genes=3, zoom=True, show=False)
+means = gsc.pl.rank_genes_groups_matrixplot(
+    pbmc, n_genes=3, standard_scale="var", show_values=True, show=False,
+)
+cells = gsc.pl.rank_genes_groups_heatmap(
+    pbmc, n_genes=3, standard_scale="var", zoom=True, show_values=True, show=False,
+)
+```
+
+For new data, run `sc.tl.rank_genes_groups(...)` explicitly during analysis first.
+Missing or malformed results fail without running analysis or overwriting `uns`.
+Ranked expression wrappers select through the public
+[`sc.get.rank_genes_groups_df`](https://scanpy.readthedocs.io/en/1.11.x/generated/scanpy.get.rank_genes_groups_df.html)
+and call the existing native plot. They inherit its source selection, summaries,
+normalization order, trees, hover, limits and opt-in interactions.
+
+| Surface | Current behavior |
+| --- | --- |
+| Stored marker selection | Default `n_genes=None` selects ten per list. A positive count takes the first ranks; a negative count takes the stored tail without reversing it. Filtered missing names are dropped before slicing. Repeated genes retain their slots and group brackets. |
+| `groups`, `groupby`, `key` | Preserve requested rank-list order; a string selects one group. `groups` selects gene lists, not observation subsets. Expression grouping defaults to stored params; `groupby` overrides it. `key=None` uses `rank_genes_groups`. |
+| `var_names`, symbols and threshold | Explicit lists/dictionaries replace automatic selection and conflict with explicit `n_genes`. Symbols for ranked marker selection use the getter's `adata.var` lookup. `min_logfoldchange` applies a strict `>` filter only when selecting automatic lists; it needs stored fold changes. As in Scanpy, explicit markers bypass that filter. |
+| Raw/layer and trees | Expression uses the parent plot's raw/layer defaults and explicit kwargs; it does not automatically switch to a ranking's stored layer. `dendrogram` defaults True and can be disabled. Reading a rank list never computes a tree; the parent plot owns its normal tree policy. |
+| Metric colors | `values_to_plot` currently errors; this preview retains expression colors and dot fractions. Missing log-fold changes or p-values are not synthesized. The packaged logreg result supports scores but cannot supply a fold-change filter. |
+| `rank_genes_groups` panels | Stored order and scores, requested groups, native label sizing, shared/separate score bounds and `n_panels_per_row` alias. Symbol labels use raw/var according to the ranking's stored `use_raw`. No expression matrix is read, including for backed data and views. Nonfinite scores or missing names error; filtered lists remain available through the expression wrappers. |
+| `ranking` | Supplied var/obs/uns/varm/obsm score columns or a nested dictionary. Dense array `indices`, label lists/prefixes, natural-log scores and `include_lowest` are supported. Sorting follows Scanpy, including its extra top label when `include_lowest=False`. Sparse/backed array-column selection errors. This function has no save argument and does not use autosave, as in Scanpy. |
+| Native rendering and delivery | Rank panels use rotated labels and native axes; width/height default to 300 pixels per panel. Fonts, automatic tick density and outer layout differ from Matplotlib. Expression wrappers return their parent chart type and accept its options; Matplotlib objects and unknown kwargs error. Notebook and offline HTML delivery use the existing chart/widget. |
+
+The repository's `integrations/scanpy/notebooks/scanpy_expression.ipynb` shows
+packaged stored scores and all three ranked expression variants.
+
 ## Dendrograms and correlation matrices
 
 Compute a tree explicitly in Python and reuse it across plots:
@@ -574,13 +614,15 @@ Two notebooks run independently:
   explicit Scanpy gene score and the eight-panel marker overview.
 - {download}`Expression plots <../../../integrations/scanpy/notebooks/scanpy_expression.ipynb>`:
   marker dotplot, per-gene scaled matrixplot, zoomable individual-cell heatmap and supplied matrix on
-  `bulk_labels`, with aligned dendrograms and value hover.
+  `bulk_labels`, clustermap, stored score panels and ranked expression variants,
+  with aligned dendrograms and value hover.
 
 These adapt supported UMAP, dotplot, matrixplot and heatmap sections of Scanpy's
 [core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
 [advanced](https://scanpy.scverse.org/en/stable/tutorials/plotting/advanced.html)
-plotting tutorials. All expression examples reuse a tree explicitly computed in
-Python with `sc.tl.dendrogram`. Clustermap is next; ranked-gene variants follow it. The
+plotting tutorials. Grouped examples reuse a tree explicitly computed in Python
+with `sc.tl.dendrogram`; clustermap computes separate cell/gene linkage. Ranked
+examples read the packaged stored results. Rank-statistic colors are next; the
 remaining tutorial plots and Matplotlib artist styling are not implemented yet.
 
 ### Native plot sizing
@@ -614,17 +656,16 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix |
-| Ranked summaries | rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap |
 | Other embeddings and PCA | scatter, embedding, tsne, pca, pca_scatter, diffmap, draw_graph, pca_loadings, pca_overview, pca_variance_ratio |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Diagnostics, ranking, matrices, simulation | rank_genes_groups, ranking, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
+| Diagnostics and simulation | highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
 | Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_as_heatmap, timeseries_subplot |
 | Spatial and density | spatial, embedding_density |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
 
-All entries except the eight plotting previews and settings helpers remain required future integration
+All entries except the thirteen plotting previews and settings helpers remain required future integration
 work. Settings remain owned by Scanpy. The external.pl namespace is separate
 from this core inventory.
 

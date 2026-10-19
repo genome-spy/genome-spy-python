@@ -93,6 +93,11 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         TopLevelSpec, "display", lambda chart, **kwargs: charts.append(chart)
     )
     namespace = {}
+    monkeypatch.setattr(
+        sc.tl,
+        "rank_genes_groups",
+        lambda *a, **k: pytest.fail("Plotting reran ranking"),
+    )
     run_notebook(NOTEBOOKS / "scanpy_expression.ipynb", namespace)
     assert charts == [
         namespace["dotplot"],
@@ -100,6 +105,10 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["heatmap"],
         namespace["matrix"],
         namespace["clustermap"],
+        namespace["rank_scores"],
+        namespace["ranked_dotplot"],
+        namespace["ranked_matrixplot"],
+        namespace["ranked_heatmap"],
     ]
     assert namespace["pbmc"].shape == (700, 765)
     order = namespace["pbmc"].uns["dendrogram_bulk_labels"]["categories_ordered"]
@@ -164,7 +173,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert len(rulers) == 1
     assert rulers[0]["ruler"]["encodings"] == ["x", "y"]
     assert rulers[0]["ruler"]["display"] == "center"
-    for chart in charts[1:]:
+    for chart in charts[1:5]:
         grid = chart.to_dict()["layer"][0]
         text = grid["layer"][1]["layer"][0]
         assert text["mark"]["fitToBand"] is True
@@ -194,3 +203,27 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         len(clustered["datasets"][mark["layer"][0]["data"]["name"]])
         for mark in branches[-2:]
     ] == [3 * 699, 3 * 9]
+
+    scores = charts[5].to_dict()
+    assert len(units(scores)) == 2
+    assert sum(len(rows) for rows in scores["datasets"].values()) == 10
+    expected_genes = [
+        gene
+        for group in namespace["ranked_groups"]
+        for gene in namespace["pbmc"].uns[namespace["rank_key"]]["names"][group][:3]
+    ]
+    for chart in charts[6:]:
+        spec = chart.to_dict()
+        records = next(
+            rows
+            for rows in spec["datasets"].values()
+            if "_gene" in rows[0] and "_group" in rows[0]
+        )
+        assert {r["_gene"] for r in records} == set(expected_genes)
+        assert {r["_group"] for r in records} == set(namespace["group_labels"])
+    heatmap_rows = next(
+        rows
+        for rows in charts[-1].to_dict()["datasets"].values()
+        if "_obs_id" in rows[0]
+    )
+    assert len(heatmap_rows) == 700 * 6
