@@ -166,6 +166,7 @@ def ranked_features(
     gene_symbols: str | None,
     min_logfoldchange: float | None,
     context: str,
+    table: pd.DataFrame | None = None,
 ) -> tuple[Any, str]:
     """Return marker slots and grouping key using Scanpy's public result getter."""
     if var_names is not None and n_genes is not None:
@@ -177,15 +178,33 @@ def ranked_features(
     count = _count(
         10 if n_genes is None else n_genes, "n_genes", context=context, negative=True
     )
-    table = _ranking_table(
-        adata,
-        result,
-        chosen,
-        key=key,
-        gene_symbols=gene_symbols,
-        min_logfoldchange=min_logfoldchange,
-        context=context,
-    )
+    if table is None:
+        table = _ranking_table(
+            adata,
+            result,
+            chosen,
+            key=key,
+            gene_symbols=gene_symbols,
+            min_logfoldchange=min_logfoldchange,
+            context=context,
+        )
+    else:
+        # Filter the shared table only for marker selection, preserving color pairs.
+        table = table.loc[table["group"].isin(chosen)]
+        table = table.assign(group=pd.Categorical(table["group"], categories=chosen))
+        if min_logfoldchange is not None:
+            number(
+                min_logfoldchange,
+                "min_logfoldchange",
+                minimum=-float("inf"),
+                context=context,
+            )
+            if "logfoldchanges" not in table:
+                raise ValueError(
+                    f"{context}: min_logfoldchange needs stored logfoldchanges; logreg results have none."
+                )
+            table = table.loc[table["logfoldchanges"] > min_logfoldchange]
+        table = table.sort_values("group", kind="stable")
     markers = {}
     for group, rows in table.groupby("group", sort=False, observed=True):
         labels = (
@@ -212,6 +231,7 @@ def ranked_statistic(
     key: str | None,
     gene_symbols: str | None,
     context: str,
+    table: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Return stored statistic colors for every group and requested gene slot."""
     from genome_spy.integrations.scanpy._grouped_data import _feature_slots
@@ -238,15 +258,16 @@ def ranked_statistic(
             f"{context}: statistic colors need complete stored rankings; run "
             "sc.tl.rank_genes_groups explicitly with n_genes=adata.n_vars first."
         )
-    table = _ranking_table(
-        adata,
-        result,
-        groups,
-        key=key,
-        gene_symbols=gene_symbols,
-        min_logfoldchange=None,
-        context=context,
-    )
+    if table is None:
+        table = _ranking_table(
+            adata,
+            result,
+            groups,
+            key=key,
+            gene_symbols=gene_symbols,
+            min_logfoldchange=None,
+            context=context,
+        )
     label = "names" if gene_symbols is None else gene_symbols
     names, _ = _feature_slots(markers, None, None)
     selected = table.loc[table[label].isin(names)]

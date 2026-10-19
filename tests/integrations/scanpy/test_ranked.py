@@ -429,7 +429,7 @@ def test_large_sparse_ranked_plots_only_read_the_selected_genes(
             values_to_plot=metric,
             **({"dot_max": 1} if family == "dotplot" else {}),
         )
-        assert shapes == [(100_000, 4)]
+        assert shapes == [(0 if family == "matrixplot" and metric else 100_000, 4)]
         assert (
             len(
                 next(

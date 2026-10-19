@@ -151,11 +151,13 @@ def grouped_expression(
     var_group_labels: Sequence[str] | None = None,
     var_group_positions: Sequence[tuple[int, int]] | None = None,
     value_limit: int | None = None,
+    read_values: bool = True,
 ) -> GroupedExpression:
     """Return requested AnnData values in a separate grouped table with marker brackets.
 
     Preserve cell order and repeated genes; value_limit rejects oversized requests
-    before expression access, without changing AnnData.
+    before expression access, without changing AnnData. read_values=False returns
+    only category/slot metadata after zero-row feature validation.
     """
     from anndata import AnnData
     from scanpy.get import obs_df
@@ -210,13 +212,17 @@ def grouped_expression(
 
     # Read each requested column once; restore repeated genes below.
     columns = [key for key in keys if key != adata.obs.index.name]
+    source = adata if read_values else adata[:0]
     frame = obs_df(
-        adata,
+        source,
         keys=list(dict.fromkeys([*columns, *names])),
         use_raw=use_raw,
         layer=layer,
         gene_symbols=gene_symbols,
     )
+    if not read_values:
+        # Zero rows validate feature lookup; only group annotations need cell rows.
+        frame = obs_df(adata, keys=columns, use_raw=use_raw)
 
     # Convert strings on this separate table so AnnData stays unchanged.
     adata.strings_to_categoricals(frame)
@@ -240,6 +246,13 @@ def grouped_expression(
         groups = groups.reorder_categories(list(categories_order))
 
     # Repeated genes keep separate positions in the final plot.
+    if not read_values:
+        index = pd.CategoricalIndex(
+            [], categories=groups.categories, name="_".join(keys)
+        )
+        return GroupedExpression(
+            pd.DataFrame(index=index, columns=names, dtype=float), feature_groups
+        )
     table = frame.loc[:, names].copy()
     table.index = pd.CategoricalIndex(groups, name="_".join(keys))
     numeric = numeric_values(table, context="Grouped plotting: expression")

@@ -748,6 +748,7 @@ def matrixplot(
         groupby,
         use_raw=use_raw,
         log=log if values_df is None else False,
+        read_values=values_df is None,
         num_categories=num_categories,
         categories_order=categories_order,
         gene_symbols=gene_symbols,
@@ -1586,10 +1587,25 @@ def _ranked_expression(
         raise TypeError(f"{context}: use the parent plot for supplied summary tables.")
     _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._ranked_data import (
+        _ranking_table,
         ranked_features,
         ranked_statistic,
+        stored_ranking,
     )
 
+    # One detached result serves both marker selection and statistic colors.
+    ranking = None
+    if values_to_plot is not None:
+        result, ranking_groups = stored_ranking(adata, key, None, context=context)
+        ranking = _ranking_table(
+            adata,
+            result,
+            ranking_groups,
+            key=key,
+            gene_symbols=gene_symbols,
+            min_logfoldchange=None,
+            context=context,
+        )
     markers, grouping = ranked_features(
         adata,
         groups,
@@ -1600,6 +1616,7 @@ def _ranked_expression(
         min_logfoldchange=min_logfoldchange,
         key=key,
         context=context,
+        table=ranking,
     )
     # Stored colors replace means; the parent still owns expression fractions.
     if values_to_plot is not None:
@@ -1610,6 +1627,7 @@ def _ranked_expression(
             key=key,
             gene_symbols=gene_symbols,
             context=context,
+            table=ranking,
         )
         kwds["dot_color_df" if plot is dotplot else "values_df"] = table
         title = (

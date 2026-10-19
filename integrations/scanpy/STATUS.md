@@ -257,6 +257,20 @@ Clearance: retain the live plan and status. M06's preview is verified; M13 retai
 builders and M14 the named compatibility limits. M07.a shared 2D embeddings is
 the next ready slice. No working plan is cleared.
 
+## Reuse review follow-up
+
+Three Sol reviewers checked reuse, self-containment, readability and YAGNI.
+Two found no significant structural issue. The reuse review identified two
+redundant reads, now fixed: supplied matrixplots validate feature lookup on zero
+rows and read only real group annotations; one detached unfiltered ranking table
+serves marker selection and statistic colors. Strict marker thresholds preserve
+needed cross-group statistic pairs. No cache is shared across calls.
+
+Getter-count and actual-value tests cover both fixes; source, symbol, categorical
+and repeated-slot validation remain intact. Targeted ranking/matrix tests and
+the full non-browser integration suite passed. The metadata-only table contains
+no cell-expression rows. M07.a remains the next ready slice.
+
 ## Milestones
 
 States apply to the stated scope; a closed preview is not a closed full family.

@@ -22,6 +22,43 @@ METRICS = [
 ]
 
 
+@pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
+def test_one_ranking_read_preserves_unfiltered_colors_and_avoids_unused_expression(
+    monkeypatch, family
+):
+    a = make_ranked_adata()
+    ranking, expression = sc.get.rank_genes_groups_df, sc.get.obs_df
+    calls, reads = [], []
+
+    def ranked(*args, **kwargs):
+        calls.append(args[1])
+        return ranking(*args, **kwargs)
+
+    def read(adata, keys, **kwargs):
+        reads.append((adata.n_obs, list(keys)))
+        return expression(adata, keys, **kwargs)
+
+    monkeypatch.setattr(sc.get, "rank_genes_groups_df", ranked)
+    monkeypatch.setattr(sc.get, "obs_df", read)
+    chart = getattr(gsc.pl, f"rank_genes_groups_{family}")(
+        a,
+        groups=["A", "C"],
+        n_genes=1,
+        min_logfoldchange=1,
+        values_to_plot="scores",
+        dendrogram=False,
+        show=False,
+    ).to_dict()
+    assert calls == [["C", "A", "D", "B"]]
+    rows = next(rows for rows in chart["datasets"].values() if "_mean" in rows[0])
+    assert {r["_gene"] for r in rows} == {"g2"}
+    assert {r["_group"]: r["_mean"] for r in rows} == {"C": 4, "A": 6, "D": -1, "B": 1}
+    if family == "matrixplot":
+        assert reads == [(0, ["group", "g2"]), (8, ["group"])]
+    else:
+        assert reads == [(8, ["group", "g2"])]
+
+
 def statistic(a, metric="scores", markers=None, **options):
     """Read a small color table with explicit repeated fixture slots."""
     return ranked_statistic(
