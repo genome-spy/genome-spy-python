@@ -417,6 +417,8 @@ def dotplot(
     dot_min: float | None = None,
     smallest_dot: float = 0.0,
     hover: bool = True,
+    zoom: bool = False,
+    highlight: bool = False,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -465,6 +467,8 @@ def dotplot(
         dot_min: Lower clipped fraction, default zero.
         smallest_dot: Minimum dot area in points squared; maximum is 200.
         hover: Show gene, group, displayed color value and expressing percentage.
+        zoom: Enable x/y wheel zoom and drag panning with aligned annotations.
+        highlight: Highlight the row and column of the hovered dot.
         width: Native plot-area width in logical pixels, default 37 per column.
         height: Native plot-area height in logical pixels, default 35 per row.
         **kwds: Only scalar linewidth is supported; other scatter options error.
@@ -498,6 +502,8 @@ def dotplot(
         "log": log,
         "mean_only_expressed": mean_only_expressed,
         "hover": hover,
+        "zoom": zoom,
+        "highlight": highlight,
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"gsc.pl.dotplot: {name} must be boolean.")
@@ -576,6 +582,8 @@ def dotplot(
         dot_max=dot_max,
         smallest_dot=smallest_dot,
         hover=hover,
+        zoom=zoom,
+        highlight=highlight,
         value_title=value_title,
         linewidth=kwds.get("linewidth", 0.2),
         rotation=var_group_rotation,
@@ -616,6 +624,8 @@ def matrixplot(
     vcenter: float | None = None,
     norm: Any = None,
     hover: bool = True,
+    zoom: bool = False,
+    show_values: bool = False,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -660,6 +670,8 @@ def matrixplot(
         vcenter: Reserved; nondefault values error.
         norm: Reserved; Matplotlib normalization objects error.
         hover: Show gene, group and displayed mean or supplied value.
+        zoom: Enable x/y wheel zoom and drag panning with aligned annotations.
+        show_values: Show plotted values to two decimals when cells have enough room.
         width: Plot-area logical pixels, default 37 per feature column.
         height: Plot-area logical pixels, default 35 per group row.
         **kwds: Scalar edgecolor and linewidth. Defaults are gray edges at 0.1
@@ -695,7 +707,13 @@ def matrixplot(
     }.items():
         if rejected:
             raise NotImplementedError(f"{context}: {name} is not supported yet.")
-    for name, value in {"log": log, "swap_axes": swap_axes, "hover": hover}.items():
+    for name, value in {
+        "log": log,
+        "swap_axes": swap_axes,
+        "hover": hover,
+        "zoom": zoom,
+        "show_values": show_values,
+    }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
     if standard_scale not in (None, "var", "group"):
@@ -761,6 +779,8 @@ def matrixplot(
         linewidth=kwds.get("linewidth", 0.1),
         rotation=var_group_rotation,
         hover=hover,
+        zoom=zoom,
+        show_values=show_values,
         value_title=value_title,
         width=width,
         height=height,
@@ -796,6 +816,7 @@ def heatmap(
     norm: Any = None,
     hover: bool = True,
     zoom: bool = False,
+    show_values: bool = False,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -835,6 +856,7 @@ def heatmap(
         norm: Matplotlib normalization objects are unsupported.
         hover: Include cell ID, gene, group and expression tooltips.
         zoom: Enable x/y wheel zoom and drag panning with aligned annotations.
+        show_values: Show plotted values to two decimals when cells have enough room.
         width: Native tile-area width in pixels.
         height: Native tile-area height in pixels.
         **kwds: Native cmap scheme, scalar alpha and interpolation="nearest".
@@ -866,6 +888,7 @@ def heatmap(
         "log": log,
         "swap_axes": swap_axes,
         "hover": hover,
+        "show_values": show_values,
         "zoom": zoom,
     }.items():
         if not isinstance(value, bool):
@@ -967,6 +990,7 @@ def heatmap(
         vmax=vmax,
         alpha=kwds.get("alpha", 1),
         hover=hover,
+        show_values=show_values,
         zoom=zoom,
         scaled=standard_scale is not None,
         width=width,
@@ -989,6 +1013,8 @@ def matrix(
     show: bool | None = None,
     save: bool | str | None = None,
     hover: bool = True,
+    zoom: bool = False,
+    show_values: bool = False,
     width: float | None = None,
     height: float | None = None,
 ) -> TopLevelSpec | None:
@@ -1012,6 +1038,8 @@ def matrix(
         show: Display according to Scanpy's autoshow when unset.
         save: Only None/False; use the returned chart's HTML/JSON export.
         hover: Include row, column and numeric value tooltips.
+        zoom: Enable x/y wheel zoom and drag panning with aligned annotations.
+        show_values: Show plotted values to two decimals when cells have enough room.
         width: Native tile-area width in pixels.
         height: Native tile-area height in pixels.
 
@@ -1031,8 +1059,13 @@ def matrix(
         >>> chart.display(inline=True)
     """
     context = "gsc.pl.matrix"
-    if not isinstance(hover, bool):
-        raise TypeError(f"{context}: hover must be boolean.")
+    for name, value in {
+        "hover": hover,
+        "zoom": zoom,
+        "show_values": show_values,
+    }.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._matrix_chart import build_matrix
 
@@ -1046,6 +1079,8 @@ def matrix(
         colorbar_shrink=colorbar_shrink,
         color_map=color_map,
         hover=hover,
+        zoom=zoom,
+        show_values=show_values,
         width=width,
         height=height,
     )

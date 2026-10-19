@@ -29,7 +29,13 @@ def test_matrix_keeps_scanpy_defaults_without_matplotlib_axes():
         assert (
             None if value.default is inspect.Parameter.empty else repr(value.default)
         ) == parameter["default"]
-    assert set(actual) - {p["name"] for p in upstream} == {"hover", "width", "height"}
+    assert set(actual) - {p["name"] for p in upstream} == {
+        "hover",
+        "width",
+        "height",
+        "zoom",
+        "show_values",
+    }
 
 
 @pytest.mark.parametrize("case", matrix_cases())

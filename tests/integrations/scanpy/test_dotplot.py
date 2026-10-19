@@ -55,7 +55,13 @@ def test_signature_preserves_scanpy_defaults_and_native_boundary():
         assert (
             None if actual.default is inspect.Parameter.empty else repr(actual.default)
         ) == parameter["default"]
-    assert set(native) - {p["name"] for p in reference} == {"width", "height", "hover"}
+    assert set(native) - {p["name"] for p in reference} == {
+        "width",
+        "height",
+        "hover",
+        "zoom",
+        "highlight",
+    }
     assert native["hover"].default is True
 
 

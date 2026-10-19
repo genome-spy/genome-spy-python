@@ -55,7 +55,13 @@ def test_signature_preserves_pinned_defaults_and_native_boundary():
         assert (
             None if actual.default is inspect.Parameter.empty else repr(actual.default)
         ) == parameter["default"]
-    assert set(native) - {p["name"] for p in reference} == {"hover", "width", "height"}
+    assert set(native) - {p["name"] for p in reference} == {
+        "hover",
+        "width",
+        "height",
+        "zoom",
+        "show_values",
+    }
 
 
 @pytest.mark.parametrize("case", matrixplot_cases())

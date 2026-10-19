@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.integrations.scanpy._grid_interactions import zoom_axes, with_values
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._grouped_chart import (
     color_legend,
@@ -42,6 +43,8 @@ def build_matrixplot(
     linewidth: float,
     rotation: float | None,
     hover: bool,
+    zoom: bool,
+    show_values: bool,
     value_title: str,
     width: float | None,
     height: float | None,
@@ -83,6 +86,7 @@ def build_matrixplot(
     )
     # Tiles fill their slots; missing means leave an empty slot with its label.
     x, y = grouped_axes(rows, columns, xpadding=0, ypadding=0)
+    x, y = zoom_axes(x, y, enabled=zoom, name="matrixplot")
     tiles = (
         gs.Chart(summary_records(colors, swap_axes=swap_axes, context=context))
         .transform_filter("isValid(datum._mean)")
@@ -124,7 +128,7 @@ def build_matrixplot(
         )
     # Reuse the dotplot's labels, marker brackets, guides and tree placement.
     return finish_grouped_chart(
-        tiles,
+        [with_values(tiles, "_mean") if show_values else tiles],
         colors,
         feature_groups,
         x,
@@ -136,4 +140,5 @@ def build_matrixplot(
         height=height,
         frame_width=1.5,
         tree=tree,
+        zoom=zoom,
     )

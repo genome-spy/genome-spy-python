@@ -7,6 +7,11 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.integrations.scanpy._grid_interactions import (
+    zoom_axes,
+    with_values,
+    with_navigation,
+)
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._data import number, numeric_values
 from genome_spy.integrations.scanpy._grouped_chart import coordinate, _slot_labels
@@ -30,6 +35,8 @@ def build_matrix(
     colorbar_shrink: float,
     color_map: Any,
     hover: bool,
+    zoom: bool,
+    show_values: bool,
     width: float | None,
     height: float | None,
 ) -> gs.TopLevelSpec:
@@ -80,6 +87,7 @@ def build_matrix(
     )
     x = coordinate(gs.X, "_x", columns, 0)
     y = coordinate(gs.Y, "_y", rows, 0, reverse=True)
+    x, y = zoom_axes(x, y, enabled=zoom, name="matrix")
     xspace = max(map(len, xlabels)) * TICK * 0.65 + 12 if xticks is not None else 25
     yspace = max(map(len, ylabels)) * TICK * 0.65 + 12 if yticks is not None else 25
     axes = []
@@ -144,11 +152,13 @@ def build_matrix(
                 gs.Tooltip("_value:Q", title="Value", format=".4g"),
             ]
         )
-    layers = [tiles]
+    layers: list[gs.Chart | gs.LayerChart] = [
+        with_values(tiles, "_value") if show_values else tiles
+    ]
     if xticks is not None:
-        layers.append(_slot_labels(xlabels, axes[0], horizontal=True))
+        layers.append(_slot_labels(xlabels, axes[0], horizontal=True, zoom=zoom))
     if yticks is not None:
-        layers.append(_slot_labels(ylabels, axes[1], horizontal=False))
+        layers.append(_slot_labels(ylabels, axes[1], horizontal=False, zoom=zoom))
     chart = gs.layer(*layers).properties(
         width=width,
         height=height,
@@ -161,6 +171,7 @@ def build_matrix(
     )
     if title is not None:
         chart = chart.properties(title=gs.title(title, font=FONT, fontSize=12 * PT))
+    chart = with_navigation(chart, enabled=zoom)
     return chart.configure_view(stroke="black", strokeWidth=0.8 * PT).configure_legend(
         labelFont=FONT,
         labelFontSize=TICK,

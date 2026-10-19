@@ -28,10 +28,17 @@ def units(spec: dict[str, Any]) -> list[dict[str, Any]]:
     return [spec]
 
 
+def leaf_marks(spec: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return leaf marks in draw order, including nested value layers."""
+    if "layer" in spec:
+        return [mark for child in spec["layer"] for mark in leaf_marks(child)]
+    return [spec]
+
+
 def points(panel: dict[str, Any]) -> dict[str, Any]:
     """Find the point mark that owns the native color scale and guide."""
     return next(
         layer
-        for layer in panel.get("layer", [panel])
+        for layer in leaf_marks(panel)
         if "scale" in layer.get("encoding", {}).get("color", {})
     )

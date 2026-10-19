@@ -8,6 +8,12 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.integrations.scanpy._grid_interactions import (
+    zoom_axes,
+    slot_position,
+    with_values,
+    with_navigation,
+)
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
@@ -46,6 +52,7 @@ def build_heatmap(
     alpha: float | None,
     hover: bool,
     zoom: bool,
+    show_values: bool,
     scaled: bool,
     width: float | None,
     height: float | None,
@@ -109,9 +116,7 @@ def build_heatmap(
     )
     x = coordinate(gs.X, "_x", cells if swap_axes else genes, 0)
     y = coordinate(gs.Y, "_y", genes if swap_axes else cells, 0, reverse=True)
-    if zoom:
-        x = x.scale(zoom=True, name="heatmap-x")
-        y = y.scale(zoom=True, name="heatmap-y")
+    x, y = zoom_axes(x, y, enabled=zoom, name="heatmap")
     # Only genes have ticks; individual cell rows remain unlabeled.
     if show_gene_labels:
         gene_axis = (y if swap_axes else x).axis(
@@ -172,17 +177,16 @@ def build_heatmap(
                 ),
             ]
         )
-    layers: list[gs.Chart | gs.LayerChart] = [tiles]
+    layers: list[gs.Chart | gs.LayerChart] = [
+        with_values(tiles, "_value", alpha=alpha) if show_values else tiles
+    ]
     if show_gene_labels:
         labels = _slot_labels(
             list(values.columns.astype(str)),
             y if swap_axes else x,
             horizontal=not swap_axes,
+            zoom=zoom,
         )
-        if zoom:
-            labels = labels.transform_filter(
-                "inrange(heatmap_gene_origin + (datum.slot + 0.5) * heatmap_gene_step, [0, 1])"
-            )
         layers.append(labels)
 
     # Category spans, labels and tree leaves follow the same cell permutation.
@@ -192,7 +196,8 @@ def build_heatmap(
     intervals["_center"] = intervals["center"] / cells
     # Project cell boundaries through the live scale, including fractional centers.
     channel = "x" if swap_axes else "y"
-    position = "heatmap_cell_origin + datum.{field} * heatmap_cell_step"
+    gene_channel = "y" if swap_axes else "x"
+    position = slot_position(channel, "datum.{field}")
     group_labels = intervals["label"].tolist()
     group_color = gs.Color("label:N").scale(domain=group_labels)
     group_color = (
@@ -243,16 +248,8 @@ def build_heatmap(
     # Scanpy uses brackets above ordinary heatmaps and a gene strip when swapped.
     if feature_groups and not swap_axes:
         brackets = _brackets(
-            feature_groups, x, swapped=False, rotation=rotation, end_band=0.8
+            feature_groups, x, swapped=False, rotation=rotation, end_band=0.8, zoom=zoom
         )
-        if zoom:
-            brackets = [
-                chart.transform_filter(
-                    "heatmap_gene_origin + datum.start * heatmap_gene_step >= 0 && "
-                    "heatmap_gene_origin + (datum.end + 1) * heatmap_gene_step <= 1"
-                )
-                for chart in brackets
-            ]
         layers.extend(brackets)
     elif feature_groups:
         marker_rows: list[dict[str, Any]] = []
@@ -276,8 +273,8 @@ def build_heatmap(
         )
         if zoom:
             markers = markers.transform_calculate(
-                _top="1 - clamp(heatmap_gene_origin + datum._gene * heatmap_gene_step, 0, 1)",
-                _bottom="1 - clamp(heatmap_gene_origin + (datum._gene + 1) * heatmap_gene_step, 0, 1)",
+                _top=f"1 - clamp({slot_position(gene_channel, 'datum._gene')}, 0, 1)",
+                _bottom=f"1 - clamp({slot_position(gene_channel, 'datum._gene + 1')}, 0, 1)",
             ).encode(
                 y=gs.Y("_top:Q").scale(None).axis(None),
                 y2="_bottom:Q",
@@ -332,17 +329,7 @@ def build_heatmap(
             layout={"anchor": "end", "direction": "vertical", "wrap": False},
         )
     )
-    if zoom:
-        # Move outside annotations with the cells and hide labels beyond the plot.
-        for name, axis in (("cell", channel), ("gene", "y" if swap_axes else "x")):
-            origin = f"scale('{axis}', 0)"
-            if axis == "y":
-                origin = f"1 - scale('{axis}', 0)"
-            chart = chart.add_params(
-                gs.param(f"heatmap_{name}_origin", expr=origin),
-                gs.param(f"heatmap_{name}_step", expr=f"bandwidth('{axis}')"),
-            )
-    return chart
+    return with_navigation(chart, enabled=zoom)
 
 
 def _category_strip(

@@ -27,6 +27,7 @@ not in this workspace or the documentation:
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
 | [_umap_chart.py](../../src/genome_spy/integrations/scanpy/_umap_chart.py) | Native points, axes, legends, labels, and panel composition. |
+| [_grid_interactions.py](../../src/genome_spy/integrations/scanpy/_grid_interactions.py) | Shared index navigation/projection, native fitted values/contrast and row/column hover bands; no AnnData access. |
 | [_umap_interactions.py](../../src/genome_spy/integrations/scanpy/_umap_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
 | [_selection.py](../../src/genome_spy/integrations/scanpy/_selection.py) | Pure interval-to-observation membership for Python subset retrieval. |
 
@@ -81,7 +82,7 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
   x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
   Existing coordinates are retained; gene scoring is an explicit Scanpy operation.
 - [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot, scaled
-  matrixplot, individual-cell heatmap with x/y zoom, supplied numeric matrix, aligned dendrograms and value hover using the core tutorial
+  matrixplot, individual-cell heatmap, supplied numeric matrix, aligned dendrograms, x/y zoom, fitted tile values and dot row/column highlighting using the core tutorial
   dictionary and existing `bulk_labels`. Scanpy computes the shared tree in Python
   from the dataset’s existing PCA representation. All three plots reuse the same data and markers.
 

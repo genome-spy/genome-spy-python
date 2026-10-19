@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
+from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
@@ -10,6 +11,11 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
+from genome_spy.integrations.scanpy._grid_interactions import (
+    slot_position,
+    visible_slots,
+    with_navigation,
+)
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._style import (
     FONT as _FONT,
@@ -40,40 +46,37 @@ def coordinate(
     )
 
 
-def _slot_labels(labels: list[str], coordinate: Any, *, horizontal: bool) -> gs.Chart:
+def _slot_labels(
+    labels: list[str], coordinate: Any, *, horizontal: bool, zoom: bool = False
+) -> gs.Chart:
     """Return a text layer placing labels at the supplied row or column positions.
 
     Separate text avoids merging repeated names into a single axis tick.
     """
     table = [{"slot": i, "label": label} for i, label in enumerate(labels)]
+    chart = gs.Chart(table)
+    if zoom:
+        chart = visible_slots(chart, "x" if horizontal else "y", "datum.slot + 0.5")
     if horizontal:
-        return (
-            gs.Chart(table)
-            .mark_text(
-                font=_FONT,
-                size=_TICK,
-                angle=-90,
-                align="right",
-                baseline="middle",
-                yOffset=8,
-                clip="never",
-                tooltip=None,
-            )
-            .encode(x=coordinate.field("slot"), y=gs.value(0), text="label:N")
-        )
-    return (
-        gs.Chart(table)
-        .mark_text(
+        return chart.mark_text(
             font=_FONT,
             size=_TICK,
+            angle=-90,
             align="right",
             baseline="middle",
-            xOffset=-8,
+            yOffset=8,
             clip="never",
             tooltip=None,
-        )
-        .encode(x=gs.value(0), y=coordinate.field("slot"), text="label:N")
-    )
+        ).encode(x=coordinate.field("slot"), y=gs.value(0), text="label:N")
+    return chart.mark_text(
+        font=_FONT,
+        size=_TICK,
+        align="right",
+        baseline="middle",
+        xOffset=-8,
+        clip="never",
+        tooltip=None,
+    ).encode(x=gs.value(0), y=coordinate.field("slot"), text="label:N")
 
 
 def _brackets(
@@ -83,6 +86,7 @@ def _brackets(
     swapped: bool,
     rotation: float | None,
     end_band: float = 0.7,
+    zoom: bool = False,
 ) -> list[gs.Chart]:
     """Return rule and text layers for marker groups at the supplied positions.
 
@@ -189,7 +193,14 @@ def _brackets(
             y=gs.value(1),
             text="label:N",
         )
-    return [line, left, right, text]
+    layers = [line, left, right, text]
+    if zoom:
+        axis = "y" if swapped else "x"
+        layers = [
+            visible_slots(chart, axis, "datum.start", "datum.end + 1")
+            for chart in layers
+        ]
+    return layers
 
 
 def plot_dimensions(
@@ -321,7 +332,7 @@ def grouped_axes(
 
 
 def finish_grouped_chart(
-    marks: gs.Chart,
+    marks: Sequence[gs.Chart | gs.LayerChart],
     colors: pd.DataFrame,
     groups: tuple[FeatureGroup, ...],
     x: Any,
@@ -334,6 +345,7 @@ def finish_grouped_chart(
     height: float,
     frame_width: float,
     tree: DendrogramData | None = None,
+    zoom: bool = False,
 ) -> gs.TopLevelSpec:
     """Combine summary marks, table labels and optional brackets/tree into a chart.
 
@@ -342,14 +354,18 @@ def finish_grouped_chart(
     xlabels, ylabels = [str(v) for v in colors.columns], [str(v) for v in colors.index]
     # Draw labels separately so repeated names do not collapse into one axis tick.
     layers: list[gs.Chart | gs.LayerChart] = [
-        marks,
-        _slot_labels(xlabels, x.axis(None), horizontal=True),
-        _slot_labels(ylabels, y.axis(None), horizontal=False),
+        *marks,
+        _slot_labels(xlabels, x.axis(None), horizontal=True, zoom=zoom),
+        _slot_labels(ylabels, y.axis(None), horizontal=False, zoom=zoom),
     ]
     if groups:
         layers.extend(
             _brackets(
-                groups, y if swap_axes else x, swapped=swap_axes, rotation=rotation
+                groups,
+                y if swap_axes else x,
+                swapped=swap_axes,
+                rotation=rotation,
+                zoom=zoom,
             )
         )
 
@@ -366,6 +382,11 @@ def finish_grouped_chart(
                 orientation="top" if swap_axes else "right",
                 padding=padding,
                 reverse=not swap_axes,
+                leaf_projection=slot_position(
+                    "x" if swap_axes else "y", "datum.{field}"
+                )
+                if zoom
+                else None,
             )
         )
 
@@ -394,6 +415,7 @@ def finish_grouped_chart(
                 offset=top_space + 10 if top_space > 10 else 10,
             )
         )
+    chart = with_navigation(chart, enabled=zoom)
     return chart.configure_view(
         stroke="black", strokeWidth=frame_width * _PT
     ).configure_legend(

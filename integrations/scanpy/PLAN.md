@@ -346,7 +346,7 @@ export compatibility remain in M14.
   supplied coordinates/order are retained. Compare all orientations, ties, swaps
   and resize behavior. Pan/zoom cannot detach a tree from its rows/columns.
   Dot/matrix trees now use native rule geometry projected into fixed index slots,
-  with excluded scales/axes. Grouped navigation remains disabled; summary hover
+  with excluded scales/axes. Grouped navigation is optional in M05.e; summary hover
   and resize alignment are verified. No Core changes or prototype geometry are
   required. Reuse these helpers when each later family is implemented.
 
@@ -369,7 +369,7 @@ rejection without data reads. Larger/chunked transport remains M05.d.
 The standalone `matrix` part of M05.b is delivered as a numeric-array preview,
 reusing numeric validation, linear color bounds, index slots and labels. Heatmap
 adds optional x/y zoom with aligned cell annotations and clipped tree branches.
-`clustermap` in M05.c is the next ready slice; larger transport remains M05.d.
+Shared grid interactions are M05.e below. `clustermap` in M05.c is the next ready slice; larger transport remains M05.d.
 
 - M05.a: observation-level heatmap reuses source/group/slot access. Carry one
   explicit observation permutation through values, IDs, category strips, group
@@ -390,6 +390,18 @@ adds optional x/y zoom with aligned cell annotations and clipped tree branches.
 - M05.d: test chunked selected-column access and a 100k-cell × 50-marker heatmap;
   record payload/render/memory limits and an explicit over-budget policy. Compare
   complete PBMC tutorial heatmaps with registered strips/tree/label alignment.
+
+- M05.e (verified interaction preview; [evidence](STATUS.md#m05e-shared-grid-interactions)):
+  share index navigation and live annotation projection across heatmap,
+  matrixplot, matrix and dotplot. Offer opt-in fitted two-decimal values on the
+  three tile families and hover row/column bands on dotplot. Preserve plotted
+  values, repeated slots, color limits, dot sizes, guides and default appearance.
+  Reuse the prepared tables; interactions must not call Scanpy or extract data.
+  Observe dense overview/zoomed text, native contrast including opacity/clipping,
+  tooltip access, normal/swapped tree alignment while panning, duplicate-slot
+  highlighting and clearing. Run the packaged-PBMC expression notebook and record
+  a realistic allocation/payload/browser observation. Keep native API limitations
+  and remaining large-data transport debt explicit.
 
 Targets: `gsc.pl.heatmap(pbmc, markers, "louvain", dendrogram=True, show=False)`
 and `gsc.pl.matrix(values, xticks=genes, yticks=groups, show=False)`.

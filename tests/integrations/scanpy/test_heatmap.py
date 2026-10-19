@@ -55,6 +55,7 @@ def test_signature_retains_upstream_defaults_and_native_additions():
     assert set(actual) - {p["name"] for p in upstream} == {
         "hover",
         "zoom",
+        "show_values",
         "width",
         "height",
     }

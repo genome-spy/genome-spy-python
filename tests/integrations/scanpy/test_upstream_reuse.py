@@ -20,8 +20,9 @@ sc = pytest.importorskip("scanpy")
 
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
 @pytest.mark.parametrize("options", [{}, {"layer": "counts"}])
+@pytest.mark.parametrize("interactive", [False, True])
 def test_grouped_plots_read_unique_keys_once_through_scanpy(
-    monkeypatch, family, options
+    monkeypatch, family, options, interactive
 ):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
@@ -35,8 +36,13 @@ def test_grouped_plots_read_unique_keys_once_through_scanpy(
         return frame
 
     monkeypatch.setattr(sc.get, "obs_df", read)
+    flags = (
+        {"zoom": True, "highlight" if family == "dotplot" else "show_values": True}
+        if interactive
+        else {}
+    )
     chart = getattr(gsc.pl, family)(
-        a, ["g2", "g1", "g2"], "group", show=False, **options
+        a, ["g2", "g1", "g2"], "group", show=False, **options, **flags
     )
     assert len(calls) == 1 and calls[0][0] is a
     assert calls[0][1] == {
@@ -46,7 +52,7 @@ def test_grouped_plots_read_unique_keys_once_through_scanpy(
         "gene_symbols": None,
     }
     spec = chart.to_dict()
-    records = spec["datasets"][spec["layer"][0]["data"]["name"]]
+    records = next(rows for rows in spec["datasets"].values() if "_mean" in rows[0])
     mean = next(
         r["_mean"] for r in records if r["_group"] == "B" and r["_gene"] == "g1"
     )

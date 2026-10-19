@@ -104,7 +104,9 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     order = namespace["pbmc"].uns["dendrogram_bulk_labels"]["categories_ordered"]
     for chart in charts[:3]:
         chart_spec = chart.to_dict()
-        values = chart_spec["datasets"][chart_spec["layer"][0]["data"]["name"]]
+        values = next(
+            rows for rows in chart_spec["datasets"].values() if "_group" in rows[0]
+        )
         assert list(dict.fromkeys(row["_group"] for row in values)) == list(order)
         tree = chart_spec["layer"][-1]["layer"][0]
         assert tree["mark"]["type"] == "rule"
@@ -121,8 +123,8 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         "Expressing cells (%)",
     ]
     spec = charts[1].to_dict()
-    tiles = spec["layer"][0]
-    records = spec["datasets"][tiles["data"]["name"]]
+    tiles = points(spec)
+    records = spec["datasets"][spec["layer"][0]["data"]["name"]]
     assert tiles["mark"]["type"] == "rect"
     assert len(records) == 100
     assert tiles["encoding"]["color"]["scale"]["scheme"] == "blues"
@@ -137,8 +139,8 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             values = [row["_mean"] for row in records if row["_gene"] == name]
             assert min(values) == 0 and max(values) == 1
     spec = charts[2].to_dict()
-    tiles = spec["layer"][0]
-    cells = spec["datasets"][tiles["data"]["name"]]
+    tiles = points(spec)
+    cells = spec["datasets"][spec["layer"][0]["data"]["name"]]
     assert all(tiles["encoding"][axis]["scale"]["zoom"] is True for axis in ("x", "y"))
     assert len(cells) == 700 * 10
     assert len({row["_obs_id"] for row in cells}) == 700
@@ -155,3 +157,13 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["pbmc"].uns["dendrogram_bulk_labels"]["correlation_matrix"],
     )
     assert [row["_column"] for row in records[:10]] == namespace["group_labels"]
+
+    assert any(p["name"] == "grid_hover" for p in charts[0].to_dict()["params"])
+    for chart in charts[1:]:
+        grid = chart.to_dict()["layer"][0]
+        text = grid["layer"][1]["layer"][0]
+        assert text["mark"]["fitToBand"] is True
+        assert all(
+            grid["layer"][0]["encoding"][axis]["scale"]["zoom"] is True
+            for axis in ("x", "y")
+        )

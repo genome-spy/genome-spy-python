@@ -176,6 +176,7 @@ ranking, palette write, or cached-result mutation occurs.
 | `cmap`, `vmin`, `vmax` | Native schemes (default `Reds` selects Vega `reds`) and finite numeric bounds. Constant bounds paint the first palette color; the guide expands by 10%, or ±0.1 at zero, matching Scanpy's precomputed dot colors. Missing values are omitted from painting without removing their slots; infinities and all-missing colors error. |
 | `title`, `colorbar_title`, `size_title`, `var_group_*` | Native labels, bracket rules and size/color guides. Mapping features supply brackets directly. Scalar `linewidth` styles dot edges. |
 | `width`, `height` | Plot-area logical pixels; defaults are 37 pixels per feature column and 35 per group row, exchanged with the axes. Labels and guides add space. |
+| `zoom`, `highlight` | Both default False. Wheel zoom/drag panning retain aligned labels and tree branches; hovering a dot shades its row and column when highlighting is enabled. Dot sizes and both guides keep their original mapping. Repeated labels retain separate integer slots. |
 | `hover` | Enabled by default. Tooltips show gene, group, displayed mean/color value and actual expressing-cell percentage, before dot-size clipping. Use `hover=False` to disable them. Scaled means and supplied color values are labeled explicitly. |
 | `figsize` | Explicit native layout budget at 100 logical pixels/inch: subtract a fixed 150-pixel guide allowance from width; height sizes the plot area. Labels and renderer padding add space, so this does not fix the outer canvas dimensions. Conflicts with `width`/`height` error. |
 | `show`, `save`, `ax`, `return_fig` | Same native return/display/export boundary as UMAP. No Axes dictionaries or fake builders. |
@@ -218,6 +219,7 @@ computed. It performs no analysis or AnnData/cache writes.
 | `cmap`, `vmin`, `vmax` | Native scheme (default viridis) with finite numeric bounds and clipping. Constant bounds expand the guide by 10%, or ±0.1 at zero; tiles map against that expanded domain, unlike dotplot's frozen constant colors. Missing tiles are unpainted but retain their slots; all-missing values error. |
 | `title`, `colorbar_title`, `var_group_*`, `width`, `height`, `figsize` | Shared native grouped layout and horizontal color guide. Index slots have no outer padding, so adjacent tiles fill the matrix. Default cells are 37 × 35 logical pixels, exchanged when axes swap. Frame width follows matrixplot's 1.5-point default. |
 | `edgecolor`, `linewidth` in kwargs | Scalar opaque CSS edge color and nonnegative width in points; defaults are gray and 0.1. `edgecolor="none"` disables edges. Plural aliases error: Scanpy 1.11.5 overwrites those forwarded forms with its defaults; use the singular forms explicitly. Other pcolor kwargs error. |
+| `zoom`, `show_values` | Both default False. Enable aligned wheel zoom/drag panning and fitted two-decimal plotted values; see [shared grid interactions](#shared-grid-interactions). |
 | `hover` | Enabled by default; show gene, group and displayed mean/scaled mean or supplied value. `hover=False` disables picking without changing tile geometry. Summary tiles do not identify individual cells. |
 | `show`, `save`, `ax`, `return_fig`, `dendrogram`, `norm`, `vcenter` | Same native delivery boundary as dotplot. Trees accept True or a stored key; norm/vcenter error. The MatrixPlot builder and its styling methods are M13. Brushes and tile navigation remain deferred. |
 
@@ -225,6 +227,38 @@ Native palette interpolation, fonts and guide layout have the same documented
 fidelity boundaries as dotplot. Complete-chart checks cover labels, brackets,
 frame and guide placement; registered tile comparisons use 150 export DPI and
 DPR 1.5. The production adapter never imports upstream plotting or Matplotlib.
+
+## Shared grid interactions
+
+Grid interactions are optional additions to the Scanpy signatures:
+
+```python
+heatmap = gsc.pl.heatmap(pbmc, markers, "bulk_labels", zoom=True, show_values=True, show=False)
+matrixplot = gsc.pl.matrixplot(pbmc, markers, "bulk_labels", zoom=True, show_values=True, show=False)
+matrix = gsc.pl.matrix(values, zoom=True, show_values=True, show=False)
+dotplot = gsc.pl.dotplot(pbmc, markers, "bulk_labels", zoom=True, highlight=True, show=False)
+```
+
+Use the mouse wheel inside the plot to zoom both axes and drag to pan. Native
+axis-margin gestures can zoom one axis. Row/column labels and dendrograms follow
+the visible slots; outside labels and partially visible gene brackets are hidden.
+Heatmap category strips and boundaries follow individual cells. Defaults remain
+`zoom=False`, `show_values=False` and `highlight=False`.
+
+`show_values` uses native `fitToBand` text, shared tile records and the plotted
+value after any log transform/scaling. Values fade in as cells become large
+enough and show two decimals; tooltips retain more precision. Missing cells have
+no text. Black/white contrast uses the native palette sampled at 256 bins,
+clamped color bounds and tile opacity over white. Sampling runs in GenomeSpy;
+there is no Python colormap implementation.
+
+`highlight` shades the hovered dot's row and column and clears on leaving the dot.
+It works independently of `hover`; no brush or individual-cell selection is
+implied by grouped summaries. Integer slots preserve repeated gene labels.
+Zooming changes positions while keeping the dot percentage-to-area mapping,
+color limits and guides fixed. These interactions run in the browser and never
+read AnnData again or rerun Scanpy analysis. Notebook widgets and standalone HTML
+use the same native specifications.
 
 ## Heatmap compatibility
 
@@ -253,6 +287,7 @@ means or changes AnnData.
 | Category colors | Reuse saved AnnData colors or the shared Scanpy default palettes without writing them back. Numeric and multi-key strips use native category20, currently limited to 20 groups. |
 | `width`, `height`, `figsize` | Width/height control the tile area in logical pixels. Defaults follow Scanpy's gene-label size rules; figsize uses 100 pixels per inch with space reserved for strips/trees. Native text and outer layout differ from Matplotlib. The vertical color guide uses at most 400 pixels. |
 | `zoom` | Defaults False. True enables wheel zoom and drag panning on both index axes. Strips, group boundaries, tree leaves and gene labels follow the visible cells/genes. Clip branches and strips at the plot extent; hide offscreen labels and gene brackets whose whole span is not visible. |
+| `show_values` | Default False. Reveal the plotted cell values to two decimals when the tiles have enough room; missing cells remain empty. |
 | `hover`, delivery | Default hover shows original cell ID/name, gene, group and displayed expression. Duplicate names use stable original-row IDs. Brushing is not offered. Existing show/save/native-return rules apply; Matplotlib axes and figure-return options error. |
 
 This preview accepts **at most 250,000 cell–gene values**, counting repeated
@@ -304,7 +339,7 @@ area height. Default square cells fit inside a 400 × 400-pixel area; `width` an
 outer layout and colorbar allocation differ from Matplotlib's figure layout.
 Titles and axis labels are supported. Default hover shows row, column and value;
 `hover=False` disables it. Existing `show`/`save` and native return/export rules
-apply. Matrix zoom and nonlinear normalization are not added by this preview.
+apply. Optional `zoom=True` enables x/y wheel zoom and drag panning, with aligned tick labels. `show_values=True` adds fitted two-decimal values. Nonlinear normalization is unsupported.
 
 Eight frozen Scanpy figures retain values, color bounds, labels, complete charts
 and registered crops at 100 display / 150 export DPI. Native DPR 1.5 checks cover
@@ -371,8 +406,8 @@ Dotplot/matrixplot trees reserve an 80-pixel branch region; heatmaps use 100 pix
 on the right or 80 above, and correlation trees use 180.
 Zero-distance leaves meet the matrix edge without a gap or distance-axis padding.
 Native dataflow projections follow the plot dimensions and fixed index-slot
-padding. Grouped navigation stays disabled, so wheel gestures cannot separate
-branches from their rows/columns. Summary hover remains available. Distances,
+padding. Optional grouped navigation uses the same live index projection for
+branches and row/column labels. Summary hover remains available. Distances,
 leaf positions and guide/label clearance are checked against frozen complete
 Scanpy figures, including swapped axes and different plot sizes. These are native
 font/layout comparisons, not a claim of identical Matplotlib outer figures.

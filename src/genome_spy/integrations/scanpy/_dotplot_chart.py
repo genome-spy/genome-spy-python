@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.integrations.scanpy._grid_interactions import zoom_axes, hover_bands
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._grouped_chart import (
@@ -90,6 +91,8 @@ def build_dotplot(
     dot_max: float | None,
     smallest_dot: float,
     hover: bool,
+    zoom: bool,
+    highlight: bool,
     value_title: str,
     linewidth: float,
     rotation: float | None,
@@ -142,6 +145,7 @@ def build_dotplot(
         # Scanpy freezes dot colors before its colorbar expands constant bounds.
         table["_paint"] = low
     x, y = grouped_axes(rows, columns, xpadding=0.3, ypadding=0.5)
+    x, y = zoom_axes(x, y, enabled=zoom, name="dotplot")
     offset = guide_offset(feature_groups, swap_axes=swap_axes, tree=tree is not None)
     dots = (
         gs.Chart(table)
@@ -203,8 +207,22 @@ def build_dotplot(
                 gs.Tooltip("_percent:Q", title="Expressing cells (%)", format=".1f"),
             ]
         )
-    return finish_grouped_chart(
-        dots,
+    marks = [dots]
+    if highlight:
+        # Only dots own picking; bands follow their row/column without intercepting hover.
+        dots = dots.add_params(
+            gs.selection_point(
+                "grid_hover",
+                on="mouseover",
+                clear="mouseout",
+                toggle=False,
+                persist=False,
+                push="outer",
+            )
+        )
+        marks = [*hover_bands(rows, columns, x, y), dots]
+    chart = finish_grouped_chart(
+        marks,
         colors,
         feature_groups,
         x,
@@ -216,4 +234,12 @@ def build_dotplot(
         height=height,
         frame_width=0.8,
         tree=tree,
+        zoom=zoom,
     )
+    if highlight:
+        chart = chart.add_params(
+            gs.param(
+                "grid_hover", value={"type": "single", "datum": None, "uniqueId": None}
+            )
+        )
+    return chart
