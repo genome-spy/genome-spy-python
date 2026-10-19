@@ -29,6 +29,12 @@ __all__ = [
     "rank_genes_groups_matrixplot",
     "rank_genes_groups_heatmap",
     "umap",
+    "embedding",
+    "tsne",
+    "diffmap",
+    "draw_graph",
+    "pca",
+    "pca_scatter",
 ]
 
 _Bound = float | str | Sequence[float | str | None] | None
@@ -110,8 +116,12 @@ def _finish_plot(
     return chart
 
 
-def umap(
+def _embedding(
     adata: AnnData,
+    basis: str,
+    context: str,
+    annotate_var_explained: bool,
+    /,
     *,
     color: str | Sequence[str] | None = None,
     mask_obs: Any = None,
@@ -164,95 +174,9 @@ def umap(
     height: float | None = None,
     **kwargs: Any,
 ) -> TopLevelSpec | None:
-    """Plot existing UMAP coordinates with Scanpy-compatible color semantics.
-
-    Description:
-        Supports Scanpy 1.11.5 categorical and continuous 2D UMAP, including
-        multiple panels, selected raw/layer genes, palettes, masks, per-cell
-        sizes, color sorting, and percentile bounds. Data preparation happens
-        in Python without modifying AnnData or computing an embedding. The
-        result is a native GenomeSpy chart, displayed through anywidget.
-        Matplotlib object parameters ``ax`` and ``return_fig`` are omitted.
-        See the Scanpy integration guide for the complete support table.
-
-    Args:
-        adata: AnnData with existing ``umap`` or ``X_umap`` coordinates.
-        color: Observation or gene keys, one per panel; None uses na_color.
-        mask_obs: Boolean observation mask or observation-column key. Masks
-            affect coloring, retaining all coordinates.
-        gene_symbols: Variable column used to resolve gene symbols.
-        use_raw: Use raw when present by default, unless a layer is selected.
-        sort_order: Draw larger continuous values last, following Scanpy ties.
-        edges: Graph edges; currently only False is supported.
-        edges_width: Reserved upstream edge width.
-        edges_color: Reserved upstream edge color.
-        neighbors_key: Reserved upstream graph key.
-        arrows: Graph arrows; currently only False is supported.
-        arrows_kwds: Reserved upstream arrow options.
-        groups: Categorical groups to color; other observations remain visible.
-        components: One-based component pairs, or "all".
-        dimensions: Zero-based component pairs; mutually exclusive with components.
-        layer: Expression layer, mutually exclusive with use_raw=True.
-        projection: Currently only "2d" is supported.
-        scale_factor: Reserved upstream spatial scaling option.
-        color_map: Alias for cmap, mutually exclusive with it.
-        cmap: GenomeSpy color scheme name; defaults to "viridis".
-        palette: Native scheme name, CSS color sequence, or category-to-color mapping.
-        na_color: Color for missing or masked values.
-        na_in_legend: Include a missing-category legend entry.
-        size: Marker area in points squared, scalar or one value per observation.
-        frameon: Show axes and frame; defaults to Scanpy's frame setting.
-        legend_fontsize: Legend/annotation font size in points or relative name.
-        legend_fontweight: Weight of on-data category labels; currently normal
-            (400) only, as other weights require an unbundled font atlas.
-        legend_loc: "right margin", "on data", "none", or None.
-        legend_fontoutline: Label halos are not yet supported.
-        colorbar_loc: Currently "right" or None.
-        vmax: Numeric or percentile upper color bound, optionally per panel.
-        vmin: Numeric or percentile lower color bound, optionally per panel.
-        vcenter: Custom centers are not yet supported.
-        norm: Custom normalization is not yet supported.
-        add_outline: Cluster outlines are not yet supported.
-        outline_width: Reserved upstream outline widths.
-        outline_color: Reserved upstream outline colors.
-        ncols: Maximum number of panel columns.
-        hspace: Relative vertical panel spacing.
-        wspace: Relative horizontal panel spacing.
-        title: Panel titles, defaulting to color keys.
-        show: Display and return None when True; return a chart when False.
-            None uses Scanpy settings.autoshow.
-        save: Image saving is not yet supported; use native HTML/JSON save.
-        marker: Dot (".") or circle ("o"), optionally per panel.
-        hover: Enable record/value tooltips without changing initial appearance.
-        zoom: Enable coordinate navigation, shared across panels.
-        selection: Native ``gs.selection_interval(..., encodings=["x", "y"])``.
-            Brush in the first panel to highlight matching coordinates in all
-            panels and show a native selected-cell count. Requires the same
-            dimension pair in every panel.
-            Point selections are not yet supported.
-        obs_id: Unique nonmissing observation-column key, defaulting to obs_names
-            or distinct snapshot-local row keys when names repeat.
-        width: GenomeSpy plot-area width per panel in logical pixels. None
-            uses 300 pixels. Axes and guides add space.
-        height: GenomeSpy plot-area height per panel in logical pixels. None
-            uses 300 pixels. Does not resize markers/fonts.
-        **kwargs: Supported scatter aliases: s, alpha, edgecolor/edgecolors,
-            linewidth/linewidths. Other options fail before data extraction.
-
-    Returns:
-        A native chart/composition when show=False, otherwise None.
-
-    Raises:
-        ImportError: If the optional dependency/version is unavailable.
-        TypeError: If an argument or source type is invalid.
-        ValueError: If requested data, sizes, masks, or bounds are invalid.
-        NotImplementedError: If a recognized plotting option is unsupported.
-
-    Example:
-        >>> import genome_spy.integrations.scanpy as gsc
-        >>> chart = gsc.pl.umap(adata, color=["cell_type", "MS4A1"], show=False)
-        >>> chart.save("umap.html", inline=True)
-    """
+    """Validate shared embedding options, then prepare and render stored coordinates."""
+    if not isinstance(annotate_var_explained, bool):
+        raise TypeError(f"{context}: annotate_var_explained must be boolean.")
     # Accept Scanpy defaults, but reject options we cannot render faithfully.
     unsupported = {
         "edges": edges is not False,
@@ -280,47 +204,47 @@ def umap(
         from genome_spy import Parameter
 
         if not isinstance(selection, Parameter):
-            raise TypeError("gsc.pl.umap: selection must be a GenomeSpy parameter.")
+            raise TypeError(f"{context}: selection must be a GenomeSpy parameter.")
         definition = selection.param.to_dict()
         config = definition.get("select")
         if not isinstance(config, dict) or config.get("type") != "interval":
             raise NotImplementedError(
-                "gsc.pl.umap: selection currently supports x/y interval brushing; "
+                f"{context}: selection currently supports x/y interval brushing; "
                 "point selections are not supported yet."
             )
         if sorted(config.get("encodings", [])) != ["x", "y"]:
             raise NotImplementedError(
-                "gsc.pl.umap: selection requires encodings=['x', 'y']."
+                f"{context}: selection requires encodings=['x', 'y']."
             )
         if "push" in definition or "value" in definition:
             raise NotImplementedError(
-                "gsc.pl.umap: selection push and initial value are not supported; "
+                f"{context}: selection push and initial value are not supported; "
                 "the adapter owns the shared brush scope."
             )
     for name, rejected in unsupported.items():
         if rejected:
             raise NotImplementedError(
-                f"gsc.pl.umap (Scanpy 1.11.5): {name} is not supported yet. "
+                f"{context} (Scanpy 1.11.5): {name} is not supported yet. "
                 "See the Scanpy integration support table."
             )
     _check_kwargs(
         kwargs,
         {"s", "alpha", "edgecolor", "edgecolors", "linewidth", "linewidths"},
-        context="gsc.pl.umap",
+        context=context,
     )
 
     # Resolve alternate argument names before reading data.
     for left, right in [("edgecolor", "edgecolors"), ("linewidth", "linewidths")]:
         if left in kwargs and right in kwargs:
-            raise TypeError(f"gsc.pl.umap: pass only one of {left} and {right}.")
+            raise TypeError(f"{context}: pass only one of {left} and {right}.")
     if "s" in kwargs:
         if size is not None:
-            raise TypeError("gsc.pl.umap: pass only one of size and s.")
+            raise TypeError(f"{context}: pass only one of size and s.")
         size = kwargs["s"]
     if color_map is not None and cmap is not None:
-        raise ValueError("gsc.pl.umap: cannot specify both color_map and cmap.")
+        raise ValueError(f"{context}: cannot specify both color_map and cmap.")
     if groups is not None and mask_obs is not None:
-        raise ValueError("gsc.pl.umap: groups and mask_obs are incompatible.")
+        raise ValueError(f"{context}: groups and mask_obs are incompatible.")
 
     # Check basic options before loading the optional Scanpy dependency.
     for name, dimension in {"width": width, "height": height}.items():
@@ -331,7 +255,7 @@ def umap(
             or dimension <= 0
         ):
             raise ValueError(
-                f"gsc.pl.umap: {name} must be a positive finite number or None."
+                f"{context}: {name} must be a positive finite number or None."
             )
     for name, option in {
         "sort_order": sort_order,
@@ -340,17 +264,19 @@ def umap(
         "zoom": zoom,
     }.items():
         if not isinstance(option, bool):
-            raise TypeError(f"gsc.pl.umap: {name} must be boolean.")
+            raise TypeError(f"{context}: {name} must be boolean.")
     if frameon is not None and not isinstance(frameon, bool):
-        raise TypeError("gsc.pl.umap: frameon must be boolean or None.")
-    sc = _prepare_plot(show, save, context="gsc.pl.umap")
-    from genome_spy.integrations.scanpy._umap_data import prepare_umap
-    from genome_spy.integrations.scanpy._umap_chart import build_umap
-    from genome_spy.integrations.scanpy._style import umap_style
+        raise TypeError(f"{context}: frameon must be boolean or None.")
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._embedding_data import prepare_embedding
+    from genome_spy.integrations.scanpy._embedding_chart import build_embedding
+    from genome_spy.integrations.scanpy._style import embedding_style
 
     # Read existing coordinates and colors without running analysis.
-    prepared = prepare_umap(
+    prepared = prepare_embedding(
         adata,
+        basis=basis,
+        annotate_var_explained=annotate_var_explained,
         color=color,
         mask_obs=mask_obs,
         gene_symbols=gene_symbols,
@@ -374,7 +300,7 @@ def umap(
     )
 
     # Keep appearance separate from the selected data.
-    style = umap_style(
+    style = embedding_style(
         count=len(prepared.panels),
         width=width,
         height=height,
@@ -390,8 +316,215 @@ def umap(
         linewidth=kwargs.get("linewidth", kwargs.get("linewidths")),
         na_color=na_color,
     )
-    chart = build_umap(prepared, style, hover=hover, zoom=zoom, selection=selection)
+    chart = build_embedding(
+        prepared, style, hover=hover, zoom=zoom, selection=selection
+    )
     return _finish_plot(chart, show, sc)
+
+
+def _embedding_signature(
+    plot: Callable[..., TopLevelSpec | None],
+) -> Callable[..., TopLevelSpec | None]:
+    """Expose shared keyword defaults without copying six plotting signatures."""
+    from inspect import signature
+
+    own = signature(plot)
+    parameters = {
+        name: parameter
+        for name, parameter in signature(_embedding).parameters.items()
+        if name not in {"context", "annotate_var_explained", "kwargs"}
+        and (name != "basis" or name in own.parameters)
+    }
+    parameters.update(own.parameters)
+    setattr(plot, "__signature__", own.replace(parameters=list(parameters.values())))
+    return plot
+
+
+@_embedding_signature
+def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
+    """Plot supplied 2D embedding coordinates with Scanpy-compatible colors.
+
+    Reads an existing obsm basis using direct-name then X_ precedence. Shared
+    options cover categorical/continuous colors, component panels, masks, native
+    sizing, hover, zoom and linked interval selection. Analysis stays in Scanpy.
+
+    Args:
+        adata: AnnData containing the supplied coordinates and requested colors.
+        basis: Existing obsm name, such as umap, tsne, diffmap or pca.
+        **kwargs: Shared embedding options shown in the signature. Components
+            are one-based strings; dimensions are zero-based pairs. Raw/layer
+            lookup, colors, defaults and native controls match pl.umap.
+
+    Returns:
+        A native chart when show=False, otherwise None after display.
+
+    Raises:
+        ImportError: If the pinned optional Scanpy dependency is unavailable.
+        TypeError: If options or source types are invalid.
+        ValueError: If coordinates, colors or component requests are invalid.
+        NotImplementedError: If a renderer option is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.embedding(adata, "pca", color="cell_type", show=False)
+    """
+    return _embedding(adata, basis, "gsc.pl.embedding", False, **kwargs)
+
+
+@_embedding_signature
+def umap(adata: AnnData, **kwargs: Any) -> TopLevelSpec | None:
+    """Plot stored UMAP coordinates through the shared embedding renderer.
+
+    Preserves Scanpy defaults and the existing native UMAP controls. Computes no
+    embedding and does not modify AnnData; see pl.embedding for shared options.
+
+    Args:
+        adata: AnnData containing umap or X_umap coordinates.
+        **kwargs: Shared embedding options shown in the signature, including
+            hover, zoom, selection, obs_id, width and height.
+
+    Returns:
+        A native chart when show=False, otherwise None after display.
+
+    Raises:
+        ImportError: If the supported Scanpy dependency is unavailable.
+        TypeError: If arguments or source types are invalid.
+        ValueError: If stored coordinates or requested data are invalid.
+        NotImplementedError: If a renderer option is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.umap(adata, color=["cell_type", "MS4A1"], show=False)
+    """
+    return _embedding(adata, "umap", "gsc.pl.umap", False, **kwargs)
+
+
+@_embedding_signature
+def tsne(adata: AnnData, **kwargs: Any) -> TopLevelSpec | None:
+    """Plot stored t-SNE coordinates through the shared embedding renderer.
+
+    Uses tsne or X_tsne without computing t-SNE; see pl.embedding for options.
+
+    Args:
+        adata: AnnData containing supplied t-SNE coordinates.
+        **kwargs: Shared embedding colors, component choices and native controls.
+
+    Returns:
+        A native chart when show=False, otherwise None after display.
+
+    Raises:
+        ImportError: If the supported Scanpy dependency is unavailable.
+        TypeError: If arguments or source types are invalid.
+        ValueError: If coordinates or requested data are missing or invalid.
+        NotImplementedError: If a renderer option is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.tsne(adata, color="cell_type", zoom=True, show=False)
+    """
+    return _embedding(adata, "tsne", "gsc.pl.tsne", False, **kwargs)
+
+
+@_embedding_signature
+def diffmap(adata: AnnData, **kwargs: Any) -> TopLevelSpec | None:
+    """Plot stored diffusion coordinates through the shared embedding renderer.
+
+    Preserves Scanpy 1.11.5's default first two columns and DC labels. Reads
+    diffmap or X_diffmap without fitting diffusion components or neighbors.
+
+    Args:
+        adata: AnnData containing supplied diffusion coordinates.
+        **kwargs: Shared embedding colors, component choices and native controls.
+
+    Returns:
+        A native chart when show=False, otherwise None after display.
+
+    Raises:
+        ImportError: If the supported Scanpy dependency is unavailable.
+        TypeError: If arguments or source types are invalid.
+        ValueError: If coordinates or requested data are missing or invalid.
+        NotImplementedError: If a renderer option is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.diffmap(adata, components="2,3", show=False)
+    """
+    return _embedding(adata, "diffmap", "gsc.pl.diffmap", False, **kwargs)
+
+
+@_embedding_signature
+def draw_graph(
+    adata: AnnData, *, layout: str | None = None, **kwargs: Any
+) -> TopLevelSpec | None:
+    """Plot an existing graph layout through the shared embedding renderer.
+
+    Reads the requested X_draw_graph_<layout> coordinates. With layout=None,
+    uses the saved draw_graph params; never computes a layout or neighbors.
+
+    Args:
+        adata: AnnData containing saved graph-layout coordinates.
+        layout: Saved layout name; None uses the last computed layout.
+        **kwargs: Shared embedding colors, component choices and native controls.
+
+    Returns:
+        A native chart when show=False, otherwise None after display.
+
+    Raises:
+        ImportError: If the supported Scanpy dependency is unavailable.
+        TypeError: If arguments or source types are invalid.
+        ValueError: If layout metadata, coordinates or requested data are invalid.
+        NotImplementedError: If a renderer option is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.draw_graph(adata, layout="fa", color="cell_type", show=False)
+    """
+    _prepare_plot(kwargs.get("show"), kwargs.get("save"), context="gsc.pl.draw_graph")
+    from anndata import AnnData
+
+    if not isinstance(adata, AnnData):
+        raise TypeError("gsc.pl.draw_graph: expected AnnData.")
+    if layout is None:
+        stored = adata.uns.get("draw_graph")
+        params = stored.get("params") if isinstance(stored, Mapping) else None
+        layout = params.get("layout") if isinstance(params, Mapping) else None
+    if not isinstance(layout, str) or not layout:
+        raise ValueError(
+            "gsc.pl.draw_graph: supply layout or stored draw_graph params; compute the layout explicitly first."
+        )
+    basis = f"draw_graph_{layout}"
+    if f"X_{basis}" not in adata.obsm:
+        raise ValueError(
+            f"gsc.pl.draw_graph: missing X_{basis}; compute the requested layout explicitly first."
+        )
+    return _embedding(adata, basis, "gsc.pl.draw_graph", False, **kwargs)
+
+
+@_embedding_signature
+def pca(
+    adata: AnnData, *, annotate_var_explained: bool = False, **kwargs: Any
+) -> TopLevelSpec | None:
+    """Plot stored PCA coordinates, optionally labeling their explained variance.
+
+    Reuses embedding data, chart and interaction helpers. Variance annotations
+    read uns['pca']['variance_ratio']; plotting never fits PCA.
+
+    Args:
+        adata: AnnData containing pca or X_pca coordinates.
+        annotate_var_explained: Add stored variance percentages to PC axis labels.
+        **kwargs: Shared embedding colors, component choices and native controls.
+
+    Returns:
+        A native chart when show=False, otherwise None after display.
+
+    Raises:
+        ImportError: If the supported Scanpy dependency is unavailable.
+        TypeError: If arguments or source types are invalid.
+        ValueError: If coordinates or required variance metadata are invalid.
+        NotImplementedError: If a renderer option is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.pca(adata, annotate_var_explained=True, show=False)
+    """
+    return _embedding(adata, "pca", "gsc.pl.pca", annotate_var_explained, **kwargs)
+
+
+pca_scatter = pca
 
 
 def dotplot(

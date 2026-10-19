@@ -1,4 +1,4 @@
-"""Native UMAP marks, guides, and panel composition."""
+"""Native embedding marks, guides, and panel composition."""
 
 from __future__ import annotations
 
@@ -7,14 +7,14 @@ from typing import Literal
 import numpy as np
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._umap_data import Panel, PreparedUMAP
-from genome_spy.integrations.scanpy._umap_interactions import (
+from genome_spy.integrations.scanpy._embedding_data import Panel, PreparedEmbedding
+from genome_spy.integrations.scanpy._embedding_interactions import (
     brush_owner,
     point_interactions,
     validate_brush,
     with_brush_count,
 )
-from genome_spy.integrations.scanpy._style import POINTS_TO_PIXELS, UMAPStyle
+from genome_spy.integrations.scanpy._style import POINTS_TO_PIXELS, EmbeddingStyle
 
 
 def coordinate_domain(values: np.ndarray, margin: float) -> tuple[float, float]:
@@ -31,10 +31,12 @@ def _coordinate(
     field: str,
     dimension: int,
     values: np.ndarray,
-    style: UMAPStyle,
+    style: EmbeddingStyle,
     zoom: bool,
     *,
     horizontal: bool,
+    label: str,
+    basis: str,
 ) -> gs.X | gs.Y:
     """Return an x or y encoding from a panel's coordinates and style.
 
@@ -49,11 +51,11 @@ def _coordinate(
         zoom=zoom,
     )
     if zoom:
-        result = result.scale(name=f"umap-{'x' if horizontal else 'y'}-{dimension}")
+        result = result.scale(name=f"{basis}-{'x' if horizontal else 'y'}-{dimension}")
     if not style.frameon:
         return result.axis(None)
     return result.axis(
-        title=f"UMAP{dimension + 1}",
+        title=label,
         ticks=False,
         labels=False,
         domain=False,
@@ -62,7 +64,7 @@ def _coordinate(
     )
 
 
-def _legend(panel: Panel, style: UMAPStyle) -> gs.Legend | None:
+def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
     """Return the panel's category legend or colorbar from its data and style.
 
     Return None when the requested placement does not use an external guide.
@@ -99,7 +101,7 @@ def _legend(panel: Panel, style: UMAPStyle) -> gs.Legend | None:
     )
 
 
-def _color(panel: Panel, index: int, style: UMAPStyle) -> gs.Color:
+def _color(panel: Panel, index: int, style: EmbeddingStyle) -> gs.Color:
     """Return a color encoding and guide from a prepared panel and its table index.
 
     Keep category palettes, numeric ranges and constant-value colors faithful.
@@ -129,16 +131,16 @@ def _color(panel: Panel, index: int, style: UMAPStyle) -> gs.Color:
 
 
 def _panel(
-    prepared: PreparedUMAP,
+    prepared: PreparedEmbedding,
     panel: Panel,
     index: int,
-    style: UMAPStyle,
+    style: EmbeddingStyle,
     *,
     hover: bool,
     zoom: bool,
     selection: gs.Parameter | None,
 ) -> gs.TopLevelSpec:
-    """Return one UMAP panel from prepared cells, panel settings and style.
+    """Return one embedding panel from prepared cells, panel settings and style.
 
     Draw points, missing values and labels in order, adding only requested interactions.
     """
@@ -151,6 +153,8 @@ def _panel(
         style,
         zoom,
         horizontal=True,
+        label=prepared.axis_labels[panel.dimensions[0]],
+        basis=prepared.basis,
     )
     y = _coordinate(
         y_field,
@@ -159,6 +163,8 @@ def _panel(
         style,
         zoom,
         horizontal=False,
+        label=prepared.axis_labels[panel.dimensions[1]],
+        basis=prepared.basis,
     )
     # Scanpy uses square points for size; GenomeSpy uses square pixels.
     maximum_size = max(1.0, float(table[f"_size_{index}"].max()))
@@ -194,6 +200,7 @@ def _panel(
         points,
         panel,
         index,
+        axis_labels=prepared.axis_labels,
         hover=hover,
         selection=selection,
         opacity=style.alpha,
@@ -238,7 +245,7 @@ def _panel(
     )
     # Only the first panel edits the brush; other panels show its selection.
     if selection is not None and index == 0:
-        result = brush_owner(result, selection)
+        result = brush_owner(result, selection, prepared.basis)
     if panel.title:
         result = result.properties(
             title=gs.title(panel.title, fontSize=style.title_fontsize, font=style.font)
@@ -258,7 +265,7 @@ def _panel(
 
 
 def _compose(
-    charts: list[gs.TopLevelSpec], style: UMAPStyle, *, share_coordinates: bool
+    charts: list[gs.TopLevelSpec], style: EmbeddingStyle, *, share_coordinates: bool
 ) -> gs.TopLevelSpec:
     """Arrange panel charts into rows using the supplied size and spacing settings.
 
@@ -290,15 +297,15 @@ def _compose(
     )
 
 
-def build_umap(
-    prepared: PreparedUMAP,
-    style: UMAPStyle,
+def build_embedding(
+    prepared: PreparedEmbedding,
+    style: EmbeddingStyle,
     *,
     hover: bool,
     zoom: bool,
     selection: gs.Parameter | None = None,
 ) -> gs.TopLevelSpec:
-    """Return a composed UMAP chart from prepared data, style and interaction options.
+    """Return a composed embedding chart from prepared data, style and interaction options.
 
     Share zoom for matching coordinates and add the linked brush count when requested.
     """

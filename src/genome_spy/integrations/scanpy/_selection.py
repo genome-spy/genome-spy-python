@@ -18,11 +18,12 @@ def selection_mask(
     snapshot: Mapping[str, Any] | None,
     *,
     dimensions: tuple[int, int] = (0, 1),
+    basis: str = "umap",
 ) -> NDArray[np.bool_]:
-    """Match a UMAP brush to observations in their current row order.
+    """Match an embedding brush to observations in their current row order.
 
     Description:
-        Uses the same ``umap``/``X_umap`` precedence as ``pl.umap`` and tests
+        Uses the same direct-name/``X_`` precedence as ``pl.embedding`` and tests
         lower-inclusive, upper-exclusive domain bounds. No active rectangle
         selects zero observations. Only embedding coordinates are read; no
         expression data is loaded and AnnData is not modified. Keep the plotted
@@ -34,6 +35,7 @@ def selection_mask(
         snapshot: Interval value from ``widget.parameter_values``, or None
             before the widget has synchronized.
         dimensions: Zero-based component pair used in the plotted panels.
+        basis: Embedding name used by the plotted panels; defaults to UMAP.
 
     Returns:
         Boolean mask suitable for ``adata[mask]``. Coincident observations
@@ -48,14 +50,10 @@ def selection_mask(
         >>> selected = adata[mask].copy()
     """
     import numpy as np
-    from anndata import AnnData
+    from genome_spy.integrations.scanpy._embedding_data import embedding_key
 
-    if not isinstance(adata, AnnData):
-        raise TypeError("selection_mask: expected AnnData.")
-    basis = "umap" if "umap" in adata.obsm else "X_umap"
-    if basis not in adata.obsm:
-        raise ValueError("selection_mask: missing umap/X_umap coordinates.")
-    embedding = adata.obsm[basis]
+    key = embedding_key(adata, basis, context="selection_mask")
+    embedding = adata.obsm[key]
     if len(dimensions) != 2 or any(
         isinstance(d, bool)
         or not isinstance(d, Integral)

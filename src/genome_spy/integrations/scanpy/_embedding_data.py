@@ -1,7 +1,8 @@
-"""Read existing UMAP plot inputs without running analysis or choosing layout."""
+"""Read stored embedding inputs without running analysis or choosing layout."""
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from itertools import combinations, product
 from numbers import Integral
@@ -39,9 +40,63 @@ class Panel:
 
 
 @dataclass(frozen=True, slots=True)
-class PreparedUMAP:
+class PreparedEmbedding:
     table: pd.DataFrame
     panels: tuple[Panel, ...]
+    axis_labels: tuple[str, ...]
+    basis: str
+
+
+def embedding_key(adata: Any, basis: str, *, context: str) -> str:
+    """Resolve an existing obsm key using Scanpy's direct-name then X_ precedence."""
+    from anndata import AnnData
+
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: expected AnnData.")
+    if not isinstance(basis, str) or not basis:
+        raise ValueError(f"{context}: basis must be a nonempty obsm name.")
+    key = basis if basis in adata.obsm else f"X_{basis}"
+    if key not in adata.obsm:
+        raise ValueError(
+            f"{context}: missing {basis}/X_{basis} in obsm; compute the embedding explicitly with Scanpy first."
+        )
+    if len(adata.obsm[key].shape) != 2:
+        raise ValueError(f"{context}: embedding coordinates must be two-dimensional.")
+    return key
+
+
+def _axis_labels(
+    adata: Any, basis: str, count: int, annotate: bool, needed: int
+) -> tuple[str, ...]:
+    """Name stored components, adding supplied PCA variance percentages when requested."""
+    prefix = {"umap": "UMAP", "tsne": "tSNE", "diffmap": "DC", "pca": "PC"}.get(
+        basis, basis
+    )
+    if "draw_graph" in basis:
+        prefix = basis.replace("draw_graph_", "").upper()
+    labels = [f"{prefix}{i + 1}" for i in range(count)]
+    if annotate:
+        stored = adata.uns.get("pca")
+        ratios = np.asarray(
+            stored.get("variance_ratio", []) if isinstance(stored, Mapping) else []
+        )
+        if (
+            ratios.ndim != 1
+            or not np.issubdtype(ratios.dtype, np.number)
+            or np.iscomplexobj(ratios)
+            or len(ratios) < needed
+            or not np.isfinite(ratios).all()
+        ):
+            raise ValueError(
+                "gsc.pl.pca: annotate_var_explained requires finite stored pca variance_ratio for each component."
+            )
+        labels = [
+            f"{label} ({round(float(ratios[i]) * 100, 2)}%)"
+            if i < len(ratios)
+            else label
+            for i, label in enumerate(labels)
+        ]
+    return tuple(labels)
 
 
 def dimensions_for(
@@ -54,7 +109,7 @@ def dimensions_for(
     pairs: Any
     if components is not None and dimensions is not None:
         raise ValueError(
-            "gsc.pl.umap: components and dimensions are mutually exclusive."
+            "Scanpy embedding: components and dimensions are mutually exclusive."
         )
     if components == "all":
         pairs = list(combinations(range(count), 2))
@@ -65,7 +120,7 @@ def dimensions_for(
             pairs = [tuple(int(x) - 1 for x in pair.split(",")) for pair in entries]
         except (ValueError, AttributeError) as error:
             raise ValueError(
-                "gsc.pl.umap: expected one-based component pairs."
+                "Scanpy embedding: expected one-based component pairs."
             ) from error
     else:
         values = (0, 1) if dimensions is None else dimensions
@@ -83,7 +138,7 @@ def dimensions_for(
         for p in pairs
     ):
         raise ValueError(
-            f"gsc.pl.umap: expected valid 2D components in an embedding with {count} columns."
+            f"Scanpy embedding: expected valid 2D components in an embedding with {count} columns."
         )
     return [(int(p[0]), int(p[1])) for p in pairs]
 
@@ -106,14 +161,16 @@ def _expression(
 ) -> tuple[Any, str]:
     """Return a copied observation or gene vector and its source label from AnnData.
 
-    Resolve symbols and raw/layer choices using Scanpy's UMAP lookup rules.
+    Resolve symbols and raw/layer choices using Scanpy's embedding lookup rules.
     """
     if key in adata.obs:
         if list(adata.obs.columns).count(key) != 1:
-            raise ValueError(f"gsc.pl.umap: observation field {key!r} is ambiguous.")
+            raise ValueError(
+                f"Scanpy embedding: observation field {key!r} is ambiguous."
+            )
         if key in adata.var_names or (use_raw and key in adata.raw.var_names):
             raise ValueError(
-                f"gsc.pl.umap: {key!r} occurs in both observation and gene names."
+                f"Scanpy embedding: {key!r} occurs in both observation and gene names."
             )
         return adata.obs[key].copy(), f"obs[{key!r}]"
     resolved = key
@@ -121,21 +178,21 @@ def _expression(
     if symbols is not None and key not in adata.var_names:
         if symbols not in adata.var or list(adata.var.columns).count(symbols) != 1:
             raise ValueError(
-                f"gsc.pl.umap: gene-symbol column {symbols!r} is missing or ambiguous."
+                f"Scanpy embedding: gene-symbol column {symbols!r} is missing or ambiguous."
             )
         matches = np.flatnonzero(adata.var[symbols].eq(key).to_numpy())
         if len(matches) != 1:
             raise ValueError(
-                f"gsc.pl.umap: gene symbol {key!r} is missing or ambiguous."
+                f"Scanpy embedding: gene symbol {key!r} is missing or ambiguous."
             )
         resolved = str(adata.var_names[matches[0]])
     names = adata.raw.var_names if use_raw else adata.var_names
     matches = np.flatnonzero(names == resolved)
     if len(matches) != 1:
         raise ValueError(
-            f"gsc.pl.umap: gene {key!r} is missing or ambiguous in the selected representation."
+            f"Scanpy embedding: gene {key!r} is missing or ambiguous in the selected representation."
         )
-    require_resident_expression(adata, use_raw, layer, context="gsc.pl.umap")
+    require_resident_expression(adata, use_raw, layer, context="Scanpy embedding")
     # Use the same public vector access as Scanpy's embedding plots.
     if use_raw:
         values = adata.raw.obs_vector(resolved)
@@ -147,22 +204,19 @@ def _expression(
 
 
 def _panel_inputs(
-    adata: Any, color: Any, components: Any, dimensions: Any, marker: Any
+    count: int, color: Any, components: Any, dimensions: Any, marker: Any
 ) -> list[tuple[Any, tuple[int, int], str]]:
     """Return each panel's color key, coordinate pair and marker from plot options.
 
-    Require stored UMAP coordinates and expand options using Scanpy's list rules.
+    Expand options using Scanpy's list rules without reading coordinates again.
     """
-    basis = "umap" if "umap" in adata.obsm else "X_umap"
-    if basis not in adata.obsm:
-        raise ValueError(
-            "gsc.pl.umap: missing umap/X_umap in obsm; compute the embedding explicitly with Scanpy first."
-        )
-    pairs = dimensions_for(components, dimensions, adata.obsm[basis].shape[1])
+    pairs = dimensions_for(components, dimensions, count)
     keys = color
     keys = [keys] if keys is None or isinstance(keys, str) else list(keys)
     if not keys or any(key is not None and not isinstance(key, str) for key in keys):
-        raise ValueError("gsc.pl.umap: color must contain observation or gene keys.")
+        raise ValueError(
+            "Scanpy embedding: color must contain observation or gene keys."
+        )
 
     # components combines every color with every pair; dimensions pairs the lists.
     if components is not None:
@@ -175,7 +229,7 @@ def _panel_inputs(
     count = max(len(keys), len(pairs), len(markers))
     if any(len(values) not in (1, count) for values in (keys, pairs, markers)):
         raise ValueError(
-            "gsc.pl.umap: color, dimensions, and marker lists cannot be broadcast."
+            "Scanpy embedding: color, dimensions, and marker lists cannot be broadcast."
         )
     keys, pairs, markers = [
         values * count if len(values) == 1 else values
@@ -183,19 +237,18 @@ def _panel_inputs(
     ]
     if any(marker not in (".", "o") for marker in markers):
         raise NotImplementedError(
-            "gsc.pl.umap: only '.' and 'o' markers are supported yet."
+            "Scanpy embedding: only '.' and 'o' markers are supported yet."
         )
     return list(zip(keys, pairs, markers, strict=True))
 
 
 def _observations(
-    adata: Any, pairs: list[tuple[int, int]], obs_id: str | None
+    adata: Any, basis: str, pairs: list[tuple[int, int]], obs_id: str | None
 ) -> pd.DataFrame:
-    """Return requested UMAP columns and cell IDs as a table in observation order.
+    """Return requested embedding columns and cell IDs as a table in observation order.
 
     Read no expression and keep duplicate cell names distinct for linked panels.
     """
-    basis = "umap" if "umap" in adata.obsm else "X_umap"
     needed = sorted({dimension for pair in pairs for dimension in pair})
     # Read coordinates without rejecting unrelated duplicate gene names.
     coordinates = from_anndata(
@@ -208,7 +261,7 @@ def _observations(
         }
     )
     if not np.isfinite(table.to_numpy()).all():
-        raise ValueError("gsc.pl.umap: coordinates must be finite.")
+        raise ValueError("Scanpy embedding: coordinates must be finite.")
 
     # Linked panels need distinct IDs even when observation names are repeated.
     if obs_id is None:
@@ -218,17 +271,17 @@ def _observations(
     else:
         if list(adata.obs.columns).count(obs_id) != 1:
             raise ValueError(
-                f"gsc.pl.umap: obs_id column {obs_id!r} is missing or ambiguous."
+                f"Scanpy embedding: obs_id column {obs_id!r} is missing or ambiguous."
             )
         values = adata.obs[obs_id]
         if values.isna().any() or not values.is_unique:
             raise ValueError(
-                "gsc.pl.umap: obs_id values must be unique and nonmissing."
+                "Scanpy embedding: obs_id values must be unique and nonmissing."
             )
         ids = values.astype(str).to_numpy()
         if len(set(ids)) != len(ids):
             raise ValueError(
-                "gsc.pl.umap: obs_id values collide when serialized as strings."
+                "Scanpy embedding: obs_id values collide when serialized as strings."
             )
     table["_obs_id"] = ids
     table["_obs_label"] = adata.obs_names.to_numpy().copy()
@@ -245,16 +298,18 @@ def _mask(adata: Any, mask: Any) -> np.ndarray | None:
     if isinstance(mask, str):
         if list(adata.obs.columns).count(mask) != 1:
             raise ValueError(
-                f"gsc.pl.umap: mask_obs field {mask!r} is missing or ambiguous."
+                f"Scanpy embedding: mask_obs field {mask!r} is missing or ambiguous."
             )
         mask = adata.obs[mask]
     # A labeled mask must already follow the same cells in the same order.
     if isinstance(mask, pd.Series) and not mask.index.equals(adata.obs_names):
-        raise ValueError("gsc.pl.umap: mask_obs index must match observation order.")
+        raise ValueError(
+            "Scanpy embedding: mask_obs index must match observation order."
+        )
     mask = np.asarray(mask)
     if mask.shape != (len(adata),) or mask.dtype != np.bool_:
         raise ValueError(
-            "gsc.pl.umap: mask_obs must be a nonmissing boolean vector with one entry per observation."
+            "Scanpy embedding: mask_obs must be a nonmissing boolean vector with one entry per observation."
         )
     return np.asarray(mask)
 
@@ -263,9 +318,11 @@ def _sizes(size: Any, count: int) -> np.ndarray:
     """Return checked scalar or per-cell areas for count cells, using Scanpy's default."""
     values = np.asarray(120000 / count if size is None else size, dtype=float)
     if values.ndim > 1 or (values.ndim == 1 and values.shape != (count,)):
-        raise ValueError("gsc.pl.umap: size must be scalar or one per observation.")
+        raise ValueError(
+            "Scanpy embedding: size must be scalar or one per observation."
+        )
     if not np.isfinite(values).all() or np.any(values < 0):
-        raise ValueError("gsc.pl.umap: size must be finite and nonnegative.")
+        raise ValueError("Scanpy embedding: size must be finite and nonnegative.")
     return values
 
 
@@ -278,16 +335,18 @@ def _title(title: Any, key: str | None, index: int) -> str | None:
     if index < len(title):
         return str(title[index])
     warnings.warn(
-        "gsc.pl.umap: title list is shorter than the panel count; using color keys.",
+        "Scanpy embedding: title list is shorter than the panel count; using color keys.",
         UserWarning,
         stacklevel=3,
     )
     return key
 
 
-def prepare_umap(
+def prepare_embedding(
     adata: Any,
     *,
+    basis: str,
+    annotate_var_explained: bool = False,
     color: Any,
     mask_obs: Any,
     gene_symbols: str | None,
@@ -308,8 +367,8 @@ def prepare_umap(
     title: Any,
     obs_id: str | None,
     colorbar_loc: str | None,
-) -> PreparedUMAP:
-    """Return a shared cell table and panel settings from AnnData and UMAP options.
+) -> PreparedEmbedding:
+    """Return a shared cell table and panel settings from AnnData and embedding options.
 
     Read existing coordinates and selected colors, preserving cell identity and
     Scanpy draw order without changing AnnData or computing an embedding.
@@ -317,13 +376,19 @@ def prepare_umap(
     from anndata import AnnData
 
     if not isinstance(adata, AnnData):
-        raise TypeError("gsc.pl.umap: expected AnnData.")
+        raise TypeError("Scanpy embedding: expected AnnData.")
     if adata.n_obs == 0:
-        raise ValueError("gsc.pl.umap: at least one observation is required.")
+        raise ValueError("Scanpy embedding: at least one observation is required.")
     # All panels share the original coordinates and observation IDs.
-    use_raw = resolve_use_raw(adata, use_raw, layer, context="gsc.pl.umap")
-    inputs = _panel_inputs(adata, color, components, dimensions, marker)
-    table = _observations(adata, [dimensions for _, dimensions, _ in inputs], obs_id)
+    use_raw = resolve_use_raw(adata, use_raw, layer, context="Scanpy embedding")
+    key = embedding_key(adata, basis, context="Scanpy embedding")
+    count = adata.obsm[key].shape[1]
+    inputs = _panel_inputs(count, color, components, dimensions, marker)
+    needed = max(d for _, pair, _ in inputs for d in pair) + 1
+    labels = _axis_labels(adata, basis, count, annotate_var_explained, needed)
+    table = _observations(
+        adata, key, [dimensions for _, dimensions, _ in inputs], obs_id
+    )
     mask = _mask(adata, mask_obs)
     size = _sizes(size, len(adata))
     na_color = native_color(na_color, "na_color")
@@ -397,4 +462,4 @@ def prepare_umap(
                 _title(title, key, index),
             )
         )
-    return PreparedUMAP(table, tuple(panels))
+    return PreparedEmbedding(table, tuple(panels), labels, basis)

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import genome_spy as gs
 
-from genome_spy.integrations.scanpy._umap_data import Panel, PreparedUMAP
-from genome_spy.integrations.scanpy._style import UMAPStyle
+from genome_spy.integrations.scanpy._embedding_data import Panel, PreparedEmbedding
+from genome_spy.integrations.scanpy._style import EmbeddingStyle
 
 
 def point_interactions(
@@ -13,6 +13,7 @@ def point_interactions(
     panel: Panel,
     index: int,
     *,
+    axis_labels: tuple[str, ...],
     hover: bool,
     selection: gs.Parameter | None,
     opacity: float,
@@ -32,8 +33,8 @@ def point_interactions(
                     f"_value_{index}:N" if panel.categorical else f"_value_{index}:Q",
                     title=f"{panel.key or 'Color'} ({panel.source})",
                 ),
-                gs.Tooltip(f"_coord_{x}:Q", title=f"UMAP{x + 1}"),
-                gs.Tooltip(f"_coord_{y}:Q", title=f"UMAP{y + 1}"),
+                gs.Tooltip(f"_coord_{x}:Q", title=axis_labels[x]),
+                gs.Tooltip(f"_coord_{y}:Q", title=axis_labels[y]),
             ]
         )
     if selection is not None:
@@ -48,21 +49,21 @@ def point_interactions(
     return chart
 
 
-def validate_brush(prepared: PreparedUMAP) -> None:
+def validate_brush(prepared: PreparedEmbedding) -> None:
     """Check prepared panels use the same coordinate pair; raise if linking is unsafe."""
     if len({panel.dimensions for panel in prepared.panels}) != 1:
         raise NotImplementedError(
-            "gsc.pl.umap: linked brushing requires the same dimensions in all panels."
+            "Scanpy embedding: linked brushing requires the same dimensions in all panels."
         )
 
 
 def with_brush_count(
     chart: gs.TopLevelSpec,
-    prepared: PreparedUMAP,
-    style: UMAPStyle,
+    prepared: PreparedEmbedding,
+    style: EmbeddingStyle,
     selection: gs.Parameter,
 ) -> gs.TopLevelSpec:
-    """Return the UMAP chart with a count row driven by the supplied brush.
+    """Return the embedding chart with a count row driven by the supplied brush.
 
     Count prepared cells in the browser using the same bounds as point highlighting.
     """
@@ -82,7 +83,7 @@ def with_brush_count(
         .transform_formula(expr="datum.count + ' cells selected'", as_="label")
         .mark_text(align="left", baseline="middle", size=12, tooltip=None)
         .encode(x=gs.value(0), y=gs.value(0.5), text="label:N")
-        .properties(name=f"umap-count-{name}", width=style.width, height=24)
+        .properties(name=f"{prepared.basis}-count-{name}", width=style.width, height=24)
     )
     return (
         gs.vconcat(chart, count, spacing=8)
@@ -96,7 +97,7 @@ def with_brush_count(
 
 
 def brush_owner(
-    chart: gs.Chart | gs.LayerChart, selection: gs.Parameter
+    chart: gs.Chart | gs.LayerChart, selection: gs.Parameter, basis: str
 ) -> gs.Chart | gs.LayerChart:
     """Return the first panel with control of the supplied shared brush.
 
@@ -105,4 +106,4 @@ def brush_owner(
     # Other panels only observe the shared value.
     return chart.add_params(
         selection.copy(name=selection.name, push="outer")
-    ).properties(name=f"umap-brush-{selection.name}")
+    ).properties(name=f"{basis}-brush-{selection.name}")

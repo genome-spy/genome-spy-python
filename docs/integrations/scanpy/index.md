@@ -24,12 +24,49 @@ chart.save("umap.html", inline=True)
 runs neighbors or UMAP analysis. A missing embedding produces an error asking
 you to compute it explicitly first.
 
-This development preview implements categorical/continuous 2D UMAP, plain dotplots
+This development preview implements shared categorical/continuous 2D embeddings
+(UMAP, t-SNE, diffusion maps, saved graph layouts, PCA and custom bases), plain dotplots
 and matrixplots, individual-cell heatmaps, supplied numeric matrices, clustermaps,
 standalone dendrograms, correlation matrices, stored rank/score panels and ranked
 dotplot/matrixplot/heatmap wrappers.
 Full public Scanpy plotting coverage is the destination; the inventory below
 records remaining work. Native plot builders remain planned.
+
+## Shared 2D embeddings
+
+UMAP, t-SNE, diffusion maps, saved graph layouts and PCA use the same preparation,
+point rendering and native interactions. Generic `embedding` reads any stored
+`obsm` basis. Named wrappers expose the same shared keyword defaults as Scanpy;
+`pca_scatter` is an alias of `pca`.
+
+```python
+pca = gsc.pl.pca(
+    pbmc, color=["louvain", "CD79A"], annotate_var_explained=True,
+    width=280, height=280, zoom=True, show=False,
+)
+custom = gsc.pl.embedding(pbmc, "pca", dimensions=(1, 2), show=False)
+
+sc.tl.tsne(pbmc, use_rep="X_pca", random_state=0, n_jobs=1)  # Explicit analysis.
+tsne = gsc.pl.tsne(pbmc, color="louvain", zoom=True, show=False)
+```
+
+A basis resolves its exact `obsm` name first, then `X_<basis>`. Components use
+Scanpy's one-based strings; `dimensions` uses zero-based pairs. Supplied columns,
+precision, observation IDs, masks, color order and raw/layer lookup share the UMAP
+path. No coordinates, neighbors or PCA metadata are fitted by plotting.
+
+`diffmap` preserves pinned Scanpy 1.11.5's first-two-column default (`DC1`, `DC2`);
+use `components="2,3"` explicitly for other columns. `draw_graph(layout=None)`
+reads `uns["draw_graph"]["params"]["layout"]`; an explicit layout selects its
+stored `X_draw_graph_<layout>` coordinates. Missing coordinates or metadata error.
+PCA's optional variance labels read `uns["pca"]["variance_ratio"]` for the displayed
+components and appear consistently in axes and hover. For Python brush retrieval,
+use the same basis and pair: `gsc.selection_mask(adata, snapshot, basis="pca",
+dimensions=(0, 1))`. The default remains UMAP.
+
+The supported controls and visual limits below apply to all these embeddings.
+3D, graph edges/arrows and remaining marker/normalization options stay in M07.d/M14.
+The UMAP notebook now includes packaged PCA and explicitly prepared t-SNE examples.
 
 ## Installation and version contract
 
@@ -54,13 +91,13 @@ semantics match the plot:
 
 | Plot | Reused methods/results | Native preparation retained |
 | --- | --- | --- |
-| UMAP | Existing `obsm` coordinates; public AnnData `obs_vector`/`raw.obs_vector`; Scanpy's public palette lists | Masks, draw order, component selection, stable IDs and native color/size/guide mapping. No embedding computation. |
+| 2D embeddings | Existing `obsm` coordinates; public AnnData `obs_vector`/`raw.obs_vector`; Scanpy's public palette lists | Masks, draw order, component selection, stable IDs and native color/size/guide mapping. No embedding computation. |
 | Dotplot | Public `sc.get.obs_df`, including selected raw/layer/symbol lookup; AnnData categorization on the detached table | Shared pandas means, strict-cutoff fractions and plotting min–max scaling. Native marks and guides use those results. |
-| Matrixplot | The same getter, categorization and shared grouped means/scaling; supplied `values_df` remains authoritative | Plot ordering, repeated slots and native tile/guide mapping. No expression-fraction computation. |
+| Matrixplot | The same getter, categorization and shared grouped means/scaling; supplied `values_df` uses only group rows and zero-row feature lookup validation | Plot ordering, repeated slots and native tile/guide mapping. No expression-fraction computation. |
 | Heatmap | The same getter, categorization, min–max operation, native palettes, marker ordering and tree branches | Cell values and original row positions, category spans and shared annotation alignment. No group means or downsampling. |
 | Dendrograms | Stored `sc.tl.dendrogram` results, or that public method for a missing tree | Structural checks, shared leaf permutations and native branch rendering. |
 | Clustermap | Public SciPy `linkage`/`dendrogram(no_plot=True)`, as used by Scanpy/Seaborn, or supplied linkage | Detached pandas normalization, bounded source access, color-track alignment and shared numeric tiles/tree rendering. No group-profile tree is substituted for cell/gene clustering. |
-| Ranked summaries | Public `sc.get.rank_genes_groups_df` and stored ranking metadata; existing dotplot, matrixplot and heatmap entry points | Ordered marker slots, strict stored fold-change filtering and clear missing-result errors. No ranking is run or cached data repaired. |
+| Ranked summaries | Public `sc.get.rank_genes_groups_df` and stored ranking metadata; existing dotplot, matrixplot and heatmap entry points | One detached result shared by marker selection and statistic colors, ordered marker slots, strict stored fold-change filtering and clear missing-result errors. No ranking is run or cached data repaired. |
 
 Scanpy 1.11.5 has no public standalone dotplot/matrixplot preparation method.
 Their calculations live in the Matplotlib plotting classes; their common private
@@ -644,7 +681,8 @@ Two notebooks run independently:
 - {download}`UMAP <../../../integrations/scanpy/notebooks/scanpy_umap.ipynb>`:
   basic categorical/continuous UMAP, linked brushing/count/Python retrieval, then
   customization with subsets, titles/frames, categorical order/palettes, an
-  explicit Scanpy gene score and the eight-panel marker overview.
+  explicit Scanpy gene score and the eight-panel marker overview, followed by
+  stored PCA with variance labels and explicitly prepared t-SNE.
 - {download}`Expression plots <../../../integrations/scanpy/notebooks/scanpy_expression.ipynb>`:
   marker dotplot, per-gene scaled matrixplot, zoomable individual-cell heatmap and supplied matrix on
   `bulk_labels`, clustermap, stored score panels and ranked expression variants,
@@ -690,8 +728,8 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap |
-| Other embeddings and PCA | scatter, embedding, tsne, pca, pca_scatter, diffmap, draw_graph, pca_loadings, pca_overview, pca_variance_ratio |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter |
+| Scatter and PCA diagnostics | scatter, pca_loadings, pca_overview, pca_variance_ratio |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Diagnostics and simulation | highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
 | Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_as_heatmap, timeseries_subplot |
@@ -699,7 +737,7 @@ remain visible. Function coverage and parameter coverage are separate.
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
 
-All entries except the thirteen plotting previews and settings helpers remain required future integration
+All entries except the nineteen plotting previews and settings helpers remain required future integration
 work. Settings remain owned by Scanpy. The external.pl namespace is separate
 from this core inventory.
 

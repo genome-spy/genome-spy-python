@@ -13,6 +13,15 @@ from genome_spy.integrations.scanpy import pl
 import genome_spy.integrations.scanpy as gsc
 
 FIXTURES = Path(__file__).with_name("fixtures")
+EMBEDDINGS = {
+    "umap",
+    "embedding",
+    "tsne",
+    "diffmap",
+    "draw_graph",
+    "pca",
+    "pca_scatter",
+}
 
 
 @pytest.mark.parametrize("family", [name for name in pl.__all__ if name != "ranking"])
@@ -27,7 +36,12 @@ def test_all_plots_share_native_display_and_autosave_rules(
 
     a = make_tree_adata()
     a.obsm["X_umap"] = a.X[:, :2].copy()
-    options = {"color": "group"} if family == "umap" else {"groupby": "group"}
+    for basis in ("tsne", "diffmap", "pca", "draw_graph_fa"):
+        a.obsm[f"X_{basis}"] = a.obsm["X_umap"].copy()
+    a.uns["draw_graph"] = {"params": {"layout": "fa"}}
+    options = {"color": "group"} if family in EMBEDDINGS else {"groupby": "group"}
+    if family == "embedding":
+        options["basis"] = "umap"
     if family == "matrix":
         a, options = [[0, 1], [2, 3]], {}
     if family == "clustermap":
@@ -66,14 +80,17 @@ def test_shared_display_validation_precedes_optional_imports(
 ):
     monkeypatch.setattr(pl, "_require_scanpy", lambda *a: pytest.fail("Loaded Scanpy"))
     args = (object(),)
-    if family in ("dotplot", "matrixplot", "heatmap"):
+    if family == "embedding":
+        args += ("umap",)
+    elif family in ("dotplot", "matrixplot", "heatmap"):
         args += (["g1"], "group")
-    elif family not in ("umap", "matrix", "clustermap") and not family.startswith(
+    elif family not in EMBEDDINGS | {"matrix", "clustermap"} and not family.startswith(
         "rank_genes_groups"
     ):
         args += ("group",)
     with pytest.raises(
-        error, match=f"gsc.pl.{family}.*{'show' if 'show' in options else 'save'}"
+        error,
+        match=f"gsc.pl.{'pca' if family == 'pca_scatter' else family}.*{'show' if 'show' in options else 'save'}",
     ):
         getattr(pl, family)(*args, **options)
 

@@ -20,7 +20,7 @@ not in this workspace or the documentation:
 | [_ranking_chart.py](../../src/genome_spy/integrations/scanpy/_ranking_chart.py) | Native score labels, axes and multi-panel layout shared by ranking and rank_genes_groups. Ranked expression wrappers reuse their existing parent charts. |
 | [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared scalar/numeric-table validation, raw/layer resolution and resident-expression checks; reused by preparation and chart modules. |
 | [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Selected values, feature slots/brackets and summaries. Shared scale_values serves cells and group means; heatmap adds cell permutations/group spans and an early size guard. No chart authoring. |
-| [_style.py](../../src/genome_spy/integrations/scanpy/_style.py) | Shared schemes, CSS colors, continuous color bounds, fonts and point units for every plot; categorical/continuous preparation and explicit UMAP style settings live here too. |
+| [_style.py](../../src/genome_spy/integrations/scanpy/_style.py) | Shared schemes, CSS colors, continuous color bounds, fonts and point units for every plot; categorical/continuous preparation and explicit embedding style settings live here too. |
 | [_dendrogram_data.py](../../src/genome_spy/integrations/scanpy/_dendrogram_data.py) | Read stored Scanpy results, delegate missing trees to sc.tl.dendrogram and share leaf/marker permutations. |
 | [_dendrogram_chart.py](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py) | Native rule branches for standalone and attached trees; no clustering. |
 | [_correlation_chart.py](../../src/genome_spy/integrations/scanpy/_correlation_chart.py) | Native correlation tiles, numbers, labels, hover and optional tree. |
@@ -31,10 +31,10 @@ not in this workspace or the documentation:
 | [_clustermap_chart.py](../../src/genome_spy/integrations/scanpy/_clustermap_chart.py) | Shared matrix tiles, slot labels, fitted values and navigation composed with two aligned trees, ordered color strips and a native observation-category legend. |
 | [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles, category strips, boundaries and cell hover; reuses grouped labels/brackets and trees projected onto unequal group spans, with optional aligned zoom (y-only by default). |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
-| [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |
-| [_umap_chart.py](../../src/genome_spy/integrations/scanpy/_umap_chart.py) | Native points, axes, legends, labels, and panel composition. |
+| [_embedding_data.py](../../src/genome_spy/integrations/scanpy/_embedding_data.py) | Resolve stored bases, shared coordinate labels and selected expression/metadata; retain row identity, masks, sizes and draw order. |
+| [_embedding_chart.py](../../src/genome_spy/integrations/scanpy/_embedding_chart.py) | Native points, axes, legends, labels, and panel composition. |
 | [_grid_interactions.py](../../src/genome_spy/integrations/scanpy/_grid_interactions.py) | Shared index navigation/projection and native fitted values/contrast; no AnnData access. Dotplot highlighting uses a native ruler. |
-| [_umap_interactions.py](../../src/genome_spy/integrations/scanpy/_umap_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
+| [_embedding_interactions.py](../../src/genome_spy/integrations/scanpy/_embedding_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
 | [_selection.py](../../src/genome_spy/integrations/scanpy/_selection.py) | Pure interval-to-observation membership for Python subset retrieval. |
 
 Scanpy owns analysis. UMAP's data module only resolves the inputs a plotting call
@@ -86,7 +86,7 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
 
 - [UMAP](notebooks/scanpy_umap.ipynb): basic categorical/continuous plotting with
   x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
-  Existing coordinates are retained; gene scoring is an explicit Scanpy operation.
+  Existing coordinates are retained; gene scoring and the final t-SNE preparation are explicit Scanpy operations. Packaged PCA and its variance labels reuse the same plotting helpers.
 - [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot, scaled
   matrixplot, individual-cell heatmap, supplied numeric matrix, aligned dendrograms, y-only zoom (both axes optional), fitted tile values and dot row/column highlighting using the core tutorial
   dictionary and existing `bulk_labels`. Scanpy computes the shared tree in Python

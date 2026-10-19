@@ -465,6 +465,10 @@ are deliberately assigned to M08/M09 until their parent chart exists.
 
 ### M07 — embeddings, scatter and PCA
 
+M07.a now has a shared stored-2D preview. The UMAP modules were generalized in
+place; named wrappers, generic bases, PCA variance labels and selection retrieval
+share the existing data/chart/style/interaction path. M07.b scatter is next.
+
 - M07.a: extract reusable embedding authoring/access from UMAP for `embedding`,
   `tsne`, `diffmap`, `draw_graph`, `pca` and alias `pca_scatter`. Resolve basis/layout
   names, components/dimensions and explained-variance labels from stored results.

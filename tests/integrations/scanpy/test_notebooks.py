@@ -28,6 +28,13 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         TopLevelSpec, "display", lambda chart, **kwargs: charts.append(chart)
     )
     original = sc.datasets.pbmc68k_reduced()
+    tsne, analyses = sc.tl.tsne, []
+
+    def prepare_tsne(*args, **kwargs):
+        analyses.append(kwargs)
+        return tsne(*args, **kwargs)
+
+    monkeypatch.setattr(sc.tl, "tsne", prepare_tsne)
     namespace = {}
     path = NOTEBOOKS / "scanpy_umap.ipynb"
     try:
@@ -36,6 +43,10 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         assert pbmc.shape == original.shape == (700, 765)
         assert pbmc.obs_names.equals(original.obs_names)
         np.testing.assert_array_equal(pbmc.obsm["X_umap"], original.obsm["X_umap"])
+        np.testing.assert_array_equal(pbmc.obsm["X_pca"], original.obsm["X_pca"])
+        assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
+        assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
+        assert pbmc.obsm["X_tsne"].shape == (700, 2)
         assert charts
         for chart in charts:
             spec = chart.to_dict()

@@ -195,3 +195,15 @@ matrixplot references, metric titles, label order and color domains. References
 use shared viridis: native GenomeSpy palettes (notably `reds`) can differ from
 Matplotlib palettes with similar names. Registered crops and overlays remain in
 temporary/ignored directories; no generated images are tracked.
+
+`embedding.json` freezes eight complete Scanpy 1.11.5 cases for custom bases,
+t-SNE, diffusion defaults/components, graph layouts and PCA variance labels/alias.
+It records ordered coordinates, sizes, categorical paint, numeric color domains,
+axes, titles, guides, source hash and 100/150 display/export DPI.
+The existing UMAP footprint oracle also covers the shared point renderer. Browser
+checks register origins without resampling, allow native palette bins and point
+antialiasing, and retain captures/overlays only in temporary directories.
+
+```sh
+uv run --no-sync python -m tests.integrations.scanpy.generate_embedding_references
+```

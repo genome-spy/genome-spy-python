@@ -12,7 +12,8 @@ workflow tests and Ruff checks pass. Local notebook edits remain unchanged.
 
 ## Current position and next work
 
-**Available:** categorical/continuous 2D UMAP, dotplot/matrixplot and cell heatmaps with dendrograms,
+**Available:** shared categorical/continuous 2D embeddings (UMAP, t-SNE, diffusion
+maps, saved graph layouts, PCA and custom bases), dotplot/matrixplot and cell heatmaps with dendrograms,
 supplied numeric matrices, clustermaps, standalone dendrograms and correlation matrix development previews.
 Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
@@ -32,7 +33,7 @@ Clustermap adds individual-cell/gene clustering using public SciPy linkage or
 supplied trees, ordered CSS annotation tracks and native hover, with explicit
 tile and pairwise-distance limits. It shares numeric tiles and tree geometry
 rather than constructing Seaborn/Matplotlib objects.
-**Available public entries: 13**, including the stored-ranking previews below. Scanpy **1.11.5** is the only accepted version;
+**Available public entries: 19**, including the stored-ranking previews below. Scanpy **1.11.5** is the only accepted version;
 bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibility.
 
 Implementation is in
@@ -54,7 +55,7 @@ reloaded from disk and all five code cells rerun in the visible Jupyter tab;
 all four charts rendered with the corrected matrix placement. No plan clearance
 changes follow from this fix.
 
-**Next ready slice: M07.a shared 2D embeddings.** M06.a–d have a stored-result preview; larger and
+**Next ready slice: M07.b scatter x/y/basis plotting.** M06.a–d have a stored-result preview; larger and
 chunked tile transport remains M05.d.
 Dotplot brushing remains deferred until the
 plain-chart preview has user review; this delivery does not add it.
@@ -163,7 +164,7 @@ The unrelated full Python suite and documentation build were not rerun.
 
 Clearance: retain. M14 owns adopting a released Core containing #587; then rerun
 the three strip cases before/after navigation, remove expected failures and the
-known-limit notices, and verify the PBMC notebook. M07.a is the next independent
+known-limit notices, and verify the PBMC notebook. M07.b is the next independent
 slice. This records a native capability blocker, not a completed hover feature.
 
 ## M06.a–c stored ranking preview
@@ -254,22 +255,68 @@ densified. The earlier resource benchmark was not repeated. The unrelated full
 repository suites and documentation build were not rerun.
 
 Clearance: retain the live plan and status. M06's preview is verified; M13 retains
-builders and M14 the named compatibility limits. M07.a shared 2D embeddings is
+builders and M14 the named compatibility limits. M07.b scatter is
 the next ready slice. No working plan is cleared.
 
-## Reuse review follow-up
+## Review follow-up and M07.a shared 2D embeddings
 
-Three Sol reviewers checked reuse, self-containment, readability and YAGNI.
-Two found no significant structural issue. The reuse review identified two
-redundant reads, now fixed: supplied matrixplots validate feature lookup on zero
+Three Sol reviewers checked reuse, self-containment, readability and YAGNI. Two
+found no significant structural issue. The reuse review identified two redundant
+reads, fixed in `ff87075`: statistic-colored matrixplots validate feature lookup on zero
 rows and read only real group annotations; one detached unfiltered ranking table
-serves marker selection and statistic colors. Strict marker thresholds preserve
-needed cross-group statistic pairs. No cache is shared across calls.
+serves marker selection and color values. Strict marker thresholds do not remove
+the statistic pairs needed for other groups. No cache is shared across calls.
+The metadata path retains raw/layer/symbol validation, categories and duplicate
+slots. Getter-count and cross-group-value regression tests cover both changes.
 
-Getter-count and actual-value tests cover both fixes; source, symbol, categorical
-and repeated-slot validation remain intact. Targeted ranking/matrix tests and
-the full non-browser integration suite passed. The metadata-only table contains
-no cell-expression rows. M07.a remains the next ready slice.
+M07.a generalizes the three UMAP modules in place to `_embedding_data.py`,
+`_embedding_chart.py` and `_embedding_interactions.py`, with shared styles.
+`embedding`, `tsne`, `diffmap`, `draw_graph`, `pca` and `pca_scatter` add six public
+entries; the alias is the same function as pca. A small effective-signature helper
+keeps Scanpy's shared defaults visible without copying every parameter list.
+Wrappers select a basis, saved layout or stored PCA variance annotations; all
+points, masks, colors, source access, draw order, observation IDs and native
+interactions use the existing pipeline. `selection_mask(basis=...)` shares basis
+resolution; its default remains UMAP. No embedding or neighbors computation runs.
+
+Direct obsm keys precede X_ keys. Components/dimensions retain pinned semantics,
+including DC1/DC2 defaults. Axes and hover share prepared labels; PCA percentages
+read stored variance ratios for the displayed components. Graph layouts use an
+explicit layout or saved draw_graph params. Missing/malformed coordinates or
+required metadata error. Three-dimensional plots, edges/arrows and remaining
+UMAP options remain M07.d/M14; PCA diagnostic plots remain M07.c.
+
+The [UMAP notebook](notebooks/scanpy_umap.ipynb) now has eleven code cells. New
+PCA panels reuse packaged coordinates; a separate explicit Scanpy cell computes
+t-SNE with the saved PCA representation and random_state=0. All eleven cells
+completed in the existing Jupyter session and both examples were visually checked.
+Old local notebook settings and outputs are preserved; committed notebooks remain
+output-free. No Core patch or new runtime dependency was introduced.
+
+Evidence: [embedding semantics/signatures](../../tests/integrations/scanpy/test_embedding.py),
+[eight frozen complete cases](../../tests/integrations/scanpy/fixtures/embedding.json),
+[native rendering and interactions](../../tests/integrations/scanpy/browser/test_embedding.py),
+[original UMAP browser regression](../../tests/integrations/scanpy/browser/test_umap.py),
+and [workflow checks](../../tests/integrations/scanpy/test_notebooks.py).
+The full non-browser integration run passed **738 checks**, and **13 new embedding
+plus 18 original UMAP browser checks** passed. The new tests observe labels,
+registered point paint/footprints, native hover, zoom, offline HTML and brush
+counts matching Python membership. Ruff formatting/lint and mypy pass.
+The final reruns passed **41 embedding checks** (including malformed metadata)
+and **106 ranking/matrix checks** (including the metadata-only table path). The unrelated full repository suites and docs build
+were not run. Generated charts and overlays stay outside Git.
+
+A seed-17 local observation used a float32 sparse 100,000-cell × 20,000-gene
+AnnData and a resident 100,000 × 50 PCA matrix, selecting columns 2 and 50 with
+observation-category colors. Only those two coordinate columns were sent in
+100,000 records. Warm preparation took 0.058 s; validated default JSON serialization
+took 10.237 s and produced 26,797,446 bytes, with 249.39 MiB peak traced Python
+allocation. Input construction is excluded. This is a local observation, not a
+capacity guarantee; large-data transport remains M05.d.
+
+Clearance: retain the live plan and status. M07.a's bounded preview is delivered;
+M07.b scatter is next. Existing family/renderer limits retain their named owners.
+No working plan becomes eligible for clearance from this slice.
 
 ## Milestones
 
@@ -285,7 +332,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
 | M05 heatmap/matrix/clustermap | In progress; three bounded previews delivered | Heatmap/matrix/shared interactions and clustermap values, masks, two Python trees, annotation tracks, native hover and PBMC workflow are covered below. Larger/chunked transport remains M05.d; broader kwargs and native delivery remain M14. |
 | M06 ranking/ranked summaries | Verified preview; compatibility limits retained | M06.a–d select stored ranks, reuse dot/matrix/heatmap charts and color summary plots with six saved statistics. Nonfinite/missing-pair behavior and filtered score panels remain M14; native builders remain M13. |
-| M07 embeddings/scatter/PCA | Ready for M07.a | Shared 2D embeddings/alias/PCA diagnostics, then remaining UMAP options. |
+| M07 embeddings/scatter/PCA | In progress; M07.a shared 2D preview delivered | Generic and named bases, stored components/layouts/variance labels, shared point rendering and selection retrieval. M07.b scatter is next; PCA diagnostics M07.c and remaining options M07.d stay open. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
 | M10 QC diagnostics | Planned | Highest expression, variable genes, legacy dispersion and Scrublet distributions. |
@@ -933,9 +980,9 @@ commands put PNGs under ignored `tmp/scanpy-references/<family>/` while updating
 tracked metadata. Existing historical image-validation records refer to these
 reproducible exports, not PNGs that need to ship in a clone.
 
-Earlier local commits still contain the old PNG blobs. This branch must not be
-pushed until that outgoing history is cleaned. History was not rewritten by this
-cleanup; rewriting requires an explicit request under the commit instructions.
+This initial tree cleanup left old PNG blobs in local history. The later,
+explicitly authorized history cleanup removed them before publication; see the
+opening status note. Outgoing history is checked again at each handoff.
 
 Validation: all 66 affected visual comparisons passed with no PNGs in `tests/`,
 as did the three reference-metadata checks. The tracked JSON checksums remained
@@ -947,7 +994,7 @@ changed; unrelated tests and the full documentation build were not rerun.
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. Eight functions are available as partial previews; 40 plot/builder
+helpers. Nineteen functions are available as partial previews; 29 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -960,12 +1007,12 @@ No placeholder functions are exported for planned work.
 | `clustermap` | Partial bounded preview available | M05.c; remaining options/transport M05.d/M14 |
 | `correlation_matrix` | Partial preview available | M04 preview; normalization/options M14 |
 | `dendrogram` | Partial preview available | M04 preview; options/export M14 |
-| `diffmap` | Not implemented | M07 |
+| `diffmap` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `dotplot` | Partial plain-chart preview; limits above | M02; trees M04; methods M13 |
 | `dpt_groups_pseudotime` | Not implemented | M11 |
 | `dpt_timeseries` | Not implemented | M11 |
-| `draw_graph` | Not implemented | M07 |
-| `embedding` | Not implemented | M07 |
+| `draw_graph` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
+| `embedding` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `embedding_density` | Not implemented | M12 |
 | `filter_genes_dispersion` | Not implemented; legacy | M10 |
 | `heatmap` | Partial cell-level preview available | M05.a/b preview; larger transport M05.d; normalization/options M14 |
@@ -977,10 +1024,10 @@ No placeholder functions are exported for planned work.
 | `paga_adjacency` | Not implemented | M11 |
 | `paga_compare` | Not implemented | M11 |
 | `paga_path` | Not implemented | M11 |
-| `pca` | Not implemented | M07 |
+| `pca` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `pca_loadings` | Not implemented | M07 |
 | `pca_overview` | Not implemented | M07 |
-| `pca_scatter` | Not implemented; pca alias | M07 |
+| `pca_scatter` | Alias of the shared pca preview | M07.a; same limits as pca |
 | `pca_variance_ratio` | Not implemented | M07 |
 | `rank_genes_groups` | Preview: stored score panels | M06.a–c; filtered/nonfinite panels and presentation debt M14 |
 | `rank_genes_groups_dotplot` | Preview: expression/statistic colors and expression fractions | M06.a–d; compatibility limits M14, builder M13 |
@@ -1001,7 +1048,7 @@ No placeholder functions are exported for planned work.
 | `timeseries_as_heatmap` | Not implemented | M11 |
 | `timeseries_subplot` | Not implemented | M11 |
 | `tracksplot` | Not implemented | M09 |
-| `tsne` | Not implemented | M07 |
+| `tsne` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `umap` | Partial preview available | M01; completion M07/M14 |
 | `violin` | Not implemented | M08 |
 

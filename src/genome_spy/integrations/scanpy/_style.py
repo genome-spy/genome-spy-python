@@ -35,7 +35,7 @@ darkblue darkgold darkgreen darkmulti darkred
 )
 
 
-def native_scheme(value: Any, name: str, *, context: str = "gsc.pl.umap") -> str:
+def native_scheme(value: Any, name: str, *, context: str = "Scanpy embedding") -> str:
     """Return a supported color scheme name in lowercase, rejecting other forms."""
     if not isinstance(value, str) or value.lower() not in _SCHEMES:
         raise NotImplementedError(
@@ -45,7 +45,7 @@ def native_scheme(value: Any, name: str, *, context: str = "gsc.pl.umap") -> str
     return value.lower()
 
 
-def native_color(value: Any, name: str, *, context: str = "gsc.pl.umap") -> str:
+def native_color(value: Any, name: str, *, context: str = "Scanpy embedding") -> str:
     """Return an opaque CSS color unchanged, or reject forms needing conversion."""
     # Let GenomeSpy parse colors; reject forms that need Matplotlib conversion.
     if isinstance(value, str):
@@ -119,26 +119,28 @@ def _bound(
     if isinstance(bound, Sequence) and not isinstance(bound, str):
         if len(bound) not in (1, count):
             raise ValueError(
-                "gsc.pl.umap: color-bound lists must have one value or one per panel."
+                "Scanpy embedding: color-bound lists must have one value or one per panel."
             )
         bound = bound[0 if len(bound) == 1 else index]
     if bound is None:
         return default
     if callable(bound):
         raise NotImplementedError(
-            "gsc.pl.umap: callable color bounds are not supported yet."
+            "Scanpy embedding: callable color bounds are not supported yet."
         )
     if isinstance(bound, str):
         if not bound.startswith("p"):
-            raise ValueError("gsc.pl.umap: percentile bounds must start with 'p'.")
+            raise ValueError("Scanpy embedding: percentile bounds must start with 'p'.")
         bound = float(np.nanpercentile(values, float(bound[1:])))
     result = float(bound)
     if not np.isfinite(result):
-        raise ValueError("gsc.pl.umap: color bounds must be finite.")
+        raise ValueError("Scanpy embedding: color bounds must be finite.")
     return result
 
 
-def _categorical(values: Any, *, context: str = "gsc.pl.umap") -> pd.Categorical | None:
+def _categorical(
+    values: Any, *, context: str = "Scanpy embedding"
+) -> pd.Categorical | None:
     """Return ordered categories for label-like values, or None for numeric colors.
 
     Preserve saved order; otherwise use Scanpy's string and boolean ordering.
@@ -166,7 +168,7 @@ def _palette(
     categories: pd.Index,
     palette: Any,
     *,
-    context: str = "gsc.pl.umap",
+    context: str = "Scanpy embedding",
 ) -> tuple[tuple[str, ...], str | None]:
     """Return ordered CSS colors or a scheme name for the requested categories.
 
@@ -250,7 +252,7 @@ def categorical_colors(
     names = tuple(str(category) for category in values.categories)
     if len(set(names)) != len(names):
         raise ValueError(
-            "gsc.pl.umap: category labels collide when serialized as strings."
+            "Scanpy embedding: category labels collide when serialized as strings."
         )
     palette_colors = (
         tuple(palette_map[category] for category in values.categories)
@@ -263,11 +265,11 @@ def categorical_colors(
     if missing.any() or key is None:
         if "NA" in names:
             raise NotImplementedError(
-                "gsc.pl.umap: a category named 'NA' conflicts with missing values."
+                "Scanpy embedding: a category named 'NA' conflicts with missing values."
             )
         if scheme is not None and na_in_legend:
             raise NotImplementedError(
-                "gsc.pl.umap: a missing-category legend with a named scheme is not supported yet; "
+                "Scanpy embedding: a missing-category legend with a named scheme is not supported yet; "
                 "pass an explicit CSS palette or na_in_legend=False."
             )
         if scheme is None:
@@ -320,20 +322,20 @@ def continuous_colors(
         values[~mask] = np.nan
     if np.isinf(values).any() or np.isnan(values).all():
         raise ValueError(
-            "gsc.pl.umap: continuous colors require finite values and at least one nonmissing value."
+            "Scanpy embedding: continuous colors require finite values and at least one nonmissing value."
         )
     # Resolve per-panel or percentile bounds before choosing the native color scale.
     low = _bound(vmin, index, count, values, float(np.nanmin(values)))
     high = _bound(vmax, index, count, values, float(np.nanmax(values)))
     low, high, _ = color_bounds(
-        values, low, high, context="gsc.pl.umap", expand_constant=colorbar
+        values, low, high, context="Scanpy embedding", expand_constant=colorbar
     )
     scheme = native_scheme("viridis" if cmap is None else cmap, "cmap")
     return ColorData(values, (low, high), (), scheme, (), False)
 
 
 @dataclass(frozen=True, slots=True)
-class UMAPStyle:
+class EmbeddingStyle:
     width: float
     height: float
     frameon: bool
@@ -361,12 +363,12 @@ class UMAPStyle:
 
 
 def _number(value: Any, name: str, *, minimum: float = 0) -> float:
-    """Return a checked UMAP number, retaining its existing True/False handling."""
-    # Keep UMAP's existing treatment of True and False as 1 and 0.
+    """Return a checked embedding number, retaining its existing True/False handling."""
+    # Keep embedding plots' existing treatment of True and False as 1 and 0.
     return number(
         float(value) if isinstance(value, bool) else value,
         name,
-        context="gsc.pl.umap",
+        context="Scanpy embedding",
         minimum=minimum,
     )
 
@@ -384,12 +386,12 @@ def _font_size(value: float | str | None) -> float:
     }
     if isinstance(value, str):
         if value not in sizes:
-            raise ValueError(f"gsc.pl.umap: unknown legend_fontsize {value!r}.")
+            raise ValueError(f"Scanpy embedding: unknown legend_fontsize {value!r}.")
         value = sizes[value]
     return _number(10 if value is None else value, "legend_fontsize") * POINTS_TO_PIXELS
 
 
-def umap_style(
+def embedding_style(
     *,
     count: int,
     width: float | None,
@@ -405,19 +407,19 @@ def umap_style(
     edgecolor: Any,
     linewidth: Any,
     na_color: Any,
-) -> UMAPStyle:
-    """Return native UMAP settings from plot options, using explicit defaults.
+) -> EmbeddingStyle:
+    """Return native embedding settings from plot options, using explicit defaults.
 
     Validate appearance separately from data so chart building needs no global style.
     """
     if isinstance(ncols, bool) or not isinstance(ncols, Integral) or ncols < 1:
-        raise ValueError("gsc.pl.umap: ncols must be a positive integer.")
+        raise ValueError("Scanpy embedding: ncols must be a positive integer.")
     opacity = _number(1 if alpha is None else alpha, "alpha")
     if opacity > 1:
-        raise ValueError("gsc.pl.umap: alpha must be a scalar between 0 and 1.")
+        raise ValueError("Scanpy embedding: alpha must be a scalar between 0 and 1.")
     no_edge = isinstance(edgecolor, str) and edgecolor.lower() == "none"
     edge = "black" if no_edge else native_color(edgecolor, "edgecolor")
-    return UMAPStyle(
+    return EmbeddingStyle(
         width=300 if width is None else width,
         height=300 if height is None else height,
         frameon=frameon,
