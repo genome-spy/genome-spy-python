@@ -387,6 +387,8 @@ Larger transport remains M05.d; M06 stored ranking and ranked summaries are next
   and rejects color objects, images, sparse/lazy data and mismatched tick counts.
   Heatmap zoom defaults off; explicit zoom keeps strips, boundaries and tree leaves
   aligned, hides offscreen labels, and hides partially visible gene brackets.
+  Native tooltips identify annotation-strip categories in both orientations;
+  the existing `hover` flag controls tiles and category strips together.
 - M05.c: `clustermap` computes requested row/column clustering in Python, honors
   supplied linkage and annotation colors, and routes supported clustering kwargs
   explicitly. Do not silently cluster a supplied ordering or densify an unrelated
@@ -398,7 +400,7 @@ Larger transport remains M05.d; M06 stored ranking and ranked summaries are next
   maintained contract, with broader options assigned to M14. Do not claim the
   full clustermap family closed from this preview.
   Observation category strips retain names/order/palettes and use their own native
-  categorical legend; explicit CSS tracks do not invent category names.
+  categorical legend and hover tooltips; explicit CSS tracks do not invent category names.
 - M05.d: test chunked selected-column access and a 100k-cell × 50-marker heatmap;
   record payload/render/memory limits and an explicit over-budget policy. Compare
   complete PBMC tutorial heatmaps with registered strips/tree/label alignment.
@@ -419,6 +421,13 @@ Larger transport remains M05.d; M06 stored ranking and ranked summaries are next
   Run the packaged-PBMC expression notebook and record
   a realistic allocation/payload/browser observation. Keep native API limitations
   and remaining large-data transport debt explicit.
+- M05.f (blocked on a released Core fix): enable native category-strip tooltips
+  in heatmap and clustermap through the existing `hover` option. Core 1.0.0
+  rejects visible outside-plot hits; [PR #587](https://github.com/genome-spy/genome-spy/pull/587)
+  fixes the picking policy upstream. After adopting the release in M14, observe
+  both heatmap orientations and clustermap before/after navigation; remove the
+  precise expected failures and known-limit notice. Keep tile hover working,
+  preserve strip geometry, and do not patch the integration bundle or add listeners.
 
 Targets: `gsc.pl.heatmap(pbmc, markers, "louvain", dendrogram=True, show=False)`
 and `gsc.pl.matrix(values, xticks=genes, yticks=groups, show=False)`.

@@ -251,6 +251,12 @@ two trees and annotation tracks follow the live row/column positions; automatic
 tick labels reveal more names as slots grow. Defaults remain
 `zoom=False`, `show_values=False` and `highlight=False`.
 
+Category-strip tooltips use the native default handler and the same `hover` flag
+as tiles. They are currently blocked in bundled Core 1.0.0: visible marks outside
+plot bounds cannot be picked. [Core PR #587](https://github.com/genome-spy/genome-spy/pull/587)
+fixes this upstream; adoption requires a released Core upgrade. Tile tooltips work
+normally. There is no patched bundle or custom hover listener in the integration.
+
 `show_values` uses native `fitToBand` text, shared tile records and the plotted
 value after any log transform/scaling. Values fade in as cells become large
 enough and show two decimals; tooltips retain more precision. Missing cells have
@@ -296,7 +302,7 @@ means or changes AnnData.
 | `width`, `height`, `figsize` | Width/height control the tile area in logical pixels. Defaults follow Scanpy's gene-label size rules; figsize uses 100 pixels per inch with space reserved for strips/trees. Native text and outer layout differ from Matplotlib. The vertical color guide uses at most 400 pixels. |
 | `zoom` | Defaults False. `True` enables y-only wheel zoom and drag panning; `"xy"` enables both index axes. Strips, group boundaries, tree leaves and gene labels follow the visible cells/genes. Clip branches and strips at the plot extent; hide offscreen labels and gene brackets whose whole span is not visible. |
 | `show_values` | Default False. Reveal the plotted cell values to two decimals when the tiles have enough room; missing cells remain empty. |
-| `hover`, delivery | Default hover shows original cell ID/name, gene, group and displayed expression. Duplicate names use stable original-row IDs. Brushing is not offered. Existing show/save/native-return rules apply; Matplotlib axes and figure-return options error. |
+| `hover`, delivery | Default hover shows original cell ID/name, gene, group and displayed expression. Category-strip tooltips are configured but subject to the Core picking limit above. `hover=False` disables both. Duplicate names use stable original-row IDs. Brushing is not offered. Existing show/save/native-return rules apply; Matplotlib axes and figure-return options error. |
 
 This preview accepts **at most 250,000 cell–gene values**, counting repeated
 slots. Larger requests fail before expression extraction and ask for an explicit
@@ -387,7 +393,7 @@ Plotting-only linkage is local and never written to AnnData.
 | `xticklabels`, `yticklabels` | Auto spacing, True/False, positive stride, or a complete label list. Repeated labels retain distinct index slots. The matrix, labels, strips and branches follow the same permutation. |
 | Layout/colors | Native scheme names, numeric `vmin`/`vmax`, `linewidths`, CSS `linecolor`, tree/track ratios and native matrix dimensions. `figsize` uses 100 logical pixels/inch and conflicts with width/height. `cbar_pos=None` hides the guide; `cbar_kws` supports its label. |
 | `zoom`, `show_values` | Opt-in shared grid navigation and fitted plotted values. `zoom=True` navigates y only; `zoom="xy"` navigates both axes. Trees, strips and visible labels follow the same ordered slots. Both options default False. |
-| Delivery | Default native hover reports original cell name, gene and plotted value. `show`, `save` and chart HTML/JSON delivery follow the shared contract. The result is a native chart, not Seaborn's ClusterGrid; its artist attributes/chains are unavailable. |
+| Delivery | Default native hover reports original cell name, gene and plotted value. Native `obs_keys` strip tooltips are configured but blocked by the Core picking limit above. `hover=False` disables both. `show`, `save` and chart HTML/JSON delivery follow the shared contract. The result is a native chart, not Seaborn's ClusterGrid; its artist attributes/chains are unavailable. |
 
 The default native palette is magma rather
 than Seaborn's rocket, and the native color guide is on the right rather than in

@@ -9,8 +9,10 @@ import pandas as pd
 from PIL import Image
 from io import BytesIO
 import pytest
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 import genome_spy.integrations.scanpy as gsc
+from genome_spy.schema import SCHEMA_VERSION
 from tests.integrations.scanpy.browser.test_umap import render
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
 from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
@@ -64,6 +66,98 @@ def pointer(page, bounds, x=0.5, y=0.5):
     )
     page.mouse.move(px, py)
     return px, py
+
+
+@pytest.mark.parametrize(
+    "family,swapped", [("heatmap", False), ("heatmap", True), ("clustermap", False)]
+)
+@pytest.mark.parametrize(
+    "hover",
+    [
+        False,
+        pytest.param(
+            True,
+            marks=pytest.mark.xfail(
+                SCHEMA_VERSION == "1.0.0",
+                reason="Core rejects outside-plot strip hits; upstream fix: genome-spy/genome-spy#587",
+                raises=PlaywrightTimeoutError,
+                strict=True,
+            ),
+        ),
+    ],
+)
+def test_category_strip_hover_before_and_after_navigation(page, family, swapped, hover):
+    options = dict(width=360, height=240, zoom="xy", hover=hover, show=False)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        if family == "heatmap":
+            chart = gsc.pl.heatmap(
+                make_heatmap_adata(),
+                ["g1", "g2"],
+                "group",
+                dendrogram=True,
+                swap_axes=swapped,
+                **options,
+            )
+        else:
+            data = make_cluster_adata()
+            chart = gsc.pl.clustermap(data, obs_keys="group", **options)
+    spec = chart.to_dict()
+    records = spec["datasets"][spec["layer"][0]["data"]["name"]]
+    if family == "heatmap":
+        groups = list({row["_obs_id"]: row["_group"] for row in records}.values())
+        strip_offset = 15
+    else:
+        groups = [
+            data.obs.loc[name, "group"]
+            for name in dict.fromkeys(row["_row"] for row in records)
+        ]
+        strip_offset = options["width"] * 0.03 / 0.77 / 2
+    bounds = render(page, chart)
+    for navigated in (False, True):
+        if navigated:
+            px, py = pointer(page, bounds)
+            page.mouse.wheel(0, -260)
+            page.wait_for_timeout(700)
+            page.mouse.down()
+            page.mouse.move(px + 12, py + 10, steps=5)
+            page.mouse.up()
+            page.wait_for_timeout(700)
+        axis = "x" if swapped else "y"
+        origin, step = page.evaluate(
+            f"['grid_{axis}_origin','grid_{axis}_step'].map(n=>api.getParam(n).getValue())"
+        )
+        slot = min(
+            range(len(groups)), key=lambda i: abs(origin + (i + 0.5) * step - 0.5)
+        )
+        fraction = origin + (slot + 0.5) * step
+        assert 0 < fraction < 1
+        canvas = page.locator("canvas").first.bounding_box()
+        px = (
+            canvas["x"]
+            + bounds["x"]
+            + (fraction * bounds["width"] if swapped else -strip_offset)
+        )
+        py = (
+            canvas["y"]
+            + bounds["y"]
+            + (bounds["height"] + 14 if swapped else fraction * bounds["height"])
+        )
+        page.mouse.move(px - 2, py - 2)
+        page.wait_for_timeout(450)
+        page.mouse.move(px, py)
+        page.wait_for_timeout(100)
+        if hover:
+            page.locator("table.attributes").wait_for(state="visible", timeout=2000)
+            assert [
+                t.strip()
+                for t in page.locator("table.attributes th").all_text_contents()
+            ] == ["group"]
+            assert page.locator("table.attributes td").all_text_contents() == [
+                groups[slot]
+            ]
+        else:
+            assert not page.locator("table.attributes").is_visible()
 
 
 @pytest.mark.parametrize(

@@ -86,6 +86,7 @@ def _color_strip(
     size: float,
     extent: float,
     zoom: bool,
+    hover: bool,
     categories: pd.Series | None = None,
     palette: tuple[str, ...] = (),
 ) -> gs.LayerChart:
@@ -101,7 +102,10 @@ def _color_strip(
         for j in range(tracks)
         for i, color in enumerate(colors.iloc[:, j])
     ]
-    strip = gs.Chart(rows).mark_rect(tooltip=None, clip="never")
+    strip = gs.Chart(rows).mark_rect(
+        tooltip={"handler": "default"} if hover and categories is not None else None,
+        clip="never",
+    )
     if horizontal:
         strip = strip.transform_calculate(
             _start="1 + datum.start", _end="1 + datum.end"
@@ -155,6 +159,10 @@ def _color_strip(
         )
         # Missing annotations leave the white strip background visible.
         strip = strip.transform_filter("isValid(datum._color)")
+        if hover:
+            strip = strip.encode(
+                tooltip=[gs.Tooltip("_color:N", title=str(categories.name))]
+            )
     else:
         css_colors = list(dict.fromkeys(colors.to_numpy().ravel()))
         color = color.scale(type="ordinal", domain=css_colors, range=css_colors).legend(
@@ -376,6 +384,7 @@ def build_clustermap(
                     size=size,
                     extent=extent,
                     zoom=bool(zoom),
+                    hover=hover,
                     categories=data.obs_labels if not horizontal else None,
                     palette=data.obs_palette if not horizontal else (),
                 )

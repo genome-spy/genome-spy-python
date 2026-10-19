@@ -131,6 +131,34 @@ Local matrix zoom experiments were preserved, with the tracked workflow's zoom
 settings validated separately. Band shading remains limited by C09 below;
 no Core patch is used. M05.c remains next and no plan is eligible for clearance.
 
+## M05.f category-strip tooltips — blocked on a released Core fix
+
+Heatmap and clustermap originally set `tooltip=None` on their annotation strips.
+They now configure the existing strips with GenomeSpy's default handler and the
+category field; `hover=False` disables strip and tile tooltips. Existing geometry,
+labels, color scales and data stay in place. No extra marks or listeners are added.
+
+Bundled Core 1.0.0 still rejects rendered hits outside ordinary plot bounds, so
+these strip tooltips are **not yet usable**. The independent native reproduction
+shows an identical rectangle working inside the plot and failing outside it with
+`clip="never"`. [Core PR #587](https://github.com/genome-spy/genome-spy/pull/587)
+contains the upstream fix, regression tests and required release note. Its
+description embeds an observed before/after recording; recording assets and
+helpers are not committed. The fixed browser reproduction shows both tooltips.
+The integration bundle remains unchanged.
+
+Validation: **116 focused semantic/API checks** pass. Browser checks pass for
+disabled strip hover and existing cell hover in both orientations and clustermap;
+the three enabled-strip cases are precise expected timeout failures only for
+Core 1.0.0. The upstream fix passes 66 interaction/facet/identity tests, build,
+TypeScript, lint and Changesets checks. Python formatting/lint and mypy pass.
+The unrelated full Python suite and documentation build were not rerun.
+
+Clearance: retain. M14 owns adopting a released Core containing #587; then rerun
+the three strip cases before/after navigation, remove expected failures and the
+known-limit notices, and verify the PBMC notebook. M06 remains the next independent
+slice. This records a native capability blocker, not a completed hover feature.
+
 ## Milestones
 
 States apply to the stated scope; a closed preview is not a closed full family.
@@ -933,6 +961,7 @@ an affected slice; upcoming releases are triggers to investigate, not assumption
 | C07 | Python linkage + native rule branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Shared geometry projects into equal summary slots or unequal cell-group centers; standalone/attached resize and registered path checks pass. M05.e verifies grouped and heatmap navigation; recheck later families. |
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots, both orientations, optional zoom and duplicate-slot highlighting verified; extend checks with later families |
 | C09 | Native band rulers fail during initial WebGL rendering with no cursor coordinate; center/line rulers render successfully | Optional shaded row/column guides | Use a native center crosshair now. Upstream [PR #586](https://github.com/genome-spy/genome-spy/pull/586) contains the fix, regression test and before/after recording. Adopt only after a released runtime upgrade; the bundled Core remains unchanged. |
+| C10 | Visible marks outside ordinary plot bounds cannot be picked in bundled Core 1.0.0 | Heatmap/clustermap category-strip hover M05.f | Native tooltip settings are prepared. Upstream [PR #587](https://github.com/genome-spy/genome-spy/pull/587) contains the fix, tests and before/after recording. Adopt a released fix in M14, rerun the three expected failures, and remove known-limit notices; no patched bundle or custom listeners. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental

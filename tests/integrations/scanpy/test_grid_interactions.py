@@ -153,6 +153,37 @@ def test_grid_can_explicitly_enable_both_axes(family):
         assert mark["encoding"][axis]["scale"]["zoom"] is True
 
 
+@pytest.mark.parametrize(
+    "family,field", [("heatmap", "label"), ("clustermap", "_color")]
+)
+@pytest.mark.parametrize("hover", [False, True])
+def test_category_strip_uses_native_tooltip_and_respects_hover(family, field, hover):
+    spec = (
+        grid_chart(family, hover=hover).to_dict()
+        if family == "heatmap"
+        else gsc.pl.clustermap(
+            make_cluster_adata(), obs_keys="group", hover=hover, show=False
+        ).to_dict()
+    )
+    strip = next(
+        mark
+        for mark in leaf_marks(spec)
+        if mark.get("encoding", {}).get("color", {}).get("field") == field
+    )
+    assert strip["mark"]["clip"] == "never"
+    if family == "heatmap":
+        assert strip["mark"]["xOffset"] == -22
+        assert strip["mark"]["x2Offset"] == -8
+    if hover:
+        assert strip["mark"]["tooltip"] == {"handler": "default"}
+        assert strip["encoding"]["tooltip"] == [
+            {"field": field, "type": "nominal", "title": "group"}
+        ]
+    else:
+        assert strip["mark"]["tooltip"] is None
+        assert "tooltip" not in strip["encoding"]
+
+
 @pytest.mark.parametrize("invalid", [None, 0, 1, "x", "y", [], {}])
 def test_zoom_rejects_other_modes_before_optional_dependencies(monkeypatch, invalid):
     monkeypatch.setattr(gsc.pl, "_require_scanpy", lambda: pytest.fail("Loaded Scanpy"))

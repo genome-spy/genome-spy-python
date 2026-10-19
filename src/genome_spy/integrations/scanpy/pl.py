@@ -861,7 +861,8 @@ def heatmap(
         vmax: Upper continuous color bound.
         vcenter: Nondefault values are unsupported.
         norm: Matplotlib normalization objects are unsupported.
-        hover: Include cell ID, gene, group and expression tooltips.
+        hover: Include cell ID, gene, group and expression tooltips. Native
+            category-strip tooltip settings await the Core picking fix in PR #587.
         zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         show_values: Show plotted values to two decimals when cells have enough room.
         width: Native tile-area width in pixels.
@@ -1038,6 +1039,7 @@ def clustermap(
         show: Display once if true; return a chart if false; None uses Scanpy's setting.
         save: None or False; use chart.save for HTML or JSON.
         hover: Show the cell ID, gene and plotted value in a native tooltip.
+            Native obs_keys strip tooltip settings await Core PR #587's picking fix.
         zoom: Enable y-only zoom and pan with True, or both axes with "xy".
         show_values: Show plotted values when enough space is available in each tile.
         width: Matrix width in logical pixels, excluding trees and labels.

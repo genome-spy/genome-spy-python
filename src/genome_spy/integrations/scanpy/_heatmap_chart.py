@@ -212,6 +212,7 @@ def build_heatmap(
             group_color,
             groupby,
             swap_axes=swap_axes,
+            hover=hover,
             position=position if zoom else None,
         )
         layers.append(annotations)
@@ -343,6 +344,7 @@ def _category_strip(
     title: str,
     *,
     swap_axes: bool,
+    hover: bool,
     position: str | None = None,
 ) -> gs.LayerChart:
     """Return category blocks, centered labels and a title outside the cell matrix.
@@ -365,7 +367,10 @@ def _category_strip(
     label_space = max(map(len, intervals["label"])) * TICK * 0.65 + 40
     if swap_axes:
         strip = strip.mark_rect(
-            yOffset=8, y2Offset=21, clip="never", tooltip=None
+            yOffset=8,
+            y2Offset=21,
+            clip="never",
+            tooltip={"handler": "default"} if hover else None,
         ).encode(
             x=gs.X("_start:Q").scale(None).axis(None),
             x2="_stop:Q",
@@ -394,7 +399,12 @@ def _category_strip(
             strip.transform_calculate(
                 _top="1 - datum._start", _bottom="1 - datum._stop"
             )
-            .mark_rect(xOffset=-22, x2Offset=-8, clip="never", tooltip=None)
+            .mark_rect(
+                xOffset=-22,
+                x2Offset=-8,
+                clip="never",
+                tooltip={"handler": "default"} if hover else None,
+            )
             .encode(
                 y=gs.Y("_top:Q").scale(None).axis(None),
                 y2="_bottom:Q",
@@ -428,6 +438,8 @@ def _category_strip(
             angle=-90,
             xOffset=-label_space,
         ).encode(x=gs.value(0), y=gs.value(0.5), text="label:N")
+    if hover:
+        strip = strip.encode(tooltip=[gs.Tooltip("label:N", title=title)])
     return (
         gs.layer(strip, labels, title_chart)
         .resolve_scale(x="excluded", y="excluded")
