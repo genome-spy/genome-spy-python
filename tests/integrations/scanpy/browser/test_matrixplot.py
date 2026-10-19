@@ -19,7 +19,9 @@ REFERENCE = json.loads((REFERENCE_DIR / "matrixplot.json").read_text())
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", matrixplot_cases())
-def test_registered_matrixplot_tiles_paint_and_grid(page, adata, tmp_path, case):
+def test_registered_matrixplot_tiles_paint_and_grid(
+    page, adata, tmp_path, reference_images, case
+):
     reference = REFERENCE["cases"][case]
     options = matrixplot_cases()[case].copy()
     chart = gsc.pl.matrixplot(
@@ -46,7 +48,9 @@ def test_registered_matrixplot_tiles_paint_and_grid(page, adata, tmp_path, case)
             )
         )
     ).convert("RGB")
-    expected = Image.open(REFERENCE_DIR / f"matrixplot-{case}-panel.png").convert("RGB")
+    expected = Image.open(
+        reference_images("matrixplot") / f"matrixplot-{case}-panel.png"
+    ).convert("RGB")
     assert abs(actual.width - expected.width) <= 2
     assert abs(actual.height - expected.height) <= 2
     values = np.array(reference["values"], dtype=float)

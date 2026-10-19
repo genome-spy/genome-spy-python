@@ -10,7 +10,7 @@ import json
 from pathlib import Path
 
 
-def main() -> None:
+def main(output: Path | None = None) -> None:
     import matplotlib as mpl
 
     mpl.use("Agg")
@@ -26,7 +26,9 @@ def main() -> None:
 
     if version("scanpy") != "1.11.5":
         raise RuntimeError("Dendrogram references require Scanpy 1.11.5.")
-    output = Path(__file__).with_name("fixtures")
+    from tests.integrations.scanpy.helpers import reference_paths
+
+    output, metadata = reference_paths("dendrogram", output)
 
     def serial(value):
         if isinstance(value, np.ndarray):
@@ -121,7 +123,7 @@ def main() -> None:
                     main.collections[0].get_array().tolist()
                 )
             plt.close(figure)
-    (output / "dendrogram.json").write_text(json.dumps(result, indent=2) + "\n")
+    (metadata / "dendrogram.json").write_text(json.dumps(result, indent=2) + "\n")
 
 
 if __name__ == "__main__":

@@ -48,13 +48,8 @@ def api_contract(sc: Any) -> dict[str, Any]:
     return {"scanpy": version("scanpy"), "namespace": "scanpy.pl", "entries": entries}
 
 
-def main() -> None:
+def main(output: Path | None = None) -> None:
     """Freeze independent reference observations and complete figures."""
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--output", type=Path, default=Path(__file__).with_name("fixtures")
-    )
-    args = parser.parse_args()
     import matplotlib
 
     matplotlib.use("Agg")
@@ -69,8 +64,10 @@ def main() -> None:
 
     if version("scanpy") != "1.11.5":
         raise RuntimeError("Reference generation requires Scanpy 1.11.5.")
-    args.output.mkdir(parents=True, exist_ok=True)
-    (args.output / "api.json").write_text(json.dumps(api_contract(sc), indent=2) + "\n")
+    from tests.integrations.scanpy.helpers import reference_paths
+
+    output, metadata = reference_paths("umap", output)
+    (metadata / "api.json").write_text(json.dumps(api_contract(sc), indent=2) + "\n")
     sizes = np.arange(8, dtype=float) * 7 + 25
     report: dict[str, Any] = {
         "versions": {
@@ -90,7 +87,7 @@ def main() -> None:
             axes = axes if isinstance(axes, list) else [axes]
             fig = axes[0].figure
             fig.canvas.draw()
-            fig.savefig(args.output / f"{name}.png", dpi=150, bbox_inches="tight")
+            fig.savefig(output / f"{name}.png", dpi=150, bbox_inches="tight")
             panels = []
             keys = options["color"]
             keys = [keys] if isinstance(keys, str) else keys
@@ -116,7 +113,7 @@ def main() -> None:
                 )
                 box = ax.get_window_extent()
                 fig.savefig(
-                    args.output / f"{name}-panel-{i}.png",
+                    output / f"{name}-panel-{i}.png",
                     dpi=150,
                     bbox_inches=box.transformed(fig.dpi_scale_trans.inverted()),
                     pad_inches=0,
@@ -171,7 +168,7 @@ def main() -> None:
             fig.canvas.draw()
             box = ax.get_window_extent()
             fig.savefig(
-                args.output / f"footprint-{token}.png",
+                output / f"footprint-{token}.png",
                 dpi=150,
                 bbox_inches=box.transformed(fig.dpi_scale_trans.inverted()),
                 pad_inches=0,
@@ -192,16 +189,19 @@ def main() -> None:
             }
             plt.close(fig)
     report["assets"] = {
-        p.name: sha256(p.read_bytes()).hexdigest()
-        for p in sorted(args.output.glob("*.png"))
+        p.name: sha256(p.read_bytes()).hexdigest() for p in sorted(output.glob("*.png"))
     }
     report["fixture_sha256"] = sha256(
         Path(__file__).with_name("fixture_data.py").read_bytes()
     ).hexdigest()
-    (args.output / "umap.json").write_text(
+    (metadata / "umap.json").write_text(
         json.dumps(report, indent=2, allow_nan=False) + "\n"
     )
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--output", type=Path, help="Put images and metadata in this directory."
+    )
+    main(parser.parse_args().output)

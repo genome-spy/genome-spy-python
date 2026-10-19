@@ -1,6 +1,17 @@
-# Scanpy reference fixtures
+# Scanpy reference metadata
 
-Generated explicitly with `uv run --group scanpy-test python -m tests.integrations.scanpy.generate_references`.
+Generated test images are never committed or pushed. Browser tests regenerate
+pinned Scanpy images once per family in pytest's temporary directory, alongside
+screenshots and overlays. CI can retain these as temporary artifacts. Frozen
+numeric/API JSON, input fixtures and generators stay in Git; tests never refresh
+the tracked JSON automatically.
+
+Explicit generator commands below refresh the tracked metadata and write images
+to ignored `tmp/scanpy-references/<family>/`. UMAP's `--output` override instead
+places both metadata and images in the supplied directory. References to retained
+figures below mean reproducible local/CI exports, not tracked PNG files.
+
+Metadata is refreshed explicitly with `uv run --group scanpy-test python -m tests.integrations.scanpy.generate_references`.
 The environment is locked in `uv.lock`; `umap.json` records exact scientific
 versions, export/display DPI, checksums, source positions and rendered values.
 `api.json` records the complete pinned public callable inventory and defaults.

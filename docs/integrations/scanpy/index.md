@@ -561,13 +561,16 @@ uv run --no-sync python -m playwright install chromium
 uv run --no-sync pytest tests/integrations/scanpy/browser
 ```
 
-Reference generation is explicit and separate from ordinary tests and runtime.
-It renders Scanpy figures and records their observed geometry, colors, and
-ordering; independent tests also check hand-calculated values, source identities,
-sparse allocation, and mutation behavior. PNG checksums, export/display DPI, and
-versions are retained under tests/integrations/scanpy/fixtures. Browser tests measure actual
-marker footprints, retain registered overlays and complete-chart captures, and
-exercise hover, navigation, and offline delivery.
+Refreshing the frozen numerical/API metadata is explicit and separate from tests
+and runtime. Browser tests use the pinned generators to render reference images
+in pytest's temporary directory without changing that metadata. Generated PNGs,
+screenshots and overlays are never committed or pushed. Explicit refresh commands
+write images to ignored `tmp/scanpy-references/<family>/`; checksums, dimensions,
+DPI and version metadata remain under `tests/integrations/scanpy/fixtures`.
+Independent tests check hand-calculated values, source identities, sparse
+allocation and mutation behavior. Browser checks measure actual marker footprints,
+retain temporary registered overlays and complete-chart captures, and exercise
+hover, navigation and offline delivery.
 
 ### Resource baseline
 

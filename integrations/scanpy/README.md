@@ -99,7 +99,8 @@ uv run jupyter lab integrations/scanpy/notebooks/
 ## Validation
 
 [Validation sources](../../tests/integrations/scanpy/) contain the tests,
-reference images/contracts, explicit reference generator, and resource benchmark.
+reference contracts, temporary reference images, explicit reference generators,
+and resource benchmarks.
 They are development code and are not shipped as part of the Python package.
 
 ```sh
@@ -109,11 +110,16 @@ uv run --no-sync pytest tests/integrations/scanpy/browser
 
 The former `tools/scanpy_reference.py` is now
 [generate_references.py](../../tests/integrations/scanpy/generate_references.py).
-It explicitly runs pinned Scanpy plotting on small synthetic test fixtures and
-records signatures, figures, domains, colors, draw order, and point footprints.
+Browser fixtures regenerate images in temporary directories without changing the
+tracked JSON. No generated PNGs are committed. Explicit refresh commands write
+images to ignored `tmp/scanpy-references/<family>/` and update text metadata.
+The generator explicitly runs pinned Scanpy plotting on small synthetic test
+fixtures and records signatures, figures, domains, colors, draw order, and point
+footprints.
 Inspecting Matplotlib artists is confined to this reference-generation step;
 production plotting never recovers input data from rendered artists. Ordinary
-tests compare against the frozen results instead of regenerating them.
+semantic tests compare frozen numerical results; visual tests render fresh
+upstream images in temporary directories.
 
 ```sh
 uv run --no-sync python -m tests.integrations.scanpy.generate_references --help

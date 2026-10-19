@@ -1,8 +1,9 @@
-"""Tracked public-API and synthetic-image oracles for Scanpy 1.11.5."""
+"""Tracked Scanpy contracts and image metadata; images are generated temporarily."""
 
 from hashlib import sha256
 import json
 from pathlib import Path
+import re
 
 import pytest
 
@@ -16,10 +17,21 @@ def test_reference_inventory_matches_the_installed_public_api() -> None:
     assert api_contract(sc) == json.loads((FIXTURES / "api.json").read_text())
 
 
-def test_reference_assets_have_recorded_checksums() -> None:
+def test_reference_image_inventory_and_checksums_are_recorded() -> None:
     manifest = json.loads((FIXTURES / "umap.json").read_text())
-    for name, expected in manifest["assets"].items():
-        assert sha256((FIXTURES / name).read_bytes()).hexdigest() == expected
+    expected = {f"{case}.png" for case in manifest["cases"]}
+    expected.update(
+        f"{case}-panel-{index}.png"
+        for case, details in manifest["cases"].items()
+        for index in range(len(details["panels"]))
+    )
+    expected.update(
+        f"footprint-{marker}.png" for marker in ("dot", "circle", "dot-stroke")
+    )
+    assert set(manifest["assets"]) == expected
+    assert all(
+        re.fullmatch(r"[0-9a-f]{64}", digest) for digest in manifest["assets"].values()
+    )
 
 
 def test_reference_input_has_not_changed_without_regeneration():

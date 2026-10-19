@@ -11,7 +11,7 @@ from pathlib import Path
 import warnings
 
 
-def main() -> None:
+def main(output: Path | None = None) -> None:
     import matplotlib as mpl
 
     mpl.use("Agg")
@@ -24,7 +24,9 @@ def main() -> None:
 
     if version("scanpy") != "1.11.5":
         raise RuntimeError("Dotplot references require Scanpy 1.11.5.")
-    output = Path(__file__).with_name("fixtures")
+    from tests.integrations.scanpy.helpers import reference_paths
+
+    output, metadata = reference_paths("dotplot", output)
     result = {
         "versions": {
             name: version(name) for name in ("scanpy", "numpy", "pandas", "matplotlib")
@@ -92,7 +94,7 @@ def main() -> None:
                 "full_sha256": sha256(full.read_bytes()).hexdigest(),
             }
             plt.close(figure)
-    (output / "dotplot.json").write_text(json.dumps(result, indent=2) + "\n")
+    (metadata / "dotplot.json").write_text(json.dumps(result, indent=2) + "\n")
 
 
 if __name__ == "__main__":

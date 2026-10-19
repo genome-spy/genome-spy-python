@@ -21,7 +21,9 @@ REFERENCE = json.loads((FIXTURES / "dendrogram.json").read_text())
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", tree_plot_cases())
-def test_registered_branches_and_complete_charts(page, tmp_path, case):
+def test_registered_branches_and_complete_charts(
+    page, tmp_path, reference_images, case
+):
     reference = REFERENCE["charts"][case]
     family, options = tree_plot_cases()[case]
     chart = getattr(gsc.pl, family)(
@@ -90,7 +92,9 @@ def test_registered_branches_and_complete_charts(page, tmp_path, case):
             )
         )
     ).convert("RGB")
-    expected = Image.open(FIXTURES / f"dendrogram-{case}-panel.png").convert("RGB")
+    expected = Image.open(
+        reference_images("dendrogram") / f"dendrogram-{case}-panel.png"
+    ).convert("RGB")
     assert (
         abs(actual.width - expected.width) <= 2
         and abs(actual.height - expected.height) <= 2

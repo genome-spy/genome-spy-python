@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-18. This is the current progress ledger; [PLAN.md](PLAN.md)
+Updated: 2026-10-19. This is the current progress ledger; [PLAN.md](PLAN.md)
 describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
@@ -582,6 +582,30 @@ were not rebuilt/rerun for this slice.
 M05.a/b previews are verified; M05 remains open for clustermap and transport.
 Clearance: **retain** the live plan/status and unique reference/resource evidence.
 The next ready item is M05.c; this preview does not close the full family.
+
+## Generated test images — October 19
+
+Removed all 138 generated test PNGs from the tracked tree. The repository
+instructions prohibit committing or pushing test images, including references,
+screenshots and overlays; Git ignore and a rejecting commit hook enforce PNG
+additions. Text metadata, source fixtures and generators remain tracked.
+
+Browser fixtures now regenerate each family's Scanpy images once per test run
+under pytest's temporary directory. Generated metadata stays there too; frozen
+JSON baselines are never refreshed by the tests. Explicit reference-refresh
+commands put PNGs under ignored `tmp/scanpy-references/<family>/` while updating
+tracked metadata. Existing historical image-validation records refer to these
+reproducible exports, not PNGs that need to ship in a clone.
+
+Earlier local commits still contain the old PNG blobs. This branch must not be
+pushed until that outgoing history is cleaned. History was not rewritten by this
+cleanup; rewriting requires an explicit request under the commit instructions.
+
+Validation: all 66 affected visual comparisons passed with no PNGs in `tests/`,
+as did the three reference-metadata checks. The tracked JSON checksums remained
+unchanged. The commit hook rejected a test PNG as expected, and ignore rules,
+Ruff formatting/lint and mypy passed. Runtime code and notebook sources were not
+changed; unrelated tests and the full documentation build were not rerun.
 
 ## Public callable coverage
 

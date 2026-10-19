@@ -1,6 +1,23 @@
-"""Chart traversal shared by integration tests and explicit benchmarks."""
+"""Chart traversal and reference paths shared by integration tests and generators."""
 
+from pathlib import Path
 from typing import Any
+
+
+def reference_paths(family: str, output: Path | None) -> tuple[Path, Path]:
+    """Return image and metadata directories for a reference family.
+
+    Explicit refreshes keep metadata in fixtures and images ignored; test overrides
+    put both in a temporary directory without changing tracked reference metadata.
+    """
+    images = (
+        output
+        if output is not None
+        else Path(__file__).resolve().parents[3] / "tmp" / "scanpy-references" / family
+    )
+    images.mkdir(parents=True, exist_ok=True)
+    metadata = output if output is not None else Path(__file__).with_name("fixtures")
+    return images, metadata
 
 
 def units(spec: dict[str, Any]) -> list[dict[str, Any]]:

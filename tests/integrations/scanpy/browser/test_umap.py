@@ -138,7 +138,7 @@ def test_complete_chart_has_original_guides_labels_and_unclipped_layout(
     [(".", "dot", 0), ("o", "circle", 0), (".", "dot-stroke", 2)],
 )
 def test_rendered_marker_footprint_matches_registered_scanpy_export(
-    page, tmp_path, marker, token, linewidth
+    page, tmp_path, reference_images, marker, token, linewidth
 ):
     a = fixture()[:1].copy()
     a.obsm["X_umap"] = np.array([[0.0, 0.0]])
@@ -168,7 +168,9 @@ def test_rendered_marker_footprint_matches_registered_scanpy_export(
             )
         )
     ).convert("RGB")
-    reference = Image.open(REFERENCE_DIR / f"footprint-{token}.png").convert("RGB")
+    reference = Image.open(reference_images("umap") / f"footprint-{token}.png").convert(
+        "RGB"
+    )
 
     def footprint(image):
         pixels = np.asarray(image)
@@ -269,7 +271,7 @@ def test_overlapping_points_hover_the_last_visible_observation(page, color):
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", ["categorical", "continuous", "grid"])
 def test_registered_plot_areas_match_reference_positions_colors_and_footprints(
-    page, tmp_path, case
+    page, tmp_path, reference_images, case
 ):
     from scipy.ndimage import distance_transform_edt
 
@@ -307,7 +309,9 @@ def test_registered_plot_areas_match_reference_positions_colors_and_footprints(
                 )
             )
         ).convert("RGB")
-        expected = Image.open(REFERENCE_DIR / f"{case}-panel-{i}.png").convert("RGB")
+        expected = Image.open(
+            reference_images("umap") / f"{case}-panel-{i}.png"
+        ).convert("RGB")
         assert abs(actual.width - expected.width) <= 1
         assert abs(actual.height - expected.height) <= 1
         # Only the known one-pixel crop rounding is reconciled; no image fit,

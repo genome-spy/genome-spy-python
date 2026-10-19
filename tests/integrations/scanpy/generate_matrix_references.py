@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 
-def main():
+def main(output: Path | None = None) -> None:
     import matplotlib as mpl
 
     mpl.use("Agg")
@@ -17,7 +17,9 @@ def main():
     from tests.integrations.scanpy.matrix_fixture import matrix_cases
 
     assert version("scanpy") == "1.11.5"
-    output = Path(__file__).with_name("fixtures")
+    from tests.integrations.scanpy.helpers import reference_paths
+
+    output, metadata = reference_paths("matrix", output)
     manifest = {
         "versions": {name: version(name) for name in ("scanpy", "numpy", "matplotlib")},
         "display_dpi": 100,
@@ -60,7 +62,7 @@ def main():
                 "full_sha256": sha256(full.read_bytes()).hexdigest(),
             }
             plt.close(fig)
-    (output / "matrix.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    (metadata / "matrix.json").write_text(json.dumps(manifest, indent=2) + "\n")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 """Shared native renderer and original grouped-data fixtures."""
 
+from functools import cache
+from importlib import import_module
 import warnings
 
 import pytest
@@ -7,6 +9,26 @@ import pytest
 from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
 
 playwright = pytest.importorskip("playwright.sync_api")
+
+
+@pytest.fixture(scope="session")
+def reference_images(tmp_path_factory):
+    """Generate pinned upstream images once per family, outside the repository."""
+    root = tmp_path_factory.mktemp("scanpy-references")
+
+    @cache
+    def render(family):
+        """Return this family's temporary exports without refreshing tracked JSON."""
+        module = (
+            "generate_references"
+            if family == "umap"
+            else f"generate_{family}_references"
+        )
+        output = root / family
+        import_module(f"tests.integrations.scanpy.{module}").main(output)
+        return output
+
+    return render
 
 
 @pytest.fixture

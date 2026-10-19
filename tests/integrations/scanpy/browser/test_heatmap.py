@@ -126,7 +126,7 @@ def test_zoom_moves_cell_annotations_and_tree(page, swapped):
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", heatmap_cases())
-def test_complete_registered_heatmaps(page, tmp_path, case):
+def test_complete_registered_heatmaps(page, tmp_path, reference_images, case):
     reference = REFERENCE["cases"][case]
     options = heatmap_cases()[case].copy()
     names = options.pop("var_names", ["g1", "g2", "g3"])
@@ -163,7 +163,9 @@ def test_complete_registered_heatmaps(page, tmp_path, case):
             )
         )
     ).convert("RGB")
-    expected = Image.open(FIXTURES / f"heatmap-{case}-panel.png").convert("RGB")
+    expected = Image.open(
+        reference_images("heatmap") / f"heatmap-{case}-panel.png"
+    ).convert("RGB")
     values = np.array(reference["values"], dtype=float)
     for row, column in np.ndindex(values.shape):
         # Sample inside each tile, clear of group borders and palette boundaries.

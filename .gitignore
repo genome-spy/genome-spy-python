@@ -54,6 +54,9 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Generated test images stay local or in temporary CI artifacts.
+/tests/**/*.png
+
 # Translations
 *.mo
 *.pot

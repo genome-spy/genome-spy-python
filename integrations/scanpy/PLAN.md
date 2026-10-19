@@ -167,7 +167,9 @@ also requires all remaining parameter and method rows to be resolved.
    outputs are a second oracle, not the only oracle.
 2. **Complete chart:** axes, titles, ticks, label slots, legends, annotations,
    footprints, ordering, trees, and clipping. Register reference/native plot
-   areas; retain overlays and metadata. Record export DPI, logical dimensions,
+   areas; keep image exports and overlays in temporary local/CI artifacts and
+   metadata in Git. Never commit or push generated test images. Record export DPI,
+   logical dimensions,
    DPR, palette bins/interpolation, fonts and browser rasterization. Set measured
    case-specific tolerances; an aggregate image-error score alone is insufficient.
 3. **Interactions offered by the slice:** observe gestures, hover contents,

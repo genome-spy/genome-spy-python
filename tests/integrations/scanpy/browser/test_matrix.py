@@ -19,7 +19,7 @@ REFERENCE = json.loads((FIXTURES / "matrix.json").read_text())["cases"]
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", matrix_cases())
-def test_complete_matrix_tiles_and_labels(page, tmp_path, case):
+def test_complete_matrix_tiles_and_labels(page, tmp_path, reference_images, case):
     values, options = matrix_cases()[case]
     reference = REFERENCE[case]
     chart = gsc.pl.matrix(
@@ -43,7 +43,9 @@ def test_complete_matrix_tiles_and_labels(page, tmp_path, case):
             )
         )
     ).convert("RGB")
-    expected = Image.open(FIXTURES / f"matrix-{case}-panel.png").convert("RGB")
+    expected = Image.open(
+        reference_images("matrix") / f"matrix-{case}-panel.png"
+    ).convert("RGB")
     assert (
         abs(actual.width - expected.width) <= 2
         and abs(actual.height - expected.height) <= 2

@@ -195,7 +195,7 @@ def test_pbmc_marker_brackets_paint_single_and_multiple_gene_spans(page):
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", dotplot_cases())
 def test_registered_dotplot_positions_paints_and_footprints(
-    page, adata, tmp_path, case
+    page, adata, tmp_path, reference_images, case
 ):
     reference = REFERENCE["cases"][case]
     options = dotplot_cases()[case].copy()
@@ -224,7 +224,9 @@ def test_registered_dotplot_positions_paints_and_footprints(
             )
         )
     ).convert("RGB")
-    expected = Image.open(REFERENCE_DIR / f"dotplot-{case}-panel.png").convert("RGB")
+    expected = Image.open(
+        reference_images("dotplot") / f"dotplot-{case}-panel.png"
+    ).convert("RGB")
     assert abs(actual.width - expected.width) <= 2
     assert abs(actual.height - expected.height) <= 2
     for (x, y), color, area in zip(
