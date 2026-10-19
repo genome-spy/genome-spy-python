@@ -694,6 +694,9 @@ only order/geometry, so individual-cell trees do not allocate an unused square
 correlation matrix. Existing group trees retain their stored correlation data.
 The native chart has left/top trees, optional multi-track annotation strips,
 right/bottom ticks and hover. Track titles reserve their own outside space.
+An `obs_keys` strip retains its categorical values and saved palette/order to
+generate a native legend alongside the expression colorbar. Plain CSS tracks
+have no category names and do not generate a legend.
 
 The [maintained contract](../../docs/integrations/scanpy/index.md#clustermap-compatibility)
 records scaling, masks, duplicates, raw vocabulary, kwargs and layout boundaries.
@@ -764,6 +767,17 @@ the existing Jupyter session; close zoom and panning were observed on the 700-ce
 example. Local zoom experiments in other cells remain intact. No Core patch or
 new clustering/data access runs during interaction. The unrelated full repository
 suite and documentation build were not rerun. M06 remains next; no plans cleared.
+
+Native legend follow-up (2026-10-19): the observation strip's own ordinal color
+encoding generates its legend through `gs.Legend`; no custom legend marks or
+legend-only datasets are added. The complete category domain stays visible while
+zooming, including unused categories and categories sharing a color. Missing
+annotations leave white space and do not become legend entries. **67 focused
+semantic/API checks** and **15 clustermap browser checks** passed, including native
+symbol colors/order/bounds, missing annotation paint, existing registered tiles,
+trees and navigation. The expression notebook was rerun with the native
+`bulk_labels` legend. Ruff and mypy pass; unrelated suites and docs build were not
+rerun. Existing local notebook experiments remain intact; no plan cleared.
 
 ## Generated test images — October 19
 

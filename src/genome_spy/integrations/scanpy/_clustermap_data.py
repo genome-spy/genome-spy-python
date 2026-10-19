@@ -33,6 +33,8 @@ class ClusteredMatrix:
     col_tree: TreeData | None
     row_colors: pd.DataFrame
     col_colors: pd.DataFrame
+    obs_labels: pd.Series | None
+    obs_palette: tuple[str, ...]
 
 
 def _tree(values: np.ndarray, linkage: Any, *, method: str, metric: str) -> TreeData:
@@ -182,6 +184,8 @@ def prepare_clustermap(
     hidden = hidden | values.isna().to_numpy()
 
     # Resolve colors against original labels, then apply the same tree permutation.
+    obs_labels = None
+    obs_palette: tuple[str, ...] = ()
     if obs_keys is not None:
         if row_colors is not None:
             raise TypeError(f"{CONTEXT}: obs_keys and row_colors cannot be combined.")
@@ -193,6 +197,10 @@ def prepare_clustermap(
         palette, _ = _palette(
             adata, obs_keys, categories.categories, None, context=CONTEXT
         )
+        # Keep categories as well as colors so the strip can own a native legend.
+        if len(categories.categories):
+            obs_labels = pd.Series(categories, index=adata.obs_names, name=obs_keys)
+            obs_palette = palette
         row_colors = pd.Series(
             ["white" if code < 0 else palette[code] for code in categories.codes],
             index=adata.obs_names,
@@ -227,4 +235,6 @@ def prepare_clustermap(
         col_tree,
         rows.iloc[list(row_order)],
         columns.iloc[list(col_order)],
+        obs_labels.iloc[list(row_order)].copy() if obs_labels is not None else None,
+        obs_palette,
     )

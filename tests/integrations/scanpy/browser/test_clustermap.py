@@ -181,6 +181,60 @@ def test_hover_tracks_supplied_order_resize_and_offline_html(page, tmp_path):
     assert not page.locator(".message-box").count()
 
 
+@pytest.mark.parametrize("zoom", [False, True])
+def test_native_category_legend_matches_strip_and_stays_visible_during_zoom(page, zoom):
+    from PIL import ImageColor
+
+    data = make_cluster_adata()
+    data.obs.loc["cell-0", "group"] = np.nan
+    chart = gsc.pl.clustermap(
+        data, obs_keys="group", zoom=zoom, width=300, height=240, show=False
+    )
+    bounds = render(page, chart)
+    for navigated in (False, True):
+        if navigated:
+            pointer(page, bounds)
+            page.mouse.wheel(0, -700)
+            page.wait_for_timeout(700)
+        root = svg_root(page)
+        legends = [
+            e
+            for e in root.iter()
+            if e.get("data-view-path", "").endswith("/legend_right")
+            and any(t.tag.endswith("text") and t.text == "C" for t in e.iter())
+        ]
+        assert len(legends) == 1
+        legend = legends[0]
+        text = [e.text for e in legend.iter() if e.tag.endswith("text")]
+        assert text == ["group", "C", "B", "A"]
+        symbols = [
+            e
+            for group in legend.iter()
+            if group.get("data-mark-type") == "point"
+            for e in group
+        ]
+        assert [ImageColor.getrgb(e.get("fill")) for e in symbols] == [
+            (0, 153, 0),
+            (153, 0, 0),
+            (0, 0, 153),
+        ]
+        # The legend is outside the matrix and inside the exported canvas.
+        labels = [position(e) for e in legend.iter() if e.tag.endswith("text")]
+        size = page.evaluate("api.getLogicalCanvasSize()")
+        assert all(
+            bounds["x"] + bounds["width"] < x < size["width"]
+            and 0 <= y < size["height"]
+            for x, y in labels
+        )
+        if not navigated:
+            canvas = page.locator("canvas").first.bounding_box()
+            pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
+            slot = REFERENCE["default"]["row_order"].index(0)
+            x = round(canvas["x"] + bounds["x"] - bounds["width"] * 0.03 / 0.77 / 2)
+            y = round(canvas["y"] + bounds["y"] + (slot + 0.5) / 6 * bounds["height"])
+            np.testing.assert_array_equal(pixels[y, x], [255, 255, 255])
+
+
 @pytest.mark.parametrize("named", [False, True])
 def test_multiple_positional_and_indexed_tracks_on_both_axes(page, named):
     data = make_cluster_adata()

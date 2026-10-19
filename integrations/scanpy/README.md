@@ -24,7 +24,7 @@ not in this workspace or the documentation:
 | [_matrixplot_chart.py](../../src/genome_spy/integrations/scanpy/_matrixplot_chart.py) | Native tiles, edge styling and summary hover; no AnnData access. |
 | [_matrix_chart.py](../../src/genome_spy/integrations/scanpy/_matrix_chart.py) | Supplied numeric tiles and native axes/color guide; reuses numeric validation, color bounds, index slots and labels without AnnData access. |
 | [_clustermap_data.py](../../src/genome_spy/integrations/scanpy/_clustermap_data.py) | Bounded full-subset access, Seaborn-compatible scaling and color tracks, public SciPy or supplied row/column linkage. |
-| [_clustermap_chart.py](../../src/genome_spy/integrations/scanpy/_clustermap_chart.py) | Shared matrix tiles, slot labels, fitted values and navigation composed with two aligned trees and ordered row/column color strips. |
+| [_clustermap_chart.py](../../src/genome_spy/integrations/scanpy/_clustermap_chart.py) | Shared matrix tiles, slot labels, fitted values and navigation composed with two aligned trees, ordered color strips and a native observation-category legend. |
 | [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles, category strips, boundaries and cell hover; reuses grouped labels/brackets and trees projected onto unequal group spans, with optional aligned zoom (y-only by default). |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_umap_data.py](../../src/genome_spy/integrations/scanpy/_umap_data.py) | Read existing coordinates and selected expression/metadata; retain row identity, masks, sizes, and draw order. |

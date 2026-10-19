@@ -86,13 +86,15 @@ def _color_strip(
     size: float,
     extent: float,
     zoom: bool,
+    categories: pd.Series | None = None,
+    palette: tuple[str, ...] = (),
 ) -> gs.LayerChart:
-    """Return outside color tracks from already ordered CSS colors and an index axis."""
+    """Return ordered color tracks, using category names for a native legend if supplied."""
     tracks = colors.shape[1]
     rows = [
         {
             "slot": i,
-            "_color": color,
+            "_color": categories.iloc[i] if categories is not None else color,
             "start": (tracks - j - 1) * size / extent,
             "end": (tracks - j) * size / extent,
         }
@@ -136,13 +138,29 @@ def _color_strip(
                 channel + "2": "_slot_stop:Q",
             }
         )
-    # Annotation colors must not share the matrix's numeric color scale.
-    palette = list(dict.fromkeys(colors.to_numpy().ravel()))
-    strip = strip.encode(
-        color=gs.Color("_color:N")
-        .scale(type="ordinal", domain=palette, range=palette)
-        .legend(None)
-    )
+    # Named categories generate a native legend; plain CSS tracks have no labels.
+    color = gs.Color("_color:N")
+    if categories is not None:
+        color = color.scale(
+            type="ordinal",
+            domain=categories.cat.categories.tolist(),
+            range=list(palette),
+        ).legend(
+            gs.Legend(
+                title=str(categories.name),
+                orient="right",
+                symbolType="square",
+                labelLimit=1000,
+            )
+        )
+        # Missing annotations leave the white strip background visible.
+        strip = strip.transform_filter("isValid(datum._color)")
+    else:
+        css_colors = list(dict.fromkeys(colors.to_numpy().ravel()))
+        color = color.scale(type="ordinal", domain=css_colors, range=css_colors).legend(
+            None
+        )
+    strip = strip.encode(color=color)
     labels = [
         {"label": str(name), "position": (tracks - i - 0.5) * size / extent}
         for i, name in enumerate(colors.columns)
@@ -358,6 +376,8 @@ def build_clustermap(
                     size=size,
                     extent=extent,
                     zoom=bool(zoom),
+                    categories=data.obs_labels if not horizontal else None,
+                    palette=data.obs_palette if not horizontal else (),
                 )
             )
     left, top = width * trees[0] / fractions[0], height * trees[1] / fractions[1]
@@ -397,6 +417,11 @@ def build_clustermap(
             },
         )
         .configure_view(stroke="transparent", strokeWidth=0)
-        .configure_legend(labelFont=FONT, labelFontSize=TICK)
+        .configure_legend(
+            labelFont=FONT,
+            labelFontSize=TICK,
+            titleFont=FONT,
+            layout={"anchor": "start", "direction": "vertical", "wrap": False},
+        )
     )
     return with_navigation(chart, enabled=bool(zoom))

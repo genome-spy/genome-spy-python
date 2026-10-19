@@ -397,6 +397,8 @@ Larger transport remains M05.d; M06 stored ranking and ranked summaries are next
   differences and unsupported kwargs remain explicit in the
   maintained contract, with broader options assigned to M14. Do not claim the
   full clustermap family closed from this preview.
+  Observation category strips retain names/order/palettes and use their own native
+  categorical legend; explicit CSS tracks do not invent category names.
 - M05.d: test chunked selected-column access and a 100k-cell × 50-marker heatmap;
   record payload/render/memory limits and an explicit over-budget policy. Compare
   complete PBMC tutorial heatmaps with registered strips/tree/label alignment.

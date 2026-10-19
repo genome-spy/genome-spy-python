@@ -1032,7 +1032,8 @@ def clustermap(
 
     Args:
         adata: Resident AnnData; subset cells and genes before plotting.
-        obs_keys: One categorical observation column for a row color strip.
+        obs_keys: One categorical observation column for a row color strip
+            and native legend.
         use_raw: Use raw expression when present by default, matching Scanpy.
         show: Display once if true; return a chart if false; None uses Scanpy's setting.
         save: None or False; use chart.save for HTML or JSON.

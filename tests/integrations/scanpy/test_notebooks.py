@@ -8,7 +8,7 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
-from tests.integrations.scanpy.helpers import points, units
+from tests.integrations.scanpy.helpers import points, units, leaf_marks
 
 sc = pytest.importorskip("scanpy")
 NOTEBOOKS = Path(__file__).resolve().parents[3] / "integrations/scanpy/notebooks"
@@ -178,6 +178,17 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert len(cells) == 700 * 10
     assert {row["_row"] for row in cells} == set(namespace["pbmc"].obs_names)
     assert {row["_column"] for row in cells} == set(namespace["marker_names"])
+    annotation = next(
+        mark["encoding"]["color"]
+        for mark in leaf_marks(clustered)
+        if mark.get("encoding", {}).get("color", {}).get("legend", {}) is not None
+        and mark.get("encoding", {}).get("color", {}).get("legend", {}).get("title")
+        == "bulk_labels"
+    )
+    assert annotation["scale"]["domain"] == namespace["group_labels"]
+    assert annotation["scale"]["range"] == list(
+        namespace["pbmc"].uns["bulk_labels_colors"]
+    )
     branches = [mark for mark in clustered["layer"] if "layer" in mark]
     assert [
         len(clustered["datasets"][mark["layer"][0]["data"]["name"]])

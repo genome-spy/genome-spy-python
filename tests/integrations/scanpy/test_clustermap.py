@@ -16,7 +16,7 @@ from tests.integrations.scanpy.clustermap_fixture import (
     make_cluster_adata,
     clustermap_cases,
 )
-from tests.integrations.scanpy.helpers import points
+from tests.integrations.scanpy.helpers import points, leaf_marks
 
 
 def test_clustermap_signature_preserves_scanpy_contract():
@@ -101,6 +101,50 @@ def test_scaling_precedes_distances_and_display_masks_do_not_change_trees():
     )
     assert data.row_tree.order == masked.row_tree.order
     np.testing.assert_array_equal(data.row_tree.dcoord, masked.row_tree.dcoord)
+
+
+def test_observation_strip_owns_category_legend_with_saved_order_and_colors():
+    adata = make_cluster_adata()
+    adata.obs["group"] = adata.obs["group"].cat.add_categories(["unused"])
+    adata.obs.iloc[0, 0] = np.nan
+    adata.uns["group_colors"] = ["green", "green", "navy", "gold"]
+    original = adata.obs.copy()
+    data = prepare_clustermap(adata, "group", False)
+    pd.testing.assert_series_equal(
+        data.obs_labels, original["group"].iloc[list(data.row_order)]
+    )
+    spec = gsc.pl.clustermap(adata, obs_keys="group", zoom=True, show=False).to_dict()
+    strips = [
+        mark
+        for mark in leaf_marks(spec)
+        if mark.get("encoding", {}).get("color", {}).get("legend", {}) is not None
+        and mark.get("encoding", {}).get("color", {}).get("legend", {}).get("title")
+        == "group"
+    ]
+    assert len(strips) == 1
+    strip = strips[0]
+    assert strip["mark"]["type"] == "rect"
+    color = strip["encoding"]["color"]
+    assert color["scale"] == {
+        "type": "ordinal",
+        "domain": ["C", "B", "A", "unused"],
+        "range": ["green", "green", "navy", "gold"],
+    }
+    assert color["legend"]["symbolType"] == "square"
+    assert {"type": "filter", "expr": "isValid(datum._color)"} in strip["transform"]
+    rows = spec["datasets"][strip["data"]["name"]]
+    assert [row["_color"] for row in rows] == [
+        None if pd.isna(label) else label for label in data.obs_labels
+    ]
+    pd.testing.assert_frame_equal(adata.obs, original)
+    # Explicit CSS tracks do not invent category names or a second mark layer.
+    explicit = gsc.pl.clustermap(
+        adata,
+        row_colors=pd.Series(["green"] * 6, index=adata.obs_names, name="group"),
+        zoom=True,
+        show=False,
+    ).to_dict()
+    assert len(leaf_marks(explicit)) == len(leaf_marks(spec))
 
 
 def test_supplied_linkage_is_authoritative_and_annotations_follow_both_orders(
