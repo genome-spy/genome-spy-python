@@ -350,5 +350,73 @@
       ],
       "full_sha256": "d8f24e2c1131eb5205225076978647691e92ac7b8eb2d236415c58a0c3091587"
     }
+  },
+  "statistics": {
+    "dotplot": {
+      "metric": "scores",
+      "plot_size": [
+        405.95238095238096,
+        308.0
+      ],
+      "x_domain": [
+        -0.30000000000000004,
+        4.3
+      ],
+      "y_domain": [
+        4.5,
+        -0.5
+      ],
+      "x_labels": [
+        "g2",
+        "g4",
+        "g2",
+        "g1"
+      ],
+      "y_labels": [
+        "C",
+        "A",
+        "D",
+        "B"
+      ],
+      "color_domain": [
+        -4.0,
+        8.0
+      ],
+      "legend_title": "scores",
+      "full_sha256": "1816066d58fa237aabd99b8ddf87f10d0c192d9edd264a4caa562d62f1ab8fca"
+    },
+    "matrixplot": {
+      "metric": "log10_pvals_adj",
+      "plot_size": [
+        405.95238095238096,
+        308.0
+      ],
+      "x_domain": [
+        0.0,
+        4.0
+      ],
+      "y_domain": [
+        4.0,
+        0.0
+      ],
+      "x_labels": [
+        "g2",
+        "g4",
+        "g2",
+        "g1"
+      ],
+      "y_labels": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "color_domain": [
+        0.045757490560675115,
+        2.3979400086720375
+      ],
+      "legend_title": "log10 p-value adj",
+      "full_sha256": "3d8983a81ae4a2cfbf0f3fec5cdc9e85ef99c9ac2feb2a31c66b9137348d0aee"
+    }
   }
 }

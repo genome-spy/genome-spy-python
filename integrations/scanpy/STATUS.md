@@ -54,7 +54,7 @@ reloaded from disk and all five code cells rerun in the visible Jupyter tab;
 all four charts rendered with the corrected matrix placement. No plan clearance
 changes follow from this fix.
 
-**Next ready slice: M06.d rank-statistic colors.** M06.a–c have a stored-result preview; larger and
+**Next ready slice: M07.a shared 2D embeddings.** M06.a–d have a stored-result preview; larger and
 chunked tile transport remains M05.d.
 Dotplot brushing remains deferred until the
 plain-chart preview has user review; this delivery does not add it.
@@ -163,7 +163,7 @@ The unrelated full Python suite and documentation build were not rerun.
 
 Clearance: retain. M14 owns adopting a released Core containing #587; then rerun
 the three strip cases before/after navigation, remove expected failures and the
-known-limit notices, and verify the PBMC notebook. M06.d remains the next independent
+known-limit notices, and verify the PBMC notebook. M07.a is the next independent
 slice. This records a native capability blocker, not a completed hover feature.
 
 ## M06.a–c stored ranking preview
@@ -180,7 +180,7 @@ stored names/scores; symbols honor the stored raw/var choice. `ranking` handles
 supplied columns/dictionaries, dense array indices, log scores and extreme-rank
 gaps. Missing/nonfinite score labels error; filtered marker lists are supported
 by the expression wrappers. Native font, tick density and outer layout differ
-from Matplotlib. Metric colors remain explicit unsupported options until M06.d.
+from Matplotlib. Metric colors were subsequently added in M06.d below.
 
 Evidence: [ranking tests](../../tests/integrations/scanpy/test_ranked.py),
 [native browser checks](../../tests/integrations/scanpy/browser/test_ranked.py),
@@ -206,8 +206,56 @@ allocation was 89.38 MiB, including optional imports and schema validation.
 Tests enforce selected-column densification and reject oversized cell heatmaps
 before expression access. These are local observations, not portable limits.
 
-Clearance: retain. M06.d is next; M14 retains filtered score-panel and native
+Clearance: retain. M14 retains filtered score-panel and native
 presentation limits. M08/M09 own ranked distributions/tracks. No plan is cleared.
+
+## M06.d stored statistic colors
+
+Verified preview: `rank_genes_groups_dotplot` and `rank_genes_groups_matrixplot`
+accept all six pinned `values_to_plot` options: scores, logfoldchanges, pvals,
+pvals_adj, log10_pvals and log10_pvals_adj. The log variants use −log10(p).
+The new preparation helper reuses stored-result validation, the public Scanpy
+getter and existing marker-slot parsing. It passes detached tables into the
+existing dotplot/matrixplot entry points; no chart, legend or interaction code
+is copied. Dot fractions still use the parent expression source and denominator.
+Matrix statistics bypass scaling; dot statistics follow the parent's scaling
+order, including swapped axes. Default and overridden guide titles are covered.
+
+`groups` selects marker lists; statistics cover every stored group. Explicit
+markers, filtered selection, tails, repeated slots, custom keys, symbols and
+compatible grouping overrides are retained. Unattached matrix rows preserve
+Scanpy's alphabetic statistic-table order; dot rows use observation categories.
+Stored raw/layer params do not override the parent's expression source. Plotting
+never computes differential expression or changes saved results.
+
+As in pinned Scanpy, metric colors require complete stored rankings. The packaged
+PBMC logreg cache has only 100 ranks, so the expression notebook explicitly
+prepares a separate complete Wilcoxon result under `rank_stats` before plotting
+fold-change dots and −log10 adjusted-p-value tiles. It retains earlier examples
+and has thirteen code cells and eleven charts. All thirteen cells completed in
+the existing live Jupyter session; the new charts were visually checked and the
+kernel is idle. Heatmaps continue to show cell
+expression. Missing metrics, ambiguous labels, absent gene/group pairs and
+nonfinite selected statistics error. The preview deliberately rejects Scanpy's
+missing-statistic fill of 1; log p-values of zero also error without clipping.
+M14 owns these explicit compatibility limits.
+
+Evidence: [statistic semantics](../../tests/integrations/scanpy/test_ranked_statistics.py),
+[shared ranking/sparse checks](../../tests/integrations/scanpy/test_ranked.py),
+[complete native comparisons and interactions](../../tests/integrations/scanpy/browser/test_ranked.py),
+and [workflow checks](../../tests/integrations/scanpy/test_notebooks.py).
+All **209 targeted ranking/API checks**, both canonical workflows and **12 ranking
+browser checks** pass, plus Ruff formatting/lint and mypy. Complete references
+use shared viridis at 150 export DPI, with native palette bins and browser
+rasterization accounted for; captures and registered overlays remain local.
+The 100,000-cell × 20,000-gene sparse tests include both statistic-color families,
+read four expression columns and send 32 summaries; the full matrix is never
+densified. The earlier resource benchmark was not repeated. The unrelated full
+repository suites and documentation build were not rerun.
+
+Clearance: retain the live plan and status. M06's preview is verified; M13 retains
+builders and M14 the named compatibility limits. M07.a shared 2D embeddings is
+the next ready slice. No working plan is cleared.
 
 ## Milestones
 
@@ -222,8 +270,8 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
 | M05 heatmap/matrix/clustermap | In progress; three bounded previews delivered | Heatmap/matrix/shared interactions and clustermap values, masks, two Python trees, annotation tracks, native hover and PBMC workflow are covered below. Larger/chunked transport remains M05.d; broader kwargs and native delivery remain M14. |
-| M06 ranking/ranked summaries | In progress; stored-result preview delivered | M06.a–c select stored ranks and reuse dot/matrix/heatmap charts. M06.d statistic colors remain next; native builders remain M13. |
-| M07 embeddings/scatter/PCA | Planned | Shared 2D embeddings/alias/PCA diagnostics, then remaining UMAP options. |
+| M06 ranking/ranked summaries | Verified preview; compatibility limits retained | M06.a–d select stored ranks, reuse dot/matrix/heatmap charts and color summary plots with six saved statistics. Nonfinite/missing-pair behavior and filtered score panels remain M14; native builders remain M13. |
+| M07 embeddings/scatter/PCA | Ready for M07.a | Shared 2D embeddings/alias/PCA diagnostics, then remaining UMAP options. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
 | M10 QC diagnostics | Planned | Highest expression, variable genes, legacy dispersion and Scrublet distributions. |
@@ -921,9 +969,9 @@ No placeholder functions are exported for planned work.
 | `pca_scatter` | Not implemented; pca alias | M07 |
 | `pca_variance_ratio` | Not implemented | M07 |
 | `rank_genes_groups` | Preview: stored score panels | M06.a–c; filtered/nonfinite panels and presentation debt M14 |
-| `rank_genes_groups_dotplot` | Preview: expression colors and fractions | M06.a–c; statistic colors M06.d, builder M13 |
+| `rank_genes_groups_dotplot` | Preview: expression/statistic colors and expression fractions | M06.a–d; compatibility limits M14, builder M13 |
 | `rank_genes_groups_heatmap` | Preview: individual-cell expression | M06.a–c; shares parent heatmap limits |
-| `rank_genes_groups_matrixplot` | Preview: expression means | M06.a–c; statistic colors M06.d, builder M13 |
+| `rank_genes_groups_matrixplot` | Preview: expression means or stored statistics | M06.a–d; compatibility limits M14, builder M13 |
 | `rank_genes_groups_stacked_violin` | Not implemented | M08; rank access M06 |
 | `rank_genes_groups_tracksplot` | Not implemented | M09; rank access M06 |
 | `rank_genes_groups_violin` | Not implemented | M08; rank access M06 |

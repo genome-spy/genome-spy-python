@@ -93,11 +93,14 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         TopLevelSpec, "display", lambda chart, **kwargs: charts.append(chart)
     )
     namespace = {}
-    monkeypatch.setattr(
-        sc.tl,
-        "rank_genes_groups",
-        lambda *a, **k: pytest.fail("Plotting reran ranking"),
-    )
+    ranking, calls = sc.tl.rank_genes_groups, []
+
+    def prepare_ranking(*args, **kwargs):
+        calls.append(kwargs)
+        assert kwargs["key_added"] == "rank_stats"
+        return ranking(*args, **kwargs)
+
+    monkeypatch.setattr(sc.tl, "rank_genes_groups", prepare_ranking)
     run_notebook(NOTEBOOKS / "scanpy_expression.ipynb", namespace)
     assert charts == [
         namespace["dotplot"],
@@ -109,7 +112,10 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["ranked_dotplot"],
         namespace["ranked_matrixplot"],
         namespace["ranked_heatmap"],
+        namespace["statistic_dotplot"],
+        namespace["statistic_matrixplot"],
     ]
+    assert len(calls) == 1 and calls[0]["n_genes"] == 765
     assert namespace["pbmc"].shape == (700, 765)
     order = namespace["pbmc"].uns["dendrogram_bulk_labels"]["categories_ordered"]
     for chart in charts[:3]:
@@ -212,7 +218,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         for group in namespace["ranked_groups"]
         for gene in namespace["pbmc"].uns[namespace["rank_key"]]["names"][group][:3]
     ]
-    for chart in charts[6:]:
+    for chart in charts[6:9]:
         spec = chart.to_dict()
         records = next(
             rows
@@ -223,7 +229,18 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         assert {r["_group"] for r in records} == set(namespace["group_labels"])
     heatmap_rows = next(
         rows
-        for rows in charts[-1].to_dict()["datasets"].values()
+        for rows in charts[8].to_dict()["datasets"].values()
         if "_obs_id" in rows[0]
     )
     assert len(heatmap_rows) == 700 * 6
+    stored = namespace["pbmc"].uns["rank_stats"]
+    for chart, metric in [(charts[9], "logfoldchanges"), (charts[10], "pvals_adj")]:
+        spec = chart.to_dict()
+        rows = next(rows for rows in spec["datasets"].values() if "_mean" in rows[0])
+        assert {r["_group"] for r in rows} == set(namespace["group_labels"])
+        for row in rows:
+            group, gene = row["_group"], row["_gene"]
+            value = stored[metric][group][list(stored["names"][group]).index(gene)]
+            assert row["_mean"] == pytest.approx(
+                -np.log10(value) if metric == "pvals_adj" else value
+            )

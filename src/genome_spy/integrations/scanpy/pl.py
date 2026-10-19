@@ -1582,14 +1582,13 @@ def _ranked_expression(
     context = f"gsc.pl.rank_genes_groups_{plot.__name__}"
     if "ax" in kwds or "return_fig" in kwds:
         _check_kwargs(kwds, set(), context=context)
-    if values_to_plot is not None:
-        raise NotImplementedError(
-            f"{context}: values_to_plot is not supported yet; use the parent plot with an explicitly supplied statistic table."
-        )
     if "dot_color_df" in kwds or "values_df" in kwds:
         raise TypeError(f"{context}: use the parent plot for supplied summary tables.")
     _prepare_plot(show, save, context=context)
-    from genome_spy.integrations.scanpy._ranked_data import ranked_features
+    from genome_spy.integrations.scanpy._ranked_data import (
+        ranked_features,
+        ranked_statistic,
+    )
 
     markers, grouping = ranked_features(
         adata,
@@ -1602,6 +1601,23 @@ def _ranked_expression(
         key=key,
         context=context,
     )
+    # Stored colors replace means; the parent still owns expression fractions.
+    if values_to_plot is not None:
+        table = ranked_statistic(
+            adata,
+            markers,
+            values_to_plot,
+            key=key,
+            gene_symbols=gene_symbols,
+            context=context,
+        )
+        kwds["dot_color_df" if plot is dotplot else "values_df"] = table
+        title = (
+            "log fold change"
+            if values_to_plot == "logfoldchanges"
+            else values_to_plot.replace("_", " ").replace("pvals", "p-value")
+        )
+        kwds.setdefault("colorbar_title", title)
     kwds.setdefault("dendrogram", True)
     return plot(
         adata,
@@ -1644,15 +1660,16 @@ def rank_genes_groups_dotplot(
 ) -> TopLevelSpec | None:
     """Plot stored ranked genes through the existing native dotplot.
 
-    Selects top or tail genes with Scanpy's public getter. Dot colors and sizes
-    remain group mean expression and expressing-cell fractions.
+    Selects top or tail genes with Scanpy's public getter. Colors show means or
+    stored statistics; sizes always show expressing-cell fractions.
 
     Args:
         adata: AnnData containing stored rankings and expression.
         groups: Rank lists to select; does not filter expression groups or cells.
         n_genes: Genes per list, default 10; negative selects the stored tail.
         groupby: Expression grouping key, default the ranking's groupby.
-        values_to_plot: Reserved; metric colors are not supported yet.
+        values_to_plot: Stored statistic for colors, or None for expression means.
+            log10_pvals and log10_pvals_adj use negative base-10 logarithms.
         var_names: Explicit markers instead of n_genes, retaining repeated slots.
         gene_symbols: Variable annotation used for gene labels and lookup.
         min_logfoldchange: Strict lower stored log-fold-change threshold.
@@ -1673,7 +1690,7 @@ def rank_genes_groups_dotplot(
         ImportError: If the supported Scanpy version is unavailable.
         ValueError: If stored rankings or gene-selection options are invalid.
         TypeError: If forwarded options are unsupported.
-        NotImplementedError: If metric colors or renderer options are unsupported.
+        NotImplementedError: If renderer options are unsupported.
 
     Example:
         >>> chart = gsc.pl.rank_genes_groups_dotplot(pbmc, n_genes=3, show=False)
@@ -1730,14 +1747,16 @@ def rank_genes_groups_matrixplot(
 ) -> TopLevelSpec | None:
     """Plot stored ranked genes through the existing native matrixplot.
 
-    Reuses ranked marker selection and the parent plot's means, scaling and trees.
+    Reuses ranked marker selection, supplied statistic tables and parent chart
+    helpers. Stored statistics bypass expression scaling, as in Scanpy.
 
     Args:
         adata: AnnData containing stored rankings and expression.
         groups: Rank lists to select; does not filter expression groups or cells.
         n_genes: Genes per list, default 10; negative selects the stored tail.
         groupby: Expression grouping key, default the ranking's groupby.
-        values_to_plot: Reserved; metric colors are not supported yet.
+        values_to_plot: Stored statistic for colors, or None for expression means.
+            log10_pvals and log10_pvals_adj use negative base-10 logarithms.
         var_names: Explicit markers instead of n_genes.
         gene_symbols: Variable annotation used for gene labels and lookup.
         min_logfoldchange: Strict lower stored log-fold-change threshold.
@@ -1758,7 +1777,7 @@ def rank_genes_groups_matrixplot(
         ImportError: If the supported Scanpy version is unavailable.
         ValueError: If stored rankings or gene-selection options are invalid.
         TypeError: If forwarded options are unsupported.
-        NotImplementedError: If metric colors or renderer options are unsupported.
+        NotImplementedError: If renderer options are unsupported.
 
     Example:
         >>> chart = gsc.pl.rank_genes_groups_matrixplot(pbmc, n_genes=3, show=False)

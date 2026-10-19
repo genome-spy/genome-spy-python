@@ -14,10 +14,14 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
 from tests.integrations.scanpy.browser.test_grid_interactions import pointer
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata, ranked_cases
+from tests.integrations.scanpy.helpers import points
 
 REFERENCE = json.loads(
     (Path(__file__).parents[1] / "fixtures/ranked.json").read_text()
 )["cases"]
+STATISTICS = json.loads(
+    (Path(__file__).parents[1] / "fixtures/ranked.json").read_text()
+)["statistics"]
 
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)
@@ -151,3 +155,131 @@ def test_ranked_expression_uses_existing_y_navigation_and_guides(page, family):
     assert after[0] == before[0] and after[1] > before[1]
     svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
     assert all(text in svg for text in ("g1", "g2", "g3", "g4"))
+
+
+@pytest.mark.parametrize("page", [1.5], indirect=True)
+@pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
+def test_statistic_colors_labels_and_complete_guides_match_scanpy(
+    page, family, tmp_path, reference_images
+):
+    reference = STATISTICS[family]
+    chart = getattr(gsc.pl, f"rank_genes_groups_{family}")(
+        make_ranked_adata(),
+        groups=["A", "C"],
+        n_genes=2,
+        values_to_plot=reference["metric"],
+        cmap="viridis",
+        dendrogram=False,
+        width=reference["plot_size"][0],
+        height=reference["plot_size"][1],
+        show=False,
+    )
+    spec = chart.to_dict()
+    mark = points(spec)
+    np.testing.assert_allclose(
+        mark["encoding"]["color"]["scale"]["domain"], reference["color_domain"]
+    )
+    assert mark["encoding"]["color"]["legend"]["title"] == reference["legend_title"]
+    bounds = render(page, chart)
+    canvas = page.locator("canvas").first.bounding_box()
+    actual = Image.open(
+        BytesIO(
+            page.screenshot(
+                clip={
+                    "x": canvas["x"] + bounds["x"],
+                    "y": canvas["y"] + bounds["y"],
+                    "width": bounds["width"],
+                    "height": bounds["height"],
+                }
+            )
+        )
+    ).convert("RGB")
+    expected = Image.open(
+        reference_images("ranked") / f"ranked-statistic-{family}-panel.png"
+    ).convert("RGB")
+    assert (
+        abs(actual.width - expected.width) <= 2
+        and abs(actual.height - expected.height) <= 2
+    )
+    # Sample each mark center using the upstream plot domains at export DPI.
+    for row in next(rows for rows in spec["datasets"].values() if "_mean" in rows[0]):
+        x, y = row["_x"] + 0.5, row["_y"] + 0.5
+        x0, x1 = reference["x_domain"]
+        y1, y0 = reference["y_domain"]
+        px, py = (
+            round((x - x0) / (x1 - x0) * actual.width),
+            round((y - y0) / (y1 - y0) * actual.height),
+        )
+        assert (
+            np.abs(
+                np.asarray(actual)[py, px].astype(int)
+                - np.asarray(expected)[py, px].astype(int)
+            ).max()
+            <= 12
+        ), row
+    svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    texts = [e.text for e in ET.fromstring(svg).iter() if e.tag.endswith("text")]
+    for label in (
+        reference["x_labels"] + reference["y_labels"] + [reference["legend_title"]]
+    ):
+        assert label in texts
+    page.screenshot(
+        path=str(tmp_path / f"statistic-{family}-complete.png"), full_page=True
+    )
+    extent = (
+        0,
+        0,
+        min(actual.width, expected.width),
+        min(actual.height, expected.height),
+    )
+    Image.blend(actual.crop(extent), expected.crop(extent), 0.5).save(
+        tmp_path / f"statistic-{family}-overlay.png"
+    )
+
+
+@pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
+def test_statistic_hover_zoom_and_offline_delivery(page, family, tmp_path):
+    options = {"highlight": True} if family == "dotplot" else {"show_values": True}
+    chart = getattr(gsc.pl, f"rank_genes_groups_{family}")(
+        make_ranked_adata(),
+        var_names=["g2"],
+        values_to_plot="scores",
+        dendrogram=False,
+        zoom=True,
+        width=300,
+        height=320,
+        show=False,
+        **options,
+    )
+    bounds = render(page, chart)
+    x = 0.5
+    y = 1 / 5 if family == "dotplot" else 1 / 8
+    px, py = pointer(page, bounds, x=x, y=y)
+    page.mouse.move(px - 2, py - 2)
+    page.wait_for_timeout(450)
+    page.mouse.move(px, py)
+    page.locator("table.attributes").wait_for(state="visible")
+    values = [
+        s.strip() for s in page.locator("table.attributes td").all_text_contents()
+    ]
+    assert values[:3] == (
+        ["g2", "C", "4.000"] if family == "dotplot" else ["g2", "A", "6.000"]
+    )
+    if family == "dotplot":
+        assert float(values[-1]) == 100
+    before = page.evaluate(
+        "['grid_x_step','grid_y_step'].map(n=>api.getParam(n).getValue())"
+    )
+    pointer(page, bounds)
+    page.mouse.wheel(0, -300)
+    page.wait_for_timeout(500)
+    after = page.evaluate(
+        "['grid_x_step','grid_y_step'].map(n=>api.getParam(n).getValue())"
+    )
+    assert after[0] == before[0] and after[1] > before[1]
+    path = tmp_path / f"statistic-{family}.html"
+    chart.save(path, inline=True, controls=False)
+    page.context.set_offline(True)
+    page.goto(path.as_uri())
+    page.locator("canvas").first.wait_for(state="visible")
+    assert not page.locator(".message-box").count()

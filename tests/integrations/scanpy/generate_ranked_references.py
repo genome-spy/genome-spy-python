@@ -27,6 +27,7 @@ def main(output: Path | None = None) -> None:
             Path(__file__).with_name("ranked_fixture.py").read_bytes()
         ).hexdigest(),
         "cases": {},
+        "statistics": {},
     }
     with mpl.rc_context(
         {"figure.figsize": (3, 3), "figure.dpi": 100, "savefig.dpi": 150}
@@ -70,6 +71,51 @@ def main(output: Path | None = None) -> None:
                 )
             manifest["cases"][name] = {
                 "panels": panels,
+                "full_sha256": sha256(full.read_bytes()).hexdigest(),
+            }
+            plt.close(figure)
+        # Reference the complete ranked wrappers, including their native metric titles.
+        for family, metric in [
+            ("dotplot", "scores"),
+            ("matrixplot", "log10_pvals_adj"),
+        ]:
+            plot = getattr(sc.pl, f"rank_genes_groups_{family}")(
+                make_ranked_adata(),
+                groups=["A", "C"],
+                n_genes=2,
+                values_to_plot=metric,
+                dendrogram=False,
+                return_fig=True,
+                figsize=(7, 4),
+                cmap="viridis",
+            )
+            plot.make_figure()
+            figure = plot.fig
+            figure.canvas.draw()
+            axes = plot.get_axes()
+            main = axes["mainplot_ax"]
+            bbox = main.get_window_extent()
+            full = images / f"ranked-statistic-{family}.png"
+            figure.savefig(full, dpi=150)
+            image = Image.open(full)
+            image.crop(
+                (
+                    round(bbox.x0 * 1.5),
+                    round(image.height - bbox.y1 * 1.5),
+                    round(bbox.x1 * 1.5),
+                    round(image.height - bbox.y0 * 1.5),
+                )
+            ).save(images / f"ranked-statistic-{family}-panel.png")
+            colorbar = axes["color_legend_ax"].collections[-1]
+            manifest["statistics"][family] = {
+                "metric": metric,
+                "plot_size": [bbox.width, bbox.height],
+                "x_domain": list(main.get_xlim()),
+                "y_domain": list(main.get_ylim()),
+                "x_labels": [t.get_text() for t in main.get_xticklabels()],
+                "y_labels": [t.get_text() for t in main.get_yticklabels()],
+                "color_domain": [colorbar.norm.vmin, colorbar.norm.vmax],
+                "legend_title": plot.color_legend_title,
                 "full_sha256": sha256(full.read_bytes()).hexdigest(),
             }
             plt.close(figure)

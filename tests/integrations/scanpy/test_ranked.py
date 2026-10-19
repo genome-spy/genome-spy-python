@@ -311,10 +311,10 @@ def test_signatures_match_scanpy_except_renderer_objects_and_native_controls(fam
 
 
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
-def test_metric_colors_fail_instead_of_falling_back_to_expression(family):
-    with pytest.raises(NotImplementedError, match="values_to_plot"):
+def test_invalid_metric_colors_fail_instead_of_falling_back_to_expression(family):
+    with pytest.raises(ValueError, match="values_to_plot"):
         getattr(gsc.pl, f"rank_genes_groups_{family}")(
-            object(), values_to_plot="scores", show=False
+            make_ranked_adata(), values_to_plot="unknown", show=False
         )
 
 
@@ -370,8 +370,19 @@ def test_ranking_display_keeps_scanpy_autoshow_and_ignores_autosave(
     assert (result is None) == bool(displayed)
 
 
-@pytest.mark.parametrize("family", ["dotplot", "matrixplot", "heatmap"])
-def test_large_sparse_ranked_plots_only_read_the_selected_genes(monkeypatch, family):
+@pytest.mark.parametrize(
+    "family,metric",
+    [
+        ("dotplot", None),
+        ("matrixplot", None),
+        ("heatmap", None),
+        ("dotplot", "scores"),
+        ("matrixplot", "scores"),
+    ],
+)
+def test_large_sparse_ranked_plots_only_read_the_selected_genes(
+    monkeypatch, family, metric
+):
     import anndata as ad
     import pandas as pd
     from scipy import sparse
@@ -385,6 +396,18 @@ def test_large_sparse_ranked_plots_only_read_the_selected_genes(monkeypatch, fam
     )
     a.var_names = [f"g{i + 1}" for i in range(a.n_vars)]
     a.uns["rank_genes_groups"] = make_ranked_adata().uns["rank_genes_groups"]
+    if metric is not None:
+        result = a.uns["rank_genes_groups"]
+        # Append complete ranks without changing the first four marker positions.
+        for field in ("names", "scores", "logfoldchanges", "pvals", "pvals_adj"):
+            first = result[field]
+            rest = [
+                a.var_names[4:].tolist() if field == "names" else np.zeros(a.n_vars - 4)
+                for _ in first.dtype.names
+            ]
+            result[field] = np.concatenate(
+                [first, np.rec.fromarrays(rest, names=first.dtype.names)]
+            )
     original, shapes = sparse.csr_matrix.toarray, []
 
     def selected(matrix, *args, **kwargs):
@@ -403,6 +426,7 @@ def test_large_sparse_ranked_plots_only_read_the_selected_genes(monkeypatch, fam
             n_genes=2,
             dendrogram=False,
             show=False,
+            values_to_plot=metric,
             **({"dot_max": 1} if family == "dotplot" else {}),
         )
         assert shapes == [(100_000, 4)]

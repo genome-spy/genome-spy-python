@@ -189,3 +189,9 @@ clustering workload, not a biological marker recommendation. No dataset is vendo
 uv run --no-sync python -m tests.integrations.scanpy.generate_clustermap_references
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_clustermap --output /tmp/clustermap.json
 ```
+
+The `statistics` section of `ranked.json` records complete ranked dotplot and
+matrixplot references, metric titles, label order and color domains. References
+use shared viridis: native GenomeSpy palettes (notably `reds`) can differ from
+Matplotlib palettes with similar names. Registered crops and overlays remain in
+temporary/ignored directories; no generated images are tracked.

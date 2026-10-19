@@ -16,7 +16,7 @@ not in this workspace or the documentation:
 | --- | --- |
 | [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
 | [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public signatures and plot-specific validation; common kwargs checks, optional dependency/version setup and native display/save handling. |
-| [_ranked_data.py](../../src/genome_spy/integrations/scanpy/_ranked_data.py) | Stored ranking checks, public Scanpy result selection and detached rank-label positions. No expression access or analysis. |
+| [_ranked_data.py](../../src/genome_spy/integrations/scanpy/_ranked_data.py) | Stored ranking checks, public Scanpy result selection, statistic color tables and detached rank-label positions. No expression access or analysis. |
 | [_ranking_chart.py](../../src/genome_spy/integrations/scanpy/_ranking_chart.py) | Native score labels, axes and multi-panel layout shared by ranking and rank_genes_groups. Ranked expression wrappers reuse their existing parent charts. |
 | [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared scalar/numeric-table validation, raw/layer resolution and resident-expression checks; reused by preparation and chart modules. |
 | [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Selected values, feature slots/brackets and summaries. Shared scale_values serves cells and group means; heatmap adds cell permutations/group spans and an early size guard. No chart authoring. |

@@ -102,30 +102,19 @@ def stored_ranking(
     return result, chosen
 
 
-def ranked_features(
+def _ranking_table(
     adata: Any,
-    groups: Any,
+    result: Mapping[str, Any],
+    chosen: list[str],
     *,
     key: str | None,
-    n_genes: int | None,
-    groupby: str | None,
-    var_names: Any,
     gene_symbols: str | None,
     min_logfoldchange: float | None,
     context: str,
-) -> tuple[Any, str]:
-    """Return marker slots and grouping key using Scanpy's public result getter."""
+) -> pd.DataFrame:
+    """Read detached ranking rows through Scanpy, checking its required fields first."""
     from scanpy.get import rank_genes_groups_df
 
-    if var_names is not None and n_genes is not None:
-        raise ValueError(f"{context}: n_genes and var_names are mutually exclusive.")
-    result, chosen = stored_ranking(adata, key, groups, context=context)
-    grouping = result["params"]["groupby"] if groupby is None else groupby
-    if var_names is not None:
-        return var_names, grouping
-    count = _count(
-        10 if n_genes is None else n_genes, "n_genes", context=context, negative=True
-    )
     method = result["params"]["method"]
     if method not in {"logreg", "t-test", "t-test_overestim_var", "wilcoxon"}:
         raise NotImplementedError(
@@ -163,6 +152,40 @@ def ranked_features(
     # Scanpy omits the group column when returning a single rank list.
     if len(chosen) == 1:
         table["group"] = chosen[0]
+    return table
+
+
+def ranked_features(
+    adata: Any,
+    groups: Any,
+    *,
+    key: str | None,
+    n_genes: int | None,
+    groupby: str | None,
+    var_names: Any,
+    gene_symbols: str | None,
+    min_logfoldchange: float | None,
+    context: str,
+) -> tuple[Any, str]:
+    """Return marker slots and grouping key using Scanpy's public result getter."""
+    if var_names is not None and n_genes is not None:
+        raise ValueError(f"{context}: n_genes and var_names are mutually exclusive.")
+    result, chosen = stored_ranking(adata, key, groups, context=context)
+    grouping = result["params"]["groupby"] if groupby is None else groupby
+    if var_names is not None:
+        return var_names, grouping
+    count = _count(
+        10 if n_genes is None else n_genes, "n_genes", context=context, negative=True
+    )
+    table = _ranking_table(
+        adata,
+        result,
+        chosen,
+        key=key,
+        gene_symbols=gene_symbols,
+        min_logfoldchange=min_logfoldchange,
+        context=context,
+    )
     markers = {}
     for group, rows in table.groupby("group", sort=False, observed=True):
         labels = (
@@ -179,6 +202,75 @@ def ranked_features(
     if not markers:
         raise ValueError(f"{context}: no ranked genes remain after filtering.")
     return markers, grouping
+
+
+def ranked_statistic(
+    adata: Any,
+    markers: Any,
+    metric: str,
+    *,
+    key: str | None,
+    gene_symbols: str | None,
+    context: str,
+) -> pd.DataFrame:
+    """Return stored statistic colors for every group and requested gene slot."""
+    from genome_spy.integrations.scanpy._grouped_data import _feature_slots
+
+    options = {
+        "scores",
+        "logfoldchanges",
+        "pvals",
+        "pvals_adj",
+        "log10_pvals",
+        "log10_pvals_adj",
+    }
+    if not isinstance(metric, str) or metric not in options:
+        raise ValueError(f"{context}: values_to_plot must be one of {sorted(options)}.")
+    result, groups = stored_ranking(adata, key, None, context=context)
+    field = metric.removeprefix("log10_")
+    if field not in result:
+        raise ValueError(
+            f"{context}: stored ranking has no {field}; compute it explicitly first."
+        )
+    # Scanpy requires complete rankings, even when plotting a short marker list.
+    if len(result["names"]) < adata.n_vars:
+        raise ValueError(
+            f"{context}: statistic colors need complete stored rankings; run "
+            "sc.tl.rank_genes_groups explicitly with n_genes=adata.n_vars first."
+        )
+    table = _ranking_table(
+        adata,
+        result,
+        groups,
+        key=key,
+        gene_symbols=gene_symbols,
+        min_logfoldchange=None,
+        context=context,
+    )
+    label = "names" if gene_symbols is None else gene_symbols
+    names, _ = _feature_slots(markers, None, None)
+    selected = table.loc[table[label].isin(names)]
+    if selected.duplicated([label, "group"]).any():
+        raise ValueError(
+            f"{context}: statistic colors need unambiguous gene labels within each group."
+        )
+    colors = selected.pivot(index="group", columns=label, values=field)
+    # Scanpy's pivot sorts groups; the parent dotplot restores category order.
+    colors = colors.reindex(index=sorted(groups), columns=names)
+    values = numeric_values(colors, context=context)
+    if not np.isfinite(values).all():
+        raise ValueError(
+            f"{context}: requested genes need finite stored {field} in every ranking group."
+        )
+    if field.startswith("pvals") and ((values < 0) | (values > 1)).any():
+        raise ValueError(f"{context}: stored {field} must be between 0 and 1.")
+    if metric.startswith("log10_"):
+        if (values == 0).any():
+            raise ValueError(
+                f"{context}: {metric} needs positive p-values; zero would produce infinity."
+            )
+        colors = -np.log10(colors)
+    return colors
 
 
 def gene_rank_panels(

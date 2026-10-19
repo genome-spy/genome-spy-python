@@ -441,13 +441,46 @@ normalization order, trees, hover, limits and opt-in interactions.
 | `groups`, `groupby`, `key` | Preserve requested rank-list order; a string selects one group. `groups` selects gene lists, not observation subsets. Expression grouping defaults to stored params; `groupby` overrides it. `key=None` uses `rank_genes_groups`. |
 | `var_names`, symbols and threshold | Explicit lists/dictionaries replace automatic selection and conflict with explicit `n_genes`. Symbols for ranked marker selection use the getter's `adata.var` lookup. `min_logfoldchange` applies a strict `>` filter only when selecting automatic lists; it needs stored fold changes. As in Scanpy, explicit markers bypass that filter. |
 | Raw/layer and trees | Expression uses the parent plot's raw/layer defaults and explicit kwargs; it does not automatically switch to a ranking's stored layer. `dendrogram` defaults True and can be disabled. Reading a rank list never computes a tree; the parent plot owns its normal tree policy. |
-| Metric colors | `values_to_plot` currently errors; this preview retains expression colors and dot fractions. Missing log-fold changes or p-values are not synthesized. The packaged logreg result supports scores but cannot supply a fold-change filter. |
+| Metric colors | Dotplot/matrixplot accept `scores`, `logfoldchanges`, `pvals`, `pvals_adj`, `log10_pvals` and `log10_pvals_adj`. The log options use **−log10(p)**. Colors read all stored ranking groups; `groups` selects marker lists only. Dot sizes still use expression fractions. Matrix statistics bypass `standard_scale`; dotplot retains its parent scaling order. Heatmaps keep individual-cell expression. |
 | `rank_genes_groups` panels | Stored order and scores, requested groups, native label sizing, shared/separate score bounds and `n_panels_per_row` alias. Symbol labels use raw/var according to the ranking's stored `use_raw`. No expression matrix is read, including for backed data and views. Nonfinite scores or missing names error; filtered lists remain available through the expression wrappers. |
 | `ranking` | Supplied var/obs/uns/varm/obsm score columns or a nested dictionary. Dense array `indices`, label lists/prefixes, natural-log scores and `include_lowest` are supported. Sorting follows Scanpy, including its extra top label when `include_lowest=False`. Sparse/backed array-column selection errors. This function has no save argument and does not use autosave, as in Scanpy. |
 | Native rendering and delivery | Rank panels use rotated labels and native axes; width/height default to 300 pixels per panel. Fonts, automatic tick density and outer layout differ from Matplotlib. Expression wrappers return their parent chart type and accept its options; Matplotlib objects and unknown kwargs error. Notebook and offline HTML delivery use the existing chart/widget. |
 
 The repository's `integrations/scanpy/notebooks/scanpy_expression.ipynb` shows
-packaged stored scores and all three ranked expression variants.
+packaged stored scores, all three ranked expression variants, and explicit Scanpy preparation followed by statistic-colored summaries.
+
+Statistic colors require complete stored rankings, as in Scanpy. The packaged
+logreg cache contains only 100 ranks per group; prepare a new result explicitly:
+
+```python
+sc.tl.rank_genes_groups(
+    pbmc, "bulk_labels", method="wilcoxon", use_raw=True,
+    n_genes=pbmc.n_vars, key_added="rank_stats",
+)
+dots = gsc.pl.rank_genes_groups_dotplot(
+    pbmc, key="rank_stats", n_genes=3, values_to_plot="logfoldchanges",
+    cmap="redblue", vmin=-4, vmax=4, show=False,
+)
+tiles = gsc.pl.rank_genes_groups_matrixplot(
+    pbmc, key="rank_stats", n_genes=3, values_to_plot="log10_pvals_adj",
+    cmap="viridis", zoom=True, show_values=True, show=False,
+)
+```
+
+Rank colors match genes by label in each stored group, including repeated plot
+slots and gene symbols. Without a tree or explicit category order, matrixplot
+retains the statistic table’s alphabetic group order; dotplot restores observation
+category order, matching Scanpy. A `groupby` override must have the same group labels.
+Expression raw/layer defaults and explicit options remain independent of ranking
+params; saved statistics are never recomputed from the selected expression source.
+The metric supplies the default colorbar title; `colorbar_title` overrides it.
+
+Missing metrics, incomplete rankings, ambiguous labels, absent gene/group pairs,
+and nonfinite selected values fail clearly. Unlike Scanpy’s missing-value fill,
+this preview does not substitute `1` for missing statistics. Raw p-values may be
+zero; log-transformed p-values must be positive because zero yields infinity.
+No clipping or replacement analysis occurs. These cases remain compatibility
+limits tracked in M14.
 
 ## Dendrograms and correlation matrices
 
@@ -622,8 +655,9 @@ These adapt supported UMAP, dotplot, matrixplot and heatmap sections of Scanpy's
 [advanced](https://scanpy.scverse.org/en/stable/tutorials/plotting/advanced.html)
 plotting tutorials. Grouped examples reuse a tree explicitly computed in Python
 with `sc.tl.dendrogram`; clustermap computes separate cell/gene linkage. Ranked
-examples read the packaged stored results. Rank-statistic colors are next; the
-remaining tutorial plots and Matplotlib artist styling are not implemented yet.
+examples read the packaged stored results; statistic-color examples explicitly
+prepare a separate complete ranking with Scanpy. Remaining tutorial plots and
+Matplotlib artist styling are not implemented yet.
 
 ### Native plot sizing
 

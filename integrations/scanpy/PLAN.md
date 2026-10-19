@@ -437,7 +437,8 @@ large inputs have a measured policy without hidden downsampling/aggregation.
 ### M06 — ranking and ranked summary plots
 
 M06.a–c now have a stored-result preview: ranking/score labels and expression-color
-wrappers are implemented. M06.d metric colors are next. Filtered marker lists
+wrappers are implemented. M06.d adds stored statistic colors to the same dotplot
+and matrixplot paths. Filtered marker lists
 work; nonfinite/missing score-panel labels currently error. Track this limit and
 native typography/guide differences in M14 rather than claiming full-family closure.
 
@@ -453,7 +454,9 @@ native typography/guide differences in M14 rather than claiming full-family clos
   delegating to the implemented family charts, not by copying them.
 - M06.d: for `values_to_plot`, metric colors and expression fractions remain
   distinct data sources. Verify raw/layer precedence from stored ranking params,
-  supplied selected groups and missing/nonfinite statistics.
+  supplied selected groups and missing/nonfinite statistics. Implemented preview:
+  six metrics, repeated slots/symbols, all stored group rows and parent scaling.
+  Missing pairs and nonfinite colors reject explicitly; M14 owns broader parity.
 
 Target: `gsc.pl.rank_genes_groups_dotplot(pbmc, key="rank_genes_groups", n_genes=3, show=False)`.
 Acceptance: frozen stored ranks produce identical slots and labels; hand-checked
