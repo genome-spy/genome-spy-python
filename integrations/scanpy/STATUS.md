@@ -5,6 +5,11 @@ describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
 
+The 44 unpublished Scanpy commits were cleaned of generated test media and saved
+notebook execution state before publication. Code, tests and commit authors/messages
+were preserved; evidence commit IDs below refer to the cleaned history. Both
+workflow tests and Ruff checks pass. Local notebook edits remain unchanged.
+
 ## Current position and next work
 
 **Available:** categorical/continuous 2D UMAP, dotplot/matrixplot and cell heatmaps with dendrograms,
@@ -80,7 +85,7 @@ Evidence: [shared behavior tests](../../tests/integrations/scanpy/test_grid_inte
 [observed browser tests](../../tests/integrations/scanpy/browser/test_grid_interactions.py),
 [public getter reuse checks](../../tests/integrations/scanpy/test_upstream_reuse.py) and
 [workflow execution](../../tests/integrations/scanpy/test_notebooks.py). The initial
-shared-interaction implementation (`d5f7586`) passed all **476 Python integration checks**, **18 new interaction browser checks** and **70 existing
+shared-interaction implementation (`69908bf`) passed all **476 Python integration checks**, **18 new interaction browser checks** and **70 existing
 affected-family browser checks**. The final focused rerun passed 31 checks.
 Ruff formatting/lint and mypy pass. The expression notebook completed all five
 code cells in its existing Jupyter session; the kernel is idle. All four PBMC
@@ -166,7 +171,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 
 | Milestone | State | Delivered evidence or remaining work |
 | --- | --- | --- |
-| M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, sole integration namespace, source/test/workflow layout, full inventory and shared lifecycle exist. Initial relocation is `cec0428`; current verification below. |
+| M00 foundation/layout/lifecycle | Closed (foundation scope) | Signature/version fixtures, sole integration namespace, source/test/workflow layout, full inventory and shared lifecycle exist. Initial relocation is `d148721`; current verification below. |
 | M01 UMAP/linked preview | Closed (preview only) | Runtime modules, dedicated PBMC UMAP notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
 | M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
@@ -182,7 +187,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains delivered with their parent families; method ledger below. |
 | M14 compatibility/docs/release | Planned | Close parameters/capabilities, versions/exports, designed workflow publication and full API evidence. |
 
-The M01 preview is recorded in `c28cee3` and `2a136b4` with earlier implementation
+The M01 preview is recorded in `a536bf6` and `ecd27c8` with earlier implementation
 history in Git. Its retained evidence is:
 
 - [Current compatibility contract](../../docs/integrations/scanpy/index.md),
@@ -202,7 +207,7 @@ history in Git. Its retained evidence is:
   All UMAP examples enable x/y zoom and panning. Linked brushing uses Shift-drag
   in the first panel so ordinary dragging remains available for navigation.
 
-UMAP preview baseline (`cfc01b7`): 119 integration checks and 20 browser checks pass,
+UMAP preview baseline (`e04e261`): 119 integration checks and 20 browser checks pass,
 as do Ruff formatting/lint and mypy. The workflow test executes every cell,
 checks unchanged source UMAP coordinates, and reruns Python retrieval for a
 nonempty selection. The UMAP notebook renders in a fresh kernel/browser.

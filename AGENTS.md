@@ -48,10 +48,12 @@ Use pytest. Add or update tests for behavior changes, with fixed seeds for rando
 behavior. Keep tests small and focused on one behavior. Apply the "Suspicious
 Check": tighten any test that could pass for the wrong reason.
 
-Never commit or push generated test images, including reference PNGs, screenshots
-and overlays. Generate them in temporary directories or ignored local caches;
-track only their generators and text metadata. Check outgoing commit history
-before pushing: deleting images from the current tree does not remove old blobs.
+Never commit or push generated test artifacts, including reference images,
+screenshots, overlays, recordings and chart exports. Generate them in temporary
+directories or ignored local caches; track test source, generators and deliberate
+text fixtures. Keep committed notebooks free of execution outputs and widget
+state. Check outgoing commit history before pushing: deleting artifacts from the
+current tree does not remove old blobs.
 
 Use `uv` for environments and dependencies. Before handoff, run targeted tests for
 changed behavior and lint. Format before finalizing non-trivial edits; type-check
