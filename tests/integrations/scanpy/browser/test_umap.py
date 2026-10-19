@@ -75,7 +75,11 @@ def move_to(page, bounds, x, y, x_domain, y_domain, expected_id):
     for dx, dy in [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)]:
         page.mouse.move(px + dx, py + dy)
         page.wait_for_timeout(80)
-        if page.get_by_text(expected_id, exact=True).is_visible():
+        if (
+            page.locator("table.attributes")
+            .get_by_text(expected_id, exact=True)
+            .first.is_visible()
+        ):
             break
     return px, py
 

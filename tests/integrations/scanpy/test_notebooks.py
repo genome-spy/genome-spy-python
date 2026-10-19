@@ -46,6 +46,16 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         np.testing.assert_array_equal(pbmc.obsm["X_pca"], original.obsm["X_pca"])
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
+        assert namespace["scatter_chart"] in charts
+        assert namespace["gene_scatter_chart"] in charts
+        gene_rows = next(
+            iter(namespace["gene_scatter_chart"].to_dict()["datasets"].values())
+        )
+        assert len(gene_rows) == pbmc.n_vars
+        assert [r["_obs_label"] for r in gene_rows] == list(pbmc.var_names)
+        np.testing.assert_array_equal(
+            [r["_coord_0"] for r in gene_rows], pbmc.var["means"]
+        )
         assert pbmc.obsm["X_tsne"].shape == (700, 2)
         assert charts
         for chart in charts:

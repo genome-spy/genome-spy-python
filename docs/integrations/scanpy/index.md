@@ -25,7 +25,7 @@ runs neighbors or UMAP analysis. A missing embedding produces an error asking
 you to compute it explicitly first.
 
 This development preview implements shared categorical/continuous 2D embeddings
-(UMAP, t-SNE, diffusion maps, saved graph layouts, PCA and custom bases), plain dotplots
+(UMAP, t-SNE, diffusion maps, saved graph layouts, PCA and custom bases), cell/gene scatter plots, plain dotplots
 and matrixplots, individual-cell heatmaps, supplied numeric matrices, clustermaps,
 standalone dendrograms, correlation matrices, stored rank/score panels and ranked
 dotplot/matrixplot/heatmap wrappers.
@@ -68,6 +68,53 @@ The supported controls and visual limits below apply to all these embeddings.
 3D, graph edges/arrows and remaining marker/normalization options stay in M07.d/M14.
 The UMAP notebook now includes packaged PCA and explicitly prepared t-SNE examples.
 
+## Scatter cells or genes
+
+`scatter` retains its own Scanpy signature and lookup rules while reusing the
+embedding point renderer, color helpers, sizing, guides, native hover and x/y zoom.
+
+```python
+cells = gsc.pl.scatter(
+    pbmc, x="n_counts", y="n_genes", color=["louvain", "percent_mito"],
+    width=280, height=280, zoom=True, show=False,
+)
+genes = gsc.pl.scatter(
+    pbmc, x="means", y="dispersions", color="dispersions_norm",
+    use_raw=False, zoom=True, show=False,
+)
+expression = gsc.pl.scatter(pbmc, "CD79A", "MS4A1", use_raw=True, show=False)
+```
+
+All x/y/color annotation keys must agree on an orientation. Observation
+annotations and gene-expression keys plot cells; variable annotations and
+observation-expression keys plot genes. Observation orientation wins when both
+match. The adapter calls public AnnData vector accessors and never transposes the
+full object or densifies the full expression matrix. It reads repeated keys once
+per source and retains duplicate point labels with distinct positional IDs.
+The UMAP notebook includes both packaged cell and gene annotation examples.
+
+| Parameters | Current behavior |
+| --- | --- |
+| `x`, `y`, `color` | Numeric coordinates, categorical/numeric annotation or expression colors, opaque CSS names/hex, or multiple color panels. Default color is gray. Annotation fields take precedence over expression and literal colors. Variable hover identifies genes. |
+| `basis`, `components` | Exact `obsm["X_" + basis]` lookup; one one-based component pair. Unlike `embedding`, scatter's diffusion-map basis skips the first stored column. Supplied basis takes priority over x/y. Missing coordinates error without analysis. |
+| `use_raw`, `layers` | Cell expression defaults to raw if present. One layer or an x/y/color triple; None/`"X"` chooses X. When raw is present, nondefault layers require explicit `use_raw=False`. Variable orientation drops automatic raw as Scanpy's transpose does; no physical transpose is used here. |
+| `groups`, `palette` | Saved category order and CSS palettes; gray background for missing/excluded groups without an NA legend. Explicit group order controls painting and the legend. Nested palettes follow categorical panels, even after numeric panels. For several categorical panels, use nested palettes; a flat list currently errors because pinned Scanpy applies it only to the first. |
+| `sort_order` | Pinned 1.11.5 does not forward this flag: numeric colors use NumPy's ascending sort for both values. Categories paint gray background first, then groups; source order is preserved within a group. |
+| `size`, `marker`, `alpha` | Scalar area, default 120000 / point count; dot or circle, once or per panel; scalar opacity. Same native point units as UMAP. |
+| `frameon`, `title` | x/y plots retain numeric axes/frame, as in Scanpy; basis frames follow the setting/request. Default titles replace key underscores with spaces; flat colors have no title. All color panels occupy one row. |
+| `legend_loc`, `legend_fontsize`, `legend_fontweight`, `color_map` | Right-margin or no legend; native font sizing and continuous scheme. Font weight has no effect on these external legends upstream. On-data label positions/weight and other legend locations remain M07.d/M14. |
+| `hover`, `zoom`, `width`, `height` | Four keyword-only native additions. Hover defaults True, zoom False; panel size defaults to 300 × 300 logical pixels. Scatter does not yet expose linked brushing or Python membership retrieval. |
+| `show`, `save`, `ax` | Same native display/export rules as other plots; `ax` is omitted and fails if passed. No image saving or Matplotlib return objects. |
+| `projection`, `legend_fontoutline`, `left_margin`, `right_margin`, stored `uns["highlights"]` | Only 2D and ordinary defaults are supported. Nondefault forms fail with the option named; native guides own layout. |
+
+Only finite numeric coordinates and resident selected expression are supported;
+backed metadata works, backed/lazy expression errors. Missing numeric colors are
+omitted from painting and coordinate limits, matching scatter rather than UMAP's
+gray missing-value layer. Native schemes can differ from Matplotlib's palette
+bins. Native axes/guide ticks and layout are not pixel-identical to Matplotlib;
+explicit opaque palettes preserve category paints. Other color forms, 3D, marker,
+margin, label and storage limits retain M07.d/M14 owners.
+
 ## Installation and version contract
 
 ```sh
@@ -92,6 +139,7 @@ semantics match the plot:
 | Plot | Reused methods/results | Native preparation retained |
 | --- | --- | --- |
 | 2D embeddings | Existing `obsm` coordinates; public AnnData `obs_vector`/`raw.obs_vector`; Scanpy's public palette lists | Masks, draw order, component selection, stable IDs and native color/size/guide mapping. No embedding computation. |
+| Scatter | Public AnnData `obs_vector`/`raw.obs_vector`/`var_vector` and stored X_ coordinates; existing embedding color/style/point helpers | Distinct orientation, per-axis layers, legacy component labels and paint order; no full transpose or analysis. |
 | Dotplot | Public `sc.get.obs_df`, including selected raw/layer/symbol lookup; AnnData categorization on the detached table | Shared pandas means, strict-cutoff fractions and plotting min–max scaling. Native marks and guides use those results. |
 | Matrixplot | The same getter, categorization and shared grouped means/scaling; supplied `values_df` uses only group rows and zero-row feature lookup validation | Plot ordering, repeated slots and native tile/guide mapping. No expression-fraction computation. |
 | Heatmap | The same getter, categorization, min–max operation, native palettes, marker ordering and tree branches | Cell values and original row positions, category spans and shared annotation alignment. No group means or downsampling. |
@@ -728,8 +776,8 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter |
-| Scatter and PCA diagnostics | scatter, pca_loadings, pca_overview, pca_variance_ratio |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter |
+| PCA diagnostics | pca_loadings, pca_overview, pca_variance_ratio |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Diagnostics and simulation | highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
 | Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_as_heatmap, timeseries_subplot |

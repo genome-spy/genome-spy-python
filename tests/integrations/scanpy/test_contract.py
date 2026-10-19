@@ -21,6 +21,7 @@ EMBEDDINGS = {
     "draw_graph",
     "pca",
     "pca_scatter",
+    "scatter",
 }
 
 
@@ -40,7 +41,7 @@ def test_all_plots_share_native_display_and_autosave_rules(
         a.obsm[f"X_{basis}"] = a.obsm["X_umap"].copy()
     a.uns["draw_graph"] = {"params": {"layout": "fa"}}
     options = {"color": "group"} if family in EMBEDDINGS else {"groupby": "group"}
-    if family == "embedding":
+    if family in ("embedding", "scatter"):
         options["basis"] = "umap"
     if family == "matrix":
         a, options = [[0, 1], [2, 3]], {}

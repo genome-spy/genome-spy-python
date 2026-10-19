@@ -19,6 +19,7 @@ from genome_spy.integrations.scanpy._data import (
 )
 from genome_spy.integrations.scanpy._style import (
     _categorical,
+    ColorData,
     categorical_colors,
     continuous_colors,
     native_color,
@@ -37,6 +38,7 @@ class Panel:
     legend_values: tuple[str, ...]
     marker: str
     title: str | None
+    show_missing: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,6 +47,8 @@ class PreparedEmbedding:
     panels: tuple[Panel, ...]
     axis_labels: tuple[str, ...]
     basis: str
+    row_label: str = "Observation"
+    show_ticks: bool = False
 
 
 def embedding_key(adata: Any, basis: str, *, context: str) -> str:
@@ -263,17 +267,23 @@ def _observations(
     if not np.isfinite(table.to_numpy()).all():
         raise ValueError("Scanpy embedding: coordinates must be finite.")
 
-    # Linked panels need distinct IDs even when observation names are repeated.
-    if obs_id is None:
-        ids = adata.obs_names.to_numpy().copy()
-        if not adata.obs_names.is_unique:
-            ids = np.array([f"row-{i}" for i in range(len(adata))])
-    else:
+    values = None
+    if obs_id is not None:
         if list(adata.obs.columns).count(obs_id) != 1:
             raise ValueError(
                 f"Scanpy embedding: obs_id column {obs_id!r} is missing or ambiguous."
             )
         values = adata.obs[obs_id]
+    return pd.concat([table, point_ids(adata.obs_names, values)], axis=1)
+
+
+def point_ids(names: pd.Index, values: pd.Series | None = None) -> pd.DataFrame:
+    """Return stable point IDs and original labels without changing their row order."""
+    if values is None:
+        ids = names.to_numpy().copy()
+        if not names.is_unique:
+            ids = np.array([f"row-{i}" for i in range(len(names))])
+    else:
         if values.isna().any() or not values.is_unique:
             raise ValueError(
                 "Scanpy embedding: obs_id values must be unique and nonmissing."
@@ -283,9 +293,23 @@ def _observations(
             raise ValueError(
                 "Scanpy embedding: obs_id values collide when serialized as strings."
             )
-    table["_obs_id"] = ids
-    table["_obs_label"] = adata.obs_names.to_numpy().copy()
-    return table
+    return pd.DataFrame({"_obs_id": ids, "_obs_label": names.to_numpy().copy()})
+
+
+def panel_values(
+    table: pd.DataFrame, index: int, colors: ColorData, order: np.ndarray, size: Any
+) -> None:
+    """Attach one panel's colors, painting order and sizes to the shared point table."""
+    table[f"_value_{index}"] = colors.values
+    table[f"_color_{index}"] = colors.values
+    if colors.categorical:
+        table[f"_color_{index}"] = [
+            "NA" if pd.isna(value) else value for value in colors.values
+        ]
+    rank = np.empty(len(order), dtype=int)
+    rank[order] = np.arange(len(order))
+    table[f"_order_{index}"] = rank
+    table[f"_size_{index}"] = size
 
 
 def _mask(adata: Any, mask: Any) -> np.ndarray | None:
@@ -429,22 +453,10 @@ def prepare_embedding(
                 colorbar=colorbar_loc is not None,
             )
 
-        # Keep missing values for hover while giving them a named palette color.
-        table[f"_value_{index}"] = colors.values
-        table[f"_color_{index}"] = colors.values
-        if colors.categorical:
-            table[f"_color_{index}"] = [
-                "NA" if pd.isna(value) else value for value in colors.values
-            ]
-
-        # Store draw order separately so rows and cell IDs stay aligned.
         order = draw_order(
             colors.values, categorical=colors.categorical, sort=sort_order
         )
-        rank = np.empty(len(order), dtype=int)
-        rank[order] = np.arange(len(order))
-        table[f"_order_{index}"] = rank
-        table[f"_size_{index}"] = size
+        panel_values(table, index, colors, order, size)
         # Scanpy 1.11.5 carries the reordered size vector into the next panel.
         if size.ndim == 1:
             size = size[order]

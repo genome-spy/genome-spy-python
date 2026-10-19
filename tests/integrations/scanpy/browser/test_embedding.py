@@ -39,6 +39,18 @@ def test_complete_embedding_matches_registered_points_guides_and_axis_labels(
         height=expected["plot_size"][1],
         show=False,
     )
+    assert_complete_chart(
+        page,
+        tmp_path,
+        chart,
+        expected,
+        reference_images("embedding") / f"{case}-panel.png",
+        case,
+    )
+
+
+def assert_complete_chart(page, tmp_path, chart, expected, reference_image, case):
+    """Compare registered point footprints, paints and complete native labels to an oracle."""
     bounds = render(page, chart)
     canvas = page.locator("canvas").first.bounding_box()
     actual = Image.open(
@@ -53,9 +65,7 @@ def test_complete_embedding_matches_registered_points_guides_and_axis_labels(
             )
         )
     ).convert("RGB")
-    oracle = Image.open(reference_images("embedding") / f"{case}-panel.png").convert(
-        "RGB"
-    )
+    oracle = Image.open(reference_image).convert("RGB")
     assert (
         abs(actual.width - oracle.width) <= 2
         and abs(actual.height - oracle.height) <= 2
@@ -86,7 +96,8 @@ def test_complete_embedding_matches_registered_points_guides_and_axis_labels(
     svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
     labels = [e.text for e in ET.fromstring(svg).iter() if e.tag.endswith("text")]
     for label in expected["labels"] + [expected["title"]] + (expected["legend"] or []):
-        assert label in labels
+        if label:
+            assert label in labels
     page.screenshot(path=str(tmp_path / f"{case}-complete.png"), full_page=True)
     Image.blend(actual.crop(extent), oracle.crop(extent), 0.5).save(
         tmp_path / f"{case}-registered-overlay.png"

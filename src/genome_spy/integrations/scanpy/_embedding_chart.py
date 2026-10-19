@@ -37,6 +37,7 @@ def _coordinate(
     horizontal: bool,
     label: str,
     basis: str,
+    show_ticks: bool,
 ) -> gs.X | gs.Y:
     """Return an x or y encoding from a panel's coordinates and style.
 
@@ -56,8 +57,10 @@ def _coordinate(
         return result.axis(None)
     return result.axis(
         title=label,
-        ticks=False,
-        labels=False,
+        ticks=show_ticks,
+        labels=show_ticks,
+        labelFontSize=style.tick_fontsize,
+        labelFont=style.font,
         domain=False,
         titleFontSize=style.axis_fontsize,
         titleFont=style.font,
@@ -84,7 +87,7 @@ def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
             orient="right",
             values=list(panel.legend_values),
             columns=columns,
-            symbolSize=36 * POINTS_TO_PIXELS**2,
+            symbolSize=style.legend_symbol_size * POINTS_TO_PIXELS**2,
             symbolOpacity=style.alpha,
             labelLimit=1000,
         )
@@ -146,25 +149,30 @@ def _panel(
     """
     table = prepared.table
     x_field, y_field = [f"_coord_{d}" for d in panel.dimensions]
+    visible = table
+    if not panel.categorical and not panel.show_missing:
+        visible = table.loc[table[f"_value_{index}"].notna()]
     x = _coordinate(
         x_field,
         panel.dimensions[0],
-        table[x_field].to_numpy(),
+        visible[x_field].to_numpy(),
         style,
         zoom,
         horizontal=True,
         label=prepared.axis_labels[panel.dimensions[0]],
         basis=prepared.basis,
+        show_ticks=prepared.show_ticks,
     )
     y = _coordinate(
         y_field,
         panel.dimensions[1],
-        table[y_field].to_numpy(),
+        visible[y_field].to_numpy(),
         style,
         zoom,
         horizontal=False,
         label=prepared.axis_labels[panel.dimensions[1]],
         basis=prepared.basis,
+        show_ticks=prepared.show_ticks,
     )
     # Scanpy uses square points for size; GenomeSpy uses square pixels.
     maximum_size = max(1.0, float(table[f"_size_{index}"].max()))
@@ -201,6 +209,7 @@ def _panel(
         panel,
         index,
         axis_labels=prepared.axis_labels,
+        row_label=prepared.row_label,
         hover=hover,
         selection=selection,
         opacity=style.alpha,
@@ -213,11 +222,12 @@ def _panel(
         panel.scheme is not None and table[f"_value_{index}"].isna().any()
     )
     if separate_missing:
-        layers.append(
-            points.transform_filter(f"!isValid(datum._value_{index})").encode(
-                color=gs.value(style.na_color)
+        if panel.show_missing:
+            layers.append(
+                points.transform_filter(f"!isValid(datum._value_{index})").encode(
+                    color=gs.value(style.na_color)
+                )
             )
-        )
         colored = colored.transform_filter(f"isValid(datum._value_{index})")
     layers.append(colored)
     # Place each group label at the middle of its cells, as Scanpy does.

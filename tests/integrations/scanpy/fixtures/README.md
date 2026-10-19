@@ -207,3 +207,13 @@ antialiasing, and retain captures/overlays only in temporary directories.
 ```sh
 uv run --no-sync python -m tests.integrations.scanpy.generate_embedding_references
 ```
+
+`scatter.json` records eight complete Scanpy 1.11.5 scatter cases: observation and
+variable annotations, selected expression in either direction, raw and distinct
+x/y/color layers, literal CSS paints and diffusion-map component skipping. The
+original synthetic inputs are in `scatter_fixture.py`; its hash and dependency
+versions are recorded. `generate_scatter_references.py` exports complete figures
+and registered plot crops at 100 display / 150 export DPI. Artist inspection is
+confined to that explicit generator. Browser checks reuse the embedding overlay
+and footprint comparisons. All generated images/HTML remain temporary or ignored;
+only the generator, tests and deliberate numeric metadata are tracked.

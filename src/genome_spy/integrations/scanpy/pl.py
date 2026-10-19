@@ -35,6 +35,7 @@ __all__ = [
     "draw_graph",
     "pca",
     "pca_scatter",
+    "scatter",
 ]
 
 _Bound = float | str | Sequence[float | str | None] | None
@@ -114,6 +115,32 @@ def _finish_plot(
         chart.display()
         return None
     return chart
+
+
+def _check_point_options(
+    *,
+    context: str,
+    width: float | None,
+    height: float | None,
+    frameon: bool | None,
+    **booleans: bool,
+) -> None:
+    """Reject invalid point dimensions and flags before loading optional dependencies."""
+    for name, dimension in {"width": width, "height": height}.items():
+        if dimension is not None and (
+            isinstance(dimension, bool)
+            or not isinstance(dimension, Real)
+            or not isfinite(dimension)
+            or dimension <= 0
+        ):
+            raise ValueError(
+                f"{context}: {name} must be a positive finite number or None."
+            )
+    for name, option in booleans.items():
+        if not isinstance(option, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    if frameon is not None and not isinstance(frameon, bool):
+        raise TypeError(f"{context}: frameon must be boolean or None.")
 
 
 def _embedding(
@@ -246,27 +273,16 @@ def _embedding(
     if groups is not None and mask_obs is not None:
         raise ValueError(f"{context}: groups and mask_obs are incompatible.")
 
-    # Check basic options before loading the optional Scanpy dependency.
-    for name, dimension in {"width": width, "height": height}.items():
-        if dimension is not None and (
-            isinstance(dimension, bool)
-            or not isinstance(dimension, Real)
-            or not isfinite(dimension)
-            or dimension <= 0
-        ):
-            raise ValueError(
-                f"{context}: {name} must be a positive finite number or None."
-            )
-    for name, option in {
-        "sort_order": sort_order,
-        "na_in_legend": na_in_legend,
-        "hover": hover,
-        "zoom": zoom,
-    }.items():
-        if not isinstance(option, bool):
-            raise TypeError(f"{context}: {name} must be boolean.")
-    if frameon is not None and not isinstance(frameon, bool):
-        raise TypeError(f"{context}: frameon must be boolean or None.")
+    _check_point_options(
+        context=context,
+        width=width,
+        height=height,
+        frameon=frameon,
+        sort_order=sort_order,
+        na_in_legend=na_in_legend,
+        hover=hover,
+        zoom=zoom,
+    )
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._embedding_data import prepare_embedding
     from genome_spy.integrations.scanpy._embedding_chart import build_embedding
@@ -320,6 +336,158 @@ def _embedding(
         prepared, style, hover=hover, zoom=zoom, selection=selection
     )
     return _finish_plot(chart, show, sc)
+
+
+def scatter(
+    adata: AnnData,
+    x: str | None = None,
+    y: str | None = None,
+    *,
+    color: str | Collection[str] | None = None,
+    use_raw: bool | None = None,
+    layers: str | Collection[str | None] | None = None,
+    sort_order: bool = True,
+    alpha: float | None = None,
+    basis: str | None = None,
+    groups: str | Collection[str] | None = None,
+    components: str | Collection[str] | None = None,
+    projection: Literal["2d", "3d"] = "2d",
+    legend_loc: str | None = "right margin",
+    legend_fontsize: float | str | None = None,
+    legend_fontweight: int | str | None = None,
+    legend_fontoutline: float | None = None,
+    color_map: Any = None,
+    palette: Any = None,
+    frameon: bool | None = None,
+    right_margin: float | None = None,
+    left_margin: float | None = None,
+    size: float | None = None,
+    marker: str | Sequence[str] = ".",
+    title: str | Collection[str] | None = None,
+    show: bool | None = None,
+    save: str | bool | None = None,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Plot cells or genes from supplied coordinates with Scanpy scatter semantics.
+
+    Uses observation/variable annotations or selected expression vectors for x
+    and y, or an existing X_<basis> embedding. Reuses native embedding points,
+    colors, guides, hover and zoom without changing AnnData or running analysis.
+
+    Args:
+        adata: AnnData containing the requested annotations and expression.
+        x: Numeric annotation or expression key for the horizontal axis.
+        y: Numeric annotation or expression key for the vertical axis.
+        color: Annotation/expression key, CSS color, or one per panel.
+        use_raw: Use raw expression; defaults to whether raw exists.
+        layers: One layer for all values, or separate x/y/color layers. Use
+            None or "X" for X; other layers require use_raw=False when raw exists.
+        sort_order: Retained Scanpy flag; pinned scatter always sorts numeric colors.
+        alpha: Scalar point opacity.
+        basis: Existing X_<basis> coordinates, taking priority over x/y.
+        groups: Category names to color; other points remain light gray.
+        components: One-based coordinate pair; diffusion maps skip the first column.
+        projection: Only 2d is currently supported.
+        legend_loc: Right margin or none; other placements currently error.
+        legend_fontsize: Native category legend font size.
+        legend_fontweight: Retained Scanpy option; only affects on-data labels upstream.
+        legend_fontoutline: Nondefault values currently error.
+        color_map: GenomeSpy continuous color scheme name.
+        palette: CSS category colors or native scheme, optionally one per panel.
+        frameon: Embedding frame visibility; x/y plots retain axes as in Scanpy.
+        right_margin: Nondefault values currently error; native guides own layout.
+        left_margin: Nondefault values currently error; use width/height for sizing.
+        size: Scalar point area, defaulting to 120000 divided by the point count.
+        marker: Dot or circle, optionally one per color panel.
+        title: Panel titles, defaulting to annotation names with underscores replaced.
+        show: Display the chart, using Scanpy autoshow when None.
+        save: None/False only; save the returned native chart as HTML/JSON.
+        hover: Enable native point tooltips.
+        zoom: Enable x/y zoom and panning.
+        width: Native panel width in pixels.
+        height: Native panel height in pixels.
+
+    Returns:
+        A native chart when show=False, otherwise None after display.
+
+    Raises:
+        ImportError: If the pinned optional Scanpy dependency is unavailable.
+        TypeError: If argument types are invalid or omitted renderer options are passed.
+        ValueError: If data, layers, orientations or components are invalid.
+        NotImplementedError: If an appearance or storage form is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.scatter(adata, "n_counts", "n_genes", color="louvain", show=False)
+    """
+    context = "gsc.pl.scatter"
+    unsupported = {
+        "projection": projection != "2d",
+        "legend_loc": legend_loc not in ("right margin", "none"),
+        "legend_fontoutline": legend_fontoutline is not None,
+        "right_margin": right_margin is not None,
+        "left_margin": left_margin is not None,
+    }
+    for name, rejected in unsupported.items():
+        if rejected:
+            raise NotImplementedError(f"{context}: {name} is not supported yet.")
+    _check_point_options(
+        context=context,
+        width=width,
+        height=height,
+        frameon=frameon,
+        sort_order=sort_order,
+        hover=hover,
+        zoom=zoom,
+    )
+    sc = _prepare_plot(show, save, context=context)
+    from dataclasses import replace
+    from genome_spy.integrations.scanpy._scatter_data import prepare_scatter
+    from genome_spy.integrations.scanpy._embedding_chart import build_embedding
+    from genome_spy.integrations.scanpy._style import embedding_style
+
+    prepared = prepare_scatter(
+        adata,
+        x=x,
+        y=y,
+        basis=basis,
+        color=color,
+        use_raw=use_raw,
+        layers=layers,
+        groups=groups,
+        components=components,
+        size=size,
+        marker=marker,
+        palette=palette,
+        cmap=color_map,
+        title=title,
+    )
+    show_frame = sc.settings._frameon if frameon is None else frameon
+    # Scanpy retains the frame and numeric ticks for direct x/y plots.
+    if basis is None or x is not None or y is not None:
+        show_frame = True
+    style = embedding_style(
+        count=len(prepared.panels),
+        width=width,
+        height=height,
+        frameon=show_frame,
+        legend_loc=legend_loc,
+        colorbar_loc="right",
+        legend_fontsize=legend_fontsize,
+        ncols=len(prepared.panels),
+        hspace=0.25,
+        wspace=None,
+        alpha=alpha,
+        edgecolor="none",
+        linewidth=None,
+        na_color="lightgrey",
+    )
+    style = replace(style, legend_symbol_size=300)
+    return _finish_plot(
+        build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
+    )
 
 
 def _embedding_signature(

@@ -3,7 +3,7 @@
 Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md), and the
 [current compatibility guide](../../docs/integrations/scanpy/index.md).
 Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
-`gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.heatmap(...)`, `gsc.pl.matrix(...)`, `gsc.pl.dendrogram(...)` or
+`gsc.pl.scatter(...)`, `gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.heatmap(...)`, `gsc.pl.matrix(...)`, `gsc.pl.dendrogram(...)` or
 `gsc.pl.correlation_matrix(...)` or `gsc.pl.clustermap(...)`.
 Stored rankings add `gsc.pl.rank_genes_groups(...)`, `gsc.pl.ranking(...)`, and
 the ranked dotplot/matrixplot/heatmap wrappers.
@@ -32,6 +32,7 @@ not in this workspace or the documentation:
 | [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles, category strips, boundaries and cell hover; reuses grouped labels/brackets and trees projected onto unequal group spans, with optional aligned zoom (y-only by default). |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_embedding_data.py](../../src/genome_spy/integrations/scanpy/_embedding_data.py) | Resolve stored bases, shared coordinate labels and selected expression/metadata; retain row identity, masks, sizes and draw order. |
+| [_scatter_data.py](../../src/genome_spy/integrations/scanpy/_scatter_data.py) | Scatter-specific cell/gene orientation, per-axis layers, selected public vectors and legacy basis/order rules. Reuses embedding identities, panel fields, colors and rendering. |
 | [_embedding_chart.py](../../src/genome_spy/integrations/scanpy/_embedding_chart.py) | Native points, axes, legends, labels, and panel composition. |
 | [_grid_interactions.py](../../src/genome_spy/integrations/scanpy/_grid_interactions.py) | Shared index navigation/projection and native fitted values/contrast; no AnnData access. Dotplot highlighting uses a native ruler. |
 | [_embedding_interactions.py](../../src/genome_spy/integrations/scanpy/_embedding_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
@@ -86,7 +87,7 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
 
 - [UMAP](notebooks/scanpy_umap.ipynb): basic categorical/continuous plotting with
   x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
-  Existing coordinates are retained; gene scoring and the final t-SNE preparation are explicit Scanpy operations. Packaged PCA and its variance labels reuse the same plotting helpers.
+  Existing coordinates are retained; gene scoring and the final t-SNE preparation are explicit Scanpy operations. Packaged PCA and its variance labels reuse the same plotting helpers. Cell/gene scatter examples read packaged observation and variable annotations without an embedding.
 - [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot, scaled
   matrixplot, individual-cell heatmap, supplied numeric matrix, aligned dendrograms, y-only zoom (both axes optional), fitted tile values and dot row/column highlighting using the core tutorial
   dictionary and existing `bulk_labels`. Scanpy computes the shared tree in Python
@@ -141,6 +142,7 @@ uv run --no-sync python -m tests.integrations.scanpy.generate_dendrogram_referen
 uv run --no-sync python -m tests.integrations.scanpy.generate_heatmap_references
 uv run --no-sync python -m tests.integrations.scanpy.generate_matrix_references
 uv run --no-sync python -m tests.integrations.scanpy.generate_clustermap_references
+uv run --no-sync python -m tests.integrations.scanpy.generate_scatter_references
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot dotplot --browser --output /tmp/dotplot.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --browser --output /tmp/matrixplot.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --dendrogram --browser --output /tmp/trees.json

@@ -467,15 +467,23 @@ are deliberately assigned to M08/M09 until their parent chart exists.
 
 M07.a now has a shared stored-2D preview. The UMAP modules were generalized in
 place; named wrappers, generic bases, PCA variance labels and selection retrieval
-share the existing data/chart/style/interaction path. M07.b scatter is next.
+share the existing data/chart/style/interaction path. M07.b now adds the bounded
+cell/gene scatter preview below; M07.c PCA diagnostics is next.
 
 - M07.a: extract reusable embedding authoring/access from UMAP for `embedding`,
   `tsne`, `diffmap`, `draw_graph`, `pca` and alias `pca_scatter`. Resolve basis/layout
   names, components/dimensions and explained-variance labels from stored results.
   Missing coordinates error; no neighbors, PCA, t-SNE or force layout rerun.
-- M07.b: implement `scatter` x/y/basis selection, observation versus variable
+- M07.b (implemented preview; [evidence](STATUS.md#m07b-scatter)): `scatter` x/y/basis selection, observation versus variable
   orientation, per-axis `layers`, labels, palettes and multiple colors. Share
   point/color code while preserving its distinct signature/lookup behavior.
+  Public AnnData vector access reads each selected source once without a full
+  transpose. Four native controls expose hover, zoom and dimensions; numeric
+  axes and variable hover use the shared renderer. Preserve exact X_ basis lookup,
+  diffusion-column skipping, raw/layer rules and legacy painting order.
+  Complete references cover both orientations, palettes, raw/layer and literal
+  colors. Remaining margins, on-data labels, highlights, markers and storage
+  options remain M07.d/M14; the preview does not close the whole family.
 - M07.c: PCA loadings/variance/overview consume stored loadings and variance data;
   preserve component order, `include_lowest`, `n_points`, `n_pcs`, logarithmic
   axes, labels and overview panel composition. Verify the pca_scatter alias target.

@@ -13,7 +13,7 @@ workflow tests and Ruff checks pass. Local notebook edits remain unchanged.
 ## Current position and next work
 
 **Available:** shared categorical/continuous 2D embeddings (UMAP, t-SNE, diffusion
-maps, saved graph layouts, PCA and custom bases), dotplot/matrixplot and cell heatmaps with dendrograms,
+maps, saved graph layouts, PCA and custom bases), cell/gene scatter plots, dotplot/matrixplot and cell heatmaps with dendrograms,
 supplied numeric matrices, clustermaps, standalone dendrograms and correlation matrix development previews.
 Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
@@ -33,7 +33,7 @@ Clustermap adds individual-cell/gene clustering using public SciPy linkage or
 supplied trees, ordered CSS annotation tracks and native hover, with explicit
 tile and pairwise-distance limits. It shares numeric tiles and tree geometry
 rather than constructing Seaborn/Matplotlib objects.
-**Available public entries: 19**, including the stored-ranking previews below. Scanpy **1.11.5** is the only accepted version;
+**Available public entries: 20**, including the stored-ranking previews below. Scanpy **1.11.5** is the only accepted version;
 bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibility.
 
 Implementation is in
@@ -55,7 +55,7 @@ reloaded from disk and all five code cells rerun in the visible Jupyter tab;
 all four charts rendered with the corrected matrix placement. No plan clearance
 changes follow from this fix.
 
-**Next ready slice: M07.b scatter x/y/basis plotting.** M06.a–d have a stored-result preview; larger and
+**Next ready slice: M07.c PCA loadings, variance and overview diagnostics.** M06.a–d have a stored-result preview; larger and
 chunked tile transport remains M05.d.
 Dotplot brushing remains deferred until the
 plain-chart preview has user review; this delivery does not add it.
@@ -318,6 +318,62 @@ Clearance: retain the live plan and status. M07.a's bounded preview is delivered
 M07.b scatter is next. Existing family/renderer limits retain their named owners.
 No working plan becomes eligible for clearance from this slice.
 
+## M07.b scatter
+
+Verified bounded preview: `gsc.pl.scatter` retains pinned Scanpy's separate
+signature and supports observation/gene x/y coordinates, exact X_ basis lookup,
+per-axis x/y/color layers, categorical/numeric/literal colors and multiple panels.
+It uses public AnnData vector access, existing embedding identity/panel fields,
+color/style helpers and the same point renderer. No second scatter chart module,
+full AnnData transpose, analysis, Matplotlib call or runtime dependency was added.
+
+Distinct semantics remain explicit: raw defaults before observation layer lookup;
+variable orientation drops automatic raw; scatter diffusion maps skip the first
+stored column. Categorical background/group paint order, saved palettes, unused
+categories, requested group order and no NA legend match the reference. Numeric
+colors retain pinned scatter's ascending sort even with sort_order=False; missing
+numeric colors are omitted from painting and initial coordinate limits. CSS name
+and hex validation now rejects misspelled color/annotation keys before rendering.
+
+Four keyword-only controls reuse native hover, x/y zoom, width and height. Direct
+x/y plots retain numeric axes; gene tooltips identify variables. The existing
+UMAP notebook adds packaged PBMC observation and variable scatter examples; all
+**13 code cells** completed in the existing Jupyter session and both charts were
+visually checked. Original code/settings and unrelated local notebooks are
+preserved; committed notebook cells have no outputs or widget state.
+
+Evidence: [semantic/signature/source tests](../../tests/integrations/scanpy/test_scatter.py),
+[eight complete reference cases](../../tests/integrations/scanpy/fixtures/scatter.json),
+[shared browser checks](../../tests/integrations/scanpy/browser/test_scatter.py),
+and [workflow regression](../../tests/integrations/scanpy/test_notebooks.py).
+The non-browser integration suite passed **789 checks**; the final targeted scatter
+run covers **51 checks** including both sparse orientations, raw/layer caching,
+views, backed metadata/early expression errors and missing-color domain limits.
+**Eight scatter reference browser comparisons plus 33 interaction/embedding/UMAP
+checks** passed. Comparisons register point locations, footprints and paints at
+100 display / 150 export DPI; native axes, titles, legends, hover, x/y zoom and
+offline HTML are checked too. Ruff formatting/lint and mypy pass.
+The unrelated full repository suites and documentation build were not run.
+
+A seed-17 local metadata scatter over sparse 100,000-cell × 20,000-gene AnnData
+prepared in **0.047 s**, serialized validated JSON in **8.420 s**, and produced
+**23,714,299 bytes**, with **241.85 MiB** peak traced Python allocation. Source
+construction is excluded; expression was not read. This is a local observation,
+not a capacity guarantee. The large chart was not measured in a browser; broader
+transport/performance remains M05.d. Generated media remains outside Git.
+
+Limits: only finite numeric coordinates, resident expression, scalar sizes and
+dot/circle markers. On-data labels, manual margins, stored highlights, 3D,
+outline/normalization and broader markers/storage stay M07.d/M14; unsupported
+forms fail by name. For multiple categorical panels, use nested palettes: pinned
+Scanpy truncates a flat CSS list after the first panel, so that form rejects.
+Native guide ticks, typography and automatic panel spacing are not pixel-identical
+to Matplotlib. Scatter does not yet expose linked brushing/Python membership.
+
+Clearance: retain the live plan/status and permanent tests/reference provenance.
+M07.b's bounded preview is delivered; M07.c PCA diagnostics is next. No working
+plan becomes eligible for removal, and full-family closure is not claimed.
+
 ## Milestones
 
 States apply to the stated scope; a closed preview is not a closed full family.
@@ -332,7 +388,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
 | M05 heatmap/matrix/clustermap | In progress; three bounded previews delivered | Heatmap/matrix/shared interactions and clustermap values, masks, two Python trees, annotation tracks, native hover and PBMC workflow are covered below. Larger/chunked transport remains M05.d; broader kwargs and native delivery remain M14. |
 | M06 ranking/ranked summaries | Verified preview; compatibility limits retained | M06.a–d select stored ranks, reuse dot/matrix/heatmap charts and color summary plots with six saved statistics. Nonfinite/missing-pair behavior and filtered score panels remain M14; native builders remain M13. |
-| M07 embeddings/scatter/PCA | In progress; M07.a shared 2D preview delivered | Generic and named bases, stored components/layouts/variance labels, shared point rendering and selection retrieval. M07.b scatter is next; PCA diagnostics M07.c and remaining options M07.d stay open. |
+| M07 embeddings/scatter/PCA | In progress; M07.a shared 2D and M07.b scatter previews delivered | Generic/named bases and cell/gene scatter share points, colors, styling, hover and zoom. Separate scatter orientation/layer rules are retained. PCA diagnostics M07.c is next; remaining options M07.d stay open. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
 | M10 QC diagnostics | Planned | Highest expression, variable genes, legacy dispersion and Scrublet distributions. |
@@ -1037,7 +1093,7 @@ No placeholder functions are exported for planned work.
 | `rank_genes_groups_tracksplot` | Not implemented | M09; rank access M06 |
 | `rank_genes_groups_violin` | Not implemented | M08; rank access M06 |
 | `ranking` | Preview: supplied score attributes/dictionaries | M06.c; shared native rank labels, dense indices only |
-| `scatter` | Not implemented | M07 |
+| `scatter` | Cell/gene x/y and stored-basis preview | M07.b; remaining options M07.d/M14 |
 | `scrublet_score_distribution` | Not implemented | M10 |
 | `set_rcParams_defaults` | External: use Scanpy | Renderer exception, M00 |
 | `set_rcParams_scanpy` | External: use Scanpy | Renderer exception, M00 |
@@ -1068,6 +1124,12 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | 3D, font atlas/weight/outline and complete typography | Native gaps/limits | M14.a; C03/C05 |
 | Image save/autosave | Inactive form only; use native HTML/JSON save | M14.c |
 | ax/cax/return_fig, artist methods, Matplotlib color/global settings | Intentional native rendering boundary | Maintained contract, not pending artist emulation |
+
+| Scatter parameter group | Current support | Completion owner |
+| --- | --- | --- |
+| Observation/variable x/y, exact X_ basis/components, per-axis layers, palettes/groups/order, multiple panels | Tested bounded preview; [contract](../../docs/integrations/scanpy/index.md#scatter-cells-or-genes) | M07.b preview retained |
+| Native numeric axes, points/guides, cell/gene hover, optional x/y zoom and dimensions | Shared embedding helpers; no scatter brush/Python membership yet | M07.b; broader selection M14 |
+| On-data labels/centroids, margins, highlights, more markers/sizes, 3D and storage/export | Nondefault forms reject; native layout/typography differences recorded | M07.d/M14 |
 
 | Matrixplot parameter group | Current support | Completion owner |
 | --- | --- | --- |

@@ -14,6 +14,7 @@ def point_interactions(
     index: int,
     *,
     axis_labels: tuple[str, ...],
+    row_label: str,
     hover: bool,
     selection: gs.Parameter | None,
     opacity: float,
@@ -27,8 +28,8 @@ def point_interactions(
         x, y = panel.dimensions
         chart = chart.encode(
             tooltip=[
-                gs.Tooltip("_obs_id:N", title="Observation ID"),
-                gs.Tooltip("_obs_label:N", title="Observation"),
+                gs.Tooltip("_obs_id:N", title=f"{row_label} ID"),
+                gs.Tooltip("_obs_label:N", title=row_label),
                 gs.Tooltip(
                     f"_value_{index}:N" if panel.categorical else f"_value_{index}:Q",
                     title=f"{panel.key or 'Color'} ({panel.source})",

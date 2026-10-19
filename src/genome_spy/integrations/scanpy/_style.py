@@ -45,16 +45,41 @@ def native_scheme(value: Any, name: str, *, context: str = "Scanpy embedding") -
     return value.lower()
 
 
+# CSS names distinguish flat scatter colors from misspelled annotation keys.
+_CSS_NAMES = frozenset(
+    """
+aliceblue antiquewhite aqua aquamarine azure beige bisque black blanchedalmond
+blue blueviolet brown burlywood cadetblue chartreuse chocolate coral cornflowerblue
+cornsilk crimson cyan darkblue darkcyan darkgoldenrod darkgray darkgreen darkgrey
+darkkhaki darkmagenta darkolivegreen darkorange darkorchid darkred darksalmon
+darkseagreen darkslateblue darkslategray darkslategrey darkturquoise darkviolet
+deeppink deepskyblue dimgray dimgrey dodgerblue firebrick floralwhite forestgreen
+fuchsia gainsboro ghostwhite gold goldenrod gray green greenyellow grey honeydew
+hotpink indianred indigo ivory khaki lavender lavenderblush lawngreen lemonchiffon
+lightblue lightcoral lightcyan lightgoldenrodyellow lightgray lightgreen lightgrey
+lightpink lightsalmon lightseagreen lightskyblue lightslategray lightslategrey
+lightsteelblue lightyellow lime limegreen linen magenta maroon mediumaquamarine
+mediumblue mediumorchid mediumpurple mediumseagreen mediumslateblue mediumspringgreen
+mediumturquoise mediumvioletred midnightblue mintcream mistyrose moccasin navajowhite
+navy oldlace olive olivedrab orange orangered orchid palegoldenrod palegreen
+paleturquoise palevioletred papayawhip peachpuff peru pink plum powderblue purple
+rebeccapurple red rosybrown royalblue saddlebrown salmon sandybrown seagreen seashell
+sienna silver skyblue slateblue slategray slategrey snow springgreen steelblue tan
+teal thistle tomato turquoise violet wheat white whitesmoke yellow yellowgreen
+""".split()
+)
+
+
 def native_color(value: Any, name: str, *, context: str = "Scanpy embedding") -> str:
     """Return an opaque CSS color unchanged, or reject forms needing conversion."""
-    # Let GenomeSpy parse colors; reject forms that need Matplotlib conversion.
+    # Validate names without converting colors or importing a rendering library.
     if isinstance(value, str):
-        named = (
-            value.isalpha()
-            and len(value) > 2
-            and value.lower() not in ("transparent", "none")
+        named = value.lower() in _CSS_NAMES
+        hex_color = (
+            value.startswith("#")
+            and len(value) in (4, 7)
+            and all(character in "0123456789abcdefABCDEF" for character in value[1:])
         )
-        hex_color = value.startswith("#") and len(value) in (4, 7)
         if named or hex_color:
             return value
     raise NotImplementedError(
@@ -354,6 +379,7 @@ class EmbeddingStyle:
     axis_fontsize: float = 10 * POINTS_TO_PIXELS
     title_fontsize: float = 12 * POINTS_TO_PIXELS
     tick_fontsize: float = 10 * POINTS_TO_PIXELS
+    legend_symbol_size: float = 36
     legend_labelspacing: float = 0.5
     legend_handletextpad: float = 0.8
     frame_color: str = "#000000"
