@@ -3,6 +3,7 @@
 from io import BytesIO
 import json
 from pathlib import Path
+import re
 import xml.etree.ElementTree as ET
 
 import numpy as np
@@ -15,6 +16,43 @@ from tests.integrations.scanpy.matrix_fixture import matrix_cases
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((FIXTURES / "matrix.json").read_text())["cases"]
+
+
+@pytest.mark.parametrize("explicit_labels", [False, True])
+@pytest.mark.parametrize("titles", ["both", "x", "y"])
+def test_axis_titles_do_not_duplicate_outer_label_space(page, explicit_labels, titles):
+    labels = ["CD4+/CD45RA+/CD25- Naive T", "CD8+/CD45RA+ Naive Cytotoxic"]
+    chart = gsc.pl.matrix(
+        [[0, 1], [2, 3]],
+        xticks=labels if explicit_labels else None,
+        yticks=labels if explicit_labels else None,
+        xlabel="Columns" if titles in ("both", "x") else None,
+        ylabel="Rows" if titles in ("both", "y") else None,
+        width=400,
+        height=350,
+        show=False,
+    )
+    bounds = render(page, chart)
+    assert abs(bounds["width"] - 400) < 1
+    assert abs(bounds["height"] - 350) < 1
+    root = ET.fromstring(
+        page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    )
+    positions = {
+        e.text: [
+            float(v)
+            for v in re.search(r"translate\(([^)]+)\)", e.get("transform"))
+            .group(1)
+            .split()
+        ]
+        for e in root.iter()
+        if e.tag.endswith("text") and e.text in ("Rows", "Columns")
+    }
+    canvas_height = page.evaluate("api.getLogicalCanvasSize().height")
+    if "Rows" in positions:
+        assert 0 < positions["Rows"][0] < 35
+    if "Columns" in positions:
+        assert 0 < canvas_height - positions["Columns"][1] < 35
 
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)

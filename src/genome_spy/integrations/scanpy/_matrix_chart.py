@@ -98,7 +98,7 @@ def build_matrix(
         axes.append(
             axis.axis(
                 title=axis_title,
-                titlePadding=space + 8,
+                titlePadding=space + 8 if labels is not None else 8,
                 labels=labels is None,
                 values=list(range(columns if horizontal else rows))
                 if labels is not None
@@ -163,8 +163,9 @@ def build_matrix(
         width=width,
         height=height,
         padding={
-            "left": yspace + (25 if ylabel else 0),
-            "bottom": xspace + (25 if xlabel else 0),
+            # Titled axes already reserve the space for their labels.
+            "left": yspace if yticks is not None and not ylabel else 10,
+            "bottom": xspace if xticks is not None and not xlabel else 10,
             "top": 10,
             "right": 10,
         },

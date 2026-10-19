@@ -36,6 +36,13 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot,
 matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
+Supplied matrices reserve long-label space once, including when axis titles are
+present. The layout regression passed **15 matrix browser checks** and **30
+matrix/workflow Python checks**, plus Ruff and mypy. The expression notebook was
+reloaded from disk and all five code cells rerun in the visible Jupyter tab;
+all four charts rendered with the corrected matrix placement. No plan clearance
+changes follow from this fix.
+
 **Next ready slice: M05.c clustermap**, followed by M06 ranked summaries. Heatmap M05.a/b is verified for the bounded preview below; larger and
 chunked tile transport remains M05.d.
 Dotplot brushing remains deferred until the
@@ -68,7 +75,7 @@ Evidence: [shared behavior tests](../../tests/integrations/scanpy/test_grid_inte
 [public getter reuse checks](../../tests/integrations/scanpy/test_upstream_reuse.py) and
 [workflow execution](../../tests/integrations/scanpy/test_notebooks.py). The initial
 shared-interaction implementation (`d5f7586`) passed all **476 Python integration checks**, **18 new interaction browser checks** and **70 existing
-affected-family browser checks** pass. The final focused rerun passed 31 checks.
+affected-family browser checks**. The final focused rerun passed 31 checks.
 Ruff formatting/lint and mypy pass. The expression notebook completed all five
 code cells in its existing Jupyter session; the kernel is idle. All four PBMC
 charts also render independently in the released native renderer.
