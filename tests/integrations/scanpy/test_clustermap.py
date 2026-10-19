@@ -30,7 +30,13 @@ def test_clustermap_signature_preserves_scanpy_contract():
         assert (
             None if native.default is inspect.Parameter.empty else repr(native.default)
         ) == parameter["default"]
-    assert set(actual) - {p["name"] for p in upstream} == {"hover", "width", "height"}
+    assert set(actual) - {p["name"] for p in upstream} == {
+        "hover",
+        "zoom",
+        "show_values",
+        "width",
+        "height",
+    }
 
 
 @pytest.mark.parametrize("case", clustermap_cases())

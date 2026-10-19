@@ -59,7 +59,7 @@ shares live index positions, annotation visibility, fitted value text/native
 palette contrast. Dotplot uses a native two-axis crosshair ruler. Existing grouped
 labels/brackets
 and tree rendering serve all applicable families. Dotplot gains `zoom` and
-`highlight`; matrixplot/matrix gain `zoom` and `show_values`; heatmap gains
+`highlight`; matrixplot/matrix/clustermap gain `zoom` and `show_values`; heatmap gains
 `show_values` and uses the shared navigation. All new options default False.
 `zoom=True` now uses y-only wheel zoom and drag panning; `zoom="xy"` enables
 both axes. This keeps gene columns fixed while exploring long expression grids.
@@ -698,8 +698,9 @@ right/bottom ticks and hover. Track titles reserve their own outside space.
 The [maintained contract](../../docs/integrations/scanpy/index.md#clustermap-compatibility)
 records scaling, masks, duplicates, raw vocabulary, kwargs and layout boundaries.
 Native magma and a right color guide replace Seaborn's rocket/inset defaults;
-explicit viridis references isolate those differences. Navigation/fitted values
-wait for plain-chart review. No Core patch, Seaborn runtime, analysis rerun or
+explicit viridis references isolate those differences. Shared grid navigation and
+fitted values are now opt-in; both trees, strips and ticks follow live index slots.
+No Core patch, Seaborn runtime, analysis rerun or
 AnnData mutation is introduced.
 
 Evidence:
@@ -748,6 +749,21 @@ copy, while the live notebook retained those experiments and rendered five chart
 The full unrelated repository suites and documentation build were not rerun.
 M05 remains open for M05.d transport and M14 option closure. M06 stored-ranking
 selection and ranked summary wrappers are next; no plan is eligible for clearance.
+
+Navigation follow-up (2026-10-19): clustermap reuses the shared `zoom` and
+`show_values` helpers. `zoom=True` keeps x fixed; `zoom="xy"` navigates both axes.
+Both trees and annotation tracks follow the same live slots, clip at viewport
+boundaries, and retain label/color identity while panning. Automatic ticks reveal
+more names as slots grow. Measurement records, masks, color limits and default
+appearance are unchanged; fitted text shares the tile source and preserves hover.
+Verification passed **530 semantic/API tests**, **38 clustermap/shared-grid browser
+tests**, both canonical workflow checks, Ruff and mypy. Browser evidence includes
+initial pixels, y locking, both-axis tree/strip alignment, dense fitted values,
+tooltip access and offline rendering. All six expression notebook cells ran in
+the existing Jupyter session; close zoom and panning were observed on the 700-cell
+example. Local zoom experiments in other cells remain intact. No Core patch or
+new clustering/data access runs during interaction. The unrelated full repository
+suite and documentation build were not rerun. M06 remains next; no plans cleared.
 
 ## Generated test images — October 19
 
@@ -873,7 +889,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | --- | --- | --- |
 | Resident raw/X, row/column linkage, scaling before distances, masks, annotation tracks, duplicates, native labels/hover | Tested bounded preview; exact forms in maintained contract | M05.c preview retained |
 | Larger/chunked values, backed/lazy data and quadratic-distance policy | Explicit pre-access guards; supplied linkage bypasses computation only | M05.d/M14.c |
-| Zoom, fitted values and linking | Plain chart review first | Follow-up M05.e |
+| Zoom and fitted values | Shared grid helpers; y-only or both-axis navigation with aligned trees/strips/ticks | M05.e preview retained |
+| Linked cell selections | Not implemented | M14.c interaction/options review |
 | Seaborn rocket/inset colorbar, custom tree/heatmap kwargs, annotation forms and normalization | Native magma/right guide; unsupported options reject by name | M14.c; Matplotlib objects remain outside boundary |
 
 | Builder surface (all three classes) | Current state | Completion evidence required |

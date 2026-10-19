@@ -13,6 +13,7 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
+from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
 
 
 def svg_root(page):
@@ -65,7 +66,9 @@ def pointer(page, bounds, x=0.5, y=0.5):
     return px, py
 
 
-@pytest.mark.parametrize("family", ["dotplot", "matrixplot", "heatmap", "matrix"])
+@pytest.mark.parametrize(
+    "family", ["dotplot", "matrixplot", "heatmap", "matrix", "clustermap"]
+)
 def test_default_zoom_and_pan_change_only_y(page, family):
     common = dict(zoom=True, width=180, height=90, show=False)
     with warnings.catch_warnings():
@@ -74,6 +77,8 @@ def test_default_zoom_and_pan_change_only_y(page, family):
             chart = gsc.pl.matrix(
                 np.arange(12).reshape(4, 3), show_values=True, **common
             )
+        elif family == "clustermap":
+            chart = gsc.pl.clustermap(make_cluster_adata(), show_values=True, **common)
         else:
             chart = getattr(gsc.pl, family)(
                 make_heatmap_adata(),
@@ -106,24 +111,34 @@ def test_default_zoom_and_pan_change_only_y(page, family):
     assert panned[1] != zoomed[1]
 
 
-@pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
-@pytest.mark.parametrize("swapped", [False, True])
+@pytest.mark.parametrize(
+    "family,swapped",
+    [
+        (family, swapped)
+        for family in ("dotplot", "matrixplot")
+        for swapped in (False, True)
+    ]
+    + [("clustermap", False)],
+)
 def test_enabling_navigation_keeps_initial_pixels(page, family, swapped):
     images, circles, rectangles = [], [], []
     for zoom in (False, True):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            chart = getattr(gsc.pl, family)(
-                make_heatmap_adata(),
-                ["g1", "g2", "g3"],
-                "group",
-                swap_axes=swapped,
-                zoom=zoom,
-                width=360,
-                height=260,
-                show=False,
-                **({"highlight": zoom} if family == "dotplot" else {}),
-            )
+            common = dict(zoom=zoom, width=360, height=260, show=False)
+            if family == "clustermap":
+                chart = gsc.pl.clustermap(
+                    make_cluster_adata(), obs_keys="group", **common
+                )
+            else:
+                chart = getattr(gsc.pl, family)(
+                    make_heatmap_adata(),
+                    ["g1", "g2", "g3"],
+                    "group",
+                    swap_axes=swapped,
+                    **common,
+                    **({"highlight": zoom} if family == "dotplot" else {}),
+                )
         target = page.context.new_page()
         try:
             bounds = render(target, chart)
@@ -190,7 +205,7 @@ def test_enabling_navigation_keeps_initial_pixels(page, family, swapped):
     assert difference[~edges].max() <= 2
 
 
-@pytest.mark.parametrize("family", ["matrix", "matrixplot", "heatmap"])
+@pytest.mark.parametrize("family", ["matrix", "matrixplot", "heatmap", "clustermap"])
 def test_dense_values_appear_after_zoom_and_do_not_block_hover(page, family, tmp_path):
     from anndata import AnnData
 
@@ -207,9 +222,12 @@ def test_dense_values_appear_after_zoom_and_do_not_block_hover(page, family, tmp
             ),
             var=pd.DataFrame(index=[f"g{i}" for i in range(30)]),
         )
-        chart = getattr(gsc.pl, family)(
-            a, list(a.var_names), "group", standard_scale="var", **common
-        )
+        if family == "clustermap":
+            chart = gsc.pl.clustermap(a, standard_scale=1, **common)
+        else:
+            chart = getattr(gsc.pl, family)(
+                a, list(a.var_names), "group", standard_scale="var", **common
+            )
     bounds = render(page, chart)
     assert not value_texts(svg_root(page))
     pointer(page, bounds)
@@ -245,7 +263,8 @@ def test_dense_values_appear_after_zoom_and_do_not_block_hover(page, family, tmp
     assert plotted == pytest.approx(float(label.text.replace("−", "-")), abs=0.0051)
     if family != "matrix":
         assert 0 <= plotted <= 1
-        assert "scaled" in page.locator("table.attributes").inner_text()
+        if family != "clustermap":
+            assert "scaled" in page.locator("table.attributes").inner_text()
     page.screenshot(path=str(tmp_path / f"{family}-zoomed-values.png"), full_page=True)
     # The same declarative interactions must survive standalone HTML delivery.
     if family == "matrix":

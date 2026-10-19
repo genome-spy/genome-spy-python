@@ -1015,6 +1015,8 @@ def clustermap(
     show: bool | None = None,
     save: bool | str | None = None,
     hover: bool = True,
+    zoom: bool | Literal["xy"] = False,
+    show_values: bool = False,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -1035,6 +1037,8 @@ def clustermap(
         show: Display once if true; return a chart if false; None uses Scanpy's setting.
         save: None or False; use chart.save for HTML or JSON.
         hover: Show the cell ID, gene and plotted value in a native tooltip.
+        zoom: Enable y-only zoom and pan with True, or both axes with "xy".
+        show_values: Show plotted values when enough space is available in each tile.
         width: Matrix width in logical pixels, excluding trees and labels.
         height: Matrix height in logical pixels, excluding trees and labels.
         **kwds: Supported Seaborn options: method, metric, z_score,
@@ -1090,8 +1094,10 @@ def clustermap(
         "cbar_kws",
     }
     _check_kwargs(kwds, data_options | chart_options, context=context)
-    if not isinstance(hover, bool):
-        raise TypeError(f"{context}: hover must be boolean.")
+    _check_grid_zoom(zoom, context=context)
+    for name, option in (("hover", hover), ("show_values", show_values)):
+        if not isinstance(option, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._clustermap_data import prepare_clustermap
     from genome_spy.integrations.scanpy._clustermap_chart import build_clustermap
@@ -1105,6 +1111,8 @@ def clustermap(
     chart = build_clustermap(
         data,
         hover=hover,
+        zoom=zoom,
+        show_values=show_values,
         width=width,
         height=height,
         **{key: value for key, value in kwds.items() if key in chart_options},

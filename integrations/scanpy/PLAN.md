@@ -394,7 +394,7 @@ Larger transport remains M05.d; M06 stored ranking and ranked summaries are next
   The delivered preview bounds tiles and pairwise distances before expression
   access. Z-score/sample-SD and min–max scaling follow Seaborn, including missing
   constant ranges; display masks do not change distances. Native palette/guide
-  differences, unsupported kwargs and fixed navigation remain explicit in the
+  differences and unsupported kwargs remain explicit in the
   maintained contract, with broader options assigned to M14. Do not claim the
   full clustermap family closed from this preview.
 - M05.d: test chunked selected-column access and a 100k-cell × 50-marker heatmap;
@@ -403,8 +403,8 @@ Larger transport remains M05.d; M06 stored ranking and ranked summaries are next
 
 - M05.e (verified interaction preview; [evidence](STATUS.md#m05e-shared-grid-interactions)):
   share index navigation and live annotation projection across heatmap,
-  matrixplot, matrix and dotplot. Offer opt-in fitted two-decimal values on the
-  three tile families and a native row/column crosshair ruler on dotplot. Preserve plotted
+  matrixplot, matrix, clustermap and dotplot. Offer opt-in fitted two-decimal values on the
+  tile families and a native row/column crosshair ruler on dotplot. Preserve plotted
   values, repeated slots, color limits, dot sizes, guides and default appearance.
   `zoom=True` uses y-only navigation; explicit `zoom="xy"` enables both axes,
   and `zoom=False` disables navigation. Test locked x domains during y zoom/pan.
@@ -412,6 +412,8 @@ Larger transport remains M05.d; M06 stored ranking and ranked summaries are next
   Observe dense overview/zoomed text, native contrast including opacity/clipping,
   tooltip access, normal/swapped tree alignment while panning, duplicate-slot
   highlighting, gaps between dots, clearing on plot leave and standalone HTML.
+  Clustermap's two trees, color tracks and visible ticks must remain aligned and
+  clipped along the scrolling direction under both zoom modes and panning.
   Run the packaged-PBMC expression notebook and record
   a realistic allocation/payload/browser observation. Keep native API limitations
   and remaining large-data transport debt explicit.

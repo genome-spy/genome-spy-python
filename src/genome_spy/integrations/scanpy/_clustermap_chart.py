@@ -1,7 +1,7 @@
 """Native clustered tiles with two attached trees and ordered color tracks."""
 
 from math import ceil
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -11,6 +11,12 @@ from genome_spy.integrations.scanpy._clustermap_data import ClusteredMatrix, CON
 from genome_spy.integrations.scanpy._data import number, numeric_values
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
 from genome_spy.integrations.scanpy._grouped_chart import coordinate, _slot_labels
+from genome_spy.integrations.scanpy._grid_interactions import (
+    slot_position,
+    zoom_axes,
+    with_navigation,
+    with_values,
+)
 from genome_spy.integrations.scanpy._matrix_chart import matrix_tiles, _labels
 from genome_spy.integrations.scanpy._style import (
     FONT,
@@ -34,7 +40,13 @@ def _ratios(value: Any, name: str) -> tuple[float, float]:
 
 
 def _tick_labels(
-    labels: pd.Index, option: Any, axis: Any, *, horizontal: bool, size: float
+    labels: pd.Index,
+    option: Any,
+    axis: Any,
+    *,
+    horizontal: bool,
+    size: float,
+    zoom: bool,
 ) -> tuple[gs.Chart | None, float]:
     """Return labels at ordered slots and their outside space, skipping crowded ticks."""
     if option is False:
@@ -51,15 +63,29 @@ def _tick_labels(
         )
     elif option is not True:
         names = _labels(option, len(names), "tick labels", context=CONTEXT)
-    layer = _slot_labels(names, axis, horizontal=horizontal, opposite=not horizontal)
-    if step > 1:
+    layer = _slot_labels(
+        names, axis, horizontal=horizontal, opposite=not horizontal, zoom=zoom
+    )
+    if zoom and isinstance(option, str) and option == "auto":
+        # Reveal more tick labels as their slots grow.
+        channel, extent = ("x", "width") if horizontal else ("y", "height")
+        layer = layer.transform_filter(
+            f"datum.slot % max(1, ceil({TICK} / (grid_{channel}_step * {extent}))) == 0"
+        )
+    elif step > 1:
         layer = layer.transform_filter(f"datum.slot % {step} == 0")
     space = max(map(len, names[::step])) * TICK * 0.65 + 12
     return layer, space
 
 
 def _color_strip(
-    colors: pd.DataFrame, axis: Any, *, horizontal: bool, size: float, extent: float
+    colors: pd.DataFrame,
+    axis: Any,
+    *,
+    horizontal: bool,
+    size: float,
+    extent: float,
+    zoom: bool,
 ) -> gs.LayerChart:
     """Return outside color tracks from already ordered CSS colors and an index axis."""
     tracks = colors.shape[1]
@@ -89,6 +115,26 @@ def _color_strip(
             y=axis.field("slot"),
             x=gs.X("_start:Q").scale(None).axis(None),
             x2="_end:Q",
+        )
+    if zoom:
+        # Clip only the scrolling direction; strips remain outside the matrix.
+        channel = "x" if horizontal else "y"
+        strip = strip.transform_filter(
+            f"{slot_position(channel, 'datum.slot + 1')} > 0 && "
+            f"{slot_position(channel, 'datum.slot')} < 1"
+        )
+        start = f"clamp({slot_position(channel, 'datum.slot')}, 0, 1)"
+        stop = f"clamp({slot_position(channel, 'datum.slot + 1')}, 0, 1)"
+        strip = strip.transform_calculate(
+            _slot_start=start if horizontal else f"1 - ({start})",
+            _slot_stop=stop if horizontal else f"1 - ({stop})",
+        ).encode(
+            **{
+                channel: (gs.X if horizontal else gs.Y)("_slot_start:Q")
+                .scale(None)
+                .axis(None),
+                channel + "2": "_slot_stop:Q",
+            }
         )
     # Annotation colors must not share the matrix's numeric color scale.
     palette = list(dict.fromkeys(colors.to_numpy().ravel()))
@@ -127,6 +173,12 @@ def _color_strip(
         .resolve_axis(x="excluded", y="excluded")
     )
     layers = [strip, outside_labels] if labels else [strip]
+    if zoom:
+        return (
+            gs.layer(*layers)
+            .resolve_scale(x="excluded", y="excluded", color="excluded")
+            .resolve_axis(x="excluded", y="excluded")
+        )
     if horizontal:
         return (
             gs.layer(*layers)
@@ -144,6 +196,8 @@ def build_clustermap(
     data: ClusteredMatrix,
     *,
     hover: bool,
+    zoom: bool | Literal["xy"],
+    show_values: bool,
     width: float | None,
     height: float | None,
     cmap: Any = None,
@@ -250,12 +304,26 @@ def build_clustermap(
         coordinate(gs.X, "_x", ncols, 0),
         coordinate(gs.Y, "_y", nrows, 0, reverse=True),
     )
-    layers: list[gs.Chart | gs.LayerChart] = [tiles]
+    x, y = zoom_axes(x, y, enabled=zoom, name="clustermap")
+    tiles = tiles.encode(x=x, y=y)
+    layers: list[gs.Chart | gs.LayerChart] = [
+        with_values(tiles, "_value") if show_values else tiles
+    ]
     xlabels, bottom = _tick_labels(
-        data.values.columns, xticklabels, x, horizontal=True, size=width
+        data.values.columns,
+        xticklabels,
+        x,
+        horizontal=True,
+        size=width,
+        zoom=bool(zoom),
     )
     ylabels, right = _tick_labels(
-        data.values.index, yticklabels, y, horizontal=False, size=height
+        data.values.index,
+        yticklabels,
+        y,
+        horizontal=False,
+        size=height,
+        zoom=bool(zoom),
     )
     # Track titles can be longer than the matrix's visible tick labels.
     for names, horizontal in (
@@ -284,7 +352,12 @@ def build_clustermap(
         if tracks.shape[1]:
             layers.append(
                 _color_strip(
-                    tracks, axis, horizontal=horizontal, size=size, extent=extent
+                    tracks,
+                    axis,
+                    horizontal=horizontal,
+                    size=size,
+                    extent=extent,
+                    zoom=bool(zoom),
                 )
             )
     left, top = width * trees[0] / fractions[0], height * trees[1] / fractions[1]
@@ -297,6 +370,7 @@ def build_clustermap(
                 size=left,
                 offset=row_space,
                 linewidth=0.5,
+                leaf_projection=slot_position("y", "datum.{field}") if zoom else None,
             )
         )
     if data.col_tree is not None:
@@ -307,9 +381,10 @@ def build_clustermap(
                 size=top,
                 offset=col_space,
                 linewidth=0.5,
+                leaf_projection=slot_position("x", "datum.{field}") if zoom else None,
             )
         )
-    return (
+    chart = (
         gs.layer(*layers)
         .properties(
             width=width,
@@ -324,3 +399,4 @@ def build_clustermap(
         .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(labelFont=FONT, labelFontSize=TICK)
     )
+    return with_navigation(chart, enabled=bool(zoom))

@@ -9,12 +9,17 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
+from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
 
 
 def grid_chart(family, **options):
     """Build a small grid with real fixture values and optional interactions."""
     if family == "matrix":
         return gsc.pl.matrix([[0, np.nan, 1], [0.3, 0.8, 0]], show=False, **options)
+    if family == "clustermap":
+        return gsc.pl.clustermap(
+            make_cluster_adata(), mask=np.eye(6, 4, dtype=bool), show=False, **options
+        )
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
         return getattr(gsc.pl, family)(
@@ -22,7 +27,9 @@ def grid_chart(family, **options):
         )
 
 
-@pytest.mark.parametrize("family", ["dotplot", "matrixplot", "heatmap", "matrix"])
+@pytest.mark.parametrize(
+    "family", ["dotplot", "matrixplot", "heatmap", "matrix", "clustermap"]
+)
 def test_grid_options_are_keyword_only_and_off_by_default(family):
     parameters = inspect.signature(getattr(gsc.pl, family)).parameters
     for name in ("zoom", "highlight" if family == "dotplot" else "show_values"):
@@ -34,7 +41,7 @@ def test_grid_options_are_keyword_only_and_off_by_default(family):
         zoom=True,
         **({"highlight": True} if family == "dotplot" else {"show_values": True}),
     ).to_dict()
-    field = "_value" if family in ("matrix", "heatmap") else "_mean"
+    field = "_mean" if family in ("dotplot", "matrixplot") else "_value"
 
     def records(s):
         return next(rows for rows in s["datasets"].values() if field in rows[0])
@@ -52,7 +59,9 @@ def test_grid_options_are_keyword_only_and_off_by_default(family):
             assert plain_mark["encoding"][channel] == active_mark["encoding"][channel]
 
 
-@pytest.mark.parametrize("family", ["dotplot", "matrixplot", "heatmap", "matrix"])
+@pytest.mark.parametrize(
+    "family", ["dotplot", "matrixplot", "heatmap", "matrix", "clustermap"]
+)
 @pytest.mark.parametrize("option", ["zoom", "extra"])
 def test_invalid_interaction_options_fail_before_loading_scanpy(
     monkeypatch, family, option
@@ -63,14 +72,18 @@ def test_invalid_interaction_options_fail_before_loading_scanpy(
         else option
     )
     monkeypatch.setattr(gsc.pl, "_require_scanpy", lambda: pytest.fail("Loaded Scanpy"))
-    arguments = (object(),) if family == "matrix" else (object(), ["g1"], "group")
+    arguments = (
+        (object(),)
+        if family in ("matrix", "clustermap")
+        else (object(), ["g1"], "group")
+    )
     with pytest.raises(TypeError, match=f"{option} must be"):
         getattr(gsc.pl, family)(*arguments, **{option: "yes"})
 
 
-@pytest.mark.parametrize("family", ["matrixplot", "heatmap", "matrix"])
+@pytest.mark.parametrize("family", ["matrixplot", "heatmap", "matrix", "clustermap"])
 def test_value_marks_share_one_source_and_keep_plotted_values(family):
-    options = {} if family == "matrix" else {"standard_scale": "var"}
+    options = {} if family in ("matrix", "clustermap") else {"standard_scale": "var"}
     spec = grid_chart(family, show_values=True, **options).to_dict()
     values = spec["layer"][0]
     tiles, text_group = values["layer"]
@@ -93,7 +106,13 @@ def test_value_marks_share_one_source_and_keep_plotted_values(family):
     assert values["params"][0]["expr"].count("scale('color'") == 256
     source = values["data"]["name"]
     assert len(spec["datasets"][source]) == (
-        6 if family == "matrix" else 12 if family == "matrixplot" else 27
+        6
+        if family == "matrix"
+        else 12
+        if family == "matrixplot"
+        else 24
+        if family == "clustermap"
+        else 27
     )
 
 
@@ -124,7 +143,9 @@ def test_highlight_uses_native_ruler_without_extra_marks_or_data():
     assert spec == plain
 
 
-@pytest.mark.parametrize("family", ["dotplot", "matrixplot", "heatmap", "matrix"])
+@pytest.mark.parametrize(
+    "family", ["dotplot", "matrixplot", "heatmap", "matrix", "clustermap"]
+)
 def test_grid_can_explicitly_enable_both_axes(family):
     spec = grid_chart(family, zoom="xy").to_dict()
     mark = next(m for m in leaf_marks(spec) if "color" in m.get("encoding", {}))

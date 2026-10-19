@@ -164,7 +164,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert len(rulers) == 1
     assert rulers[0]["ruler"]["encodings"] == ["x", "y"]
     assert rulers[0]["ruler"]["display"] == "center"
-    for chart in charts[1:4]:
+    for chart in charts[1:]:
         grid = chart.to_dict()["layer"][0]
         text = grid["layer"][1]["layer"][0]
         assert text["mark"]["fitToBand"] is True
@@ -174,7 +174,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         )
     clustered = charts[4].to_dict()
     tiles = points(clustered)
-    cells = clustered["datasets"][tiles["data"]["name"]]
+    cells = clustered["datasets"][clustered["layer"][0]["data"]["name"]]
     assert len(cells) == 700 * 10
     assert {row["_row"] for row in cells} == set(namespace["pbmc"].obs_names)
     assert {row["_column"] for row in cells} == set(namespace["marker_names"])

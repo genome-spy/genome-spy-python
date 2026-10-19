@@ -238,6 +238,7 @@ Grid interactions are optional additions to the Scanpy signatures:
 heatmap = gsc.pl.heatmap(pbmc, markers, "bulk_labels", zoom=True, show_values=True, show=False)
 matrixplot = gsc.pl.matrixplot(pbmc, markers, "bulk_labels", zoom=True, show_values=True, show=False)
 matrix = gsc.pl.matrix(values, zoom=True, show_values=True, show=False)
+clustermap = gsc.pl.clustermap(cells, zoom=True, show_values=True, show=False)
 dotplot = gsc.pl.dotplot(pbmc, markers, "bulk_labels", zoom=True, highlight=True, show=False)
 ```
 
@@ -245,7 +246,9 @@ Use the mouse wheel inside the plot to zoom y and drag to pan y with
 `zoom=True`; x stays fixed. Set `zoom="xy"` to enable zooming and panning both
 axes. Native axis-margin gestures can then zoom one axis. Row/column labels and
 dendrograms follow the visible slots; outside labels and partially visible gene brackets are hidden.
-Heatmap category strips and boundaries follow individual cells. Defaults remain
+Heatmap category strips and boundaries follow individual cells. Clustermap's
+two trees and annotation tracks follow the live row/column positions; automatic
+tick labels reveal more names as slots grow. Defaults remain
 `zoom=False`, `show_values=False` and `highlight=False`.
 
 `show_values` uses native `fitToBand` text, shared tile records and the plotted
@@ -363,7 +366,7 @@ genes = ["CD79A", "MS4A1", "CD3D", "NKG7"]
 cells = pbmc.raw[:, genes].to_adata()
 chart = gsc.pl.clustermap(
     cells, obs_keys="bulk_labels", use_raw=False, cmap="viridis",
-    yticklabels=False, width=400, height=450, show=False,
+    yticklabels=False, zoom=True, show_values=True, width=400, height=450, show=False,
 )
 ```
 
@@ -383,10 +386,10 @@ Plotting-only linkage is local and never written to AnnData.
 | `obs_keys`, `row_colors`, `col_colors` | One categorical observation key, or explicit CSS color tracks. Pandas Series/DataFrames align by index; lists are positional, with nested lists representing tracks. Missing pandas annotations are white. Saved category palettes/order are reused without mutation. `obs_keys` conflicts with explicit row colors. |
 | `xticklabels`, `yticklabels` | Auto spacing, True/False, positive stride, or a complete label list. Repeated labels retain distinct index slots. The matrix, labels, strips and branches follow the same permutation. |
 | Layout/colors | Native scheme names, numeric `vmin`/`vmax`, `linewidths`, CSS `linecolor`, tree/track ratios and native matrix dimensions. `figsize` uses 100 logical pixels/inch and conflicts with width/height. `cbar_pos=None` hides the guide; `cbar_kws` supports its label. |
+| `zoom`, `show_values` | Opt-in shared grid navigation and fitted plotted values. `zoom=True` navigates y only; `zoom="xy"` navigates both axes. Trees, strips and visible labels follow the same ordered slots. Both options default False. |
 | Delivery | Default native hover reports original cell name, gene and plotted value. `show`, `save` and chart HTML/JSON delivery follow the shared contract. The result is a native chart, not Seaborn's ClusterGrid; its artist attributes/chains are unavailable. |
 
-This first clustermap preview has fixed navigation. Zoom, fitted values and linking
-are held for review of the basic chart. The default native palette is magma rather
+The default native palette is magma rather
 than Seaborn's rocket, and the native color guide is on the right rather than in
 Seaborn's upper-left inset. Explicit viridis references isolate layout/value fidelity
 from this palette difference. Custom `cbar_pos`, `pivot_kws`, `tree_kws`, `annot`,

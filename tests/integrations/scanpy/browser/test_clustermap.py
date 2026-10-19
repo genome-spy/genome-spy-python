@@ -11,6 +11,12 @@ from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.test_grid_interactions import (
+    pointer,
+    position,
+    svg_root,
+    value_texts,
+)
 from tests.integrations.scanpy.clustermap_fixture import (
     make_cluster_adata,
     clustermap_cases,
@@ -245,3 +251,116 @@ def test_multiple_positional_and_indexed_tracks_on_both_axes(page, named):
         np.testing.assert_allclose(
             pixels[y, x].astype(int), ImageColor.getrgb(columns[original]), atol=2
         )
+
+
+@pytest.mark.parametrize("zoom", [True, "xy"])
+def test_navigation_keeps_both_trees_strips_and_labels_aligned(page, zoom, tmp_path):
+    data = make_cluster_adata()
+    row_colors = ["red", "blue", "green", "gold", "black", "purple"]
+    col_colors = ["red", "green", "blue", "black"]
+    chart = gsc.pl.clustermap(
+        data,
+        row_colors=pd.Series(row_colors, index=data.obs_names, name="Cell type"),
+        col_colors=pd.Series(col_colors, index=data.var_names, name="Gene class"),
+        zoom=zoom,
+        show_values=True,
+        width=320,
+        height=240,
+        show=False,
+    )
+    bounds = render(page, chart)
+    px, py = pointer(page, bounds)
+    page.mouse.wheel(0, -260)
+    page.wait_for_timeout(700)
+    for pan in (False, True):
+        if pan:
+            page.mouse.down()
+            page.mouse.move(px + 20, py + 18, steps=5)
+            page.mouse.up()
+            page.wait_for_timeout(700)
+        root = svg_root(page)
+        assert value_texts(root)
+        origins = page.evaluate(
+            "['grid_x_origin','grid_y_origin','grid_x_step','grid_y_step'].map(n=>api.getParam(n).getValue())"
+        )
+        trees = [e for e in root.iter() if e.get("stroke") == "#555555"]
+        strips = [
+            [e for e in group if e.tag.endswith("rect")]
+            for group in root.iter()
+            if group.get("data-mark-type") == "rect"
+        ][1:3]
+        assert len(trees) == len(strips) == 2
+        # Every visible label and zero-distance tree leaf uses the same slot center.
+        for axis, labels, tree, strip, colors in (
+            (1, data.obs_names, trees[0], strips[0], row_colors),
+            (0, data.var_names, trees[1], strips[1], col_colors),
+        ):
+            origin, step = origins[axis], origins[axis + 2]
+            channel, cross = ("y", "x") if axis else ("x", "y")
+            start = bounds[channel]
+            extent = bounds["height" if axis else "width"]
+            cross_extent = bounds["width" if axis else "height"]
+            edge = bounds[cross] - cross_extent * 0.03 / 0.77
+            leaves = [
+                float(line.get(channel + end))
+                for line in tree
+                for end in ("1", "2")
+                if abs(float(line.get(cross + end)) - edge) < 0.2
+            ]
+            for line in tree:
+                for end in ("1", "2"):
+                    assert (
+                        start - 0.2
+                        <= float(line.get(channel + end))
+                        <= start + extent + 0.2
+                    )
+            order = REFERENCE["default"]["row_order" if axis else "col_order"]
+            visible = 0
+            for slot, original in enumerate(order):
+                fraction = origin + (slot + 0.5) * step
+                if not 0 < fraction < 1:
+                    continue
+                visible += 1
+                center = start + fraction * extent
+                label = next(
+                    e
+                    for e in root.iter()
+                    if e.tag.endswith("text") and e.text == labels[original]
+                )
+                assert position(label)[axis] == pytest.approx(center, abs=0.6)
+                assert any(abs(leaf - position(label)[axis]) < 0.2 for leaf in leaves)
+                rectangle = next(
+                    r
+                    for r in strip
+                    if float(r.get(channel))
+                    <= center
+                    <= float(r.get(channel))
+                    + float(r.get("height" if axis else "width"))
+                )
+                from PIL import ImageColor
+
+                assert ImageColor.getrgb(rectangle.get("fill")) == ImageColor.getrgb(
+                    colors[original]
+                )
+            assert visible > 0
+            for rectangle in strip:
+                assert float(rectangle.get(channel)) >= start - 0.6
+                assert (
+                    float(rectangle.get(channel))
+                    + float(rectangle.get("height" if axis else "width"))
+                    <= start + extent + 0.6
+                )
+        assert (
+            0
+            < sum(
+                e.tag.endswith("text") and e.text in data.obs_names for e in root.iter()
+            )
+            < data.n_obs
+        )
+    # The declarative chart must also render in offline HTML.
+    output = tmp_path / "clustermap-navigation.html"
+    chart.save(output, inline=True, controls=False)
+    page.context.set_offline(True)
+    page.goto(output.as_uri())
+    page.locator("canvas").wait_for(state="visible")
+    assert not page.locator(".message-box").count()
