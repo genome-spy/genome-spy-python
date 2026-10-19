@@ -19,13 +19,21 @@ from genome_spy.integrations.scanpy._grouped_data import (
 
 
 @dataclass(frozen=True, slots=True)
-class DendrogramData:
-    categories: tuple[Any, ...]
+class TreeData:
+    """Ordered branch coordinates shared by group and individual-item trees."""
+
     order: tuple[Any, ...]
-    linkage: np.ndarray
-    correlation: np.ndarray
     icoord: np.ndarray
     dcoord: np.ndarray
+
+
+@dataclass(frozen=True, slots=True)
+class DendrogramData(TreeData):
+    """Stored Scanpy group tree, including its correlation matrix."""
+
+    categories: tuple[Any, ...]
+    linkage: np.ndarray
+    correlation: np.ndarray
 
 
 def _grouping(
@@ -165,12 +173,12 @@ def prepare_dendrogram(
     # Correlation rows and columns must follow the current category order.
     positions = [categories.index(value) for value in groups.categories]
     return DendrogramData(
-        tuple(groups.categories),
-        tuple(current[label] for label in labels),
-        linkage,
-        correlation[np.ix_(positions, positions)],
-        icoord,
-        dcoord,
+        categories=tuple(groups.categories),
+        order=tuple(current[label] for label in labels),
+        linkage=linkage,
+        correlation=correlation[np.ix_(positions, positions)],
+        icoord=icoord,
+        dcoord=dcoord,
     )
 
 

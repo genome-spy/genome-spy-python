@@ -47,7 +47,12 @@ def coordinate(
 
 
 def _slot_labels(
-    labels: list[str], coordinate: Any, *, horizontal: bool, zoom: bool = False
+    labels: list[str],
+    coordinate: Any,
+    *,
+    horizontal: bool,
+    zoom: bool = False,
+    opposite: bool = False,
 ) -> gs.Chart:
     """Return a text layer placing labels at the supplied row or column positions.
 
@@ -71,12 +76,14 @@ def _slot_labels(
     return chart.mark_text(
         font=_FONT,
         size=_TICK,
-        align="right",
+        align="left" if opposite else "right",
         baseline="middle",
-        xOffset=-8,
+        xOffset=8 if opposite else -8,
         clip="never",
         tooltip=None,
-    ).encode(x=gs.value(0), y=coordinate.field("slot"), text="label:N")
+    ).encode(
+        x=gs.value(1 if opposite else 0), y=coordinate.field("slot"), text="label:N"
+    )
 
 
 def _brackets(

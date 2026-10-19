@@ -25,7 +25,8 @@ runs neighbors or UMAP analysis. A missing embedding produces an error asking
 you to compute it explicitly first.
 
 This development preview implements categorical/continuous 2D UMAP, plain dotplots
-and matrixplots, individual-cell heatmaps, supplied numeric matrices, standalone dendrograms and correlation matrices.
+and matrixplots, individual-cell heatmaps, supplied numeric matrices, clustermaps,
+standalone dendrograms and correlation matrices.
 Full public Scanpy plotting coverage is the destination; the inventory below
 records remaining work. Native plot builders remain planned.
 
@@ -57,6 +58,7 @@ semantics match the plot:
 | Matrixplot | The same getter, categorization and shared grouped means/scaling; supplied `values_df` remains authoritative | Plot ordering, repeated slots and native tile/guide mapping. No expression-fraction computation. |
 | Heatmap | The same getter, categorization, min–max operation, native palettes, marker ordering and tree branches | Cell values and original row positions, category spans and shared annotation alignment. No group means or downsampling. |
 | Dendrograms | Stored `sc.tl.dendrogram` results, or that public method for a missing tree | Structural checks, shared leaf permutations and native branch rendering. |
+| Clustermap | Public SciPy `linkage`/`dendrogram(no_plot=True)`, as used by Scanpy/Seaborn, or supplied linkage | Detached pandas normalization, bounded source access, color-track alignment and shared numeric tiles/tree rendering. No group-profile tree is substituted for cell/gene clustering. |
 
 Scanpy 1.11.5 has no public standalone dotplot/matrixplot preparation method.
 Their calculations live in the Matplotlib plotting classes; their common private
@@ -354,6 +356,50 @@ allocation including serialization was 344 MB. Browser first paint including
 dispatch took 10.3 s; paused hover was 113 ms. These local observations expose
 the current serialization cost; larger/chunked transport remains M05.d.
 
+## Clustermap compatibility
+
+```python
+genes = ["CD79A", "MS4A1", "CD3D", "NKG7"]
+cells = pbmc.raw[:, genes].to_adata()
+chart = gsc.pl.clustermap(
+    cells, obs_keys="bulk_labels", use_raw=False, cmap="viridis",
+    yticklabels=False, width=400, height=450, show=False,
+)
+```
+
+Clustermap retains individual cells and clusters both rows and columns by default.
+It does not reuse the group-profile tree from dotplot/matrixplot: its distances
+describe the supplied cell/gene values. Scanpy delegates this plot to Seaborn;
+the adapter uses the same public SciPy calculations without constructing a figure.
+Plotting-only linkage is local and never written to AnnData.
+
+| Option | Supported preview |
+| --- | --- |
+| `use_raw` | Defaults to raw when present. The entire supplied matrix is requested, so subset AnnData first. Scanpy 1.11.5 labels raw columns with `adata.var_names`; differing raw/X variable counts raise a clear error. No layer/symbol extensions are added. |
+| `method`, `metric`, `row_cluster`, `col_cluster` | SciPy string names, default average linkage and Euclidean distance. Disabling an axis keeps its supplied order. No embedding, group analysis or ranking runs. |
+| `row_linkage`, `col_linkage` | Finite valid linkage with the matching leaf count. Supplied trees are authoritative and are not recomputed; each axis can use a different method/metric. |
+| `z_score`, `standard_scale` | None, 0 (rows), or 1 (columns); mutually exclusive. Scaling precedes linkage. Z-scores use sample standard deviation, matching Seaborn; constant ranges become missing rather than the zero convention of grouped expression plots. Missing distances fail. |
+| `mask` | Matching boolean array or identically indexed DataFrame. Masks affect display and color bounds, never linkage. Missing values may be displayed blank when clustering is disabled or valid linkage is supplied. At least one unmasked finite value is required. |
+| `obs_keys`, `row_colors`, `col_colors` | One categorical observation key, or explicit CSS color tracks. Pandas Series/DataFrames align by index; lists are positional, with nested lists representing tracks. Missing pandas annotations are white. Saved category palettes/order are reused without mutation. `obs_keys` conflicts with explicit row colors. |
+| `xticklabels`, `yticklabels` | Auto spacing, True/False, positive stride, or a complete label list. Repeated labels retain distinct index slots. The matrix, labels, strips and branches follow the same permutation. |
+| Layout/colors | Native scheme names, numeric `vmin`/`vmax`, `linewidths`, CSS `linecolor`, tree/track ratios and native matrix dimensions. `figsize` uses 100 logical pixels/inch and conflicts with width/height. `cbar_pos=None` hides the guide; `cbar_kws` supports its label. |
+| Delivery | Default native hover reports original cell name, gene and plotted value. `show`, `save` and chart HTML/JSON delivery follow the shared contract. The result is a native chart, not Seaborn's ClusterGrid; its artist attributes/chains are unavailable. |
+
+This first clustermap preview has fixed navigation. Zoom, fitted values and linking
+are held for review of the basic chart. The default native palette is magma rather
+than Seaborn's rocket, and the native color guide is on the right rather than in
+Seaborn's upper-left inset. Explicit viridis references isolate layout/value fidelity
+from this palette difference. Custom `cbar_pos`, `pivot_kws`, `tree_kws`, `annot`,
+`center`, `robust`, `norm`, artist options and unknown kwargs reject by name.
+
+The preview accepts resident dense/CSR/CSC inputs and views, with at most **250,000
+matrix values** and **1,000,000 pairwise distances per automatically clustered
+axis**. Both guards run before expression access. Supplying linkage avoids the
+distance allocation, but not the tile limit. Backed/lazy matrices reject before
+reading expression; no silent sampling, aggregation or full unrelated matrix
+densification occurs. The expression notebook uses all 700 packaged PBMC cells
+and the same ten marker genes.
+
 ## Dendrograms and correlation matrices
 
 Compute a tree explicitly in Python and reuse it across plots:
@@ -559,17 +605,17 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, dendrogram, correlation_matrix |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix |
 | Ranked summaries | rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap |
 | Other embeddings and PCA | scatter, embedding, tsne, pca, pca_scatter, diffmap, draw_graph, pca_loadings, pca_overview, pca_variance_ratio |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Diagnostics, ranking, matrices, simulation | clustermap, rank_genes_groups, ranking, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
+| Diagnostics, ranking, matrices, simulation | rank_genes_groups, ranking, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
 | Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_as_heatmap, timeseries_subplot |
 | Spatial and density | spatial, embedding_density |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
 
-All entries except the seven plotting previews and settings helpers remain required future integration
+All entries except the eight plotting previews and settings helpers remain required future integration
 work. Settings remain owned by Scanpy. The external.pl namespace is separate
 from this core inventory.
 
@@ -658,6 +704,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrix
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.clustermap
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.dendrogram
 

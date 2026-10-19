@@ -99,6 +99,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["matrixplot"],
         namespace["heatmap"],
         namespace["matrix"],
+        namespace["clustermap"],
     ]
     assert namespace["pbmc"].shape == (700, 765)
     order = namespace["pbmc"].uns["dendrogram_bulk_labels"]["categories_ordered"]
@@ -163,7 +164,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert len(rulers) == 1
     assert rulers[0]["ruler"]["encodings"] == ["x", "y"]
     assert rulers[0]["ruler"]["display"] == "center"
-    for chart in charts[1:]:
+    for chart in charts[1:4]:
         grid = chart.to_dict()["layer"][0]
         text = grid["layer"][1]["layer"][0]
         assert text["mark"]["fitToBand"] is True
@@ -171,3 +172,14 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             grid["layer"][0]["encoding"][axis]["scale"]["zoom"] is (axis == "y")
             for axis in ("x", "y")
         )
+    clustered = charts[4].to_dict()
+    tiles = points(clustered)
+    cells = clustered["datasets"][tiles["data"]["name"]]
+    assert len(cells) == 700 * 10
+    assert {row["_row"] for row in cells} == set(namespace["pbmc"].obs_names)
+    assert {row["_column"] for row in cells} == set(namespace["marker_names"])
+    branches = [mark for mark in clustered["layer"] if "layer" in mark]
+    assert [
+        len(clustered["datasets"][mark["layer"][0]["data"]["name"]])
+        for mark in branches[-2:]
+    ] == [3 * 699, 3 * 9]

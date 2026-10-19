@@ -5,7 +5,7 @@ from typing import Literal
 import numpy as np
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
+from genome_spy.integrations.scanpy._dendrogram_data import TreeData
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._style import (
     FONT as _FONT,
@@ -16,7 +16,7 @@ from genome_spy.integrations.scanpy._style import (
 Orientation = Literal["top", "bottom", "left", "right"]
 
 
-def tree_records(tree: DendrogramData) -> list[dict[str, float]]:
+def tree_records(tree: TreeData) -> list[dict[str, float]]:
     """Turn stored tree branches into line segments with one position per group.
 
     Return endpoint rows that GenomeSpy can draw without calculating a tree.
@@ -34,19 +34,21 @@ def tree_records(tree: DendrogramData) -> list[dict[str, float]]:
     ]
 
 
-def distance_domain(tree: DendrogramData) -> list[float]:
+def distance_domain(tree: TreeData) -> list[float]:
     """Return padded distance limits from tree heights, including a zero-height tree."""
     high = float(tree.dcoord.max())
     return [-0.05 * high, 1.05 * high] if high else [-0.055, 0.055]
 
 
 def tree_overlay(
-    tree: DendrogramData,
+    tree: TreeData,
     *,
     orientation: Orientation,
     padding: float = 0,
     reverse: bool = False,
     size: float = 80,
+    offset: float = 0,
+    linewidth: float = 1.5,
     leaf_positions: list[float] | None = None,
     leaf_projection: str | None = None,
 ) -> gs.LayerChart:
@@ -61,6 +63,8 @@ def tree_overlay(
     leaf2 = leaf.replace("datum.leaf", "datum.leaf2")
     distance = f"datum.distance / {maximum} * {size}"
     distance2 = distance.replace("datum.distance", "datum.distance2")
+    if offset:
+        distance, distance2 = f"({distance}) + {offset}", f"({distance2}) + {offset}"
     records = tree_records(tree)
     # Heatmap groups have unequal sizes, unlike summary rows.
     if leaf_positions is not None:
@@ -76,7 +80,7 @@ def tree_overlay(
         leaf = leaf_projection.format(field="leaf")
         leaf2 = leaf_projection.format(field="leaf2")
     rules = gs.Chart(records).mark_rule(
-        color="#555555", size=1.5 * _PT, clip="never", tooltip=None
+        color="#555555", size=linewidth * _PT, clip="never", tooltip=None
     )
     if orientation in ("right", "left"):
         side = "-" if orientation == "left" else "1 +"
@@ -120,7 +124,7 @@ def tree_overlay(
 
 
 def build_dendrogram(
-    tree: DendrogramData,
+    tree: TreeData,
     *,
     orientation: Orientation,
     remove_labels: bool,

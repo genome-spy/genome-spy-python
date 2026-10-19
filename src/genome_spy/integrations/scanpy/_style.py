@@ -138,7 +138,7 @@ def _bound(
     return result
 
 
-def _categorical(values: Any) -> pd.Categorical | None:
+def _categorical(values: Any, *, context: str = "gsc.pl.umap") -> pd.Categorical | None:
     """Return ordered categories for label-like values, or None for numeric colors.
 
     Preserve saved order; otherwise use Scanpy's string and boolean ordering.
@@ -154,14 +154,19 @@ def _categorical(values: Any) -> pd.Categorical | None:
         nonmissing = pd.Series(values).dropna()
         if not all(isinstance(x, str) for x in nonmissing):
             raise TypeError(
-                "gsc.pl.umap: color metadata must be numeric, boolean, string, or categorical."
+                f"{context}: color metadata must be numeric, boolean, string, or categorical."
             )
         return pd.Categorical(values, categories=natsorted(nonmissing.unique()))
     return None
 
 
 def _palette(
-    adata: Any, key: str, categories: pd.Index, palette: Any
+    adata: Any,
+    key: str,
+    categories: pd.Index,
+    palette: Any,
+    *,
+    context: str = "gsc.pl.umap",
 ) -> tuple[tuple[str, ...], str | None]:
     """Return ordered CSS colors or a scheme name for the requested categories.
 
@@ -169,26 +174,26 @@ def _palette(
     """
     count = len(categories)
     if isinstance(palette, str):
-        return (), native_scheme(palette, "palette")
+        return (), native_scheme(palette, "palette", context=context)
     if isinstance(palette, Mapping):
         # Named colors follow category order, not dictionary order.
         try:
             selected = [palette[c] for c in categories]
         except KeyError as error:
             raise ValueError(
-                "gsc.pl.umap: palette mapping is missing a category."
+                f"{context}: palette mapping is missing a category."
             ) from error
     elif palette is not None:
         if not isinstance(palette, (Sequence, np.ndarray)):
             raise NotImplementedError(
-                "gsc.pl.umap: palette requires CSS colors or a native scheme; color cyclers are unsupported."
+                f"{context}: palette requires CSS colors or a native scheme; color cyclers are unsupported."
             )
         selected = list(palette)
         if not selected:
-            raise ValueError("gsc.pl.umap: palette cannot be empty.")
+            raise ValueError(f"{context}: palette cannot be empty.")
         if len(selected) < count:
             warnings.warn(
-                "gsc.pl.umap: palette has fewer colors than categories; colors repeat.",
+                f"{context}: palette has fewer colors than categories; colors repeat.",
                 UserWarning,
                 stacklevel=3,
             )
@@ -210,7 +215,7 @@ def _palette(
             selected = next(
                 (p[:count] for p in defaults if len(p) >= count), ["grey"] * count
             )
-    return tuple(native_color(c, "palette") for c in selected), None
+    return tuple(native_color(c, "palette", context=context) for c in selected), None
 
 
 def categorical_colors(

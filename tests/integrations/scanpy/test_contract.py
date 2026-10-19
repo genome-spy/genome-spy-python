@@ -30,6 +30,8 @@ def test_all_plots_share_native_display_and_autosave_rules(
     options = {"color": "group"} if family == "umap" else {"groupby": "group"}
     if family == "matrix":
         a, options = [[0, 1], [2, 3]], {}
+    if family == "clustermap":
+        options = {"obs_keys": "group"}
     if family in ("dotplot", "matrixplot", "heatmap"):
         options["var_names"] = ["g1", "g2"]
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
@@ -62,7 +64,7 @@ def test_shared_display_validation_precedes_optional_imports(
     args = (object(),)
     if family in ("dotplot", "matrixplot", "heatmap"):
         args += (["g1"], "group")
-    elif family not in ("umap", "matrix"):
+    elif family not in ("umap", "matrix", "clustermap"):
         args += ("group",)
     with pytest.raises(
         error, match=f"gsc.pl.{family}.*{'show' if 'show' in options else 'save'}"

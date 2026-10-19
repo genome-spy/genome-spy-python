@@ -75,16 +75,6 @@ def build_matrix(
     )
     if not width or not height:
         raise ValueError(f"{context}: width and height must be positive.")
-    yy, xx = np.indices(values.shape)
-    table = pd.DataFrame(
-        {
-            "_x": xx.ravel(),
-            "_y": yy.ravel(),
-            "_value": values.ravel(),
-            "_column": np.asarray(xlabels)[xx.ravel()],
-            "_row": np.asarray(ylabels)[yy.ravel()],
-        }
-    )
     x = coordinate(gs.X, "_x", columns, 0)
     y = coordinate(gs.Y, "_y", rows, 0, reverse=True)
     x, y = zoom_axes(x, y, enabled=zoom, name="matrix")
@@ -114,44 +104,33 @@ def build_matrix(
                 titleFontSize=10 * PT,
             )
         )
-    tiles = (
-        gs.Chart(table)
-        .transform_filter("isValid(datum._value)")
-        .mark_rect(tooltip={"handler": "default"} if hover else None)
-        .encode(
-            x=axes[0],
-            y=axes[1],
-            color=gs.Color("_value:Q")
-            .scale(
-                type="linear",
-                domain=[low, high],
-                scheme=scheme,
-                zero=False,
-                nice=False,
-                clamp=True,
+    tiles = matrix_tiles(
+        values,
+        xlabels,
+        ylabels,
+        hover=hover,
+        color=gs.Color("_value:Q")
+        .scale(
+            type="linear",
+            domain=[low, high],
+            scheme=scheme,
+            zero=False,
+            nice=False,
+            clamp=True,
+        )
+        .legend(
+            gs.Legend(
+                title=None,
+                orient="right",
+                direction="vertical",
+                gradientLength=height * shrink,
+                gradientThickness=15,
+                gradientStrokeColor="black",
+                gradientStrokeWidth=0.8 * PT,
+                offset=15,
             )
-            .legend(
-                gs.Legend(
-                    title=None,
-                    orient="right",
-                    direction="vertical",
-                    gradientLength=height * shrink,
-                    gradientThickness=15,
-                    gradientStrokeColor="black",
-                    gradientStrokeWidth=0.8 * PT,
-                    offset=15,
-                )
-            ),
-        )
-    )
-    if hover:
-        tiles = tiles.encode(
-            tooltip=[
-                gs.Tooltip("_row:N", title="Row"),
-                gs.Tooltip("_column:N", title="Column"),
-                gs.Tooltip("_value:Q", title="Value", format=".4g"),
-            ]
-        )
+        ),
+    ).encode(x=axes[0], y=axes[1])
     layers: list[gs.Chart | gs.LayerChart] = [
         with_values(tiles, "_value") if show_values else tiles
     ]
@@ -180,7 +159,56 @@ def build_matrix(
     )
 
 
-def _labels(labels: Collection[str] | None, count: int, name: str) -> list[str]:
+def matrix_tiles(
+    values: np.ndarray,
+    xlabels: list[str],
+    ylabels: list[str],
+    *,
+    color: gs.Color,
+    hover: bool,
+) -> gs.Chart:
+    """Return index-positioned numeric tiles and optional hover from a detached array.
+
+    Keep labels separate from positions so duplicate names retain distinct cells.
+    """
+    yy, xx = np.indices(values.shape)
+    table = pd.DataFrame(
+        {
+            "_x": xx.ravel(),
+            "_y": yy.ravel(),
+            "_value": values.ravel(),
+            "_column": np.asarray(xlabels)[xx.ravel()],
+            "_row": np.asarray(ylabels)[yy.ravel()],
+        }
+    )
+    tiles = (
+        gs.Chart(table)
+        .transform_filter("isValid(datum._value)")
+        .mark_rect(tooltip={"handler": "default"} if hover else None)
+        .encode(
+            x=coordinate(gs.X, "_x", values.shape[1], 0),
+            y=coordinate(gs.Y, "_y", values.shape[0], 0, reverse=True),
+            color=color,
+        )
+    )
+    if hover:
+        tiles = tiles.encode(
+            tooltip=[
+                gs.Tooltip("_row:N", title="Row"),
+                gs.Tooltip("_column:N", title="Column"),
+                gs.Tooltip("_value:Q", title="Value", format=".4g"),
+            ]
+        )
+    return tiles
+
+
+def _labels(
+    labels: Collection[str] | None,
+    count: int,
+    name: str,
+    *,
+    context: str = "gsc.pl.matrix",
+) -> list[str]:
     """Return explicit tick labels or numeric positions, preserving repeated labels.
 
     Reject mismatched counts rather than displaying labels over the wrong cells.
@@ -188,5 +216,5 @@ def _labels(labels: Collection[str] | None, count: int, name: str) -> list[str]:
     if labels is None:
         return [str(index) for index in range(count)]
     if isinstance(labels, (str, bytes)) or len(labels) != count:
-        raise ValueError(f"gsc.pl.matrix: {name} must contain {count} labels.")
+        raise ValueError(f"{context}: {name} must contain {count} labels.")
     return [str(label) for label in labels]

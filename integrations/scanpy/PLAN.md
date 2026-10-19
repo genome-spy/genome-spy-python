@@ -370,7 +370,10 @@ The standalone `matrix` part of M05.b is delivered as a numeric-array preview,
 reusing numeric validation, linear color bounds, index slots and labels. Heatmap
 adds optional zoom with aligned cell annotations and clipped tree branches;
 y-only by default, with both axes explicitly available.
-Shared grid interactions are M05.e below. `clustermap` in M05.c is the next ready slice; larger transport remains M05.d.
+Shared grid interactions are M05.e below. M05.c has a bounded clustermap preview
+with public SciPy or supplied linkage, ordered annotation tracks and shared
+tiles/branches; see its [status evidence](STATUS.md#m05c--clustermap-preview).
+Larger transport remains M05.d; M06 stored ranking and ranked summaries are next.
 
 - M05.a: observation-level heatmap reuses source/group/slot access. Carry one
   explicit observation permutation through values, IDs, category strips, group
@@ -388,6 +391,12 @@ Shared grid interactions are M05.e below. `clustermap` in M05.c is the next read
   supplied linkage and annotation colors, and routes supported clustering kwargs
   explicitly. Do not silently cluster a supplied ordering or densify an unrelated
   expression matrix. Reject unsupported Seaborn/Matplotlib options by name.
+  The delivered preview bounds tiles and pairwise distances before expression
+  access. Z-score/sample-SD and min–max scaling follow Seaborn, including missing
+  constant ranges; display masks do not change distances. Native palette/guide
+  differences, unsupported kwargs and fixed navigation remain explicit in the
+  maintained contract, with broader options assigned to M14. Do not claim the
+  full clustermap family closed from this preview.
 - M05.d: test chunked selected-column access and a 100k-cell × 50-marker heatmap;
   record payload/render/memory limits and an explicit over-budget policy. Compare
   complete PBMC tutorial heatmaps with registered strips/tree/label alignment.

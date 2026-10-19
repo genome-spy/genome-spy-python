@@ -159,3 +159,22 @@ allocation including serialization, process RSS, browser first paint including
 dispatch, paused hover checked against the actual input tile, and JS heap. The
 small 0.8 MB array produces 28.1 MB formatted JSON; larger/chunked matrix transport
 remains M05.d. This single-machine observation is not a portable capacity limit.
+
+`clustermap.json` freezes seven Scanpy 1.11.5/Seaborn 0.13.2 cases from original
+MIT cell/gene inputs: row/column order and branch geometry, z-score/min–max order,
+disabled clustering, display masks, annotation labels and complete plot crops.
+The manifest retains versions, input/image hashes and 100/150 display/export DPI.
+Browser comparisons use a shared viridis palette and register tile centers and
+branch endpoints without fitting images. Palette interiors allow 12/255 RGB;
+SVG endpoints allow 0.6 logical pixel for rounding. Full screenshots and overlays
+stay in pytest temporary directories.
+
+`clustermap-performance.json` records warm plotting, formatted/validated JSON,
+peak tracked Python allocation, browser render/hover and JS heap on 700 packaged
+PBMC cells × the first 40 raw-snapshot genes. The gene choice is a transport and
+clustering workload, not a biological marker recommendation. No dataset is vendored.
+
+```sh
+uv run --no-sync python -m tests.integrations.scanpy.generate_clustermap_references
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_clustermap --output /tmp/clustermap.json
+```

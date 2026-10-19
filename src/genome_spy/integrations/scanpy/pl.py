@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from genome_spy import Parameter, TopLevelSpec
 
 __all__ = [
+    "clustermap",
     "correlation_matrix",
     "dendrogram",
     "dotplot",
@@ -1002,6 +1003,111 @@ def heatmap(
         width=width,
         height=height,
         figsize=figsize,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def clustermap(
+    adata: AnnData,
+    obs_keys: str | None = None,
+    *,
+    use_raw: bool | None = None,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Display individual cells and genes ordered by hierarchical clustering.
+
+    Description:
+        Reproduce supported Scanpy/Seaborn clustermap computations with public
+        SciPy linkage and native tiles. This plotting-only clustering does not
+        write AnnData or rerun analysis. Supplied linkage is authoritative.
+        The preview uses a native magma palette and a color guide on the right;
+        it returns a GenomeSpy chart rather than Seaborn's ClusterGrid.
+
+    Args:
+        adata: Resident AnnData; subset cells and genes before plotting.
+        obs_keys: One categorical observation column for a row color strip.
+        use_raw: Use raw expression when present by default, matching Scanpy.
+        show: Display once if true; return a chart if false; None uses Scanpy's setting.
+        save: None or False; use chart.save for HTML or JSON.
+        hover: Show the cell ID, gene and plotted value in a native tooltip.
+        width: Matrix width in logical pixels, excluding trees and labels.
+        height: Matrix height in logical pixels, excluding trees and labels.
+        **kwds: Supported Seaborn options: method, metric, z_score,
+            standard_scale, row_cluster, col_cluster, row_linkage, col_linkage,
+            row_colors, col_colors, mask, figsize, dendrogram_ratio, colors_ratio,
+            xticklabels, yticklabels, cmap, vmin, vmax, linewidths, linecolor,
+            cbar_pos (default or None), and cbar_kws (label only).
+
+    Returns:
+        A native chart, or None after display.
+
+    Raises:
+        ImportError: The supported Scanpy dependency is unavailable.
+        TypeError: Options or data have unsupported types.
+        ValueError: Shapes, linkage, scaling or resource limits are invalid.
+        NotImplementedError: A renderer-specific option is unsupported.
+
+    Example:
+        >>> import scanpy as sc
+        >>> import genome_spy.integrations.scanpy as gsc
+        >>> pbmc = sc.datasets.pbmc68k_reduced()
+        >>> chart = gsc.pl.clustermap(
+        ...     pbmc[:, ["CD79A", "MS4A1", "CD3D"]],
+        ...     obs_keys="bulk_labels", use_raw=False, show=False,
+        ... )
+    """
+    context = "gsc.pl.clustermap"
+    data_options = {
+        "method",
+        "metric",
+        "z_score",
+        "standard_scale",
+        "row_cluster",
+        "col_cluster",
+        "row_linkage",
+        "col_linkage",
+        "row_colors",
+        "col_colors",
+        "mask",
+    }
+    chart_options = {
+        "cmap",
+        "vmin",
+        "vmax",
+        "figsize",
+        "dendrogram_ratio",
+        "colors_ratio",
+        "xticklabels",
+        "yticklabels",
+        "linewidths",
+        "linecolor",
+        "cbar_pos",
+        "cbar_kws",
+    }
+    _check_kwargs(kwds, data_options | chart_options, context=context)
+    if not isinstance(hover, bool):
+        raise TypeError(f"{context}: hover must be boolean.")
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._clustermap_data import prepare_clustermap
+    from genome_spy.integrations.scanpy._clustermap_chart import build_clustermap
+
+    data = prepare_clustermap(
+        adata,
+        obs_keys,
+        use_raw,
+        **{key: value for key, value in kwds.items() if key in data_options},
+    )
+    chart = build_clustermap(
+        data,
+        hover=hover,
+        width=width,
+        height=height,
+        **{key: value for key, value in kwds.items() if key in chart_options},
     )
     return _finish_plot(chart, show, sc)
 
