@@ -537,7 +537,7 @@ commit evidence and unmet verification gates live in the
   numeric normalization/center/callable bounds and missing-category schemes.
   Recheck native primitives and add focused tests per option; do not sample
   Matplotlib colors or accept its normalization objects.
-  The next continuous-colorbar increment preserves `colorbar_loc=None`/`"right"`
+  The continuous-colorbar increment preserves `colorbar_loc=None`/`"right"`
   and adds `"left"`, `"top"`, `"bottom"` through native guide orientation. Verify
   categorical guides, multi-panel bounds, collected/native configuration overrides,
   hover/zoom and unchanged transported records. It does not alter scatter's

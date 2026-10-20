@@ -221,7 +221,7 @@ def _embedding(
         "legend_fontweight": legend_loc == "on data"
         and legend_fontweight not in (400, "normal", "regular"),
         "legend_loc": legend_loc not in (None, "none", "right margin", "on data"),
-        "colorbar_loc": colorbar_loc not in (None, "right"),
+        "colorbar_loc": colorbar_loc not in (None, "right", "left", "top", "bottom"),
         "vcenter": vcenter is not None,
         "norm": norm is not None,
         "add_outline": add_outline not in (False, None),
@@ -525,6 +525,7 @@ def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
         **kwargs: Shared embedding options shown in the signature. Components
             are one-based strings; dimensions are zero-based pairs. Raw/layer
             lookup, colors, defaults and native controls match pl.umap.
+            colorbar_loc accepts right, left, top, bottom, or None to hide it.
 
     Returns:
         A native chart when show=False, otherwise None after display.

@@ -70,11 +70,11 @@ Reuse existing data/tree preparation and evolve the shared chart helpers.
 then cover matrixplot/dotplot and matrix/clustermap/correlation. Runtime migration
 has not started; the release upgrade alone did not change these layouts.
 
-M07.d's continuous-colorbar placement increment remains ready, after this grid
-migration: preserve `colorbar_loc=None`/`"right"` and add `"left"`, `"top"`, and
-`"bottom"` to shared embedding entry points. Scatter's distinct signature stays
-unchanged. Default categorical-guide fitting is separately blocked by C11; keep
-its upstream reproducer and recheck it on a released Core fix.
+M07.d's [native colorbar placement increment](#m07d-native-colorbar-placement) is
+closed for the four sides and None across shared embedding entry points.
+Scatter's distinct signature stays unchanged. Default categorical-guide fitting
+is separately blocked by C11; keep its upstream reproducer and recheck it on a
+released Core fix.
 
 The M06/M07 resource gates now have fresh seven-workload evidence below. This
 does not close M07.a/b's newly observed categorical-guide rendering gap.
@@ -92,6 +92,7 @@ inside their own track viewports, independently of the legacy overlay behavior.
 | M07.c loadings increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-stored-pca-loadings) | Broader storage/typography/export remain M14. Variance and overview are separate increments; this does not close M07. |
 | M07.c variance increment | Closed (bounded preview) | [Contract, tests and resources](#m07c-stored-pca-variance-ratios) | Broader storage/typography/export remain M14; this does not close the overview or M07. |
 | M07.c overview increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-pca-overview) | Parent storage, typography and export limits remain M14; broader embedding options remain M07.d and C11 retains their categorical-guide gate. |
+| M07.d colorbar placement increment | Closed (bounded increment) | [Contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Ready; implementation not started | [Upgrade record](#core-12-runtime-adoption); [migration scope](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Migrate bands, labels, brackets and trees with required native cell-group gaps. Verify shared scale alignment and preserve Python preparation/interactions. |
 | M14.b.2 grouped summary layout | Planned | [Shared helper migration](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Reuse the first increment's track helpers through dotplot/matrixplot; retain native guides/ruler and inherit changes in ranked variants. |
@@ -762,6 +763,44 @@ The subsequent resource verification closes gate 4; the current queue now scopes
 M07.d and records C11. Parent storage, typography and export limits remain M14. Clearance:
 retain the live plan/status and permanent source/tests/contracts; no working
 document is eligible for removal.
+
+## M07.d native colorbar placement
+
+The shared `embedding`, `umap`, `tsne`, `diffmap`, `draw_graph`, `pca` and
+`pca_scatter` entry points support `colorbar_loc="right"` (default), `"left"`,
+`"top"`, `"bottom"`, and None. Vertical bars use the plot height; horizontal bars
+use the plot width, with the existing 30:1 gradient aspect. Categorical legends
+retain `legend_loc` and stay explicitly right/vertical when colorbars move.
+Numeric defaults remain overridable through native legend configuration and
+collection, including linked charts. Scatter's public signature is unchanged.
+
+Permanent checks live in `tests/integrations/scanpy/test_colorbar.py` and
+`tests/integrations/scanpy/browser/test_colorbar.py`. The latter measures complete
+guide bounds on mixed one/two-row 320 × 180 panels at DPR 1, verifies all category
+labels and collected overrides, and allows two logical pixels for native gradient
+borders/snapping. Existing embedding/scatter reference and interaction checks
+cover default appearance, hover IDs, zoom, linked counts/Python membership and
+offline HTML. All seven entry points preserve transported records and point/axis
+encodings when changing placement or applying native numeric-guide overrides.
+
+Workflow evidence: a temporary Jupyter notebook uses Scanpy's packaged PBMC
+700 × 765 dataset, retains stored UMAP coordinates, and produces five anywidget
+displays and inline HTML exports for the four sides/None. All five exports render
+with external requests blocked. User notebooks are not edited or executed;
+generated notebooks, screenshots and HTML stay in temporary directories.
+
+Resource gate reuse: the [M06/M07 resource envelopes](#m06m07-resource-verification)
+cover the unchanged preparation, transport, point marks and interaction paths.
+The equality checks retain the same records and encodings; this increment adds
+only native guide configuration, with new layout coverage above. The larger
+eight-panel timing/heap workloads were not rerun; no new performance claim is made.
+
+Validation: **197 targeted Python checks**, **41 browser checks**, five real-kernel
+widget displays and five offline packaged-data exports, Ruff and mypy pass.
+The separate Core 1.2 C11 reproducer remains an expected failure; upstream
+[PR #591](https://github.com/genome-spy/genome-spy/pull/591) does not change the
+bundled runtime. Broader M07.d options and M14 storage/typography/export limits
+remain open. The current grid-migration queue and plan clearance remain unchanged.
 
 ## M01 retained delivery evidence
 
@@ -1491,7 +1530,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | --- | --- | --- |
 | Existing 2D coordinates, raw/layer, symbols, masks, categories, sizes/order, native axes/guides | Tested supported subset; exact forms in user contract | M01 preview retained |
 | Hover, optional zoom, first-owner interval, linked count and Python retrieval | Tested preview; no point selection or initial interval value | M01; broader native selections M14 |
-| Graph edges/arrows, scale_factor, outlines, broader markers/guide locations | Nondefault forms reject | M07.d |
+| Continuous colorbar placement | Four sides/None; native defaults and collection supported | M07.d placement increment closed |
+| Graph edges/arrows, scale_factor, outlines, broader markers/categorical guide locations | Nondefault forms reject | M07.d |
 | norm/vcenter/callable bounds | Nondefault forms reject; Matplotlib objects remain outside boundary | M07.d/M14.c |
 | Backed/lazy expression; named scheme with NA legend; category/NA label collision | Explicit current restrictions | M14.c |
 | 3D, font atlas/weight/outline and complete typography | Native gaps/limits | M14.a; C03/C05 |

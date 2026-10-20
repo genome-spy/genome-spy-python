@@ -88,6 +88,9 @@ def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
             symbolOpacity=style.alpha,
             labelLimit=1000,
         )
+        # Moving the continuous guide must not move categorical legends.
+        if style.colorbar_loc not in (None, "right"):
+            legend = legend.orient("right").direction("vertical")
         return legend.columns(columns) if columns > 1 else legend
     if style.colorbar_loc is None:
         return None
@@ -321,13 +324,16 @@ def build_embedding(
     chart = _compose(charts, style, share_coordinates=share_coordinates)
     if selection is not None:
         chart = with_brush_count(chart, prepared, style, selection)
+    horizontal = style.colorbar_loc in ("top", "bottom")
+    gradient_length = style.width if horizontal else style.height
     # Keep presentation defaults overridable through native chart configuration.
     return chart._configure_nested(
         "legend",
-        orient="right",
+        orient=style.colorbar_loc or "right",
+        direction="horizontal" if horizontal else "vertical",
         symbolSize=style.legend_symbol_size * POINTS_TO_PIXELS**2,
-        gradientLength=style.height,
-        gradientThickness=style.height / 30,
+        gradientLength=gradient_length,
+        gradientThickness=gradient_length / 30,
         gradientStrokeColor=style.frame_color,
         gradientStrokeWidth=style.frame_width,
     )

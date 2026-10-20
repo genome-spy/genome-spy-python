@@ -313,9 +313,24 @@ raise an error instead of being ignored.
 | projection, edges/arrows, scale_factor | Only the ordinary 2D/no-graph defaults are supported yet. |
 | norm, vcenter, callable color bounds | Not implemented yet. Their nondefault forms raise errors. |
 | add_outline, legend_fontoutline, nondefault outline settings | Not implemented yet; no silent approximation with unoutlined points/text. |
-| colorbar_loc | Right or None. Other positions are not implemented yet. |
+| colorbar_loc | `"right"` (default), `"left"`, `"top"`, `"bottom"`, or None to hide continuous colorbars. Categorical legends retain `legend_loc`. |
 | Arbitrary scatter kwargs, other markers/legend locations | Error with the unsupported argument named. |
 
+Continuous colorbars span the plot height on the left/right and the plot width
+on the top/bottom, including non-square panels. These are native guide defaults,
+so `.resolve_legend(default="collected")` and `.configure_legend(...)` can still
+collect and restyle numeric colorbars. When moving colorbars, categorical legends
+remain explicitly on the right in vertical order.
+
+```python
+chart = gsc.pl.umap(
+    adata, color=["n_counts", "percent_mito"], colorbar_loc="top", show=False
+)
+chart.resolve_legend(default="collected").configure_legend(
+    gradientLength=140, gradientThickness=8
+)
+```
+diff --git a/integrations/scanpy/STATUS.md b/integrations/scanpy/STATUS.md
 Supported input arrays are NumPy and SciPy CSR/CSC matrices/arrays. Views preserve
 positional correspondence. Only requested unique expression columns are
 densified; AnnData can materialize dense views through its public array access.

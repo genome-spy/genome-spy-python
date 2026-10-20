@@ -105,12 +105,14 @@ def assert_complete_chart(page, tmp_path, chart, expected, reference_image, case
 
 
 @pytest.mark.parametrize("basis", ["tsne", "diffmap", "pca", "draw_graph_fa"])
-def test_shared_hover_zoom_and_offline_delivery(page, tmp_path, basis):
+@pytest.mark.parametrize("location", ["left", "top"])
+def test_shared_hover_zoom_and_offline_delivery(page, tmp_path, basis, location):
     a = make_embedding_adata()
     chart = gsc.pl.embedding(
         a,
         basis,
         color="score",
+        colorbar_loc=location,
         obs_id="cell_id",
         size=100,
         zoom=True,
@@ -151,7 +153,13 @@ def test_shared_hover_zoom_and_offline_delivery(page, tmp_path, basis):
 def test_pca_brush_count_and_python_membership_agree(page):
     a = make_embedding_adata()
     brush = gs.selection_interval("cells", encodings=["x", "y"])
-    chart = gsc.pl.pca(a, color=["cell_type", "score"], selection=brush, show=False)
+    chart = gsc.pl.pca(
+        a,
+        color=["cell_type", "score"],
+        colorbar_loc="bottom",
+        selection=brush,
+        show=False,
+    )
     bounds = render(page, chart)
     canvas = page.locator("canvas").first.bounding_box()
     x, y = canvas["x"] + bounds["x"], canvas["y"] + bounds["y"]
