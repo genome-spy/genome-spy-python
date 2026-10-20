@@ -80,6 +80,26 @@ def test_single_plot_compositions_share_arrow_transport(wrapper) -> None:
     assert widget.spec["spec"]["data"]["name"]
 
 
+def test_surround_side_shared_encoding_serializes_named_channels() -> None:
+    from genome_spy.schema import Encoding
+
+    encoding = Encoding(
+        y=gs.Y("row:I").axis(None),
+        y2=gs.Y2("end:Q"),
+        tooltip=[gs.Tooltip("label", title="Cell line")],
+    )
+    side = gs.SurroundSideSpec(encoding=encoding, views=[gs.Chart().mark_rect()])
+    chart = gs.surround(gs.Chart().mark_rect(), surround=gs.SurroundSides(right=side))
+    expected = {
+        "y": {"field": "row", "type": "index", "axis": None},
+        "y2": {"field": "end"},
+        "tooltip": [{"field": "label", "title": "Cell line"}],
+    }
+    assert chart.to_dict()["surround"]["right"]["encoding"] == expected
+    assert chart._prepare_render().spec["surround"]["right"]["encoding"] == expected
+    assert isinstance(encoding._kwds["y"], gs.Y)
+
+
 @pytest.mark.parametrize(
     ("spec", "chart_type"),
     [

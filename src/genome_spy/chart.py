@@ -22,6 +22,7 @@ from genome_spy._embed import (
 from genome_spy._utils import JsonSpec, compact_json, pretty_json
 from genome_spy._chart_authoring import (
     merge_encoding_definitions,
+    normalize_channel,
     normalize_data,
     normalize_transform,
 )
@@ -491,6 +492,8 @@ class TopLevelSpec(
                     validate=False,
                     normalize_chart_data=normalize_chart_data,
                 )
+            if isinstance(value, Channel):
+                return normalize_channel(value.encoding_name or "", value)
             if isinstance(value, SchemaBase):
                 properties = {
                     key: child
