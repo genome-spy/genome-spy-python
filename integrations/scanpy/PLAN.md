@@ -660,7 +660,7 @@ coverage separately from the three constructor entries in STATUS.
 ### M14 — compatibility closure and released capabilities
 
 Recheck the installed schema/runtime at the start of each affected slice and each
-Core upgrade. As audited here, Core **1.0.0** exposes `rect`, `point`, `rule`,
+Core upgrade. The adopted Core **1.2.0** exposes `rect`, `point`, `rule`,
 `tick`, `text`, `link`, and `arrow`, with no filled-area, raster-image, or 3D
 projection primitive in the bundled schema. See the status capability ledger.
 Python linkage/KDE/graph computation cannot supply a missing renderer primitive.
@@ -673,9 +673,10 @@ Python linkage/KDE/graph computation cannot supply a missing renderer primitive.
   wrapper's normal runtime/schema-generation path. The merged
   [container refactor #581](https://github.com/genome-spy/genome-spy/pull/581) and
   upstream [surround design](https://github.com/genome-spy/genome-spy/blob/master/docs/grammar/composition/surround.md)
-  inform the migration; verify the actual release and the forthcoming published
-  heatmap examples before implementing against them. The current wrapper has no
-  surround authoring API; do not patch the bundle or bypass generated types.
+  inform the migration. Core 1.2.0 and the generated `gs.surround()`/`gs.facet()`
+  APIs are now adopted. The [clustered heatmap example](../../docs/examples/clustered_heatmap.py)
+  reproduces the published upstream specification; use it as the native layout
+  reference without patching the bundle or bypassing generated types.
   First migrate heatmap/clustermap bands, labels and trees into native side tracks:
   center tiles own the matrix, side tracks own their in-bounds marks, and native
   aligned x/y scales own navigation/registration. Keep perpendicular track scales

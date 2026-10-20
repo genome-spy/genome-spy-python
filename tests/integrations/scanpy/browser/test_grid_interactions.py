@@ -153,9 +153,10 @@ def test_category_strip_hover_before_and_after_navigation(page, family, swapped,
                 t.strip()
                 for t in page.locator("table.attributes th").all_text_contents()
             ] == ["group"]
-            assert page.locator("table.attributes td").all_text_contents() == [
-                groups[slot]
-            ]
+            assert [
+                text.strip()
+                for text in page.locator("table.attributes td").all_text_contents()
+            ] == [groups[slot]]
         else:
             assert not page.locator("table.attributes").is_visible()
 
