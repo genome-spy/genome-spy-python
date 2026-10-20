@@ -41,6 +41,7 @@ def test_core_1_2_grammar_renders_offline(kind: str, tmp_path: Path) -> None:
             )
         )
     output = tmp_path / f"{kind}.html"
+    chart = chart.configure_point(color="#4c78a8").configure_link(color="#4c78a8")
     chart.save(
         output, inline=True, controls=False, embed_options={"renderer": "canvas"}
     )
@@ -60,6 +61,16 @@ def test_core_1_2_grammar_renders_offline(kind: str, tmp_path: Path) -> None:
             page.locator("canvas").first.wait_for(state="visible")
             page.locator(".canvas-wrapper.loading").wait_for(state="hidden")
             page.get_by_text("Loading...", exact=True).wait_for(state="hidden")
+            page.wait_for_function("""() => {
+              const canvas = document.querySelector('canvas');
+              const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+              let colored = 0;
+              for (let i = 0; i < pixels.length; i += 4) {
+                if (Math.abs(pixels[i] - 76) <= 3 && Math.abs(pixels[i + 1] - 120) <= 3 &&
+                    Math.abs(pixels[i + 2] - 168) <= 3 && pixels[i + 3] > 20) colored++;
+              }
+              return colored > 10;
+            }""")
             assert page.locator(".message-box").count() == 0
             assert not errors, errors
             assert page.locator("canvas").first.evaluate(
