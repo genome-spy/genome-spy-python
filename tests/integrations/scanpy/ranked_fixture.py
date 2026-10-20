@@ -63,4 +63,19 @@ def ranked_cases():
             ("varm", "PCs"),
             {"indices": [1, 0], "n_points": 2, "include_lowest": True},
         ),
+        "pca_extremes": (
+            "pca_loadings",
+            (),
+            {"components": "2,1", "n_points": 2},
+        ),
+        "pca_top": (
+            "pca_loadings",
+            (),
+            {"components": [2, 1], "include_lowest": False, "n_points": 2},
+        ),
+        "pca_all": (
+            "pca_loadings",
+            (),
+            {"components": [1, 2], "n_points": 4},
+        ),
     }

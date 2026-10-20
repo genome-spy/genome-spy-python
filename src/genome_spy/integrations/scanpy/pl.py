@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Callable, Collection, Mapping, Sequence
 from importlib.metadata import PackageNotFoundError, version
 from math import isfinite
-from numbers import Real
+from numbers import Integral, Real
 from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
@@ -35,6 +35,7 @@ __all__ = [
     "draw_graph",
     "pca",
     "pca_scatter",
+    "pca_loadings",
     "scatter",
 ]
 
@@ -1769,13 +1770,126 @@ def ranking(
         log=log,
         include_lowest=include_lowest,
     )
-    columns = len(panels) if len(panels) <= 5 else (len(panels) + 1) // 2
     chart = build_ranking(
         panels,
-        ncols=columns,
         sharey=False,
         fontsize=8,
         color=color,
+        hover=hover,
+        width=width,
+        height=height,
+        context=context,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def pca_loadings(
+    adata: AnnData,
+    components: str | Sequence[int] | None = None,
+    *,
+    include_lowest: bool = True,
+    n_points: int | None = None,
+    show: bool | None = None,
+    save: str | bool | None = None,
+    hover: bool = True,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Rank genes by their stored principal-component loadings.
+
+    Reads varm["PCs"] and variable names, using the same rank panels as ranking.
+    Neither PCA nor expression extraction runs, and AnnData stays unchanged.
+
+    Args:
+        adata: AnnData with resident NumPy loadings in varm["PCs"].
+        components: One-based components in display order; default first three.
+        include_lowest: Show both loading extremes, with a gap for omitted ranks.
+        n_points: Rank count, default min(30, adata.n_vars). Without include_lowest,
+            Scanpy includes one extra label when available.
+        show: Display once, return chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Show gene name, loading score and displayed rank.
+        width: Native width per panel, default 300 logical pixels.
+        height: Native height per panel, default 300 logical pixels.
+
+    Returns:
+        A native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        TypeError: If AnnData, flags or loading storage are unsupported.
+        ValueError: If stored loadings, components, counts or dimensions are invalid.
+        NotImplementedError: If saving requests Matplotlib output.
+
+    Example:
+        >>> chart = gsc.pl.pca_loadings(adata, components="1,2", show=False)
+    """
+    context = "gsc.pl.pca_loadings"
+    for name, value in {"include_lowest": include_lowest, "hover": hover}.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    sc = _prepare_plot(show, save, context=context)
+    from anndata import AnnData
+    from genome_spy.integrations.scanpy._ranked_data import (
+        _count,
+        attribute_rank_panels,
+    )
+    from genome_spy.integrations.scanpy._ranking_chart import build_ranking
+
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: expected AnnData.")
+    if "PCs" not in adata.varm:
+        raise ValueError(
+            f"{context}: missing varm['PCs']; run sc.pp.pca explicitly first."
+        )
+    # Loadings select individual one-based components, rather than embedding pairs.
+    try:
+        if components is None:
+            chosen = [1, 2, 3]
+        elif isinstance(components, str):
+            chosen = [int(value) for value in components.split(",")]
+        else:
+            chosen = list(components)
+    except (TypeError, ValueError) as error:
+        raise ValueError(
+            f"{context}: components must be one-based integers."
+        ) from error
+    shape = adata.varm["PCs"].shape
+    if (
+        len(shape) != 2
+        or not chosen
+        or any(
+            isinstance(value, bool)
+            or not isinstance(value, Integral)
+            or not 1 <= value <= shape[1]
+            for value in chosen
+        )
+    ):
+        raise ValueError(f"{context}: components must be available one-based integers.")
+    count = _count(
+        min(30, adata.n_vars) if n_points is None else n_points,
+        "n_points",
+        context=context,
+    )
+    if count > adata.n_vars:
+        raise ValueError(f"{context}: n_points exceeds the {adata.n_vars} variables.")
+    panels = attribute_rank_panels(
+        adata,
+        "varm",
+        "PCs",
+        dictionary=None,
+        indices=[int(value) - 1 for value in chosen],
+        labels=None,
+        n_points=count,
+        log=False,
+        include_lowest=include_lowest,
+        context=context,
+    )
+    chart = build_ranking(
+        panels,
+        sharey=False,
+        fontsize=8,
+        color="black",
         hover=hover,
         width=width,
         height=height,

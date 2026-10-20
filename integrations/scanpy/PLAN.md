@@ -488,12 +488,30 @@ commit evidence and unmet verification gates live in the
   colors. Remaining margins, on-data labels, highlights, markers and storage
   options remain M07.d/M14; the preview does not close the whole family.
 - M07.c: PCA loadings/variance/overview consume stored loadings and variance data;
-  preserve component order, `include_lowest`, `n_points`, `n_pcs`, logarithmic
-  axes, labels and overview panel composition. Start with a loadings increment:
-  `gsc.pl.pca_loadings(pbmc, components="1,2", include_lowest=True, n_points=20, show=False)`.
+  preserve component order, `include_lowest`, `n_points`, `n_pcs`, variance-score
+  transformations, labels and overview panel composition. Start with a loadings increment:
+  `gsc.pl.pca_loadings(pca_genes, components="1,2", include_lowest=True, n_points=20, show=False)`.
+  For packaged PBMC, `pca_genes = pbmc[:, pbmc.var["highly_variable"]]` selects
+  the genes with stored loadings; the other rows contain NaN and must not be
+  silently dropped or replaced by analysis.
   Reuse the ranking renderer where equivalent. Test supplied `varm["PCs"]` and
   gene labels, reversed components, signed/tied loadings, omitted lower ranks,
   limits and missing results; never run PCA. Then add variance and overview.
+  Loadings acceptance: default components are 1–3 and default rank count is
+  min(30, n_vars); preserve top-only's extra label, repeated components/labels,
+  odd high/low splits and selected-column access. Test resident loadings on sparse
+  expression, views and backed AnnData without reading X. Missing/nonfinite or
+  unavailable results fail by name. Reuse rank chart references, hover/HTML and
+  a realistic multi-panel resource workload; add a packaged-data notebook example.
+  A single component should render normally despite pinned Scanpy's indexing bug.
+  Next variance acceptance: `gsc.pl.pca_variance_ratio(pbmc, n_pcs=10, log=True,
+  show=False)` reads `uns["pca"]["variance_ratio"]`. Preserve `n_pcs=30`,
+  `log=False`, numbered PC labels, NumPy sorting/ties and top-only's extra label.
+  Scanpy applies a natural logarithm to scores before ranking; it does not use a
+  logarithmic axis. Missing results and nonpositive log inputs need named errors,
+  with no PCA computation. Test stored ordering, truncation, bounds, public
+  delivery, references, hover/HTML, resources and the notebook. Overview follows
+  both diagnostics.
   The pca_scatter alias belongs to M07.a's existing signature/identity evidence.
 - M07.d: complete 2D options currently rejected by UMAP: graph/arrow overlays,
   scale factor, supported marker/style forms, outlines, colorbar positions,

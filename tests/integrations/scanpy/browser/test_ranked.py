@@ -40,7 +40,11 @@ def test_complete_rank_panels_match_registered_labels_and_score_positions(
     (tmp_path / f"ranked-{case}.svg").write_text(svg)
     root = ET.fromstring(svg)
     texts = [e for e in root.iter() if e.tag.endswith("text")]
-    label_names = {label["text"] for panel in reference for label in panel["labels"]}
+    label_names = {
+        label["text"].replace("⋮", "...")
+        for panel in reference
+        for label in panel["labels"]
+    }
     labels = [e for e in texts if e.text in label_names]
     assert len(labels) == sum(len(panel["labels"]) for panel in reference)
     image = Image.open(BytesIO(page.screenshot(full_page=True))).convert("RGBA")
@@ -69,7 +73,7 @@ def test_complete_rank_panels_match_registered_labels_and_score_positions(
                     )
                 )
                 for e in labels
-                if e.text == label["text"]
+                if e.text == label["text"].replace("⋮", "...")
             ]
             # Viewport origins and extents each snap to physical pixels.
             assert any(np.allclose(pos, expected, atol=2 / 1.5) for pos in positions), (
@@ -102,12 +106,25 @@ def test_complete_rank_panels_match_registered_labels_and_score_positions(
         Image.blend(*layers, 0.5).save(tmp_path / f"ranked-{case}-overlay-{i}.png")
 
 
-def test_rank_label_native_hover_and_offline_html(page, tmp_path):
-    chart = gsc.pl.rank_genes_groups(
-        make_ranked_adata(), groups="C", n_genes=3, show=False
+@pytest.mark.parametrize("family", ["rank_genes_groups", "pca_loadings"])
+def test_rank_label_native_hover_and_offline_html(page, tmp_path, family):
+    options = (
+        {"groups": "C", "n_genes": 3}
+        if family == "rank_genes_groups"
+        else {"components": "1", "n_points": 2, "include_lowest": False}
     )
+    chart = getattr(gsc.pl, family)(make_ranked_adata(), show=False, **options)
+    spec = chart.to_dict()
+    x0, x1 = spec["encoding"]["x"]["scale"]["domain"]
+    y0, y1 = spec["encoding"]["y"]["scale"]["domain"]
+    record = spec["datasets"][spec["data"]["name"]][1]
     bounds = render(page, chart)
-    px, py = pointer(page, bounds, x=(1 + 0.9) / 3.8, y=(4.9 - 2) / 3.9)
+    px, py = pointer(
+        page,
+        bounds,
+        x=(record["_rank"] - x0) / (x1 - x0),
+        y=(y1 - record["_score"]) / (y1 - y0),
+    )
     page.mouse.move(px - 2, py - 4)
     page.wait_for_timeout(450)
     for dx, dy in [(0, -4), (0, -8), (2, -4)]:
@@ -117,17 +134,70 @@ def test_rank_label_native_hover_and_offline_html(page, tmp_path):
             break
     assert [
         text.strip() for text in page.locator("table.attributes td").all_text_contents()
-    ] == [
-        "g1",
-        "2.000",
-        "1",
-    ]
+    ] == (
+        ["g1", "2.000", "1"] if family == "rank_genes_groups" else ["g4", "6.000", "1"]
+    )
     path = tmp_path / "ranking.html"
     chart.save(path, inline=True, controls=False)
     page.context.set_offline(True)
     page.goto(path.as_uri())
     page.locator("canvas").first.wait_for(state="visible")
     assert not page.locator(".message-box").count()
+
+
+def test_loadings_hover_can_be_disabled(page):
+    chart = gsc.pl.pca_loadings(
+        make_ranked_adata(),
+        "1",
+        include_lowest=False,
+        n_points=2,
+        hover=False,
+        show=False,
+    )
+    bounds = render(page, chart)
+    px, py = pointer(page, bounds, x=1.9 / 3.8, y=2.4 / 4.6)
+    page.mouse.move(px, py - 4)
+    page.wait_for_timeout(450)
+    assert not page.locator("table.attributes").is_visible()
+
+
+def test_packaged_loading_labels_fit_inside_the_complete_chart(page):
+    import scanpy as sc
+
+    a = sc.datasets.pbmc68k_reduced()
+    chart = gsc.pl.pca_loadings(
+        a[:, a.var["highly_variable"]], "1,2", n_points=20, show=False
+    )
+    spec = chart.to_dict()
+    names = {
+        r["_label"]
+        for table in spec["datasets"].values()
+        for r in table
+        if r["_label"] != "⋮"
+    }
+    render(page, chart)
+    svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    boxes = page.evaluate(
+        """({svg,names}) => {
+        const root = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement;
+        root.style.cssText='position:absolute;left:0;top:0;visibility:hidden';
+        document.body.append(root);
+        const boxes=[...root.querySelectorAll('text')].filter(n=>names.includes(n.textContent)).map(n=>{
+            const r=n.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height};
+        });
+        root.remove(); return boxes;
+    }""",
+        {"svg": svg, "names": list(names)},
+    )
+    size = page.evaluate("api.getLogicalCanvasSize()")
+    assert len(boxes) == 40
+    assert all(
+        0 <= b["y"] and b["y"] + b["height"] <= size["height"] + 1 for b in boxes
+    )
+    assert all(0 <= b["x"] and b["x"] + b["width"] <= size["width"] + 1 for b in boxes)
+    assert "?" not in [
+        e.text for e in ET.fromstring(svg).iter() if e.tag.endswith("text")
+    ]
 
 
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot", "heatmap"])

@@ -9,7 +9,7 @@ from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS, native
 def build_ranking(
     panels: list[RankPanel],
     *,
-    ncols: int,
+    ncols: int | None = None,
     sharey: bool,
     fontsize: float,
     color: str,
@@ -28,6 +28,8 @@ def build_ranking(
     if not width or not height or not fontsize:
         raise ValueError(f"{context}: width, height and fontsize must be positive.")
     color = native_color(color, "color", context=context)
+    if ncols is None:
+        ncols = len(panels) if len(panels) <= 5 else (len(panels) + 1) // 2
     bounds = [min(p.y_domain[0] for p in panels), max(p.y_domain[1] for p in panels)]
     charts = []
     last_row = ((len(panels) - 1) // ncols) * ncols
@@ -60,7 +62,13 @@ def build_ranking(
                 y=gs.Y("_score:Q")
                 .scale(domain=domain, zero=False, nice=False)
                 .axis(title=ylabel if index % ncols == 0 else None),
-                text="_label:N",
+                # Rotate ASCII dots because the native atlas lacks vertical ellipsis.
+                text=gs.Text(
+                    {
+                        "expr": "datum._label === '⋮' ? '...' : datum._label",
+                        "type": "nominal",
+                    }
+                ),
             )
         )
         if hover:
@@ -71,7 +79,16 @@ def build_ranking(
                     gs.Tooltip("_rank:Q", title="Rank", format="d"),
                 ]
             )
-        charts.append(chart.properties(width=width, height=height, title=panel.title))
+        # Rotated gene names can extend above the plot's score limits.
+        top_space = max(map(len, panel.values["_label"])) * fontsize * POINTS_TO_PIXELS
+        charts.append(
+            chart.properties(
+                width=width,
+                height=height,
+                title=panel.title,
+                padding={"top": top_space},
+            )
+        )
     if len(charts) == 1:
         return charts[0]
     return gs.concat(*charts, columns=min(ncols, len(charts))).resolve_scale(

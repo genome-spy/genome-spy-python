@@ -35,6 +35,8 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         return tsne(*args, **kwargs)
 
     monkeypatch.setattr(sc.tl, "tsne", prepare_tsne)
+    monkeypatch.setattr(sc.pp, "pca", lambda *a, **k: pytest.fail("Ran PCA"))
+    monkeypatch.setattr(sc.tl, "pca", lambda *a, **k: pytest.fail("Ran PCA"))
     namespace = {}
     path = NOTEBOOKS / "scanpy_umap.ipynb"
     try:
@@ -44,8 +46,26 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         assert pbmc.obs_names.equals(original.obs_names)
         np.testing.assert_array_equal(pbmc.obsm["X_umap"], original.obsm["X_umap"])
         np.testing.assert_array_equal(pbmc.obsm["X_pca"], original.obsm["X_pca"])
+        np.testing.assert_array_equal(pbmc.varm["PCs"], original.varm["PCs"])
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
+        loadings = namespace["loadings_chart"]
+        assert loadings in charts
+        assert namespace["pca_genes"].shape == (700, 309)
+        assert (
+            loadings.to_dict()
+            == gsc.pl.ranking(
+                namespace["pca_genes"],
+                "varm",
+                "PCs",
+                indices=[0, 1],
+                n_points=20,
+                include_lowest=True,
+                width=280,
+                height=280,
+                show=False,
+            ).to_dict()
+        )
         assert namespace["scatter_chart"] in charts
         scatter = namespace["scatter_chart"].to_dict()
         assert scatter["resolve"]["legend"] == {"default": "collected"}
@@ -70,6 +90,8 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         assert pbmc.obsm["X_tsne"].shape == (700, 2)
         assert charts
         for chart in charts:
+            if chart is loadings:
+                continue
             spec = chart.to_dict()
             assert spec["datasets"]
             for panel in units(spec):

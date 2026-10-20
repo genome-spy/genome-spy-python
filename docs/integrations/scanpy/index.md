@@ -30,7 +30,8 @@ and matrixplots, individual-cell heatmaps, supplied numeric matrices, clustermap
 standalone dendrograms, correlation matrices, stored rank/score panels and ranked
 dotplot/matrixplot/heatmap wrappers.
 Full public Scanpy plotting coverage is the destination; the inventory below
-records remaining work. Native plot builders remain planned.
+records remaining work. Stored PCA loadings share the ranking panels. Native
+plot builders remain planned.
 
 ## Shared 2D embeddings
 
@@ -67,6 +68,45 @@ dimensions=(0, 1))`. The default remains UMAP.
 The supported controls and visual limits below apply to all these embeddings.
 3D, graph edges/arrows and remaining marker/normalization options stay in M07.d/M14.
 The UMAP notebook now includes packaged PCA and explicitly prepared t-SNE examples.
+
+## PCA loadings
+
+`pca_loadings` reads stored `varm["PCs"]` and `var_names`. It reuses the same
+preparation and native text panels as `ranking`, just as Scanpy delegates this
+plot to its ranking function. No PCA, expression access or source mutation runs.
+
+```python
+# This packaged dataset stores loadings only for its highly variable genes.
+pca_genes = pbmc[:, pbmc.var["highly_variable"]]
+loadings = gsc.pl.pca_loadings(
+    pca_genes, components="1,2", n_points=20,
+    width=280, height=280, show=False,
+)
+loadings.display(inline=True, controls=False)
+```
+
+Components are one-based strings or integer sequences, in display order; the
+default is the first three. Repeated components and variable labels are retained.
+`n_points=None` selects min(30, n_vars); explicit counts cannot exceed n_vars.
+`include_lowest=True` splits that count between high and low loadings, with a gap
+when ranks are omitted. It requires at least two ranks. Top-only mode preserves
+Scanpy's extra label when available. Sorting, signed scores and ties use the
+existing NumPy ranking path.
+
+Selected loadings must be finite resident NumPy data. Sparse expression, views
+and backed AnnData work when their selected loadings are resident; sparse/lazy
+loadings reject without densification. Missing loadings require explicit Scanpy
+PCA first. Select valid genes explicitly when a stored array has missing rows;
+the packaged PBMC example selects its 309 highly variable genes. Scanpy 1.11.5
+also errors on that full array. A single component renders normally here despite
+an indexing error in the pinned upstream plotting function.
+
+Native `hover` shows gene, loading score and displayed rank; `hover=False`
+disables it. `width`/`height` size each plot area. Native fonts, ticks and outer
+spacing retain the ranking renderer's documented differences. Rotated ASCII dots
+render the omitted-rank marker because the native font lacks vertical ellipsis.
+`show`/`save` use
+the common native delivery contract. PCA variance and overview remain planned.
 
 ## Scatter cells or genes
 
@@ -156,6 +196,7 @@ semantics match the plot:
 | --- | --- | --- |
 | 2D embeddings | Existing `obsm` coordinates; public AnnData `obs_vector`/`raw.obs_vector`; Scanpy's public palette lists | Masks, draw order, component selection, stable IDs and native color/size/guide mapping. No embedding computation. |
 | Scatter | Public AnnData `obs_vector`/`raw.obs_vector`/`var_vector` and stored X_ coordinates; existing embedding color/style/point helpers | Distinct orientation, per-axis layers, legacy component labels and paint order; no full transpose or analysis. |
+| PCA loadings | Stored `varm["PCs"]` and `var_names`; existing ranking preparation and chart builder | One-based component/count validation; no PCA or expression access. |
 | Dotplot | Public `sc.get.obs_df`, including selected raw/layer/symbol lookup; AnnData categorization on the detached table | Shared pandas means, strict-cutoff fractions and plotting min–max scaling. Native marks and guides use those results. |
 | Matrixplot | The same getter, categorization and shared grouped means/scaling; supplied `values_df` uses only group rows and zero-row feature lookup validation | Plot ordering, repeated slots and native tile/guide mapping. No expression-fraction computation. |
 | Heatmap | The same getter, categorization, min–max operation, native palettes, marker ordering and tree branches | Cell values and original row positions, category spans and shared annotation alignment. No group means or downsampling. |
@@ -746,7 +787,7 @@ Two notebooks run independently:
   basic categorical/continuous UMAP, linked brushing/count/Python retrieval, then
   customization with subsets, titles/frames, categorical order/palettes, an
   explicit Scanpy gene score and the eight-panel marker overview, followed by
-  stored PCA with variance labels and explicitly prepared t-SNE.
+  stored PCA with variance labels/loadings, explicitly prepared t-SNE and cell/gene scatter.
 - {download}`Expression plots <../../../integrations/scanpy/notebooks/scanpy_expression.ipynb>`:
   marker dotplot, per-gene scaled matrixplot, zoomable individual-cell heatmap and supplied matrix on
   `bulk_labels`, clustermap, stored score panels and ranked expression variants,
@@ -792,8 +833,8 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter |
-| PCA diagnostics | pca_loadings, pca_overview, pca_variance_ratio |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings |
+| PCA diagnostics | pca_overview, pca_variance_ratio |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Diagnostics and simulation | highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
 | Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_as_heatmap, timeseries_subplot |

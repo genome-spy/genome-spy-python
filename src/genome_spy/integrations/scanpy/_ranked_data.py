@@ -350,11 +350,11 @@ def attribute_rank_panels(
     n_points: int,
     log: bool,
     include_lowest: bool,
+    context: str = "gsc.pl.ranking",
 ) -> list[RankPanel]:
     """Return sorted panels from supplied AnnData scores; never fit or modify data."""
     from anndata import AnnData
 
-    context = "gsc.pl.ranking"
     if not isinstance(adata, AnnData):
         raise TypeError(f"{context}: expected AnnData.")
     count = _count(n_points, "n_points", context=context)

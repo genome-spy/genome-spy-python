@@ -3,6 +3,7 @@
 import inspect
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -23,6 +24,28 @@ EMBEDDINGS = {
     "pca_scatter",
     "scatter",
 }
+
+
+def test_progress_inventory_matches_the_pinned_api_and_available_exports():
+    status = (
+        Path(__file__).resolve().parents[3] / "integrations/scanpy/STATUS.md"
+    ).read_text()
+    inventory = status.split("## Public callable coverage\n", 1)[1].split(
+        "## Parameter", 1
+    )[0]
+    rows = dict(re.findall(r"^\| `([^`]+)` \| ([^|]+) \|", inventory, re.MULTILINE))
+    pinned = json.loads((FIXTURES / "api.json").read_text())["entries"]
+    assert rows.keys() == pinned.keys()
+    available = {
+        name
+        for name, state in rows.items()
+        if not state.startswith(("Not implemented", "External:"))
+    }
+    assert available == set(pl.__all__)
+    assert (
+        f"{len(available)} functions are available as partial previews; {len(rows) - len(available) - 2} plot/builder"
+        in inventory
+    )
 
 
 @pytest.mark.parametrize("family", [name for name in pl.__all__ if name != "ranking"])
@@ -53,6 +76,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
 
         a, options = make_ranked_adata(), {}
+    if family == "pca_loadings":
+        from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
+
+        a, options = make_ranked_adata(), {"components": "1,2"}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -85,9 +112,11 @@ def test_shared_display_validation_precedes_optional_imports(
         args += ("umap",)
     elif family in ("dotplot", "matrixplot", "heatmap"):
         args += (["g1"], "group")
-    elif family not in EMBEDDINGS | {"matrix", "clustermap"} and not family.startswith(
-        "rank_genes_groups"
-    ):
+    elif family not in EMBEDDINGS | {
+        "matrix",
+        "clustermap",
+        "pca_loadings",
+    } and not family.startswith("rank_genes_groups"):
         args += ("group",)
     with pytest.raises(
         error,
