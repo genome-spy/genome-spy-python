@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-19. This is the current progress ledger; [PLAN.md](PLAN.md)
+Updated: 2026-10-20. This is the current progress ledger; [PLAN.md](PLAN.md)
 describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
@@ -411,6 +411,30 @@ to Matplotlib. Scatter does not yet expose linked brushing/Python membership.
 Clearance: retain the live plan/status and permanent tests/reference provenance.
 M07.b remains Implemented until its browser resource gate passes. No working
 plan becomes eligible for removal, and full-family closure is not claimed.
+
+### Native legend customization follow-up (2026-10-20)
+
+Shared embedding/scatter presentation defaults now live in native chart
+configuration, so `configure_legend` can change guide size and placement. A single
+panel row no longer has a redundant outer row wrapper; inner rows allow native
+legend collection at the chart root. Ordinary calls retain their existing guide
+appearance and independent scales/guides. No plotting parameters or custom guides
+were added.
+
+The UMAP notebook's cell-scatter example collects compact native guides below
+both panels. `height` remains the plot-area height, with external guides added
+outside it. All thirteen notebook code cells completed in the existing Jupyter
+session; the final scatter output was visually checked. Tests cover collected categorical and continuous guides below one
+and two panel rows, their bounds/symbol footprints, unchanged point data/marks,
+nonoverlapping colorbar labels, Scanpy's many-category column defaults and
+linked-chart configuration.
+
+Validation: **307 targeted semantic/API checks**, **46 browser checks**, and the
+canonical UMAP workflow pass. Ruff formatting/lint and mypy pass. Existing
+registered chart comparisons, hover, zoom, brush counts and offline delivery
+remain covered. Generated evidence stays outside Git. Full unrelated suites,
+documentation build and resource measurements were not repeated; M06/M07 resource
+gates and plan clearance remain unchanged.
 
 ## M01 retained delivery evidence
 

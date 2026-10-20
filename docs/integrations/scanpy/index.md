@@ -93,6 +93,22 @@ full object or densifies the full expression matrix. It reads repeated keys once
 per source and retains duplicate point labels with distinct positional IDs.
 The UMAP notebook includes both packaged cell and gene annotation examples.
 
+Use native chart methods to collect guides below the panels and make them compact:
+
+```python
+cells = cells.resolve_legend(default="collected").configure_legend(
+    orient="bottom", direction="horizontal", columns=6,
+    symbolSize=64, gradientLength=140, gradientThickness=10, tickCount=3,
+    layout={"anchor": "middle", "wrap": True},
+)
+```
+
+These methods also work on shared embedding plots. Color scales stay independent;
+compatible guides are collected in one place. Ordinary calls preserve Scanpy's
+scatter legend symbol area of 300 points² (about 24 pixels across). Native
+`symbolSize` uses logical pixel area, so 64 gives smaller symbols without changing
+the plotted points. Panel `height` sizes the plot area; external guides add height.
+
 | Parameters | Current behavior |
 | --- | --- |
 | `x`, `y`, `color` | Numeric coordinates, categorical/numeric annotation or expression colors, opaque CSS names/hex, or multiple color panels. Default color is gray. Annotation fields take precedence over expression and literal colors. Variable hover identifies genes. |

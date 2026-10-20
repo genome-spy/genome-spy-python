@@ -24,6 +24,54 @@ def records(spec):
     return next(iter(spec["datasets"].values()))
 
 
+@pytest.mark.parametrize(
+    "family,linked", [("scatter", False), ("umap", False), ("umap", True)]
+)
+def test_native_legend_configuration_overrides_shared_defaults_without_changing_points(
+    family, linked
+):
+    import genome_spy as gs
+    from genome_spy.integrations.scanpy._style import POINTS_TO_PIXELS
+
+    options = {"basis": "umap"} if family == "scatter" else {}
+    if linked:
+        options["selection"] = gs.selection_interval("cells", encodings=["x", "y"])
+    default = getattr(gsc.pl, family)(
+        make_scatter_adata(), color=["cell_type", "score"], show=False, **options
+    )
+    compact = default.resolve_legend(default="collected").configure_legend(
+        orient="bottom",
+        direction="horizontal",
+        columns=4,
+        symbolSize=64,
+        gradientLength=140,
+    )
+    original, updated = default.to_dict(), compact.to_dict()
+    assert (
+        original["config"]["legend"]["symbolSize"]
+        == (300 if family == "scatter" else 36) * POINTS_TO_PIXELS**2
+    )
+    assert original["config"]["legend"]["orient"] == "right"
+    assert updated["config"]["legend"]["symbolSize"] == 64
+    assert updated["config"]["legend"]["orient"] == "bottom"
+    assert updated["config"]["legend"]["gradientLength"] == 140
+    assert updated["resolve"]["legend"] == {"default": "collected"}
+    assert updated["datasets"] == original["datasets"]
+    assert units(updated) == units(original)
+    plot = units(updated["vconcat"][0]) if linked else units(updated)
+    assert all(
+        "orient" not in points(panel)["encoding"]["color"]["legend"] for panel in plot
+    )
+    assert "columns" not in points(plot[0])["encoding"]["color"]["legend"]
+
+
+def test_many_categories_keep_scanpy_column_defaults():
+    a = make_scatter_adata()
+    a.obs["many"] = pd.Categorical(range(a.n_obs), categories=range(31))
+    spec = gsc.pl.scatter(a, "x_value", "y_value", color="many", show=False).to_dict()
+    assert spec["encoding"]["color"]["legend"]["columns"] == 3
+
+
 def test_signature_preserves_scatter_defaults_and_adds_only_native_controls():
     actual = inspect.signature(gsc.pl.scatter).parameters
     upstream = inspect.signature(sc.pl.scatter).parameters

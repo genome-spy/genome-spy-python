@@ -428,10 +428,7 @@ def test_native_dimensions_override_panel_areas_without_changing_data_or_setting
             == original["config"]["legend"]["labelFontSize"]
         )
     numeric = units(resized.to_dict())[1]
-    assert (
-        points(numeric)["encoding"]["color"]["legend"]["gradientLength"]
-        == numeric["height"]
-    )
+    assert resized.to_dict()["config"]["legend"]["gradientLength"] == numeric["height"]
     assert before == (list(mpl.rcParams["figure.figsize"]), mpl.rcParams["figure.dpi"])
 
 

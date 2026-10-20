@@ -47,6 +47,17 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
         assert namespace["scatter_chart"] in charts
+        scatter = namespace["scatter_chart"].to_dict()
+        assert scatter["resolve"]["legend"] == {"default": "collected"}
+        assert scatter["resolve"]["scale"]["color"] == "independent"
+        legend = scatter["config"]["legend"]
+        assert (
+            legend["orient"],
+            legend["direction"],
+            legend["columns"],
+            legend["symbolSize"],
+        ) == ("bottom", "horizontal", 6, 64)
+        assert legend["tickCount"] == 3
         assert namespace["gene_scatter_chart"] in charts
         gene_rows = next(
             iter(namespace["gene_scatter_chart"].to_dict()["datasets"].values())

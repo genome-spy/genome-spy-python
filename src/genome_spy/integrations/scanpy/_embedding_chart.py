@@ -82,26 +82,16 @@ def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
             columns = 3
         elif count > 14:
             columns = 2
-        return gs.Legend(
+        legend = gs.Legend(
             title=None,
-            orient="right",
             values=list(panel.legend_values),
-            columns=columns,
-            symbolSize=style.legend_symbol_size * POINTS_TO_PIXELS**2,
             symbolOpacity=style.alpha,
             labelLimit=1000,
         )
+        return legend.columns(columns) if columns > 1 else legend
     if style.colorbar_loc is None:
         return None
-    return gs.Legend(
-        title=None,
-        orient="right",
-        gradientLength=style.height,
-        gradientThickness=style.height / 30,
-        gradientOpacity=style.alpha,
-        gradientStrokeColor=style.frame_color,
-        gradientStrokeWidth=style.frame_width,
-    )
+    return gs.Legend(title=None, gradientOpacity=style.alpha)
 
 
 def _color(panel: Panel, index: int, style: EmbeddingStyle) -> gs.Color:
@@ -295,16 +285,17 @@ def _compose(
     rows = [
         gs.hconcat(
             *charts[start : start + style.ncols], spacing=style.wspace * style.width
-        )
-        .resolve_scale(**resolutions)
-        .resolve_legend(default="independent")
+        ).resolve_scale(**resolutions)
         for start in range(0, len(charts), style.ncols)
     ]
-    return (
-        gs.vconcat(*rows, spacing=style.hspace * style.height)
-        .resolve_scale(**resolutions)
-        .resolve_legend(default="independent")
+    combined = (
+        rows[0]
+        if len(rows) == 1
+        else gs.vconcat(*rows, spacing=style.hspace * style.height).resolve_scale(
+            **resolutions
+        )
     )
+    return combined.resolve_legend(default="independent")
 
 
 def build_embedding(
@@ -328,8 +319,15 @@ def build_embedding(
     # Share zoom only when the panels show the same coordinate pair.
     share_coordinates = zoom and len({p.dimensions for p in prepared.panels}) == 1
     chart = _compose(charts, style, share_coordinates=share_coordinates)
-    return (
-        with_brush_count(chart, prepared, style, selection)
-        if selection is not None
-        else chart
+    if selection is not None:
+        chart = with_brush_count(chart, prepared, style, selection)
+    # Keep presentation defaults overridable through native chart configuration.
+    return chart._configure_nested(
+        "legend",
+        orient="right",
+        symbolSize=style.legend_symbol_size * POINTS_TO_PIXELS**2,
+        gradientLength=style.height,
+        gradientThickness=style.height / 30,
+        gradientStrokeColor=style.frame_color,
+        gradientStrokeWidth=style.frame_width,
     )

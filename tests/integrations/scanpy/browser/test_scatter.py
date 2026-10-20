@@ -86,3 +86,103 @@ def test_scatter_hover_zoom_and_offline_html_use_existing_embedding_interactions
     page.goto(path.as_uri())
     page.locator("canvas").first.wait_for(state="visible")
     assert not page.locator(".message-box").count()
+
+
+@pytest.mark.parametrize("family,rows", [("scatter", 1), ("umap", 1), ("umap", 2)])
+def test_native_collected_legends_fit_below_all_panels_with_compact_symbols(
+    page, tmp_path, family, rows
+):
+    import scanpy as sc
+
+    a = sc.datasets.pbmc68k_reduced()
+    options = {"x": "n_counts", "y": "n_genes"} if family == "scatter" else {"ncols": 2}
+    colors = (
+        ["louvain", "percent_mito"]
+        if rows == 1
+        else ["louvain", "n_counts", "phase", "percent_mito"]
+    )
+    chart = (
+        getattr(gsc.pl, family)(
+            a, color=colors, width=280, height=280, show=False, **options
+        )
+        .resolve_legend(default="collected")
+        .configure_legend(
+            orient="bottom",
+            direction="horizontal",
+            columns=6,
+            symbolSize=64,
+            gradientLength=140,
+            gradientThickness=10,
+            tickCount=3,
+            layout={"anchor": "middle", "wrap": True},
+        )
+    )
+    render(page, chart)
+    bounds = [
+        page.evaluate("i=>api.views.getLayoutBounds({scope:[],view:'panel-'+i})", i)
+        for i in range(len(colors))
+    ]
+    plot_bottom = max(b["y"] + b["height"] for b in bounds)
+    svg = page.evaluate("async()=> (await api.imageExport.svg()).blob.text()")
+    guides = page.evaluate(
+        """svg=>{
+        const root = new DOMParser().parseFromString(svg, 'image/svg+xml').documentElement;
+        root.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
+        document.body.append(root);
+        const box = node => { const r=node.getBoundingClientRect(); return {x:r.x,y:r.y,width:r.width,height:r.height}; };
+        const result = {
+            text: [...root.querySelectorAll('text')].map(n=>({label:n.textContent,...box(n)})),
+            shapes: [...root.querySelectorAll('path,circle,rect')].map(box),
+            gradients: [...root.querySelectorAll('rect')].filter(n=>(n.getAttribute('fill')||'').startsWith('url(')).map(box),
+        };
+        root.remove();
+        return result;
+    }""",
+        svg,
+    )
+    labels = [
+        r
+        for r in guides["text"]
+        if r["label"] in [str(i) for i in range(11)] + ["G1", "S", "G2M"]
+    ]
+    assert len(labels) == 11 + (3 if rows == 2 else 0)
+    assert all(label["y"] > plot_bottom for label in labels)
+    symbols = [
+        b
+        for b in guides["shapes"]
+        if b["y"] > plot_bottom
+        and b["width"] > 4
+        and abs(b["width"] - b["height"]) < 0.1
+    ]
+    assert len(symbols) == len(labels)
+    assert all(symbol["width"] < 12 for symbol in symbols)
+    assert len(guides["gradients"]) == (1 if rows == 1 else 2)
+    assert all(
+        g["y"] > plot_bottom and abs(g["width"] - 140) < 1 for g in guides["gradients"]
+    )
+    for gradient in guides["gradients"]:
+        ticks = sorted(
+            (
+                label
+                for label in guides["text"]
+                if gradient["y"] + gradient["height"]
+                <= label["y"]
+                < gradient["y"] + gradient["height"] + 25
+                and gradient["x"] - 20
+                <= label["x"]
+                < gradient["x"] + gradient["width"] + 20
+            ),
+            key=lambda label: label["x"],
+        )
+        assert len(ticks) >= 2
+        assert all(
+            left["x"] + left["width"] <= right["x"]
+            for left, right in zip(ticks, ticks[1:])
+        )
+    size = page.evaluate("api.getLogicalCanvasSize()")
+    for item in labels + symbols + guides["gradients"]:
+        assert 0 <= item["x"] and item["x"] + item["width"] <= size["width"] + 1
+        assert item["y"] + item["height"] <= size["height"] + 1
+    page.screenshot(
+        path=str(tmp_path / f"{family}-{rows}-bottom-guides.png"), full_page=True
+    )
