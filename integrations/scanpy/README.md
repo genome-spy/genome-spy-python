@@ -31,14 +31,14 @@ not in this workspace or the documentation:
 | [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Selected values, feature slots/brackets and summaries. Shared scale_values serves cells and group means; heatmap adds cell permutations/group spans and an early size guard. No chart authoring. |
 | [_style.py](../../src/genome_spy/integrations/scanpy/_style.py) | Shared schemes, CSS colors, continuous color bounds, fonts and point units for every plot; categorical/continuous preparation and explicit embedding style settings live here too. |
 | [_dendrogram_data.py](../../src/genome_spy/integrations/scanpy/_dendrogram_data.py) | Read stored Scanpy results, delegate missing trees to sc.tl.dendrogram and share leaf/marker permutations. |
-| [_dendrogram_chart.py](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py) | Native rule branches for standalone and attached trees; no clustering. |
+| [_dendrogram_chart.py](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py) | Shared stored branch coordinates with native rules or gapped side-track links; no clustering. |
 | [_correlation_chart.py](../../src/genome_spy/integrations/scanpy/_correlation_chart.py) | Native correlation tiles, numbers, labels, hover and optional tree. |
 | [_grouped_chart.py](../../src/genome_spy/integrations/scanpy/_grouped_chart.py) | Dotplot/matrixplot share index slots, labels, brackets, sizing, guides and attached-tree layout; correlation reuses index coordinates. |
 | [_matrixplot_chart.py](../../src/genome_spy/integrations/scanpy/_matrixplot_chart.py) | Native tiles, edge styling and summary hover; no AnnData access. |
 | [_matrix_chart.py](../../src/genome_spy/integrations/scanpy/_matrix_chart.py) | Supplied numeric tiles and native axes/color guide; reuses numeric validation, color bounds, index slots and labels without AnnData access. |
 | [_clustermap_data.py](../../src/genome_spy/integrations/scanpy/_clustermap_data.py) | Bounded full-subset access, Seaborn-compatible scaling and color tracks, public SciPy or supplied row/column linkage. |
 | [_clustermap_chart.py](../../src/genome_spy/integrations/scanpy/_clustermap_chart.py) | Shared matrix tiles, slot labels, fitted values and navigation composed with two aligned trees, ordered color strips and a native observation-category legend. |
-| [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles, category strips, boundaries and cell hover; reuses grouped labels/brackets and trees projected onto unequal group spans, with optional aligned zoom (y-only by default). |
+| [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles and native surround tracks with shared index gaps, category bands, centered labels and stored tree links; reuses grouped labels/brackets and fitted values, with optional aligned zoom (y-only by default). |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_embedding_data.py](../../src/genome_spy/integrations/scanpy/_embedding_data.py) | Resolve stored bases, shared coordinate labels and selected expression/metadata; retain row identity, masks, sizes and draw order. |
 | [_scatter_data.py](../../src/genome_spy/integrations/scanpy/_scatter_data.py) | Scatter-specific cell/gene orientation, per-axis layers, selected public vectors and legacy basis/order rules. Reuses embedding identities, panel fields, colors and rendering. |
@@ -86,8 +86,9 @@ different lookups, dotplot and matrixplot scale at different stages, and their
 layouts differ from standalone trees/correlation matrices. Reuse those common
 parts directly when later families arrive. A chart module per family
 does not imply a separate validator, color system, data accessor or tree layout.
-Heatmap now supplies an explicit observation permutation and unequal group centers
-to the shared tree renderer; summary plots retain their equal-slot projection.
+Heatmap supplies an explicit observation permutation and unequal group centers
+to the shared tree renderer. Its native side tracks share gapped index scales;
+summary plots retain their equal-slot projection.
 
 ## Plotting workflows
 

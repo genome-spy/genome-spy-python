@@ -8,20 +8,20 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.schema import ViewBackground
 from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
-    slot_position,
     with_values,
-    with_navigation,
 )
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
-from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
+from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._grouped_chart import (
     _brackets,
     _slot_labels,
     bracket_space,
     coordinate,
+    feature_gaps,
 )
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup, HeatmapData
 from genome_spy.integrations.scanpy._style import (
@@ -117,6 +117,24 @@ def build_heatmap(
     x = coordinate(gs.X, "_x", cells if swap_axes else genes, 0)
     y = coordinate(gs.Y, "_y", genes if swap_axes else cells, 0, reverse=True)
     x, y = zoom_axes(x, y, enabled=zoom, name="heatmap")
+    cell_gaps = prepared.intervals["stop"].iloc[:-1].tolist()
+    gene_gaps = feature_gaps(feature_groups, genes)
+    scales = gs.scales(
+        x=gs.Scale(
+            type="index",
+            **x.scale(gapPositions=cell_gaps if swap_axes else gene_gaps).to_dict()[
+                "scale"
+            ],
+        ),
+        y=gs.Scale(
+            type="index",
+            **y.scale(gapPositions=gene_gaps if swap_axes else cell_gaps).to_dict()[
+                "scale"
+            ],
+        ),
+    )
+    # The surround owns the scales; marks only declare fields and axes.
+    x, y = gs.X("_x:I").axis(None), gs.Y("_y:I").axis(None)
     # Only genes have ticks; individual cell rows remain unlabeled.
     if show_gene_labels:
         gene_axis = (y if swap_axes else x).axis(
@@ -157,8 +175,7 @@ def build_heatmap(
                     gradientThickness=15,
                     gradientStrokeColor="black",
                     gradientStrokeWidth=0.8 * PT,
-                    offset=(110 if tree and not swap_axes else 15)
-                    + (15 if feature_groups and swap_axes else 0),
+                    offset=15,
                 )
             ),
         )
@@ -177,157 +194,117 @@ def build_heatmap(
                 ),
             ]
         )
-    layers: list[gs.Chart | gs.LayerChart] = [
-        with_values(tiles, "_value", alpha=alpha) if show_values else tiles
-    ]
+    center = (
+        with_values(tiles, "_value", alpha=alpha) if show_values else gs.layer(tiles)
+    )
+    center = center.properties(
+        name="heatmap-cells",
+        width=width,
+        height=height,
+        view=ViewBackground(stroke="black", strokeWidth=0.8 * PT),
+    )
+    sides: dict[str, Any] = {}
+    gene_axis, cell_axis = (y.axis(None), x) if swap_axes else (x.axis(None), y)
+    gene_side, cell_side = ("left", "bottom") if swap_axes else ("bottom", "left")
     if show_gene_labels:
-        labels = _slot_labels(
-            list(values.columns.astype(str)),
-            y if swap_axes else x,
-            horizontal=not swap_axes,
-            zoom=bool(zoom),
-        )
-        layers.append(labels)
+        sides[gene_side] = [
+            _slot_labels(
+                list(values.columns.astype(str)),
+                gene_axis,
+                horizontal=not swap_axes,
+                in_bounds=True,
+            ).properties(name="heatmap-genes")
+        ]
 
-    # Category spans, labels and tree leaves follow the same cell permutation.
-    intervals = prepared.intervals.copy()
-    intervals["_start"] = intervals["start"] / cells
-    intervals["_stop"] = intervals["stop"] / cells
-    intervals["_center"] = intervals["center"] / cells
-    # Project cell boundaries through the live scale, including fractional centers.
-    channel = "x" if swap_axes else "y"
-    gene_channel = "y" if swap_axes else "x"
-    position = slot_position(channel, "datum.{field}")
+    # All side views inherit the same final cell and gene slots as the tiles.
+    intervals = prepared.intervals
     group_labels = intervals["label"].tolist()
+    centers = intervals["center"].tolist()
     group_color = gs.Color("label:N").scale(domain=group_labels)
     group_color = (
         group_color.scale(scheme=palette_scheme)
         if palette_scheme
         else group_color.scale(range=list(palette))
-    )
-    group_color = group_color.legend(None)
+    ).legend(None)
     if categorical:
-        annotations = _category_strip(
-            intervals,
+        strip = _category_strip(
+            list(values.index.astype(str)),
+            cell_axis,
             group_color,
-            groupby,
-            swap_axes=swap_axes,
+            horizontal=swap_axes,
+            title=groupby,
             hover=hover,
-            position=position if zoom else None,
         )
-        layers.append(annotations)
-        boundaries = intervals.iloc[:-1]
-        lines = gs.Chart(boundaries).mark_rule(color="black", size=PT, tooltip=None)
-        if zoom:
-            projected = position.format(field="stop")
-            if not swap_axes:
-                projected = f"1 - ({projected})"
-            lines = lines.transform_filter(f"inrange({projected}, [0, 1])")
-            lines = lines.transform_calculate(_boundary=projected)
-            lines = lines.encode(
-                **{
-                    channel: (gs.X if swap_axes else gs.Y)("_boundary:Q")
-                    .scale(None)
-                    .axis(None),
-                    "y" if swap_axes else "x": gs.value(0),
-                    "y2" if swap_axes else "x2": gs.value(1),
-                }
-            )
-        elif swap_axes:
-            lines = lines.encode(
-                x=gs.X("_stop:Q").scale(None).axis(None), y=gs.value(0), y2=gs.value(1)
-            )
-        else:
-            lines = lines.transform_calculate(_boundary="1 - datum._stop").encode(
-                y=gs.Y("_boundary:Q").scale(None).axis(None),
-                x=gs.value(0),
-                x2=gs.value(1),
-            )
-        boundary_layer = gs.layer(lines).resolve_scale(x="excluded", y="excluded")
-        layers.append(boundary_layer.resolve_axis(x="excluded", y="excluded"))
+        labels = _slot_labels(
+            group_labels,
+            cell_axis,
+            horizontal=swap_axes,
+            positions=centers,
+            in_bounds=True,
+        ).properties(
+            name="heatmap-groups",
+            title=gs.Title(
+                text=groupby,
+                orient="bottom" if swap_axes else "left",
+                angle=0 if swap_axes else -90,
+                font=FONT,
+                fontSize=10 * PT,
+                fontWeight="normal",
+            ),
+        )
+        tracks = [strip, labels] if swap_axes else [labels, strip]
+        sides[cell_side] = gs.SurroundSideSpec(views=tracks, spacing=8)
 
-    # Scanpy uses brackets above ordinary heatmaps and a gene strip when swapped.
-    if feature_groups and not swap_axes:
-        brackets = _brackets(
-            feature_groups,
-            x,
-            swapped=False,
-            rotation=rotation,
-            end_band=0.8,
-            zoom=bool(zoom),
-        )
-        layers.extend(brackets)
-    elif feature_groups:
-        marker_rows: list[dict[str, Any]] = []
+    # Preserve Scanpy's colored marker strip for swapped heatmaps.
+    if feature_groups and swap_axes:
         matched = {group.label for group in feature_groups}.issubset(group_labels)
-        for index, group in enumerate(feature_groups):
-            color_label = (
-                group.label
+        marker_rows = [
+            {
+                "slot": slot,
+                "label": group.label
                 if matched
-                else group_labels[min(index, len(group_labels) - 1)]
-            )
-            marker_rows.extend(
-                {"_gene": slot, "label": color_label}
-                for slot in range(group.start, group.end + 1)
-            )
-        markers = (
+                else group_labels[min(i, len(group_labels) - 1)],
+            }
+            for i, group in enumerate(feature_groups)
+            for slot in range(group.start, group.end + 1)
+        ]
+        sides["right"] = [
             gs.Chart(marker_rows)
-            .mark_rect(xOffset=8, x2Offset=20, clip="never", tooltip=None)
+            .mark_rect(clip=True, tooltip=None)
             .encode(
-                x=gs.value(1), x2=gs.value(1), y=y.field("_gene"), color=group_color
+                y=gene_axis.field("slot"),
+                color=group_color,
             )
-        )
-        if zoom:
-            markers = markers.transform_calculate(
-                _top=f"1 - clamp({slot_position(gene_channel, 'datum._gene')}, 0, 1)",
-                _bottom=f"1 - clamp({slot_position(gene_channel, 'datum._gene + 1')}, 0, 1)",
-            ).encode(
-                y=gs.Y("_top:Q").scale(None).axis(None),
-                y2="_bottom:Q",
-            )
-            layers.append(
-                gs.layer(markers)
-                .resolve_scale(x="excluded", y="excluded")
-                .resolve_axis(x="excluded", y="excluded")
-            )
-        else:
-            layers.append(markers)
+            .properties(width=12, name="heatmap-marker-strip")
+        ]
+    elif feature_groups:
+        sides["top"] = [
+            gs.layer(
+                *_brackets(
+                    feature_groups,
+                    gene_axis,
+                    swapped=False,
+                    rotation=rotation,
+                    end_band=0.8,
+                    zoom=bool(zoom),
+                    in_bounds=True,
+                )
+            ).properties(height=bracket_space(feature_groups), name="heatmap-brackets")
+        ]
     if tree is not None:
-        layers.append(
-            tree_overlay(
+        sides["top" if swap_axes else "right"] = [
+            tree_track(
                 tree,
-                orientation="top" if swap_axes else "right",
-                reverse=not swap_axes,
+                centers,
+                horizontal=swap_axes,
                 size=80 if swap_axes else 100,
-                leaf_positions=intervals["center" if zoom else "_center"].tolist(),
-                leaf_projection=position if zoom else None,
-            )
-        )
-    gene_space = (
-        max(map(len, map(str, values.columns))) * TICK * 0.65 + 12
-        if show_gene_labels
-        else 10
-    )
-    group_space = max(map(len, group_labels)) * TICK * 0.65 + 35 if categorical else 10
-    top_space = 10.0
-    if tree and swap_axes:
-        top_space = 90
-    elif feature_groups and not swap_axes:
-        top_space = bracket_space(feature_groups)
-    chart = (
-        gs.layer(*layers)
-        .properties(
-            width=width,
-            height=height,
-            padding={
-                "left": gene_space if swap_axes else group_space + 25,
-                "bottom": group_space + 25 if swap_axes else gene_space,
-                "top": top_space,
-                "right": 25,
-            },
-        )
-        .resolve_scale(color="independent")
-        .configure_view(stroke="black", strokeWidth=0.8 * PT)
+            ).properties(name="heatmap-tree")
+        ]
+
+    return (
+        gs.surround(center, surround=gs.SurroundSides(**sides), spacing=0)
+        .properties(scales=scales)
+        .resolve_legend(color="collected")
         .configure_legend(
             labelFont=FONT,
             labelFontSize=TICK,
@@ -335,113 +312,29 @@ def build_heatmap(
             layout={"anchor": "end", "direction": "vertical", "wrap": False},
         )
     )
-    return with_navigation(chart, enabled=bool(zoom))
 
 
 def _category_strip(
-    intervals: pd.DataFrame,
+    labels: list[str],
+    coordinate: Any,
     color: gs.Color,
-    title: str,
     *,
-    swap_axes: bool,
+    horizontal: bool,
+    title: str,
     hover: bool,
-    position: str | None = None,
-) -> gs.LayerChart:
-    """Return category blocks, centered labels and a title outside the cell matrix.
+) -> gs.Chart:
+    """Return one native category band per cell, sharing the gapped cell axis.
 
-    Use normalized group spans so the strip remains aligned after resizing.
+    A small metadata table keeps gaps and tooltips aligned without copying expression.
     """
-    strip = gs.Chart(intervals)
-    if position is not None:
-        strip = strip.transform_calculate(
-            **{
-                f"_{field}": f"clamp({position.format(field=field)}, 0, 1)"
-                for field in ("start", "stop")
-            },
-            _center=position.format(field="center"),
-        )
-    labels = strip
-    if position is not None:
-        labels = labels.transform_filter("inrange(datum._center, [0, 1])")
-    title_chart = gs.Chart([{"label": title}])
-    label_space = max(map(len, intervals["label"])) * TICK * 0.65 + 40
-    if swap_axes:
-        strip = strip.mark_rect(
-            yOffset=8,
-            y2Offset=21,
-            clip="never",
-            tooltip={"handler": "default"} if hover else None,
-        ).encode(
-            x=gs.X("_start:Q").scale(None).axis(None),
-            x2="_stop:Q",
-            y=gs.value(0),
-            y2=gs.value(0),
-            color=color,
-        )
-        rotate = max(map(len, intervals["label"])) >= 3
-        labels = labels.mark_text(
-            font=FONT,
-            size=TICK,
-            clip="never",
-            tooltip=None,
-            angle=-90 if rotate else 0,
-            align="right" if rotate else "center",
-            baseline="middle" if rotate else "top",
-            yOffset=30,
-        ).encode(
-            x=gs.X("_center:Q").scale(None).axis(None), y=gs.value(0), text="label:N"
-        )
-        title_chart = title_chart.mark_text(
-            font=FONT, size=10 * PT, clip="never", tooltip=None, yOffset=label_space
-        ).encode(x=gs.value(0.5), y=gs.value(0), text="label:N")
-    else:
-        strip = (
-            strip.transform_calculate(
-                _top="1 - datum._start", _bottom="1 - datum._stop"
-            )
-            .mark_rect(
-                xOffset=-22,
-                x2Offset=-8,
-                clip="never",
-                tooltip={"handler": "default"} if hover else None,
-            )
-            .encode(
-                y=gs.Y("_top:Q").scale(None).axis(None),
-                y2="_bottom:Q",
-                x=gs.value(0),
-                x2=gs.value(0),
-                color=color,
-            )
-        )
-        labels = (
-            labels.transform_calculate(_center_y="1 - datum._center")
-            .mark_text(
-                font=FONT,
-                size=TICK,
-                clip="never",
-                tooltip=None,
-                align="right",
-                baseline="middle",
-                xOffset=-30,
-            )
-            .encode(
-                y=gs.Y("_center_y:Q").scale(None).axis(None),
-                x=gs.value(0),
-                text="label:N",
-            )
-        )
-        title_chart = title_chart.mark_text(
-            font=FONT,
-            size=10 * PT,
-            clip="never",
-            tooltip=None,
-            angle=-90,
-            xOffset=-label_space,
-        ).encode(x=gs.value(0), y=gs.value(0.5), text="label:N")
+    strip = gs.Chart([{"slot": i, "label": label} for i, label in enumerate(labels)])
+    strip = strip.mark_rect(
+        clip=True,
+        minHeight=0,
+        minOpacity=1,
+        tooltip={"handler": "default"} if hover else None,
+    ).encode(color=color, **{"x" if horizontal else "y": coordinate.field("slot")})
     if hover:
         strip = strip.encode(tooltip=[gs.Tooltip("label:N", title=title)])
-    return (
-        gs.layer(strip, labels, title_chart)
-        .resolve_scale(x="excluded", y="excluded")
-        .resolve_axis(x="excluded", y="excluded")
-    )
+    strip = strip.properties(name="heatmap-category-strip")
+    return strip.properties(height=14) if horizontal else strip.properties(width=14)

@@ -465,7 +465,7 @@ def heatmap_values(
         positions = np.arange(len(values))
     scaled = scaled.iloc[positions]
 
-    # Scanpy places strip labels and tree leaves half a row beyond the block center.
+    # Keep labels and tree leaves at the same center of each cell block.
     counts = scaled.index.value_counts(sort=False)
     stops = counts.cumsum().to_numpy()
     starts = stops - counts.to_numpy()
@@ -474,7 +474,7 @@ def heatmap_values(
             "label": [str(label) for label in counts.index],
             "start": starts,
             "stop": stops,
-            "center": (starts + stops) / 2 + 0.5,
+            "center": (starts + stops - 1) / 2,
         }
     )
     if not intervals["label"].is_unique:

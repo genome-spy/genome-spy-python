@@ -22,6 +22,8 @@ def reference_paths(family: str, output: Path | None) -> tuple[Path, Path]:
 
 def units(spec: dict[str, Any]) -> list[dict[str, Any]]:
     """Return leaf views while retaining layers as one plotting panel."""
+    if "surround" in spec:
+        return units(spec["spec"])
     for composition in ("concat", "hconcat", "vconcat"):
         if composition in spec:
             return [unit for child in spec[composition] for unit in units(child)]
@@ -30,6 +32,13 @@ def units(spec: dict[str, Any]) -> list[dict[str, Any]]:
 
 def leaf_marks(spec: dict[str, Any]) -> list[dict[str, Any]]:
     """Return leaf marks in draw order, including nested value layers."""
+    if "surround" in spec:
+        sides = [
+            track
+            for side in spec["surround"].values()
+            for track in (side["views"] if isinstance(side, dict) else side)
+        ]
+        return [mark for child in [spec["spec"], *sides] for mark in leaf_marks(child)]
     if "layer" in spec:
         return [mark for child in spec["layer"] for mark in leaf_marks(child)]
     return [spec]

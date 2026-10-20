@@ -14,6 +14,7 @@ import genome_spy.integrations.scanpy as gsc
 from genome_spy.integrations.scanpy import _grouped_data, pl
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata, heatmap_cases
 from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
+from tests.integrations.scanpy.helpers import leaf_marks, points
 
 sc = pytest.importorskip("scanpy")
 FIXTURES = Path(__file__).with_name("fixtures")
@@ -38,7 +39,9 @@ def plot(adata, **options):
 
 def records(chart):
     spec = chart.to_dict()
-    return pd.DataFrame(spec["datasets"][spec["layer"][0]["data"]["name"]])
+    return pd.DataFrame(
+        next(rows for rows in spec["datasets"].values() if "_value" in rows[0])
+    )
 
 
 def test_signature_retains_upstream_defaults_and_native_additions():
@@ -75,7 +78,7 @@ def test_values_labels_and_bounds_match_frozen_scanpy(case):
     )
     spec = chart.to_dict()
     np.testing.assert_allclose(
-        spec["layer"][0]["encoding"]["color"]["scale"]["domain"],
+        points(spec)["encoding"]["color"]["scale"]["domain"],
         reference["color_domain"],
     )
     labels = (
@@ -85,7 +88,12 @@ def test_values_labels_and_bounds_match_frozen_scanpy(case):
     )
     if labels:
         assert [
-            row["label"] for row in spec["datasets"][spec["layer"][1]["data"]["name"]]
+            row["label"]
+            for row in spec["datasets"][
+                next(m for m in leaf_marks(spec) if m.get("name") == "heatmap-genes")[
+                    "data"
+                ]["name"]
+            ]
         ] == labels
 
 
@@ -161,19 +169,81 @@ def test_trees_reorder_cells_markers_and_ids_together_without_analysis(
 def test_unequal_group_spans_and_tree_centers(adata, swapped):
     chart = plot(adata, dendrogram=True, swap_axes=swapped)
     spec = chart.to_dict()
-    branches = spec["datasets"][spec["layer"][-1]["layer"][0]["data"]["name"]]
+    tree = spec["surround"]["top" if swapped else "right"][0]
+    branches = spec["datasets"][tree["data"]["name"]]
     data = records(chart).drop_duplicates("_obs_id")
     counts = data.groupby("_group", sort=False).size().to_numpy()
-    centers = (counts.cumsum() - counts / 2 + 0.5) / adata.n_obs
+    centers = counts.cumsum() - counts / 2 - 0.5
     leaf_positions = sorted(
         {
-            row[field]
+            row[field] + row[f"{field}_offset"]
             for row in branches
             for field, distance in [("leaf", "distance"), ("leaf2", "distance2")]
             if row[distance] == 0
         }
     )
     np.testing.assert_allclose(leaf_positions, centers)
+
+
+@pytest.mark.parametrize("swapped", [False, True])
+def test_native_tracks_share_authoritative_gapped_slot_scales(adata, swapped):
+    spec = plot(
+        adata,
+        var_names={"First": ["g2", "g2"], "Last": ["g1"]},
+        dendrogram=True,
+        swap_axes=swapped,
+        zoom="xy",
+        show_values=True,
+    ).to_dict()
+    data = records(plot(adata, dendrogram=True))
+    stops = (
+        data.drop_duplicates("_obs_id").groupby("_group", sort=False).size().cumsum()
+    )
+    cell, gene = ("x", "y") if swapped else ("y", "x")
+    assert spec["scales"][cell]["gapPositions"] == stops.iloc[:-1].tolist()
+    assert spec["scales"][gene]["gapPositions"] == [2]
+    assert spec["scales"][cell]["domain"] == [0, adata.n_obs - 1]
+    assert spec["spec"]["width"] == (1000 if swapped else 90)
+    marks = leaf_marks(spec)
+    assert all(mark["mark"].get("clip") != "never" for mark in marks)
+    for mark in marks:
+        for axis in (cell, gene):
+            encoding = mark.get("encoding", {}).get(axis, {})
+            if encoding.get("type") == "index":
+                assert "scale" not in encoding
+    strip = next(mark for mark in marks if mark.get("name") == "heatmap-category-strip")
+    assert len(spec["datasets"][strip["data"]["name"]]) == adata.n_obs
+    assert (
+        sum(len(rows) for rows in spec["datasets"].values() if "_value" in rows[0])
+        == adata.n_obs * 3
+    )
+
+
+@pytest.mark.parametrize(
+    "spans,cuts",
+    [
+        ([(0, 1), (2, 2)], [2]),
+        ([(0, 0)], []),
+        ([(0, 1), (1, 2)], []),
+        ([(np.int64(0), np.int64(1)), (np.int64(2), np.int64(2))], [2]),
+    ],
+)
+def test_only_partitioned_marker_spans_create_gaps(adata, spans, cuts):
+    spec = json.loads(
+        plot(
+            adata, var_group_labels=["block"] * len(spans), var_group_positions=spans
+        ).to_json()
+    )
+    assert spec["scales"]["x"]["gapPositions"] == cuts
+
+
+def test_single_group_keeps_all_slots_without_a_group_gap():
+    spec = plot(make_heatmap_adata("one_group")).to_dict()
+    assert spec["scales"]["y"]["gapPositions"] == []
+    assert len(records(plot(make_heatmap_adata("one_group")))) == 27
+    assert not any(
+        mark.get("name") == "heatmap-category-strip" for mark in leaf_marks(spec)
+    )
 
 
 @pytest.mark.parametrize("storage", [sparse.csr_matrix, sparse.csc_matrix])
@@ -212,12 +282,12 @@ def test_two_groups_get_a_tree_and_many_genes_hide_labels(adata):
     a = adata[adata.obs["group"].isin(["C", "A"])].copy()
     a.obs["group"] = a.obs["group"].cat.remove_unused_categories()
     spec = plot(a, dendrogram=True).to_dict()
-    tree = spec["layer"][-1]["layer"][0]
+    tree = spec["surround"]["right"][0]
     assert len(spec["datasets"][tree["data"]["name"]]) == 3
     hidden = plot(adata, var_names=["g1"] * 51).to_dict()
     shown = plot(adata, var_names=["g1"] * 51, show_gene_labels=True).to_dict()
-    assert len(hidden["layer"]) + 1 == len(shown["layer"])
-    labels = shown["datasets"][shown["layer"][1]["data"]["name"]]
+    assert len(leaf_marks(hidden)) + 1 == len(leaf_marks(shown))
+    labels = shown["datasets"][shown["surround"]["bottom"][0]["data"]["name"]]
     assert [row["label"] for row in labels] == ["g1"] * 51
 
 
@@ -225,7 +295,7 @@ def test_partial_marker_labels_use_palette_positions_when_swapped(adata):
     spec = plot(
         adata, var_names={"A": ["g1"], "other": ["g2"]}, swap_axes=True
     ).to_dict()
-    strip = spec["layer"][-1]
+    strip = spec["surround"]["right"][0]
     rows = spec["datasets"][strip["data"]["name"]]
     assert [row["label"] for row in rows] == ["C", "A"]
 
@@ -268,7 +338,7 @@ def test_backed_expression_is_rejected_before_getter(adata, monkeypatch, tmp_pat
 @pytest.mark.parametrize("swapped", [False, True])
 def test_gene_ticks_and_disabled_hover(adata, swapped):
     spec = plot(adata, swap_axes=swapped, hover=False).to_dict()
-    tiles = spec["layer"][0]
+    tiles = points(spec)
     gene, cell = ("y", "x") if swapped else ("x", "y")
     assert tiles["encoding"][gene]["axis"]["values"] == [0, 1, 2]
     assert tiles["encoding"][cell]["axis"] is None

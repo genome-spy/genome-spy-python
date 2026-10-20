@@ -1,4 +1,4 @@
-"""Native rules render Python tree geometry; GenomeSpy performs no clustering."""
+"""Native marks render Python tree geometry; GenomeSpy performs no clustering."""
 
 from typing import Literal
 
@@ -7,6 +7,7 @@ import numpy as np
 import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_data import TreeData
 from genome_spy.integrations.scanpy._data import number
+from genome_spy.integrations.scanpy._grid_interactions import index_offset
 from genome_spy.integrations.scanpy._style import (
     FONT as _FONT,
     POINTS_TO_PIXELS as _PT,
@@ -16,13 +17,15 @@ from genome_spy.integrations.scanpy._style import (
 Orientation = Literal["top", "bottom", "left", "right"]
 
 
-def tree_records(tree: TreeData) -> list[dict[str, float]]:
+def tree_records(
+    tree: TreeData, leaf_positions: list[float] | None = None
+) -> list[dict[str, float]]:
     """Turn stored tree branches into line segments with one position per group.
 
     Return endpoint rows that GenomeSpy can draw without calculating a tree.
     """
     # Convert Scanpy's ten-unit leaf spacing into one slot per group.
-    return [
+    records = [
         {
             "leaf": float(leaves[i] / 10),
             "leaf2": float(leaves[i + 1] / 10),
@@ -32,6 +35,64 @@ def tree_records(tree: TreeData) -> list[dict[str, float]]:
         for leaves, distances in zip(tree.icoord, tree.dcoord, strict=True)
         for i in range(3)
     ]
+    if leaf_positions is not None:
+        if len(leaf_positions) != len(tree.order):
+            raise ValueError("Tree leaf positions must match the number of groups.")
+        for record in records:
+            for field in ("leaf", "leaf2"):
+                record[field] = float(
+                    np.interp(
+                        record[field], np.arange(len(tree.order)) + 0.5, leaf_positions
+                    )
+                )
+    return records
+
+
+def tree_track(
+    tree: TreeData, leaf_positions: list[float], *, horizontal: bool, size: float
+) -> gs.Chart:
+    """Return an in-bounds side tree using stored branches and final slot centers.
+
+    Integer anchors and fractional offsets share the matrix's gapped index scale.
+    """
+    records = tree_records(tree, leaf_positions)
+    for record in records:
+        for field in ("leaf", "leaf2"):
+            record[f"{field}_offset"] = record[field] % 1
+            record[field] = float(np.floor(record[field]))
+    axis = "x" if horizontal else "y"
+    leaf = (gs.X if horizontal else gs.Y)("leaf:I", band=0.5).axis(None)
+    # Leave room for the root stroke inside the tree's viewport.
+    distance = (
+        (gs.Y if horizontal else gs.X)("distance:Q")
+        .scale(
+            domain=[0, distance_domain(tree)[1]],
+            nice=False,
+            zero=False,
+            zoom=False,
+        )
+        .axis(None)
+    )
+    chart = gs.Chart(records).mark_link(
+        linkShape="line", color="#555555", size=1.5 * _PT, clip=True, tooltip=None
+    )
+    if horizontal:
+        return chart.encode(
+            x=leaf,
+            x2=gs.X2("leaf2:I", band=0.5),
+            y=distance,
+            y2="distance2:Q",
+            xOffset=index_offset(axis, "leaf_offset"),
+            x2Offset=gs.X2Offset(field="leaf2_offset"),
+        ).properties(height=size)
+    return chart.encode(
+        y=leaf,
+        y2=gs.Y2("leaf2:I", band=0.5),
+        x=distance,
+        x2="distance2:Q",
+        yOffset=index_offset(axis, "leaf_offset"),
+        y2Offset=gs.Y2Offset(field="leaf2_offset"),
+    ).properties(width=size)
 
 
 def distance_domain(tree: TreeData) -> list[float]:
@@ -49,12 +110,11 @@ def tree_overlay(
     size: float = 80,
     offset: float = 0,
     linewidth: float = 1.5,
-    leaf_positions: list[float] | None = None,
     leaf_projection: str | None = None,
 ) -> gs.LayerChart:
-    """Return branches from a tree, orientation and optional leaf positions.
+    """Return branches outside a matrix, with an optional live slot projection.
 
-    Use normalized centers or a browser projection for heatmaps; otherwise align summary slots.
+    Align summary slots, with a live projection when navigation is enabled.
     """
     # Recalculate positions in the browser so leaves stay aligned after resizing.
     n = len(tree.order)
@@ -66,16 +126,6 @@ def tree_overlay(
     if offset:
         distance, distance2 = f"({distance}) + {offset}", f"({distance2}) + {offset}"
     records = tree_records(tree)
-    # Heatmap groups have unequal sizes, unlike summary rows.
-    if leaf_positions is not None:
-        if len(leaf_positions) != n:
-            raise ValueError("Tree leaf positions must match the number of groups.")
-        for record in records:
-            for field in ("leaf", "leaf2"):
-                record[field] = float(
-                    np.interp(record[field], np.arange(n) + 0.5, leaf_positions)
-                )
-        leaf, leaf2 = "datum.leaf", "datum.leaf2"
     if leaf_projection is not None:
         leaf = leaf_projection.format(field="leaf")
         leaf2 = leaf_projection.format(field="leaf2")

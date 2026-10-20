@@ -66,16 +66,11 @@ all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Active work: finish M14.b.1 verification, native heatmap side tracks and group
-gaps.** The **Plan Scanpy plotting compatibility** chat owns this slice in the shared checkout:
-native side tracks, centered labels/tree leaves and cell/marker gaps are present
-as uncommitted work. Complete the remaining visual, interaction, workflow and
-resource gates before committing and closing the increment; do not restart it.
-The owning chat records the expression-notebook update/run and final validation
-evidence with that slice. Existing work and notebook edits must be preserved.
-
-**After M14.b.1 closes:** continue M14.b.2, matrixplot/dotplot through the shared
-helpers, then M14.b.3, numeric/clustered grids. These families retain their earlier
+**Next work: M14.b.2, matrixplot/dotplot through the shared native track helpers.**
+M14.b.1's heatmap migration is closed for its stated scope; the
+[delivery record](#m14b1-native-heatmap-tracks-and-gaps) includes chart, interaction,
+workflow and resource evidence. Follow with M14.b.3, numeric/clustered grids.
+These families retain their earlier
 layouts until their own [migration increments](PLAN.md#m14b-native-grid-layout-and-group-gaps)
 are implemented and verified.
 
@@ -89,10 +84,9 @@ The M06/M07 resource gates now have fresh seven-workload evidence below. This
 does not close M07.a/b's newly observed categorical-guide rendering gap.
 
 Core 1.2.0, its generated composition APIs and the published heatmap example are
-now adopted; see the [upgrade record](#core-12-runtime-adoption). M14.b.1 is under
-verification; M14.b.2/3 remain queued. M05.f follows these migrations: heatmap
-bands are in native track viewports in the active work, while clustermap still
-needs its own migration and checks.
+now adopted; see the [upgrade record](#core-12-runtime-adoption). M14.b.1 is closed;
+M14.b.2 is ready and M14.b.3 remains planned. Heatmap bands are verified inside
+native track viewports; clustermap still needs its own M05.f migration and checks.
 
 | Slice | Lifecycle state | Commit/evidence | Remaining work before Verified/Closed |
 | --- | --- | --- | --- |
@@ -104,10 +98,10 @@ needs its own migration and checks.
 | M07.c overview increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-pca-overview) | Parent storage, typography and export limits remain M14; broader embedding options remain M07.d and C11 retains their categorical-guide gate. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
-| M14.b.1 heatmap side tracks/gaps | In progress; verification underway | [Migration scope](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Native tracks and cell/marker gaps implemented; complete visual, interaction, notebook and resource checks before closing. |
-| M14.b.2 grouped summary layout | Planned | [Shared helper migration](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Reuse the first increment's track helpers through dotplot/matrixplot; retain native guides/ruler and inherit changes in ranked variants. |
+| M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
+| M14.b.2 grouped summary layout | Ready | [Shared helper migration](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Reuse the first increment's track helpers through dotplot/matrixplot; retain native guides/ruler and inherit changes in ranked variants. |
 | M14.b.3 numeric/clustered layout | Planned | [Native numeric grid scope](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Migrate matrix/clustermap/correlation labels, trees and color tracks; verify both axes without inventing cluster groups. |
-| M05.f category-strip hover | Heatmap migration under verification; clustermap migration planned | C10; [upgrade record](#core-12-runtime-adoption); [layout route](#m05f-category-strip-tooltips--layout-migration) | Verify heatmap track hover/geometry/navigation with M14.b.1; clustermap remains M14.b.3. Legacy hover already works on Core 1.2. |
+| M05.f category-strip hover | Heatmap track migration verified; clustermap migration planned | C10; [heatmap evidence](#m14b1-native-heatmap-tracks-and-gaps); [layout route](#m05f-category-strip-tooltips--layout-migration) | Clustermap viewport migration and verification remain M14.b.3. Legacy hover already works on Core 1.2. |
 
 M07.d/M14 retain the explicitly unsupported options; dotplot brushing remains
 deferred pending review. **Clearance: retain; no working document is eligible for removal.**
@@ -126,7 +120,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
-| M05 heatmap/matrix/clustermap | In progress; bounded previews verified | Original previews have linked evidence below. M14.b.1 heatmap migration is under verification; M05.f's remaining clustermap migration belongs to M14.b.3. M05.d and broader kwargs/delivery remain open. |
+| M05 heatmap/matrix/clustermap | In progress; bounded previews verified | M14.b.1 native heatmap migration is closed; M05.f's remaining clustermap migration belongs to M14.b.3. M05.d and broader kwargs/delivery remain open. |
 | M06 ranking/ranked summaries | Closed (bounded preview) | M06.a–d have semantic/chart/workflow/interaction and resource evidence. Broader compatibility remains M14; native builders remain M13 and ranked distributions/tracks remain M08/M09. |
 | M07 embeddings/scatter/PCA | In progress | M07.a/b resource gates pass; categorical-guide rendering remains open under C11. M07.c loadings/variance/overview and M07.d colorbar placement are Closed for their stated scope; other options remain open. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
@@ -135,7 +129,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M11 trajectories/graphs/series | Planned | Stored DPT/PAGA, graph layouts, series/simulation, return/side-effect contracts; evaluate C04 paths. |
 | M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
-| M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1 heatmap layout migration is under verification; M14.b.2/3 remain queued. Parameter/capability closure, workflow publication and full API evidence remain open. |
+| M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1 heatmap migration is closed; M14.b.2 is ready and M14.b.3 remains planned. Parameter/capability closure, workflow publication and full API evidence remain open. |
 
 ## M05.e shared grid interactions
 
@@ -242,6 +236,59 @@ The plan now requires native group gaps and removes stale release/hover blockers
 This is planning evidence, not verification of migrated charts; runtime code and
 local notebooks are unchanged.
 
+## M14.b.1 native heatmap tracks and gaps
+
+Closed for the heatmap migration. The [chart](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py)
+uses `gs.surround`: tiles/fitted values own the center, while bands, labels,
+brackets and tree branches have their own clipped side views. Shared authoritative
+index scales own the final domains, navigation and gaps. Cell-group cuts use final
+exclusive stops; partitioned marker blocks also define feature gaps. Core's
+default six-CSS-pixel gaps stay fixed under zoom and DPR changes. Arbitrary
+brackets and a single group do not invent gaps or dummy measurements.
+
+Existing grouped labels/brackets, branch records and fitted values are reused.
+Native link marks place point endpoints correctly across gaps. The tree uses
+the existing distance-domain headroom to keep its root stroke inside its viewport.
+Stored linkage, merge heights, cell/marker ordering and scientific preparation
+remain unchanged. The only preparation correction is the group-center slot:
+`(start + stop - 1) / 2`, replacing the old half-row label/leaf offset. The old
+heatmap overlay, white boundary rules and unused overlay leaf-position option
+are removed; other families keep their existing paths until their own migration.
+
+Evidence:
+
+- **942 Python integration checks** passed, excluding browser and notebook files.
+  A later four-case marker-span rerun also verifies JSON serialization of NumPy
+  integer boundaries. Sparse/source/cache/identity/scaling checks remain independent
+  of rendering; no extra analysis or AnnData reads are introduced by tracks.
+- **54 affected browser checks** passed across heatmap and shared interactions.
+  Sixteen frozen complete Scanpy references still supply values, colors, labels
+  and branch heights. Registration inserts only the intentional native gaps and
+  accounts for track placement/root headroom; paint tolerance remains 12/255 RGB.
+  Measured gaps, band/tile/label/tree alignment, connected branches, enabled and
+  disabled hover, empty-gap picking, y-only/xy navigation, resize, dense fitted
+  values and offline HTML pass. Native track tests cover both orientations at
+  DPR 1 and 1.5 and wait for live scale transitions before probing narrow gaps.
+- The [canonical expression workflow test](../../tests/integrations/scanpy/test_notebooks.py)
+  passes. The expression notebook was also restarted and run in live Jupyter:
+  **13 completed code cells, 11 widget charts, no errors, idle kernel**. Ranked
+  heatmaps inherit the parent migration. Local sizing/zoom edits remain local;
+  the tracked notebook contains source only, without outputs or widget state.
+- The [maintained resource observation](../../tests/integrations/scanpy/fixtures/heatmap-surround-performance.json)
+  repeats the ranked 5,000-cell × 50-marker workload over 20,000 sparse genes,
+  with 50 expression groups. Only 5,000 × 50 values densify. Peak tracked Python
+  allocation is 108.85 MiB; compact JSON is 25.109 MiB, **0.46%** above the prior
+  workload, including the small per-cell band table. Preparation is 3.21 s,
+  validated JSON 4.06 s, browser render/dispatch 16.60 s, hover 107 ms after the
+  pointer pause, wheel response 1.27 s and live JS heap 27.35 MiB. These are fresh
+  sequential local observations, not portable limits or an Arrow-widget benchmark.
+
+Ruff formatting/lint and mypy pass. The unrelated full repository/JavaScript
+suites and documentation build were not rerun. The 250,000-value budget remains;
+larger/chunked transport stays M05.d, parameter/storage/export closure stays M14,
+and clustermap's track migration stays M14.b.3. Clearance: retain; no working
+document becomes eligible for removal from this increment.
+
 ## M06/M07 resource verification
 
 Seven fresh, sequential workloads on the unchanged `c659bf2` runtime close
@@ -328,10 +375,9 @@ The unrelated full repository/integration suites and Sphinx build were not rerun
 
 ## M05.f category-strip tooltips — layout migration
 
-Current state: M14.b.1 moves heatmap bands into native track viewports and is
-under verification in the working tree. Clustermap still needs M14.b.3. Neither
-the passing legacy hover checks nor this partial migration closes M05.f for both
-families.
+Current state: heatmap bands are verified inside native track viewports in
+[M14.b.1](#m14b1-native-heatmap-tracks-and-gaps). Clustermap still needs M14.b.3;
+the heatmap migration alone does not close M05.f for both families.
 
 Design correction (October 20, before migration): heatmap used negative pixel
 offsets; clustermap used normalized positions below 0 or above 1. Both disabled
@@ -372,8 +418,8 @@ Core 1.0.0. The upstream fix passes 66 interaction/facet/identity tests, build,
 TypeScript, lint and Changesets checks. Python formatting/lint and mypy pass.
 The unrelated full Python suite and documentation build were not rerun.
 
-Clearance: retain. M14.b.1 and M14.b.3 own replacing each family's overlay layout
-and verifying track hits, geometry, navigation and the PBMC notebook. Core 1.2
+Clearance: retain. M14.b.1 closes the heatmap portion; M14.b.3 still owns replacing
+clustermap's overlay and verifying its geometry, navigation and workflow. Core 1.2
 already removed the legacy picking failure; keep the retained Core 1.0 results
 historical rather than treating them as current expected failures.
 
@@ -1146,7 +1192,7 @@ preview. No working document is newly eligible for clearance.
 ## M05.a/b cell heatmap preview
 
 Retained evidence for the original preview below predates native surround tracks
-and group gaps. M14.b.1 is now implementing and verifying that migration; its
+and group gaps. [M14.b.1](#m14b1-native-heatmap-tracks-and-gaps) verifies that migration; its
 centered group labels/tree leaves deliberately replace the old half-row placement.
 
 Runtime: [public heatmap](../../src/genome_spy/integrations/scanpy/pl.py),
@@ -1622,7 +1668,7 @@ affected slice.
 | C07 | Python linkage + native rule branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Shared geometry projects into equal summary slots or unequal cell-group centers; standalone/attached resize and registered path checks pass. M05.e verifies grouped and heatmap navigation; recheck later families. |
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots, both orientations, optional zoom and duplicate-slot highlighting verified; extend checks with later families |
 | C09 | Core 1.0 band rulers failed during initial WebGL rendering; the adopted Core 1.2 capability needs a focused recheck | Optional shaded row/column guides | Keep the native center crosshair until shaded-guide behavior is verified against Core 1.2. [PR #586](https://github.com/genome-spy/genome-spy/pull/586) records the upstream fix and regression evidence. |
-| C10 | Heatmap bands moved into native viewports in active M14.b.1 work under verification; clustermap retains overlays. Core 1.2 passes legacy hover checks. | Heatmap/clustermap category-strip hover M05.f; layout debt owned by M14.b | Close heatmap track geometry/hover/navigation checks with M14.b.1, then migrate and verify clustermap in M14.b.3. No patched bundle or custom listeners. |
+| C10 | Heatmap bands and native gap navigation verified in their own viewports; clustermap retains overlays. Core 1.2 passes legacy hover checks. | Remaining clustermap track migration M05.f/M14.b.3 | Reuse the verified heatmap track helpers for clustermap and verify its own geometry/hover/navigation. No patched bundle or custom listeners. |
 | C11 | Bundled Core 1.2 allocates one column's width to vertical multi-column legends; later columns clip. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | [Minimal native regression](../../tests/integrations/scanpy/browser/test_native_legend_extent.py) strictly xfails on 1.2.0. [Upstream fix PR #591](https://github.com/genome-spy/genome-spy/pull/591) includes before/after video comments; it is not adopted in the bundled runtime. Recheck after adopting a released Core fix before automatic column fitting; no local bundle patch. |
 
 Python computation alone does not close a renderer gap. Local Core patches are

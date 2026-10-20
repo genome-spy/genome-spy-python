@@ -330,7 +330,7 @@ chart.resolve_legend(default="collected").configure_legend(
     gradientLength=140, gradientThickness=8
 )
 ```
-diff --git a/integrations/scanpy/STATUS.md b/integrations/scanpy/STATUS.md
+
 Supported input arrays are NumPy and SciPy CSR/CSC matrices/arrays. Views preserve
 positional correspondence. Only requested unique expression columns are
 densified; AnnData can materialize dense views through its public array access.
@@ -468,18 +468,17 @@ Use the mouse wheel inside the plot to zoom y and drag to pan y with
 `zoom=True`; x stays fixed. Set `zoom="xy"` to enable zooming and panning both
 axes. Native axis-margin gestures can then zoom one axis. Row/column labels and
 dendrograms follow the visible slots; outside labels and partially visible gene brackets are hidden.
-Heatmap category strips and boundaries follow individual cells. Clustermap's
+Heatmap category bands and group gaps follow individual cells. Clustermap's
 two trees and annotation tracks follow the live row/column positions; automatic
 tick labels reveal more names as slots grow. Defaults remain
 `zoom=False`, `show_values=False` and `highlight=False`.
 
 Category-strip tooltips use the native default handler and the same `hover` flag
 as tiles. They work with the bundled Core 1.2.0 runtime, including after zoom and
-pan. The adapter still draws these strips outside the matrix viewport with
-clipping disabled. M14.b/M05.f will move them into native aligned surround tracks,
-with each strip inside its own viewport, using the released clustered-heatmap
-example as the layout reference. There is no patched bundle or custom hover
-listener in the integration.
+pan. Heatmap bands, labels, brackets and trees use native `gs.surround` side
+tracks with shared index scales. Clustermap still uses its earlier outside-plot
+tracks; its native layout migration remains M14.b.3. There is no patched bundle
+or custom hover listener in the integration.
 
 `show_values` uses native `fitToBand` text, shared tile records and the plotted
 value after any log transform/scaling. Values fade in as cells become large
@@ -511,7 +510,7 @@ heatmap.display(inline=True, controls=False)
 Each tile represents one cell and one requested gene. Heatmap shares the grouped
 getter, source/storage checks, palettes, scaling, labels, marker ordering and
 native tree renderer. Preparation keeps one explicit cell permutation; values,
-IDs, category strips, group boundaries and branches follow it. Scanpy's category
+IDs, category bands, group gaps and branches follow it. Scanpy's category
 sorting includes its within-group tie order. The adapter never substitutes group
 means or changes AnnData.
 
@@ -519,14 +518,15 @@ means or changes AnnData.
 | --- | --- |
 | `var_names`, `groupby`, `use_raw`, `layer`, `gene_symbols`, `num_categories` | Grouped access rules and resident NumPy/CSR/CSC storage limits apply. Repeated gene slots and views are supported. Missing group labels and unused categories fail explicitly; single-group data retains cell order without a category strip or tree. |
 | `log`, `standard_scale` | Apply log1p before min–max scaling of individual cell values: `"var"` scales each gene across cells; `"obs"` scales each cell across requested genes. Constant ranges become zero. These are not matrixplot's scaled group means. |
-| `dendrogram` | False, True or a stored-result key. Reuse Scanpy's stored result or the guarded public computation. Heatmap supports two-group trees. Interpolate branches to unequal cell-group spans, retaining Scanpy's half-row strip-label/leaf placement. Matching marker blocks follow tree order too. |
+| `dendrogram` | False, True or a stored-result key. Reuse Scanpy's stored result or the guarded public computation. Heatmap supports two-group trees. Interpolate stored branches to the centers of unequal cell-group spans; native link endpoints keep them connected across gaps. Group labels share those centers, correcting the old half-row offset. Matching marker blocks follow tree order too. |
 | `swap_axes`, `show_gene_labels`, `var_group_*` | Ordinary heatmaps use gene brackets above the matrix; swapped heatmaps use a colored gene-group strip on the right, as Scanpy does. Show gene labels by default for at most 50 slots. `var_group_rotation` affects ordinary brackets. |
 | `cmap`, `vmin`, `vmax`, `alpha`, `interpolation` | Native scheme (default viridis), numeric bounds, scalar opacity and nearest-neighbor tiles. Missing values keep their positions but are unpainted; all-missing colors error. Other interpolation, norm/vcenter, Matplotlib colormaps and unsupported imshow kwargs error by name. |
+| Group gaps/layout | Native surround side tracks share the tile index scales. Cell groups have 6 CSS-pixel gaps that stay fixed under zoom and DPR changes; marker blocks also have gaps when their spans partition the genes. A single group has no internal gap. Arbitrary/overlapping brackets do not invent groups. Native scale settings can customize gaps. |
 | Category colors | Reuse saved AnnData colors or the shared Scanpy default palettes without writing them back. Numeric and multi-key strips use native category20, currently limited to 20 groups. |
 | `width`, `height`, `figsize` | Width/height control the tile area in logical pixels. Defaults follow Scanpy's gene-label size rules; figsize uses 100 pixels per inch with space reserved for strips/trees. Native text and outer layout differ from Matplotlib. The vertical color guide uses at most 400 pixels. |
-| `zoom` | Defaults False. `True` enables y-only wheel zoom and drag panning; `"xy"` enables both index axes. Strips, group boundaries, tree leaves and gene labels follow the visible cells/genes. Clip branches and strips at the plot extent; hide offscreen labels and gene brackets whose whole span is not visible. |
+| `zoom` | Defaults False. `True` enables y-only wheel zoom and drag panning; `"xy"` enables both index axes. Bands, gaps, tree leaves and gene labels follow the visible cells/genes. Clip branches and strips at the plot extent; hide offscreen labels and gene brackets whose whole span is not visible. |
 | `show_values` | Default False. Reveal the plotted cell values to two decimals when the tiles have enough room; missing cells remain empty. |
-| `hover`, delivery | Default hover shows original cell ID/name, gene, group and displayed expression. Category-strip tooltips are configured but subject to the Core picking limit above. `hover=False` disables both. Duplicate names use stable original-row IDs. Brushing is not offered. Existing show/save/native-return rules apply; Matplotlib axes and figure-return options error. |
+| `hover`, delivery | Default hover shows original cell ID/name, gene, group and displayed expression. Category-band tooltips show the group in its own native track. `hover=False` disables both. Duplicate names use stable original-row IDs. Brushing is not offered. Existing show/save/native-return rules apply; Matplotlib axes and figure-return options error. |
 
 This preview accepts **at most 250,000 cell–gene values**, counting repeated
 slots. Larger requests fail before expression extraction and ask for an explicit
@@ -617,7 +617,7 @@ Plotting-only linkage is local and never written to AnnData.
 | `xticklabels`, `yticklabels` | Auto spacing, True/False, positive stride, or a complete label list. Repeated labels retain distinct index slots. The matrix, labels, strips and branches follow the same permutation. |
 | Layout/colors | Native scheme names, numeric `vmin`/`vmax`, `linewidths`, CSS `linecolor`, tree/track ratios and native matrix dimensions. `figsize` uses 100 logical pixels/inch and conflicts with width/height. `cbar_pos=None` hides the guide; `cbar_kws` supports its label. |
 | `zoom`, `show_values` | Opt-in shared grid navigation and fitted plotted values. `zoom=True` navigates y only; `zoom="xy"` navigates both axes. Trees, strips and visible labels follow the same ordered slots. Both options default False. |
-| Delivery | Default native hover reports original cell name, gene and plotted value. Native `obs_keys` strip tooltips are configured but blocked by the Core picking limit above. `hover=False` disables both. `show`, `save` and chart HTML/JSON delivery follow the shared contract. The result is a native chart, not Seaborn's ClusterGrid; its artist attributes/chains are unavailable. |
+| Delivery | Default native hover reports original cell name, gene and plotted value. Native `obs_keys` strip tooltips show the observation category. `hover=False` disables both. `show`, `save` and chart HTML/JSON delivery follow the shared contract. The result is a native chart, not Seaborn's ClusterGrid; its artist attributes/chains are unavailable. |
 
 The default native palette is magma rather
 than Seaborn's rocket, and the native color guide is on the right rather than in

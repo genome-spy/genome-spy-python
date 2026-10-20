@@ -217,8 +217,14 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             rows for rows in chart_spec["datasets"].values() if "_group" in rows[0]
         )
         assert list(dict.fromkeys(row["_group"] for row in values)) == list(order)
-        tree = chart_spec["layer"][-1]["layer"][0]
-        assert tree["mark"]["type"] == "rule"
+        tree = next(
+            mark
+            for mark in leaf_marks(chart_spec)
+            if mark.get("mark", {}).get("color") == "#555555"
+        )
+        assert tree["mark"]["type"] == (
+            "link" if chart is namespace["heatmap"] else "rule"
+        )
         assert len(chart_spec["datasets"][tree["data"]["name"]]) == 3 * (len(order) - 1)
     spec = charts[0].to_dict()
     dot = points(spec)
@@ -249,9 +255,10 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             assert min(values) == 0 and max(values) == 1
     spec = charts[2].to_dict()
     tiles = points(spec)
-    cells = spec["datasets"][spec["layer"][0]["data"]["name"]]
-    assert tiles["encoding"]["x"]["scale"]["zoom"] is False
-    assert tiles["encoding"]["y"]["scale"]["zoom"] is True
+    cells = next(rows for rows in spec["datasets"].values() if "_obs_id" in rows[0])
+    assert spec["scales"]["x"]["zoom"] is False
+    assert spec["scales"]["y"]["zoom"] is True
+    assert len(spec["scales"]["y"]["gapPositions"]) == len(order) - 1
     assert len(cells) == 700 * 10
     assert len({row["_obs_id"] for row in cells}) == 700
     assert tiles["encoding"]["color"]["scale"]["domain"] == [0, 1]
@@ -273,11 +280,17 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert rulers[0]["ruler"]["encodings"] == ["x", "y"]
     assert rulers[0]["ruler"]["display"] == "center"
     for chart in charts[1:5]:
-        grid = chart.to_dict()["layer"][0]
+        spec = chart.to_dict()
+        grid = spec["spec"] if "surround" in spec else spec["layer"][0]
         text = grid["layer"][1]["layer"][0]
         assert text["mark"]["fitToBand"] is True
         assert all(
-            grid["layer"][0]["encoding"][axis]["scale"]["zoom"] is (axis == "y")
+            (
+                spec["scales"][axis]
+                if "surround" in spec
+                else grid["layer"][0]["encoding"][axis]["scale"]
+            )["zoom"]
+            is (axis == "y")
             for axis in ("x", "y")
         )
     clustered = charts[4].to_dict()

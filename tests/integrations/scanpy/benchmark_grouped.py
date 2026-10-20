@@ -111,7 +111,7 @@ def main() -> None:
     retained, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
     spec = chart.to_dict()
-    spec["name"] = "benchmark"
+    spec.get("spec", spec)["name"] = "benchmark"
     payload = json.dumps(spec, separators=(",", ":")).encode()
     serialized = perf_counter()
     report = {
@@ -205,7 +205,15 @@ def main() -> None:
                 + (row + 0.5 + ypad) / (groups + 2 * ypad) * bounds["height"]
             )
             if args.plot == "heatmap":
-                py = canvas["y"] + bounds["y"] + bounds["height"] / 2
+                cuts = spec["scales"]["y"]["gapPositions"]
+                row = cells // 2
+                step = (bounds["height"] - 6 * len(cuts)) / cells
+                py = (
+                    canvas["y"]
+                    + bounds["y"]
+                    + (row + 0.5) * step
+                    + 6 * sum(cut <= row for cut in cuts)
+                )
             page.mouse.move(px - 2, py - 2)
             page.wait_for_timeout(450)
             start = perf_counter()
@@ -226,11 +234,15 @@ def main() -> None:
             )
             zoom_elapsed = None
             if args.ranked:
-                step = page.evaluate("api.getParam('grid_y_step').getValue()")
+                domain = page.evaluate(
+                    f"api.getScaleResolutionByName('{args.plot}-y').getDomain()"
+                )
+                span = domain[1] - domain[0]
                 start = perf_counter()
                 page.mouse.wheel(0, -220)
                 page.wait_for_function(
-                    "step=>api.getParam('grid_y_step').getValue()>step", arg=step
+                    "({name,span})=>{const d=api.getScaleResolutionByName(name).getDomain();return d[1]-d[0]<span}",
+                    arg={"name": f"{args.plot}-y", "span": span},
                 )
                 zoom_elapsed = perf_counter() - start
             session = page.context.new_cdp_session(page)

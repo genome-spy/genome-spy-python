@@ -12,6 +12,7 @@ import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._grid_interactions import (
+    index_offset,
     slot_position,
     visible_slots,
     with_navigation,
@@ -53,37 +54,58 @@ def _slot_labels(
     horizontal: bool,
     zoom: bool = False,
     opposite: bool = False,
+    in_bounds: bool = False,
+    positions: Sequence[float] | None = None,
 ) -> gs.Chart:
     """Return a text layer placing labels at the supplied row or column positions.
 
     Separate text avoids merging repeated names into a single axis tick.
     """
     table = [{"slot": i, "label": label} for i, label in enumerate(labels)]
+    if positions is not None:
+        table = [
+            {"slot": int(np.floor(slot)), "fraction": slot % 1, "label": label}
+            for slot, label in zip(positions, labels, strict=True)
+        ]
     chart = gs.Chart(table)
-    if zoom:
+    if zoom and not in_bounds:
         chart = visible_slots(chart, "x" if horizontal else "y", "datum.slot + 0.5")
+    if positions is not None:
+        axis = "x" if horizontal else "y"
+        chart = chart.encode(**{f"{axis}Offset": index_offset(axis, "fraction")})
+    space = max(map(len, labels), default=0) * _TICK * 0.65 + 12
     if horizontal:
-        return chart.mark_text(
+        chart = chart.mark_text(
             font=_FONT,
             size=_TICK,
             angle=-90,
             align="right",
             baseline="middle",
             yOffset=8,
-            clip="never",
+            clip=True if in_bounds else "never",
             tooltip=None,
-        ).encode(x=coordinate.field("slot"), y=gs.value(0), text="label:N")
-    return chart.mark_text(
+        ).encode(
+            x=coordinate.field("slot"),
+            y=gs.value(1 if in_bounds else 0),
+            text="label:N",
+        )
+        return chart.properties(height=space) if in_bounds else chart
+    chart = chart.mark_text(
         font=_FONT,
         size=_TICK,
         align="left" if opposite else "right",
         baseline="middle",
         xOffset=8 if opposite else -8,
-        clip="never",
+        clip=True if in_bounds else "never",
         tooltip=None,
     ).encode(
-        x=gs.value(1 if opposite else 0), y=coordinate.field("slot"), text="label:N"
+        x=gs.value(0 if opposite else 1)
+        if in_bounds
+        else gs.value(1 if opposite else 0),
+        y=coordinate.field("slot"),
+        text="label:N",
     )
+    return chart.properties(width=space) if in_bounds else chart
 
 
 def _brackets(
@@ -94,6 +116,7 @@ def _brackets(
     rotation: float | None,
     end_band: float = 0.7,
     zoom: bool = False,
+    in_bounds: bool = False,
 ) -> list[gs.Chart]:
     """Return rule and text layers for marker groups at the supplied positions.
 
@@ -111,27 +134,36 @@ def _brackets(
         }
         for group in groups
     ]
-    line = gs.Chart(table).mark_rule(
+    axis, extent = ("y", "height") if swapped else ("x", "width")
+    end_offset = (
+        0
+        if in_bounds
+        else gs.expr(f"{end_band - 1:g} * bandwidth('{axis}') * {extent}")
+    )
+    edge = gs.value(0 if in_bounds else 1)
+    chart = gs.Chart(table)
+    # Links anchor both bracket endpoints to their slots across gaps.
+    draw = chart.mark_link if in_bounds else chart.mark_rule
+    mark_options: dict[str, Any] = {"linkShape": "line"} if in_bounds else {}
+    line = draw(
         color="black",
         size=1.5 * _PT,
-        clip="never",
+        clip=True if in_bounds else "never",
         tooltip=None,
         xOffset=4 if swapped else 0,
-        x2Offset=4
-        if swapped
-        else gs.expr(f"{end_band - 1:g} * bandwidth('x') * width"),
+        x2Offset=4 if swapped else end_offset,
         yOffset=0 if swapped else -4,
-        y2Offset=gs.expr(f"{end_band - 1:g} * bandwidth('y') * height")
-        if swapped
-        else -4,
+        y2Offset=end_offset if swapped else -4,
+        **mark_options,
     )
-    caps = gs.Chart(table).mark_rule(
+    caps = draw(
         color="black",
         size=1.5 * _PT,
-        clip="never",
+        clip=True if in_bounds else "never",
         tooltip=None,
         x2Offset=4 if swapped else 0,
         y2Offset=0 if swapped else -4,
+        **mark_options,
     )
     if rotation is None:
         # Long labels need rotation to clear neighboring brackets.
@@ -146,24 +178,24 @@ def _brackets(
         angle=-rotation,
         align="left" if not swapped and rotation == 90 else "center",
         baseline="middle" if rotation else "bottom",
-        # Positional offsets stay outside the plot when the text rotates.
+        # Offsets keep the label clear of the bracket after rotation.
         xOffset=16 if swapped else 0,
         yOffset=0 if swapped else -8,
-        clip="never",
+        clip=True if in_bounds else "never",
         tooltip=None,
     )
     if swapped:
         line = line.encode(
             y=coordinate.field("start").band(0.2),
-            y2=gs.Y2("stop:I").band(0),
-            x=gs.value(1),
-            x2=gs.value(1),
+            y2=gs.Y2("end:I").band(end_band) if in_bounds else gs.Y2("stop:I").band(0),
+            x=edge,
+            x2=edge,
         )
         left = caps.encode(
             y=coordinate.field("start").band(0.2),
             y2=gs.Y2("start:I").band(0.2),
-            x=gs.value(1),
-            x2=gs.value(1),
+            x=edge,
+            x2=edge,
         )
         right = left.encode(
             y=coordinate.field("end").band(end_band), y2=gs.Y2("end:I").band(end_band)
@@ -173,21 +205,21 @@ def _brackets(
             yOffset=gs.YOffset(
                 gs.expr("datum.band * bandwidth('y') * height"), type="quantitative"
             ).scale(None),
-            x=gs.value(1),
+            x=edge,
             text="label:N",
         )
     else:
         line = line.encode(
             x=coordinate.field("start").band(0.2),
-            x2=gs.X2("stop:I").band(0),
-            y=gs.value(1),
-            y2=gs.value(1),
+            x2=gs.X2("end:I").band(end_band) if in_bounds else gs.X2("stop:I").band(0),
+            y=edge,
+            y2=edge,
         )
         left = caps.encode(
             x=coordinate.field("start").band(0.2),
             x2=gs.X2("start:I").band(0.2),
-            y=gs.value(1),
-            y2=gs.value(1),
+            y=edge,
+            y2=edge,
         )
         right = left.encode(
             x=coordinate.field("end").band(end_band), x2=gs.X2("end:I").band(end_band)
@@ -197,11 +229,18 @@ def _brackets(
             xOffset=gs.XOffset(
                 gs.expr("datum.band * bandwidth('x') * width"), type="quantitative"
             ).scale(None),
-            y=gs.value(1),
+            y=edge,
             text="label:N",
         )
     layers = [line, left, right, text]
-    if zoom:
+    if zoom and in_bounds:
+        predicate = (
+            "scale('y', datum.end) - bandwidth('y') >= 0 && scale('y', datum.start) <= 1"
+            if swapped
+            else "scale('x', datum.start) >= 0 && scale('x', datum.end) + bandwidth('x') <= 1"
+        )
+        layers = [chart.transform_filter(predicate) for chart in layers]
+    elif zoom:
         axis = "y" if swapped else "x"
         layers = [
             visible_slots(chart, axis, "datum.start", "datum.end + 1")
@@ -278,6 +317,17 @@ def summary_records(
 def bracket_space(groups: tuple[FeatureGroup, ...]) -> float:
     """Estimate space in pixels for marker-group labels so they clear the plot."""
     return max((len(g.label) for g in groups), default=0) * _TICK * 0.65 + 12
+
+
+def feature_gaps(groups: tuple[FeatureGroup, ...], count: int) -> list[int]:
+    """Return internal cuts when marker spans partition all feature slots.
+
+    Arbitrary or overlapping brackets do not define grouping gaps.
+    """
+    ordered = sorted(groups, key=lambda group: group.start)
+    ends = [int(group.end) + 1 for group in ordered]
+    starts = [group.start for group in ordered]
+    return ends[:-1] if ends and ends[-1] == count and starts == [0, *ends[:-1]] else []
 
 
 def guide_offset(

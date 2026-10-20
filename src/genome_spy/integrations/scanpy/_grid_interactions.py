@@ -23,6 +23,19 @@ def slot_position(axis: str, value: str) -> str:
     return f"grid_{axis}_origin + ({value}) * grid_{axis}_step"
 
 
+def index_offset(axis: str, field: str) -> Any:
+    """Turn a fractional slot field into a live within-band pixel offset.
+
+    Keep integer anchors on the index scale so grouping gaps remain aligned.
+    """
+    extent = "width" if axis == "x" else "height"
+    sign = "" if axis == "x" else "-"
+    return (gs.XOffset if axis == "x" else gs.YOffset)(f"{field}:Q").scale(
+        domain=[0, 1],
+        range=[0, gs.expr(f"{sign}{extent} * bandstep('{axis}', {extent})")],
+    )
+
+
 def visible_slots(
     chart: gs.Chart, axis: str, start: str, stop: str | None = None
 ) -> gs.Chart:

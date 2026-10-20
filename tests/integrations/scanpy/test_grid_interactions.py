@@ -52,8 +52,16 @@ def test_grid_options_are_keyword_only_and_off_by_default(family):
         m for m in leaf_marks(active) if "color" in m.get("encoding", {})
     )
     for axis in ("x", "y"):
-        assert plain_mark["encoding"][axis]["scale"]["zoom"] is False
-        assert active_mark["encoding"][axis]["scale"]["zoom"] is (axis == "y")
+        assert (
+            plain["scales"][axis]
+            if family == "heatmap"
+            else plain_mark["encoding"][axis]["scale"]
+        )["zoom"] is False
+        assert (
+            active["scales"][axis]
+            if family == "heatmap"
+            else active_mark["encoding"][axis]["scale"]
+        )["zoom"] is (axis == "y")
     for channel in ("color", "size"):
         if channel in plain_mark["encoding"]:
             assert plain_mark["encoding"][channel] == active_mark["encoding"][channel]
@@ -85,7 +93,7 @@ def test_invalid_interaction_options_fail_before_loading_scanpy(
 def test_value_marks_share_one_source_and_keep_plotted_values(family):
     options = {} if family in ("matrix", "clustermap") else {"standard_scale": "var"}
     spec = grid_chart(family, show_values=True, **options).to_dict()
-    values = spec["layer"][0]
+    values = spec["spec"] if family == "heatmap" else spec["layer"][0]
     tiles, text_group = values["layer"]
     text = text_group["layer"][0]
     assert "data" not in tiles and "data" not in text
@@ -150,7 +158,11 @@ def test_grid_can_explicitly_enable_both_axes(family):
     spec = grid_chart(family, zoom="xy").to_dict()
     mark = next(m for m in leaf_marks(spec) if "color" in m.get("encoding", {}))
     for axis in ("x", "y"):
-        assert mark["encoding"][axis]["scale"]["zoom"] is True
+        assert (
+            spec["scales"][axis]
+            if family == "heatmap"
+            else mark["encoding"][axis]["scale"]
+        )["zoom"] is True
 
 
 @pytest.mark.parametrize(
@@ -170,10 +182,9 @@ def test_category_strip_uses_native_tooltip_and_respects_hover(family, field, ho
         for mark in leaf_marks(spec)
         if mark.get("encoding", {}).get("color", {}).get("field") == field
     )
-    assert strip["mark"]["clip"] == "never"
+    assert strip["mark"]["clip"] == (True if family == "heatmap" else "never")
     if family == "heatmap":
-        assert strip["mark"]["xOffset"] == -22
-        assert strip["mark"]["x2Offset"] == -8
+        assert "xOffset" not in strip["mark"] and "x2Offset" not in strip["mark"]
     if hover:
         assert strip["mark"]["tooltip"] == {"handler": "default"}
         assert strip["encoding"]["tooltip"] == [
