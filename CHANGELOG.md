@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-10-20
+
+### Added
+
+- Typed facet and surround compositions, dendrogram transforms, secondary-offset
+  channels, and the remaining schema and expression additions from GenomeSpy 1.2.0.
+- Discoverable named field arguments on encoding constructors and named setters
+  for inline schema objects, with automatic public exports for generated channels.
+- A DepMap clustered heatmap gallery example adapted from the official GenomeSpy
+  surround specification.
+
+### Changed
+
+- Upgrade the bundled GenomeSpy Core, controls, Inspector, and schema to 1.2.0.
+- Use surround layouts in the PISA interaction matrix, UpSet mutations, PBMC
+  marker matrix, and PBMC cell heatmap examples.
+- Use named Python arguments and schema objects throughout gallery configuration,
+  and Python expression objects in the updated surround examples.
+
+### Fixed
+
+- Keep chart colors aligned with the documentation's selected light or dark theme.
+- Serialize named channel objects in shared surround-side encodings.
+- Preserve secondary-offset field and expression types according to the schema.
+- Support named resolution settings on unit charts and omit forbidden schema
+  properties from generated signatures.
+- Avoid redundant validation of nested schema objects when validation is explicitly
+  disabled, while retaining default validation checks.
+
 ## [0.6.0] - 2026-10-01
 
 ### Added
@@ -152,6 +181,8 @@ First public alpha release, targeting GenomeSpy Core 0.87.0.
 - Packaged example datasets, documentation, tutorials, and an interactive
   visualization gallery.
 
+[0.7.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.6.0...v0.7.0
+[0.6.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/genome-spy/genome-spy-python/compare/v0.2.0...v0.3.0
