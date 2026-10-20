@@ -6,6 +6,7 @@ An IGV-like alignment view with depth, mismatch, CIGAR, and read-level tracks.
 from __future__ import annotations
 
 import genome_spy as gs
+from genome_spy.schema import ChromosomalLocus
 
 META = {
     "category": "Read alignments and RNA splicing",
@@ -38,7 +39,7 @@ LANE_HEIGHT = gs.param(
     "laneHeight",
     value=12,
     bind=gs.binding_range(min=1, max=30, step=1),
-    transition={"type": "lerp", "halfLife": 30, "epsilon": 0.02},
+    transition=gs.LerpTransition(type="lerp", halfLife=30, epsilon=0.02),
 )
 MIN_MAPQ = gs.param(
     "minMapq",
@@ -59,7 +60,7 @@ ZOOM_MESSAGE_STATE = gs.param(
         1,
         0,
     ),
-    transition={"type": "lerp", "halfLife": 60},
+    transition=gs.LerpTransition(type="lerp", halfLife=60),
 )
 
 # Count how many reads cover each position, using the reads shown below.
@@ -336,8 +337,8 @@ chart = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr20", "pos": 10031817},
-                    {"chrom": "chr20", "pos": 10031936},
+                    ChromosomalLocus(chrom="chr20", pos=10031817),
+                    ChromosomalLocus(chrom="chr20", pos=10031936),
                 ]
             )
         ),

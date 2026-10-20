@@ -208,7 +208,7 @@ chart = (
             "Heights and labels show distinct tumor sample counts."
         ),
         datasets={"mutations": data["mutations"], "domains": data["domains"]},
-        scales={"x": {"domainMin": 1, "nice": False}},
+        scales=gs.scales(x=gs.Scale(domainMin=1, nice=False)),
     )
     .add_params(protein_length, line_width, pixels_per_residue)
     .resolve_scale(x="shared", color="independent")

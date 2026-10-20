@@ -13,7 +13,9 @@ META = {
     "max_width": 980,
 }
 DATA = "https://data.genomespy.app/datasets/bpreveal-pisa/v3/"
-tracks = gs.Data(url=DATA + "fig2cd-atac-tracks.parquet", format={"type": "parquet"})
+tracks = gs.Data(
+    url=DATA + "fig2cd-atac-tracks.parquet", format=gs.data_format(type="parquet")
+)
 INPUT_DOMAIN = [15646649, 15647250]
 OUTPUT_DOMAIN = [15646499, 15647400]
 
@@ -54,7 +56,7 @@ show_labels = gs.param(
 ruler_opacity = gs.param(
     "rulerOpacity",
     expr=gs.expr.if_(show_labels, 0, 0.3),
-    transition={"type": "lerp", "halfLife": 100, "epsilon": 0.01},
+    transition=gs.LerpTransition(type="lerp", halfLife=100, epsilon=0.01),
 )
 cursor = gs.ruler(
     "matrixCursor",
@@ -211,7 +213,7 @@ motifs = (
         name="motifs",
         data=gs.Data(
             url=DATA + "fig2cd-atac-motifs.parquet",
-            format={"type": "parquet"},
+            format=gs.data_format(type="parquet"),
         ),
     )
     .transform_calculate(
@@ -235,7 +237,7 @@ matrix = (
         view=gs.view(stroke="gray"),
         data=gs.Data(
             url=DATA + "fig2d-atac-matrix.parquet",
-            format={"type": "parquet"},
+            format=gs.data_format(type="parquet"),
         ),
     )
     .add_params(
@@ -276,7 +278,7 @@ accessibility = (
             dx=5,
         ),
     )
-    .properties(resolve={"scale": {"x": "excluded"}})
+    .resolve_scale(x="excluded")
 )
 
 # The bottom margin shares genomic x; zooming changes bars into sequence letters.
@@ -308,16 +310,16 @@ contribution = (
     gs.multiscale(
         bars,
         logo,
-        stops={
-            "channel": "x",
-            "values": [0.15],
-            "transition": {"type": "lerp", "halfLife": 60},
-        },
+        stops=gs.MultiscaleStops(
+            channel="x",
+            values=[0.15],
+            transition=gs.LerpTransition(type="lerp", halfLife=60),
+        ),
     )
     .properties(
         name="importance",
         data=tracks,
-        width={"grow": 1},
+        width=gs.SizeDef(grow=1),
         height=60,
         title=gs.Title(text="Contribution score", style="overlay-title", dx=5),
     )
@@ -348,7 +350,9 @@ chart = (
     .resolve_axis(x="independent", y="independent")
     .resolve_legend(color="collected")
     .configure_axis(domain=False, grid=False, labelFontSize=10, titleFontSize=10)
-    .configure_legend(layout={"left": {"anchor": "middle", "wrap": False}})
+    .configure_legend(
+        layout=gs.LegendLayout(left=gs.LegendRegionLayout(anchor="middle", wrap=False))
+    )
     .configure_legend_track(style=None)
     .configure_title(fontSize=12, fontWeight="normal", offset=2)
 )

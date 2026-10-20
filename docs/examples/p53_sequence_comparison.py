@@ -296,6 +296,6 @@ chart = (
         labelFontSize=10,
         symbolSize=60,
         spacing=20,
-        layout={"anchor": "middle"},
+        layout=gs.LegendLayout(anchor="middle"),
     )
 )

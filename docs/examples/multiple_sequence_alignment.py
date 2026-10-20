@@ -5,6 +5,7 @@ each aligned sequence.
 """
 
 import genome_spy as gs
+from genome_spy.schema import ZoomParams
 from genome_spy.schema import Scale
 
 META = {
@@ -81,7 +82,7 @@ chart = (
             url="https://data.genomespy.app/sample-data/16SRNA_Deino_87seq.aln",
             format=gs.data_format(type="fasta"),
         ),
-        scales=gs.scales(x=gs.Scale(domain=[190, 230], zoom={"extent": "data"})),
+        scales=gs.scales(x=gs.Scale(domain=[190, 230], zoom=ZoomParams(extent="data"))),
         description="A multiple sequence alignment with a sequence-logo overview.",
     )
     # Split each sequence into individual letters at numbered positions.

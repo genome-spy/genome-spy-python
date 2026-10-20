@@ -62,14 +62,14 @@ intersection_sizes = (
         name="intersection-sizes",
         width=gs.step(20),
         height=210,
-        scales={
-            "y": {
-                "zero": True,
-                "nice": True,
-                "padding": 0.12,
-                "domainMin": 0,
-            }
-        },
+        scales=gs.scales(
+            y=gs.Scale(
+                zero=True,
+                nice=True,
+                padding=0.12,
+                domainMin=0,
+            )
+        ),
     )
     .resolve_scale(y="excluded")
     .encode(
@@ -111,15 +111,15 @@ set_sizes = (
         name="set-sizes",
         width=150,
         height=gs.step(20),
-        scales={
-            "x": {
-                "zero": True,
-                "nice": True,
-                "reverse": True,
-                "padding": 0.08,
-                "domain": [0, 100],
-            }
-        },
+        scales=gs.scales(
+            x=gs.Scale(
+                zero=True,
+                nice=True,
+                reverse=True,
+                padding=0.08,
+                domain=[0, 100],
+            )
+        ),
     )
     .add_params(SET_CURSOR_UPDATE)
     .resolve_scale(x="excluded")
@@ -248,18 +248,18 @@ chart = (
             format=gs.data_format(type="csv"),
         ),
         spacing=3,
-        scales={
-            "x": {
-                "domain": [0.5, 20.5],
-                "paddingInner": 0.22,
-                "paddingOuter": 0.12,
-            },
-            "y": {
-                "domain": [-0.5, 4.5],
-                "paddingInner": 0.16,
-                "paddingOuter": 0.08,
-            },
-        },
+        scales=gs.scales(
+            x=gs.Scale(
+                domain=[0.5, 20.5],
+                paddingInner=0.22,
+                paddingOuter=0.12,
+            ),
+            y=gs.Scale(
+                domain=[-0.5, 4.5],
+                paddingInner=0.16,
+                paddingOuter=0.08,
+            ),
+        ),
     )
     .add_params(SET_CURSOR)
     .resolve_scale(x="shared", y="shared")

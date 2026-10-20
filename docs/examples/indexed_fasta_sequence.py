@@ -7,6 +7,7 @@ drawn as both a colored tile and a base label on the locus axis.
 from __future__ import annotations
 
 import genome_spy as gs
+from genome_spy.schema import ChromosomalLocus
 
 META = {
     "category": "Sequences, alignments, and logos",
@@ -48,8 +49,8 @@ chart = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr7", "pos": 20003500},
-                    {"chrom": "chr7", "pos": 20003540},
+                    ChromosomalLocus(chrom="chr7", pos=20003500),
+                    ChromosomalLocus(chrom="chr7", pos=20003540),
                 ]
             )
         ),

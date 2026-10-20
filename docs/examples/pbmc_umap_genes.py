@@ -51,7 +51,7 @@ points = (
     .properties(width=gs.SizeDef(grow=1), height=210)
 )
 panels = [
-    points.transform_collect(sort={"field": gene})
+    points.transform_collect(sort=gs.compare(field=gene))
     .encode(
         color=gs.Color(f"{gene}:Q")
         .scale(
@@ -69,7 +69,7 @@ panels = [
     for i, gene in enumerate(genes)
 ]
 counts = (
-    points.transform_collect(sort={"field": "n_counts"})
+    points.transform_collect(sort=gs.compare(field="n_counts"))
     .encode(
         color=gs.Color("n_counts:Q")
         .scale(domain=[0, data["n_counts_limit"]], scheme="blues")

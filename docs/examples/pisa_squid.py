@@ -13,7 +13,9 @@ META = {
     "max_width": 980,
 }
 DATA = "https://data.genomespy.app/datasets/bpreveal-pisa/v3/"
-tracks = gs.Data(url=DATA + "fig2cd-atac-tracks.parquet", format={"type": "parquet"})
+tracks = gs.Data(
+    url=DATA + "fig2cd-atac-tracks.parquet", format=gs.data_format(type="parquet")
+)
 MUTED = "#d8dbe0"
 
 # Preserve the reference palette: each effect value is paired with its color.
@@ -84,7 +86,7 @@ accessibility = (
     .properties(
         name="prediction",
         title=gs.Title(text="Accessibility", style="overlay-title"),
-        height={"grow": 0.16},
+        height=gs.SizeDef(grow=0.16),
         cursor="text",
     )
     .add_params(output_brush)
@@ -128,7 +130,11 @@ effect_color = (
     )
 )
 links = (
-    gs.Chart(gs.Data(url=DATA + "fig2c-atac-links.parquet", format={"type": "parquet"}))
+    gs.Chart(
+        gs.Data(
+            url=DATA + "fig2c-atac-links.parquet", format=gs.data_format(type="parquet")
+        )
+    )
     .transform_calculate(absEffect=gs.expr.abs(gs.datum.effect))
     .mark_link(linkShape="diagonal", orient="vertical", size=1.5, minPickingSize=2)
     .encode(
@@ -193,7 +199,7 @@ motifs = (
         name="motifs",
         data=gs.Data(
             url=DATA + "fig2cd-atac-motifs.parquet",
-            format={"type": "parquet"},
+            format=gs.data_format(type="parquet"),
         ),
     )
     .transform_calculate(
@@ -250,16 +256,16 @@ contribution = (
     gs.multiscale(
         bars,
         logo,
-        stops={
-            "channel": "x",
-            "values": [0.15],
-            "transition": {"type": "lerp", "halfLife": 60},
-        },
+        stops=gs.MultiscaleStops(
+            channel="x",
+            values=[0.15],
+            transition=gs.LerpTransition(type="lerp", halfLife=60),
+        ),
     )
     .properties(
         name="importance",
         data=tracks,
-        height={"grow": 0.16},
+        height=gs.SizeDef(grow=0.16),
         cursor="text",
         title=gs.Title(text="Contribution score", style="overlay-title"),
     )
@@ -281,7 +287,7 @@ chart = (
     (accessibility & (links + motifs).resolve_scale(color="independent") & contribution)
     .properties(
         spacing=0,
-        padding={"top": 8, "right": 30, "bottom": 8, "left": 10},
+        padding=gs.Paddings(top=8, right=30, bottom=8, left=10),
         scales=gs.scales(x=gs.Scale(domain=[15646649, 15647250], zoom=True)),
     )
     .add_params(
@@ -296,7 +302,7 @@ chart = (
     .configure_legend(
         labelFontSize=11,
         titleFontSize=11,
-        layout={"left": {"anchor": "middle", "wrap": False}},
+        layout=gs.LegendLayout(left=gs.LegendRegionLayout(anchor="middle", wrap=False)),
     )
     .configure_legend_track(style=None)
     .configure_title(fontSize=12, fontWeight="normal", offset=2)

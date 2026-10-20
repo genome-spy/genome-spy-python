@@ -54,5 +54,5 @@ chart = (
         .legend(title="Cell type", orient="bottom", columns=4),
         tooltip=["cell:N", "cell_type:N"],
     )
-    .properties(height=520, title="PBMC cell types")
+    .properties(title="PBMC cell types")
 )

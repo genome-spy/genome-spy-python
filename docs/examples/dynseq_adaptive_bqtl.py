@@ -5,6 +5,12 @@ letters to labeled bars as the reader zooms in.
 """
 
 import genome_spy as gs
+from genome_spy.schema import (
+    ChromosomalLocus,
+    CoordinateLookupInput,
+    FormulaParams,
+    ZoomParams,
+)
 
 META = {
     "category": "Regulatory model interpretation",
@@ -141,16 +147,16 @@ def _allele_track(*, alternate: bool):
         .transform_formula(expr=gs.expr.upper(gs.datum.base), as_="base")
         .transform_formula(expr=gs.datum.start + gs.datum.rawPos, as_="pos")
         .transform_coordinate_lookup(
-            from_={
-                "data": gs.lazy.bigwig(bigwig_url, pixelsPerBin=1),
-                "transform": [
-                    {
-                        "type": "formula",
-                        "expr": gs.datum.start,
-                        "as": "pos",
-                    }
+            from_=CoordinateLookupInput(
+                data=gs.lazy.bigwig(bigwig_url, pixelsPerBin=1),
+                transform=[
+                    FormulaParams(
+                        type="formula",
+                        expr=gs.datum.start,
+                        as_="pos",
+                    )
                 ],
-            },
+            ),
             key=["chrom", "pos"],
             values=["score"],
         )
@@ -178,15 +184,15 @@ chart = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr22", "pos": 43720850},
-                    {"chrom": "chr22", "pos": 43720960},
+                    ChromosomalLocus(chrom="chr22", pos=43720850),
+                    ChromosomalLocus(chrom="chr22", pos=43720960),
                 ],
-                zoom={
-                    "extent": [
-                        {"chrom": "chr22", "pos": 43719872},
-                        {"chrom": "chr22", "pos": 43721985},
+                zoom=ZoomParams(
+                    extent=[
+                        ChromosomalLocus(chrom="chr22", pos=43719872),
+                        ChromosomalLocus(chrom="chr22", pos=43721985),
                     ]
-                },
+                ),
             )
         ),
         description=(

@@ -6,7 +6,14 @@ rounded allele-specific solution.
 """
 
 import genome_spy as gs
-from genome_spy.schema import RulerMarkConfig
+from genome_spy.schema import (
+    CrossInput,
+    FilterParams,
+    FormulaParams,
+    ProjectParams,
+    RulerMarkConfig,
+    SequenceParams,
+)
 
 META = {
     "category": "Copy-number plots",
@@ -132,51 +139,51 @@ sunrise = (
             style="overlay-title",
         ),
         height=240,
-        data={
-            "sequence": {
-                "start": 0.1,
-                "stop": 1.051,
-                "step": 0.01,
-                "as": "rhoCandidate",
-            }
-        },
+        data=gs.Data(
+            sequence=SequenceParams(
+                start=0.1,
+                stop=1.051,
+                step=0.01,
+                as_="rhoCandidate",
+            )
+        ),
     )
     .add_params(SELECTED_FIT_UPDATE)
     .resolve_scale(x="excluded")
     .resolve_axis(x="excluded")
     .transform_cross(
-        from_={
-            "data": {
-                "sequence": {
-                    "start": 1,
-                    "stop": 6.001,
-                    "step": 0.05,
-                    "as": "psiCandidate",
-                }
-            }
-        }
+        from_=CrossInput(
+            data=gs.Data(
+                sequence=SequenceParams(
+                    start=1,
+                    stop=6.001,
+                    step=0.05,
+                    as_="psiCandidate",
+                )
+            )
+        )
     )
     .transform_cross(
-        from_={
-            "data": {"url": SEGMENT_URL},
-            "transform": [
-                {"type": "filter", "expr": gs.datum.chr != "X"},
-                {
-                    "type": "project",
-                    "fields": ["logRMean", "bafMean", "nProbes"],
-                },
-                {
-                    "type": "formula",
-                    "expr": gs.datum.nProbes
+        from_=CrossInput(
+            data=gs.Data(url=SEGMENT_URL),
+            transform=[
+                FilterParams(type="filter", expr=gs.datum.chr != "X"),
+                ProjectParams(
+                    type="project",
+                    fields=["logRMean", "bafMean", "nProbes"],
+                ),
+                FormulaParams(
+                    type="formula",
+                    expr=gs.datum.nProbes
                     * gs.expr.if_(
                         DOWNWEIGHT_BALANCED & (gs.datum.bafMean == 0.5),
                         0.05,
                         1,
                     ),
-                    "as": "fitWeight",
-                },
+                    as_="fitWeight",
+                ),
             ],
-        }
+        )
     )
 )
 

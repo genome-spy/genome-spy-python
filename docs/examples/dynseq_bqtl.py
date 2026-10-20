@@ -5,6 +5,12 @@ over the same base-resolution locus.
 """
 
 import genome_spy as gs
+from genome_spy.schema import (
+    ChromosomalLocus,
+    CoordinateLookupInput,
+    FormulaParams,
+    ZoomParams,
+)
 
 META = {
     "category": "Regulatory model interpretation",
@@ -86,19 +92,19 @@ allele_track = (
     .add_params(allele)
     # Match each base to its score in the chosen allele's BigWig file.
     .transform_coordinate_lookup(
-        from_={
-            "data": gs.lazy.bigwig(
+        from_=CoordinateLookupInput(
+            data=gs.lazy.bigwig(
                 gs.expr(gs.expr.if_(allele == "ref", REF_BIGWIG_URL, ALT_BIGWIG_URL)),
                 pixelsPerBin=1,
             ),
-            "transform": [
-                {
-                    "type": "formula",
-                    "expr": gs.datum.start,
-                    "as": "pos",
-                }
+            transform=[
+                FormulaParams(
+                    type="formula",
+                    expr=gs.datum.start,
+                    as_="pos",
+                )
             ],
-        },
+        ),
         key=["chrom", "pos"],
         values=["score"],
     )
@@ -131,15 +137,15 @@ chart = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr22", "pos": 43720850},
-                    {"chrom": "chr22", "pos": 43720960},
+                    ChromosomalLocus(chrom="chr22", pos=43720850),
+                    ChromosomalLocus(chrom="chr22", pos=43720960),
                 ],
-                zoom={
-                    "extent": [
-                        {"chrom": "chr22", "pos": 43719872},
-                        {"chrom": "chr22", "pos": 43721985},
+                zoom=ZoomParams(
+                    extent=[
+                        ChromosomalLocus(chrom="chr22", pos=43719872),
+                        ChromosomalLocus(chrom="chr22", pos=43721985),
                     ]
-                },
+                ),
             )
         ),
         templates={"allele-track": allele_track},
