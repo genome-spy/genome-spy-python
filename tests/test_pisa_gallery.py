@@ -54,15 +54,17 @@ def test_matrix_aligns_margin_tracks_and_limits_label_materialization() -> None:
     spec = runpy.run_path(str(EXAMPLES / "pisa_interaction_matrix.py"))[
         "chart"
     ].to_dict()
-    matrix, accessibility, contribution = spec["concat"]
-    assert spec["columns"] == 2
+    matrix = spec["spec"]
+    accessibility = spec["surround"]["right"][0]
+    contribution = spec["surround"]["bottom"][0]
+    assert "concat" not in spec
     assert spec["scales"]["y"] == {
         "type": "index",
         "domain": [15646499, 15647400],
         "reverse": True,
     }
-    assert accessibility["resolve"]["scale"]["x"] == "excluded"
-    assert contribution["resolve"]["scale"]["y"] == "excluded"
+    assert "resolve" not in accessibility
+    assert "resolve" not in contribution
     assert matrix["data"]["url"].endswith("/v3/fig2d-atac-matrix.parquet")
     params = {parameter["name"]: parameter for parameter in matrix["params"]}
     assert params["matrixCursor"]["ruler"]["encodings"] == ["x", "y"]
@@ -76,14 +78,14 @@ def test_matrix_aligns_margin_tracks_and_limits_label_materialization() -> None:
         {"type": "collect"},
         {
             "type": "filter",
-            "expr": "((((showCellLabels && (datum.input >= labelXStart)) && (datum.input < labelXEnd)) && (datum.output >= labelYStart)) && (datum.output < labelYEnd))",
+            "expr": "showCellLabels && datum.input >= labelXStart && datum.input < labelXEnd && datum.output >= labelYStart && datum.output < labelYEnd",
         },
     ]
     assert labels["encoding"]["text"]["format"] == ".2f"
     assert {p["name"]: p["expr"] for p in labels["params"]} == {
         f"label{axis}{edge}": (
-            f"if(showCellLabels,({rounding}(({extreme}(domain('{axis.lower()}')[0],"
-            f"domain('{axis.lower()}')[1]) / label{axis}BinSize)) * label{axis}BinSize),null)"
+            f"showCellLabels ? {rounding}({extreme}(domain('{axis.lower()}')[0], "
+            f"domain('{axis.lower()}')[1]) / label{axis}BinSize) * label{axis}BinSize : null"
         )
         for axis in ("X", "Y")
         for edge, rounding, extreme in (

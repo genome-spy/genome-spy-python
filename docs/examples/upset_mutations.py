@@ -27,9 +27,10 @@ SET_CURSOR_UPDATE = gs.ruler(
         opacity=0.7,
     ),
 )
-SET_CURSOR_Y = SET_CURSOR.values.y
 # Keep all combinations visible until hover, then emphasize those with that gene.
-CURSOR = ~gs.expr.isValid(SET_CURSOR_Y) | (gs.datum.profileContainsHoveredSet == 1)
+CURSOR = gs.Expression(
+    "!isValid(setCursor.values.y) || datum.profileContainsHoveredSet == 1"
+)
 
 # Show how many samples have each exact combination of mutated genes.
 intersection_bars = (
@@ -60,7 +61,6 @@ intersection_sizes = (
     gs.layer(intersection_bars, intersection_labels)
     .properties(
         name="intersection-sizes",
-        width=gs.step(20),
         height=210,
         scales=gs.scales(
             y=gs.Scale(
@@ -71,13 +71,12 @@ intersection_sizes = (
             )
         ),
     )
-    .resolve_scale(y="excluded")
     .encode(
         opacity=gs.Opacity(gs.expr(CURSOR), type="nominal")
         .scale(type="ordinal", domain=[False, True], range=[0.14, 1])
         .legend(None)
     )
-    .transform_filter(gs.datum.setIndex == 0)
+    .transform_filter("datum.setIndex == 0")
 )
 
 # Show how many samples have a mutation in each gene, regardless of combination.
@@ -110,26 +109,24 @@ set_sizes = (
     .properties(
         name="set-sizes",
         width=150,
-        height=gs.step(20),
         scales=gs.scales(
             x=gs.Scale(
                 zero=True,
                 nice=True,
                 reverse=True,
                 padding=0.08,
-                domain=[0, 100],
+                domainMin=0,
             )
         ),
     )
     .add_params(SET_CURSOR_UPDATE)
-    .resolve_scale(x="excluded")
-    .transform_filter(gs.datum.profileNumber == 1)
+    .transform_filter("datum.profileNumber == 1")
 )
 
 # Label the matrix rows with gene names.
 set_names = (
     gs.Chart()
-    .transform_filter(gs.datum.profileNumber == 1)
+    .transform_filter("datum.profileNumber == 1")
     .mark_text(align="right", dx=-3, clip="never")
     .encode(
         x=gs.value(0),
@@ -143,7 +140,7 @@ set_names = (
 # Shade alternating rows to make the matrix easier to read.
 row_backgrounds = (
     gs.Chart()
-    .transform_filter((gs.datum.setIndex % 2 == 0) & (gs.datum.profileNumber == 1))
+    .transform_filter("datum.setIndex % 2 == 0 && datum.profileNumber == 1")
     .mark_rect()
     .encode(x=None, y=gs.Y("setIndex:I"), color=gs.value("#f1f1f1"))
     .properties(name="row-backgrounds")
@@ -156,7 +153,7 @@ background_points = (
         filled=True,
         size=95,
         strokeWidth=0,
-        opacity=gs.expr(gs.expr.if_(gs.expr.isValid(SET_CURSOR_Y), 0.2, 1)),
+        opacity=gs.expr("isValid(setCursor.values.y) ? 0.2 : 1"),
     )
     .encode(
         x=gs.X("profileNumber:I"),
@@ -169,7 +166,7 @@ background_points = (
 # Join the genes belonging to the same combination with a vertical line.
 connectors = (
     gs.Chart()
-    .transform_filter(gs.datum.member)
+    .transform_filter("datum.member")
     .transform_aggregate(
         groupby=["profileNumber", "profileContainsHoveredSet"],
         fields=["setIndex", "setIndex"],
@@ -188,7 +185,7 @@ connectors = (
 # Draw dark dots for the genes present in each combination.
 members = (
     gs.Chart()
-    .transform_filter(gs.datum.member)
+    .transform_filter("datum.member")
     .mark_point(filled=True, size=115, strokeWidth=0)
     .encode(
         x=gs.X("profileNumber:I").axis(None),
@@ -227,12 +224,9 @@ matrix = (
 
 # Load the mutation table and arrange the bars above and beside the matrix.
 chart = (
-    gs.concat(
-        gs.Chart([]).mark_point().properties(name="empty-space", width=0, height=0),
-        intersection_sizes,
-        set_sizes,
+    gs.surround(
         matrix,
-        columns=2,
+        surround=gs.SurroundSides(top=[intersection_sizes], left=[set_sizes]),
     )
     .properties(
         name="upsetr-mutations",
@@ -250,19 +244,16 @@ chart = (
         spacing=3,
         scales=gs.scales(
             x=gs.Scale(
-                domain=[0.5, 20.5],
                 paddingInner=0.22,
                 paddingOuter=0.12,
             ),
             y=gs.Scale(
-                domain=[-0.5, 4.5],
                 paddingInner=0.16,
                 paddingOuter=0.08,
             ),
         ),
     )
     .add_params(SET_CURSOR)
-    .resolve_scale(x="shared", y="shared")
     # Gather the five genes' mutation indicators into one column.
     .transform_regex_fold(
         columnRegex="^(PTEN|TP53|EGFR|PIK3R1|RB1)$",
@@ -275,9 +266,9 @@ chart = (
         set="set",
         membership="membership",
     )
-    .transform_filter(gs.datum.profileDegree > 0)
+    .transform_filter("datum.profileDegree > 0")
     .transform_formula(
-        expr=gs.expr.if_(gs.datum.member, gs.datum.profileSize, 0),
+        expr="datum.member ? datum.profileSize : 0",
         as_="memberSize",
     )
     # Add up the samples containing each gene.
@@ -291,12 +282,9 @@ chart = (
     # Check which combinations contain the hovered gene.
     .transform_collect()
     .transform_formula(
-        expr=gs.expr.if_(
-            gs.expr.isValid(SET_CURSOR_Y)
-            & (gs.expr.round(SET_CURSOR_Y) == gs.datum.setIndex)
-            & gs.datum.member,
-            1,
-            0,
+        expr=(
+            "isValid(setCursor.values.y) && round(setCursor.values.y) == "
+            "datum.setIndex && datum.member ? 1 : 0"
         ),
         as_="hoveredSetMember",
     )

@@ -16,10 +16,10 @@ from bars to base-colored sequence letters as you zoom in.
 
 ## How the chart is built
 
-`gs.concat(..., columns=2)` arranges three charts: the matrix, an accessibility
-track on its right, and a contribution track below it. The genomic axes are
-linked so that positions stay aligned when you pan or zoom. Each side track
-has its own scale for the signal it shows.
+`gs.surround()` places the accessibility track to the matrix's right and the
+contribution track below it. Each margin shares the corresponding genomic axis
+with the matrix, keeping positions aligned when you pan or zoom, while its
+signal scale stays independent.
 
 The Python example provides URLs for prepared Parquet tables. GenomeSpy loads
 and filters the data in the browser; Python does not load or process the tables.

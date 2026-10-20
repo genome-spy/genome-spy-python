@@ -48,6 +48,10 @@ CATEGORIES: dict[str, tuple[int, str]] = {
         25,
         "Single-cell UMAPs, marker heatmaps, and expression tracks with AnnData.",
     ),
+    "Expression and heatmaps": (
+        27,
+        "Clustered expression matrices with aligned trees and annotations.",
+    ),
     "Regulatory model interpretation": (
         30,
         "PISA effects and DynSeq contribution scores for interpreting regulatory models.",

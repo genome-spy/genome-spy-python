@@ -42,20 +42,20 @@ effect_scale = gs.Scale(
 )
 
 # Label visibility depends on the rendered cell size in both dimensions.
-label_x_span = gs.param("labelVisibilityXSpan", expr=gs.Expression("width") / 15)
-label_y_span = gs.param("labelVisibilityYSpan", expr=gs.Expression("height") / 8)
+label_x_span = gs.param("labelVisibilityXSpan", expr="width / 15")
+label_y_span = gs.param("labelVisibilityYSpan", expr="height / 8")
 x_tile_size = gs.param("labelXBinSize", value=10)
 y_tile_size = gs.param("labelYBinSize", value=15)
 show_labels = gs.param(
     "showCellLabels",
     expr=(
-        (gs.expr.abs(gs.expr.span(gs.expr.domain("x"))) <= label_x_span)
-        & (gs.expr.abs(gs.expr.span(gs.expr.domain("y"))) <= label_y_span)
+        "abs(span(domain('x'))) <= labelVisibilityXSpan && "
+        "abs(span(domain('y'))) <= labelVisibilityYSpan"
     ),
 )
 ruler_opacity = gs.param(
     "rulerOpacity",
-    expr=gs.expr.if_(show_labels, 0, 0.3),
+    expr="showCellLabels ? 0 : 0.3",
     transition=gs.LerpTransition(type="lerp", halfLife=100, epsilon=0.01),
 )
 cursor = gs.ruler(
@@ -90,9 +90,7 @@ cells = (
 # One row anchors the dashed reference where input and output positions agree.
 diagonal = (
     gs.Chart(tracks)
-    .transform_filter(
-        (gs.datum.track == "importance") & (gs.datum.position == INPUT_DOMAIN[0])
-    )
+    .transform_filter("datum.track == 'importance' && datum.position == 15646649")
     .mark_rule(
         color="#333333", opacity=0.35, size=0.75, strokeDash=[3, 3], tooltip=None
     )
@@ -106,40 +104,32 @@ diagonal = (
 )
 
 # Stable tile bounds prevent materializing a text mark for every matrix cell.
-x_domain = gs.expr.domain("x")
-y_domain = gs.expr.domain("y")
 label_x_start = gs.param(
     "labelXStart",
-    expr=gs.expr.if_(
-        show_labels,
-        gs.expr.floor(gs.expr.min(x_domain[0], x_domain[1]) / x_tile_size)
-        * x_tile_size,
-        None,
+    expr=(
+        "showCellLabels ? floor(min(domain('x')[0], domain('x')[1]) / "
+        "labelXBinSize) * labelXBinSize : null"
     ),
 )
 label_x_end = gs.param(
     "labelXEnd",
-    expr=gs.expr.if_(
-        show_labels,
-        gs.expr.ceil(gs.expr.max(x_domain[0], x_domain[1]) / x_tile_size) * x_tile_size,
-        None,
+    expr=(
+        "showCellLabels ? ceil(max(domain('x')[0], domain('x')[1]) / "
+        "labelXBinSize) * labelXBinSize : null"
     ),
 )
 label_y_start = gs.param(
     "labelYStart",
-    expr=gs.expr.if_(
-        show_labels,
-        gs.expr.floor(gs.expr.min(y_domain[0], y_domain[1]) / y_tile_size)
-        * y_tile_size,
-        None,
+    expr=(
+        "showCellLabels ? floor(min(domain('y')[0], domain('y')[1]) / "
+        "labelYBinSize) * labelYBinSize : null"
     ),
 )
 label_y_end = gs.param(
     "labelYEnd",
-    expr=gs.expr.if_(
-        show_labels,
-        gs.expr.ceil(gs.expr.max(y_domain[0], y_domain[1]) / y_tile_size) * y_tile_size,
-        None,
+    expr=(
+        "showCellLabels ? ceil(max(domain('y')[0], domain('y')[1]) / "
+        "labelYBinSize) * labelYBinSize : null"
     ),
 )
 labels = (
@@ -147,11 +137,8 @@ labels = (
     .add_params(label_x_start, label_x_end, label_y_start, label_y_end)
     .transform_collect()
     .transform_filter(
-        show_labels
-        & (gs.datum.input >= label_x_start)
-        & (gs.datum.input < label_x_end)
-        & (gs.datum.output >= label_y_start)
-        & (gs.datum.output < label_y_end)
+        "showCellLabels && datum.input >= labelXStart && datum.input < labelXEnd "
+        "&& datum.output >= labelYStart && datum.output < labelYEnd"
     )
     .mark_text(
         size=10,
@@ -196,6 +183,7 @@ motif_blocks = (
             gs.Tooltip("score").title("Score"),
         ],
     )
+    .properties(name="Motif intervals")
 )
 motif_labels = (
     gs.Chart()
@@ -206,6 +194,7 @@ motif_labels = (
         tooltip=None,
     )
     .encode(text="motifLabel", color=gs.value("black"))
+    .properties(name="Motif labels")
 )
 motifs = (
     (motif_blocks + motif_labels)
@@ -217,17 +206,13 @@ motifs = (
         ),
     )
     .transform_calculate(
-        motifLabel=gs.expr.if_(
-            gs.datum.name == "m1bp",
-            "M1bp",
-            gs.expr.if_(gs.datum.name == "gaga", "Gaga", "Zelda"),
-        )
+        motifLabel="datum.name == 'm1bp' ? 'M1bp' : datum.name == 'gaga' ? 'Gaga' : 'Zelda'"
     )
     .encode(
         x=gs.X("start:I").axis(None),
         x2="end",
-        y=gs.value(gs.expr(4 / gs.Expression("height"))),
-        y2=gs.value(gs.expr(20 / gs.Expression("height"))),
+        y=gs.value(gs.expr("4 / height")),
+        y2=gs.value(gs.expr("20 / height")),
     )
 )
 matrix = (
@@ -255,7 +240,7 @@ matrix = (
 # The right margin shares genomic y with the matrix, but has its own value x.
 accessibility = (
     gs.Chart(tracks)
-    .transform_filter(gs.datum.track == "prediction")
+    .transform_filter("datum.track == 'prediction'")
     .mark_rect(color="#332288", minOpacity=1)
     .encode(
         x=gs.X("value:Q").scale(type="linear", zero=True).axis(None),
@@ -278,11 +263,14 @@ accessibility = (
             dx=5,
         ),
     )
-    .resolve_scale(x="excluded")
 )
 
 # The bottom margin shares genomic x; zooming changes bars into sequence letters.
-bars = gs.Chart().mark_rect(color="#332288", minOpacity=1)
+bars = (
+    gs.Chart()
+    .mark_rect(color="#332288", minOpacity=1)
+    .properties(name="Contribution bars")
+)
 logo = (
     gs.Chart()
     .mark_text(
@@ -305,6 +293,7 @@ logo = (
         )
         .legend(None),
     )
+    .properties(name="Contribution sequence logo")
 )
 contribution = (
     gs.multiscale(
@@ -319,11 +308,10 @@ contribution = (
     .properties(
         name="importance",
         data=tracks,
-        width=gs.SizeDef(grow=1),
         height=60,
         title=gs.Title(text="Contribution score", style="overlay-title", dx=5),
     )
-    .transform_filter(gs.datum.track == "importance")
+    .transform_filter("datum.track == 'importance'")
     .encode(
         x=gs.X("position:I").title("dm6 chrX"),
         y=gs.datum(0, type="quantitative").scale(type="linear", zero=True).axis(None),
@@ -334,20 +322,21 @@ contribution = (
             gs.Tooltip("value").title("Contribution").format(".4g"),
         ],
     )
-    .resolve_scale(y="excluded")
 )
 
-# A three-cell grid aligns both margins with the matrix without a dummy panel.
+# Surround shares each margin's positional axis with the central matrix.
 chart = (
-    gs.concat(matrix, accessibility, contribution, columns=2, spacing=2)
+    gs.surround(
+        matrix,
+        surround=gs.SurroundSides(right=[accessibility], bottom=[contribution]),
+        spacing=2,
+    )
     .properties(
         scales=gs.scales(
             x=gs.Scale(type="index", domain=INPUT_DOMAIN),
             y=gs.Scale(type="index", domain=OUTPUT_DOMAIN, reverse=True),
         )
     )
-    .resolve_scale(x="shared", y="shared", color="independent")
-    .resolve_axis(x="independent", y="independent")
     .resolve_legend(color="collected")
     .configure_axis(domain=False, grid=False, labelFontSize=10, titleFontSize=10)
     .configure_legend(

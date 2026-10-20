@@ -22,9 +22,10 @@ it.
 ## Python implementation
 
 Regex folding normalizes the wide mutation table and the set-intersection
-transform groups patients by membership profile. A two-column concatenation
-shares the categorical matrix scales while excluding the independent
-quantitative scales.
+transform groups patients by membership profile. `gs.surround()` places the
+intersection bars above the matrix and set-size bars to its left. Each margin
+shares the matrix's corresponding index scale and keeps an independent
+quantitative count scale. GenomeSpy runs these transforms in the browser.
 
 See the [official GenomeSpy example](https://genomespy.app/docs/examples/generic/upsetr-mutations/)
 for the full reading and transform guide.

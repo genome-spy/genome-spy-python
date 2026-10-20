@@ -1363,16 +1363,13 @@ def test_upset_plot_derives_and_aligns_exact_set_intersections() -> None:
         "set": "set",
         "membership": "membership",
     }
-    assert [view["name"] for view in spec["concat"]] == [
-        "empty-space",
-        "intersection-sizes",
-        "set-sizes",
-        "combination-matrix",
-    ]
-    assert spec["columns"] == 2
-    assert spec["scales"]["x"]["domain"] == [0.5, 20.5]
-    assert spec["scales"]["y"]["domain"] == [-0.5, 4.5]
-    assert spec["concat"][1]["scales"]["y"] == {
+    assert spec["spec"]["name"] == "combination-matrix"
+    assert spec["surround"]["top"][0]["name"] == "intersection-sizes"
+    assert spec["surround"]["left"][0]["name"] == "set-sizes"
+    assert "concat" not in spec
+    assert spec["scales"]["x"] == {"paddingInner": 0.22, "paddingOuter": 0.12}
+    assert spec["scales"]["y"] == {"paddingInner": 0.16, "paddingOuter": 0.08}
+    assert spec["surround"]["top"][0]["scales"]["y"] == {
         "zero": True,
         "nice": True,
         "padding": 0.12,
