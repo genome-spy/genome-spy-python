@@ -30,7 +30,8 @@ and matrixplots, individual-cell heatmaps, supplied numeric matrices, clustermap
 standalone dendrograms, correlation matrices, stored rank/score panels and ranked
 dotplot/matrixplot/heatmap wrappers.
 Full public Scanpy plotting coverage is the destination; the inventory below
-records remaining work. Stored PCA loadings and variance ratios share the ranking panels. Native
+records remaining work. Stored PCA loadings and variance ratios share the ranking panels;
+PCA overview composes these with the existing embedding chart. Native
 plot builders remain planned.
 
 ## Shared 2D embeddings
@@ -105,7 +106,7 @@ Native `hover` shows gene, loading score and displayed rank; `hover=False`
 disables it. `width`/`height` size each plot area. Native fonts, ticks and outer
 spacing retain the ranking renderer's documented differences. Rotated ASCII dots
 render the omitted-rank marker because the native font lacks vertical ellipsis.
-`show`/`save` use the common native delivery contract. PCA overview remains planned.
+`show`/`save` use the common native delivery contract.
 
 ## PCA variance ratios
 
@@ -136,6 +137,32 @@ Sparse/lazy vectors reject without materialization. Sparse expression, views and
 backed AnnData work with resident stored ratios, without needing PCA coordinates
 or loadings. Missing ratios error and ask for explicit Scanpy PCA. Supplied
 finite linear scores are plotted as given, with no added range or sum constraint.
+
+## PCA overview
+
+`pca_overview` reuses `pca`, `pca_loadings` and `pca_variance_ratio`, in that order.
+Scanpy opens three plots; the native result arranges their charts vertically and
+displays once. Each row keeps its data, axes and independent scales and guides.
+
+```python
+pca_genes = pbmc[:, pbmc.var["highly_variable"]]
+overview = gsc.pl.pca_overview(
+    pca_genes, color="louvain", zoom=True, width=280, height=280, show=False,
+)
+overview.display(inline=True, controls=False)
+```
+
+As in Scanpy, forwarded plotting options affect **only the PCA embedding**.
+This includes component choices and the native `hover`, `zoom`, `width` and
+`height` controls. Loadings keep their first-three-component and extreme-rank
+defaults; variance ratios keep `n_pcs=30, log=False`. To customize diagnostics,
+call them separately and compose the resulting charts with native operators.
+
+All three plots use supplied results. Plotting never fits PCA or filters genes;
+the packaged-data example explicitly selects genes with stored finite loadings.
+Missing or unsupported results retain their parent's named error. All children
+are constructed before displaying, so an error cannot leave a partial overview.
+Common show/save rules apply to the whole result, including standalone HTML.
 
 ## Scatter cells or genes
 
@@ -227,6 +254,7 @@ semantics match the plot:
 | Scatter | Public AnnData `obs_vector`/`raw.obs_vector`/`var_vector` and stored X_ coordinates; existing embedding color/style/point helpers | Distinct orientation, per-axis layers, legacy component labels and paint order; no full transpose or analysis. |
 | PCA loadings | Stored `varm["PCs"]` and `var_names`; existing ranking preparation and chart builder | One-based component/count validation; no PCA or expression access. |
 | PCA variance ratios | Stored `uns["pca"]["variance_ratio"]`; existing ranking preparation, NumPy sorting/log and chart builder | Named result/count checks; original PC labels stay attached. No PCA, renormalization or expression access. |
+| PCA overview | Existing PCA scatter, loadings and variance-ratio entry points | Native vertical composition displays once, with independent scales/guides and unchanged diagnostic defaults. |
 | Dotplot | Public `sc.get.obs_df`, including selected raw/layer/symbol lookup; AnnData categorization on the detached table | Shared pandas means, strict-cutoff fractions and plotting min–max scaling. Native marks and guides use those results. |
 | Matrixplot | The same getter, categorization and shared grouped means/scaling; supplied `values_df` uses only group rows and zero-row feature lookup validation | Plot ordering, repeated slots and native tile/guide mapping. No expression-fraction computation. |
 | Heatmap | The same getter, categorization, min–max operation, native palettes, marker ordering and tree branches | Cell values and original row positions, category spans and shared annotation alignment. No group means or downsampling. |
@@ -817,7 +845,8 @@ Two notebooks run independently:
   basic categorical/continuous UMAP, linked brushing/count/Python retrieval, then
   customization with subsets, titles/frames, categorical order/palettes, an
   explicit Scanpy gene score and the eight-panel marker overview, followed by
-  stored PCA with variance labels/loadings and a variance-ratio plot, explicitly prepared t-SNE and cell/gene scatter.
+  stored PCA with variance labels/loadings, variance ratios and the composed overview,
+  explicitly prepared t-SNE and cell/gene scatter.
 - {download}`Expression plots <../../../integrations/scanpy/notebooks/scanpy_expression.ipynb>`:
   marker dotplot, per-gene scaled matrixplot, zoomable individual-cell heatmap and supplied matrix on
   `bulk_labels`, clustermap, stored score panels and ranked expression variants,
@@ -863,8 +892,7 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio |
-| PCA diagnostics | pca_overview |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Diagnostics and simulation | highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
 | Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_as_heatmap, timeseries_subplot |

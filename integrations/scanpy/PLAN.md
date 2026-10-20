@@ -496,7 +496,8 @@ commit evidence and unmet verification gates live in the
   silently dropped or replaced by analysis.
   Reuse the ranking renderer where equivalent. Test supplied `varm["PCs"]` and
   gene labels, reversed components, signed/tied loadings, omitted lower ranks,
-  limits and missing results; never run PCA. Then add variance and overview.
+  limits and missing results; never run PCA. Variance and overview now reuse these
+  parents; their verified scope and remaining limits live in STATUS.
   Loadings acceptance: default components are 1–3 and default rank count is
   min(30, n_vars); preserve top-only's extra label, repeated components/labels,
   odd high/low splits and selected-column access. Test resident loadings on sparse
@@ -511,8 +512,8 @@ commit evidence and unmet verification gates live in the
   logarithmic axis. Keep float32 log rounding before plotting conversion.
   Missing results and nonpositive log inputs need named errors,
   with no PCA computation. Test stored ordering, truncation, bounds, public
-  delivery, references, hover/HTML, resources and the notebook. Overview follows
-  both diagnostics.
+  delivery, references, hover/HTML, resources and the notebook. Overview composes
+  both diagnostics with the existing PCA chart, without another data/chart module.
   Overview acceptance: `gsc.pl.pca_overview(pca_genes, color="louvain", show=False)`
   reuses `pca`, `pca_loadings` and `pca_variance_ratio` with their existing defaults.
   Scanpy opens the three plots in that order; compose the native results vertically

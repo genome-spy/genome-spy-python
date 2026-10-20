@@ -9,6 +9,7 @@ Stored rankings add `gsc.pl.rank_genes_groups(...)`, `gsc.pl.ranking(...)`, and
 the ranked dotplot/matrixplot/heatmap wrappers.
 `gsc.pl.pca_loadings(...)` and `gsc.pl.pca_variance_ratio(...)` reuse the ranking
 panels for stored PCA results.
+`gsc.pl.pca_overview(...)` composes these diagnostics with the existing PCA scatter.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
 The implementation lives in the installable [source package](../../src/genome_spy/integrations/scanpy/),
@@ -88,7 +89,7 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
 
 - [UMAP](notebooks/scanpy_umap.ipynb): basic categorical/continuous plotting with
   x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
-  Existing coordinates are retained; gene scoring and the final t-SNE preparation are explicit Scanpy operations. Packaged PCA scatter, stored loadings and variance ratios reuse embedding/ranking helpers. Cell/gene scatter examples read packaged observation and variable annotations without an embedding.
+  Existing coordinates are retained; gene scoring and the final t-SNE preparation are explicit Scanpy operations. Packaged PCA scatter, stored loadings, variance ratios and their composed overview reuse embedding/ranking helpers. Cell/gene scatter examples read packaged observation and variable annotations without an embedding.
 - [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot, scaled
   matrixplot, individual-cell heatmap, supplied numeric matrix, aligned dendrograms, y-only zoom (both axes optional), fitted tile values and dot row/column highlighting using the core tutorial
   dictionary and existing `bulk_labels`. Scanpy computes the shared tree in Python

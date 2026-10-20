@@ -74,6 +74,22 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         assert (
             sum(len(table) for table in variance.to_dict()["datasets"].values()) == 11
         )
+        overview = namespace["overview_chart"]
+        assert overview in charts
+        overview_spec = overview.to_dict()
+        assert len(overview_spec["vconcat"]) == 3
+        assert len(units(overview_spec["vconcat"][1])) == 3
+        assert overview_spec["vconcat"][2]["hconcat"][0]["encoding"]["x"]["scale"][
+            "domain"
+        ] == [
+            -0.9,
+            30.9,
+        ]
+        for panel in units(overview_spec["vconcat"][0]):
+            assert all(
+                points(panel)["encoding"][axis]["scale"]["zoom"] is True
+                for axis in ("x", "y")
+            )
         assert namespace["pca_genes"].shape == (700, 309)
         assert (
             loadings.to_dict()
@@ -113,7 +129,7 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         assert pbmc.obsm["X_tsne"].shape == (700, 2)
         assert charts
         for chart in charts:
-            if chart is loadings or chart is variance:
+            if chart is loadings or chart is variance or chart is overview:
                 continue
             spec = chart.to_dict()
             assert spec["datasets"]
