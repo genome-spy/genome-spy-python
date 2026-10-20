@@ -62,16 +62,22 @@ all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M07.d's native continuous-colorbar placement increment.** Preserve
-the existing `colorbar_loc=None`/`"right"` behavior and categorical guides while
-adding `"left"`, `"top"`, and `"bottom"` to the shared embedding entry points.
-Verify default and explicit guide orientation, multi-panel bounds, collected
-guide overrides, hover/zoom and unchanged records. Scatter's distinct signature
-stays unchanged. Default categorical-guide fitting is separately blocked by C11;
-keep its upstream reproducer and recheck it on a released Core fix.
+**Next work: M14.b.1, native heatmap side tracks and group gaps.** Use released
+`gs.surround` for the category strip, labels, marker brackets and attached tree,
+with shared index scales and real gaps between the final ordered cell groups.
+Reuse existing data/tree preparation and evolve the shared chart helpers.
+[M14.b's migration increments](PLAN.md#m14b-native-grid-layout-and-group-gaps)
+then cover matrixplot/dotplot and matrix/clustermap/correlation. Runtime migration
+has not started; the release upgrade alone did not change these layouts.
+
+M07.d's continuous-colorbar placement increment remains ready, after this grid
+migration: preserve `colorbar_loc=None`/`"right"` and add `"left"`, `"top"`, and
+`"bottom"` to shared embedding entry points. Scatter's distinct signature stays
+unchanged. Default categorical-guide fitting is separately blocked by C11; keep
+its upstream reproducer and recheck it on a released Core fix.
 
 The M06/M07 resource gates now have fresh seven-workload evidence below. This
-does not close M07.a/b's newly observed categorical-guide rendering gap:
+does not close M07.a/b's newly observed categorical-guide rendering gap.
 
 Core 1.2.0, its generated composition APIs and the published heatmap example are
 now adopted; see the [upgrade record](#core-12-runtime-adoption). M14.b's native
@@ -85,9 +91,11 @@ inside their own track viewports, independently of the legacy overlay behavior.
 | M07.b scatter | Implemented; resource gate verified | `0fdcc02`; [cell and gene workloads](#m06m07-resource-verification) | Large default category symbols can overflow short panels; C11 blocks the multi-column correction. Keep this complete-chart gate open independently of passed resource checks. |
 | M07.c loadings increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-stored-pca-loadings) | Broader storage/typography/export remain M14. Variance and overview are separate increments; this does not close M07. |
 | M07.c variance increment | Closed (bounded preview) | [Contract, tests and resources](#m07c-stored-pca-variance-ratios) | Broader storage/typography/export remain M14; this does not close the overview or M07. |
-| M07.c overview increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-pca-overview) | Parent storage, typography and export limits remain M14; broader embedding options remain M07.d. This does not close M07.a/b resource gates. |
+| M07.c overview increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-pca-overview) | Parent storage, typography and export limits remain M14; broader embedding options remain M07.d and C11 retains their categorical-guide gate. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
-| M14.b container layout migration | Ready; Core 1.2 runtime/wrapper and published example adopted | [Upgrade record](#core-12-runtime-adoption); [migration scope](PLAN.md#m14--compatibility-closure-and-released-capabilities) | Use native side tracks for heatmap/clustermap; migrate related grids in focused increments. Preserve Python preparation and native guides/interactions. |
+| M14.b.1 heatmap side tracks/gaps | Ready; implementation not started | [Upgrade record](#core-12-runtime-adoption); [migration scope](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Migrate bands, labels, brackets and trees with required native cell-group gaps. Verify shared scale alignment and preserve Python preparation/interactions. |
+| M14.b.2 grouped summary layout | Planned | [Shared helper migration](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Reuse the first increment's track helpers through dotplot/matrixplot; retain native guides/ruler and inherit changes in ranked variants. |
+| M14.b.3 numeric/clustered layout | Planned | [Native numeric grid scope](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Migrate matrix/clustermap/correlation labels, trees and color tracks; verify both axes without inventing cluster groups. |
 | M05.f category-strip hover | Planned viewport migration; legacy hover works on Core 1.2 | C10; [upgrade record](#core-12-runtime-adoption); [layout route](#m05f-category-strip-tooltips--layout-migration) | Place bands inside their own aligned track viewports and recheck enabled-hover, geometry, navigation and workflow behavior. |
 
 M07.d/M14 retain the explicitly unsupported options; dotplot brushing remains
@@ -214,6 +222,14 @@ SVG/raster exports and offline delivery across the existing plot families.
 At runtime adoption, resource and parameter-closure gates remained open.
 The later resource verification below closes gate 4; parameter and rendering
 limits retain their explicit owners.
+
+Layout planning refresh (October 20): inspected the released typed API and the
+checked-in clustered-heatmap, PBMC cell-heatmap and marker-matrix surround
+examples against the current integration chart helpers. Three clustered-example
+structure/expression checks and the callable-inventory check pass; Ruff is clean.
+The plan now requires native group gaps and removes stale release/hover blockers.
+This is planning evidence, not verification of migrated charts; runtime code and
+local notebooks are unchanged.
 
 ## M06/M07 resource verification
 
@@ -1543,7 +1559,7 @@ affected slice.
 | C03 | No native 3D projection | 3D embedding options M07/M14 | Released capability or explicit product scope decision; keep unresolved until then |
 | C04 | No dedicated line/path mark in bundled mark inventory | Series/graph/path M11 | Verify native rule/link segments can preserve required semantics; otherwise upstream released capability |
 | C05 | Font/outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
-| C06 | Core 1.2 container layout and typed surround/facet APIs adopted; Scanpy migration remains open | Heatmap/clustermap side tracks, related grids, UMAP/repeated panels; M14.b | Use the published heatmap example and verify native viewport/scale/guide ownership and existing chart/navigation/selection contracts |
+| C06 | Core 1.2 typed surround/facet APIs and native index gaps available; Scanpy migration remains open | Heatmap/clustermap side tracks, related grids, UMAP/repeated panels; M14.b | Use the published heatmap example; verify viewport/scale/guide ownership, required heatmap group gaps and existing navigation/selection contracts |
 | C07 | Python linkage + native rule branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Shared geometry projects into equal summary slots or unequal cell-group centers; standalone/attached resize and registered path checks pass. M05.e verifies grouped and heatmap navigation; recheck later families. |
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots, both orientations, optional zoom and duplicate-slot highlighting verified; extend checks with later families |
 | C09 | Core 1.0 band rulers failed during initial WebGL rendering; the adopted Core 1.2 capability needs a focused recheck | Optional shaded row/column guides | Keep the native center crosshair until shaded-guide behavior is verified against Core 1.2. [PR #586](https://github.com/genome-spy/genome-spy/pull/586) records the upstream fix and regression evidence. |

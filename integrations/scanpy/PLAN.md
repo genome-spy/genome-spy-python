@@ -389,8 +389,8 @@ Larger transport remains M05.d; stored ranking and ranked summaries belong to M0
   and rejects color objects, images, sparse/lazy data and mismatched tick counts.
   Heatmap zoom defaults off; explicit zoom keeps strips, boundaries and tree leaves
   aligned, hides offscreen labels, and hides partially visible gene brackets.
-  M05.f owns usable native annotation-strip tooltips in both orientations after
-  adopting its released Core fix; the existing hover flag already configures them.
+  Native annotation-strip hover passes on Core 1.2; M05.f still owns placing the
+  bands inside their own track viewports and verifying the migrated layout.
 - M05.c: `clustermap` computes requested row/column clustering in Python, honors
   supplied linkage and annotation colors, and routes supported clustering kwargs
   explicitly. Do not silently cluster a supplied ordering or densify an unrelated
@@ -402,8 +402,9 @@ Larger transport remains M05.d; stored ranking and ranked summaries belong to M0
   maintained contract, with broader options assigned to M14. Do not claim the
   full clustermap family closed from this preview.
   Observation category strips retain names/order/palettes and use their own native
-  categorical legend; usable native strip hover remains M05.f. Explicit CSS
-  tracks do not invent category names.
+  categorical legend. M05.f retains the native strip-viewport migration; legacy
+  strip hover already passes on Core 1.2. Explicit CSS tracks do not invent
+  category names.
 - M05.d: test chunked selected-column access and a 100k-cell × 50-marker heatmap;
   record payload/render/memory limits and an explicit over-budget policy. Compare
   complete PBMC tutorial heatmaps with registered strips/tree/label alignment.
@@ -424,7 +425,7 @@ Larger transport remains M05.d; stored ranking and ranked summaries belong to M0
   Run the packaged-PBMC expression notebook and record
   a realistic allocation/payload/browser observation. Keep native API limitations
   and remaining large-data transport debt explicit.
-- M05.f (awaiting released layout adoption in M14.b): move heatmap and clustermap
+- M05.f (released layout available through M14.b): move heatmap and clustermap
   category bands into their own aligned track viewports, then verify native hover.
   The current adapter draws these marks beyond the matrix viewport using offsets
   or coordinates outside 0–1 with clip="never". That layout choice is adapter debt;
@@ -434,8 +435,9 @@ Larger transport remains M05.d; stored ranking and ranked summaries belong to M0
   After migrating, observe both heatmap orientations and clustermap before/after
   zoom, pan and resize. Assert bands lie inside their own viewports, retained
   category identity/palettes and native legends, and normal tile/strip hover.
-  Replace the current expected failures with passing checks and remove limit
-  notices only after observation. No patched bundle or custom hover listeners.
+  Preserve the now-passing legacy hover coverage and add checks for the new
+  viewport bounds and gapped layout. Remove obsolete layout helpers/notices only
+  after observation. No patched bundle or custom hover listeners.
 
 Targets: `gsc.pl.heatmap(pbmc, markers, "louvain", dendrogram=True, show=False)`
 and `gsc.pl.matrix(values, xticks=genes, yticks=groups, show=False)`.
@@ -686,20 +688,10 @@ Python linkage/KDE/graph computation cannot supply a missing renderer primitive.
   APIs are now adopted. The [clustered heatmap example](../../docs/examples/clustered_heatmap.py)
   reproduces the published upstream specification; use it as the native layout
   reference without patching the bundle or bypassing generated types.
-  First migrate heatmap/clustermap bands, labels and trees into native side tracks:
-  center tiles own the matrix, side tracks own their in-bounds marks, and native
-  aligned x/y scales own navigation/registration. Keep perpendicular track scales
-  independent and preserve native categorical/color legends. Then apply equivalent
-  layout changes to matrix, matrixplot, dotplot and correlation where needed.
-  Reuse existing Scanpy computation, selected-data preparation, identities, slots,
-  means, scaling and tree order. Remove offset/padding/projection helpers only
-  where native layout replaces them; fitted values and other shared interactions
-  retain their existing owners. Verify unchanged initial values/order/appearance,
-  both index axes, duplicate slots, unequal cell-group spans, tree alignment,
-  in-viewport strip hover, y-only/xy zoom, resize, guides and complete-chart
-  references. Facet/embedding changes also recheck axes/gap/plot zoom routing,
-  brush owner/scope, counts, reruns/disposal and snapshots. Keep these as focused
-  increments; do not promise an unreleased Python API shape.
+  Use the focused increments and required group gaps below. Facet/embedding
+  changes remain a separate increment: recheck axes/gap/plot zoom routing,
+  brush owner/scope, counts, reruns/disposal and snapshots rather than bundling
+  them into the expression-grid migration.
 - M14.c: close backed/lazy selected-expression access, aliases/kwargs, supported
   marker/legend forms, return modes, tree fallback, save/export and every meaningful
   parameter limit. Maintain a per-family parameter/method matrix as each family
@@ -709,10 +701,93 @@ Python linkage/KDE/graph computation cannot supply a missing renderer primitive.
   semantic/reference/browser/resource suites and deprecation behavior.
   Only then widen `scanpy==1.11.5` to the tested range.
 
-Acceptance: every inventory entry is verified or an explicit renderer-specific
-exception; parameter and method debt is resolved, not hidden by a function count.
-If native capability gaps remain, publish a precisely scoped preview rather than
-calling the integration a complete drop-in replacement.
+Acceptance for M14 as a whole: every inventory entry is verified or an explicit
+renderer-specific exception; parameter and method debt is resolved, not hidden
+by a function count. If native capability gaps remain, publish a precisely scoped
+preview rather than calling the integration a complete drop-in replacement.
+
+#### M14.b native grid layout and group gaps
+
+The released API replaces the adapter's outside-viewport overlays. The center
+owns tiles/dots and fitted values; `gs.surround` sides own category bands, labels,
+brackets and trees in their own viewports. Declare the aligned index scales on
+the surround owner, with explicit domains from the prepared slot counts. Keep
+perpendicular tree-height scales and annotation color scales independent. Use
+native legends and layout spacing rather than compensating legend offsets or
+negative coordinates to reserve room for tracks. Preserve the documented
+`width`/`height` and `figsize` budget semantics during this change.
+
+Heatmap cell groups must have real blank space between them. Use native index
+`gapPositions`, with Core's default `gapWidth` of 6 CSS pixels, which stays fixed
+under zoom and device-pixel-ratio changes. These gaps are a deliberate requested
+appearance change; values, ordering and scientific meaning stay unchanged.
+Ordinary native scale configuration owns gap styling; do not add a parallel
+Scanpy-specific layout configuration system.
+
+- Cell-group cuts come from the final ordered `HeatmapData.intervals` exclusive
+  stops, excluding the last stop. For group sizes 2, 3 and 1, use cuts `[2, 5]`:
+  a cut at 2 separates slots 1 and 2. With `swap_axes=True`, these cuts move to x.
+- Marker groups can supply feature-axis cuts after their final permutation when
+  `FeatureGroup` spans form a contiguous, nonoverlapping partition. Inclusive
+  group ends become cuts at `end + 1`, excluding the final end. Arbitrary or
+  overlapping brackets retain their meaning without inventing a partition.
+- A single group has no internal cut. Missing cells and masked tiles retain
+  their slots; repeated gene labels retain distinct integer slots. Do not insert
+  dummy rows, mask out real cells, or paint white rules over tiles to imitate gaps.
+- A supplied numeric matrix has no inferred groups. Clustermap currently has no
+  cluster-cut contract: do not guess cuts from merge heights or category colors.
+  Explicit cluster-cut support needs its own reviewed input/ordering contract;
+  it is not required to migrate existing clustermap tracks into native viewports.
+
+Deliver in small increments, updating the current queue in STATUS after each:
+
+1. **M14.b.1 — cell heatmap and shared track helpers.** Replace heatmap's category
+   strip, group/gene labels, marker brackets and attached tree overlays with
+   native side views. Add cell-group and applicable marker-group gaps. Evolve
+   existing `_grouped_chart` label/bracket and `_dendrogram_chart` helpers so the
+   following families can reuse them. Keep tree computation in Python through
+   stored/public Scanpy results. The released `transform_dendrogram` can lay out
+   precomputed hierarchy where it matches the stored tree; it does not replace
+   clustering or justify recomputation. Preserve merge heights and final leaf
+   order, including unequal cell-group spans and fractional branch positions.
+2. **M14.b.2 — matrixplot and dotplot.** Apply the same side-view layout through
+   `finish_grouped_chart`, including marker-group gaps. Retain the existing
+   summary records, means/fractions, authoritative `values_df`, dot footprints,
+   native guides, fitted values and ruler. Ranked variants inherit the migration
+   through their parent chart paths; do not implement them separately.
+3. **M14.b.3 — matrix, clustermap and correlation.** Reuse the migrated labels
+   and tree views for both axes, moving clustermap color tracks into native
+   sides. Keep supplied/SciPy linkage, masks, palettes and permutations intact.
+   Reuse the same numeric tiles and interactions without manufacturing groups.
+   This completes M05.f only after both heatmap and clustermap pass its gates.
+
+Keep the data-access, grouped-summary, ranking and tree-preparation modules
+unchanged unless a focused failing semantic test requires a correction. In
+`_grid_interactions`, retain shared zoom and fitted-value behavior. The old
+`origin + slot * step` annotation projection assumes uniform spacing and is
+incorrect after native gaps: migrated views must use the shared gapped scale.
+Check tree anchors and group centers through that same scale. Remove obsolete
+projection/clipping/padding code as its last actual caller is migrated; do not
+introduce another general layout framework alongside `gs.surround`.
+
+Each increment requires:
+
+- Semantic tests proving the same selected records, values, IDs, category/feature
+  permutations, normalization, masks and cached-tree behavior. No extra AnnData
+  reads, hidden analysis or full-matrix densification for layout.
+- Complete registered charts with axes, labels, brackets, trees, legends and
+  measured native gaps. Include both orientations, unequal group sizes, a single
+  group, reordered/duplicate markers and missing tiles. Preserve parity outside
+  the intentional gaps and native track placement; review changed references
+  rather than blindly replacing them.
+- Observed strip/tile hover, no data hit in blank gaps, y-only/xy zoom, pan,
+  resize and multiple DPRs. Check shared leaf/strip/label positions, fixed CSS gap
+  widths, viewport bounds, fit-to-band values and the native dotplot ruler.
+- Widget and standalone HTML delivery, the updated packaged-PBMC expression
+  workflow, and a representative payload/render/memory comparison. Track labels
+  and bands must not duplicate the expression measurement table. Keep generated
+  media and notebook execution state out of Git. The existing 250,000-value
+  heatmap limit stays; larger/chunked transport remains M05.d.
 
 ## Documentation and release
 
