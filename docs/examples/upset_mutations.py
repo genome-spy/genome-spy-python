@@ -60,18 +60,16 @@ intersection_sizes = (
     gs.layer(intersection_bars, intersection_labels)
     .properties(
         name="intersection-sizes",
-        width=gs.step(20),
         height=210,
-        scales={
-            "y": {
-                "zero": True,
-                "nice": True,
-                "padding": 0.12,
-                "domainMin": 0,
-            }
-        },
+        scales=gs.scales(
+            y=gs.Scale(
+                zero=True,
+                nice=True,
+                padding=0.12,
+                domainMin=0,
+            )
+        ),
     )
-    .resolve_scale(y="excluded")
     .encode(
         opacity=gs.Opacity(gs.expr(CURSOR), type="nominal")
         .scale(type="ordinal", domain=[False, True], range=[0.14, 1])
@@ -110,19 +108,17 @@ set_sizes = (
     .properties(
         name="set-sizes",
         width=150,
-        height=gs.step(20),
-        scales={
-            "x": {
-                "zero": True,
-                "nice": True,
-                "reverse": True,
-                "padding": 0.08,
-                "domain": [0, 100],
-            }
-        },
+        scales=gs.scales(
+            x=gs.Scale(
+                zero=True,
+                nice=True,
+                reverse=True,
+                padding=0.08,
+                domainMin=0,
+            )
+        ),
     )
     .add_params(SET_CURSOR_UPDATE)
-    .resolve_scale(x="excluded")
     .transform_filter(gs.datum.profileNumber == 1)
 )
 
@@ -227,12 +223,9 @@ matrix = (
 
 # Load the mutation table and arrange the bars above and beside the matrix.
 chart = (
-    gs.concat(
-        gs.Chart([]).mark_point().properties(name="empty-space", width=0, height=0),
-        intersection_sizes,
-        set_sizes,
+    gs.surround(
         matrix,
-        columns=2,
+        surround=gs.SurroundSides(top=[intersection_sizes], left=[set_sizes]),
     )
     .properties(
         name="upsetr-mutations",
@@ -248,21 +241,18 @@ chart = (
             format=gs.data_format(type="csv"),
         ),
         spacing=3,
-        scales={
-            "x": {
-                "domain": [0.5, 20.5],
-                "paddingInner": 0.22,
-                "paddingOuter": 0.12,
-            },
-            "y": {
-                "domain": [-0.5, 4.5],
-                "paddingInner": 0.16,
-                "paddingOuter": 0.08,
-            },
-        },
+        scales=gs.scales(
+            x=gs.Scale(
+                paddingInner=0.22,
+                paddingOuter=0.12,
+            ),
+            y=gs.Scale(
+                paddingInner=0.16,
+                paddingOuter=0.08,
+            ),
+        ),
     )
     .add_params(SET_CURSOR)
-    .resolve_scale(x="shared", y="shared")
     # Gather the five genes' mutation indicators into one column.
     .transform_regex_fold(
         columnRegex="^(PTEN|TP53|EGFR|PIK3R1|RB1)$",

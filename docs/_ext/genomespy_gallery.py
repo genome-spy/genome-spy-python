@@ -112,6 +112,10 @@ GALLERY_CARD_LABELS = {
     "pbmc_marker_matrix": ("PBMC marker matrix", "PBMC3k · 12 marker genes"),
     "pbmc_cell_heatmap": ("PBMC cell heatmap", "PBMC3k · 2,638 cells"),
     "pbmc_expression_tracks": ("PBMC expression tracks", "PBMC3k · AnnData"),
+    "clustered_heatmap": (
+        "Clustered heatmap with dendrograms",
+        "DepMap · 60 cell lines and 72 genes",
+    ),
     "stacked_bar": ("Horizontal stacked bars", "Barley yields · Vega datasets"),
     "layered_lollipop": ("Layered lollipop plot", "Synthetic sine wave"),
     "independent_scales": (

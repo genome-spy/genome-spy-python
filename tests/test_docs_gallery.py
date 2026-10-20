@@ -6,6 +6,7 @@ this test doubles as a schema check for the authored examples.
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import re
 import sys
@@ -48,6 +49,31 @@ def _example_paths() -> list[Path]:
 
 def test_gallery_has_examples() -> None:
     assert _example_paths(), "no gallery examples found under docs/examples/"
+
+
+def test_gallery_configuration_uses_discoverable_arguments() -> None:
+    schema_options = {
+        "format",
+        "from_",
+        "layout",
+        "padding",
+        "resolve",
+        "scales",
+        "stops",
+        "transition",
+        "zoom",
+    }
+    for path in _example_paths():
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.keyword)
+                and node.arg in schema_options
+                and isinstance(node.value, ast.Dict)
+            ):
+                pytest.fail(
+                    f"{path.name}:{node.lineno}: use a named schema object or setter for {node.arg}"
+                )
 
 
 @pytest.mark.parametrize(
@@ -203,7 +229,7 @@ def test_heatmap_with_text_generates_grid_and_separates_text_colors() -> None:
         "project",
         "formula",
     ]
-    assert "title" not in spec
+    assert spec["title"] == "Heatmap with zoomable values"
     assert spec["encoding"]["x"]["type"] == "index"
     assert spec["encoding"]["y"]["type"] == "index"
     assert spec["resolve"]["scale"]["color"] == "independent"
@@ -385,9 +411,7 @@ def test_examples_use_typed_axis_and_view_configuration() -> None:
     stacked = gallery.collect_example(EXAMPLES_DIR / "stacked_genome_browser.py")
     viewport = gallery.collect_example(EXAMPLES_DIR / "scrollable_viewport.py")
 
-    assert composing.spec["vconcat"][0]["axes"] == {
-        "x": {"orient": "top", "title": None}
-    }
+    assert composing.spec["axes"] == {"x": {"orient": "top", "title": None}}
     assert refseq.spec["axes"] == {"x": {"title": None}}
     assert stacked.spec["axes"] == {
         "x": {"orient": "bottom", "title": "Genomic position"}
@@ -1339,16 +1363,13 @@ def test_upset_plot_derives_and_aligns_exact_set_intersections() -> None:
         "set": "set",
         "membership": "membership",
     }
-    assert [view["name"] for view in spec["concat"]] == [
-        "empty-space",
-        "intersection-sizes",
-        "set-sizes",
-        "combination-matrix",
-    ]
-    assert spec["columns"] == 2
-    assert spec["scales"]["x"]["domain"] == [0.5, 20.5]
-    assert spec["scales"]["y"]["domain"] == [-0.5, 4.5]
-    assert spec["concat"][1]["scales"]["y"] == {
+    assert spec["spec"]["name"] == "combination-matrix"
+    assert spec["surround"]["top"][0]["name"] == "intersection-sizes"
+    assert spec["surround"]["left"][0]["name"] == "set-sizes"
+    assert "concat" not in spec
+    assert spec["scales"]["x"] == {"paddingInner": 0.22, "paddingOuter": 0.12}
+    assert spec["scales"]["y"] == {"paddingInner": 0.16, "paddingOuter": 0.08}
+    assert spec["surround"]["top"][0]["scales"]["y"] == {
         "zero": True,
         "nice": True,
         "padding": 0.12,
@@ -1536,18 +1557,16 @@ def test_manhattan_plot_uses_canonical_hg18_points() -> None:
     threshold = example.spec["params"][0]
     assert threshold["name"] == "manhattanSignificanceCutoff"
     assert threshold["bind"]["input"] == "range"
-    assert example.spec["layer"][0]["transform"] == [
-        {
-            "type": "formula",
-            "expr": "manhattanSignificanceCutoff",
-            "as": "threshold",
-        }
-    ]
+    assert "transform" not in example.spec["layer"][0]
+    assert example.spec["layer"][0]["encoding"]["y"]["datum"] == {
+        "expr": "manhattanSignificanceCutoff"
+    }
     assert example.spec["layer"][3]["transform"] == [
+        {"type": "collect"},
         {
             "type": "filter",
             "expr": "(datum.neglog >= manhattanSignificanceCutoff)",
-        }
+        },
     ]
     assert example.spec["layer"][3]["mark"]["color"] == "#c53b2c"
 
@@ -1693,6 +1712,7 @@ def test_gallery_generation_runs_during_sphinx_config_phase() -> None:
 
     assert "config-inited" in events
     assert "builder-inited" not in events
+    assert app.css_files == ["workflows.css"]
 
 
 @pytest.fixture
@@ -2234,12 +2254,16 @@ class FakeSphinxApp:
     def __init__(self) -> None:
         self.events: list[tuple[str, object]] = []
         self.directives: list[tuple[str, object]] = []
+        self.css_files: list[str] = []
 
     def connect(self, name: str, callback: object) -> None:
         self.events.append((name, callback))
 
     def add_directive(self, name: str, directive: object) -> None:
         self.directives.append((name, directive))
+
+    def add_css_file(self, name: str) -> None:
+        self.css_files.append(name)
 
 
 class FakeState:

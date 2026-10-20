@@ -429,6 +429,8 @@ def test_composition_guide_embeds_only_named_tutorial_charts() -> None:
         "layered_chart",
         "vertical_chart",
         "horizontal_chart",
+        "facet_chart",
+        "surround_chart",
         "grid_chart",
     ]
     assert set(targets) <= tutorial.CHARTS.keys()

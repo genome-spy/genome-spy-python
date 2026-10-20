@@ -7,6 +7,7 @@ Colors encode pathogenicity classes across a focused genomic locus.
 from __future__ import annotations
 
 import genome_spy as gs
+from genome_spy.schema import ChromosomalLocus
 
 META = {
     "category": "Mutation position plots",
@@ -56,8 +57,8 @@ variants = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr18", "pos": 31524101},
-                    {"chrom": "chr18", "pos": 31525003},
+                    ChromosomalLocus(chrom="chr18", pos=31524101),
+                    ChromosomalLocus(chrom="chr18", pos=31525003),
                 ]
             )
         ),

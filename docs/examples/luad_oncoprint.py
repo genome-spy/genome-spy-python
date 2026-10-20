@@ -298,7 +298,7 @@ matrix_panel = (
 ).properties(
     width=SAMPLE_TRACK_WIDTH,
     height=MATRIX_HEIGHT,
-    scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.03}},
+    scales=gs.scales(y=gs.Scale(domain=gene_order, reverse=True, padding=0.03)),
 )
 
 # Show the percentage of affected samples beside each gene.
@@ -346,7 +346,9 @@ gene_count_panel = (
 # Keep the percentages and count bars on the same gene rows.
 matrix_summary = (
     gs.concat(percent_panel, gene_count_panel, columns=2, spacing=2)
-    .properties(scales={"y": {"domain": gene_order, "reverse": True, "padding": 0.03}})
+    .properties(
+        scales=gs.scales(y=gs.Scale(domain=gene_order, reverse=True, padding=0.03))
+    )
     .resolve_scale(x="excluded", y="shared")
 )
 
@@ -401,14 +403,14 @@ sample_tracks = (
         spacing=4,
     )
     .properties(
-        scales={
-            "x": {
-                "domain": sample_domain,
-                "paddingInner": 0,
-                "paddingOuter": 0,
-                "zoom": True,
-            }
-        },
+        scales=gs.scales(
+            x=gs.Scale(
+                domain=sample_domain,
+                paddingInner=0,
+                paddingOuter=0,
+                zoom=True,
+            )
+        ),
     )
     .add_params(sample_ruler)
     .resolve_scale(x="shared", y="independent")

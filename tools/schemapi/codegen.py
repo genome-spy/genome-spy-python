@@ -68,8 +68,6 @@ KWDS_TARGETS = frozenset(
         "ZoomParams",
     }
 )
-# Inline schema objects exposed through keyword-based property setters.
-INLINE_OBJECT_SETTERS = frozenset({"project"})
 ANONYMOUS_PROPERTY_KWDS = {
     "axes": "AxesKwds",
     "legends": "LegendsKwds",
@@ -399,7 +397,17 @@ class SchemaAnalyzer:
                 continue
             for variant in variants:
                 if isinstance(variant, dict):
-                    resolved.update(self.resolve_properties(variant, seen=seen))
+                    for name, property_schema in self.resolve_properties(
+                        variant, seen=seen
+                    ).items():
+                        if (
+                            key != "allOf"
+                            and name in resolved
+                            and isinstance(property_schema, dict)
+                            and property_schema.get("not") == {}
+                        ):
+                            continue
+                        resolved[name] = property_schema
         return resolved
 
     def resolved_identifier_properties(self, schema: dict[str, Any]) -> tuple[str, ...]:
@@ -603,7 +611,11 @@ class SchemaAnalyzer:
         object_property_refs = self._resolved_object_property_refs(
             {"properties": properties}
         )
-        property_names = [name for name in sorted(properties) if name.isidentifier()]
+        property_names = [
+            name
+            for name in sorted(properties)
+            if name.isidentifier() and properties[name].get("not") != {}
+        ]
         return tuple(
             PropertySpec(
                 name=name,
@@ -1299,15 +1311,7 @@ class SchemaWrapperGenerator:
                     structural = [
                         name
                         for name in required
-                        if name
-                        in {
-                            "mark",
-                            "layer",
-                            "multiscale",
-                            "vconcat",
-                            "hconcat",
-                            "concat",
-                        }
+                        if name not in {"spec", "stops", "columns"}
                     ]
                     root_variants.extend(structural)
 
@@ -1846,6 +1850,14 @@ class SchemaWrapperGenerator:
                 self.top_level_property_specs("MultiscaleSpec"),
                 ("multiscale", "stops"),
             ),
+            "FacetPropertiesMixin": (
+                self.top_level_property_specs("FacetSpec"),
+                ("spec", "facet"),
+            ),
+            "SurroundPropertiesMixin": (
+                self.top_level_property_specs("SurroundSpec"),
+                ("spec", "surround"),
+            ),
         }
         imported_view_specs = self.schema_property_specs("ImportSpec")
         property_mixins = [
@@ -1981,6 +1993,20 @@ class SchemaWrapperGenerator:
             typing_imports.append("Literal")
         if has_expression_transform:
             typing_imports.append("cast")
+        exports = tuple(
+            sorted(
+                {
+                    *properties_specs,
+                    "EncodingMethodMixin",
+                    "ImportedViewConstructorMixin",
+                    "MarkMethodMixin",
+                    "ResolutionMethodMixin",
+                    "TopLevelMergeMixin",
+                    "TransformMethodMixin",
+                    *(["ConfigMethodMixin"] if config_method_specs else []),
+                }
+            )
+        )
         source = "\n".join(
             [
                 GENERATED_HEADER,
@@ -2070,49 +2096,11 @@ class SchemaWrapperGenerator:
                 "",
                 *(transform_methods or ["    pass"]),
                 "",
-                (
-                    '__all__ = ["ConcatPropertiesMixin", "ConfigMethodMixin", "EncodingMethodMixin", "HConcatPropertiesMixin", "ImportedViewConstructorMixin", "LayerPropertiesMixin", "MarkMethodMixin", "MultiscalePropertiesMixin", "ResolutionMethodMixin", "TopLevelMergeMixin", "TransformMethodMixin", "UnitPropertiesMixin", "VConcatPropertiesMixin"]'
-                    if config_method_specs
-                    else '__all__ = ["ConcatPropertiesMixin", "EncodingMethodMixin", "HConcatPropertiesMixin", "ImportedViewConstructorMixin", "LayerPropertiesMixin", "MarkMethodMixin", "MultiscalePropertiesMixin", "ResolutionMethodMixin", "TopLevelMergeMixin", "TransformMethodMixin", "UnitPropertiesMixin", "VConcatPropertiesMixin"]'
-                ),
+                "__all__ = " + repr(list(exports)),
                 "",
             ]
         )
-        return GeneratedModule(
-            source=source,
-            exports=(
-                (
-                    "ConcatPropertiesMixin",
-                    "ConfigMethodMixin",
-                    "EncodingMethodMixin",
-                    "HConcatPropertiesMixin",
-                    "ImportedViewConstructorMixin",
-                    "LayerPropertiesMixin",
-                    "MarkMethodMixin",
-                    "MultiscalePropertiesMixin",
-                    "ResolutionMethodMixin",
-                    "TopLevelMergeMixin",
-                    "TransformMethodMixin",
-                    "UnitPropertiesMixin",
-                    "VConcatPropertiesMixin",
-                )
-                if config_method_specs
-                else (
-                    "ConcatPropertiesMixin",
-                    "EncodingMethodMixin",
-                    "HConcatPropertiesMixin",
-                    "ImportedViewConstructorMixin",
-                    "LayerPropertiesMixin",
-                    "MarkMethodMixin",
-                    "MultiscalePropertiesMixin",
-                    "ResolutionMethodMixin",
-                    "TopLevelMergeMixin",
-                    "TransformMethodMixin",
-                    "UnitPropertiesMixin",
-                    "VConcatPropertiesMixin",
-                )
-            ),
-        )
+        return GeneratedModule(source=source, exports=exports)
 
     def mark_signature_class(self, mark_type: str) -> str | None:
         """Return the best generated schema class to use for a mark method signature."""
@@ -2454,6 +2442,8 @@ class SchemaWrapperGenerator:
                 "MultiscaleChart",
                 ("stops",),
             ),
+            ("facet", "FacetSpec", "spec", "FacetChart", ("facet",)),
+            ("surround", "SurroundSpec", "spec", "SurroundChart", ("surround",)),
         )
         method_specs = [
             (
@@ -2468,6 +2458,7 @@ class SchemaWrapperGenerator:
                 ),
             )
             for name, schema_class, child_key, return_class, required in specs
+            if child_key != "spec" or schema_class in self._definitions_map
         ]
         import_property_specs = tuple(
             property_spec
@@ -3133,8 +3124,6 @@ def _schema_class_source(
             if spec.nested_schema_class_name is not None
             else analyzer.property_specs_from_properties(
                 resolved_properties[spec.name].get("properties", {})
-                if spec.name in INLINE_OBJECT_SETTERS
-                else {}
             )
         )
         for spec in property_specs
@@ -4210,10 +4199,22 @@ def _composition_function_source(
         f"        {property_spec.name!r}: {property_spec.python_name},"
         for property_spec in (*required_specs, *property_specs)
     )
+    example = None
+    if child_key == "spec":
+        config = (
+            'core.FacetFieldDef(field="group")'
+            if name == "facet"
+            else "core.SurroundSides()"
+        )
+        example = f"{name}(Chart().mark_point(), {required_specs[0].name}={config})"
     return "\n".join(
         [
             f"def {name}(",
-            "    *charts: TopLevelSpec | ImportedView,",
+            *(
+                ["    spec: TopLevelSpec | ImportedView,", "    *,"]
+                if child_key == "spec"
+                else ["    *charts: TopLevelSpec | ImportedView,"]
+            ),
             required_parameters,
             optional_parameters,
             f") -> {return_class}:",
@@ -4221,6 +4222,14 @@ def _composition_function_source(
                 f"Return a {name} composition of the given charts.",
                 (*required_specs, *property_specs),
                 indent=4,
+                extra_args=("spec: Central or repeated plot.",)
+                if child_key == "spec"
+                else ("*charts: Child plots.",),
+                returns=f"A renderable ``{return_class}``.",
+                raises=(
+                    "SchemaValidationError: If the composed specification is invalid when serialized.",
+                ),
+                example=example,
             ),
             "    properties = {",
             values,
@@ -4230,7 +4239,7 @@ def _composition_function_source(
             "    }",
             f"    from genome_spy.chart import {return_class}",
             "",
-            f"    return {return_class}({child_key}=cast(Any, list(charts)), **defined)",
+            f"    return {return_class}({child_key}=cast(Any, {'spec' if child_key == 'spec' else 'list(charts)'}), **defined)",
             "",
         ]
     )
@@ -4757,7 +4766,7 @@ def _channel_class_source(
         else "Channel | SchemaBase | str | dict[str, Any]"
     )
     constructor_body = (
-        "        definition = (\n"
+        "        definition = defined if value is _MISSING else (\n"
         "            {**value, **defined}\n"
         "            if isinstance(value, dict)\n"
         "            else {'value': value, **defined}\n"
@@ -4774,7 +4783,7 @@ def _channel_class_source(
         f'    """Generated wrapper for the ``{encoding_name}`` encoding channel."""\n\n'
         "    def __init__(\n"
         "        self,\n"
-        f"        value: {value_annotation},\n"
+        f"        value: {value_annotation} | UndefinedType = _MISSING,\n"
         "        /,\n"
         "        *,\n"
         f"{constructor_parameters}\n"

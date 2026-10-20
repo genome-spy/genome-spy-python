@@ -89,6 +89,7 @@ ScaleType_T: TypeAlias = Literal[
     "index",
     "locus",
 ]
+SecondaryOffsetChannel_T: TypeAlias = Literal["x2Offset", "y2Offset"]
 SecondaryPositionalChannel_T: TypeAlias = Literal["x2", "y2"]
 PositionalChannel_T: TypeAlias = (
     PrimaryPositionalChannel_T | SecondaryPositionalChannel_T
@@ -96,6 +97,7 @@ PositionalChannel_T: TypeAlias = (
 ChannelWithScale_T: TypeAlias = (
     PositionalChannel_T
     | OffsetChannel_T
+    | SecondaryOffsetChannel_T
     | Literal["color"]
     | Literal["fill"]
     | Literal["stroke"]
@@ -170,6 +172,7 @@ __all__ = [
     "Scalar_T",
     "ScaleInterpolate_T",
     "ScaleType_T",
+    "SecondaryOffsetChannel_T",
     "SecondaryPositionalChannel_T",
     "PositionalChannel_T",
     "ChannelWithScale_T",

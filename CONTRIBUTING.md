@@ -90,6 +90,7 @@ Regenerate after changing that version or the generator:
 
 ```bash
 uv run python tools/generate_schema_wrapper.py
+uv run python tools/vendor_javascript.py
 ```
 
 This requires `npm` and internet access. Use `--package-dir` for a local package,
@@ -110,6 +111,25 @@ regenerating them produces no differences.
 New transforms should be generated from the schema. Add overrides in
 `tools/generate_schema_wrapper.py` only for Python conventions the schema
 cannot describe.
+
+The generator emits explicit typed constructor and setter arguments from schema
+properties, including inline objects; avoid replacing these with untyped
+`**kwargs` or runtime-only signature patches. Channel imports and `__all__` are
+generated too. A new channel must appear in the public namespace automatically.
+New composition families still need renderable chart classes, serialization and
+round-trip support. The schema-derived root coverage test must fail until that
+support exists, rather than silently omitting unfamiliar roots.
+
+When adapting examples, use named schema objects or nested setters such as
+`gs.Scale().zoom(extent="data")`. Keep dictionaries for data records and authored
+names such as datasets, templates and parameter values. Test generated signatures
+and type-check a consumer example as well as validating its serialized JSON.
+
+Altair uses the same separation between a generated schema API and handwritten
+chart operations. Its [constructor and setter generator](https://github.com/vega/altair/blob/main/tools/schemapi/codegen.py)
+emits typed signatures and overloads; its [property-setter runtime](https://github.com/vega/altair/blob/main/altair/utils/schemapi.py)
+also supplies signatures for interactive completion. Prefer our existing explicit
+Python methods so completion, static checking and runtime calls agree.
 
 ## Documentation
 

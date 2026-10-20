@@ -300,6 +300,7 @@ def write_schema_files(
         output_dir.parent,
         interaction_helper_names(generator),
     )
+    write_public_channel_exports(output_dir.parent, channels_module.exports)
 
 
 def interaction_helper_names(generator: SchemaWrapperGenerator) -> tuple[str, ...]:
@@ -318,13 +319,15 @@ def interaction_helper_names(generator: SchemaWrapperGenerator) -> tuple[str, ..
     )
 
 
-def _replace_generated_block(path: Path, block: str, lines: list[str]) -> None:
+def _replace_generated_block(
+    path: Path, block: str, lines: list[str], *, prefix: str = PUBLIC_BLOCK_PREFIX
+) -> None:
     """Replace one explicit generated block in a public Python module."""
     if not path.exists():
         return
     source = path.read_text(encoding="utf-8")
-    start = f"# BEGIN {PUBLIC_BLOCK_PREFIX} {block}"
-    end = f"# END {PUBLIC_BLOCK_PREFIX} {block}"
+    start = f"# BEGIN {prefix} {block}"
+    end = f"# END {prefix} {block}"
     pattern = re.compile(
         rf"^(?P<indent>[ \t]*){re.escape(start)}\n.*?^(?P=indent){re.escape(end)}$",
         re.DOTALL | re.MULTILINE,
@@ -336,8 +339,25 @@ def _replace_generated_block(path: Path, block: str, lines: list[str]) -> None:
         source,
     )
     if count != 1:
-        raise ValueError(f"Expected one generated interaction block in {path}.")
+        raise ValueError(f"Expected one {prefix} {block} block in {path}.")
     path.write_text(updated, encoding="utf-8")
+
+
+def write_public_channel_exports(package_dir: Path, names: tuple[str, ...]) -> None:
+    """Update explicit public channel exports from the generated encoding API."""
+    for filename, module in (
+        ("api.py", "genome_spy.schema.channels"),
+        ("__init__.py", "genome_spy.api"),
+    ):
+        path = package_dir / filename
+        imports = [f"from {module} import (", *(f"    {name}," for name in names), ")"]
+        _replace_generated_block(path, "IMPORTS", imports, prefix="GENERATED CHANNEL")
+        _replace_generated_block(
+            path,
+            "EXPORTS",
+            [f'    "{name}",' for name in names],
+            prefix="GENERATED CHANNEL",
+        )
 
 
 def write_public_interaction_exports(

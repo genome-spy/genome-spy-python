@@ -5,6 +5,7 @@ are imported by URL and aligned under a parent-owned genomic scale and axis.
 """
 
 import genome_spy as gs
+from genome_spy.schema import ChromosomalLocus
 
 META = {
     "category": "Multi-track genome browsers",
@@ -37,8 +38,8 @@ chart = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr20", "pos": 10006452},
-                    {"chrom": "chr20", "pos": 10006533},
+                    ChromosomalLocus(chrom="chr20", pos=10006452),
+                    ChromosomalLocus(chrom="chr20", pos=10006533),
                 ]
             )
         ),

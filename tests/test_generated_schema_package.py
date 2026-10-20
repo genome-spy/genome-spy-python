@@ -133,6 +133,11 @@ def test_external_type_checker_sees_generated_public_signatures(tmp_path) -> Non
                 "import genome_spy as gs",
                 "chart = gs.Chart().mark_text(size=12).encode(x=gs.X('x:Q'))",
                 "gs.vconcat(chart, spacing=2)",
+                "gs.X(field='x', type='quantitative')",
+                "gs.X2Offset(field='offset')",
+                "gs.facet(chart, facet=gs.FacetFieldDef(field='group'))",
+                "gs.surround(chart, surround=gs.SurroundSides(top=[chart]))",
+                "gs.facet(chart, facet='group')",
                 "gs.Chart().mark_text(size='large')",
                 "gs.Chart().properties(layer=[])",
             ]
@@ -150,6 +155,7 @@ def test_external_type_checker_sees_generated_public_signatures(tmp_path) -> Non
     assert completed.returncode == 1
     assert 'Argument "size"' in completed.stdout
     assert 'Unexpected keyword argument "layer"' in completed.stdout
+    assert 'Argument "facet"' in completed.stdout
 
 
 def test_expression_arrays_accept_stored_typed_lists(tmp_path: Path) -> None:
@@ -351,6 +357,15 @@ def test_generated_schema_wrappers_validate_by_default() -> None:
     assert UnitSpec(mark="not-a-mark").to_dict(validate=False) == {"mark": "not-a-mark"}
 
 
+def test_validation_flag_propagates_to_nested_schema_objects() -> None:
+    spec = UnitSpec(mark=PointProps(type="point", size="invalid"))
+    assert spec.to_dict(validate=False) == {
+        "mark": {"type": "point", "size": "invalid"}
+    }
+    with pytest.raises(SchemaValidationError, match="Invalid PointProps at size"):
+        spec.to_dict()
+
+
 def test_generated_schema_copy_is_deep_by_default() -> None:
     original = UnitSpec(mark="point", transform=[{"type": "filter", "expr": "x > 0"}])
     copied = original.copy()
@@ -405,7 +420,38 @@ def test_generated_transform_methods_cover_transform_union() -> None:
         "vconcat",
         "hconcat",
         "concat",
+        "facet",
+        "surround",
     }
+
+
+def test_every_generated_channel_is_public() -> None:
+    for name in generated_channels.__all__:
+        assert name in gs.__all__
+        assert getattr(gs, name) is getattr(generated_channels, name)
+
+
+def test_every_schema_root_has_a_public_builder() -> None:
+    variants = load_schema()["definitions"]["CoreRootSpec"]["anyOf"]
+    roots = {
+        key
+        for variant in variants
+        for key in variant["required"]
+        if key not in {"spec", "stops", "columns"}
+    }
+    assert roots == {
+        "mark",
+        "layer",
+        "multiscale",
+        "facet",
+        "hconcat",
+        "vconcat",
+        "concat",
+        "surround",
+    }
+    for key in roots - {"mark"}:
+        assert key in gs.__all__
+        assert callable(getattr(gs, key))
 
 
 def test_generated_transform_methods_normalize_python_keywords() -> None:

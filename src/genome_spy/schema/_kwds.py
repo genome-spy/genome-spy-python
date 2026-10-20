@@ -47,6 +47,7 @@ if TYPE_CHECKING:
         DirectionDef,
         ExprDef,
         ExprRef,
+        FacetHeader,
         FieldDefWithoutScale,
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeForShapeStringNull,
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber,
@@ -85,6 +86,7 @@ if TYPE_CHECKING:
         ScaleConfig,
         ScaleInterpolateParams,
         SchemeParams,
+        SecondaryOffsetDef,
         SelectionDomainRef,
         Step,
         StringDatumDef,
@@ -109,7 +111,7 @@ class AxisKwds(TypedDict, total=False):
 
     domain: bool
     domainCap: Literal["butt", "round", "square"]
-    domainColor: str
+    domainColor: str | ExprRef | dict[str, Any]
     domainDash: Sequence[float]
     domainDashOffset: float
     domainWidth: float
@@ -117,7 +119,7 @@ class AxisKwds(TypedDict, total=False):
     format: str
     grid: bool
     gridCap: Literal["butt", "round", "square"]
-    gridColor: str
+    gridColor: str | ExprRef | dict[str, Any]
     gridDash: Sequence[float]
     gridDashOffset: float
     gridOpacity: float
@@ -125,7 +127,7 @@ class AxisKwds(TypedDict, total=False):
     labelAlign: Align_T
     labelAngle: float
     labelBaseline: Baseline_T
-    labelColor: str
+    labelColor: str | ExprRef | dict[str, Any]
     labelFlush: bool | float
     labelFlushOffset: float
     labelFont: str
@@ -144,7 +146,7 @@ class AxisKwds(TypedDict, total=False):
     placement: AxisPlacement_T
     style: str | Sequence[str] | None
     tickCap: Literal["butt", "round", "square"]
-    tickColor: str
+    tickColor: str | ExprRef | dict[str, Any]
     tickCount: float | ExprRef | dict[str, Any]
     tickDash: Sequence[float]
     tickDashOffset: float
@@ -153,7 +155,7 @@ class AxisKwds(TypedDict, total=False):
     tickWidth: float
     ticks: bool
     title: str | None
-    titleColor: str
+    titleColor: str | ExprRef | dict[str, Any]
     titleFit: Literal["point", "range"]
     titleFont: str
     titleFontSize: float
@@ -170,22 +172,22 @@ class AxisConfigKwds(TypedDict, total=False):
 
     chromGrid: bool
     chromGridCap: Literal["butt", "round", "square"]
-    chromGridColor: str
+    chromGridColor: str | ExprRef | dict[str, Any]
     chromGridDash: Sequence[float]
     chromGridDashOffset: float
-    chromGridFillEven: str
-    chromGridFillOdd: str
+    chromGridFillEven: str | ExprRef | dict[str, Any]
+    chromGridFillOdd: str | ExprRef | dict[str, Any]
     chromGridOpacity: float
     chromGridWidth: float
     chromLabelAlign: Align_T
-    chromLabelColor: str
+    chromLabelColor: str | ExprRef | dict[str, Any]
     chromLabelFont: str
     chromLabelFontSize: float
     chromLabelFontStyle: FontStyle_T
     chromLabelFontWeight: FontWeight_T
     chromLabelPadding: float
     chromLabels: bool
-    chromTickColor: str
+    chromTickColor: str | ExprRef | dict[str, Any]
     chromTickDash: Sequence[float]
     chromTickDashOffset: float
     chromTickSize: float
@@ -193,7 +195,7 @@ class AxisConfigKwds(TypedDict, total=False):
     chromTicks: bool
     domain: bool
     domainCap: Literal["butt", "round", "square"]
-    domainColor: str
+    domainColor: str | ExprRef | dict[str, Any]
     domainDash: Sequence[float]
     domainDashOffset: float
     domainWidth: float
@@ -201,7 +203,7 @@ class AxisConfigKwds(TypedDict, total=False):
     format: str
     grid: bool
     gridCap: Literal["butt", "round", "square"]
-    gridColor: str
+    gridColor: str | ExprRef | dict[str, Any]
     gridDash: Sequence[float]
     gridDashOffset: float
     gridOpacity: float
@@ -209,7 +211,7 @@ class AxisConfigKwds(TypedDict, total=False):
     labelAlign: Align_T
     labelAngle: float
     labelBaseline: Baseline_T
-    labelColor: str
+    labelColor: str | ExprRef | dict[str, Any]
     labelFlush: bool | float
     labelFlushOffset: float
     labelFont: str
@@ -228,7 +230,7 @@ class AxisConfigKwds(TypedDict, total=False):
     placement: AxisPlacement_T
     style: str | Sequence[str] | None
     tickCap: Literal["butt", "round", "square"]
-    tickColor: str
+    tickColor: str | ExprRef | dict[str, Any]
     tickCount: float | ExprRef | dict[str, Any]
     tickDash: Sequence[float]
     tickDashOffset: float
@@ -237,7 +239,7 @@ class AxisConfigKwds(TypedDict, total=False):
     tickWidth: float
     ticks: bool
     title: str | None
-    titleColor: str
+    titleColor: str | ExprRef | dict[str, Any]
     titleFit: Literal["point", "range"]
     titleFont: str
     titleFontSize: float
@@ -436,6 +438,7 @@ class EncodingKwds(TypedDict, total=False):
     uniqueId: FieldDefWithoutScale | dict[str, Any]
     x: dict[str, Any] | None
     x2: Position2Def | dict[str, Any] | None
+    x2Offset: SecondaryOffsetDef | dict[str, Any] | None
     xOffset: (
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
@@ -455,6 +458,7 @@ class EncodingKwds(TypedDict, total=False):
         | None
     )
     y2: Position2Def | dict[str, Any] | None
+    y2Offset: SecondaryOffsetDef | dict[str, Any] | None
     yOffset: (
         FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber
         | dict[str, Any]
@@ -478,22 +482,22 @@ class GenomeAxisKwds(TypedDict, total=False):
 
     chromGrid: bool
     chromGridCap: Literal["butt", "round", "square"]
-    chromGridColor: str
+    chromGridColor: str | ExprRef | dict[str, Any]
     chromGridDash: Sequence[float]
     chromGridDashOffset: float
-    chromGridFillEven: str
-    chromGridFillOdd: str
+    chromGridFillEven: str | ExprRef | dict[str, Any]
+    chromGridFillOdd: str | ExprRef | dict[str, Any]
     chromGridOpacity: float
     chromGridWidth: float
     chromLabelAlign: Align_T
-    chromLabelColor: str
+    chromLabelColor: str | ExprRef | dict[str, Any]
     chromLabelFont: str
     chromLabelFontSize: float
     chromLabelFontStyle: FontStyle_T
     chromLabelFontWeight: FontWeight_T
     chromLabelPadding: float
     chromLabels: bool
-    chromTickColor: str
+    chromTickColor: str | ExprRef | dict[str, Any]
     chromTickDash: Sequence[float]
     chromTickDashOffset: float
     chromTickSize: float
@@ -501,7 +505,7 @@ class GenomeAxisKwds(TypedDict, total=False):
     chromTicks: bool
     domain: bool
     domainCap: Literal["butt", "round", "square"]
-    domainColor: str
+    domainColor: str | ExprRef | dict[str, Any]
     domainDash: Sequence[float]
     domainDashOffset: float
     domainWidth: float
@@ -509,7 +513,7 @@ class GenomeAxisKwds(TypedDict, total=False):
     format: str
     grid: bool
     gridCap: Literal["butt", "round", "square"]
-    gridColor: str
+    gridColor: str | ExprRef | dict[str, Any]
     gridDash: Sequence[float]
     gridDashOffset: float
     gridOpacity: float
@@ -517,7 +521,7 @@ class GenomeAxisKwds(TypedDict, total=False):
     labelAlign: Align_T
     labelAngle: float
     labelBaseline: Baseline_T
-    labelColor: str
+    labelColor: str | ExprRef | dict[str, Any]
     labelFlush: bool | float
     labelFlushOffset: float
     labelFont: str
@@ -536,7 +540,7 @@ class GenomeAxisKwds(TypedDict, total=False):
     placement: AxisPlacement_T
     style: str | Sequence[str] | None
     tickCap: Literal["butt", "round", "square"]
-    tickColor: str
+    tickColor: str | ExprRef | dict[str, Any]
     tickCount: float | ExprRef | dict[str, Any]
     tickDash: Sequence[float]
     tickDashOffset: float
@@ -545,7 +549,7 @@ class GenomeAxisKwds(TypedDict, total=False):
     tickWidth: float
     ticks: bool
     title: str | None
-    titleColor: str
+    titleColor: str | ExprRef | dict[str, Any]
     titleFit: Literal["point", "range"]
     titleFont: str
     titleFontSize: float
@@ -573,6 +577,9 @@ class GenomeSpyConfigKwds(TypedDict, total=False):
     axisTop: AxisConfig | AxisConfigKwds
     axisX: AxisConfig | AxisConfigKwds
     axisY: AxisConfig | AxisConfigKwds
+    header: FacetHeader | dict[str, Any]
+    headerColumn: FacetHeader | dict[str, Any]
+    headerRow: FacetHeader | dict[str, Any]
     legend: LegendConfig | LegendConfigKwds
     legendTrack: LegendConfig | LegendConfigKwds
     link: LinkConfig | LinkConfigKwds
@@ -599,16 +606,16 @@ class HandledTooltipKwds(TypedDict, total=False):
 class LegendKwds(TypedDict, total=False):
     """TypedDict helper for raw ``Legend`` mappings."""
 
-    backgroundFill: str
+    backgroundFill: str | ExprRef | dict[str, Any]
     backgroundFillOpacity: float
-    backgroundStroke: str
+    backgroundStroke: str | ExprRef | dict[str, Any]
     backgroundStrokeOpacity: float
     backgroundStrokeWidth: float
     columns: float
     direction: LegendDirection_T
     gradientLength: float
     gradientOpacity: float
-    gradientStrokeColor: str
+    gradientStrokeColor: str | ExprRef | dict[str, Any]
     gradientStrokeWidth: float
     gradientThickness: float
     labelLimit: float
@@ -616,10 +623,10 @@ class LegendKwds(TypedDict, total=False):
     orient: LegendOrient_T | ExprRef | dict[str, Any]
     padding: float
     style: str | Sequence[str] | None
-    symbolFillColor: str
-    symbolOpacity: float
+    symbolFillColor: str | ExprRef | dict[str, Any]
+    symbolOpacity: float | ExprRef | dict[str, Any]
     symbolSize: float
-    symbolStrokeColor: str
+    symbolStrokeColor: str | ExprRef | dict[str, Any]
     symbolStrokeWidth: float
     symbolType: str
     tickCount: float
@@ -631,9 +638,9 @@ class LegendKwds(TypedDict, total=False):
 class LegendConfigKwds(TypedDict, total=False):
     """TypedDict helper for raw ``LegendConfig`` mappings."""
 
-    backgroundFill: str
+    backgroundFill: str | ExprRef | dict[str, Any]
     backgroundFillOpacity: float
-    backgroundStroke: str
+    backgroundStroke: str | ExprRef | dict[str, Any]
     backgroundStrokeOpacity: float
     backgroundStrokeWidth: float
     columnPadding: float
@@ -642,12 +649,12 @@ class LegendConfigKwds(TypedDict, total=False):
     disable: bool | ExprRef | dict[str, Any]
     gradientLength: float
     gradientOpacity: float
-    gradientStrokeColor: str
+    gradientStrokeColor: str | ExprRef | dict[str, Any]
     gradientStrokeWidth: float
     gradientThickness: float
     labelAlign: Align_T
     labelBaseline: Baseline_T
-    labelColor: str
+    labelColor: str | ExprRef | dict[str, Any]
     labelFont: str
     labelFontSize: float
     labelFontStyle: FontStyle_T
@@ -661,18 +668,18 @@ class LegendConfigKwds(TypedDict, total=False):
     rowPadding: float
     spacing: float
     style: str | Sequence[str] | None
-    symbolBaseFillColor: str
-    symbolBaseStrokeColor: str
-    symbolFillColor: str
+    symbolBaseFillColor: str | ExprRef | dict[str, Any]
+    symbolBaseStrokeColor: str | ExprRef | dict[str, Any]
+    symbolFillColor: str | ExprRef | dict[str, Any]
     symbolOffset: float
-    symbolOpacity: float
+    symbolOpacity: float | ExprRef | dict[str, Any]
     symbolSize: float
-    symbolStrokeColor: str
+    symbolStrokeColor: str | ExprRef | dict[str, Any]
     symbolStrokeWidth: float
     symbolType: str
     tickCount: float
     title: str | None
-    titleColor: str
+    titleColor: str | ExprRef | dict[str, Any]
     titleFont: str
     titleFontSize: float
     titleFontStyle: FontStyle_T
@@ -689,6 +696,7 @@ class LinkConfigKwds(TypedDict, total=False):
     arcFadingDistance: Sequence[float] | Literal[False] | ExprRef | dict[str, Any]
     arcHeightFactor: float | ExprRef | dict[str, Any]
     buildIndex: bool
+    clamp: bool | Literal["x"] | Literal["y"]
     clampApex: bool | ExprRef | dict[str, Any]
     clip: bool | Literal["x"] | Literal["y"] | Literal["never"]
     color: str | ExprRef | dict[str, Any]
@@ -699,6 +707,7 @@ class LinkConfigKwds(TypedDict, total=False):
         | Literal["diagonal"]
         | Literal["line"]
         | Literal["dome"]
+        | Literal["orthogonal"]
         | ExprRef
         | dict[str, Any]
     )
@@ -727,6 +736,7 @@ class MarkConfigKwds(TypedDict, total=False):
     """TypedDict helper for raw ``MarkConfig`` mappings."""
 
     buildIndex: bool
+    clamp: bool | Literal["x"] | Literal["y"]
     clip: bool | Literal["x"] | Literal["y"] | Literal["never"]
     color: str | ExprRef | dict[str, Any]
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
@@ -792,6 +802,7 @@ class PointConfigKwds(TypedDict, total=False):
 
     angle: float | ExprRef | dict[str, Any]
     buildIndex: bool
+    clamp: bool | Literal["x"] | Literal["y"]
     clip: bool | Literal["x"] | Literal["y"] | Literal["never"]
     color: str | ExprRef | dict[str, Any]
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
@@ -839,6 +850,7 @@ class RectConfigKwds(TypedDict, total=False):
     """TypedDict helper for raw ``RectConfig`` mappings."""
 
     buildIndex: bool
+    clamp: bool | Literal["x"] | Literal["y"]
     clip: bool | Literal["x"] | Literal["y"] | Literal["never"]
     color: str | ExprRef | dict[str, Any]
     cornerRadius: float | ExprRef | dict[str, Any]
@@ -893,6 +905,7 @@ class RuleConfigKwds(TypedDict, total=False):
     """TypedDict helper for raw ``RuleConfig`` mappings."""
 
     buildIndex: bool
+    clamp: bool | Literal["x"] | Literal["y"]
     clip: bool | Literal["x"] | Literal["y"] | Literal["never"]
     color: str | ExprRef | dict[str, Any]
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
@@ -982,6 +995,10 @@ class ScaleKwds(TypedDict, total=False):
     domainMin: float
     domainTransition: bool
     exponent: float
+    gapPositions: (
+        Sequence[float] | Literal["chromosomes"] | ExprRef | dict[str, Any] | None
+    )
+    gapWidth: float | ExprRef | dict[str, Any] | None
     interpolate: (
         ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds
     )
@@ -1023,6 +1040,10 @@ class ScaleConfigKwds(TypedDict, total=False):
     domainMin: float
     domainTransition: bool
     exponent: float
+    gapPositions: (
+        Sequence[float] | Literal["chromosomes"] | ExprRef | dict[str, Any] | None
+    )
+    gapWidth: float | ExprRef | dict[str, Any] | None
     index: dict[str, Any]
     interpolate: (
         ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds
@@ -1068,6 +1089,7 @@ class SeparatorPropsKwds(TypedDict, total=False):
     """TypedDict helper for raw ``SeparatorProps`` mappings."""
 
     buildIndex: bool
+    clamp: bool | Literal["x"] | Literal["y"]
     clip: bool | Literal["x"] | Literal["y"] | Literal["never"]
     color: str | ExprRef | dict[str, Any]
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
@@ -1121,6 +1143,7 @@ class TextConfigKwds(TypedDict, total=False):
     angle: float | ExprRef | dict[str, Any]
     baseline: Baseline_T
     buildIndex: bool
+    clamp: bool | Literal["x"] | Literal["y"]
     clip: bool | Literal["x"] | Literal["y"] | Literal["never"]
     color: str | ExprRef | dict[str, Any]
     cullByVisibleRange: bool | Literal["x"] | Literal["y"]
@@ -1222,14 +1245,14 @@ class TitleConfigKwds(TypedDict, total=False):
 class ViewBackgroundKwds(TypedDict, total=False):
     """TypedDict helper for raw ``ViewBackground`` mappings."""
 
-    fill: str
+    fill: str | ExprRef | dict[str, Any]
     fillOpacity: float
     shadowBlur: float | ExprRef | dict[str, Any]
     shadowColor: str | ExprRef | dict[str, Any]
     shadowOffsetX: float | ExprRef | dict[str, Any]
     shadowOffsetY: float | ExprRef | dict[str, Any]
     shadowOpacity: float | ExprRef | dict[str, Any]
-    stroke: str
+    stroke: str | ExprRef | dict[str, Any]
     strokeOpacity: float
     strokeWidth: float
     strokeZindex: float
@@ -1244,7 +1267,7 @@ class ViewConfigKwds(TypedDict, total=False):
     continuousWidth: float
     discreteHeight: float | Step | StepKwds
     discreteWidth: float | Step | StepKwds
-    fill: str
+    fill: str | ExprRef | dict[str, Any]
     fillOpacity: float
     shadowBlur: float | ExprRef | dict[str, Any]
     shadowColor: str | ExprRef | dict[str, Any]
@@ -1252,7 +1275,7 @@ class ViewConfigKwds(TypedDict, total=False):
     shadowOffsetY: float | ExprRef | dict[str, Any]
     shadowOpacity: float | ExprRef | dict[str, Any]
     step: float | ExprRef | dict[str, Any]
-    stroke: str
+    stroke: str | ExprRef | dict[str, Any]
     strokeOpacity: float
     strokeWidth: float
     strokeZindex: float
@@ -1292,7 +1315,9 @@ class LegendsKwds(TypedDict, total=False):
     stroke: Legend | LegendKwds
     strokeOpacity: Legend | LegendKwds
     strokeWidth: Legend | LegendKwds
+    x2Offset: Legend | LegendKwds
     xOffset: Legend | LegendKwds
+    y2Offset: Legend | LegendKwds
     yOffset: Legend | LegendKwds
 
 
@@ -1340,9 +1365,11 @@ class ScalesKwds(TypedDict, total=False):
     strokeWidth: Scale | ScaleKwds
     x: Scale | ScaleKwds
     x2: Scale | ScaleKwds
+    x2Offset: Scale | ScaleKwds
     xOffset: Scale | ScaleKwds
     y: Scale | ScaleKwds
     y2: Scale | ScaleKwds
+    y2Offset: Scale | ScaleKwds
     yOffset: Scale | ScaleKwds
 
 

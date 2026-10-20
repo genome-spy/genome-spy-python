@@ -82,6 +82,7 @@ class MarkMethodMixin:
         self,
         *,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -169,6 +170,7 @@ class MarkMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cornerRadius (float | ExprRef | dict[str, Any]): Radius of the rounded corners. **Default value:** ``0``
@@ -207,6 +209,7 @@ class MarkMethodMixin:
         """
         properties = {
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cornerRadius": cornerRadius,
@@ -253,6 +256,7 @@ class MarkMethodMixin:
         *,
         angle: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -315,6 +319,7 @@ class MarkMethodMixin:
         Args:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -349,6 +354,7 @@ class MarkMethodMixin:
         properties = {
             "angle": angle,
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -389,6 +395,7 @@ class MarkMethodMixin:
         self,
         *,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -430,6 +437,7 @@ class MarkMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -453,6 +461,7 @@ class MarkMethodMixin:
         """
         properties = {
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -483,6 +492,7 @@ class MarkMethodMixin:
         self,
         *,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -523,6 +533,7 @@ class MarkMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -545,6 +556,7 @@ class MarkMethodMixin:
         """
         properties = {
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -577,6 +589,7 @@ class MarkMethodMixin:
         angle: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseline: Baseline_T | UndefinedType = Undefined,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -657,6 +670,7 @@ class MarkMethodMixin:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             baseline (Baseline_T): The vertical alignment of the text. One of ``"top"``, ``"middle"``, ``"bottom"``. **Default value:** ``"bottom"``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -700,6 +714,7 @@ class MarkMethodMixin:
             "angle": angle,
             "baseline": baseline,
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -756,6 +771,7 @@ class MarkMethodMixin:
         | dict[str, Any]
         | UndefinedType = Undefined,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clampApex: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
@@ -772,6 +788,7 @@ class MarkMethodMixin:
         | Literal["diagonal"]
         | Literal["line"]
         | Literal["dome"]
+        | Literal["orthogonal"]
         | core.ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
@@ -821,19 +838,20 @@ class MarkMethodMixin:
             arcFadingDistance (Sequence[float] | Literal[False] | ExprRef | dict[str, Any]): The fading distance range for ``"arc"`` and ``"dome"`` shapes, in logical screen pixels. Opacity fades smoothly from one to zero between these perpendicular distances from the line joining the rendered endpoints. For domes, this is the baseline rather than the apex position, regardless of orientation, direction, or the scale used for height. Both ``false`` and ``[0, 0]`` disable fading. **Default value:** ``false``
             arcHeightFactor (float | ExprRef | dict[str, Any]): Scaling factor for the ``"arc``" shape's height. The default value ``1.0`` produces roughly circular arcs. **Default value:** ``1.0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clampApex (bool | ExprRef | dict[str, Any]): Whether the apex of the ``"dome"`` shape is clamped to the viewport edge. When over a half of the dome is located outside the viewport, clamping allows for more accurate reading of the value encoded by the apex' position. **Default value:** ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
-            linkShape (Literal['arc'] | Literal['diagonal'] | Literal['line'] | Literal['dome'] | ExprRef | dict[str, Any]): The shape of the link path. The ``"arc"`` shape draws a circular arc between the two points. The apex of the arc resides on the left side of the line that connects the two points. The ``"dome"`` shape draws a vertical or horizontal arc with a specific height. The primary positional channel determines the apex of the arc and the secondary determines the endpoint placement. The ``"diagonal"`` shape draws an "S"-shaped curve between the two points. The ``"line"`` shape draws a straight line between the two points. See an example of the different shapes below. **Default value:** ``"arc"``
+            linkShape (Literal['arc'] | Literal['diagonal'] | Literal['line'] | Literal['dome'] | Literal['orthogonal'] | ExprRef | dict[str, Any]): The shape of the link path. The ``"arc"`` shape draws a circular arc between the two points. The apex of the arc resides on the left side of the line that connects the two points. The ``"dome"`` shape draws a vertical or horizontal arc with a specific height. The primary positional channel determines the apex of the arc and the secondary determines the endpoint placement. The ``"diagonal"`` shape draws an "S"-shaped curve between the two points. The ``"orthogonal"`` shape draws two straight legs joined at a right angle, with butt caps and a miter join. Coincident endpoints draw nothing. The ``"line"`` shape draws a straight line between the two points. See an example of the different shapes below. **Default value:** ``"arc"``
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
             noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Alias for ``noFadingOnSecondPass``, used only when that property is unspecified. Requires active conditional ordering; selections in color or size encodings alone no longer suppress fading.
             noFadingOnSecondPass (bool | ExprRef | dict[str, Any]): Shows foreground arcs in full by disabling distance fading during the second visual pass of an active conditional ``order`` encoding. Configure selected links with the higher order value to draw them unfaded above other links. Reversing the order values instead exempts the unselected links. Has no effect without active conditional ordering, including when all selections are empty. Picking always uses normal fading. __Default value:__ ``false``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
-            orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Only applies to diagonal links. **Default value:** ``"vertical"``
+            orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Applies to dome, diagonal, and orthogonal links. Orthogonal links place the elbow at the source position along the orientation axis: horizontal uses ``(x, y2)``; vertical uses ``(x2, y)``. With parent-to-child tree edges, the turn stays at the parent's merge height. **Default value:** ``"vertical"``
             segments (float | ExprRef | dict[str, Any]): The number of segments in the bézier curve. Affects the rendering quality and performance. Use a higher value for a smoother curve. **Default value:** ``101``
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
@@ -851,6 +869,7 @@ class MarkMethodMixin:
             "arcFadingDistance": arcFadingDistance,
             "arcHeightFactor": arcHeightFactor,
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clampApex": clampApex,
             "clip": clip,
             "color": color,
@@ -886,6 +905,7 @@ class MarkMethodMixin:
         self,
         *,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -963,6 +983,7 @@ class MarkMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -999,6 +1020,7 @@ class MarkMethodMixin:
         """
         properties = {
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -1043,6 +1065,7 @@ class MarkMethodMixin:
         *,
         angle: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -1105,6 +1128,7 @@ class MarkMethodMixin:
         Args:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -1139,6 +1163,7 @@ class MarkMethodMixin:
         properties = {
             "angle": angle,
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -1350,6 +1375,13 @@ class EncodingMethodMixin:
         | Sequence[Channel | SchemaBase | str | dict[str, Any]]
         | None
         | UndefinedType = Undefined,
+        x2Offset: Channel
+        | SchemaBase
+        | str
+        | dict[str, Any]
+        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+        | None
+        | UndefinedType = Undefined,
         xOffset: Channel
         | SchemaBase
         | str
@@ -1365,6 +1397,13 @@ class EncodingMethodMixin:
         | None
         | UndefinedType = Undefined,
         y2: Channel
+        | SchemaBase
+        | str
+        | dict[str, Any]
+        | Sequence[Channel | SchemaBase | str | dict[str, Any]]
+        | None
+        | UndefinedType = Undefined,
+        y2Offset: Channel
         | SchemaBase
         | str
         | dict[str, Any]
@@ -1406,9 +1445,11 @@ class EncodingMethodMixin:
             uniqueId (FieldDefWithoutScale | dict[str, Any]): For internal use
             x (dict[str, Any] | None): X coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             x2 (Position2Def | dict[str, Any] | None): X2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            x2Offset (SecondaryOffsetDef | dict[str, Any] | None): Horizontal displacement of x2, using the xOffset scale for data values.
             xOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Horizontal offset from the encoded x position, in logical pixels.
             y (PositionFieldDef | dict[str, Any] | ChromPosDef | PositionDatumDef | PositionExprDef | ValueDefNumber | None): Y coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
             y2 (Position2Def | dict[str, Any] | None): Y2 coordinates of the marks. The ``value`` of this channel can be a number between zero and one.
+            y2Offset (SecondaryOffsetDef | dict[str, Any] | None): Vertical displacement of y2, using the yOffset scale for data values.
             yOffset (FieldOrDatumDefWithConditionMarkPropFieldDefTypeNumber | dict[str, Any] | FieldOrDatumDefWithConditionScaleDatumDefNumber | MarkPropExprDefType | ValueDefWithConditionNumberType | MarkPropExprDef | None): Vertical offset from the encoded y position, in logical pixels.
         """
         properties = {
@@ -1436,9 +1477,11 @@ class EncodingMethodMixin:
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -1478,9 +1521,11 @@ class ResolutionMethodMixin:
         uniqueId: ResolutionBehavior_T | UndefinedType = Undefined,
         x: ResolutionBehavior_T | UndefinedType = Undefined,
         x2: ResolutionBehavior_T | UndefinedType = Undefined,
+        x2Offset: ResolutionBehavior_T | UndefinedType = Undefined,
         xOffset: ResolutionBehavior_T | UndefinedType = Undefined,
         y: ResolutionBehavior_T | UndefinedType = Undefined,
         y2: ResolutionBehavior_T | UndefinedType = Undefined,
+        y2Offset: ResolutionBehavior_T | UndefinedType = Undefined,
         yOffset: ResolutionBehavior_T | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with merged axis resolutions."""
@@ -1510,9 +1555,11 @@ class ResolutionMethodMixin:
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -1548,9 +1595,11 @@ class ResolutionMethodMixin:
         uniqueId: LegendResolutionBehavior_T | UndefinedType = Undefined,
         x: LegendResolutionBehavior_T | UndefinedType = Undefined,
         x2: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        x2Offset: LegendResolutionBehavior_T | UndefinedType = Undefined,
         xOffset: LegendResolutionBehavior_T | UndefinedType = Undefined,
         y: LegendResolutionBehavior_T | UndefinedType = Undefined,
         y2: LegendResolutionBehavior_T | UndefinedType = Undefined,
+        y2Offset: LegendResolutionBehavior_T | UndefinedType = Undefined,
         yOffset: LegendResolutionBehavior_T | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with merged legend resolutions."""
@@ -1580,9 +1629,11 @@ class ResolutionMethodMixin:
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -1618,9 +1669,11 @@ class ResolutionMethodMixin:
         uniqueId: ResolutionBehavior_T | UndefinedType = Undefined,
         x: ResolutionBehavior_T | UndefinedType = Undefined,
         x2: ResolutionBehavior_T | UndefinedType = Undefined,
+        x2Offset: ResolutionBehavior_T | UndefinedType = Undefined,
         xOffset: ResolutionBehavior_T | UndefinedType = Undefined,
         y: ResolutionBehavior_T | UndefinedType = Undefined,
         y2: ResolutionBehavior_T | UndefinedType = Undefined,
+        y2Offset: ResolutionBehavior_T | UndefinedType = Undefined,
         yOffset: ResolutionBehavior_T | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with merged scale resolutions."""
@@ -1650,9 +1703,11 @@ class ResolutionMethodMixin:
             "uniqueId": uniqueId,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {
@@ -1682,6 +1737,9 @@ class TopLevelMergeMixin:
         axisTop: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined,
         axisX: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined,
         axisY: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined,
+        header: core.FacetHeader | dict[str, Any] | UndefinedType = Undefined,
+        headerColumn: core.FacetHeader | dict[str, Any] | UndefinedType = Undefined,
+        headerRow: core.FacetHeader | dict[str, Any] | UndefinedType = Undefined,
         legend: core.LegendConfig | LegendConfigKwds | UndefinedType = Undefined,
         legendTrack: core.LegendConfig | LegendConfigKwds | UndefinedType = Undefined,
         link: core.LinkConfig | LinkConfigKwds | UndefinedType = Undefined,
@@ -1713,6 +1771,9 @@ class TopLevelMergeMixin:
             axisTop (AxisConfig | AxisConfigKwds): Defaults for top-oriented axes.
             axisX (AxisConfig | AxisConfigKwds): Defaults for x axes.
             axisY (AxisConfig | AxisConfigKwds): Defaults for y axes.
+            header (FacetHeader | dict[str, Any]): Defaults for facet category labels, using view-title property names.
+            headerColumn (FacetHeader | dict[str, Any]): Defaults for column facet labels, overriding general header defaults.
+            headerRow (FacetHeader | dict[str, Any]): Defaults for row facet labels, overriding general header defaults.
             legend (LegendConfig | LegendConfigKwds): Defaults shared by all legends. Set ``disable`` to ``true`` to suppress automatic legend creation by default.
             legendTrack (LegendConfig | LegendConfigKwds): Defaults for legends of track-like views that use ``index`` or ``locus`` scales on the x channel. __Default value:__ ``{ "style": "track-bottom-legend" }``
             link (LinkConfig | LinkConfigKwds): Defaults for link marks.
@@ -1742,6 +1803,9 @@ class TopLevelMergeMixin:
             "axisTop": axisTop,
             "axisX": axisX,
             "axisY": axisY,
+            "header": header,
+            "headerColumn": headerColumn,
+            "headerRow": headerRow,
             "legend": legend,
             "legendTrack": legendTrack,
             "link": link,
@@ -1765,7 +1829,7 @@ class TopLevelMergeMixin:
         value: core.ViewBackground | ViewBackgroundKwds | None | object = Undefined,
         /,
         *,
-        fill: str | UndefinedType = Undefined,
+        fill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         fillOpacity: float | UndefinedType = Undefined,
         shadowBlur: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -1781,7 +1845,7 @@ class TopLevelMergeMixin:
         | core.ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
-        stroke: str | UndefinedType = Undefined,
+        stroke: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         strokeOpacity: float | UndefinedType = Undefined,
         strokeWidth: float | UndefinedType = Undefined,
         strokeZindex: float | UndefinedType = Undefined,
@@ -1791,14 +1855,14 @@ class TopLevelMergeMixin:
         """Return a copy with merged top-level ``view``.
 
         Args:
-            fill (str): Fill color of the view background.
+            fill (str | ExprRef | dict[str, Any]): Fill color of the view background.
             fillOpacity (float): Opacity of the view background fill.
             shadowBlur (float | ExprRef | dict[str, Any]): The blur radius of the drop shadow in pixels. Higher values produce a more diffuse shadow. **Default value:** ``0``
             shadowColor (str | ExprRef | dict[str, Any]): The color of the drop shadow. Any valid CSS color string is allowed. **Default value:** ``"black"``
             shadowOffsetX (float | ExprRef | dict[str, Any]): The horizontal offset of the drop shadow in pixels. Positive values move the shadow to the right. **Default value:** ``0``
             shadowOffsetY (float | ExprRef | dict[str, Any]): The vertical offset of the drop shadow in pixels. Positive values move the shadow downward. **Default value:** ``0``
             shadowOpacity (float | ExprRef | dict[str, Any]): The opacity of the drop shadow. Value between ``0`` (fully transparent) and ``1`` (fully opaque). **Default value:** ``0`` (disabled)
-            stroke (str): Stroke color of the view background.
+            stroke (str | ExprRef | dict[str, Any]): Stroke color of the view background.
             strokeOpacity (float): Opacity of the view background stroke.
             strokeWidth (float): Stroke width of the view background border.
             strokeZindex (float): Z-order of the background stroke relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
@@ -1843,9 +1907,11 @@ class TopLevelMergeMixin:
         strokeWidth: core.Scale | ScaleKwds | UndefinedType = Undefined,
         x: core.Scale | ScaleKwds | UndefinedType = Undefined,
         x2: core.Scale | ScaleKwds | UndefinedType = Undefined,
+        x2Offset: core.Scale | ScaleKwds | UndefinedType = Undefined,
         xOffset: core.Scale | ScaleKwds | UndefinedType = Undefined,
         y: core.Scale | ScaleKwds | UndefinedType = Undefined,
         y2: core.Scale | ScaleKwds | UndefinedType = Undefined,
+        y2Offset: core.Scale | ScaleKwds | UndefinedType = Undefined,
         yOffset: core.Scale | ScaleKwds | UndefinedType = Undefined,
     ) -> Self:
         """Return a copy with merged top-level ``scales``.
@@ -1866,9 +1932,11 @@ class TopLevelMergeMixin:
             strokeWidth (Scale | ScaleKwds): Schema-defined ``strokeWidth`` property.
             x (Scale | ScaleKwds): Schema-defined ``x`` property.
             x2 (Scale | ScaleKwds): Schema-defined ``x2`` property.
+            x2Offset (Scale | ScaleKwds): Schema-defined ``x2Offset`` property.
             xOffset (Scale | ScaleKwds): Schema-defined ``xOffset`` property.
             y (Scale | ScaleKwds): Schema-defined ``y`` property.
             y2 (Scale | ScaleKwds): Schema-defined ``y2`` property.
+            y2Offset (Scale | ScaleKwds): Schema-defined ``y2Offset`` property.
             yOffset (Scale | ScaleKwds): Schema-defined ``yOffset`` property.
         """
         defined = {
@@ -1887,9 +1955,11 @@ class TopLevelMergeMixin:
             "strokeWidth": strokeWidth,
             "x": x,
             "x2": x2,
+            "x2Offset": x2Offset,
             "xOffset": xOffset,
             "y": y,
             "y2": y2,
+            "y2Offset": y2Offset,
             "yOffset": yOffset,
         }
         defined = {key: item for key, item in defined.items() if item is not Undefined}
@@ -1967,7 +2037,7 @@ class UnitPropertiesMixin:
         *,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -2019,8 +2089,9 @@ class UnitPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -2088,7 +2159,7 @@ class UnitPropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -2113,7 +2184,7 @@ class UnitPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -2168,7 +2239,7 @@ class UnitPropertiesMixin:
         *,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -2232,8 +2303,9 @@ class UnitPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -2300,7 +2372,7 @@ class UnitPropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -2325,7 +2397,7 @@ class UnitPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -2380,7 +2452,7 @@ class UnitPropertiesMixin:
         deep: bool = True,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -2444,8 +2516,9 @@ class UnitPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -2512,7 +2585,7 @@ class UnitPropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -2537,7 +2610,7 @@ class UnitPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): The background of the view, including fill, stroke, and stroke width.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -2603,7 +2676,7 @@ class LayerPropertiesMixin:
         *,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -2656,8 +2729,9 @@ class LayerPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -2725,7 +2799,7 @@ class LayerPropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -2749,7 +2823,7 @@ class LayerPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -2803,7 +2877,7 @@ class LayerPropertiesMixin:
         *,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -2864,8 +2938,9 @@ class LayerPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -2932,7 +3007,7 @@ class LayerPropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -2956,7 +3031,7 @@ class LayerPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -3010,7 +3085,7 @@ class LayerPropertiesMixin:
         deep: bool = True,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -3071,8 +3146,9 @@ class LayerPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -3139,7 +3215,7 @@ class LayerPropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -3163,7 +3239,7 @@ class LayerPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -3222,9 +3298,11 @@ class HConcatPropertiesMixin:
             | dict[str, Any]
             | core.LayerSpec
             | core.MultiscaleSpec
+            | core.FacetSpec
             | core.VConcatSpec
             | core.HConcatSpec
             | core.ConcatSpec
+            | core.SurroundSpec
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
@@ -3233,7 +3311,7 @@ class HConcatPropertiesMixin:
         | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -3285,8 +3363,9 @@ class HConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -3354,7 +3433,7 @@ class HConcatPropertiesMixin:
             annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -3365,7 +3444,7 @@ class HConcatPropertiesMixin:
             encoding (Encoding | EncodingKwds): Specifies how data are encoded using the visual channels.
             genome (UrlGenomeConfig | dict[str, Any] | InlineGenomeConfig | GenomeConfigBase): Schema-defined ``genome`` property.
             genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
-            hconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``hconcat`` property.
+            hconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``hconcat`` property.
             height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
             legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
@@ -3379,7 +3458,7 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -3435,7 +3514,7 @@ class HConcatPropertiesMixin:
         | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -3455,9 +3534,11 @@ class HConcatPropertiesMixin:
             | dict[str, Any]
             | core.LayerSpec
             | core.MultiscaleSpec
+            | core.FacetSpec
             | core.VConcatSpec
             | core.HConcatSpec
             | core.ConcatSpec
+            | core.SurroundSpec
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
@@ -3498,8 +3579,9 @@ class HConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -3566,7 +3648,7 @@ class HConcatPropertiesMixin:
             annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -3577,7 +3659,7 @@ class HConcatPropertiesMixin:
             encoding (Encoding | EncodingKwds): Specifies how data are encoded using the visual channels.
             genome (UrlGenomeConfig | dict[str, Any] | InlineGenomeConfig | GenomeConfigBase): Schema-defined ``genome`` property.
             genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
-            hconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``hconcat`` property.
+            hconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``hconcat`` property.
             height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
             legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
@@ -3591,7 +3673,7 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -3647,7 +3729,7 @@ class HConcatPropertiesMixin:
         | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -3667,9 +3749,11 @@ class HConcatPropertiesMixin:
             | dict[str, Any]
             | core.LayerSpec
             | core.MultiscaleSpec
+            | core.FacetSpec
             | core.VConcatSpec
             | core.HConcatSpec
             | core.ConcatSpec
+            | core.SurroundSpec
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
@@ -3710,8 +3794,9 @@ class HConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -3778,7 +3863,7 @@ class HConcatPropertiesMixin:
             annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -3789,7 +3874,7 @@ class HConcatPropertiesMixin:
             encoding (Encoding | EncodingKwds): Specifies how data are encoded using the visual channels.
             genome (UrlGenomeConfig | dict[str, Any] | InlineGenomeConfig | GenomeConfigBase): Schema-defined ``genome`` property.
             genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
-            hconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``hconcat`` property.
+            hconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``hconcat`` property.
             height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
             legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
             name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
@@ -3803,7 +3888,7 @@ class HConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -3862,9 +3947,11 @@ class VConcatPropertiesMixin:
             | dict[str, Any]
             | core.LayerSpec
             | core.MultiscaleSpec
+            | core.FacetSpec
             | core.VConcatSpec
             | core.HConcatSpec
             | core.ConcatSpec
+            | core.SurroundSpec
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
@@ -3873,7 +3960,7 @@ class VConcatPropertiesMixin:
         | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -3925,8 +4012,9 @@ class VConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -3994,7 +4082,7 @@ class VConcatPropertiesMixin:
             annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -4018,8 +4106,8 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``vconcat`` property.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``vconcat`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -4075,7 +4163,7 @@ class VConcatPropertiesMixin:
         | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -4127,8 +4215,9 @@ class VConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -4168,9 +4257,11 @@ class VConcatPropertiesMixin:
             | dict[str, Any]
             | core.LayerSpec
             | core.MultiscaleSpec
+            | core.FacetSpec
             | core.VConcatSpec
             | core.HConcatSpec
             | core.ConcatSpec
+            | core.SurroundSpec
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
@@ -4206,7 +4297,7 @@ class VConcatPropertiesMixin:
             annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -4230,8 +4321,8 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``vconcat`` property.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``vconcat`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -4287,7 +4378,7 @@ class VConcatPropertiesMixin:
         | UndefinedType = Undefined,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -4339,8 +4430,9 @@ class VConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -4380,9 +4472,11 @@ class VConcatPropertiesMixin:
             | dict[str, Any]
             | core.LayerSpec
             | core.MultiscaleSpec
+            | core.FacetSpec
             | core.VConcatSpec
             | core.HConcatSpec
             | core.ConcatSpec
+            | core.SurroundSpec
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
@@ -4418,7 +4512,7 @@ class VConcatPropertiesMixin:
             annotate (Sequence[UnitSpec | dict[str, Any] | LayerSpec]): Schema-defined ``annotate`` property.
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -4442,8 +4536,8 @@ class VConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
-            vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``vconcat`` property.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            vconcat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``vconcat`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -4502,9 +4596,11 @@ class ConcatPropertiesMixin:
             | dict[str, Any]
             | core.LayerSpec
             | core.MultiscaleSpec
+            | core.FacetSpec
             | core.VConcatSpec
             | core.HConcatSpec
             | core.ConcatSpec
+            | core.SurroundSpec
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
@@ -4512,7 +4608,7 @@ class ConcatPropertiesMixin:
         *,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -4564,8 +4660,9 @@ class ConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -4632,10 +4729,10 @@ class ConcatPropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             columns (float): The number of columns in the grid.
-            concat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``concat`` property.
+            concat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``concat`` property.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
             data (Any): Specifies a data source. If omitted, the data source is inherited from the parent view.
@@ -4658,7 +4755,7 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -4712,7 +4809,7 @@ class ConcatPropertiesMixin:
         *,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         concat: Sequence[
@@ -4720,9 +4817,11 @@ class ConcatPropertiesMixin:
             | dict[str, Any]
             | core.LayerSpec
             | core.MultiscaleSpec
+            | core.FacetSpec
             | core.VConcatSpec
             | core.HConcatSpec
             | core.ConcatSpec
+            | core.SurroundSpec
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
@@ -4776,8 +4875,9 @@ class ConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -4843,10 +4943,10 @@ class ConcatPropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             columns (float): The number of columns in the grid.
-            concat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``concat`` property.
+            concat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``concat`` property.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
             data (Any): Specifies a data source. If omitted, the data source is inherited from the parent view.
@@ -4869,7 +4969,7 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -4923,7 +5023,7 @@ class ConcatPropertiesMixin:
         deep: bool = True,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         concat: Sequence[
@@ -4931,9 +5031,11 @@ class ConcatPropertiesMixin:
             | dict[str, Any]
             | core.LayerSpec
             | core.MultiscaleSpec
+            | core.FacetSpec
             | core.VConcatSpec
             | core.HConcatSpec
             | core.ConcatSpec
+            | core.SurroundSpec
             | core.ImportSpec
         ]
         | UndefinedType = Undefined,
@@ -4987,8 +5089,9 @@ class ConcatPropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -5054,10 +5157,10 @@ class ConcatPropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             columns (float): The number of columns in the grid.
-            concat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | VConcatSpec | HConcatSpec | ConcatSpec | ImportSpec]): Schema-defined ``concat`` property.
+            concat (Sequence[UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | FacetSpec | VConcatSpec | HConcatSpec | ConcatSpec | SurroundSpec | ImportSpec]): Schema-defined ``concat`` property.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
             data (Any): Specifies a data source. If omitted, the data source is inherited from the parent view.
@@ -5080,7 +5183,7 @@ class ConcatPropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
             visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
@@ -5150,7 +5253,7 @@ class MultiscalePropertiesMixin:
         *,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -5203,8 +5306,9 @@ class MultiscalePropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -5272,7 +5376,7 @@ class MultiscalePropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -5297,7 +5401,7 @@ class MultiscalePropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -5352,7 +5456,7 @@ class MultiscalePropertiesMixin:
         *,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -5418,8 +5522,9 @@ class MultiscalePropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -5486,7 +5591,7 @@ class MultiscalePropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -5511,7 +5616,7 @@ class MultiscalePropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -5566,7 +5671,7 @@ class MultiscalePropertiesMixin:
         deep: bool = True,
         assembly: str | UndefinedType = Undefined,
         axes: AxesKwds | UndefinedType = Undefined,
-        background: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseUrl: str | UndefinedType = Undefined,
         config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
         cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -5632,8 +5737,9 @@ class MultiscalePropertiesMixin:
         | UndefinedType = Undefined,
         title: str | core.Title | TitleKwds | UndefinedType = Undefined,
         transform: Sequence[
-            core.AlignmentMismatchesParams
+            core.DendrogramParams
             | dict[str, Any]
+            | core.AlignmentMismatchesParams
             | core.AggregateParams
             | core.CollectParams
             | core.CoverageParams
@@ -5700,7 +5806,7 @@ class MultiscalePropertiesMixin:
         Args:
             assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
             axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
-            background (str): Background color of the canvas.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
             baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
             config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
@@ -5725,7 +5831,7 @@ class MultiscalePropertiesMixin:
             templates (dict[str, Any]): Schema-defined ``templates`` property.
             theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
             title (str | Title | TitleKwds): View title.
-            transform (Sequence[AlignmentMismatchesParams | dict[str, Any] | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
             view (ViewBackground | ViewBackgroundKwds): Schema-defined ``view`` property.
             viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
             viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
@@ -5775,6 +5881,1172 @@ class MultiscalePropertiesMixin:
         return self._copy_with_properties(deep=deep, properties=defined)  # type: ignore[attr-defined, no-any-return]
 
 
+class FacetPropertiesMixin:
+    """Schema-derived top-level property builder."""
+
+    def __init__(
+        self,
+        spec: core.LayerSpec
+        | dict[str, Any]
+        | core.UnitSpec
+        | core.ImportSpec
+        | UndefinedType = Undefined,
+        facet: core.FacetMapping
+        | dict[str, Any]
+        | core.FacetFieldDef
+        | UndefinedType = Undefined,
+        *,
+        assembly: str | UndefinedType = Undefined,
+        axes: AxesKwds | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        baseUrl: str | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
+        cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        data: Any | UndefinedType = Undefined,
+        datasets: dict[str, Any] | UndefinedType = Undefined,
+        description: str | Sequence[str] | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        encoding: core.Encoding | EncodingKwds | UndefinedType = Undefined,
+        genome: core.UrlGenomeConfig
+        | dict[str, Any]
+        | core.InlineGenomeConfig
+        | core.GenomeConfigBase
+        | UndefinedType = Undefined,
+        genomes: dict[str, Any] | UndefinedType = Undefined,
+        height: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        legends: LegendsKwds | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        overhang: core.OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
+        padding: core.Paddings | PaddingsKwds | float | UndefinedType = Undefined,
+        params: Sequence[
+            core.PlainValueParameter
+            | dict[str, Any]
+            | core.TransitionedValueParameter
+            | core.PlainExprParameter
+            | core.TransitionedExprParameter
+            | core.DebouncedExprParameter
+            | core.SelectionParameter
+            | core.RulerParameter
+        ]
+        | UndefinedType = Undefined,
+        resolve: ResolveKwds | UndefinedType = Undefined,
+        scales: ScalesKwds | UndefinedType = Undefined,
+        spacing: float | core.FacetSpacing | dict[str, Any] | UndefinedType = Undefined,
+        templates: dict[str, Any] | UndefinedType = Undefined,
+        theme: BuiltInThemeName_T
+        | Sequence[BuiltInThemeName_T]
+        | UndefinedType = Undefined,
+        title: str | core.Title | TitleKwds | UndefinedType = Undefined,
+        transform: Sequence[
+            core.DendrogramParams
+            | dict[str, Any]
+            | core.AlignmentMismatchesParams
+            | core.AggregateParams
+            | core.CollectParams
+            | core.CoverageParams
+            | core.CoordinateLookupParams
+            | core.CrossParams
+            | core.Displace1DParams
+            | core.Displace2DParams
+            | core.FlattenDelimitedParams
+            | core.FormulaParams
+            | core.LookupParams
+            | core.ExprFilterParams
+            | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
+            | core.FilterScoredLabelsParams
+            | core.FlattenParams
+            | core.FlattenCompressedExonsParams
+            | core.FlattenCigarParams
+            | core.FlattenSequenceParams
+            | core.IdentifierParams
+            | core.LinearizeGenomicCoordinateParams
+            | core.MeasureTextParams
+            | core.TruncateTextParams
+            | core.PackLegendLabelsParams
+            | core.MergeFacetsParams
+            | core.PileupParams
+            | core.ProjectParams
+            | core.RegexExtractParams
+            | core.RegexFoldParams
+            | core.SampleParams
+            | core.SetIntersectionParams
+            | core.StackParams
+            | core.WindowParams
+        ]
+        | UndefinedType = Undefined,
+        viewportHeight: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        viewportWidth: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        visible: bool | UndefinedType = Undefined,
+        width: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
+        schema_url: str | None = None,
+    ) -> None:
+        """Initialize a schema-derived top-level specification.
+
+        Args:
+            assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
+            axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
+            baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
+            columns (float): Wraps a single-field facet into the specified number of columns. Valid only with a direct field definition such as ``facet: { field: "group" }``. Row/column facet mappings do not support wrapping. The count must be a positive integer.
+            config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
+            cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
+            data (Any): Specifies a data source. If omitted, the data source is inherited from the parent view.
+            datasets (dict[str, Any]): Named datasets available to this view and its descendants. A descendant declaration with the same name shadows this declaration. Declare named data here to establish reliable lexical scope and enable scoped runtime updates.
+            description (str | Sequence[str]): A description of the view. Can be used for documentation. The description of the top-level view is shown in the toolbar of the GenomeSpy App.
+            domainInert (bool): If true, this view and its descendants do not contribute to scale domains. Child views inherit this flag automatically. **Default value:** ``false``
+            encoding (Encoding | EncodingKwds): Specifies how data are encoded using the visual channels.
+            facet (FacetMapping | dict[str, Any] | FacetFieldDef): Defines the field or fields used to split data into repeated facet cells. A single field definition creates a wrappable series of cells. Use ``row`` and ``column`` to fix the direction or create a two-dimensional facet matrix.
+            genome (UrlGenomeConfig | dict[str, Any] | InlineGenomeConfig | GenomeConfigBase): Schema-defined ``genome`` property.
+            genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
+            height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
+            legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
+            overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
+            padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
+            spacing (float | FacetSpacing | dict[str, Any]): Space in pixels between facet rows and columns, including header bands. A number sets both directions. An object sets each direction separately; omitted directions use the default. Zero removes the gap. __Default value:__ ``10``
+            spec (LayerSpec | dict[str, Any] | UnitSpec | ImportSpec): Schema-defined ``spec`` property.
+            templates (dict[str, Any]): Schema-defined ``templates`` property.
+            theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
+            title (str | Title | TitleKwds): View title.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
+            width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
+            schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
+        """
+        properties = {
+            "assembly": assembly,
+            "axes": axes,
+            "background": background,
+            "baseUrl": baseUrl,
+            "columns": columns,
+            "config": config,
+            "cursor": cursor,
+            "data": data,
+            "datasets": datasets,
+            "description": description,
+            "domainInert": domainInert,
+            "encoding": encoding,
+            "facet": facet,
+            "genome": genome,
+            "genomes": genomes,
+            "height": height,
+            "legends": legends,
+            "name": name,
+            "overhang": overhang,
+            "padding": padding,
+            "params": params,
+            "resolve": resolve,
+            "scales": scales,
+            "spacing": spacing,
+            "spec": spec,
+            "templates": templates,
+            "theme": theme,
+            "title": title,
+            "transform": transform,
+            "viewportHeight": viewportHeight,
+            "viewportWidth": viewportWidth,
+            "visible": visible,
+            "width": width,
+            "zindex": zindex,
+        }
+        defined = {
+            key: value for key, value in properties.items() if value is not Undefined
+        }
+        self._initialize_spec(properties=defined, schema_url=schema_url)  # type: ignore[attr-defined]
+
+    def properties(
+        self,
+        *,
+        assembly: str | UndefinedType = Undefined,
+        axes: AxesKwds | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        baseUrl: str | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
+        cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        data: Any | UndefinedType = Undefined,
+        datasets: dict[str, Any] | UndefinedType = Undefined,
+        description: str | Sequence[str] | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        encoding: core.Encoding | EncodingKwds | UndefinedType = Undefined,
+        facet: core.FacetMapping
+        | dict[str, Any]
+        | core.FacetFieldDef
+        | UndefinedType = Undefined,
+        genome: core.UrlGenomeConfig
+        | dict[str, Any]
+        | core.InlineGenomeConfig
+        | core.GenomeConfigBase
+        | UndefinedType = Undefined,
+        genomes: dict[str, Any] | UndefinedType = Undefined,
+        height: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        legends: LegendsKwds | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        overhang: core.OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
+        padding: core.Paddings | PaddingsKwds | float | UndefinedType = Undefined,
+        params: Sequence[
+            core.PlainValueParameter
+            | dict[str, Any]
+            | core.TransitionedValueParameter
+            | core.PlainExprParameter
+            | core.TransitionedExprParameter
+            | core.DebouncedExprParameter
+            | core.SelectionParameter
+            | core.RulerParameter
+        ]
+        | UndefinedType = Undefined,
+        resolve: ResolveKwds | UndefinedType = Undefined,
+        scales: ScalesKwds | UndefinedType = Undefined,
+        spacing: float | core.FacetSpacing | dict[str, Any] | UndefinedType = Undefined,
+        spec: core.LayerSpec
+        | dict[str, Any]
+        | core.UnitSpec
+        | core.ImportSpec
+        | UndefinedType = Undefined,
+        templates: dict[str, Any] | UndefinedType = Undefined,
+        theme: BuiltInThemeName_T
+        | Sequence[BuiltInThemeName_T]
+        | UndefinedType = Undefined,
+        title: str | core.Title | TitleKwds | UndefinedType = Undefined,
+        transform: Sequence[
+            core.DendrogramParams
+            | dict[str, Any]
+            | core.AlignmentMismatchesParams
+            | core.AggregateParams
+            | core.CollectParams
+            | core.CoverageParams
+            | core.CoordinateLookupParams
+            | core.CrossParams
+            | core.Displace1DParams
+            | core.Displace2DParams
+            | core.FlattenDelimitedParams
+            | core.FormulaParams
+            | core.LookupParams
+            | core.ExprFilterParams
+            | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
+            | core.FilterScoredLabelsParams
+            | core.FlattenParams
+            | core.FlattenCompressedExonsParams
+            | core.FlattenCigarParams
+            | core.FlattenSequenceParams
+            | core.IdentifierParams
+            | core.LinearizeGenomicCoordinateParams
+            | core.MeasureTextParams
+            | core.TruncateTextParams
+            | core.PackLegendLabelsParams
+            | core.MergeFacetsParams
+            | core.PileupParams
+            | core.ProjectParams
+            | core.RegexExtractParams
+            | core.RegexFoldParams
+            | core.SampleParams
+            | core.SetIntersectionParams
+            | core.StackParams
+            | core.WindowParams
+        ]
+        | UndefinedType = Undefined,
+        viewportHeight: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        viewportWidth: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        visible: bool | UndefinedType = Undefined,
+        width: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
+    ) -> Self:
+        """Return a new specification with updated top-level properties.
+
+        Args:
+            assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
+            axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
+            baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
+            columns (float): Wraps a single-field facet into the specified number of columns. Valid only with a direct field definition such as ``facet: { field: "group" }``. Row/column facet mappings do not support wrapping. The count must be a positive integer.
+            config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
+            cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
+            data (Any): Specifies a data source. If omitted, the data source is inherited from the parent view.
+            datasets (dict[str, Any]): Named datasets available to this view and its descendants. A descendant declaration with the same name shadows this declaration. Declare named data here to establish reliable lexical scope and enable scoped runtime updates.
+            description (str | Sequence[str]): A description of the view. Can be used for documentation. The description of the top-level view is shown in the toolbar of the GenomeSpy App.
+            domainInert (bool): If true, this view and its descendants do not contribute to scale domains. Child views inherit this flag automatically. **Default value:** ``false``
+            encoding (Encoding | EncodingKwds): Specifies how data are encoded using the visual channels.
+            facet (FacetMapping | dict[str, Any] | FacetFieldDef): Defines the field or fields used to split data into repeated facet cells. A single field definition creates a wrappable series of cells. Use ``row`` and ``column`` to fix the direction or create a two-dimensional facet matrix.
+            genome (UrlGenomeConfig | dict[str, Any] | InlineGenomeConfig | GenomeConfigBase): Schema-defined ``genome`` property.
+            genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
+            height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
+            legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
+            overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
+            padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
+            spacing (float | FacetSpacing | dict[str, Any]): Space in pixels between facet rows and columns, including header bands. A number sets both directions. An object sets each direction separately; omitted directions use the default. Zero removes the gap. __Default value:__ ``10``
+            spec (LayerSpec | dict[str, Any] | UnitSpec | ImportSpec): Schema-defined ``spec`` property.
+            templates (dict[str, Any]): Schema-defined ``templates`` property.
+            theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
+            title (str | Title | TitleKwds): View title.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
+            width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
+        """
+        properties = {
+            "assembly": assembly,
+            "axes": axes,
+            "background": background,
+            "baseUrl": baseUrl,
+            "columns": columns,
+            "config": config,
+            "cursor": cursor,
+            "data": data,
+            "datasets": datasets,
+            "description": description,
+            "domainInert": domainInert,
+            "encoding": encoding,
+            "facet": facet,
+            "genome": genome,
+            "genomes": genomes,
+            "height": height,
+            "legends": legends,
+            "name": name,
+            "overhang": overhang,
+            "padding": padding,
+            "params": params,
+            "resolve": resolve,
+            "scales": scales,
+            "spacing": spacing,
+            "spec": spec,
+            "templates": templates,
+            "theme": theme,
+            "title": title,
+            "transform": transform,
+            "viewportHeight": viewportHeight,
+            "viewportWidth": viewportWidth,
+            "visible": visible,
+            "width": width,
+            "zindex": zindex,
+        }
+        defined = {
+            key: value for key, value in properties.items() if value is not Undefined
+        }
+        return self._with_properties(defined)  # type: ignore[attr-defined, no-any-return]
+
+    def copy(
+        self,
+        *,
+        deep: bool = True,
+        assembly: str | UndefinedType = Undefined,
+        axes: AxesKwds | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        baseUrl: str | UndefinedType = Undefined,
+        columns: float | UndefinedType = Undefined,
+        config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
+        cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        data: Any | UndefinedType = Undefined,
+        datasets: dict[str, Any] | UndefinedType = Undefined,
+        description: str | Sequence[str] | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        encoding: core.Encoding | EncodingKwds | UndefinedType = Undefined,
+        facet: core.FacetMapping
+        | dict[str, Any]
+        | core.FacetFieldDef
+        | UndefinedType = Undefined,
+        genome: core.UrlGenomeConfig
+        | dict[str, Any]
+        | core.InlineGenomeConfig
+        | core.GenomeConfigBase
+        | UndefinedType = Undefined,
+        genomes: dict[str, Any] | UndefinedType = Undefined,
+        height: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        legends: LegendsKwds | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        overhang: core.OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
+        padding: core.Paddings | PaddingsKwds | float | UndefinedType = Undefined,
+        params: Sequence[
+            core.PlainValueParameter
+            | dict[str, Any]
+            | core.TransitionedValueParameter
+            | core.PlainExprParameter
+            | core.TransitionedExprParameter
+            | core.DebouncedExprParameter
+            | core.SelectionParameter
+            | core.RulerParameter
+        ]
+        | UndefinedType = Undefined,
+        resolve: ResolveKwds | UndefinedType = Undefined,
+        scales: ScalesKwds | UndefinedType = Undefined,
+        spacing: float | core.FacetSpacing | dict[str, Any] | UndefinedType = Undefined,
+        spec: core.LayerSpec
+        | dict[str, Any]
+        | core.UnitSpec
+        | core.ImportSpec
+        | UndefinedType = Undefined,
+        templates: dict[str, Any] | UndefinedType = Undefined,
+        theme: BuiltInThemeName_T
+        | Sequence[BuiltInThemeName_T]
+        | UndefinedType = Undefined,
+        title: str | core.Title | TitleKwds | UndefinedType = Undefined,
+        transform: Sequence[
+            core.DendrogramParams
+            | dict[str, Any]
+            | core.AlignmentMismatchesParams
+            | core.AggregateParams
+            | core.CollectParams
+            | core.CoverageParams
+            | core.CoordinateLookupParams
+            | core.CrossParams
+            | core.Displace1DParams
+            | core.Displace2DParams
+            | core.FlattenDelimitedParams
+            | core.FormulaParams
+            | core.LookupParams
+            | core.ExprFilterParams
+            | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
+            | core.FilterScoredLabelsParams
+            | core.FlattenParams
+            | core.FlattenCompressedExonsParams
+            | core.FlattenCigarParams
+            | core.FlattenSequenceParams
+            | core.IdentifierParams
+            | core.LinearizeGenomicCoordinateParams
+            | core.MeasureTextParams
+            | core.TruncateTextParams
+            | core.PackLegendLabelsParams
+            | core.MergeFacetsParams
+            | core.PileupParams
+            | core.ProjectParams
+            | core.RegexExtractParams
+            | core.RegexFoldParams
+            | core.SampleParams
+            | core.SetIntersectionParams
+            | core.StackParams
+            | core.WindowParams
+        ]
+        | UndefinedType = Undefined,
+        viewportHeight: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        viewportWidth: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        visible: bool | UndefinedType = Undefined,
+        width: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
+    ) -> Self:
+        """Return a copy with updated top-level properties.
+
+        Args:
+            assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
+            axes (AxesKwds): Defines properties for axis resolutions used by this view subtree. When a positional scale is declared at the view level, an axis can be created explicitly by declaring the corresponding channel here. Use this when a composed view shares an axis across child views and the axis settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
+            baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
+            columns (float): Wraps a single-field facet into the specified number of columns. Valid only with a direct field definition such as ``facet: { field: "group" }``. Row/column facet mappings do not support wrapping. The count must be a positive integer.
+            config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
+            cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
+            data (Any): Specifies a data source. If omitted, the data source is inherited from the parent view.
+            datasets (dict[str, Any]): Named datasets available to this view and its descendants. A descendant declaration with the same name shadows this declaration. Declare named data here to establish reliable lexical scope and enable scoped runtime updates.
+            description (str | Sequence[str]): A description of the view. Can be used for documentation. The description of the top-level view is shown in the toolbar of the GenomeSpy App.
+            domainInert (bool): If true, this view and its descendants do not contribute to scale domains. Child views inherit this flag automatically. **Default value:** ``false``
+            encoding (Encoding | EncodingKwds): Specifies how data are encoded using the visual channels.
+            facet (FacetMapping | dict[str, Any] | FacetFieldDef): Defines the field or fields used to split data into repeated facet cells. A single field definition creates a wrappable series of cells. Use ``row`` and ``column`` to fix the direction or create a two-dimensional facet matrix.
+            genome (UrlGenomeConfig | dict[str, Any] | InlineGenomeConfig | GenomeConfigBase): Schema-defined ``genome`` property.
+            genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
+            height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
+            legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
+            overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
+            padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
+            spacing (float | FacetSpacing | dict[str, Any]): Space in pixels between facet rows and columns, including header bands. A number sets both directions. An object sets each direction separately; omitted directions use the default. Zero removes the gap. __Default value:__ ``10``
+            spec (LayerSpec | dict[str, Any] | UnitSpec | ImportSpec): Schema-defined ``spec`` property.
+            templates (dict[str, Any]): Schema-defined ``templates`` property.
+            theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
+            title (str | Title | TitleKwds): View title.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            viewportHeight (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport height of the view. If the view size exceeds the viewport height, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``height``)
+            viewportWidth (SizeDef | SizeDefKwds | float | ExprRef | dict[str, Any] | Literal['container']): Optional viewport width of the view. If the view size exceeds the viewport width, it will be shown with scrollbars. This property implicitly enables clipping. If an expression reference is provided, it must resolve to a number or ``"container"``. **Default:** ``null`` (same as ``width``)
+            visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
+            width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
+        """
+        properties = {
+            "assembly": assembly,
+            "axes": axes,
+            "background": background,
+            "baseUrl": baseUrl,
+            "columns": columns,
+            "config": config,
+            "cursor": cursor,
+            "data": data,
+            "datasets": datasets,
+            "description": description,
+            "domainInert": domainInert,
+            "encoding": encoding,
+            "facet": facet,
+            "genome": genome,
+            "genomes": genomes,
+            "height": height,
+            "legends": legends,
+            "name": name,
+            "overhang": overhang,
+            "padding": padding,
+            "params": params,
+            "resolve": resolve,
+            "scales": scales,
+            "spacing": spacing,
+            "spec": spec,
+            "templates": templates,
+            "theme": theme,
+            "title": title,
+            "transform": transform,
+            "viewportHeight": viewportHeight,
+            "viewportWidth": viewportWidth,
+            "visible": visible,
+            "width": width,
+            "zindex": zindex,
+        }
+        defined = {
+            key: value for key, value in properties.items() if value is not Undefined
+        }
+        return self._copy_with_properties(deep=deep, properties=defined)  # type: ignore[attr-defined, no-any-return]
+
+
+class SurroundPropertiesMixin:
+    """Schema-derived top-level property builder."""
+
+    def __init__(
+        self,
+        spec: core.UnitSpec
+        | dict[str, Any]
+        | core.LayerSpec
+        | core.MultiscaleSpec
+        | core.ImportSpec
+        | UndefinedType = Undefined,
+        surround: core.SurroundSides | dict[str, Any] | UndefinedType = Undefined,
+        *,
+        assembly: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        baseUrl: str | UndefinedType = Undefined,
+        config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
+        cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        data: Any | UndefinedType = Undefined,
+        datasets: dict[str, Any] | UndefinedType = Undefined,
+        description: str | Sequence[str] | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        encoding: core.Encoding | EncodingKwds | UndefinedType = Undefined,
+        genome: core.UrlGenomeConfig
+        | dict[str, Any]
+        | core.InlineGenomeConfig
+        | core.GenomeConfigBase
+        | UndefinedType = Undefined,
+        genomes: dict[str, Any] | UndefinedType = Undefined,
+        height: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        legends: LegendsKwds | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        overhang: core.OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
+        padding: core.Paddings | PaddingsKwds | float | UndefinedType = Undefined,
+        params: Sequence[
+            core.PlainValueParameter
+            | dict[str, Any]
+            | core.TransitionedValueParameter
+            | core.PlainExprParameter
+            | core.TransitionedExprParameter
+            | core.DebouncedExprParameter
+            | core.SelectionParameter
+            | core.RulerParameter
+        ]
+        | UndefinedType = Undefined,
+        resolve: ResolveKwds | UndefinedType = Undefined,
+        scales: ScalesKwds | UndefinedType = Undefined,
+        spacing: float | UndefinedType = Undefined,
+        templates: dict[str, Any] | UndefinedType = Undefined,
+        theme: BuiltInThemeName_T
+        | Sequence[BuiltInThemeName_T]
+        | UndefinedType = Undefined,
+        title: str | core.Title | TitleKwds | UndefinedType = Undefined,
+        transform: Sequence[
+            core.DendrogramParams
+            | dict[str, Any]
+            | core.AlignmentMismatchesParams
+            | core.AggregateParams
+            | core.CollectParams
+            | core.CoverageParams
+            | core.CoordinateLookupParams
+            | core.CrossParams
+            | core.Displace1DParams
+            | core.Displace2DParams
+            | core.FlattenDelimitedParams
+            | core.FormulaParams
+            | core.LookupParams
+            | core.ExprFilterParams
+            | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
+            | core.FilterScoredLabelsParams
+            | core.FlattenParams
+            | core.FlattenCompressedExonsParams
+            | core.FlattenCigarParams
+            | core.FlattenSequenceParams
+            | core.IdentifierParams
+            | core.LinearizeGenomicCoordinateParams
+            | core.MeasureTextParams
+            | core.TruncateTextParams
+            | core.PackLegendLabelsParams
+            | core.MergeFacetsParams
+            | core.PileupParams
+            | core.ProjectParams
+            | core.RegexExtractParams
+            | core.RegexFoldParams
+            | core.SampleParams
+            | core.SetIntersectionParams
+            | core.StackParams
+            | core.WindowParams
+        ]
+        | UndefinedType = Undefined,
+        visible: bool | UndefinedType = Undefined,
+        width: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
+        schema_url: str | None = None,
+    ) -> None:
+        """Initialize a schema-derived top-level specification.
+
+        Args:
+            assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
+            baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
+            config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
+            cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
+            data (Any): Specifies a data source. If omitted, the data source is inherited from the parent view.
+            datasets (dict[str, Any]): Named datasets available to this view and its descendants. A descendant declaration with the same name shadows this declaration. Declare named data here to establish reliable lexical scope and enable scoped runtime updates.
+            description (str | Sequence[str]): A description of the view. Can be used for documentation. The description of the top-level view is shown in the toolbar of the GenomeSpy App.
+            domainInert (bool): If true, this view and its descendants do not contribute to scale domains. Child views inherit this flag automatically. **Default value:** ``false``
+            encoding (Encoding | EncodingKwds): Specifies how data are encoded using the visual channels.
+            genome (UrlGenomeConfig | dict[str, Any] | InlineGenomeConfig | GenomeConfigBase): Schema-defined ``genome`` property.
+            genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
+            height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
+            legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
+            overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
+            padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
+            spacing (float): Gap between the center and each side, in pixels. __Default value:__ ``10``
+            spec (UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | ImportSpec): Central plot. Accepts unit plots, layers, multiscale layers, and imports resolving to these. Its width and height determine the aligned plot size.
+            surround (SurroundSides | dict[str, Any]): Optional top, right, bottom, and left groups. Each accepts an array of plots or an object with ``views`` and shared view settings. Top/bottom plots share the center's x scale; left/right plots share its y scale.
+            templates (dict[str, Any]): Schema-defined ``templates`` property.
+            theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
+            title (str | Title | TitleKwds): View title.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
+            width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
+            schema_url (str | None): Root JSON Schema URL. Uses the packaged default when omitted.
+        """
+        properties = {
+            "assembly": assembly,
+            "background": background,
+            "baseUrl": baseUrl,
+            "config": config,
+            "cursor": cursor,
+            "data": data,
+            "datasets": datasets,
+            "description": description,
+            "domainInert": domainInert,
+            "encoding": encoding,
+            "genome": genome,
+            "genomes": genomes,
+            "height": height,
+            "legends": legends,
+            "name": name,
+            "overhang": overhang,
+            "padding": padding,
+            "params": params,
+            "resolve": resolve,
+            "scales": scales,
+            "spacing": spacing,
+            "spec": spec,
+            "surround": surround,
+            "templates": templates,
+            "theme": theme,
+            "title": title,
+            "transform": transform,
+            "visible": visible,
+            "width": width,
+            "zindex": zindex,
+        }
+        defined = {
+            key: value for key, value in properties.items() if value is not Undefined
+        }
+        self._initialize_spec(properties=defined, schema_url=schema_url)  # type: ignore[attr-defined]
+
+    def properties(
+        self,
+        *,
+        assembly: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        baseUrl: str | UndefinedType = Undefined,
+        config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
+        cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        data: Any | UndefinedType = Undefined,
+        datasets: dict[str, Any] | UndefinedType = Undefined,
+        description: str | Sequence[str] | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        encoding: core.Encoding | EncodingKwds | UndefinedType = Undefined,
+        genome: core.UrlGenomeConfig
+        | dict[str, Any]
+        | core.InlineGenomeConfig
+        | core.GenomeConfigBase
+        | UndefinedType = Undefined,
+        genomes: dict[str, Any] | UndefinedType = Undefined,
+        height: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        legends: LegendsKwds | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        overhang: core.OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
+        padding: core.Paddings | PaddingsKwds | float | UndefinedType = Undefined,
+        params: Sequence[
+            core.PlainValueParameter
+            | dict[str, Any]
+            | core.TransitionedValueParameter
+            | core.PlainExprParameter
+            | core.TransitionedExprParameter
+            | core.DebouncedExprParameter
+            | core.SelectionParameter
+            | core.RulerParameter
+        ]
+        | UndefinedType = Undefined,
+        resolve: ResolveKwds | UndefinedType = Undefined,
+        scales: ScalesKwds | UndefinedType = Undefined,
+        spacing: float | UndefinedType = Undefined,
+        spec: core.UnitSpec
+        | dict[str, Any]
+        | core.LayerSpec
+        | core.MultiscaleSpec
+        | core.ImportSpec
+        | UndefinedType = Undefined,
+        surround: core.SurroundSides | dict[str, Any] | UndefinedType = Undefined,
+        templates: dict[str, Any] | UndefinedType = Undefined,
+        theme: BuiltInThemeName_T
+        | Sequence[BuiltInThemeName_T]
+        | UndefinedType = Undefined,
+        title: str | core.Title | TitleKwds | UndefinedType = Undefined,
+        transform: Sequence[
+            core.DendrogramParams
+            | dict[str, Any]
+            | core.AlignmentMismatchesParams
+            | core.AggregateParams
+            | core.CollectParams
+            | core.CoverageParams
+            | core.CoordinateLookupParams
+            | core.CrossParams
+            | core.Displace1DParams
+            | core.Displace2DParams
+            | core.FlattenDelimitedParams
+            | core.FormulaParams
+            | core.LookupParams
+            | core.ExprFilterParams
+            | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
+            | core.FilterScoredLabelsParams
+            | core.FlattenParams
+            | core.FlattenCompressedExonsParams
+            | core.FlattenCigarParams
+            | core.FlattenSequenceParams
+            | core.IdentifierParams
+            | core.LinearizeGenomicCoordinateParams
+            | core.MeasureTextParams
+            | core.TruncateTextParams
+            | core.PackLegendLabelsParams
+            | core.MergeFacetsParams
+            | core.PileupParams
+            | core.ProjectParams
+            | core.RegexExtractParams
+            | core.RegexFoldParams
+            | core.SampleParams
+            | core.SetIntersectionParams
+            | core.StackParams
+            | core.WindowParams
+        ]
+        | UndefinedType = Undefined,
+        visible: bool | UndefinedType = Undefined,
+        width: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
+    ) -> Self:
+        """Return a new specification with updated top-level properties.
+
+        Args:
+            assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
+            baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
+            config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
+            cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
+            data (Any): Specifies a data source. If omitted, the data source is inherited from the parent view.
+            datasets (dict[str, Any]): Named datasets available to this view and its descendants. A descendant declaration with the same name shadows this declaration. Declare named data here to establish reliable lexical scope and enable scoped runtime updates.
+            description (str | Sequence[str]): A description of the view. Can be used for documentation. The description of the top-level view is shown in the toolbar of the GenomeSpy App.
+            domainInert (bool): If true, this view and its descendants do not contribute to scale domains. Child views inherit this flag automatically. **Default value:** ``false``
+            encoding (Encoding | EncodingKwds): Specifies how data are encoded using the visual channels.
+            genome (UrlGenomeConfig | dict[str, Any] | InlineGenomeConfig | GenomeConfigBase): Schema-defined ``genome`` property.
+            genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
+            height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
+            legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
+            overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
+            padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
+            spacing (float): Gap between the center and each side, in pixels. __Default value:__ ``10``
+            spec (UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | ImportSpec): Central plot. Accepts unit plots, layers, multiscale layers, and imports resolving to these. Its width and height determine the aligned plot size.
+            surround (SurroundSides | dict[str, Any]): Optional top, right, bottom, and left groups. Each accepts an array of plots or an object with ``views`` and shared view settings. Top/bottom plots share the center's x scale; left/right plots share its y scale.
+            templates (dict[str, Any]): Schema-defined ``templates`` property.
+            theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
+            title (str | Title | TitleKwds): View title.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
+            width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
+        """
+        properties = {
+            "assembly": assembly,
+            "background": background,
+            "baseUrl": baseUrl,
+            "config": config,
+            "cursor": cursor,
+            "data": data,
+            "datasets": datasets,
+            "description": description,
+            "domainInert": domainInert,
+            "encoding": encoding,
+            "genome": genome,
+            "genomes": genomes,
+            "height": height,
+            "legends": legends,
+            "name": name,
+            "overhang": overhang,
+            "padding": padding,
+            "params": params,
+            "resolve": resolve,
+            "scales": scales,
+            "spacing": spacing,
+            "spec": spec,
+            "surround": surround,
+            "templates": templates,
+            "theme": theme,
+            "title": title,
+            "transform": transform,
+            "visible": visible,
+            "width": width,
+            "zindex": zindex,
+        }
+        defined = {
+            key: value for key, value in properties.items() if value is not Undefined
+        }
+        return self._with_properties(defined)  # type: ignore[attr-defined, no-any-return]
+
+    def copy(
+        self,
+        *,
+        deep: bool = True,
+        assembly: str | UndefinedType = Undefined,
+        background: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        baseUrl: str | UndefinedType = Undefined,
+        config: core.GenomeSpyConfig | GenomeSpyConfigKwds | UndefinedType = Undefined,
+        cursor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        data: Any | UndefinedType = Undefined,
+        datasets: dict[str, Any] | UndefinedType = Undefined,
+        description: str | Sequence[str] | UndefinedType = Undefined,
+        domainInert: bool | UndefinedType = Undefined,
+        encoding: core.Encoding | EncodingKwds | UndefinedType = Undefined,
+        genome: core.UrlGenomeConfig
+        | dict[str, Any]
+        | core.InlineGenomeConfig
+        | core.GenomeConfigBase
+        | UndefinedType = Undefined,
+        genomes: dict[str, Any] | UndefinedType = Undefined,
+        height: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        legends: LegendsKwds | UndefinedType = Undefined,
+        name: str | UndefinedType = Undefined,
+        overhang: core.OverhangConfig | dict[str, Any] | UndefinedType = Undefined,
+        padding: core.Paddings | PaddingsKwds | float | UndefinedType = Undefined,
+        params: Sequence[
+            core.PlainValueParameter
+            | dict[str, Any]
+            | core.TransitionedValueParameter
+            | core.PlainExprParameter
+            | core.TransitionedExprParameter
+            | core.DebouncedExprParameter
+            | core.SelectionParameter
+            | core.RulerParameter
+        ]
+        | UndefinedType = Undefined,
+        resolve: ResolveKwds | UndefinedType = Undefined,
+        scales: ScalesKwds | UndefinedType = Undefined,
+        spacing: float | UndefinedType = Undefined,
+        spec: core.UnitSpec
+        | dict[str, Any]
+        | core.LayerSpec
+        | core.MultiscaleSpec
+        | core.ImportSpec
+        | UndefinedType = Undefined,
+        surround: core.SurroundSides | dict[str, Any] | UndefinedType = Undefined,
+        templates: dict[str, Any] | UndefinedType = Undefined,
+        theme: BuiltInThemeName_T
+        | Sequence[BuiltInThemeName_T]
+        | UndefinedType = Undefined,
+        title: str | core.Title | TitleKwds | UndefinedType = Undefined,
+        transform: Sequence[
+            core.DendrogramParams
+            | dict[str, Any]
+            | core.AlignmentMismatchesParams
+            | core.AggregateParams
+            | core.CollectParams
+            | core.CoverageParams
+            | core.CoordinateLookupParams
+            | core.CrossParams
+            | core.Displace1DParams
+            | core.Displace2DParams
+            | core.FlattenDelimitedParams
+            | core.FormulaParams
+            | core.LookupParams
+            | core.ExprFilterParams
+            | core.SelectionFilterParams
+            | core.AxisLabelLayoutParams
+            | core.FilterScoredLabelsParams
+            | core.FlattenParams
+            | core.FlattenCompressedExonsParams
+            | core.FlattenCigarParams
+            | core.FlattenSequenceParams
+            | core.IdentifierParams
+            | core.LinearizeGenomicCoordinateParams
+            | core.MeasureTextParams
+            | core.TruncateTextParams
+            | core.PackLegendLabelsParams
+            | core.MergeFacetsParams
+            | core.PileupParams
+            | core.ProjectParams
+            | core.RegexExtractParams
+            | core.RegexFoldParams
+            | core.SampleParams
+            | core.SetIntersectionParams
+            | core.StackParams
+            | core.WindowParams
+        ]
+        | UndefinedType = Undefined,
+        visible: bool | UndefinedType = Undefined,
+        width: core.SizeDef
+        | SizeDefKwds
+        | float
+        | core.Step
+        | StepKwds
+        | core.ExprRef
+        | dict[str, Any]
+        | Literal["container"]
+        | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
+    ) -> Self:
+        """Return a copy with updated top-level properties.
+
+        Args:
+            assembly (str): Default assembly for locus scales that do not define ``scale.assembly``. Can reference either a key in ``genomes`` or a built-in assembly name.
+            background (str | ExprRef | dict[str, Any]): Background color of the canvas. Expressions use the root parameter scope and update the canvas and default export background when dependencies change. An expression resolving to ``null`` makes the canvas transparent; exports use white unless their background is explicitly set to ``null``.
+            baseUrl (str): The base URL for relative URL data sources and URL imports. The base URLs are inherited in the view hierarchy unless overridden with this property. By default, the top-level view's base URL equals to the visualization specification's base URL.
+            config (GenomeSpyConfig | GenomeSpyConfigKwds): Configures defaults for this view subtree. Properties in child views override properties inherited from ancestors.
+            cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is inside the view. The deepest matching cursor wins: mark cursor first, then the pointed view, then ancestor views outward toward the root. __Default value:__ browser default
+            data (Any): Specifies a data source. If omitted, the data source is inherited from the parent view.
+            datasets (dict[str, Any]): Named datasets available to this view and its descendants. A descendant declaration with the same name shadows this declaration. Declare named data here to establish reliable lexical scope and enable scoped runtime updates.
+            description (str | Sequence[str]): A description of the view. Can be used for documentation. The description of the top-level view is shown in the toolbar of the GenomeSpy App.
+            domainInert (bool): If true, this view and its descendants do not contribute to scale domains. Child views inherit this flag automatically. **Default value:** ``false``
+            encoding (Encoding | EncodingKwds): Specifies how data are encoded using the visual channels.
+            genome (UrlGenomeConfig | dict[str, Any] | InlineGenomeConfig | GenomeConfigBase): Schema-defined ``genome`` property.
+            genomes (dict[str, Any]): Named genome assembly definitions. Each object key is the assembly name.
+            height (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Height of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default value:** ``"container"``
+            legends (LegendsKwds): Defines properties for legend resolutions used by this view subtree. Use this when a composed view shares a legend across child views and the legend settings belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error.
+            name (str): An explicit name used to address the view. It is recommended to keep names unique among siblings. In the App (where view state is bookmarkable), the name must be unique within its import scope for views with configurable visibility, etc.
+            overhang (OverhangConfig | dict[str, Any]): Controls whether external overhang on each edge reserves layout space. Setting an edge to false lets axes, titles, legends, or custom view overhang overlap nearby content while remaining visible. **Default value:** all edges reserve overhang
+            padding (Paddings | PaddingsKwds | float): Padding applied to the view. Accepts either a number representing pixels or an object specifying separate paddings for each edge. Examples: - ``padding: 10`` - ``padding: { top: 10, right: 20, bottom: 10, left: 20 }`` **Default value:** ``0``
+            params (Sequence[PlainValueParameter | dict[str, Any] | TransitionedValueParameter | PlainExprParameter | TransitionedExprParameter | DebouncedExprParameter | SelectionParameter | RulerParameter]): Dynamic variables that parameterize a visualization.
+            resolve (ResolveKwds): Specifies how scales, axes, and legends are resolved in the view hierarchy. If legend resolution is not configured explicitly, it follows the corresponding scale resolution.
+            scales (ScalesKwds): Defines properties for scale resolutions used by this view subtree. A scale declaration does not create an axis; declare the corresponding ``axes`` property when an axis is needed without a positional encoding. Use this when a composed view shares a scale across child views and the scale settings, such as the visible domain, belong to the composed view rather than an individual encoding. An ancestor declaration shadows the whole declaration of a descendant that targets the same resolution. Declarations in separate sibling subtrees are ambiguous and cause an error. Expression references in these scale properties use this view's parameter scope and can access parameters declared here or on ancestors.
+            spacing (float): Gap between the center and each side, in pixels. __Default value:__ ``10``
+            spec (UnitSpec | dict[str, Any] | LayerSpec | MultiscaleSpec | ImportSpec): Central plot. Accepts unit plots, layers, multiscale layers, and imports resolving to these. Its width and height determine the aligned plot size.
+            surround (SurroundSides | dict[str, Any]): Optional top, right, bottom, and left groups. Each accepts an array of plots or an object with ``views`` and shared view settings. Top/bottom plots share the center's x scale; left/right plots share its y scale.
+            templates (dict[str, Any]): Schema-defined ``templates`` property.
+            theme (BuiltInThemeName_T | Sequence[BuiltInThemeName_T]): Selects built-in theme preset(s) for the whole visualization.
+            title (str | Title | TitleKwds): View title.
+            transform (Sequence[DendrogramParams | dict[str, Any] | AlignmentMismatchesParams | AggregateParams | CollectParams | CoverageParams | CoordinateLookupParams | CrossParams | Displace1DParams | Displace2DParams | FlattenDelimitedParams | FormulaParams | LookupParams | ExprFilterParams | SelectionFilterParams | AxisLabelLayoutParams | FilterScoredLabelsParams | FlattenParams | FlattenCompressedExonsParams | FlattenCigarParams | FlattenSequenceParams | IdentifierParams | LinearizeGenomicCoordinateParams | MeasureTextParams | TruncateTextParams | PackLegendLabelsParams | MergeFacetsParams | PileupParams | ProjectParams | RegexExtractParams | RegexFoldParams | SampleParams | SetIntersectionParams | StackParams | WindowParams]): An array of transformations applied to the data before visual encoding.
+            visible (bool): The default visibility of the view. An invisible view is removed from the layout and not rendered. For context, see toggleable view visibility. **Default:** ``true``
+            width (SizeDef | SizeDefKwds | float | Step | StepKwds | ExprRef | dict[str, Any] | Literal['container']): Width of the view. If a number, it is interpreted as pixels. If an expression reference is provided, it must resolve to a number or ``"container"``. Check child sizing for details. **Default:** ``"container"``
+            zindex (float): Z-order among sibling views in a composition. Higher values render later. Views with equal values render in declaration order. This does not affect layout order. __Default value:__ ``0``
+        """
+        properties = {
+            "assembly": assembly,
+            "background": background,
+            "baseUrl": baseUrl,
+            "config": config,
+            "cursor": cursor,
+            "data": data,
+            "datasets": datasets,
+            "description": description,
+            "domainInert": domainInert,
+            "encoding": encoding,
+            "genome": genome,
+            "genomes": genomes,
+            "height": height,
+            "legends": legends,
+            "name": name,
+            "overhang": overhang,
+            "padding": padding,
+            "params": params,
+            "resolve": resolve,
+            "scales": scales,
+            "spacing": spacing,
+            "spec": spec,
+            "surround": surround,
+            "templates": templates,
+            "theme": theme,
+            "title": title,
+            "transform": transform,
+            "visible": visible,
+            "width": width,
+            "zindex": zindex,
+        }
+        defined = {
+            key: value for key, value in properties.items() if value is not Undefined
+        }
+        return self._copy_with_properties(deep=deep, properties=defined)  # type: ignore[attr-defined, no-any-return]
+
+
 class ConfigMethodMixin:
     """Schema-derived config methods for the handwritten chart API."""
 
@@ -5796,6 +7068,9 @@ class ConfigMethodMixin:
         axisTop: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined,
         axisX: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined,
         axisY: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined,
+        header: core.FacetHeader | dict[str, Any] | UndefinedType = Undefined,
+        headerColumn: core.FacetHeader | dict[str, Any] | UndefinedType = Undefined,
+        headerRow: core.FacetHeader | dict[str, Any] | UndefinedType = Undefined,
         legend: core.LegendConfig | LegendConfigKwds | UndefinedType = Undefined,
         legendTrack: core.LegendConfig | LegendConfigKwds | UndefinedType = Undefined,
         link: core.LinkConfig | LinkConfigKwds | UndefinedType = Undefined,
@@ -5827,6 +7102,9 @@ class ConfigMethodMixin:
             axisTop (AxisConfig | AxisConfigKwds): Defaults for top-oriented axes.
             axisX (AxisConfig | AxisConfigKwds): Defaults for x axes.
             axisY (AxisConfig | AxisConfigKwds): Defaults for y axes.
+            header (FacetHeader | dict[str, Any]): Defaults for facet category labels, using view-title property names.
+            headerColumn (FacetHeader | dict[str, Any]): Defaults for column facet labels, overriding general header defaults.
+            headerRow (FacetHeader | dict[str, Any]): Defaults for row facet labels, overriding general header defaults.
             legend (LegendConfig | LegendConfigKwds): Defaults shared by all legends. Set ``disable`` to ``true`` to suppress automatic legend creation by default.
             legendTrack (LegendConfig | LegendConfigKwds): Defaults for legends of track-like views that use ``index`` or ``locus`` scales on the x channel. __Default value:__ ``{ "style": "track-bottom-legend" }``
             link (LinkConfig | LinkConfigKwds): Defaults for link marks.
@@ -5856,6 +7134,9 @@ class ConfigMethodMixin:
             "axisTop": axisTop,
             "axisX": axisX,
             "axisY": axisY,
+            "header": header,
+            "headerColumn": headerColumn,
+            "headerRow": headerRow,
             "legend": legend,
             "legendTrack": legendTrack,
             "link": link,
@@ -5880,6 +7161,7 @@ class ConfigMethodMixin:
         /,
         *,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -5957,6 +7239,7 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -5993,6 +7276,7 @@ class ConfigMethodMixin:
         """
         defined = {
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -6037,22 +7321,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -6060,7 +7353,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -6068,7 +7361,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -6076,7 +7369,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -6098,7 +7391,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -6107,7 +7400,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -6123,22 +7416,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -6146,7 +7439,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -6154,7 +7447,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -6162,7 +7455,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -6181,7 +7474,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -6190,7 +7483,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -6292,22 +7585,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -6315,7 +7617,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -6323,7 +7625,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -6331,7 +7633,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -6353,7 +7655,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -6362,7 +7664,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -6378,22 +7680,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -6401,7 +7703,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -6409,7 +7711,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -6417,7 +7719,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -6436,7 +7738,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -6445,7 +7747,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -6547,22 +7849,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -6570,7 +7881,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -6578,7 +7889,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -6586,7 +7897,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -6608,7 +7919,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -6617,7 +7928,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -6633,22 +7944,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -6656,7 +7967,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -6664,7 +7975,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -6672,7 +7983,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -6691,7 +8002,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -6700,7 +8011,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -6802,22 +8113,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -6825,7 +8145,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -6833,7 +8153,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -6841,7 +8161,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -6863,7 +8183,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -6872,7 +8192,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -6888,22 +8208,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -6911,7 +8231,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -6919,7 +8239,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -6927,7 +8247,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -6946,7 +8266,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -6955,7 +8275,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -7057,22 +8377,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -7080,7 +8409,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -7088,7 +8417,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -7096,7 +8425,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -7118,7 +8447,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -7127,7 +8456,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -7143,22 +8472,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -7166,7 +8495,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -7174,7 +8503,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -7182,7 +8511,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -7201,7 +8530,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -7210,7 +8539,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -7312,22 +8641,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -7335,7 +8673,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -7343,7 +8681,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -7351,7 +8689,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -7373,7 +8711,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -7382,7 +8720,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -7398,22 +8736,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -7421,7 +8759,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -7429,7 +8767,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -7437,7 +8775,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -7456,7 +8794,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -7465,7 +8803,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -7567,22 +8905,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -7590,7 +8937,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -7598,7 +8945,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -7606,7 +8953,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -7628,7 +8975,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -7637,7 +8984,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -7653,22 +9000,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -7676,7 +9023,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -7684,7 +9031,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -7692,7 +9039,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -7711,7 +9058,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -7720,7 +9067,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -7822,22 +9169,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -7845,7 +9201,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -7853,7 +9209,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -7861,7 +9217,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -7883,7 +9239,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -7892,7 +9248,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -7908,22 +9264,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -7931,7 +9287,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -7939,7 +9295,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -7947,7 +9303,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -7966,7 +9322,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -7975,7 +9331,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -8077,22 +9433,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -8100,7 +9465,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -8108,7 +9473,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -8116,7 +9481,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -8138,7 +9503,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -8147,7 +9512,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -8163,22 +9528,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -8186,7 +9551,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -8194,7 +9559,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -8202,7 +9567,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -8221,7 +9586,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -8230,7 +9595,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -8332,22 +9697,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -8355,7 +9729,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -8363,7 +9737,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -8371,7 +9745,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -8393,7 +9767,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -8402,7 +9776,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -8418,22 +9792,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -8441,7 +9815,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -8449,7 +9823,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -8457,7 +9831,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -8476,7 +9850,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -8485,7 +9859,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -8587,22 +9961,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -8610,7 +9993,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -8618,7 +10001,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -8626,7 +10009,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -8648,7 +10031,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -8657,7 +10040,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -8673,22 +10056,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -8696,7 +10079,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -8704,7 +10087,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -8712,7 +10095,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -8731,7 +10114,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -8740,7 +10123,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -8842,22 +10225,31 @@ class ConfigMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -8865,7 +10257,7 @@ class ConfigMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -8873,7 +10265,7 @@ class ConfigMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -8881,7 +10273,7 @@ class ConfigMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -8903,7 +10295,7 @@ class ConfigMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -8912,7 +10304,7 @@ class ConfigMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -8928,22 +10320,22 @@ class ConfigMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -8951,7 +10343,7 @@ class ConfigMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -8959,7 +10351,7 @@ class ConfigMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -8967,7 +10359,7 @@ class ConfigMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -8986,7 +10378,7 @@ class ConfigMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -8995,7 +10387,7 @@ class ConfigMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -9090,14 +10482,233 @@ class ConfigMethodMixin:
         defined = {key: item for key, item in defined.items() if item is not Undefined}
         return self._configure_nested("axisY", value, **defined)  # type: ignore[attr-defined, no-any-return]
 
+    def configure_header(
+        self,
+        value: core.FacetHeader | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        align: Align_T | UndefinedType = Undefined,
+        anchor: TitleAnchor_T | UndefinedType = Undefined,
+        angle: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        baseline: Baseline_T | UndefinedType = Undefined,
+        color: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        dx: float | UndefinedType = Undefined,
+        dy: float | UndefinedType = Undefined,
+        font: str | UndefinedType = Undefined,
+        fontSize: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        fontStyle: FontStyle_T | UndefinedType = Undefined,
+        fontWeight: FontWeight_T | UndefinedType = Undefined,
+        format: str | UndefinedType = Undefined,
+        frame: TitleFrame_T | UndefinedType = Undefined,
+        labels: bool | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: TitleOrient_T | UndefinedType = Undefined,
+        reserve: bool | UndefinedType = Undefined,
+        style: str | Sequence[str] | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
+    ) -> Self:
+        """Return a chart with ``header`` config updated.
+
+        Args:
+            align (Align_T): Horizontal text alignment for title text. One of ``"left"``, ``"center"``, or ``"right"``.
+            anchor (TitleAnchor_T): The anchor position for placing the title and subtitle text. One of ``"start"``, ``"middle"``, or ``"end"``. For example, with an orientation of top these anchor positions map to a left-, center-, or right-aligned title.
+            angle (float | ExprRef | dict[str, Any]): Angle in degrees of title and subtitle text.
+            baseline (Baseline_T): Vertical text baseline for title and subtitle text. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, or ``"bottom"``.
+            color (str | ExprRef | dict[str, Any]): Text color for title text.
+            dx (float): Delta offset for title and subtitle text x-coordinate.
+            dy (float): Delta offset for title and subtitle text y-coordinate.
+            font (str): Font name for title text.
+            fontSize (float | ExprRef | dict[str, Any]): Font size in pixels for title text.
+            fontStyle (FontStyle_T): Font style for title text.
+            fontWeight (FontWeight_T): Font weight for title text. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
+            format (str): D3 number format for numeric category labels, for example ``".1f"`` or ``",.0f"``. String and boolean categories retain their original labels.
+            frame (TitleFrame_T): The reference frame for the title anchor. ``"group"`` anchors the title along the plot area. ``"bounds"`` anchors the title along the full bounds, including axes, legends, and other reserved space. __Default value:__ ``"group"``
+            labels (bool): Whether category labels are shown. Hidden labels reserve no space. __Default value:__ ``true``
+            offset (float): The orthogonal offset in pixels by which to displace the title group from its position along the edge of the chart.
+            orient (TitleOrient_T): Default title orientation (``"none"``, ``"top"``, ``"bottom"``, ``"left"``, or ``"right"``)
+            reserve (bool): Whether the title reserves layout space outside the plot area. Reserved titles are placed outside axes, legends, and other guide space on the same side. Setting this to ``false`` lets the title render without affecting layout, enabling wilder layouts where titles may overlap nearby content. __Default value:__ ``true``
+            style (str | Sequence[str]): A mark style property to apply to the title text mark. If not specified, a default style of ``"group-title"`` is applied.
+            zindex (float): Z-order of the title relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``1``
+        """
+        defined = {
+            "align": align,
+            "anchor": anchor,
+            "angle": angle,
+            "baseline": baseline,
+            "color": color,
+            "dx": dx,
+            "dy": dy,
+            "font": font,
+            "fontSize": fontSize,
+            "fontStyle": fontStyle,
+            "fontWeight": fontWeight,
+            "format": format,
+            "frame": frame,
+            "labels": labels,
+            "offset": offset,
+            "orient": orient,
+            "reserve": reserve,
+            "style": style,
+            "zindex": zindex,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._configure_nested("header", value, **defined)  # type: ignore[attr-defined, no-any-return]
+
+    def configure_header_column(
+        self,
+        value: core.FacetHeader | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        align: Align_T | UndefinedType = Undefined,
+        anchor: TitleAnchor_T | UndefinedType = Undefined,
+        angle: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        baseline: Baseline_T | UndefinedType = Undefined,
+        color: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        dx: float | UndefinedType = Undefined,
+        dy: float | UndefinedType = Undefined,
+        font: str | UndefinedType = Undefined,
+        fontSize: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        fontStyle: FontStyle_T | UndefinedType = Undefined,
+        fontWeight: FontWeight_T | UndefinedType = Undefined,
+        format: str | UndefinedType = Undefined,
+        frame: TitleFrame_T | UndefinedType = Undefined,
+        labels: bool | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: TitleOrient_T | UndefinedType = Undefined,
+        reserve: bool | UndefinedType = Undefined,
+        style: str | Sequence[str] | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
+    ) -> Self:
+        """Return a chart with ``headerColumn`` config updated.
+
+        Args:
+            align (Align_T): Horizontal text alignment for title text. One of ``"left"``, ``"center"``, or ``"right"``.
+            anchor (TitleAnchor_T): The anchor position for placing the title and subtitle text. One of ``"start"``, ``"middle"``, or ``"end"``. For example, with an orientation of top these anchor positions map to a left-, center-, or right-aligned title.
+            angle (float | ExprRef | dict[str, Any]): Angle in degrees of title and subtitle text.
+            baseline (Baseline_T): Vertical text baseline for title and subtitle text. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, or ``"bottom"``.
+            color (str | ExprRef | dict[str, Any]): Text color for title text.
+            dx (float): Delta offset for title and subtitle text x-coordinate.
+            dy (float): Delta offset for title and subtitle text y-coordinate.
+            font (str): Font name for title text.
+            fontSize (float | ExprRef | dict[str, Any]): Font size in pixels for title text.
+            fontStyle (FontStyle_T): Font style for title text.
+            fontWeight (FontWeight_T): Font weight for title text. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
+            format (str): D3 number format for numeric category labels, for example ``".1f"`` or ``",.0f"``. String and boolean categories retain their original labels.
+            frame (TitleFrame_T): The reference frame for the title anchor. ``"group"`` anchors the title along the plot area. ``"bounds"`` anchors the title along the full bounds, including axes, legends, and other reserved space. __Default value:__ ``"group"``
+            labels (bool): Whether category labels are shown. Hidden labels reserve no space. __Default value:__ ``true``
+            offset (float): The orthogonal offset in pixels by which to displace the title group from its position along the edge of the chart.
+            orient (TitleOrient_T): Default title orientation (``"none"``, ``"top"``, ``"bottom"``, ``"left"``, or ``"right"``)
+            reserve (bool): Whether the title reserves layout space outside the plot area. Reserved titles are placed outside axes, legends, and other guide space on the same side. Setting this to ``false`` lets the title render without affecting layout, enabling wilder layouts where titles may overlap nearby content. __Default value:__ ``true``
+            style (str | Sequence[str]): A mark style property to apply to the title text mark. If not specified, a default style of ``"group-title"`` is applied.
+            zindex (float): Z-order of the title relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``1``
+        """
+        defined = {
+            "align": align,
+            "anchor": anchor,
+            "angle": angle,
+            "baseline": baseline,
+            "color": color,
+            "dx": dx,
+            "dy": dy,
+            "font": font,
+            "fontSize": fontSize,
+            "fontStyle": fontStyle,
+            "fontWeight": fontWeight,
+            "format": format,
+            "frame": frame,
+            "labels": labels,
+            "offset": offset,
+            "orient": orient,
+            "reserve": reserve,
+            "style": style,
+            "zindex": zindex,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._configure_nested("headerColumn", value, **defined)  # type: ignore[attr-defined, no-any-return]
+
+    def configure_header_row(
+        self,
+        value: core.FacetHeader | dict[str, Any] | None | object = Undefined,
+        /,
+        *,
+        align: Align_T | UndefinedType = Undefined,
+        anchor: TitleAnchor_T | UndefinedType = Undefined,
+        angle: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        baseline: Baseline_T | UndefinedType = Undefined,
+        color: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        dx: float | UndefinedType = Undefined,
+        dy: float | UndefinedType = Undefined,
+        font: str | UndefinedType = Undefined,
+        fontSize: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
+        fontStyle: FontStyle_T | UndefinedType = Undefined,
+        fontWeight: FontWeight_T | UndefinedType = Undefined,
+        format: str | UndefinedType = Undefined,
+        frame: TitleFrame_T | UndefinedType = Undefined,
+        labels: bool | UndefinedType = Undefined,
+        offset: float | UndefinedType = Undefined,
+        orient: TitleOrient_T | UndefinedType = Undefined,
+        reserve: bool | UndefinedType = Undefined,
+        style: str | Sequence[str] | UndefinedType = Undefined,
+        zindex: float | UndefinedType = Undefined,
+    ) -> Self:
+        """Return a chart with ``headerRow`` config updated.
+
+        Args:
+            align (Align_T): Horizontal text alignment for title text. One of ``"left"``, ``"center"``, or ``"right"``.
+            anchor (TitleAnchor_T): The anchor position for placing the title and subtitle text. One of ``"start"``, ``"middle"``, or ``"end"``. For example, with an orientation of top these anchor positions map to a left-, center-, or right-aligned title.
+            angle (float | ExprRef | dict[str, Any]): Angle in degrees of title and subtitle text.
+            baseline (Baseline_T): Vertical text baseline for title and subtitle text. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, or ``"bottom"``.
+            color (str | ExprRef | dict[str, Any]): Text color for title text.
+            dx (float): Delta offset for title and subtitle text x-coordinate.
+            dy (float): Delta offset for title and subtitle text y-coordinate.
+            font (str): Font name for title text.
+            fontSize (float | ExprRef | dict[str, Any]): Font size in pixels for title text.
+            fontStyle (FontStyle_T): Font style for title text.
+            fontWeight (FontWeight_T): Font weight for title text. This can be either a string (e.g ``"bold"``, ``"normal"``) or a number (``100``, ``200``, ``300``, ..., ``900`` where ``"normal"`` = ``400`` and ``"bold"`` = ``700``).
+            format (str): D3 number format for numeric category labels, for example ``".1f"`` or ``",.0f"``. String and boolean categories retain their original labels.
+            frame (TitleFrame_T): The reference frame for the title anchor. ``"group"`` anchors the title along the plot area. ``"bounds"`` anchors the title along the full bounds, including axes, legends, and other reserved space. __Default value:__ ``"group"``
+            labels (bool): Whether category labels are shown. Hidden labels reserve no space. __Default value:__ ``true``
+            offset (float): The orthogonal offset in pixels by which to displace the title group from its position along the edge of the chart.
+            orient (TitleOrient_T): Default title orientation (``"none"``, ``"top"``, ``"bottom"``, ``"left"``, or ``"right"``)
+            reserve (bool): Whether the title reserves layout space outside the plot area. Reserved titles are placed outside axes, legends, and other guide space on the same side. Setting this to ``false`` lets the title render without affecting layout, enabling wilder layouts where titles may overlap nearby content. __Default value:__ ``true``
+            style (str | Sequence[str]): A mark style property to apply to the title text mark. If not specified, a default style of ``"group-title"`` is applied.
+            zindex (float): Z-order of the title relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``1``
+        """
+        defined = {
+            "align": align,
+            "anchor": anchor,
+            "angle": angle,
+            "baseline": baseline,
+            "color": color,
+            "dx": dx,
+            "dy": dy,
+            "font": font,
+            "fontSize": fontSize,
+            "fontStyle": fontStyle,
+            "fontWeight": fontWeight,
+            "format": format,
+            "frame": frame,
+            "labels": labels,
+            "offset": offset,
+            "orient": orient,
+            "reserve": reserve,
+            "style": style,
+            "zindex": zindex,
+        }
+        defined = {key: item for key, item in defined.items() if item is not Undefined}
+        return self._configure_nested("headerRow", value, **defined)  # type: ignore[attr-defined, no-any-return]
+
     def configure_legend(
         self,
         value: core.LegendConfig | LegendConfigKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columnPadding: float | UndefinedType = Undefined,
@@ -9106,12 +10717,15 @@ class ConfigMethodMixin:
         disable: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelAlign: Align_T | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
@@ -9128,18 +10742,33 @@ class ConfigMethodMixin:
         rowPadding: float | UndefinedType = Undefined,
         spacing: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolBaseFillColor: str | UndefinedType = Undefined,
-        symbolBaseStrokeColor: str | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
+        symbolBaseFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolBaseStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolOffset: float | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
         titleFontStyle: FontStyle_T | UndefinedType = Undefined,
@@ -9152,9 +10781,9 @@ class ConfigMethodMixin:
         """Return a chart with ``legend`` config updated.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columnPadding (float): Padding between legend columns in pixels.
@@ -9163,12 +10792,12 @@ class ConfigMethodMixin:
             disable (bool | ExprRef | dict[str, Any]): Disable automatic legend creation. Use ``legend: null`` on an encoding channel to remove that channel's legend. __Default value:__ ``false``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelAlign (Align_T): Horizontal alignment of legend labels.
             labelBaseline (Baseline_T): Baseline alignment of legend labels.
-            labelColor (str): Legend label color.
+            labelColor (str | ExprRef | dict[str, Any]): Legend label color.
             labelFont (str): Legend label font.
             labelFontSize (float): Legend label font size in pixels.
             labelFontStyle (FontStyle_T): Legend label font style.
@@ -9182,18 +10811,18 @@ class ConfigMethodMixin:
             rowPadding (float): Padding between legend rows in pixels.
             spacing (float): Spacing in pixels between legends collected into the same legend region.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolBaseFillColor (str): Base fill color for legend symbols when the legend does not encode fill.
-            symbolBaseStrokeColor (str): Base stroke color for legend symbols when the legend does not encode stroke.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolBaseFillColor (str | ExprRef | dict[str, Any]): Base fill color for legend symbols when the legend does not encode fill.
+            symbolBaseStrokeColor (str | ExprRef | dict[str, Any]): Base stroke color for legend symbols when the legend does not encode stroke.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOffset (float): Offset applied to legend symbols in pixels.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
-            titleColor (str): Legend title color.
+            titleColor (str | ExprRef | dict[str, Any]): Legend title color.
             titleFont (str): Legend title font.
             titleFontSize (float): Legend title font size in pixels.
             titleFontStyle (FontStyle_T): Legend title font style.
@@ -9263,9 +10892,12 @@ class ConfigMethodMixin:
         value: core.LegendConfig | LegendConfigKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columnPadding: float | UndefinedType = Undefined,
@@ -9274,12 +10906,15 @@ class ConfigMethodMixin:
         disable: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelAlign: Align_T | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
         labelFontSize: float | UndefinedType = Undefined,
         labelFontStyle: FontStyle_T | UndefinedType = Undefined,
@@ -9296,18 +10931,33 @@ class ConfigMethodMixin:
         rowPadding: float | UndefinedType = Undefined,
         spacing: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolBaseFillColor: str | UndefinedType = Undefined,
-        symbolBaseStrokeColor: str | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
+        symbolBaseFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolBaseStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolOffset: float | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
         titleFontStyle: FontStyle_T | UndefinedType = Undefined,
@@ -9320,9 +10970,9 @@ class ConfigMethodMixin:
         """Return a chart with ``legendTrack`` config updated.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columnPadding (float): Padding between legend columns in pixels.
@@ -9331,12 +10981,12 @@ class ConfigMethodMixin:
             disable (bool | ExprRef | dict[str, Any]): Disable automatic legend creation. Use ``legend: null`` on an encoding channel to remove that channel's legend. __Default value:__ ``false``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelAlign (Align_T): Horizontal alignment of legend labels.
             labelBaseline (Baseline_T): Baseline alignment of legend labels.
-            labelColor (str): Legend label color.
+            labelColor (str | ExprRef | dict[str, Any]): Legend label color.
             labelFont (str): Legend label font.
             labelFontSize (float): Legend label font size in pixels.
             labelFontStyle (FontStyle_T): Legend label font style.
@@ -9350,18 +11000,18 @@ class ConfigMethodMixin:
             rowPadding (float): Padding between legend rows in pixels.
             spacing (float): Spacing in pixels between legends collected into the same legend region.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolBaseFillColor (str): Base fill color for legend symbols when the legend does not encode fill.
-            symbolBaseStrokeColor (str): Base stroke color for legend symbols when the legend does not encode stroke.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolBaseFillColor (str | ExprRef | dict[str, Any]): Base fill color for legend symbols when the legend does not encode fill.
+            symbolBaseStrokeColor (str | ExprRef | dict[str, Any]): Base stroke color for legend symbols when the legend does not encode stroke.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
             symbolOffset (float): Offset applied to legend symbols in pixels.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
             title (str | None): Title text for the legend. If ``null``, the title is removed.
-            titleColor (str): Legend title color.
+            titleColor (str | ExprRef | dict[str, Any]): Legend title color.
             titleFont (str): Legend title font.
             titleFontSize (float): Legend title font size in pixels.
             titleFontStyle (FontStyle_T): Legend title font style.
@@ -9441,6 +11091,7 @@ class ConfigMethodMixin:
         | dict[str, Any]
         | UndefinedType = Undefined,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clampApex: bool | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
@@ -9457,6 +11108,7 @@ class ConfigMethodMixin:
         | Literal["diagonal"]
         | Literal["line"]
         | Literal["dome"]
+        | Literal["orthogonal"]
         | core.ExprRef
         | dict[str, Any]
         | UndefinedType = Undefined,
@@ -9506,19 +11158,20 @@ class ConfigMethodMixin:
             arcFadingDistance (Sequence[float] | Literal[False] | ExprRef | dict[str, Any]): The fading distance range for ``"arc"`` and ``"dome"`` shapes, in logical screen pixels. Opacity fades smoothly from one to zero between these perpendicular distances from the line joining the rendered endpoints. For domes, this is the baseline rather than the apex position, regardless of orientation, direction, or the scale used for height. Both ``false`` and ``[0, 0]`` disable fading. **Default value:** ``false``
             arcHeightFactor (float | ExprRef | dict[str, Any]): Scaling factor for the ``"arc``" shape's height. The default value ``1.0`` produces roughly circular arcs. **Default value:** ``1.0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clampApex (bool | ExprRef | dict[str, Any]): Whether the apex of the ``"dome"`` shape is clamped to the viewport edge. When over a half of the dome is located outside the viewport, clamping allows for more accurate reading of the value encoded by the apex' position. **Default value:** ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
             cursor (str | ExprRef | dict[str, Any]): Mouse cursor shown while the pointer is over the mark. Mark cursor takes precedence over enclosing view cursors. __Default value:__ browser default
-            linkShape (Literal['arc'] | Literal['diagonal'] | Literal['line'] | Literal['dome'] | ExprRef | dict[str, Any]): The shape of the link path. The ``"arc"`` shape draws a circular arc between the two points. The apex of the arc resides on the left side of the line that connects the two points. The ``"dome"`` shape draws a vertical or horizontal arc with a specific height. The primary positional channel determines the apex of the arc and the secondary determines the endpoint placement. The ``"diagonal"`` shape draws an "S"-shaped curve between the two points. The ``"line"`` shape draws a straight line between the two points. See an example of the different shapes below. **Default value:** ``"arc"``
+            linkShape (Literal['arc'] | Literal['diagonal'] | Literal['line'] | Literal['dome'] | Literal['orthogonal'] | ExprRef | dict[str, Any]): The shape of the link path. The ``"arc"`` shape draws a circular arc between the two points. The apex of the arc resides on the left side of the line that connects the two points. The ``"dome"`` shape draws a vertical or horizontal arc with a specific height. The primary positional channel determines the apex of the arc and the secondary determines the endpoint placement. The ``"diagonal"`` shape draws an "S"-shaped curve between the two points. The ``"orthogonal"`` shape draws two straight legs joined at a right angle, with butt caps and a miter join. Coincident endpoints draw nothing. The ``"line"`` shape draws a straight line between the two points. See an example of the different shapes below. **Default value:** ``"arc"``
             maxChordLength (float | ExprRef | dict[str, Any]): The maximum length of ``"arc"`` shape's chord in pixels. The chord is the line segment between the two points that define the arc. Limiting the chord length serves two purposes when zooming in close enough: 1) it prevents the arc from becoming a straight line and 2) it mitigates the limited precision of floating point numbers in arc rendering. **Default value:** ``50000``
             minArcHeight (float | ExprRef | dict[str, Any]): The minimum height of an ``"arc"`` shape. Makes very short links more clearly visible. **Default value:** ``1.5``
             minPickingSize (float | ExprRef | dict[str, Any]): The minimum picking size invisibly increases the stroke width or point diameter of marks when pointing them with the mouse cursor, making it easier to select them. The valus is the minimum size in pixels. **Default value:** ``3.0`` for ``"link"`` and ``2.0`` for ``"point"``
             noFadingOnPointSelection (bool | ExprRef | dict[str, Any]): Alias for ``noFadingOnSecondPass``, used only when that property is unspecified. Requires active conditional ordering; selections in color or size encodings alone no longer suppress fading.
             noFadingOnSecondPass (bool | ExprRef | dict[str, Any]): Shows foreground arcs in full by disabling distance fading during the second visual pass of an active conditional ``order`` encoding. Configure selected links with the higher order value to draw them unfaded above other links. Reversing the order values instead exempts the unselected links. Has no effect without active conditional ordering, including when all selections are empty. Picking always uses normal fading. __Default value:__ ``false``
             opacity (float | ExprRef | dict[str, Any]): Opacity of the mark. Affects ``fillOpacity`` or ``strokeOpacity``, depending on the ``filled`` property.
-            orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Only applies to diagonal links. **Default value:** ``"vertical"``
+            orient (Literal['vertical'] | Literal['horizontal'] | ExprRef | dict[str, Any]): The orientation of the link path. Either ``"vertical"`` or ``"horizontal"``. Applies to dome, diagonal, and orthogonal links. Orthogonal links place the elbow at the source position along the orientation axis: horizontal uses ``(x, y2)``; vertical uses ``(x2, y)``. With parent-to-child tree edges, the turn stays at the parent's merge height. **Default value:** ``"vertical"``
             segments (float | ExprRef | dict[str, Any]): The number of segments in the bézier curve. Affects the rendering quality and performance. Use a higher value for a smoother curve. **Default value:** ``101``
             size (float | ExprRef | dict[str, Any]): Stroke width of ``"link"`` and ``"rule"`` marks in pixels, the area of the bounding square of ``"point"`` mark, or the font size of ``"text"`` mark.
             style (str | Sequence[str]): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones.
@@ -9536,6 +11189,7 @@ class ConfigMethodMixin:
             "arcFadingDistance": arcFadingDistance,
             "arcHeightFactor": arcHeightFactor,
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clampApex": clampApex,
             "clip": clip,
             "color": color,
@@ -9571,6 +11225,7 @@ class ConfigMethodMixin:
         /,
         *,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -9600,6 +11255,7 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -9616,6 +11272,7 @@ class ConfigMethodMixin:
         """
         defined = {
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -9640,6 +11297,7 @@ class ConfigMethodMixin:
         *,
         angle: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -9702,6 +11360,7 @@ class ConfigMethodMixin:
         Args:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -9736,6 +11395,7 @@ class ConfigMethodMixin:
         defined = {
             "angle": angle,
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -9812,6 +11472,7 @@ class ConfigMethodMixin:
         /,
         *,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -9899,6 +11560,7 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cornerRadius (float | ExprRef | dict[str, Any]): Radius of the rounded corners. **Default value:** ``0``
@@ -9937,6 +11599,7 @@ class ConfigMethodMixin:
         """
         defined = {
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cornerRadius": cornerRadius,
@@ -9982,6 +11645,7 @@ class ConfigMethodMixin:
         /,
         *,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -10023,6 +11687,7 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -10046,6 +11711,7 @@ class ConfigMethodMixin:
         """
         defined = {
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -10098,6 +11764,17 @@ class ConfigMethodMixin:
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         index: dict[str, Any] | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
@@ -10150,6 +11827,8 @@ class ConfigMethodMixin:
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             index (dict[str, Any]): Defaults for GenomeSpy's ``index`` scales.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             locus (dict[str, Any]): Defaults for GenomeSpy's ``locus`` scales.
@@ -10186,6 +11865,8 @@ class ConfigMethodMixin:
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "index": index,
             "interpolate": interpolate,
             "locus": locus,
@@ -10228,6 +11909,7 @@ class ConfigMethodMixin:
         angle: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         baseline: Baseline_T | UndefinedType = Undefined,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -10308,6 +11990,7 @@ class ConfigMethodMixin:
             angle (float | ExprRef | dict[str, Any]): The rotation angle in degrees. **Default value:** ``0``
             baseline (Baseline_T): The vertical alignment of the text. One of ``"top"``, ``"middle"``, ``"bottom"``. **Default value:** ``"bottom"``
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -10351,6 +12034,7 @@ class ConfigMethodMixin:
             "angle": angle,
             "baseline": baseline,
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -10398,6 +12082,7 @@ class ConfigMethodMixin:
         /,
         *,
         buildIndex: bool | UndefinedType = Undefined,
+        clamp: bool | Literal["x"] | Literal["y"] | UndefinedType = Undefined,
         clip: bool
         | Literal["x"]
         | Literal["y"]
@@ -10438,6 +12123,7 @@ class ConfigMethodMixin:
 
         Args:
             buildIndex (bool): Whether the x channel should build an index for efficient subset rendering. If omitted, GenomeSpy enables indexing automatically for positional x encodings.
+            clamp (bool | Literal['x'] | Literal['y']): Clamps projected anchors or range endpoints to the view before constructing mark geometry. ``true`` clamps both axes; ``"x"`` or ``"y"`` selects one axis. Position offsets are included. For rectangles, clamping keeps outlines around the visible part of a group during zooming. With ``clip: false``, full strokes remain visible at the boundary; symbols, arrowheads, and text glyphs can extend beyond it. Rectangles and explicit text ranges collapsed on a clamped axis are hidden. Rules and ticks intersect the selected bounds without changing direction; excluded or collapsed segments are hidden. Zero-length rules are hidden even when ``clamp`` is false. Links and arrows with coincident endpoints are hidden. Shared scales and their inversion are unchanged. __Default value:__ ``false``
             clip (bool | Literal['x'] | Literal['y'] | Literal['never']): Controls whether the mark is clipped to the UnitView's rectangle. The values ``"x"`` and ``"y"`` clip only in the corresponding screen-space direction. Inherited clipping from parent containers still applies unless ``"never"`` is used. __Default value:__ ``true`` when either positional scale is zoomable; otherwise ``false``
             color (str | ExprRef | dict[str, Any]): Color of the mark. Affects either ``fill`` or ``stroke``, depending on the ``filled`` property.
             cullByVisibleRange (bool | Literal['x'] | Literal['y']): Hide point-like mark instances whose anchor falls outside the inherited visible range in the given screen-space direction.
@@ -10460,6 +12146,7 @@ class ConfigMethodMixin:
         """
         defined = {
             "buildIndex": buildIndex,
+            "clamp": clamp,
             "clip": clip,
             "color": color,
             "cullByVisibleRange": cullByVisibleRange,
@@ -10582,7 +12269,7 @@ class ConfigMethodMixin:
         continuousWidth: float | UndefinedType = Undefined,
         discreteHeight: float | core.Step | StepKwds | UndefinedType = Undefined,
         discreteWidth: float | core.Step | StepKwds | UndefinedType = Undefined,
-        fill: str | UndefinedType = Undefined,
+        fill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         fillOpacity: float | UndefinedType = Undefined,
         shadowBlur: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         shadowColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -10599,7 +12286,7 @@ class ConfigMethodMixin:
         | dict[str, Any]
         | UndefinedType = Undefined,
         step: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-        stroke: str | UndefinedType = Undefined,
+        stroke: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         strokeOpacity: float | UndefinedType = Undefined,
         strokeWidth: float | UndefinedType = Undefined,
         strokeZindex: float | UndefinedType = Undefined,
@@ -10612,7 +12299,7 @@ class ConfigMethodMixin:
             continuousWidth (float): The default width when the view has a continuous x scale. __Default value:__ ``"container"``
             discreteHeight (float | Step | StepKwds): The default height when the view has a discrete y scale or no y scale. This may be a fixed height or a step size for each discrete domain value. __Default value:__ ``"container"``
             discreteWidth (float | Step | StepKwds): The default width when the view has a discrete x scale or no x scale. This may be a fixed width or a step size for each discrete domain value. __Default value:__ ``"container"``
-            fill (str): Fill color of the view background.
+            fill (str | ExprRef | dict[str, Any]): Fill color of the view background.
             fillOpacity (float): Opacity of the view background fill.
             shadowBlur (float | ExprRef | dict[str, Any]): The blur radius of the drop shadow in pixels. Higher values produce a more diffuse shadow. **Default value:** ``0``
             shadowColor (str | ExprRef | dict[str, Any]): The color of the drop shadow. Any valid CSS color string is allowed. **Default value:** ``"black"``
@@ -10620,7 +12307,7 @@ class ConfigMethodMixin:
             shadowOffsetY (float | ExprRef | dict[str, Any]): The vertical offset of the drop shadow in pixels. Positive values move the shadow downward. **Default value:** ``0``
             shadowOpacity (float | ExprRef | dict[str, Any]): The opacity of the drop shadow. Value between ``0`` (fully transparent) and ``1`` (fully opaque). **Default value:** ``0`` (disabled)
             step (float | ExprRef | dict[str, Any]): Default step size for discrete view sizes. __Default value:__ none
-            stroke (str): Stroke color of the view background.
+            stroke (str | ExprRef | dict[str, Any]): Stroke color of the view background.
             strokeOpacity (float): Opacity of the view background stroke.
             strokeWidth (float): Stroke width of the view background border.
             strokeZindex (float): Z-order of the stroke relative to the view content. Values greater than ``0`` render the stroke after the view marks. Values less than or equal to ``0`` render before the marks. The default value depends on the element type.
@@ -10651,6 +12338,37 @@ class ConfigMethodMixin:
 
 class TransformMethodMixin:
     """Schema-derived transform methods for top-level specifications."""
+
+    def transform_dendrogram(
+        self,
+        *,
+        height: Field_T,
+        key: Field_T,
+        leafIndex: Field_T,
+        parentKey: Field_T,
+        as_: Sequence[str] | UndefinedType = Undefined,
+        description: str | UndefinedType = Undefined,
+    ) -> Self:
+        """Add a ``dendrogram`` transform.
+
+        Args:
+            height (Field_T): Finite, nonnegative merge height, including leaf heights.
+            key (Field_T): Unique string or finite numeric node identifier.
+            leafIndex (Field_T): Integer row position for each leaf, matching the heatmap order. Indices must be distinct and in [0, 2^44); each subtree's leaves must be contiguous in the ordered leaf sequence. Internal nodes need no value in this field.
+            parentKey (Field_T): Parent node identifier. Exactly one root must contain null.
+            as\\_ (Sequence[str]): Output field names for source/target IDs, heights, integer anchors, and fractional offsets. Generated values overwrite copied child metadata. Names must be distinct and cannot use the reserved internal __uniqueId. __Default value:__ ["sourceId", "targetId", "sourceHeight", "targetHeight", "sourceIndex", "targetIndex", "sourceOffset", "targetOffset"]
+            description (str): A description of the transform step. Can be used for documentation and agent context.
+        """
+        transform: dict[str, Any] = {"type": "dendrogram"}
+        transform["height"] = height
+        transform["key"] = key
+        transform["leafIndex"] = leafIndex
+        transform["parentKey"] = parentKey
+        if as_ is not Undefined:
+            transform["as"] = as_
+        if description is not Undefined:
+            transform["description"] = description
+        return self._append_transform(transform)  # type: ignore[attr-defined, no-any-return]
 
     def transform_alignment_mismatches(
         self,
@@ -11828,12 +13546,14 @@ __all__ = [
     "ConcatPropertiesMixin",
     "ConfigMethodMixin",
     "EncodingMethodMixin",
+    "FacetPropertiesMixin",
     "HConcatPropertiesMixin",
     "ImportedViewConstructorMixin",
     "LayerPropertiesMixin",
     "MarkMethodMixin",
     "MultiscalePropertiesMixin",
     "ResolutionMethodMixin",
+    "SurroundPropertiesMixin",
     "TopLevelMergeMixin",
     "TransformMethodMixin",
     "UnitPropertiesMixin",

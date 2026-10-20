@@ -65,7 +65,7 @@ rail = (
         .legend(title="Cell type", orient="bottom", columns=2),
         tooltip=["cell:N", "cell_type:N"],
     )
-    .properties(width=14, height=560)
+    .properties(width=14)
 )
 tree = (
     gs.Chart(data["group_tree"])
@@ -78,13 +78,12 @@ tree = (
         y=gs.Y("cell:Q").axis(None),
         y2="cell_end:Q",
     )
-    .properties(width=75, height=560)
+    .properties(width=75)
 )
 chart = (
-    (
-        rail
-        | (tiles + boundaries).properties(height=560, width=gs.SizeDef(grow=1))
-        | tree
+    gs.surround(
+        (tiles + boundaries).properties(height=560, width=gs.SizeDef(grow=1)),
+        surround=gs.SurroundSides(left=[rail], right=[tree]),
     )
     .properties(
         scales=gs.scales(
@@ -99,7 +98,6 @@ chart = (
         ),
         title="PBMC marker expression in individual cells",
     )
-    .resolve_scale(x="independent", y="shared", color="independent")
     .resolve_legend(default="collected")
     .configure_legend(direction="horizontal", titleOrient="top", columnPadding=20)
 )

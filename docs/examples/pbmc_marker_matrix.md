@@ -5,6 +5,11 @@ value.
 Colored blocks above the genes identify their associated cell types. The tree
 at the right groups cell types with similar expression.
 
+`gs.surround()` aligns the marker-group header, row labels, count bars, and tree
+with the central matrix. The header uses the same gene bands as the matrix,
+including groups spanning multiple genes. Python loads prepared mean-expression,
+annotation, and tree-segment tables; GenomeSpy renders them in the browser.
+
 Explore individual cells in the [heatmap](pbmc_cell_heatmap.md) or
 [expression tracks](pbmc_expression_tracks.md).
 

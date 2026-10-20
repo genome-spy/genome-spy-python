@@ -4,6 +4,7 @@ Load a genomic window from an indexed BAM file and stack its reads by strand.
 """
 
 import genome_spy as gs
+from genome_spy.schema import ChromosomalLocus
 
 META = {"category": "Read alignments and RNA splicing", "order": 25, "height": 520}
 
@@ -58,8 +59,8 @@ chart = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr21", "pos": 33037317},
-                    {"chrom": "chr21", "pos": 33039137},
+                    ChromosomalLocus(chrom="chr21", pos=33037317),
+                    ChromosomalLocus(chrom="chr21", pos=33039137),
                 ]
             )
         ),

@@ -410,7 +410,7 @@ chart = (
         titleOrient="top",
         labelFontSize=10,
         symbolSize=65,
-        layout={"right": {"anchor": "end"}},
+        layout=gs.LegendLayout(right=gs.LegendRegionLayout(anchor="end")),
     )
     .properties(
         title=f"Altered in {data['altered_samples']} ({100 * data['altered_samples'] / len(data['samples']):.1f}%) of {len(data['samples'])} samples",

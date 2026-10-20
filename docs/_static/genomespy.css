@@ -432,11 +432,23 @@ p.lead {
 /* ---------- Live documentation embeds ---------- */
 /* Render gallery and prose charts inline at the full available width. */
 .gs-doc-embed {
+  color-scheme: light;
   display: block;
   width: 100%;
   height: 400px;
   margin-inline: auto;
   margin: 1.25rem 0 0.5rem;
+}
+
+/* Match Furo's selected theme instead of the operating system's preference. */
+body[data-theme="dark"] .gs-doc-embed {
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) .gs-doc-embed {
+    color-scheme: dark;
+  }
 }
 
 .gs-embed-actions {

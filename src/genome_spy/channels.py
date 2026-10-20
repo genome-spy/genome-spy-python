@@ -21,6 +21,7 @@ from genome_spy.schema.ergonomics import (
 from genome_spy.schemapi import (
     SchemaBase,
     Undefined,
+    UndefinedType,
     merge_mapping_value,
     normalize_schema_value,
 )
@@ -138,14 +139,16 @@ class ValueChannel(ValueChannelMethodMixin, Channel):
 
 
 def channel(
-    value: Channel | SchemaBase | str | dict[str, Any],
+    value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = Undefined,
     /,
     *,
     encoding_name: str | None = None,
     **kwargs: Any,
 ) -> Channel:
     """Create a generic channel definition from shorthand or a raw mapping."""
-    if isinstance(value, Channel):
+    if value is Undefined:
+        definition = {}
+    elif isinstance(value, Channel):
         definition = value.to_dict()
         encoding_name = encoding_name or value.encoding_name
     elif isinstance(value, SchemaBase):

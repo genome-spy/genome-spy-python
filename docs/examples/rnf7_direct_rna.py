@@ -30,7 +30,7 @@ lane_height = gs.param(
     "laneHeight",
     value=6,
     bind=gs.binding_range(min=3, max=14, step=1, name="Read row height: "),
-    transition={"type": "lerp", "halfLife": 30, "epsilon": 0.02},
+    transition=gs.LerpTransition(type="lerp", halfLife=30, epsilon=0.02),
 )
 
 # The whole-pileup overview controls the shared detail window.

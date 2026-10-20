@@ -7,6 +7,7 @@ are drawn as locus spans and colored by their annotation class.
 from __future__ import annotations
 
 import genome_spy as gs
+from genome_spy.schema import ChromosomalLocus
 
 META = {
     "category": "Genome annotations",
@@ -41,8 +42,8 @@ chart = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr7", "pos": 66600000},
-                    {"chrom": "chr7", "pos": 66800000},
+                    ChromosomalLocus(chrom="chr7", pos=66600000),
+                    ChromosomalLocus(chrom="chr7", pos=66800000),
                 ]
             )
         ),

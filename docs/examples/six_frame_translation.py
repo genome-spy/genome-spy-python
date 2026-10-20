@@ -5,6 +5,7 @@ on both strands and kept aligned with a base-level reference track.
 """
 
 import genome_spy as gs
+from genome_spy.schema import ChromosomalLocus
 
 META = {
     "category": "Sequences, alignments, and logos",
@@ -192,7 +193,7 @@ translation_template = (
         ),
         as_="codon",
     )
-    .transform_lookup(from_={"name": "geneticCode"}, key="codon", default="?")
+    .transform_lookup(from_=gs.Data(name="geneticCode"), key="codon", default="?")
     .transform_formula(expr=strand + " " + (gs.datum.pos % 3), as_="lane")
 )
 
@@ -234,7 +235,7 @@ translation = (
     )
     .transform_formula(expr=gs.expr.upper(gs.datum.base), as_="base")
     .transform_lookup(
-        from_={"name": "nucleotideComplements"},
+        from_=gs.Data(name="nucleotideComplements"),
         key="base",
         values=["complement"],
         default="N",
@@ -266,8 +267,8 @@ chart = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr7", "pos": 20395929},
-                    {"chrom": "chr7", "pos": 20395976},
+                    ChromosomalLocus(chrom="chr7", pos=20395929),
+                    ChromosomalLocus(chrom="chr7", pos=20395976),
                 ]
             )
         ),

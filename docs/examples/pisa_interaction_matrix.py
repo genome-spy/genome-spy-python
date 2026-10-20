@@ -13,7 +13,9 @@ META = {
     "max_width": 980,
 }
 DATA = "https://data.genomespy.app/datasets/bpreveal-pisa/v3/"
-tracks = gs.Data(url=DATA + "fig2cd-atac-tracks.parquet", format={"type": "parquet"})
+tracks = gs.Data(
+    url=DATA + "fig2cd-atac-tracks.parquet", format=gs.data_format(type="parquet")
+)
 INPUT_DOMAIN = [15646649, 15647250]
 OUTPUT_DOMAIN = [15646499, 15647400]
 
@@ -54,7 +56,7 @@ show_labels = gs.param(
 ruler_opacity = gs.param(
     "rulerOpacity",
     expr=gs.expr.if_(show_labels, 0, 0.3),
-    transition={"type": "lerp", "halfLife": 100, "epsilon": 0.01},
+    transition=gs.LerpTransition(type="lerp", halfLife=100, epsilon=0.01),
 )
 cursor = gs.ruler(
     "matrixCursor",
@@ -194,6 +196,7 @@ motif_blocks = (
             gs.Tooltip("score").title("Score"),
         ],
     )
+    .properties(name="Motif intervals")
 )
 motif_labels = (
     gs.Chart()
@@ -204,6 +207,7 @@ motif_labels = (
         tooltip=None,
     )
     .encode(text="motifLabel", color=gs.value("black"))
+    .properties(name="Motif labels")
 )
 motifs = (
     (motif_blocks + motif_labels)
@@ -211,7 +215,7 @@ motifs = (
         name="motifs",
         data=gs.Data(
             url=DATA + "fig2cd-atac-motifs.parquet",
-            format={"type": "parquet"},
+            format=gs.data_format(type="parquet"),
         ),
     )
     .transform_calculate(
@@ -235,7 +239,7 @@ matrix = (
         view=gs.view(stroke="gray"),
         data=gs.Data(
             url=DATA + "fig2d-atac-matrix.parquet",
-            format={"type": "parquet"},
+            format=gs.data_format(type="parquet"),
         ),
     )
     .add_params(
@@ -276,11 +280,14 @@ accessibility = (
             dx=5,
         ),
     )
-    .properties(resolve={"scale": {"x": "excluded"}})
 )
 
 # The bottom margin shares genomic x; zooming changes bars into sequence letters.
-bars = gs.Chart().mark_rect(color="#332288", minOpacity=1)
+bars = (
+    gs.Chart()
+    .mark_rect(color="#332288", minOpacity=1)
+    .properties(name="Contribution bars")
+)
 logo = (
     gs.Chart()
     .mark_text(
@@ -303,21 +310,21 @@ logo = (
         )
         .legend(None),
     )
+    .properties(name="Contribution sequence logo")
 )
 contribution = (
     gs.multiscale(
         bars,
         logo,
-        stops={
-            "channel": "x",
-            "values": [0.15],
-            "transition": {"type": "lerp", "halfLife": 60},
-        },
+        stops=gs.MultiscaleStops(
+            channel="x",
+            values=[0.15],
+            transition=gs.LerpTransition(type="lerp", halfLife=60),
+        ),
     )
     .properties(
         name="importance",
         data=tracks,
-        width={"grow": 1},
         height=60,
         title=gs.Title(text="Contribution score", style="overlay-title", dx=5),
     )
@@ -332,23 +339,26 @@ contribution = (
             gs.Tooltip("value").title("Contribution").format(".4g"),
         ],
     )
-    .resolve_scale(y="excluded")
 )
 
-# A three-cell grid aligns both margins with the matrix without a dummy panel.
+# Surround shares each margin's positional axis with the central matrix.
 chart = (
-    gs.concat(matrix, accessibility, contribution, columns=2, spacing=2)
+    gs.surround(
+        matrix,
+        surround=gs.SurroundSides(right=[accessibility], bottom=[contribution]),
+        spacing=2,
+    )
     .properties(
         scales=gs.scales(
             x=gs.Scale(type="index", domain=INPUT_DOMAIN),
             y=gs.Scale(type="index", domain=OUTPUT_DOMAIN, reverse=True),
         )
     )
-    .resolve_scale(x="shared", y="shared", color="independent")
-    .resolve_axis(x="independent", y="independent")
     .resolve_legend(color="collected")
     .configure_axis(domain=False, grid=False, labelFontSize=10, titleFontSize=10)
-    .configure_legend(layout={"left": {"anchor": "middle", "wrap": False}})
+    .configure_legend(
+        layout=gs.LegendLayout(left=gs.LegendRegionLayout(anchor="middle", wrap=False))
+    )
     .configure_legend_track(style=None)
     .configure_title(fontSize=12, fontWeight="normal", offset=2)
 )

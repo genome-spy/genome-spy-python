@@ -66,7 +66,7 @@ tmb_limit = data["tmb_limit"]
 count_limit = data["count_limit"]
 sample_domain = data["sample_domain"]
 gene_order = data["genes"].sort_values("gene_order")["gene"].tolist()
-gene_scale = {"domain": gene_order, "reverse": True, "padding": 0.08}
+gene_scale = gs.Scale(domain=gene_order, reverse=True, padding=0.08)
 
 mutation_legend = (
     Legend()
@@ -122,7 +122,7 @@ matrix_panel = (
     .properties(
         width=matrix_width,
         height=matrix_height,
-        scales={"y": gene_scale},
+        scales=gs.scales(y=gene_scale),
     )
     .add_params(sample_ruler)
 )
@@ -136,7 +136,9 @@ percent_panel = (
         y=gs.Y("gene:N").axis(None).title(None),
         text=gs.Text("label:N"),
     )
-    .properties(width=percent_width, height=matrix_height, scales={"y": gene_scale})
+    .properties(
+        width=percent_width, height=matrix_height, scales=gs.scales(y=gene_scale)
+    )
 )
 
 # Leave space above the percentages to line them up with the matrix rows.
@@ -184,21 +186,21 @@ count_grid = (
 )
 
 counts_panel = (count_grid + count_bars).properties(
-    width=counts_width, height=matrix_height, scales={"y": gene_scale}
+    width=counts_width, height=matrix_height, scales=gs.scales(y=gene_scale)
 )
 
 # Keep the top bars and matrix columns aligned while zooming through samples.
 sample_column = (
     gs.concat(tmb, matrix_panel, columns=1, spacing=4)
     .properties(
-        scales={
-            "x": {
-                "domain": sample_domain,
-                "paddingInner": 0,
-                "paddingOuter": 0,
-                "zoom": True,
-            }
-        }
+        scales=gs.scales(
+            x=gs.Scale(
+                domain=sample_domain,
+                paddingInner=0,
+                paddingOuter=0,
+                zoom=True,
+            )
+        )
     )
     .resolve_scale(x="shared", y="independent")
 )

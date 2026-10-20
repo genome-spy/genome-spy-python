@@ -5,6 +5,7 @@ copy-number segments for the highly rearranged HCC1954 breast-cancer cell line.
 """
 
 import genome_spy as gs
+from genome_spy.schema import ChromosomalLocus
 
 META = {
     "category": "Copy-number plots",
@@ -168,7 +169,7 @@ sv_track = (
         as_="_lookup_mate_id",
     )
     .transform_lookup(
-        from_={"source": "input"},
+        from_=gs.LookupSelfInput(source="input"),
         fields="_lookup_mate_id",
         key="ID[0]",
         values=["CHROM", "POS", "_source_order"],
@@ -237,8 +238,8 @@ chart = (
         scales=gs.scales(
             x=gs.Scale(
                 domain=[
-                    {"chrom": "chr21", "pos": 4708647},
-                    {"chrom": "chr22", "pos": 43863053},
+                    ChromosomalLocus(chrom="chr21", pos=4708647),
+                    ChromosomalLocus(chrom="chr22", pos=43863053),
                 ]
             )
         ),

@@ -9,6 +9,7 @@ import pytest
 from tools.generate_schema_wrapper import (
     TRANSFORM_METHOD_OVERRIDES,
     interaction_helper_names,
+    write_public_channel_exports,
     write_public_interaction_exports,
     write_schema_files,
     write_schema_package,
@@ -1150,13 +1151,14 @@ def test_resolution_methods_follow_referenced_resolution_maps() -> None:
     assert "ResolutionBehavior_T" in source
 
 
-def test_inline_projection_setter_is_derived_from_schema() -> None:
+@pytest.mark.parametrize("property_name", ["project", "futureInlineOptions"])
+def test_inline_object_setters_are_derived_from_schema(property_name: str) -> None:
     schema = {
         "definitions": {
             "Predicate": {
                 "type": "object",
                 "properties": {
-                    "project": {
+                    property_name: {
                         "type": "object",
                         "properties": {"x": {"enum": ["x", "x2"]}},
                     }
@@ -1168,8 +1170,8 @@ def test_inline_projection_setter_is_derived_from_schema() -> None:
         SchemaWrapperGenerator(schema).generate_core_module().source.replace("'", '"')
     )
     assert 'x: Literal["x", "x2"] | UndefinedType = Undefined' in source
-    assert 'self._with_property("project", value, **defined)' in source
-    schema["definitions"]["Predicate"]["properties"]["project"]["properties"] = {
+    assert f'self._with_property("{property_name}", value, **defined)' in source
+    schema["definitions"]["Predicate"]["properties"][property_name]["properties"] = {
         "y": {"enum": ["y", "y2"]}
     }
     source = (
@@ -1177,3 +1179,45 @@ def test_inline_projection_setter_is_derived_from_schema() -> None:
     )
     assert 'y: Literal["y", "y2"] | UndefinedType = Undefined' in source
     assert 'x: Literal["x", "x2"]' not in source
+
+
+def test_future_channels_are_added_to_public_exports(tmp_path: Path) -> None:
+    for filename in ("api.py", "__init__.py"):
+        (tmp_path / filename).write_text(
+            "# BEGIN GENERATED CHANNEL IMPORTS\n# END GENERATED CHANNEL IMPORTS\n"
+            "__all__ = [\n    # BEGIN GENERATED CHANNEL EXPORTS\n"
+            "    # END GENERATED CHANNEL EXPORTS\n]\n",
+            encoding="utf-8",
+        )
+    write_public_channel_exports(tmp_path, ("X", "FutureChannel"))
+    for filename in ("api.py", "__init__.py"):
+        source = (tmp_path / filename).read_text(encoding="utf-8")
+        assert "    FutureChannel," in source
+        assert '    "FutureChannel",' in source
+        compile(source, filename, "exec")
+
+
+def test_capabilities_do_not_silently_drop_future_root_variants() -> None:
+    schema = {
+        "definitions": {
+            "CoreRootSpec": {
+                "anyOf": [
+                    {"required": ["futureComposition", "spec"]},
+                ]
+            }
+        }
+    }
+    manifest = SchemaWrapperGenerator(schema).capability_manifest()
+    assert manifest["root_spec_variants"] == ["futureComposition"]
+
+
+def test_forbidden_properties_are_omitted_without_hiding_other_union_branches() -> None:
+    analyzer = SchemaAnalyzer({})
+    allowed = {"properties": {"width": {"type": "number"}}}
+    forbidden = {"properties": {"width": {"not": {}}}}
+    assert analyzer.property_specs_from_properties(forbidden["properties"]) == ()
+    variants = analyzer.resolve_properties({"anyOf": [allowed, forbidden]})
+    specs = analyzer.property_specs_from_properties(variants)
+    assert len(specs) == 1
+    assert specs[0].name == "width"
+    assert specs[0].annotation.annotation == "float"
