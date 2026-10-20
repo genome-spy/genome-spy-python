@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-20. This is the current progress ledger; [PLAN.md](PLAN.md)
+Updated: 2026-10-21. This is the current progress ledger; [PLAN.md](PLAN.md)
 describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
@@ -238,7 +238,7 @@ local notebooks are unchanged.
 
 ## M14.b.1 native heatmap tracks and gaps
 
-Closed for the heatmap migration. The [chart](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py)
+Closed for the heatmap migration in `4422f8a`. The [chart](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py)
 uses `gs.surround`: tiles/fitted values own the center, while bands, labels,
 brackets and tree branches have their own clipped side views. Shared authoritative
 index scales own the final domains, navigation and gaps. Cell-group cuts use final
