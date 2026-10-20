@@ -78,14 +78,14 @@ def test_matrix_aligns_margin_tracks_and_limits_label_materialization() -> None:
         {"type": "collect"},
         {
             "type": "filter",
-            "expr": "showCellLabels && datum.input >= labelXStart && datum.input < labelXEnd && datum.output >= labelYStart && datum.output < labelYEnd",
+            "expr": "((((showCellLabels && (datum.input >= labelXStart)) && (datum.input < labelXEnd)) && (datum.output >= labelYStart)) && (datum.output < labelYEnd))",
         },
     ]
     assert labels["encoding"]["text"]["format"] == ".2f"
     assert {p["name"]: p["expr"] for p in labels["params"]} == {
         f"label{axis}{edge}": (
-            f"showCellLabels ? {rounding}({extreme}(domain('{axis.lower()}')[0], "
-            f"domain('{axis.lower()}')[1]) / label{axis}BinSize) * label{axis}BinSize : null"
+            f"if(showCellLabels,({rounding}(({extreme}(domain('{axis.lower()}')[0],"
+            f"domain('{axis.lower()}')[1]) / label{axis}BinSize)) * label{axis}BinSize),null)"
         )
         for axis in ("X", "Y")
         for edge, rounding, extreme in (

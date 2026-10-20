@@ -14,6 +14,8 @@ META = {
     "max_width": 1100,
 }
 DATA = "https://data.genomespy.app/datasets/depmap-cell-line-rna-seq/v1/"
+view_width = gs.Expression("width")
+view_height = gs.Expression("height")
 cell_lines = gs.Data(
     url=DATA + "cell-lines.csv", format=gs.data_format(parse={"row": "number"})
 )
@@ -35,7 +37,11 @@ column_tree = (
         x=gs.X("sourceIndex:I", band=0.5).axis(None),
         x2=gs.X2("targetIndex", band=0.5),
         xOffset=gs.XOffset("sourceOffset:Q").scale(
-            domain=[0, 1], range=[0, gs.expr("width * bandstep('x', width)")]
+            domain=[0, 1],
+            range=[
+                0,
+                gs.expr(view_width * gs.expr.bandstep("x", view_width)),
+            ],
         ),
         x2Offset=gs.X2Offset(field="targetOffset"),
         y=gs.Y("sourceHeight:Q")
@@ -93,7 +99,11 @@ row_tree = (
         y=gs.Y("sourceIndex:I", band=0.5).axis(None),
         y2=gs.Y2("targetIndex", band=0.5),
         yOffset=gs.YOffset("sourceOffset:Q").scale(
-            domain=[0, 1], range=[0, gs.expr("-height * bandstep('y', height)")]
+            domain=[0, 1],
+            range=[
+                0,
+                gs.expr(-view_height * gs.expr.bandstep("y", view_height)),
+            ],
         ),
         y2Offset=gs.Y2Offset(field="targetOffset"),
         color=gs.Color("cluster:N")
@@ -259,7 +269,7 @@ cells = (
         values=["column", "symbol", "entrezId", "cluster", "meanLog2Tpm", "sdLog2Tpm"],
     )
     .transform_formula(
-        expr="datum.value * datum.sdLog2Tpm + datum.meanLog2Tpm", as_="log2Tpm"
+        expr=gs.datum.value * gs.datum.sdLog2Tpm + gs.datum.meanLog2Tpm, as_="log2Tpm"
     )
     .add_params(hovered)
     .mark_rect(stroke="#0f172a")
