@@ -284,15 +284,16 @@ def test_pbmc_tree_shares_the_plotted_group_or_cell_axis(name: str) -> None:
         assert tree["encoding"]["x"]["type"] == "quantitative"
         assert tree["height"] == 65
     else:
-        column = spec["hconcat"][-1]
-        tree = column["vconcat"][-1] if name == "pbmc_marker_matrix" else column
-        assert spec["resolve"]["scale"]["y"] == "shared"
+        tree = spec["surround"]["right"][0]
+        assert "hconcat" not in spec
+        assert tree["width"] == 75
+        assert "height" not in tree
         assert tree["encoding"]["y"]["field"] == (
             "row" if name == "pbmc_marker_matrix" else "cell"
         )
         assert tree["encoding"]["y"]["type"] == "quantitative"
         if name == "pbmc_marker_matrix":
-            scale = tree["encoding"]["y"]["scale"]
+            scale = spec["scales"]["y"]
             assert scale.get("type", "linear") == "linear"
             assert scale["domain"] == [-0.5, 7.5]
             assert scale["nice"] is False and scale["zero"] is False
@@ -332,8 +333,22 @@ def test_pbmc_matrix_annotations_cover_each_marker_and_align_row_intervals() -> 
     spec = (
         import_module("docs.examples.pbmc_marker_matrix").chart._prepare_render().spec
     )
-    header, matrix = spec["hconcat"][2]["vconcat"]
-    assert header["resolve"]["scale"]["y"] == "excluded"
+    header = spec["surround"]["top"][0]
+    matrix = spec["spec"]
+    blocks = header["layer"][0]
+    assert (
+        blocks["encoding"]["x"]["field"] == matrix["encoding"]["x"]["field"] == "gene"
+    )
+    assert blocks["encoding"]["x"]["scale"] == matrix["encoding"]["x"]["scale"]
+    single_labels, labels = header["layer"][1:]
+    assert "x2" not in single_labels["encoding"]
+    assert labels["encoding"]["x"] == {
+        "field": "start_gene",
+        "type": "ordinal",
+        "axis": None,
+    }
+    assert labels["encoding"]["x2"] == {"field": "end_gene"}
+    assert len(spec["surround"]["left"]) == 2
     assert header["layer"][1]["encoding"]["text"]["field"] == "cell_type"
     assert matrix["encoding"]["y"]["field"] == "row_start"
     assert matrix["encoding"]["y2"]["field"] == "row_end"

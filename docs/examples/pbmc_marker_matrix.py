@@ -17,16 +17,10 @@ data = load_data(
     "pbmc_markers", ("groups", "markers", "means", "group_tree", "marker_groups")
 )
 genes = data["markers"]["gene"].tolist()
-row_y = (
-    gs.Y("group_order:Q")
-    .scale(
-        domain=data["group_domain"], reverse=True, nice=False, zero=False, zoom=False
-    )
-    .axis(None)
-)
+row_y = gs.Y("group_order:Q").axis(None)
 gene_x = (
     gs.X("gene:O")
-    .scale(domain=genes, padding=0, zoom=False)
+    .scale(type="band", domain=genes, padding=0, zoom=False)
     .axis(
         title=None,
         orient="top",
@@ -61,7 +55,7 @@ labels = (
     gs.Chart(data["groups"])
     .mark_text(align="right", size=12)
     .encode(x=gs.value(1), y=row_y, text="cell_type:N")
-    .properties(width=155, height=320)
+    .properties(width=155)
 )
 counts = (
     gs.Chart(data["groups"])
@@ -80,7 +74,7 @@ counts = (
         y2="row_end:Q",
         tooltip=["cell_type:N", "count:Q"],
     )
-    .properties(width=80, height=320)
+    .properties(width=80)
 )
 count_labels = (
     gs.Chart(data["groups"])
@@ -99,75 +93,67 @@ tree = (
         y=row_y.field("row"),
         y2="row_end:Q",
     )
-    .properties(width=75, height=320)
+    .properties(width=75)
 )
 colors = gs.Scale(
     domain=data["groups"]["cell_type"].tolist(),
     range=data["groups"]["color"].tolist(),
 )
-header_x = (
-    gs.X("start:Q")
-    .scale(domain=data["marker_domain"], nice=False, zero=False, zoom=False)
-    .axis(None)
-)
 # Marker-group blocks span all genes associated with that cell type.
 marker_blocks = (
-    gs.Chart(data["marker_groups"])
-    .mark_rect(xOffset=1, x2Offset=-1)
+    gs.Chart(data["markers"])
+    .mark_rect()
     .encode(
-        x=header_x,
-        x2="end:Q",
+        x=gene_x.axis(None),
         color=gs.Color("cell_type:N").scale(colors).legend(None),
         tooltip="cell_type:N",
     )
 )
 marker_labels = (
     gs.Chart(data["marker_groups"])
-    .mark_text(angle=-90, size=10.5, color="white", squeeze=False, tooltip=None)
+    .mark_text(angle=-90, size=10.5, squeeze=False, tooltip=None)
     .encode(
-        x=header_x.field("center"),
+        x=gs.X("start_gene:O").axis(None),
         y=gs.value(0.5),
         text="cell_type:N",
+        color=gs.Color("label_color:N")
+        .scale(domain=["white", "#173238"], range=["white", "#173238"])
+        .legend(None),
     )
 )
 marker_header = (
     (
         marker_blocks
-        + marker_labels.transform_filter(gs.datum.label_color == "white")
-        + marker_labels.mark_text(
-            angle=-90, size=10.5, color="#173238", squeeze=False, tooltip=None
-        ).transform_filter(gs.datum.label_color == "#173238")
+        + marker_labels.transform_filter(gs.datum.start_gene == gs.datum.end_gene)
+        + marker_labels.encode(x2="end_gene").transform_filter(
+            gs.datum.start_gene != gs.datum.end_gene
+        )
     )
     .properties(height=120)
-    .resolve_scale(x="excluded", y="excluded", color="excluded")
+    .resolve_scale(color="independent")
 )
-# The matrix's top gene axis occupies 40 px below the colored header.
-spacer = (
-    gs.layer(gs.Chart([{}]).mark_point(opacity=0, tooltip=None))
-    .properties(height=160)
-    .resolve_scale(y="excluded")
-)
-expression_column = (
-    (marker_header & matrix)
-    .properties(width=gs.SizeDef(grow=1))
-    .resolve_scale(x="shared")
-)
-label_column = (spacer & labels).properties(width=155).resolve_scale(x="independent")
-count_column = (
-    (spacer & (counts + count_labels).properties(width=80, height=320))
-    .properties(width=80)
-    .resolve_scale(x="independent")
-)
-tree_column = (spacer & tree).properties(width=75).resolve_scale(x="independent")
+# Surround aligns annotations directly, including the top gene axis's extent.
 chart = (
-    gs.hconcat(
-        label_column,
-        count_column,
-        expression_column,
-        tree_column,
+    gs.surround(
+        matrix,
+        surround=gs.SurroundSides(
+            top=[marker_header],
+            left=[labels, (counts + count_labels).properties(width=80)],
+            right=[tree],
+        ),
         spacing=12,
     )
-    .resolve_scale(x="independent", y="shared", color="independent")
+    .properties(
+        scales=gs.scales(
+            y=gs.Scale(
+                domain=data["group_domain"],
+                reverse=True,
+                nice=False,
+                zero=False,
+                zoom=False,
+            )
+        )
+    )
     .resolve_legend(default="collected")
     .configure_legend(direction="horizontal", titleOrient="top")
     .properties(title="PBMC marker expression by cell type")
