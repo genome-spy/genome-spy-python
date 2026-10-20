@@ -12,6 +12,12 @@ panels for stored PCA results.
 `gsc.pl.pca_overview(...)` composes these diagnostics with the existing PCA scatter.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
+When resuming work in another chat, read [the current queue](STATUS.md#current-work-queue)
+and inspect recent commits and uncommitted changes first. STATUS owns the active
+slice, completed increments and remaining gates; PLAN owns scope and acceptance.
+Preserve work already in progress instead of restarting it from an older chat
+summary. The source map below describes the working checkout, not release readiness.
+
 The implementation lives in the installable [source package](../../src/genome_spy/integrations/scanpy/),
 not in this workspace or the documentation:
 

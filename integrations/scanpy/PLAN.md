@@ -6,6 +6,9 @@ exist. Read [STATUS.md](STATUS.md) for implemented behavior, the next slice,
 blockers, the 50-entry inventory, validation evidence, and clearance decisions.
 Its [current queue](STATUS.md#current-work-queue) is the sole next-work list;
 this plan defines deliverables and acceptance criteria.
+When multiple chats share the checkout, reconcile the current queue with recent
+commits and uncommitted work before starting another slice. Record completion
+and verification in STATUS rather than adding a second queue here.
 The [shared lifecycle](../README.md#plan-lifecycle) defines milestone states and
 when working plans can be cleared. Update the status ledger with each slice.
 
@@ -532,16 +535,17 @@ commit evidence and unmet verification gates live in the
   never filter genes or run PCA silently. Complete resource gates for the composed
   workload before closing the overview increment.
   The pca_scatter alias belongs to M07.a's existing signature/identity evidence.
-- M07.d: complete 2D options currently rejected by UMAP: graph/arrow overlays,
-  scale factor, supported marker/style forms, outlines, colorbar positions,
+- M07.d: complete the remaining 2D options rejected by UMAP: graph/arrow overlays,
+  scale factor, supported marker/style forms, outlines,
   numeric normalization/center/callable bounds and missing-category schemes.
   Recheck native primitives and add focused tests per option; do not sample
   Matplotlib colors or accept its normalization objects.
-  The continuous-colorbar increment preserves `colorbar_loc=None`/`"right"`
-  and adds `"left"`, `"top"`, `"bottom"` through native guide orientation. Verify
-  categorical guides, multi-panel bounds, collected/native configuration overrides,
-  hover/zoom and unchanged transported records. It does not alter scatter's
-  distinct signature or resolve C11's categorical multi-column extent bug.
+  The colorbar-placement contract covers `colorbar_loc=None` and all four sides
+  through native guide orientation, preserving categorical guides, multi-panel
+  bounds, collected/native configuration overrides, hover/zoom and transported
+  records. Its [completed increment](STATUS.md#m07d-native-colorbar-placement)
+  does not alter scatter's distinct signature or resolve C11's categorical
+  multi-column extent bug.
 
 Targets: `gsc.pl.embedding(adata, basis="tsne", color="cell_type", show=False)`
 and `gsc.pl.pca_overview(adata, show=False)` after explicit Scanpy PCA.
