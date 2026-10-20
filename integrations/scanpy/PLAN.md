@@ -424,13 +424,18 @@ Larger transport remains M05.d; stored ranking and ranked summaries belong to M0
   Run the packaged-PBMC expression notebook and record
   a realistic allocation/payload/browser observation. Keep native API limitations
   and remaining large-data transport debt explicit.
-- M05.f (blocked on a released Core fix): enable native category-strip tooltips
-  in heatmap and clustermap through the existing `hover` option. Core 1.0.0
-  rejects visible outside-plot hits; [PR #587](https://github.com/genome-spy/genome-spy/pull/587)
-  fixes the picking policy upstream. After adopting the release in M14, observe
-  both heatmap orientations and clustermap before/after navigation; remove the
-  precise expected failures and known-limit notice. Keep tile hover working,
-  preserve strip geometry, and do not patch the integration bundle or add listeners.
+- M05.f (awaiting released layout adoption in M14.b): move heatmap and clustermap
+  category bands into their own aligned track viewports, then verify native hover.
+  The current adapter draws these marks beyond the matrix viewport using offsets
+  or coordinates outside 0–1 with clip="never". That layout choice is adapter debt;
+  changing Core picking policy is not a prerequisite for an in-bounds heatmap.
+  [PR #587](https://github.com/genome-spy/genome-spy/pull/587) reproduces that
+  out-of-bounds interaction behavior, but is not a dependency of this slice.
+  After migrating, observe both heatmap orientations and clustermap before/after
+  zoom, pan and resize. Assert bands lie inside their own viewports, retained
+  category identity/palettes and native legends, and normal tile/strip hover.
+  Replace the current expected failures with passing checks and remove limit
+  notices only after observation. No patched bundle or custom hover listeners.
 
 Targets: `gsc.pl.heatmap(pbmc, markers, "louvain", dendrogram=True, show=False)`
 and `gsc.pl.matrix(values, xticks=genes, yticks=groups, show=False)`.
@@ -664,9 +669,27 @@ Python linkage/KDE/graph computation cannot supply a missing renderer primitive.
   images and 3D as required; review tree/axis alignment, typography, outlines,
   missing colors and numeric normalization individually. No local bundle patches.
   Real Core bugs need an upstream reproducer and observed evidence.
-- M14.b: adopt improved faceting after release. Isolate composition changes;
-  recheck axes/gap/plot zoom routing, guides, sizing, brush owner/scope, counts,
-  reruns/disposal and snapshots. Do not promise an unreleased API shape.
+- M14.b: adopt the released container layout and improved faceting through the
+  wrapper's normal runtime/schema-generation path. The merged
+  [container refactor #581](https://github.com/genome-spy/genome-spy/pull/581) and
+  upstream [surround design](https://github.com/genome-spy/genome-spy/blob/master/docs/grammar/composition/surround.md)
+  inform the migration; verify the actual release and the forthcoming published
+  heatmap examples before implementing against them. The current wrapper has no
+  surround authoring API; do not patch the bundle or bypass generated types.
+  First migrate heatmap/clustermap bands, labels and trees into native side tracks:
+  center tiles own the matrix, side tracks own their in-bounds marks, and native
+  aligned x/y scales own navigation/registration. Keep perpendicular track scales
+  independent and preserve native categorical/color legends. Then apply equivalent
+  layout changes to matrix, matrixplot, dotplot and correlation where needed.
+  Reuse existing Scanpy computation, selected-data preparation, identities, slots,
+  means, scaling and tree order. Remove offset/padding/projection helpers only
+  where native layout replaces them; fitted values and other shared interactions
+  retain their existing owners. Verify unchanged initial values/order/appearance,
+  both index axes, duplicate slots, unequal cell-group spans, tree alignment,
+  in-viewport strip hover, y-only/xy zoom, resize, guides and complete-chart
+  references. Facet/embedding changes also recheck axes/gap/plot zoom routing,
+  brush owner/scope, counts, reruns/disposal and snapshots. Keep these as focused
+  increments; do not promise an unreleased Python API shape.
 - M14.c: close backed/lazy selected-expression access, aliases/kwargs, supported
   marker/legend forms, return modes, tree fallback, save/export and every meaningful
   parameter limit. Maintain a per-family parameter/method matrix as each family

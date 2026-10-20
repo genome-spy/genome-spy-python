@@ -65,6 +65,11 @@ all slice gates or full-family compatibility are closed.
 increment.** PCA overview now reuses the three parent charts; its verification is
 recorded below. Required verification of existing previews remains open independently:
 
+The announced Core release also triggers M14.b's container-layout review. Adopt
+its released runtime/schema and published heatmap examples before implementing
+that migration. M05.f will use category bands inside their own track viewports;
+it no longer depends on merging/adopting the outside-picking change in #587.
+
 | Slice | Lifecycle state | Commit/evidence | Remaining work before Verified/Closed |
 | --- | --- | --- | --- |
 | M06.a–d stored ranking | Implemented | `2800f23`, `f043299`; [checks and observations](#m06ac-stored-ranking-preview) | Record resource evidence for the new rank-label renderer; document whether unchanged parent dot/matrix/heatmap resource workloads cover the ranked wrappers. Do not substitute the older parent run without that assessment. |
@@ -74,7 +79,8 @@ recorded below. Required verification of existing previews remains open independ
 | M07.c variance increment | Closed (bounded preview) | [Contract, tests and resources](#m07c-stored-pca-variance-ratios) | Broader storage/typography/export remain M14; this does not close the overview or M07. |
 | M07.c overview increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-pca-overview) | Parent storage, typography and export limits remain M14; broader embedding options remain M07.d. This does not close M07.a/b resource gates. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
-| M05.f category-strip hover | Blocked | C10; [Core adoption and recheck](#m05f-category-strip-tooltips--blocked-on-a-released-core-fix) | Adopt a released Core fix and pass the three expected-failure cases plus navigation/workflow checks. |
+| M14.b container layout migration | Planned; awaiting release/wrapper adoption and published examples | [Migration scope](PLAN.md#m14--compatibility-closure-and-released-capabilities); merged Core #581 and upstream surround design | Upgrade runtime/generated schema first, then use native side tracks for heatmap/clustermap; migrate related grids in focused increments. Preserve Python preparation and native guides/interactions. |
+| M05.f category-strip hover | Planned; depends on M14.b layout migration | C10; [current limit and corrected route](#m05f-category-strip-tooltips--layout-migration) | Place bands inside their own aligned track viewports and pass enabled-hover, geometry, navigation and workflow checks. Core #587 is not a prerequisite. |
 
 M07.d/M14 retain the explicitly unsupported options; dotplot brushing remains
 deferred pending review. **Clearance: retain; no working document is eligible for removal.**
@@ -93,7 +99,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
-| M05 heatmap/matrix/clustermap | In progress; bounded previews verified | Heatmap/matrix/clustermap and shared grid interactions have linked evidence below. M05.d is Planned; usable strip hover M05.f is Blocked on C10. Broader kwargs/delivery remain M14. |
+| M05 heatmap/matrix/clustermap | In progress; bounded previews verified | Heatmap/matrix/clustermap and shared grid interactions have linked evidence below. M05.d is Planned; strip hover M05.f awaits native track layout in M14.b. Broader kwargs/delivery remain M14. |
 | M06 ranking/ranked summaries | Implemented; resource verification pending | M06.a–d runtime, semantic/chart/workflow checks exist; gate 4 remains in the current queue. Compatibility limits remain M14; native builders remain M13. |
 | M07 embeddings/scatter/PCA | In progress | M07.a/b are Implemented with resource gates open; M07.c loadings/variance/overview previews are Closed and broader options are Planned. See the current queue for evidence and remaining gates. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
@@ -182,7 +188,26 @@ Local matrix zoom experiments were preserved, with the tracked workflow's zoom
 settings validated separately. Band shading remains limited by C09 below;
 no Core patch is used. No plan is eligible for clearance.
 
-## M05.f category-strip tooltips — blocked on a released Core fix
+## M05.f category-strip tooltips — layout migration
+
+Design correction (October 20): the current adapter deliberately places bands
+outside the matrix's own viewport. Heatmap uses negative pixel offsets;
+clustermap uses normalized positions below 0 or above 1. Both disable clipping
+and reserve padding. This kept annotations in the same layered chart and manually
+aligned them with navigation, but is not a requirement of heatmap rendering.
+It is an adapter layout shortcut, not evidence that Core must permit such hits.
+
+The intended route is M14.b: after adopting the released container layout/schema
+and reviewing the forthcoming official heatmap examples, use separate native
+track viewports with shared aligned index scales. Bands remain adjacent to the
+matrix and inside their own viewports. Native layout should own registration,
+spacing, clipping and guide placement; Python data/statistics/tree preparation
+remain reusable. Existing outside-hit failures stay visible until the migrated
+geometry and hover pass. #587 remains a separate picking-policy proposal and is
+not a heatmap integration dependency. Production charts are unchanged by this
+planning correction.
+
+Retained observations from the current overlay implementation:
 
 Heatmap and clustermap originally set `tooltip=None` on their annotation strips.
 They now configure the existing strips with GenomeSpy's default handler and the
@@ -193,7 +218,7 @@ Bundled Core 1.0.0 still rejects rendered hits outside ordinary plot bounds, so
 these strip tooltips are **not yet usable**. The independent native reproduction
 shows an identical rectangle working inside the plot and failing outside it with
 `clip="never"`. [Core PR #587](https://github.com/genome-spy/genome-spy/pull/587)
-contains the upstream fix, regression tests and required release note. Its
+contains the proposed picking change, regression tests and required release note. Its
 description embeds an observed before/after recording; recording assets and
 helpers are not committed. The fixed browser reproduction shows both tooltips.
 The integration bundle remains unchanged.
@@ -205,10 +230,10 @@ Core 1.0.0. The upstream fix passes 66 interaction/facet/identity tests, build,
 TypeScript, lint and Changesets checks. Python formatting/lint and mypy pass.
 The unrelated full Python suite and documentation build were not rerun.
 
-Clearance: retain. M14 owns adopting a released Core containing #587; then rerun
-the three strip cases before/after navigation, remove expected failures and the
-known-limit notices, and verify the PBMC notebook. This records a native
-capability blocker, not a completed hover feature.
+Clearance: retain. M14.b owns replacing the overlay layout; then rerun the three
+strip cases before/after navigation, remove expected failures and known-limit
+notices, and verify the PBMC notebook. The earlier outside-hit reproduction does
+not establish that changing Core's picking policy is the right heatmap design.
 
 ## M06.a–c stored ranking preview
 
@@ -1401,11 +1426,11 @@ an affected slice; upcoming releases are triggers to investigate, not assumption
 | C03 | No native 3D projection | 3D embedding options M07/M14 | Released capability or explicit product scope decision; keep unresolved until then |
 | C04 | No dedicated line/path mark in bundled mark inventory | Series/graph/path M11 | Verify native rule/link segments can preserve required semantics; otherwise upstream released capability |
 | C05 | Font/outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
-| C06 | Faceting/composition improvement announced, not adopted | UMAP and repeated panel layout | Released version/schema; recheck plot/gap/axis zoom and brush scope/count |
+| C06 | Container-layout/faceting upgrade pending; upstream surround design and merged #581 reviewed | Heatmap/clustermap side tracks, related grids, UMAP/repeated panels; M14.b | Adopt actual runtime/generated schema, review published heatmap examples, then verify native viewport/scale/guide ownership and existing chart/navigation/selection contracts |
 | C07 | Python linkage + native rule branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Shared geometry projects into equal summary slots or unequal cell-group centers; standalone/attached resize and registered path checks pass. M05.e verifies grouped and heatmap navigation; recheck later families. |
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots, both orientations, optional zoom and duplicate-slot highlighting verified; extend checks with later families |
 | C09 | Native band rulers fail during initial WebGL rendering with no cursor coordinate; center/line rulers render successfully | Optional shaded row/column guides | Use a native center crosshair now. Upstream [PR #586](https://github.com/genome-spy/genome-spy/pull/586) contains the fix, regression test and before/after recording. Adopt only after a released runtime upgrade; the bundled Core remains unchanged. |
-| C10 | Visible marks outside ordinary plot bounds cannot be picked in bundled Core 1.0.0 | Heatmap/clustermap category-strip hover M05.f | Native tooltip settings are prepared. Upstream [PR #587](https://github.com/genome-spy/genome-spy/pull/587) contains the fix, tests and before/after recording. Adopt a released fix in M14, rerun the three expected failures, and remove known-limit notices; no patched bundle or custom listeners. |
+| C10 | Adapter bands currently sit outside their own viewport; bundled Core rejects those hits | Heatmap/clustermap category-strip hover M05.f; layout debt owned by M14.b | Move bands into native aligned track viewports and verify geometry/hover after zoom/resize. [PR #587](https://github.com/genome-spy/genome-spy/pull/587) records a separate outside-picking proposal; its adoption is not required for an in-bounds heatmap. No patched bundle or custom listeners. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental

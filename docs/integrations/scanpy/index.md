@@ -454,10 +454,14 @@ tick labels reveal more names as slots grow. Defaults remain
 `zoom=False`, `show_values=False` and `highlight=False`.
 
 Category-strip tooltips use the native default handler and the same `hover` flag
-as tiles. They are currently blocked in bundled Core 1.0.0: visible marks outside
-plot bounds cannot be picked. [Core PR #587](https://github.com/genome-spy/genome-spy/pull/587)
-fixes this upstream; adoption requires a released Core upgrade. Tile tooltips work
-normally. There is no patched bundle or custom hover listener in the integration.
+as tiles. They do not currently work: the adapter draws the strips outside the
+matrix viewport with clipping disabled, and bundled Core 1.0.0 rejects those
+hits. The planned correction is native aligned side tracks, with each strip
+inside its own viewport, after the released layout/schema upgrade and review of
+the forthcoming official heatmap examples. Tile tooltips work normally.
+[Core PR #587](https://github.com/genome-spy/genome-spy/pull/587) investigates
+outside-plot picking separately; the heatmap migration does not depend on it.
+There is no patched bundle or custom hover listener in the integration.
 
 `show_values` uses native `fitToBand` text, shared tile records and the plotted
 value after any log transform/scaling. Values fade in as cells become large
