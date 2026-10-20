@@ -504,14 +504,25 @@ commit evidence and unmet verification gates live in the
   unavailable results fail by name. Reuse rank chart references, hover/HTML and
   a realistic multi-panel resource workload; add a packaged-data notebook example.
   A single component should render normally despite pinned Scanpy's indexing bug.
-  Next variance acceptance: `gsc.pl.pca_variance_ratio(pbmc, n_pcs=10, log=True,
+  Variance acceptance: `gsc.pl.pca_variance_ratio(pbmc, n_pcs=10, log=True,
   show=False)` reads `uns["pca"]["variance_ratio"]`. Preserve `n_pcs=30`,
   `log=False`, numbered PC labels, NumPy sorting/ties and top-only's extra label.
   Scanpy applies a natural logarithm to scores before ranking; it does not use a
-  logarithmic axis. Missing results and nonpositive log inputs need named errors,
+  logarithmic axis. Keep float32 log rounding before plotting conversion.
+  Missing results and nonpositive log inputs need named errors,
   with no PCA computation. Test stored ordering, truncation, bounds, public
   delivery, references, hover/HTML, resources and the notebook. Overview follows
   both diagnostics.
+  Overview acceptance: `gsc.pl.pca_overview(pca_genes, color="louvain", show=False)`
+  reuses `pca`, `pca_loadings` and `pca_variance_ratio` with their existing defaults.
+  Scanpy opens the three plots in that order; compose the native results vertically
+  and display once. Forward supported PCA plotting kwargs only to the embedding,
+  keeping loadings/variance defaults; reject unsupported kwargs before any output.
+  Test parent-chart equivalence, supplied coordinates/results, native scale/guide
+  independence, nested data/configuration, show/save, hover and notebook/HTML
+  delivery. Missing or nonfinite inputs retain each parent's explicit errors;
+  never filter genes or run PCA silently. Complete resource gates for the composed
+  workload before closing the overview increment.
   The pca_scatter alias belongs to M07.a's existing signature/identity evidence.
 - M07.d: complete 2D options currently rejected by UMAP: graph/arrow overlays,
   scale factor, supported marker/style forms, outlines, colorbar positions,

@@ -386,7 +386,8 @@ def attribute_rank_panels(
     if log:
         if (scores <= 0).any():
             raise ValueError(f"{context}: log scores must be positive.")
-        scores = np.log(scores)
+        # Scanpy logs the original dtype before converting plotting values.
+        scores = numeric_values(np.log(values), context=context)
     if labels is None:
         labels = (
             adata.var_names

@@ -22,7 +22,8 @@ maps, saved graph layouts, PCA and custom bases), cell/gene scatter plots, dotpl
 supplied numeric matrices, clustermaps, standalone dendrograms and correlation matrix development previews.
 Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
-Stored PCA loadings reuse the ranking preparation and native text panels.
+Stored PCA loadings and variance ratios reuse the ranking preparation and native
+text panels.
 UMAP includes native sizing, optional hover/zoom, linked interval highlighting/count
 and Python subset retrieval. Dotplot includes index-scaled slots, grouped summaries,
 brackets, native size/color guides and optional summary hover. Matrixplot reuses
@@ -54,15 +55,15 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot,
 matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
-The current canonical workflows contain fourteen UMAP/embedding/scatter/loadings
+The current canonical workflows contain fifteen UMAP/embedding/scatter/PCA
 code cells and thirteen expression/ranked code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next feature: M07.c variance ratios.** The
-[variance increment and acceptance cases](PLAN.md#m07--embeddings-scatter-and-pca)
-are ready after the stored-loadings preview; overview follows it. Required verification of existing
+**Next feature: M07.c PCA overview.** The
+[composition increment and acceptance cases](PLAN.md#m07--embeddings-scatter-and-pca)
+are ready after the loadings and variance previews. Required verification of existing
 previews remains open independently:
 
 | Slice | Lifecycle state | Commit/evidence | Remaining work before Verified/Closed |
@@ -71,7 +72,8 @@ previews remains open independently:
 | M07.a shared embeddings | Implemented | `39b4d7d`; [checks and Python measurement](#review-follow-up-and-m07a-shared-2d-embeddings) | Close resource gate 4 with a representative multi-panel browser workload or an explicit UMAP-baseline reuse assessment: covered paths/workload, machine/runtime, render/interaction latency, retained memory and supported envelope. |
 | M07.b scatter | Implemented | `0fdcc02`; [checks and Python measurement](#m07b-scatter) | Complete the same browser resource gate for cell and gene orientations, including a realistic multi-panel case. |
 | M07.c loadings increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-stored-pca-loadings) | Broader storage/typography/export remain M14. Variance and overview are separate increments; this does not close M07. |
-| M07.c variance increment | Ready; not implemented | Pinned signature in [API inventory](../../tests/integrations/scanpy/fixtures/api.json); concrete call and acceptance in PLAN | Read stored variance ratios through the ranking helpers, then complete all five gates. Overview remains Planned. |
+| M07.c variance increment | Closed (bounded preview) | [Contract, tests and resources](#m07c-stored-pca-variance-ratios) | Broader storage/typography/export remain M14; this does not close the overview or M07. |
+| M07.c overview increment | Ready; not implemented | Pinned signature in [API inventory](../../tests/integrations/scanpy/fixtures/api.json); concrete call and acceptance in PLAN | Compose the existing PCA/metadata plots, then complete all five gates. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M05.f category-strip hover | Blocked | C10; [Core adoption and recheck](#m05f-category-strip-tooltips--blocked-on-a-released-core-fix) | Adopt a released Core fix and pass the three expected-failure cases plus navigation/workflow checks. |
 
@@ -94,7 +96,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
 | M05 heatmap/matrix/clustermap | In progress; bounded previews verified | Heatmap/matrix/clustermap and shared grid interactions have linked evidence below. M05.d is Planned; usable strip hover M05.f is Blocked on C10. Broader kwargs/delivery remain M14. |
 | M06 ranking/ranked summaries | Implemented; resource verification pending | M06.a–d runtime, semantic/chart/workflow checks exist; gate 4 remains in the current queue. Compatibility limits remain M14; native builders remain M13. |
-| M07 embeddings/scatter/PCA | In progress | M07.a/b are Implemented with resource gates open; M07.c loadings preview is Closed, variance is Ready and overview/options are Planned. See the current queue for evidence and remaining gates. |
+| M07 embeddings/scatter/PCA | In progress | M07.a/b are Implemented with resource gates open; M07.c loadings/variance previews are Closed, overview is Ready and broader options are Planned. See the current queue for evidence and remaining gates. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
 | M10 QC diagnostics | Planned | Highest expression, variable genes, legacy dispersion and Scrublet distributions. |
@@ -493,6 +495,55 @@ separate M07.c work. The inventory/export regression now guards coverage counts.
 Unrelated repository suites and the documentation build were not rerun.
 Clearance: retain the live PLAN/STATUS and permanent source/tests/contracts;
 no working document becomes eligible for removal from this increment.
+
+## M07.c stored PCA variance ratios
+
+Closed (bounded preview): `pca_variance_ratio` reads
+`uns["pca"]["variance_ratio"]` through the existing attribute-ranking preparation
+and native text renderer. No new data/chart module, analysis or expression access
+was added. The shared log operation now runs on the source dtype before converting
+to plotting floats, matching Scanpy's float32 rounding as well as float64 results.
+
+The pinned signature/defaults, PC labels, NumPy sorting/ties, natural-log score
+transformation, top-only extra label and short-result rank extent are preserved.
+Results are detached snapshots: no normalization, cache writes or source repair.
+Missing/nonfinite/malformed vectors, invalid counts and nonpositive log inputs
+error with the plotting function named. NumPy arrays and resident sequences work;
+sparse/lazy vectors reject. Views and backed AnnData use resident stored results
+without reading X, coordinates or loadings. Native hover, sizing and common
+show/save semantics reuse the existing helpers.
+
+Evidence: [semantic/source/precision checks](../../tests/integrations/scanpy/test_pca_variance_ratio.py),
+[three complete frozen variance cases](../../tests/integrations/scanpy/fixtures/ranked.json),
+[observed hover/offline checks](../../tests/integrations/scanpy/browser/test_ranked.py),
+and [canonical notebook execution](../../tests/integrations/scanpy/test_notebooks.py).
+All **275 focused semantic/API checks**, the canonical UMAP workflow and **24
+ranking/PCA browser checks** pass. Full charts register labels, scores, titles,
+axes and plot bounds against Scanpy at 100 display/150 export DPI and DPR 1.5;
+overlays stay temporary. Linear/log hover, disabled hover and offline HTML are
+observed. All **15 UMAP notebook code cells** completed in Jupyter and the variance
+plot was visually checked. Ruff formatting/lint and mypy pass.
+
+Resource observation: macOS 26.6.2 arm64, Python 3.11.15, Scanpy 1.11.5, AnnData
+0.12.19, NumPy 2.4.6, pandas 2.3.3, Core 1.0.0, Chromium 156.0.8078.4. Seed 17;
+100,000 × 20,000 CSR expression (unread), a resident 5,000-element float64 vector
+formed by sorting uniform[0.0001, 1] draws descending and normalizing their sum;
+n_pcs=30, log=True, 360 × 240 pixels. Excluding imports/source construction,
+preparation took **0.012 s**, validated JSON serialization **0.565 s**, peak traced
+Python allocation **0.503 MiB**, retained **0.243 MiB**. The payload contains
+**2,816 bytes** and 31 labels. Browser render was **1.294 s**, paused label hover
+**113 ms**, retained JS heap after collection **6.29 MiB**. The unchanged renderer
+is also covered by the larger three-panel/93-label loadings observation above;
+this run adds the variance/log data path. Larger displayed rank counts remain
+unmeasured. These are local observations, not timing guarantees or closure of
+M06/M07.a/b resource gates.
+
+Remaining limits: finite resident vectors, positive values throughout log input,
+inherited native font/tick/spacing differences, and inactive image saving (M14).
+Overview is the next separate M07.c increment. The full repository/integration
+suites and documentation build were not rerun for this narrow addition.
+Clearance: retain the live PLAN/STATUS and permanent source/tests/contracts;
+no working document is eligible for removal.
 
 ## M01 retained delivery evidence
 
@@ -1154,7 +1205,7 @@ changed; unrelated tests and the full documentation build were not rerun.
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 21 functions are available as partial previews; 27 plot/builder
+helpers. 22 functions are available as partial previews; 26 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -1186,9 +1237,9 @@ No placeholder functions are exported for planned work.
 | `paga_path` | Not implemented | M11 |
 | `pca` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `pca_loadings` | Stored-loadings preview available | M07.c loadings increment; shared ranking preparation/renderer |
-| `pca_overview` | Not implemented | M07.c; after loadings/variance |
+| `pca_overview` | Not implemented; Ready | M07.c overview increment |
 | `pca_scatter` | Alias of the shared pca preview | M07.a; same limits as pca |
-| `pca_variance_ratio` | Not implemented | M07.c; after loadings |
+| `pca_variance_ratio` | Stored-variance preview available | M07.c variance increment; shared ranking helpers |
 | `rank_genes_groups` | Preview: stored score panels | M06.a–c; filtered/nonfinite panels and presentation debt M14 |
 | `rank_genes_groups_dotplot` | Preview: expression/statistic colors and expression fractions | M06.a–d; compatibility limits M14, builder M13 |
 | `rank_genes_groups_heatmap` | Preview: individual-cell expression | M06.a–c; shares parent heatmap limits |
@@ -1239,7 +1290,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | --- | --- | --- |
 | Stored finite NumPy loadings, component order/repeats, high/low/top ranks, native sizing/hover and common delivery | Bounded loadings preview; [contract](../../docs/integrations/scanpy/index.md#pca-loadings) | M07.c loadings preview retained |
 | Sparse/lazy or nonfinite loadings, full typography and image export | Explicit restrictions; no automatic filtering/analysis | M14 |
-| Variance ratios and overview | Not implemented; variance is Ready | M07.c |
+| Stored variance ratios, PC numbering, linear/natural-log scores, native sizing/hover and common delivery | Bounded variance preview; [contract](../../docs/integrations/scanpy/index.md#pca-variance-ratios) | M07.c variance preview retained |
+| Overview | Not implemented; Ready | M07.c |
 
 | Matrixplot parameter group | Current support | Completion owner |
 | --- | --- | --- |

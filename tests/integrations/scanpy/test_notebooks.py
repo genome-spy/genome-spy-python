@@ -47,10 +47,33 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         np.testing.assert_array_equal(pbmc.obsm["X_umap"], original.obsm["X_umap"])
         np.testing.assert_array_equal(pbmc.obsm["X_pca"], original.obsm["X_pca"])
         np.testing.assert_array_equal(pbmc.varm["PCs"], original.varm["PCs"])
+        np.testing.assert_array_equal(
+            pbmc.uns["pca"]["variance_ratio"], original.uns["pca"]["variance_ratio"]
+        )
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
         loadings = namespace["loadings_chart"]
         assert loadings in charts
+        variance = namespace["variance_chart"]
+        assert variance in charts
+        assert (
+            variance.to_dict()
+            == gsc.pl.ranking(
+                pbmc,
+                "uns",
+                "variance_ratio",
+                dictionary="pca",
+                labels="PC",
+                n_points=10,
+                log=True,
+                width=360,
+                height=240,
+                show=False,
+            ).to_dict()
+        )
+        assert (
+            sum(len(table) for table in variance.to_dict()["datasets"].values()) == 11
+        )
         assert namespace["pca_genes"].shape == (700, 309)
         assert (
             loadings.to_dict()
@@ -90,7 +113,7 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         assert pbmc.obsm["X_tsne"].shape == (700, 2)
         assert charts
         for chart in charts:
-            if chart is loadings:
+            if chart is loadings or chart is variance:
                 continue
             spec = chart.to_dict()
             assert spec["datasets"]

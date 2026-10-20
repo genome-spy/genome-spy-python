@@ -13,6 +13,7 @@ def make_ranked_adata():
     a.layers["counts"] = a.X * 3
     a.varm["PCs"] = np.array([[4, 1], [2, 2], [8, 3], [6, 4]])
     a.uns["provided"] = {"score_name": np.array([1.0, 4.0, 2.0, 8.0, 3.0, 7.0])}
+    a.uns["pca"] = {"variance_ratio": np.array([0.2, 0.4, 0.1, 0.2, 0.05])}
     groups = ["C", "A", "D", "B"]
     names = [
         ["g2", "g1", "g3", "g4"],
@@ -78,4 +79,7 @@ def ranked_cases():
             (),
             {"components": [1, 2], "n_points": 4},
         ),
+        "variance_linear": ("pca_variance_ratio", (), {"n_pcs": 2}),
+        "variance_log": ("pca_variance_ratio", (), {"n_pcs": 3, "log": True}),
+        "variance_short": ("pca_variance_ratio", (), {}),
     }

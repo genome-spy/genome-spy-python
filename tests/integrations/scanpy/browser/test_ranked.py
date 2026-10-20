@@ -106,13 +106,22 @@ def test_complete_rank_panels_match_registered_labels_and_score_positions(
         Image.blend(*layers, 0.5).save(tmp_path / f"ranked-{case}-overlay-{i}.png")
 
 
-@pytest.mark.parametrize("family", ["rank_genes_groups", "pca_loadings"])
-def test_rank_label_native_hover_and_offline_html(page, tmp_path, family):
-    options = (
-        {"groups": "C", "n_genes": 3}
-        if family == "rank_genes_groups"
-        else {"components": "1", "n_points": 2, "include_lowest": False}
-    )
+@pytest.mark.parametrize(
+    "family,options,expected",
+    [
+        ("rank_genes_groups", {"groups": "C", "n_genes": 3}, ["g1", "2.000", "1"]),
+        (
+            "pca_loadings",
+            {"components": "1", "n_points": 2, "include_lowest": False},
+            ["g4", "6.000", "1"],
+        ),
+        ("pca_variance_ratio", {"n_pcs": 2}, ["PC4", "0.2000", "1"]),
+        ("pca_variance_ratio", {"n_pcs": 3, "log": True}, ["PC4", "−1.609", "1"]),
+    ],
+)
+def test_rank_label_native_hover_and_offline_html(
+    page, tmp_path, family, options, expected
+):
     chart = getattr(gsc.pl, family)(make_ranked_adata(), show=False, **options)
     spec = chart.to_dict()
     x0, x1 = spec["encoding"]["x"]["scale"]["domain"]
@@ -134,9 +143,7 @@ def test_rank_label_native_hover_and_offline_html(page, tmp_path, family):
             break
     assert [
         text.strip() for text in page.locator("table.attributes td").all_text_contents()
-    ] == (
-        ["g1", "2.000", "1"] if family == "rank_genes_groups" else ["g4", "6.000", "1"]
-    )
+    ] == expected
     path = tmp_path / "ranking.html"
     chart.save(path, inline=True, controls=False)
     page.context.set_offline(True)
@@ -145,17 +152,23 @@ def test_rank_label_native_hover_and_offline_html(page, tmp_path, family):
     assert not page.locator(".message-box").count()
 
 
-def test_loadings_hover_can_be_disabled(page):
-    chart = gsc.pl.pca_loadings(
-        make_ranked_adata(),
-        "1",
-        include_lowest=False,
-        n_points=2,
-        hover=False,
-        show=False,
+@pytest.mark.parametrize(
+    "family,options,y",
+    [
+        (
+            "pca_loadings",
+            {"components": "1", "include_lowest": False, "n_points": 2},
+            2.4 / 4.6,
+        ),
+        ("pca_variance_ratio", {"n_pcs": 2}, 0.22 / 0.23),
+    ],
+)
+def test_pca_hover_can_be_disabled(page, family, options, y):
+    chart = getattr(gsc.pl, family)(
+        make_ranked_adata(), hover=False, show=False, **options
     )
     bounds = render(page, chart)
-    px, py = pointer(page, bounds, x=1.9 / 3.8, y=2.4 / 4.6)
+    px, py = pointer(page, bounds, x=1.9 / 3.8, y=y)
     page.mouse.move(px, py - 4)
     page.wait_for_timeout(450)
     assert not page.locator("table.attributes").is_visible()

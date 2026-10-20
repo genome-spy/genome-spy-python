@@ -36,6 +36,7 @@ __all__ = [
     "pca",
     "pca_scatter",
     "pca_loadings",
+    "pca_variance_ratio",
     "scatter",
 ]
 
@@ -1883,6 +1884,101 @@ def pca_loadings(
         n_points=count,
         log=False,
         include_lowest=include_lowest,
+        context=context,
+    )
+    chart = build_ranking(
+        panels,
+        sharey=False,
+        fontsize=8,
+        color="black",
+        hover=hover,
+        width=width,
+        height=height,
+        context=context,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def pca_variance_ratio(
+    adata: AnnData,
+    n_pcs: int = 30,
+    *,
+    log: bool = False,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Plot ranked variance ratios from stored PCA results.
+
+    Reads uns["pca"]["variance_ratio"] through the shared ranking helpers.
+    log=True takes the natural logarithm before sorting, as Scanpy does;
+    PCA and expression access never run, and stored results stay unchanged.
+
+    Args:
+        adata: AnnData with a resident variance-ratio vector in uns["pca"].
+        n_pcs: Positive rank count; Scanpy includes one extra PC when available.
+        log: Take the natural logarithm of positive ratios before ranking.
+        show: Display once, return chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Show the original PC label, plotted score and displayed rank.
+        width: Native plot width, default 300 logical pixels.
+        height: Native plot height, default 300 logical pixels.
+
+    Returns:
+        A native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        TypeError: If AnnData, flags or variance-ratio storage are unsupported.
+        ValueError: If ratios, log inputs, rank counts or dimensions are invalid.
+        NotImplementedError: If saving requests Matplotlib output.
+
+    Example:
+        >>> chart = gsc.pl.pca_variance_ratio(adata, n_pcs=10, log=True, show=False)
+    """
+    context = "gsc.pl.pca_variance_ratio"
+    for name, value in {"log": log, "hover": hover}.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    sc = _prepare_plot(show, save, context=context)
+    import numpy as np
+    from anndata import AnnData
+    from genome_spy.integrations.scanpy._ranked_data import (
+        _count,
+        attribute_rank_panels,
+    )
+    from genome_spy.integrations.scanpy._ranking_chart import build_ranking
+
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: expected AnnData.")
+    stored = adata.uns.get("pca")
+    if not isinstance(stored, Mapping) or "variance_ratio" not in stored:
+        raise ValueError(
+            f"{context}: missing uns['pca']['variance_ratio']; run sc.pp.pca explicitly first."
+        )
+    ratios = stored["variance_ratio"]
+    # Reject lazy vectors before table construction can materialize them.
+    if (
+        isinstance(ratios, (str, bytes))
+        or not isinstance(ratios, (np.ndarray, Sequence))
+        or getattr(ratios, "ndim", 1) != 1
+    ):
+        raise TypeError(
+            f"{context}: variance_ratio requires a resident one-dimensional vector."
+        )
+    count = _count(n_pcs, "n_pcs", context=context)
+    panels = attribute_rank_panels(
+        adata,
+        "uns",
+        "variance_ratio",
+        dictionary="pca",
+        indices=None,
+        labels="PC",
+        n_points=count,
+        log=log,
+        include_lowest=False,
         context=context,
     )
     chart = build_ranking(

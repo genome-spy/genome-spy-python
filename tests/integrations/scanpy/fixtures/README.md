@@ -11,9 +11,10 @@ to ignored `tmp/scanpy-references/<family>/`. UMAP's `--output` override instead
 places both metadata and images in the supplied directory. References to retained
 figures below mean reproducible local/CI exports, not tracked PNG files.
 
-`ranked.json` freezes seven complete ranking/score-panel cases from the original
+`ranked.json` freezes ten complete ranking/score-panel cases from the original
 `ranked_fixture.py`: common/separate score bounds, supplied log scores, PCA
-component order/count/top-only behavior and extreme rank gaps. It records exact
+component order/count/top-only behavior, linear/log variance ratios, short-result
+rank extents and extreme rank gaps. It records exact
 labels, score positions, domains, titles, axis labels,
 font sizes and display/export DPI. Native SVG anchors and registered overlays are
 checked at DPR 1.5; native Lato and automatic tick density differ from Matplotlib.

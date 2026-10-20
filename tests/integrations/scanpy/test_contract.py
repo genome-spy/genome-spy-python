@@ -80,6 +80,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
 
         a, options = make_ranked_adata(), {"components": "1,2"}
+    if family == "pca_variance_ratio":
+        from tests.integrations.scanpy.ranked_fixture import make_ranked_adata
+
+        a, options = make_ranked_adata(), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -116,6 +120,7 @@ def test_shared_display_validation_precedes_optional_imports(
         "matrix",
         "clustermap",
         "pca_loadings",
+        "pca_variance_ratio",
     } and not family.startswith("rank_genes_groups"):
         args += ("group",)
     with pytest.raises(

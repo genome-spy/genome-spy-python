@@ -7,7 +7,8 @@ Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
 `gsc.pl.correlation_matrix(...)` or `gsc.pl.clustermap(...)`.
 Stored rankings add `gsc.pl.rank_genes_groups(...)`, `gsc.pl.ranking(...)`, and
 the ranked dotplot/matrixplot/heatmap wrappers.
-`gsc.pl.pca_loadings(...)` reuses the ranking panels for stored PCA results.
+`gsc.pl.pca_loadings(...)` and `gsc.pl.pca_variance_ratio(...)` reuse the ranking
+panels for stored PCA results.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
 The implementation lives in the installable [source package](../../src/genome_spy/integrations/scanpy/),
@@ -18,7 +19,7 @@ not in this workspace or the documentation:
 | [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
 | [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public signatures and plot-specific validation; common kwargs checks, optional dependency/version setup and native display/save handling. |
 | [_ranked_data.py](../../src/genome_spy/integrations/scanpy/_ranked_data.py) | Stored ranking checks, public Scanpy result selection, statistic color tables and detached rank-label positions. No expression access or analysis. |
-| [_ranking_chart.py](../../src/genome_spy/integrations/scanpy/_ranking_chart.py) | Native score labels, axes and multi-panel layout shared by ranking, PCA loadings and rank_genes_groups. Ranked expression wrappers reuse their existing parent charts. |
+| [_ranking_chart.py](../../src/genome_spy/integrations/scanpy/_ranking_chart.py) | Native score labels, axes and multi-panel layout shared by ranking, PCA loadings/variance and rank_genes_groups. Ranked expression wrappers reuse their existing parent charts. |
 | [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared scalar/numeric-table validation, raw/layer resolution and resident-expression checks; reused by preparation and chart modules. |
 | [_grouped_data.py](../../src/genome_spy/integrations/scanpy/_grouped_data.py) | Selected values, feature slots/brackets and summaries. Shared scale_values serves cells and group means; heatmap adds cell permutations/group spans and an early size guard. No chart authoring. |
 | [_style.py](../../src/genome_spy/integrations/scanpy/_style.py) | Shared schemes, CSS colors, continuous color bounds, fonts and point units for every plot; categorical/continuous preparation and explicit embedding style settings live here too. |
@@ -87,7 +88,7 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
 
 - [UMAP](notebooks/scanpy_umap.ipynb): basic categorical/continuous plotting with
   x/y zoom and panning, linked brushing/count/Python retrieval, then customization.
-  Existing coordinates are retained; gene scoring and the final t-SNE preparation are explicit Scanpy operations. Packaged PCA scatter and stored loadings reuse embedding/ranking helpers. Cell/gene scatter examples read packaged observation and variable annotations without an embedding.
+  Existing coordinates are retained; gene scoring and the final t-SNE preparation are explicit Scanpy operations. Packaged PCA scatter, stored loadings and variance ratios reuse embedding/ranking helpers. Cell/gene scatter examples read packaged observation and variable annotations without an embedding.
 - [Expression plots](notebooks/scanpy_expression.ipynb): marker dotplot, scaled
   matrixplot, individual-cell heatmap, supplied numeric matrix, aligned dendrograms, y-only zoom (both axes optional), fitted tile values and dot row/column highlighting using the core tutorial
   dictionary and existing `bulk_labels`. Scanpy computes the shared tree in Python
