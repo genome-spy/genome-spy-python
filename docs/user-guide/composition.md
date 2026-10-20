@@ -89,6 +89,45 @@ panel label that shared mapping within its own column. Child sizing, spacing,
 and separators are documented in
 [view concatenation](https://genomespy.app/docs/grammar/composition/concat/).
 
+## Repeat categories with facets
+
+Use {py:func}`~genome_spy.facet` to repeat one plot by category. The container
+supplies the data; Core splits the records and runs the child plot's transforms
+for each category. Facets share scales and axes. `FacetFieldDef` specifies a
+single field for a wrapped layout; `FacetMapping` specifies rows and columns.
+
+```{literalinclude} ../tutorials/composition.py
+:language: python
+:start-after: composition-facet-start
+:end-before: composition-facet-end
+```
+
+```{genomespy-chart} composition:facet_chart
+:height: 300
+:title: The same plot repeated by group
+```
+
+Header, spacing and field options use named Python arguments. See the upstream
+[facet guide](https://genomespy.app/docs/grammar/facet/) for layout constraints.
+
+## Align marginal panels with surround
+
+Use {py:func}`~genome_spy.surround` for a central plot with marginal panels.
+Top and bottom panels share the center's x scale; left and right panels share
+its y scale. Each side accepts a list of plots or `SurroundSideSpec` with named
+`views` and shared settings.
+
+```{literalinclude} ../tutorials/composition.py
+:language: python
+:start-after: composition-surround-start
+:end-before: composition-surround-end
+```
+
+```{genomespy-chart} composition:surround_chart
+:height: 330
+:title: Points with an aligned marginal tick track
+```
+
 ## Shared, independent, and excluded resolution
 
 A **resolution** states which child views participate in the same scale, axis,

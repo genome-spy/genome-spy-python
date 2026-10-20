@@ -25,10 +25,12 @@ extended without mutating the original.
 
    Chart
    ConcatChart
+   FacetChart
    HConcatChart
    ImportedView
    LayerChart
    MultiscaleChart
+   SurroundChart
    TopLevelSpec
    VConcatChart
 ```
@@ -70,9 +72,11 @@ shorthand such as `"score:Q"` for simple cases.
    UniqueId
    X
    X2
+   X2Offset
    XOffset
    Y
    Y2
+   Y2Offset
    YOffset
 ```
 
@@ -102,6 +106,7 @@ schema objects.
    datum
    dynamic_opacity
    expr
+   facet
    hconcat
    import_view
    layer
@@ -114,6 +119,7 @@ schema objects.
    selection_interval
    selection_point
    step
+   surround
    title
    to_arrow_ipc
    value
@@ -141,9 +147,18 @@ Schema-backed configuration objects accepted by charts, channels, and helpers.
    DynamicOpacity
    ExprRef
    Expression
+   FacetFieldDef
+   FacetHeader
+   FacetMapping
+   FacetSpacing
    GenomeAxis
    HandledTooltip
    Legend
+   LegendLayout
+   LegendRegionLayout
+   LerpTransition
+   LookupSelfInput
+   MultiscaleStops
    NamedSelectionPredicateRef
    Paddings
    Parameter
@@ -151,13 +166,17 @@ Schema-backed configuration objects accepted by charts, channels, and helpers.
    Parse
    RulerMarkConfig
    Scale
+   ScaleGroupsData
    SelectionDomainRef
    SelectionPredicateDefinition
    SelectionPredicateOperand
    SelectionUnionTest
    SizeDef
    Step
+   SurroundSideSpec
+   SurroundSides
    Title
+   ViewportDomainRef
 ```
 
 ## Data sources

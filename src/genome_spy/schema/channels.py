@@ -66,7 +66,7 @@ class Angle(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -261,16 +261,22 @@ class Angle(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -281,10 +287,19 @@ class Angle(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -295,16 +310,16 @@ class Angle(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -312,10 +327,10 @@ class Angle(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -383,6 +398,17 @@ class Angle(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -418,6 +444,8 @@ class Angle(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -446,6 +474,8 @@ class Angle(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -470,7 +500,7 @@ class Color(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -665,16 +695,22 @@ class Color(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -685,10 +721,19 @@ class Color(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -699,16 +744,16 @@ class Color(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -716,10 +761,10 @@ class Color(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -787,6 +832,17 @@ class Color(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -822,6 +878,8 @@ class Color(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -850,6 +908,8 @@ class Color(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -874,7 +934,7 @@ class Direction(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -1042,6 +1102,17 @@ class Direction(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -1077,6 +1148,8 @@ class Direction(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -1105,6 +1178,8 @@ class Direction(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -1129,7 +1204,7 @@ class Dx(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -1324,16 +1399,22 @@ class Dx(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -1344,10 +1425,19 @@ class Dx(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -1358,16 +1448,16 @@ class Dx(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -1375,10 +1465,10 @@ class Dx(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -1446,6 +1536,17 @@ class Dx(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -1481,6 +1582,8 @@ class Dx(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -1509,6 +1612,8 @@ class Dx(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -1533,7 +1638,7 @@ class Dy(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -1728,16 +1833,22 @@ class Dy(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -1748,10 +1859,19 @@ class Dy(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -1762,16 +1882,16 @@ class Dy(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -1779,10 +1899,10 @@ class Dy(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -1850,6 +1970,17 @@ class Dy(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -1885,6 +2016,8 @@ class Dy(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -1913,6 +2046,8 @@ class Dy(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -1937,7 +2072,7 @@ class FacetIndex(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         description: str | UndefinedType = _MISSING,
@@ -2012,7 +2147,7 @@ class Fill(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -2207,16 +2342,22 @@ class Fill(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -2227,10 +2368,19 @@ class Fill(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -2241,16 +2391,16 @@ class Fill(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -2258,10 +2408,10 @@ class Fill(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -2329,6 +2479,17 @@ class Fill(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -2364,6 +2525,8 @@ class Fill(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -2392,6 +2555,8 @@ class Fill(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -2416,7 +2581,7 @@ class FillOpacity(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -2611,16 +2776,22 @@ class FillOpacity(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -2631,10 +2802,19 @@ class FillOpacity(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -2645,16 +2825,16 @@ class FillOpacity(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -2662,10 +2842,10 @@ class FillOpacity(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -2733,6 +2913,17 @@ class FillOpacity(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -2768,6 +2959,8 @@ class FillOpacity(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -2796,6 +2989,8 @@ class FillOpacity(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -2820,7 +3015,7 @@ class Key(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         description: str | UndefinedType = _MISSING,
@@ -2895,7 +3090,7 @@ class Opacity(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -3090,16 +3285,22 @@ class Opacity(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -3110,10 +3311,19 @@ class Opacity(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -3124,16 +3334,16 @@ class Opacity(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -3141,10 +3351,10 @@ class Opacity(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -3212,6 +3422,17 @@ class Opacity(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -3247,6 +3468,8 @@ class Opacity(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -3275,6 +3498,8 @@ class Opacity(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -3299,7 +3524,7 @@ class Order(Channel):
 
     def __init__(
         self,
-        value: float | dict[str, Any],
+        value: float | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         condition: OrderCondition | dict[str, Any] | UndefinedType = _MISSING,
@@ -3317,9 +3542,13 @@ class Order(Channel):
             key: item for key, item in properties.items() if item is not _MISSING
         }
         definition = (
-            {**value, **defined}
-            if isinstance(value, dict)
-            else {"value": value, **defined}
+            defined
+            if value is _MISSING
+            else (
+                {**value, **defined}
+                if isinstance(value, dict)
+                else {"value": value, **defined}
+            )
         )
         super().__init__(definition, encoding_name="order")
 
@@ -3343,7 +3572,7 @@ class Sample(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         description: str | UndefinedType = _MISSING,
@@ -3418,7 +3647,7 @@ class Search(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         description: str | UndefinedType = _MISSING,
@@ -3493,7 +3722,7 @@ class SemanticScore(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         description: str | UndefinedType = _MISSING,
@@ -3578,7 +3807,7 @@ class Shape(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -3773,16 +4002,22 @@ class Shape(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -3793,10 +4028,19 @@ class Shape(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -3807,16 +4051,16 @@ class Shape(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -3824,10 +4068,10 @@ class Shape(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -3895,6 +4139,17 @@ class Shape(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -3930,6 +4185,8 @@ class Shape(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -3958,6 +4215,8 @@ class Shape(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -3982,7 +4241,7 @@ class Size(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -4177,16 +4436,22 @@ class Size(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -4197,10 +4462,19 @@ class Size(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -4211,16 +4485,16 @@ class Size(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -4228,10 +4502,10 @@ class Size(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -4299,6 +4573,17 @@ class Size(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -4334,6 +4619,8 @@ class Size(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -4362,6 +4649,8 @@ class Size(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -4386,7 +4675,7 @@ class Stroke(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -4581,16 +4870,22 @@ class Stroke(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -4601,10 +4896,19 @@ class Stroke(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -4615,16 +4919,16 @@ class Stroke(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -4632,10 +4936,10 @@ class Stroke(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -4703,6 +5007,17 @@ class Stroke(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -4738,6 +5053,8 @@ class Stroke(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -4766,6 +5083,8 @@ class Stroke(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -4790,7 +5109,7 @@ class StrokeOpacity(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -4985,16 +5304,22 @@ class StrokeOpacity(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -5005,10 +5330,19 @@ class StrokeOpacity(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -5019,16 +5353,16 @@ class StrokeOpacity(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -5036,10 +5370,10 @@ class StrokeOpacity(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -5107,6 +5441,17 @@ class StrokeOpacity(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -5142,6 +5487,8 @@ class StrokeOpacity(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -5170,6 +5517,8 @@ class StrokeOpacity(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -5194,7 +5543,7 @@ class StrokeWidth(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -5389,16 +5738,22 @@ class StrokeWidth(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -5409,10 +5764,19 @@ class StrokeWidth(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -5423,16 +5787,16 @@ class StrokeWidth(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -5440,10 +5804,10 @@ class StrokeWidth(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -5511,6 +5875,17 @@ class StrokeWidth(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -5546,6 +5921,8 @@ class StrokeWidth(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -5574,6 +5951,8 @@ class StrokeWidth(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -5598,7 +5977,7 @@ class Text(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -5776,6 +6155,17 @@ class Text(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -5811,6 +6201,8 @@ class Text(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -5839,6 +6231,8 @@ class Text(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -5863,7 +6257,7 @@ class Tooltip(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -6041,6 +6435,17 @@ class Tooltip(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -6076,6 +6481,8 @@ class Tooltip(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -6104,6 +6511,8 @@ class Tooltip(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -6128,7 +6537,7 @@ class UniqueId(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         description: str | UndefinedType = _MISSING,
@@ -6203,7 +6612,7 @@ class X(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -6393,22 +6802,31 @@ class X(Channel):
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -6416,7 +6834,7 @@ class X(Channel):
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -6424,7 +6842,7 @@ class X(Channel):
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -6432,7 +6850,7 @@ class X(Channel):
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -6454,7 +6872,7 @@ class X(Channel):
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -6463,7 +6881,7 @@ class X(Channel):
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -6479,22 +6897,22 @@ class X(Channel):
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -6502,7 +6920,7 @@ class X(Channel):
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -6510,7 +6928,7 @@ class X(Channel):
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -6518,7 +6936,7 @@ class X(Channel):
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -6537,7 +6955,7 @@ class X(Channel):
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -6546,7 +6964,7 @@ class X(Channel):
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -6669,6 +7087,17 @@ class X(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -6704,6 +7133,8 @@ class X(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -6732,6 +7163,8 @@ class X(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -6756,7 +7189,7 @@ class X2(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -6936,22 +7369,31 @@ class X2(Channel):
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -6959,7 +7401,7 @@ class X2(Channel):
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -6967,7 +7409,7 @@ class X2(Channel):
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -6975,7 +7417,7 @@ class X2(Channel):
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -6997,7 +7439,7 @@ class X2(Channel):
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -7006,7 +7448,7 @@ class X2(Channel):
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -7022,22 +7464,22 @@ class X2(Channel):
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -7045,7 +7487,7 @@ class X2(Channel):
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -7053,7 +7495,7 @@ class X2(Channel):
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -7061,7 +7503,7 @@ class X2(Channel):
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -7080,7 +7522,7 @@ class X2(Channel):
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -7089,7 +7531,7 @@ class X2(Channel):
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -7212,6 +7654,17 @@ class X2(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -7247,6 +7700,8 @@ class X2(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -7275,6 +7730,8 @@ class X2(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -7294,12 +7751,145 @@ class X2(Channel):
         return self._with_nested("scale", value, **defined)
 
 
+class X2Offset(Channel):
+    """Generated wrapper for the ``x2Offset`` encoding channel."""
+
+    def __init__(
+        self,
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
+        /,
+        *,
+        band: float | UndefinedType = _MISSING,
+        datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
+        description: str | UndefinedType = _MISSING,
+        domainInert: bool | UndefinedType = _MISSING,
+        expr: str | UndefinedType = _MISSING,
+        field: str | UndefinedType = _MISSING,
+        title: str | None | UndefinedType = _MISSING,
+        type: Type_T | UndefinedType = _MISSING,
+    ) -> None:
+        """Create a ``x2Offset`` encoding channel.
+
+        Args:
+            band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
+            datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
+            description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
+            domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
+            expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            title (str | None): A title for the field. If ``null``, the title will be removed.
+            type (Type_T): Schema-defined ``type`` property.
+            value (float | ExprRef | dict[str, Any]): A constant value in visual domain (e.g., ``"red"`` / ``"#0099ff"``, values between ``0`` to ``1`` for opacity).
+        """
+        properties = {
+            "band": band,
+            "datum": datum,
+            "description": description,
+            "domainInert": domainInert,
+            "expr": expr,
+            "field": field,
+            "title": title,
+            "type": type,
+        }
+        defined = {
+            key: item for key, item in properties.items() if item is not _MISSING
+        }
+        wrapped = channel(value, encoding_name="x2Offset", **defined)
+        super().__init__(wrapped.definition, encoding_name="x2Offset")
+
+    def band(
+        self,
+        value: float,
+    ) -> X2Offset:
+        """Return a channel with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def datum(
+        self,
+        value: Scalar_T | ExprRef | dict[str, Any],
+    ) -> X2Offset:
+        """Return a channel with ``datum`` updated."""
+        return self._with_property("datum", value)
+
+    def description(
+        self,
+        value: str,
+    ) -> X2Offset:
+        """Return a channel with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(
+        self,
+        value: bool,
+    ) -> X2Offset:
+        """Return a channel with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> X2Offset:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def field(
+        self,
+        value: str,
+    ) -> X2Offset:
+        """Return a channel with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def title(
+        self,
+        value: str | None,
+    ) -> X2Offset:
+        """Return a channel with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(
+        self,
+        value: Type_T,
+    ) -> X2Offset:
+        """Return a channel with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def value(
+        self,
+        value: float | ExprRef | dict[str, Any],
+    ) -> X2Offset:
+        """Return a channel with ``value`` updated."""
+        return self._with_property("value", value)
+
+    def sort(
+        self,
+        value: CompareParams
+        | CompareParamsKwds
+        | str
+        | list[str]
+        | None
+        | object = _MISSING,
+        /,
+        *,
+        field: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
+        order: Sequence[SortOrder_T] | SortOrder_T | UndefinedType = Undefined,
+    ) -> X2Offset:
+        """Return a channel with a ``sort`` configuration."""
+        properties = {
+            "field": field,
+            "order": order,
+        }
+        defined = {
+            key: item for key, item in properties.items() if item is not Undefined
+        }
+        return self._with_sort(value, defined)
+
+
 class XOffset(Channel):
     """Generated wrapper for the ``xOffset`` encoding channel."""
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -7494,16 +8084,22 @@ class XOffset(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -7514,10 +8110,19 @@ class XOffset(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -7528,16 +8133,16 @@ class XOffset(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -7545,10 +8150,10 @@ class XOffset(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -7616,6 +8221,17 @@ class XOffset(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -7651,6 +8267,8 @@ class XOffset(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -7679,6 +8297,8 @@ class XOffset(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -7703,7 +8323,7 @@ class Y(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -7883,22 +8503,31 @@ class Y(Channel):
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -7906,7 +8535,7 @@ class Y(Channel):
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -7914,7 +8543,7 @@ class Y(Channel):
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -7922,7 +8551,7 @@ class Y(Channel):
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -7944,7 +8573,7 @@ class Y(Channel):
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -7953,7 +8582,7 @@ class Y(Channel):
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -7969,22 +8598,22 @@ class Y(Channel):
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -7992,7 +8621,7 @@ class Y(Channel):
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -8000,7 +8629,7 @@ class Y(Channel):
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -8008,7 +8637,7 @@ class Y(Channel):
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -8027,7 +8656,7 @@ class Y(Channel):
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -8036,7 +8665,7 @@ class Y(Channel):
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -8159,6 +8788,17 @@ class Y(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -8194,6 +8834,8 @@ class Y(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -8222,6 +8864,8 @@ class Y(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -8246,7 +8890,7 @@ class Y2(Channel):
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -8426,22 +9070,31 @@ class Y2(Channel):
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -8449,7 +9102,7 @@ class Y2(Channel):
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -8457,7 +9110,7 @@ class Y2(Channel):
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -8465,7 +9118,7 @@ class Y2(Channel):
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -8487,7 +9140,7 @@ class Y2(Channel):
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -8496,7 +9149,7 @@ class Y2(Channel):
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -8512,22 +9165,22 @@ class Y2(Channel):
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -8535,7 +9188,7 @@ class Y2(Channel):
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -8543,7 +9196,7 @@ class Y2(Channel):
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -8551,7 +9204,7 @@ class Y2(Channel):
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -8570,7 +9223,7 @@ class Y2(Channel):
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -8579,7 +9232,7 @@ class Y2(Channel):
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -8702,6 +9355,17 @@ class Y2(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -8737,6 +9401,8 @@ class Y2(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -8765,6 +9431,8 @@ class Y2(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -8784,12 +9452,145 @@ class Y2(Channel):
         return self._with_nested("scale", value, **defined)
 
 
+class Y2Offset(Channel):
+    """Generated wrapper for the ``y2Offset`` encoding channel."""
+
+    def __init__(
+        self,
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
+        /,
+        *,
+        band: float | UndefinedType = _MISSING,
+        datum: Scalar_T | ExprRef | dict[str, Any] | UndefinedType = _MISSING,
+        description: str | UndefinedType = _MISSING,
+        domainInert: bool | UndefinedType = _MISSING,
+        expr: str | UndefinedType = _MISSING,
+        field: str | UndefinedType = _MISSING,
+        title: str | None | UndefinedType = _MISSING,
+        type: Type_T | UndefinedType = _MISSING,
+    ) -> None:
+        """Create a ``y2Offset`` encoding channel.
+
+        Args:
+            band (float): Relative position on band scale. For example, the marks will be positioned at the beginning of the band if set to ``0``, and at the middle of the band if set to ``0.5``.
+            datum (Scalar_T | ExprRef | dict[str, Any]): A constant value in data domain.
+            description (str): A description of the encoded value. Can be used for documentation and to explain the meaning of the channel mapping.
+            domainInert (bool): Whether the field or evaluated expr should be excluded from the scale's domain. Prefer the view-level ``domainInert`` when an entire subtree should be excluded. **Default value:** ``false``
+            expr (str): An expression. Properties of the data can be accessed through the ``datum`` object.
+            field (str): __Required.__ A string defining the name of the field from which to pull a data value. __See also:__ ``field`` documentation. __Notes:__ 1) Dots (``.``) and brackets (``[`` and ``]``) can be used to access nested objects (e.g., ``"field": "foo.bar"`` and ``"field": "foo['bar']"``). If field names contain dots or brackets but are not nested, you can use ``\\`` to escape dots and brackets (e.g., ``"a\\.b"`` and ``"a\\[0\\]"``). See more details about escaping in the Vega-Lite field documentation.
+            title (str | None): A title for the field. If ``null``, the title will be removed.
+            type (Type_T): Schema-defined ``type`` property.
+            value (float | ExprRef | dict[str, Any]): A constant value in visual domain (e.g., ``"red"`` / ``"#0099ff"``, values between ``0`` to ``1`` for opacity).
+        """
+        properties = {
+            "band": band,
+            "datum": datum,
+            "description": description,
+            "domainInert": domainInert,
+            "expr": expr,
+            "field": field,
+            "title": title,
+            "type": type,
+        }
+        defined = {
+            key: item for key, item in properties.items() if item is not _MISSING
+        }
+        wrapped = channel(value, encoding_name="y2Offset", **defined)
+        super().__init__(wrapped.definition, encoding_name="y2Offset")
+
+    def band(
+        self,
+        value: float,
+    ) -> Y2Offset:
+        """Return a channel with ``band`` updated."""
+        return self._with_property("band", value)
+
+    def datum(
+        self,
+        value: Scalar_T | ExprRef | dict[str, Any],
+    ) -> Y2Offset:
+        """Return a channel with ``datum`` updated."""
+        return self._with_property("datum", value)
+
+    def description(
+        self,
+        value: str,
+    ) -> Y2Offset:
+        """Return a channel with ``description`` updated."""
+        return self._with_property("description", value)
+
+    def domainInert(
+        self,
+        value: bool,
+    ) -> Y2Offset:
+        """Return a channel with ``domainInert`` updated."""
+        return self._with_property("domainInert", value)
+
+    def expr(
+        self,
+        value: str,
+    ) -> Y2Offset:
+        """Return a channel with ``expr`` updated."""
+        return self._with_property("expr", value)
+
+    def field(
+        self,
+        value: str,
+    ) -> Y2Offset:
+        """Return a channel with ``field`` updated."""
+        return self._with_property("field", value)
+
+    def title(
+        self,
+        value: str | None,
+    ) -> Y2Offset:
+        """Return a channel with ``title`` updated."""
+        return self._with_property("title", value)
+
+    def type(
+        self,
+        value: Type_T,
+    ) -> Y2Offset:
+        """Return a channel with ``type`` updated."""
+        return self._with_property("type", value)
+
+    def value(
+        self,
+        value: float | ExprRef | dict[str, Any],
+    ) -> Y2Offset:
+        """Return a channel with ``value`` updated."""
+        return self._with_property("value", value)
+
+    def sort(
+        self,
+        value: CompareParams
+        | CompareParamsKwds
+        | str
+        | list[str]
+        | None
+        | object = _MISSING,
+        /,
+        *,
+        field: Sequence[Field_T] | Field_T | UndefinedType = Undefined,
+        order: Sequence[SortOrder_T] | SortOrder_T | UndefinedType = Undefined,
+    ) -> Y2Offset:
+        """Return a channel with a ``sort`` configuration."""
+        properties = {
+            "field": field,
+            "order": order,
+        }
+        defined = {
+            key: item for key, item in properties.items() if item is not Undefined
+        }
+        return self._with_sort(value, defined)
+
+
 class YOffset(Channel):
     """Generated wrapper for the ``yOffset`` encoding channel."""
 
     def __init__(
         self,
-        value: Channel | SchemaBase | str | dict[str, Any],
+        value: Channel | SchemaBase | str | dict[str, Any] | UndefinedType = _MISSING,
         /,
         *,
         band: float | UndefinedType = _MISSING,
@@ -8984,16 +9785,22 @@ class YOffset(Channel):
         value: Legend | LegendKwds | None | object = Undefined,
         /,
         *,
-        backgroundFill: str | UndefinedType = Undefined,
+        backgroundFill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         backgroundFillOpacity: float | UndefinedType = Undefined,
-        backgroundStroke: str | UndefinedType = Undefined,
+        backgroundStroke: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         backgroundStrokeOpacity: float | UndefinedType = Undefined,
         backgroundStrokeWidth: float | UndefinedType = Undefined,
         columns: float | UndefinedType = Undefined,
         direction: LegendDirection_T | UndefinedType = Undefined,
         gradientLength: float | UndefinedType = Undefined,
         gradientOpacity: float | UndefinedType = Undefined,
-        gradientStrokeColor: str | UndefinedType = Undefined,
+        gradientStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         gradientStrokeWidth: float | UndefinedType = Undefined,
         gradientThickness: float | UndefinedType = Undefined,
         labelLimit: float | UndefinedType = Undefined,
@@ -9004,10 +9811,19 @@ class YOffset(Channel):
         | UndefinedType = Undefined,
         padding: float | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
-        symbolFillColor: str | UndefinedType = Undefined,
-        symbolOpacity: float | UndefinedType = Undefined,
+        symbolFillColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        symbolOpacity: float
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolSize: float | UndefinedType = Undefined,
-        symbolStrokeColor: str | UndefinedType = Undefined,
+        symbolStrokeColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         symbolStrokeWidth: float | UndefinedType = Undefined,
         symbolType: str | UndefinedType = Undefined,
         tickCount: float | UndefinedType = Undefined,
@@ -9018,16 +9834,16 @@ class YOffset(Channel):
         """Return a channel with a ``Legend`` legend.
 
         Args:
-            backgroundFill (str): Fill color of the legend background.
+            backgroundFill (str | ExprRef | dict[str, Any]): Fill color of the legend background.
             backgroundFillOpacity (float): Opacity of the legend background fill.
-            backgroundStroke (str): Stroke color of the legend background.
+            backgroundStroke (str | ExprRef | dict[str, Any]): Stroke color of the legend background.
             backgroundStrokeOpacity (float): Opacity of the legend background stroke.
             backgroundStrokeWidth (float): Stroke width of the legend background border.
             columns (float): The number of columns in which to arrange symbol legend entries.
             direction (LegendDirection_T): The direction in which legend entries are laid out. This is independent of ``orient``, which selects the legend region. __Default value:__ ``"vertical"``
             gradientLength (float): Fixed length of the gradient ramp in pixels. This is the width of a horizontal ramp and the height of a vertical ramp. When omitted, the ramp fills available space when its direction is parallel to its legend region. Otherwise its natural length is 200 pixels.
             gradientOpacity (float): Opacity of the gradient ramp. __Default value:__ ``1``
-            gradientStrokeColor (str): Stroke color of the gradient ramp border.
+            gradientStrokeColor (str | ExprRef | dict[str, Any]): Stroke color of the gradient ramp border.
             gradientStrokeWidth (float): Stroke width of the gradient ramp border in pixels. __Default value:__ ``0``
             gradientThickness (float): Thickness of the gradient ramp in pixels. __Default value:__ ``12``
             labelLimit (float): Maximum label text width in pixels.
@@ -9035,10 +9851,10 @@ class YOffset(Channel):
             orient (LegendOrient_T | ExprRef | dict[str, Any]): The plot side or inside corner where the legend is placed. Side legends are placed outside the plot area. Corner legends are placed inside the plot area.
             padding (float): Internal padding in pixels around the legend content and background.
             style (str | Sequence[str] | None): Named style reference or references resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited legend styles.
-            symbolFillColor (str): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
-            symbolOpacity (float): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
+            symbolFillColor (str | ExprRef | dict[str, Any]): Symbol fill color. Overrides inherited fill styling, except when the legend encodes fill or uses fill to encode color.
+            symbolOpacity (float | ExprRef | dict[str, Any]): Symbol opacity. Overrides inherited mark and encoding opacity, except when the legend encodes opacity. Set to 1 to keep a category key opaque while selections dim the data marks.
             symbolSize (float): Symbol size in pixels squared. Overrides inherited styling, except when the legend encodes size.
-            symbolStrokeColor (str): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
+            symbolStrokeColor (str | ExprRef | dict[str, Any]): Symbol stroke color. Overrides inherited stroke styling, except when the legend encodes stroke or uses stroke to encode color.
             symbolStrokeWidth (float): Symbol stroke width in pixels. Overrides inherited styling, except when the legend encodes stroke width.
             symbolType (str): Symbol shape. Overrides inherited styling, except when the legend encodes shape.
             tickCount (float): Desired number of ticks for a quantitative gradient legend. Explicit ``values`` take precedence over this property. __Default value:__ ``5``
@@ -9106,6 +9922,17 @@ class YOffset(Channel):
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -9141,6 +9968,8 @@ class YOffset(Channel):
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -9169,6 +9998,8 @@ class YOffset(Channel):
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -9213,8 +10044,10 @@ __all__ = [
     "UniqueId",
     "X",
     "X2",
+    "X2Offset",
     "XOffset",
     "Y",
     "Y2",
+    "Y2Offset",
     "YOffset",
 ]

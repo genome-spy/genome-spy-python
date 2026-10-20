@@ -85,22 +85,31 @@ class DatumChannelMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -108,7 +117,7 @@ class DatumChannelMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -116,7 +125,7 @@ class DatumChannelMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -124,7 +133,7 @@ class DatumChannelMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -146,7 +155,7 @@ class DatumChannelMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -155,7 +164,7 @@ class DatumChannelMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -171,22 +180,22 @@ class DatumChannelMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -194,7 +203,7 @@ class DatumChannelMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -202,7 +211,7 @@ class DatumChannelMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -210,7 +219,7 @@ class DatumChannelMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -229,7 +238,7 @@ class DatumChannelMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -238,7 +247,7 @@ class DatumChannelMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -410,6 +419,17 @@ class DatumChannelMethodMixin:
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -445,6 +465,8 @@ class DatumChannelMethodMixin:
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -473,6 +495,8 @@ class DatumChannelMethodMixin:
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -548,22 +572,31 @@ class LocusChannelMethodMixin:
         *,
         chromGrid: bool | UndefinedType = Undefined,
         chromGridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        chromGridColor: str | UndefinedType = Undefined,
+        chromGridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromGridDash: Sequence[float] | UndefinedType = Undefined,
         chromGridDashOffset: float | UndefinedType = Undefined,
-        chromGridFillEven: str | UndefinedType = Undefined,
-        chromGridFillOdd: str | UndefinedType = Undefined,
+        chromGridFillEven: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
+        chromGridFillOdd: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromGridOpacity: float | UndefinedType = Undefined,
         chromGridWidth: float | UndefinedType = Undefined,
         chromLabelAlign: Align_T | UndefinedType = Undefined,
-        chromLabelColor: str | UndefinedType = Undefined,
+        chromLabelColor: str
+        | core.ExprRef
+        | dict[str, Any]
+        | UndefinedType = Undefined,
         chromLabelFont: str | UndefinedType = Undefined,
         chromLabelFontSize: float | UndefinedType = Undefined,
         chromLabelFontStyle: FontStyle_T | UndefinedType = Undefined,
         chromLabelFontWeight: FontWeight_T | UndefinedType = Undefined,
         chromLabelPadding: float | UndefinedType = Undefined,
         chromLabels: bool | UndefinedType = Undefined,
-        chromTickColor: str | UndefinedType = Undefined,
+        chromTickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         chromTickDash: Sequence[float] | UndefinedType = Undefined,
         chromTickDashOffset: float | UndefinedType = Undefined,
         chromTickSize: float | UndefinedType = Undefined,
@@ -571,7 +604,7 @@ class LocusChannelMethodMixin:
         chromTicks: bool | UndefinedType = Undefined,
         domain: bool | UndefinedType = Undefined,
         domainCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        domainColor: str | UndefinedType = Undefined,
+        domainColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         domainDash: Sequence[float] | UndefinedType = Undefined,
         domainDashOffset: float | UndefinedType = Undefined,
         domainWidth: float | UndefinedType = Undefined,
@@ -579,7 +612,7 @@ class LocusChannelMethodMixin:
         format: str | UndefinedType = Undefined,
         grid: bool | UndefinedType = Undefined,
         gridCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        gridColor: str | UndefinedType = Undefined,
+        gridColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         gridDash: Sequence[float] | UndefinedType = Undefined,
         gridDashOffset: float | UndefinedType = Undefined,
         gridOpacity: float | UndefinedType = Undefined,
@@ -587,7 +620,7 @@ class LocusChannelMethodMixin:
         labelAlign: Align_T | UndefinedType = Undefined,
         labelAngle: float | UndefinedType = Undefined,
         labelBaseline: Baseline_T | UndefinedType = Undefined,
-        labelColor: str | UndefinedType = Undefined,
+        labelColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         labelFlush: bool | float | UndefinedType = Undefined,
         labelFlushOffset: float | UndefinedType = Undefined,
         labelFont: str | UndefinedType = Undefined,
@@ -609,7 +642,7 @@ class LocusChannelMethodMixin:
         placement: AxisPlacement_T | UndefinedType = Undefined,
         style: str | Sequence[str] | None | UndefinedType = Undefined,
         tickCap: Literal["butt", "round", "square"] | UndefinedType = Undefined,
-        tickColor: str | UndefinedType = Undefined,
+        tickColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickCount: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         tickDash: Sequence[float] | UndefinedType = Undefined,
         tickDashOffset: float | UndefinedType = Undefined,
@@ -618,7 +651,7 @@ class LocusChannelMethodMixin:
         tickWidth: float | UndefinedType = Undefined,
         ticks: bool | UndefinedType = Undefined,
         title: str | None | UndefinedType = Undefined,
-        titleColor: str | UndefinedType = Undefined,
+        titleColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
         titleFit: Literal["point", "range"] | UndefinedType = Undefined,
         titleFont: str | UndefinedType = Undefined,
         titleFontSize: float | UndefinedType = Undefined,
@@ -634,22 +667,22 @@ class LocusChannelMethodMixin:
         Args:
             chromGrid (bool): A boolean flag indicating if chromosome grid lines should be included as part of the axis. __Default value:__ ``false``
             chromGridCap (Literal['butt', 'round', 'square']): The stroke cap for the chromosome grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            chromGridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            chromGridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             chromGridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome grid mark lines.
             chromGridDashOffset (float): The pixel offset at which to start drawing with the chromosome grid mark dash array.
-            chromGridFillEven (str): Fill color of odd chromosomes. __Default value:__ (none)
-            chromGridFillOdd (str): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillEven (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
+            chromGridFillOdd (str | ExprRef | dict[str, Any]): Fill color of odd chromosomes. __Default value:__ (none)
             chromGridOpacity (float): The opacity of the chromosome grid lines. __Default value:__ ``1``
             chromGridWidth (float): Width of the chromosome grid lines. __Default value:__ ``1``
             chromLabelAlign (Align_T): Horizontal text alignment of chromosome name labels. __Default value:__ ``"left"``
-            chromLabelColor (str): Text color of chromosome name labels. __Default value:__ ``"black"``
+            chromLabelColor (str | ExprRef | dict[str, Any]): Text color of chromosome name labels. __Default value:__ ``"black"``
             chromLabelFont (str): The font of chromosome name labels.
             chromLabelFontSize (float): Font size of chromosome name labels, in pixels. __Default value:__ ``13``
             chromLabelFontStyle (FontStyle_T): Font style of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelFontWeight (FontWeight_T): Font weight of chromosome name labels. __Default value:__ ``"normal"``
             chromLabelPadding (float): The padding, in pixels, between chromosome boundary ticks and chromosome name labels. __Default value:__ ``7``
             chromLabels (bool): A boolean flag indicating if chromosome name labels should be included as part of the genome axis. __Default value:__ ``true``
-            chromTickColor (str): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
+            chromTickColor (str | ExprRef | dict[str, Any]): The color of chromosome boundary ticks. __Default value:__ ``"#989898"``
             chromTickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed chromosome boundary ticks. __Default value:__ ``[4, 2]``
             chromTickDashOffset (float): The pixel offset at which to start drawing with the chromosome tick dash array. __Default value:__ ``1``
             chromTickSize (float): The size in pixels of chromosome boundary ticks. __Default value:__ ``18``
@@ -657,7 +690,7 @@ class LocusChannelMethodMixin:
             chromTicks (bool): A boolean flag indicating if chromosome boundary ticks should be included as part of the genome axis. __Default value:__ ``true``
             domain (bool): A boolean flag indicating if the domain (the axis baseline) should be included as part of the axis. __Default value:__ ``true``
             domainCap (Literal['butt', 'round', 'square']): The stroke cap for the domain line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            domainColor (str): Color of axis domain line. __Default value:__ ``"gray"``.
+            domainColor (str | ExprRef | dict[str, Any]): Color of axis domain line. __Default value:__ ``"gray"``.
             domainDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed domain lines.
             domainDashOffset (float): The pixel offset at which to start drawing with the domain dash array.
             domainWidth (float): Stroke width of axis domain line __Default value:__ ``1``
@@ -665,7 +698,7 @@ class LocusChannelMethodMixin:
             format (str): The format specifier pattern for axis labels. Must be a legal d3-format specifier.
             grid (bool): A boolean flag indicating if grid lines should be included as part of the axis. __Default value:__ ``false``
             gridCap (Literal['butt', 'round', 'square']): The stroke cap for the grid line's ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            gridColor (str): Color of grid lines. __Default value:__ ``lightgray``
+            gridColor (str | ExprRef | dict[str, Any]): Color of grid lines. __Default value:__ ``lightgray``
             gridDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed grid mark lines.
             gridDashOffset (float): The pixel offset at which to start drawing with the grid mark dash array.
             gridOpacity (float): The opacity of the grid lines. __Default value:__ ``1``
@@ -673,7 +706,7 @@ class LocusChannelMethodMixin:
             labelAlign (Align_T): Horizontal text alignment of axis tick labels, overriding the default setting for the current axis orientation.
             labelAngle (float): The rotation angle of the axis labels. __Default value:__ ``-90`` for nominal and ordinal fields; ``0`` otherwise.
             labelBaseline (Baseline_T): Vertical text baseline of axis tick labels, overriding the default setting for the current axis orientation. One of ``"alphabetic"`` (default), ``"top"``, ``"middle"``, ``"bottom"``.
-            labelColor (str): The color of the tick label, can be in hex color code or regular color name.
+            labelColor (str | ExprRef | dict[str, Any]): The color of the tick label, can be in hex color code or regular color name.
             labelFlush (bool | float): Indicates whether labels near the beginning or end of the axis should be aligned flush with the scale range. A number specifies the endpoint distance threshold in pixels. ``true`` uses a threshold of one pixel. Flushing is supported for quantitative, index, and locus axes. By default, it is enabled for non-zoomable x axes of these types. On a zoomable x axis with a configured bounded zoom extent, ticks matching the extent boundaries are flushed while they remain visible. Other zoomable ticks and y-axis ticks are not flushed by default. Flushing supports label angles that are multiples of 90 degrees. The automatic behavior is disabled at other angles.
             labelFlushOffset (float): The number of pixels by which to move flush-adjusted labels outward from the axis range. __Default value:__ ``0``
             labelFont (str): The font of the tick label.
@@ -692,7 +725,7 @@ class LocusChannelMethodMixin:
             placement (AxisPlacement_T): Placement of the axis relative to the plotting area. Outside axes reserve layout space outside the plot. Inside axes are mirrored into the plot and do not reserve external layout space. __Default value:__ ``"outside"``.
             style (str | Sequence[str] | None): Named style reference(s) resolved from ``config.style``. If an array is provided, later styles override earlier ones. Set to ``null`` to reset inherited axis styles.
             tickCap (Literal['butt', 'round', 'square']): The stroke cap for the tick lines' ending style. One of ``"butt"``, ``"round"`` or ``"square"``. __Default value:__ ``"butt"``
-            tickColor (str): The color of the axis's tick. __Default value:__ ``"gray"``
+            tickColor (str | ExprRef | dict[str, Any]): The color of the axis's tick. __Default value:__ ``"gray"``
             tickCount (float | ExprRef | dict[str, Any]): A desired number of ticks, for axes visualizing quantitative scales. The resulting number may be different so that values are "nice" (multiples of ``2``, ``5``, ``10``) and lie within the underlying scale's range. An expression reference can use ``axisLength`` for the current length of the axis in pixels. For example, ``{ "expr": "ceil(axisLength / 40)" }`` requests one tick per 40 pixels. __Default value:__ an expression based on ``axisLength``
             tickDash (Sequence[float]): An array of alternating [stroke, space] lengths for dashed tick mark lines.
             tickDashOffset (float): The pixel offset at which to start drawing with the tick mark dash array.
@@ -701,7 +734,7 @@ class LocusChannelMethodMixin:
             tickWidth (float): The width, in pixels, of ticks. __Default value:__ ``1``
             ticks (bool): Boolean value that determines whether the axis should include ticks. __Default value:__ ``true``
             title (str | None): A title for the axis. By default, the title is derived from the encoding title, field, or expression. Set to ``null`` to remove it.
-            titleColor (str): Color of the title, can be in hex color code or regular color name.
+            titleColor (str | ExprRef | dict[str, Any]): Color of the title, can be in hex color code or regular color name.
             titleFit (Literal['point', 'range']): Fitting mode for the axis title. ``"point"`` anchors the title at the center of the axis without constraining its length. ``"range"`` constrains the title to the axis span using ranged text, allowing it to be squeezed to fit and kept visible inside scrollable viewports. __Default value:__ ``"point"``
             titleFont (str): Font of the title. (e.g., ``"Helvetica Neue"``).
             titleFontSize (float): Font size of the title.
@@ -824,6 +857,17 @@ class LocusChannelMethodMixin:
         domainMin: float | UndefinedType = Undefined,
         domainTransition: bool | UndefinedType = Undefined,
         exponent: float | UndefinedType = Undefined,
+        gapPositions: Sequence[float]
+        | Literal["chromosomes"]
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
+        gapWidth: float
+        | core.ExprRef
+        | dict[str, Any]
+        | None
+        | UndefinedType = Undefined,
         interpolate: ScaleInterpolate_T
         | core.ScaleInterpolateParams
         | ScaleInterpolateParamsKwds
@@ -859,6 +903,8 @@ class LocusChannelMethodMixin:
             domainMin (float): Sets the minimum value in the scale domain, overriding the domain property. This property is only intended for use with scales having continuous domains.
             domainTransition (bool): Controls whether domain updates are applied immediately or with a smooth transition. Set this to ``false`` to apply domain updates immediately. The default is ``true``, except for domains that include ``ExprRef``s, which default to ``false`` unless overridden. __Default value:__ ``true``, except ``false`` for ``ExprRef``-driven domains.
             exponent (float): The exponent of the ``pow`` scale.
+            gapPositions (Sequence[float] | Literal['chromosomes'] | ExprRef | dict[str, Any] | None): Boundaries before which to insert grouping gaps on positional index or locus scales. A cut at 10 separates bands 9 and 10. Positions are sorted and deduplicated. ``"chromosomes"`` uses the bound locus assembly's internal chromosome boundaries. An expression may return an array or null. Constant null or an empty array completely disables grouping gaps. __Default value:__ null.
+            gapWidth (float | ExprRef | dict[str, Any] | None): Grouping gap width in CSS pixels, independent of zoom and device pixel ratio. An expression may return a nonnegative number or null. Constant zero or null completely disables grouping gaps. __Default value:__ 6 when gapPositions is supplied, otherwise 0.
             interpolate (ScaleInterpolate_T | ScaleInterpolateParams | ScaleInterpolateParamsKwds): The interpolation method for range values. By default, a general interpolator for numbers, dates, strings and colors (in HCL space) is used. For color ranges, this property allows interpolation in alternative color spaces. Legal values include ``rgb``, ``hsl``, ``hsl-long``, ``lab``, ``hcl``, ``hcl-long``, ``cubehelix`` and ``cubehelix-long`` ('-long' variants use longer paths in polar coordinate spaces). If object-valued, this property accepts an object with a string-valued type property and an optional numeric gamma property applicable to rgb and cubehelix interpolators. For more, see the d3-interpolate documentation. __Default value:__ ``hcl``
             name (str): The name of the scale. Names are optional but allow the scales to be referenced and found with the API.
             nice (bool | float | dict[str, Any]): Extending the domain so that it starts and ends on nice round values. This method typically modifies the scale’s domain, and may only extend the bounds to the nearest round value. Nicing is useful if the domain is computed from data and may be irregular. For example, for a domain of [0.201479…, 0.996679…], a nice domain might be [0.2, 1.0]. For quantitative scales such as linear, ``nice`` can be either a boolean flag or a number. If ``nice`` is a number, it will represent a desired tick count. This allows greater control over the step size used to extend the bounds, guaranteeing that the returned ticks will exactly cover the domain. __Default value:__ ``true`` for unbinned quantitative fields; ``false`` otherwise.
@@ -887,6 +933,8 @@ class LocusChannelMethodMixin:
             "domainMin": domainMin,
             "domainTransition": domainTransition,
             "exponent": exponent,
+            "gapPositions": gapPositions,
+            "gapWidth": gapWidth,
             "interpolate": interpolate,
             "name": name,
             "nice": nice,
@@ -1696,14 +1744,14 @@ def data_format(
 
 def view(
     *,
-    fill: str | UndefinedType = Undefined,
+    fill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     fillOpacity: float | UndefinedType = Undefined,
     shadowBlur: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     shadowColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     shadowOffsetX: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     shadowOffsetY: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     shadowOpacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-    stroke: str | UndefinedType = Undefined,
+    stroke: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     strokeOpacity: float | UndefinedType = Undefined,
     strokeWidth: float | UndefinedType = Undefined,
     strokeZindex: float | UndefinedType = Undefined,
@@ -1713,14 +1761,14 @@ def view(
     """Create a view background configuration.
 
     Args:
-        fill (str): Fill color of the view background.
+        fill (str | ExprRef | dict[str, Any]): Fill color of the view background.
         fillOpacity (float): Opacity of the view background fill.
         shadowBlur (float | ExprRef | dict[str, Any]): The blur radius of the drop shadow in pixels. Higher values produce a more diffuse shadow. **Default value:** ``0``
         shadowColor (str | ExprRef | dict[str, Any]): The color of the drop shadow. Any valid CSS color string is allowed. **Default value:** ``"black"``
         shadowOffsetX (float | ExprRef | dict[str, Any]): The horizontal offset of the drop shadow in pixels. Positive values move the shadow to the right. **Default value:** ``0``
         shadowOffsetY (float | ExprRef | dict[str, Any]): The vertical offset of the drop shadow in pixels. Positive values move the shadow downward. **Default value:** ``0``
         shadowOpacity (float | ExprRef | dict[str, Any]): The opacity of the drop shadow. Value between ``0`` (fully transparent) and ``1`` (fully opaque). **Default value:** ``0`` (disabled)
-        stroke (str): Stroke color of the view background.
+        stroke (str | ExprRef | dict[str, Any]): Stroke color of the view background.
         strokeOpacity (float): Opacity of the view background stroke.
         strokeWidth (float): Stroke width of the view background border.
         strokeZindex (float): Z-order of the background stroke relative to the view content. Values greater than ``0`` render after the view marks. Values less than or equal to ``0`` render before the marks. __Default value:__ ``0``, or ``10`` when the view content is clipped or scrollable.
@@ -1754,7 +1802,7 @@ def view_config(
     continuousWidth: float | UndefinedType = Undefined,
     discreteHeight: float | core.Step | StepKwds | UndefinedType = Undefined,
     discreteWidth: float | core.Step | StepKwds | UndefinedType = Undefined,
-    fill: str | UndefinedType = Undefined,
+    fill: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     fillOpacity: float | UndefinedType = Undefined,
     shadowBlur: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     shadowColor: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
@@ -1762,7 +1810,7 @@ def view_config(
     shadowOffsetY: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     shadowOpacity: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     step: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
-    stroke: str | UndefinedType = Undefined,
+    stroke: str | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     strokeOpacity: float | UndefinedType = Undefined,
     strokeWidth: float | UndefinedType = Undefined,
     strokeZindex: float | UndefinedType = Undefined,
@@ -1775,7 +1823,7 @@ def view_config(
         continuousWidth (float): The default width when the view has a continuous x scale. __Default value:__ ``"container"``
         discreteHeight (float | Step | StepKwds): The default height when the view has a discrete y scale or no y scale. This may be a fixed height or a step size for each discrete domain value. __Default value:__ ``"container"``
         discreteWidth (float | Step | StepKwds): The default width when the view has a discrete x scale or no x scale. This may be a fixed width or a step size for each discrete domain value. __Default value:__ ``"container"``
-        fill (str): Fill color of the view background.
+        fill (str | ExprRef | dict[str, Any]): Fill color of the view background.
         fillOpacity (float): Opacity of the view background fill.
         shadowBlur (float | ExprRef | dict[str, Any]): The blur radius of the drop shadow in pixels. Higher values produce a more diffuse shadow. **Default value:** ``0``
         shadowColor (str | ExprRef | dict[str, Any]): The color of the drop shadow. Any valid CSS color string is allowed. **Default value:** ``"black"``
@@ -1783,7 +1831,7 @@ def view_config(
         shadowOffsetY (float | ExprRef | dict[str, Any]): The vertical offset of the drop shadow in pixels. Positive values move the shadow downward. **Default value:** ``0``
         shadowOpacity (float | ExprRef | dict[str, Any]): The opacity of the drop shadow. Value between ``0`` (fully transparent) and ``1`` (fully opaque). **Default value:** ``0`` (disabled)
         step (float | ExprRef | dict[str, Any]): Default step size for discrete view sizes. __Default value:__ none
-        stroke (str): Stroke color of the view background.
+        stroke (str | ExprRef | dict[str, Any]): Stroke color of the view background.
         strokeOpacity (float): Opacity of the view background stroke.
         strokeWidth (float): Stroke width of the view background border.
         strokeZindex (float): Z-order of the stroke relative to the view content. Values greater than ``0`` render the stroke after the view marks. Values less than or equal to ``0`` render before the marks. The default value depends on the element type.
@@ -1829,6 +1877,9 @@ def config(
     axisTop: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined,
     axisX: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined,
     axisY: core.AxisConfig | AxisConfigKwds | UndefinedType = Undefined,
+    header: core.FacetHeader | dict[str, Any] | UndefinedType = Undefined,
+    headerColumn: core.FacetHeader | dict[str, Any] | UndefinedType = Undefined,
+    headerRow: core.FacetHeader | dict[str, Any] | UndefinedType = Undefined,
     legend: core.LegendConfig | LegendConfigKwds | UndefinedType = Undefined,
     legendTrack: core.LegendConfig | LegendConfigKwds | UndefinedType = Undefined,
     link: core.LinkConfig | LinkConfigKwds | UndefinedType = Undefined,
@@ -1860,6 +1911,9 @@ def config(
         axisTop (AxisConfig | AxisConfigKwds): Defaults for top-oriented axes.
         axisX (AxisConfig | AxisConfigKwds): Defaults for x axes.
         axisY (AxisConfig | AxisConfigKwds): Defaults for y axes.
+        header (FacetHeader | dict[str, Any]): Defaults for facet category labels, using view-title property names.
+        headerColumn (FacetHeader | dict[str, Any]): Defaults for column facet labels, overriding general header defaults.
+        headerRow (FacetHeader | dict[str, Any]): Defaults for row facet labels, overriding general header defaults.
         legend (LegendConfig | LegendConfigKwds): Defaults shared by all legends. Set ``disable`` to ``true`` to suppress automatic legend creation by default.
         legendTrack (LegendConfig | LegendConfigKwds): Defaults for legends of track-like views that use ``index`` or ``locus`` scales on the x channel. __Default value:__ ``{ "style": "track-bottom-legend" }``
         link (LinkConfig | LinkConfigKwds): Defaults for link marks.
@@ -1889,6 +1943,9 @@ def config(
         "axisTop": axisTop,
         "axisX": axisX,
         "axisY": axisY,
+        "header": header,
+        "headerColumn": headerColumn,
+        "headerRow": headerRow,
         "legend": legend,
         "legendTrack": legendTrack,
         "link": link,

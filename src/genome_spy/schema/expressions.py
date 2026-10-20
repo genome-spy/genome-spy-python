@@ -461,6 +461,13 @@ class expr(core.ExprRef, metaclass=_ExprMeta):
         return _function_expression("bandwidth", channel)
 
     @classmethod
+    def bandstep(
+        cls, channel: IntoExpression, extent_: IntoExpression, /
+    ) -> Expression:
+        """Build a GenomeSpy ``bandstep`` expression."""
+        return _function_expression("bandstep", channel, extent_)
+
+    @classmethod
     def zoomLevel(
         cls, channel: IntoExpression | UndefinedType = Undefined, /
     ) -> Expression:

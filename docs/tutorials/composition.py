@@ -83,6 +83,38 @@ horizontal_chart = (
 # composition-horizontal-end
 
 
+# composition-facet-start
+facet_chart = gs.facet(
+    gs.Chart().mark_point(filled=True, size=90).encode(x="position:Q", y="signal:Q"),
+    facet=gs.FacetMapping().column(
+        field="group", header=gs.FacetHeader(fontSize=13, color="#444444")
+    ),
+    data=measurements,
+    spacing=gs.FacetSpacing(column=18),
+)
+# composition-facet-end
+
+
+# composition-surround-start
+surround_chart = gs.surround(
+    gs.Chart().mark_point(filled=True, size=90).encode(x="position:Q", y="signal:Q"),
+    surround=gs.SurroundSides(
+        top=gs.SurroundSideSpec(
+            views=[
+                gs.Chart()
+                .mark_tick(orient="vertical")
+                .encode(x="position:Q")
+                .properties(height=25)
+            ],
+            spacing=4,
+        )
+    ),
+    data=measurements,
+    spacing=8,
+)
+# composition-surround-end
+
+
 # composition-grid-start
 memberships = [
     {"column": 0, "row": 0, "member": True, "columnTotal": 2, "rowTotal": 2},
@@ -178,6 +210,8 @@ grid_chart = (
 
 
 CHARTS = {
+    "facet_chart": facet_chart,
+    "surround_chart": surround_chart,
     "layered_chart": layered_chart,
     "vertical_chart": vertical_chart,
     "horizontal_chart": horizontal_chart,

@@ -30,6 +30,7 @@ class LazyDataMethodMixin:
         | dict[str, Any]
         | core.IndexUrlTemplate
         | UndefinedType = Undefined,
+        tags: Sequence[str] | UndefinedType = Undefined,
         windowSize: float | core.ExprRef | dict[str, Any] | UndefinedType = Undefined,
     ) -> core.Data:
         """Create a lazy ``bam`` data source.
@@ -40,6 +41,7 @@ class LazyDataMethodMixin:
             debounceDomainChange (float | ExprRef | dict[str, Any]): Debounce time for scale-domain driven data updates, in milliseconds. __Default value:__ ``200``
             debounceMode (Literal['domain', 'window']): The debounce mode for data updates. If set to ``"domain"``, domain change events (panning and zooming) will be debounced. If set to ``"window"``, the data fetches initiated by the changes to the visible window (or tile) will be debounced. If your data is small, the ``"window"`` is better as it will start fetching data while the user is still panning around, resulting in a shorter perceived latency. __Default value:__ ``"window"``
             indexUrl (str | ExprRef | dict[str, Any] | IndexUrlTemplate): URL of the index file. When ``url`` is a template, this can be an index URL template using the same placeholder and values. __Default value:__ ``url`` + ``".bai"``.
+            tags (Sequence[str]): SAM auxiliary tags to expose on each read, for example ``["HP", "CB"]``. Each tag is available as a field named ``tag_`` followed by the tag name, for example ``tag_HP``. The field is ``undefined`` when a read lacks the tag. Tags that are not listed are not decoded.
             windowSize (float | ExprRef | dict[str, Any]): Size of each chunk when fetching the BAM file. Data is only fetched when the length of the visible domain smaller than the window size. __Default value:__ ``10000``
         """
         properties = {
@@ -48,6 +50,7 @@ class LazyDataMethodMixin:
             "debounceDomainChange": debounceDomainChange,
             "debounceMode": debounceMode,
             "indexUrl": indexUrl,
+            "tags": tags,
             "windowSize": windowSize,
         }
         defined: dict[str, Any] = {

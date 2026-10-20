@@ -109,7 +109,7 @@ class SchemaBase:
     def to_dict(self, *, validate: bool = True) -> dict[str, Any]:
         """Serialize this schema wrapper to a JSON-compatible dictionary."""
         result = {
-            key: _todict(value)
+            key: normalize_schema_value(value, validate=validate)
             for key, value in self._kwds.items()
             if value is not Undefined
         }
@@ -138,10 +138,6 @@ class SchemaBase:
         """Return this class schema with referenced properties merged in."""
         rootschema = cls._rootschema or cls._schema
         return _resolve_schema_references(cls._schema, rootschema)
-
-
-def _todict(value: Any) -> Any:
-    return normalize_schema_value(value, validate=True)
 
 
 def normalize_schema_value(value: Any, *, validate: bool = False) -> Any:

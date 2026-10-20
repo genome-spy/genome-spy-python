@@ -29,6 +29,7 @@ from genome_spy.channels import Channel
 from genome_spy.data_transformers import _DatasetConsolidation, data_transformers
 from genome_spy.schema import (
     ConcatSpec,
+    FacetSpec,
     GenomeSpyConfig,
     HConcatSpec,
     ImportSpec,
@@ -37,6 +38,7 @@ from genome_spy.schema import (
     MultiscaleSpec,
     Root,
     SCHEMA_VERSION,
+    SurroundSpec,
     UnitSpec,
     VConcatSpec,
 )
@@ -44,12 +46,14 @@ from genome_spy.schema.mixins import (
     ConcatPropertiesMixin,
     ConfigMethodMixin,
     EncodingMethodMixin,
+    FacetPropertiesMixin,
     HConcatPropertiesMixin,
     ImportedViewConstructorMixin,
     LayerPropertiesMixin,
     MarkMethodMixin,
     MultiscalePropertiesMixin,
     ResolutionMethodMixin,
+    SurroundPropertiesMixin,
     TopLevelMergeMixin,
     TransformMethodMixin,
     UnitPropertiesMixin,
@@ -57,10 +61,12 @@ from genome_spy.schema.mixins import (
 )
 from genome_spy.schema.composition import (
     concat as _concat,
+    facet as _facet,
     hconcat as _hconcat,
     layer as _layer,
     multiscale as _multiscale,
     import_view as _import_view,
+    surround as _surround,
     vconcat as _vconcat,
 )
 from genome_spy.schemapi import (
@@ -209,7 +215,9 @@ def _parameter_declaration_identity(value: Parameter | SchemaBase) -> tuple[str,
     return name, True
 
 
-class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin):
+class TopLevelSpec(
+    TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin, ResolutionMethodMixin
+):
     """Shared behavior for top-level GenomeSpy specifications."""
 
     _schema_spec_cls: ClassVar[type[SchemaBase]]
@@ -483,6 +491,16 @@ class TopLevelSpec(TopLevelMergeMixin, EncodingMethodMixin, TransformMethodMixin
                     validate=False,
                     normalize_chart_data=normalize_chart_data,
                 )
+            if isinstance(value, SchemaBase):
+                properties = {
+                    key: child
+                    if key in {"data", "datasets", "templates"}
+                    else nested_view(child)
+                    for key, child in value._kwds.items()
+                }
+                if all(child is value._kwds[key] for key, child in properties.items()):
+                    return value
+                return value.copy(deep=False, **properties)
             if isinstance(value, (list, tuple)):
                 return [nested_view(child) for child in value]
             if isinstance(value, dict):
@@ -1026,7 +1044,7 @@ class Chart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy upd
         return self._configured(value, **kwargs)
 
 
-class _CompositionSpec(TopLevelSpec, ConfigMethodMixin, ResolutionMethodMixin):
+class _CompositionSpec(TopLevelSpec, ConfigMethodMixin):
     _schema_spec_cls: ClassVar[type]
     _children_key: ClassVar[str]
     _kwds: dict[str, Any]
@@ -1059,8 +1077,9 @@ class _CompositionSpec(TopLevelSpec, ConfigMethodMixin, ResolutionMethodMixin):
         )
         children = values.get(self._children_key, Undefined)
         if children is not Undefined:
-            values[self._children_key] = [
-                (
+
+            def child_spec(child: Any) -> dict[str, Any]:
+                return (
                     child._to_dict(
                         include_schema=False,
                         validate=False,
@@ -1069,8 +1088,12 @@ class _CompositionSpec(TopLevelSpec, ConfigMethodMixin, ResolutionMethodMixin):
                     if isinstance(child, TopLevelSpec)
                     else child.to_dict(include_schema=False, validate=False)
                 )
-                for child in children
-            ]
+
+            values[self._children_key] = (
+                child_spec(children)
+                if self._children_key == "spec"
+                else [child_spec(child) for child in children]
+            )
         spec = self._schema_spec_cls(**values).to_dict(validate=False)
         return self._validated_root_spec(
             spec,
@@ -1153,6 +1176,24 @@ class MultiscaleChart(  # type: ignore[misc]  # Generated copy narrows SchemaBas
     _children_key = "multiscale"
 
 
+class FacetChart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy updates.
+    FacetPropertiesMixin, _CompositionSpec, FacetSpec
+):
+    """A plot repeated by category with shared scales and axes."""
+
+    _schema_spec_cls = FacetSpec
+    _children_key = "spec"
+
+
+class SurroundChart(  # type: ignore[misc]  # Generated copy narrows SchemaBase.copy updates.
+    SurroundPropertiesMixin, _CompositionSpec, SurroundSpec
+):
+    """A central plot with aligned marginal panels."""
+
+    _schema_spec_cls = SurroundSpec
+    _children_key = "spec"
+
+
 class ImportedView(ImportedViewConstructorMixin, ImportSpec):
     """A child-view import that can participate in chart composition."""
 
@@ -1213,11 +1254,25 @@ def _view_from_dict(
         "vconcat",
         "hconcat",
         "concat",
+        "facet",
+        "surround",
     ):
         if structural_key not in values:
             continue
         if structural_key == "mark":
             return Chart(schema_url=schema_url, **values)
+
+        if structural_key in {"facet", "surround"}:
+            raw_spec = values.pop("spec", None)
+            if not isinstance(raw_spec, Mapping):
+                raise TypeError(f"{structural_key} spec must be a view specification.")
+            child_spec = _view_from_dict(
+                dict(raw_spec), schema_url=schema_url, allow_import=True
+            )
+            chart_class = FacetChart if structural_key == "facet" else SurroundChart
+            return chart_class(
+                spec=cast(Any, child_spec), schema_url=schema_url, **values
+            )
 
         raw_children = values.pop(structural_key)
         if not isinstance(raw_children, list):
@@ -1259,8 +1314,10 @@ def _view_from_dict(
 
 
 concat = _concat
+facet = _facet
 hconcat = _hconcat
 layer = _layer
 multiscale = _multiscale
+surround = _surround
 import_view = _import_view
 vconcat = _vconcat

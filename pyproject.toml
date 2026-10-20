@@ -113,7 +113,7 @@ artifacts = [
 "skills/create-genomespy-visualization" = "skills/create-genomespy-visualization"
 
 [tool.genome-spy]
-core-version = "1.0.0"
+core-version = "1.2.0"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.2.0",
   "definitions": [
     "AggregateOp",
     "AggregateParams",
@@ -73,6 +73,7 @@
     "DataFormat",
     "DataSource",
     "DebouncedExprParameter",
+    "DendrogramParams",
     "DirectionDef",
     "Displace1DParams",
     "Displace2DParams",
@@ -88,6 +89,11 @@
     "ExprFilterParams",
     "ExprParameter",
     "ExprRef",
+    "FacetFieldDef",
+    "FacetHeader",
+    "FacetMapping",
+    "FacetSpacing",
+    "FacetSpec",
     "FadedMultiscaleStops",
     "Field",
     "FieldDefWithoutScale",
@@ -226,12 +232,15 @@
     "ScalarDomain",
     "Scale",
     "ScaleConfig",
+    "ScaleGroupsData",
     "ScaleInterpolate",
     "ScaleInterpolateParams",
     "ScaleType",
     "SchemeParams",
     "SearchDef",
     "SecondaryChromPosDef",
+    "SecondaryOffsetChannel",
+    "SecondaryOffsetDef",
     "SecondaryPositionalChannel",
     "SelectionDomainRef",
     "SelectionExtent",
@@ -255,6 +264,11 @@
     "StringDatumDef",
     "StringFieldDef",
     "StyleConfig",
+    "SurroundPlotSpec",
+    "SurroundSide",
+    "SurroundSideSpec",
+    "SurroundSides",
+    "SurroundSpec",
     "TabixTsvData",
     "TemplateImport",
     "TextConfig",
@@ -340,12 +354,19 @@
     "uniqueId",
     "x",
     "x2",
+    "x2Offset",
     "xOffset",
     "y",
     "y2",
+    "y2Offset",
     "yOffset"
   ],
   "transforms": [
+    {
+      "schema": "DendrogramParams",
+      "type": "dendrogram",
+      "method": "transform_dendrogram"
+    },
     {
       "schema": "AlignmentMismatchesParams",
       "type": "alignmentMismatches",
@@ -610,8 +631,10 @@
     "mark",
     "layer",
     "multiscale",
+    "facet",
     "vconcat",
     "hconcat",
-    "concat"
+    "concat",
+    "surround"
   ]
 }
