@@ -12,6 +12,11 @@ workflow tests and Ruff checks pass. Local notebook edits remain unchanged.
 
 ## Current position and next work
 
+The queue and callable inventory below own current progress. Workspace overviews
+link here instead of maintaining separate counts or feature queues. Repository
+instructions no longer require absent ignored planning files; retained checkpoints
+below remain historical evidence, not competing lifecycle states.
+
 **Available:** shared categorical/continuous 2D embeddings (UMAP, t-SNE, diffusion
 maps, saved graph layouts, PCA and custom bases), cell/gene scatter plots, dotplot/matrixplot and cell heatmaps with dendrograms,
 supplied numeric matrices, clustermaps, standalone dendrograms and correlation matrix development previews.

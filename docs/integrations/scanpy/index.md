@@ -801,7 +801,7 @@ remain visible. Function coverage and parameter coverage are separate.
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
 
-All entries except the nineteen plotting previews and settings helpers remain required future integration
+All entries except the available plotting previews and settings helpers remain required future integration
 work. Settings remain owned by Scanpy. The external.pl namespace is separate
 from this core inventory.
 

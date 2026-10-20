@@ -57,9 +57,8 @@ palettes and Scanpy's public default palette lists, go directly to native scales
 GenomeSpy maps continuous values and draws the guides. Plotting retains source
 measurements; it does not compute embeddings, rankings, or new scientific results.
 
-UMAP, dotplots/matrixplots and cell heatmaps with dendrograms, standalone trees and correlation
-matrices are currently implemented as previews. Each future family
-gets its own chart module and reuses compatible AnnData access, category/color handling, and
+The [status ledger](STATUS.md#public-callable-coverage) records available previews
+and remaining families. New chart families reuse compatible AnnData access, category/color handling, and
 plotting computations. A separate data module per family is optional: add one
 only when that family needs distinct preparation that merits its own module.
 Share common operations directly; there is no requirement to implement another
@@ -94,8 +93,8 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
   from the dataset’s existing PCA representation. Clustermap then clusters all
   700 individual cells and the same ten raw-snapshot marker genes using public
   SciPy linkage, rather than reusing a group-profile tree.
-  A final section reads the packaged logreg scores and shows ranked dotplot,
-  matrixplot and heatmap examples using the same summaries, trees and interactions.
+  A final section reads packaged logreg scores and explicitly computes a separate
+  ranking for statistic colors, reusing summaries, trees and interactions.
 
 These adapt supported portions of the official core and advanced tutorials.
 Keep related examples together within each workflow, without placeholder cells

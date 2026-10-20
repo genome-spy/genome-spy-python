@@ -82,8 +82,4 @@ explicitly asked.
 | `integrations/README.md` | Integration layout, plan lifecycle, and clearance rules |
 | `integrations/<library>/STATUS.md` | Current implementation, next slice, blockers, and retained evidence |
 | `integrations/<library>/PLAN.md` | Planning or extending a library integration; update status with implementation |
-| `plans/implementation_plan.md` | Starting implementation; understand phases and open questions |
-| `plans/deferred.md` | Adding scope; avoid intentionally deferred work |
-| `plans/architecture.md` | Changing public API shape, schema strategy, or notebook integration |
-| `plans/tmp_repo_index.md` | Using `tmp/` repos for wrapper/widget design |
-| `plans/project_bootstrap.md` | Updating or extending the initial scaffold |
+| `plans/` | Optional ignored local context; may be absent. Tracked integration plans and status own current scope and delivery. |
