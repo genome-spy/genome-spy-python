@@ -535,6 +535,11 @@ commit evidence and unmet verification gates live in the
   numeric normalization/center/callable bounds and missing-category schemes.
   Recheck native primitives and add focused tests per option; do not sample
   Matplotlib colors or accept its normalization objects.
+  The next continuous-colorbar increment preserves `colorbar_loc=None`/`"right"`
+  and adds `"left"`, `"top"`, `"bottom"` through native guide orientation. Verify
+  categorical guides, multi-panel bounds, collected/native configuration overrides,
+  hover/zoom and unchanged transported records. It does not alter scatter's
+  distinct signature or resolve C11's categorical multi-column extent bug.
 
 Targets: `gsc.pl.embedding(adata, basis="tsne", color="cell_type", show=False)`
 and `gsc.pl.pca_overview(adata, show=False)` after explicit Scanpy PCA.
@@ -669,6 +674,10 @@ Python linkage/KDE/graph computation cannot supply a missing renderer primitive.
   images and 3D as required; review tree/axis alignment, typography, outlines,
   missing colors and numeric normalization individually. No local bundle patches.
   Real Core bugs need an upstream reproducer and observed evidence.
+  C11 retains a minimal native legend regression: Core 1.2 clips later columns
+  of vertical symbol legends. Recheck a released fix before automatic category-
+  guide fitting; keep M07.a/b's complete-chart gate open independently of passed
+  resource checks.
 - M14.b: adopt the released container layout and improved faceting through the
   wrapper's normal runtime/schema-generation path. The merged
   [container refactor #581](https://github.com/genome-spy/genome-spy/pull/581) and

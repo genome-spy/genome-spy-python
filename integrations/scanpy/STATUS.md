@@ -41,7 +41,8 @@ supplied trees, ordered CSS annotation tracks and native hover, with explicit
 tile and pairwise-distance limits. It shares numeric tiles and tree geometry
 rather than constructing Seaborn/Matplotlib objects.
 Scanpy **1.11.5** is the only accepted version;
-bundled GenomeSpy Core is **1.0.0**. This is not full Scanpy plotting compatibility.
+bundled GenomeSpy Core is **1.2.0** in genome-spy-python **0.7.0**.
+This is not full Scanpy plotting compatibility.
 
 Implementation is in
 [`src/genome_spy/integrations/scanpy/`](../../src/genome_spy/integrations/scanpy/).
@@ -61,9 +62,16 @@ all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: close the M06/M07 resource gates, then scope M07.d's next 2D option
-increment.** PCA overview now reuses the three parent charts; its verification is
-recorded below. Required verification of existing previews remains open independently:
+**Next work: M07.d's native continuous-colorbar placement increment.** Preserve
+the existing `colorbar_loc=None`/`"right"` behavior and categorical guides while
+adding `"left"`, `"top"`, and `"bottom"` to the shared embedding entry points.
+Verify default and explicit guide orientation, multi-panel bounds, collected
+guide overrides, hover/zoom and unchanged records. Scatter's distinct signature
+stays unchanged. Default categorical-guide fitting is separately blocked by C11;
+keep its upstream reproducer and recheck it on a released Core fix.
+
+The M06/M07 resource gates now have fresh seven-workload evidence below. This
+does not close M07.a/b's newly observed categorical-guide rendering gap:
 
 Core 1.2.0, its generated composition APIs and the published heatmap example are
 now adopted; see the [upgrade record](#core-12-runtime-adoption). M14.b's native
@@ -72,9 +80,9 @@ inside their own track viewports, independently of the legacy overlay behavior.
 
 | Slice | Lifecycle state | Commit/evidence | Remaining work before Verified/Closed |
 | --- | --- | --- | --- |
-| M06.a–d stored ranking | Implemented | `2800f23`, `f043299`; [checks and observations](#m06ac-stored-ranking-preview) | Record resource evidence for the new rank-label renderer; document whether unchanged parent dot/matrix/heatmap resource workloads cover the ranked wrappers. Do not substitute the older parent run without that assessment. |
-| M07.a shared embeddings | Implemented | `39b4d7d`; [checks and Python measurement](#review-follow-up-and-m07a-shared-2d-embeddings) | Close resource gate 4 with a representative multi-panel browser workload or an explicit UMAP-baseline reuse assessment: covered paths/workload, machine/runtime, render/interaction latency, retained memory and supported envelope. |
-| M07.b scatter | Implemented | `0fdcc02`; [checks and Python measurement](#m07b-scatter) | Complete the same browser resource gate for cell and gene orientations, including a realistic multi-panel case. |
+| M06.a–d stored ranking | Closed (bounded preview) | `2800f23`, `f043299`; [resource closure and reuse assessment](#m06m07-resource-verification) | Broader parameter/storage/typography/export limits remain M14; ranked distributions/tracks remain M08/M09 and builders remain M13. |
+| M07.a shared embeddings | Implemented; resource gate verified | `39b4d7d`; [fresh eight-panel workload](#m06m07-resource-verification) | C11 blocks reliable default multi-column categorical-guide fitting. Existing parameter/storage limits retain M07.d/M14 owners; resource verification alone does not close the preview. |
+| M07.b scatter | Implemented; resource gate verified | `0fdcc02`; [cell and gene workloads](#m06m07-resource-verification) | Large default category symbols can overflow short panels; C11 blocks the multi-column correction. Keep this complete-chart gate open independently of passed resource checks. |
 | M07.c loadings increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-stored-pca-loadings) | Broader storage/typography/export remain M14. Variance and overview are separate increments; this does not close M07. |
 | M07.c variance increment | Closed (bounded preview) | [Contract, tests and resources](#m07c-stored-pca-variance-ratios) | Broader storage/typography/export remain M14; this does not close the overview or M07. |
 | M07.c overview increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-pca-overview) | Parent storage, typography and export limits remain M14; broader embedding options remain M07.d. This does not close M07.a/b resource gates. |
@@ -100,8 +108,8 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
 | M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
 | M05 heatmap/matrix/clustermap | In progress; bounded previews verified | Heatmap/matrix/clustermap and shared grid interactions have linked evidence below. M05.d is Planned; M05.f's native strip-viewport migration awaits M14.b. Broader kwargs/delivery remain M14. |
-| M06 ranking/ranked summaries | Implemented; resource verification pending | M06.a–d runtime, semantic/chart/workflow checks exist; gate 4 remains in the current queue. Compatibility limits remain M14; native builders remain M13. |
-| M07 embeddings/scatter/PCA | In progress | M07.a/b are Implemented with resource gates open; M07.c loadings/variance/overview previews are Closed and broader options are Planned. See the current queue for evidence and remaining gates. |
+| M06 ranking/ranked summaries | Closed (bounded preview) | M06.a–d have semantic/chart/workflow/interaction and resource evidence. Broader compatibility remains M14; native builders remain M13 and ranked distributions/tracks remain M08/M09. |
+| M07 embeddings/scatter/PCA | In progress | M07.a/b resource gates pass; categorical-guide rendering remains open under C11. M07.c loadings/variance/overview previews are Closed and broader options are Planned. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
 | M10 QC diagnostics | Planned | Highest expression, variable genes, legacy dispersion and Scrublet distributions. |
@@ -203,7 +211,93 @@ checks** (excluding docs/codegen), **219 integration browser checks**, and
 **32 JavaScript checks** pass. Ruff formatting/lint and mypy pass. The browser
 run includes complete registered charts, hover, navigation, selections, resizing,
 SVG/raster exports and offline delivery across the existing plot families.
-Existing resource and parameter-closure gates remain open.
+At runtime adoption, resource and parameter-closure gates remained open.
+The later resource verification below closes gate 4; parameter and rendering
+limits retain their explicit owners.
+
+## M06/M07 resource verification
+
+Seven fresh, sequential workloads on the unchanged `c659bf2` runtime close
+resource gate 4 for the stated M06/M07 previews. Reproduction commands, seeds,
+allocation scopes and raw measurements are retained in
+[`m06-m07-performance.json`](../../tests/integrations/scanpy/fixtures/m06-m07-performance.json).
+The [workspace commands](README.md#validation) run the maintained benchmarks;
+no ignored research files or generated media are required.
+
+Machine/runtime: Apple M5, 10 logical CPUs, 32 GiB RAM, macOS 26.6.2 arm64,
+Python 3.11.15, Scanpy 1.11.5, AnnData 0.12.19, NumPy 2.4.6, pandas 2.3.3,
+SciPy 1.17.1, Core 1.2.0 and Chromium 156.0.8078.4, DPR 1.
+These are local observations with allocation tracing, not portable timing limits.
+
+| Workload | Displayed output | JSON MiB | Browser render s | JS heap MiB after GC |
+| --- | --- | --- | --- | --- |
+| PCA | 20,000 cells, eight 300 × 300 panels | 15.065 | 7.799 | 85.57 |
+| Cell scatter | 20,000 cells, eight 300 × 300 panels | 15.046 | 9.375 | 87.62 |
+| Gene scatter | 20,000 genes, eight 300 × 300 panels | 12.566 | 9.172 | 85.57 |
+| Stored gene ranks | Six 300 × 300 panels, 180 labels | 0.016 | 3.476 | 9.35 |
+| Ranked dotplot, stored scores | 50 groups × 40 markers | 0.197 | 1.687 | 8.28 |
+| Ranked matrixplot, stored scores | 50 groups × 40 markers | 0.144 | 1.503 | 7.68 |
+| Ranked cell heatmap | 5,000 cells × 50 markers | 24.993 | 15.884 | 27.01 |
+
+The point workloads use a 20,000 × 20,000 CSR matrix with 20 sparse samples per
+cell. PCA selects PC2/PC50 from 50 resident components. Each call sends one shared
+table, four unique expression colors and categorical/continuous annotations.
+Guards permit only four 20,000 × 1 columns for PCA/cell scatter, or four
+1 × 20,000 rows for gene scatter; the full matrix never densifies. All eight
+plot bounds fit the viewport (2,800 × 1,800 for PCA; 4,000 × 1,800 for scatter).
+Sixteen isolated source IDs are checked by actual hover. Median hover is
+about 79 ms after the pointer pause; wheel responses are 0.25–0.78 s.
+Warm plotting takes 0.046–0.062 s, Arrow preparation about 0.8 s, and validated
+JSON takes 24–25 s under tracing. JSON is 12.6–15.1 MiB versus 4.3–4.4 MiB of Arrow;
+browser timings measure JSON dispatch, not an Arrow widget roundtrip. Peak traced
+allocations are 126–134 MiB and retained allocations, including both transports,
+83–88 MiB. Larger/chunked transport remains M05.d; this does not establish
+100,000-cell, eight-panel interactive performance.
+
+M06's six-panel rank renderer reads stored 20,000-gene lists from six groups over
+an unread 100,000 × 20,000 sparse source. Cold plotting setup takes 3.452 s and
+validated JSON 0.928 s; traced peak/retained allocations are 76.9/76.8 MiB,
+including optional plotting imports. Hover checks the correct gene on every
+panel in 0.56–0.66 s including the deliberate 450 ms pointer pause. Render timing
+includes the entrance animation; the probe waits for the final canvas geometry.
+
+Ranked dot/matrix workloads use 100,000 cells, 20,000 sparse genes and complete
+stored lists for 50 groups. Cold preparation is 6.3–6.5 s and traced peaks about
+258 MiB. Dotplot densifies exactly 100,000 × 40 selected values; matrixplot's
+authoritative score table requires only a 0 × 40 feature-validation read.
+Heatmap densifies exactly 5,000 × 50 values at its existing 250,000-tile limit;
+preparation is 6.262 s and peak traced allocation 108.8 MiB. Hover is
+96–211 ms after the pointer pause, and y-wheel response is 0.18–1.24 s.
+
+Reuse assessment: default expression-colored ranked wrappers still call the
+same parent dotplot/matrixplot/heatmap functions after stored-marker selection.
+Existing parent selected-access, means/scaling and tree resource observations
+remain applicable to those unchanged paths. The new score-colored dotplot adds
+the full stored-statistic table and still reads expression for fractions; the
+score-colored matrixplot independently covers the metadata-only path. Both
+exercise the same 2,000 native marks as the parent workloads on Core 1.2.
+The fresh ranked heatmap covers the full parent tile budget. Other stored
+statistics alter selected numeric values, not table cardinality or the renderer;
+semantic/source tests cover all six metrics. No old parent browser number is
+presented as a fresh measurement. The PCA renderer is the unchanged shared
+two-coordinate pipeline used by UMAP/t-SNE/diffmap/saved graph layouts; prior
+semantic, complete-chart, linked-selection and workflow evidence still applies.
+
+M06 closes only its documented ranking/ranked-summary preview. M07.a/b resource
+gates pass, but the captures expose an independent complete-chart gap: large
+scatter legends overflow short panels, while native multi-column legends clip
+later columns under Core 1.2 (C11). Those previews remain Implemented until that
+rendering gate passes. The attempted automatic-column workaround was removed;
+no runtime or bundled JavaScript changed. The strict expected-failure
+[native reproducer](../../tests/integrations/scanpy/browser/test_native_legend_extent.py)
+guards rechecking a released fix. Local plans remain **retain**.
+
+Validation: all seven resource workloads, **218 targeted semantic/source checks**
+and **50 ranking/embedding/scatter browser regressions** pass; C11 is one strict
+expected failure. Ruff formatting/lint and mypy pass. Runtime sources did not
+change, so the canonical-workflow and broader integration evidence in the Core
+1.2 upgrade record remains applicable; notebook edits were not modified or run.
+The unrelated full repository/integration suites and Sphinx build were not rerun.
 
 ## M05.f category-strip tooltips — layout migration
 
@@ -298,7 +392,8 @@ presentation limits. M08/M09 own ranked distributions/tracks. No plan is cleared
 
 ## M06.d stored statistic colors
 
-Implemented preview (`f043299`; resource gate pending):
+Delivered in `f043299`; resource closure is now recorded
+[above](#m06m07-resource-verification):
 `rank_genes_groups_dotplot` and `rank_genes_groups_matrixplot`
 accept all six pinned `values_to_plot` options: scores, logfoldchanges, pvals,
 pvals_adj, log10_pvals and log10_pvals_adj. The log variants use −log10(p).
@@ -341,9 +436,9 @@ read four expression columns and send 32 summaries; the full matrix is never
 densified. The earlier resource benchmark was not repeated. The unrelated full
 repository suites and documentation build were not rerun.
 
-Clearance: retain the live plan and status. Semantic/chart/workflow checks passed;
-M06 resource closure remains in the current queue. M13 retains builders and M14
-the named compatibility limits. No working plan is cleared.
+Clearance: retain the live plan and status. The subsequent resource verification
+closes this bounded preview. M13 retains builders and M14 the named compatibility
+limits. No working plan is cleared.
 
 ## Review follow-up and M07.a shared 2D embeddings
 
@@ -356,7 +451,7 @@ the statistic pairs needed for other groups. No cache is shared across calls.
 The metadata path retains raw/layer/symbol validation, categories and duplicate
 slots. Getter-count and cross-group-value regression tests cover both changes.
 
-Implemented in `39b4d7d` (resource gate pending): M07.a generalizes the three UMAP
+Delivered in `39b4d7d`: M07.a generalizes the three UMAP
 modules in place to `_embedding_data.py`, `_embedding_chart.py` and
 `_embedding_interactions.py`, with shared styles.
 `embedding`, `tsne`, `diffmap`, `draw_graph`, `pca` and `pca_scatter` add six public
@@ -402,13 +497,14 @@ took 10.237 s and produced 26,797,446 bytes, with 249.39 MiB peak traced Python
 allocation. Input construction is excluded. This is a local observation, not a
 capacity guarantee; large-data transport remains M05.d.
 
-Clearance: retain. M07.a remains Implemented until its browser resource gate
-passes; functionality and the measurements above are retained evidence, not full
-verification. Existing family/renderer limits retain their named owners.
+Clearance: retain. The later [resource verification](#m06m07-resource-verification)
+closes resource gate 4. M07.a remains Implemented because C11 leaves a
+complete-chart guide-layout gate open. Existing family/renderer limits retain
+their named owners.
 
 ## M07.b scatter
 
-Implemented in `0fdcc02` (resource gate pending): `gsc.pl.scatter` retains pinned
+Delivered in `0fdcc02`: `gsc.pl.scatter` retains pinned
 Scanpy's separate signature and supports observation/gene x/y coordinates, exact X_ basis lookup,
 per-axis x/y/color layers, categorical/numeric/literal colors and multiple panels.
 It uses public AnnData vector access, existing embedding identity/panel fields,
@@ -447,8 +543,9 @@ A seed-17 local metadata scatter over sparse 100,000-cell × 20,000-gene AnnData
 prepared in **0.047 s**, serialized validated JSON in **8.420 s**, and produced
 **23,714,299 bytes**, with **241.85 MiB** peak traced Python allocation. Source
 construction is excluded; expression was not read. This is a local observation,
-not a capacity guarantee. The large chart was not measured in a browser; that
-missing verification remains M07.b. M05.d covers larger/chunked tile transport.
+not a capacity guarantee. At that checkpoint the large chart was not measured
+in a browser; the later eight-panel workload closes representative browser
+resource verification. M05.d covers larger/chunked tile transport.
 Generated media remains outside Git.
 
 Limits: only finite numeric coordinates, resident expression, scalar sizes and
@@ -460,8 +557,9 @@ Native guide ticks, typography and automatic panel spacing are not pixel-identic
 to Matplotlib. Scatter does not yet expose linked brushing/Python membership.
 
 Clearance: retain the live plan/status and permanent tests/reference provenance.
-M07.b remains Implemented until its browser resource gate passes. No working
-plan becomes eligible for removal, and full-family closure is not claimed.
+The later [resource verification](#m06m07-resource-verification) closes resource
+gate 4; M07.b remains Implemented because C11 leaves guide fitting unresolved.
+No working plan becomes eligible for removal, and full-family closure is not claimed.
 
 ### Native legend customization follow-up (2026-10-20)
 
@@ -644,8 +742,8 @@ the tested workload; they are not portable timing limits. This adds composed
 PCA evidence; reuse against older M06/M07.a/b gates still needs the explicit
 assessment recorded in the current queue.
 
-Next work is the existing resource verification queue followed by M07.d option
-closure. Parent storage, typography and export limits remain M14. Clearance:
+The subsequent resource verification closes gate 4; the current queue now scopes
+M07.d and records C11. Parent storage, typography and export limits remain M14. Clearance:
 retain the live plan/status and permanent source/tests/contracts; no working
 document is eligible for removal.
 
@@ -1450,6 +1548,7 @@ affected slice.
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots, both orientations, optional zoom and duplicate-slot highlighting verified; extend checks with later families |
 | C09 | Core 1.0 band rulers failed during initial WebGL rendering; the adopted Core 1.2 capability needs a focused recheck | Optional shaded row/column guides | Keep the native center crosshair until shaded-guide behavior is verified against Core 1.2. [PR #586](https://github.com/genome-spy/genome-spy/pull/586) records the upstream fix and regression evidence. |
 | C10 | Adapter bands still sit outside their own viewport; Core 1.2 passes the existing enabled-hover/navigation checks | Heatmap/clustermap category-strip hover M05.f; layout debt owned by M14.b | Move bands into native aligned track viewports and verify geometry/hover after zoom/resize. No patched bundle or custom listeners. |
+| C11 | Core 1.2 allocates one column's width to vertical multi-column legends; subsequent columns clip in WebGL and SVG. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | [Minimal native regression](../../tests/integrations/scanpy/browser/test_native_legend_extent.py) strictly xfails on 1.2.0: twelve entries in two columns export only six labels. Upstream `legendView.js:getLegendExtent` uses `maxEntryWidth` instead of the measured full `maxX` for the vertical symbol legend. Recheck a released Core fix before automatic column fitting; no local bundle patch. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental
@@ -1462,6 +1561,11 @@ latest delivery commits, and corrected premature Verified claims for M06/M07.
 Required browser resource evidence stays with the originating slices; it was
 not completed by the scatter implementation or deferred to tile transport.
 No acceptance gate was waived and no research/working plan was cleared.
+
+Resource reconciliation (2026-10-20): seven maintained benchmark workloads and
+explicit parent-path reuse close gate 4 for M06/M07. M06's bounded preview closes;
+M07.a/b remain Implemented because the newly reproduced C11 guide-layout gap
+leaves complete-chart verification open. No plan is eligible for clearance.
 
 No research artifacts are deleted by this update. Paths below can be absent in
 a fresh clone; active delivery depends only on tracked files. The ignored

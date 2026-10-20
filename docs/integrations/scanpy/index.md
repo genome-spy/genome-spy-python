@@ -205,6 +205,11 @@ scatter legend symbol area of 300 points² (about 24 pixels across). Native
 `symbolSize` uses logical pixel area, so 64 gives smaller symbols without changing
 the plotted points. Panel `height` sizes the plot area; external guides add height.
 
+Core 1.2 clips later columns of vertical categorical legends. Large scatter
+symbols can also overflow a short single-column guide. The compact horizontal
+configuration above avoids these cases. Automatic default-guide fitting remains
+open under C11 in the integration status ledger; point data and hover are unaffected.
+
 | Parameters | Current behavior |
 | --- | --- |
 | `x`, `y`, `color` | Numeric coordinates, categorical/numeric annotation or expression colors, opaque CSS names/hex, or multiple color panels. Default color is gray. Annotation fields take precedence over expression and literal colors. Variable hover identifies genes. |
@@ -454,14 +459,12 @@ tick labels reveal more names as slots grow. Defaults remain
 `zoom=False`, `show_values=False` and `highlight=False`.
 
 Category-strip tooltips use the native default handler and the same `hover` flag
-as tiles. They do not currently work: the adapter draws the strips outside the
-matrix viewport with clipping disabled, and bundled Core 1.0.0 rejects those
-hits. The planned correction is native aligned side tracks, with each strip
-inside its own viewport, after the released layout/schema upgrade and review of
-the forthcoming official heatmap examples. Tile tooltips work normally.
-[Core PR #587](https://github.com/genome-spy/genome-spy/pull/587) investigates
-outside-plot picking separately; the heatmap migration does not depend on it.
-There is no patched bundle or custom hover listener in the integration.
+as tiles. They work with the bundled Core 1.2.0 runtime, including after zoom and
+pan. The adapter still draws these strips outside the matrix viewport with
+clipping disabled. M14.b/M05.f will move them into native aligned surround tracks,
+with each strip inside its own viewport, using the released clustered-heatmap
+example as the layout reference. There is no patched bundle or custom hover
+listener in the integration.
 
 `show_values` uses native `fitToBand` text, shared tile records and the plotted
 value after any log transform/scaling. Values fade in as cells become large

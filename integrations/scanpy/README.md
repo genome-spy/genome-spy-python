@@ -150,7 +150,20 @@ uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot ma
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot matrixplot --dendrogram --browser --output /tmp/trees.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot heatmap --browser --output /tmp/heatmap.json
 uv run --no-sync python -m tests.integrations.scanpy.benchmark --help
+uv run --no-sync python -m tests.integrations.scanpy.benchmark --plot pca --cells 20000 --panels 8 --browser --output /tmp/scanpy-pca.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark --plot scatter --cells 20000 --panels 8 --browser --output /tmp/scanpy-scatter.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark --plot scatter-genes --cells 20000 --panels 8 --browser --output /tmp/scanpy-scatter-genes.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_ranked --output /tmp/scanpy-rank-labels.json
+uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --ranked --plot dotplot --browser --output /tmp/scanpy-ranked-dotplot.json
 ```
+
+Run resource workloads sequentially in fresh processes. `--ranked` also works with
+`--plot matrixplot` and `--plot heatmap`: dot/matrix colors use stored scores,
+while heatmaps retain cell expression. Sparse-allocation guards check selected
+columns or rows; statistic-colored matrixplots only validate features on zero
+rows. Reports record their allocation/timing scopes, including optional imports,
+JSON dispatch, pointer pauses and garbage collection. Keep screenshots temporary;
+retained resource metadata is a local observation, not a portable timing limit.
 
 Reference regeneration is a deliberate compatibility update, not a prerequisite
 for using the integration. Notebook examples use real packaged data; synthetic

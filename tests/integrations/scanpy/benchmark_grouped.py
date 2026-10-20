@@ -24,6 +24,7 @@ def main() -> None:
         "--plot", choices=("dotplot", "matrixplot", "heatmap"), default="dotplot"
     )
     parser.add_argument("--dendrogram", action="store_true")
+    parser.add_argument("--ranked", action="store_true")
     args = parser.parse_args()
     import anndata as ad
     import numpy as np
@@ -31,6 +32,7 @@ def main() -> None:
     from scipy import sparse
 
     import genome_spy.integrations.scanpy as gsc
+    from genome_spy.schema import SCHEMA_VERSION
 
     rng = np.random.default_rng(0)
     cells, genes, markers, groups = 100_000, 20_000, 40, 50
@@ -53,30 +55,60 @@ def main() -> None:
     adata.var_names = [f"g{i}" for i in range(genes)]
     if args.dendrogram:
         adata.obsm["X_pca"] = rng.standard_normal((cells, 20), dtype=np.float32)
+    if args.ranked:
+        labels = [str(i) for i in range(groups)]
+        names = adata.var_names.to_numpy()
+        scores = np.linspace(100, 1, genes)
+        adata.uns["rank_genes_groups"] = {
+            "params": {
+                "groupby": "group",
+                "method": "t-test",
+                "reference": "rest",
+                "use_raw": False,
+            },
+            **{
+                key: np.rec.fromarrays([values] * groups, names=labels)
+                for key, values in {
+                    "names": names,
+                    "scores": scores,
+                    "logfoldchanges": scores / 2,
+                    "pvals": np.linspace(0.00001, 0.9, genes),
+                    "pvals_adj": np.linspace(0.0001, 1, genes),
+                }.items()
+            },
+        }
     original, shapes = sparse.csr_matrix.toarray, []
 
     def selected_only(matrix, *positional, **kwargs):
         shapes.append(list(matrix.shape))
-        assert matrix.shape == (cells, markers)
+        rows = 0 if args.ranked and args.plot == "matrixplot" else cells
+        assert matrix.shape == (rows, markers), matrix.shape
         return original(matrix, *positional, **kwargs)
 
     sparse.csr_matrix.toarray = selected_only
     tracemalloc.start()
     start = perf_counter()
     try:
-        chart = getattr(gsc.pl, args.plot)(
+        family = f"rank_genes_groups_{args.plot}" if args.ranked else args.plot
+        positional = () if args.ranked else ([f"g{i}" for i in range(markers)], "group")
+        options = {}
+        if args.ranked:
+            options.update(groups=["0"], n_genes=markers, zoom=True)
+            if args.plot != "heatmap":
+                options["values_to_plot"] = "scores"
+        chart = getattr(gsc.pl, family)(
             adata,
-            [f"g{i}" for i in range(markers)],
-            "group",
+            *positional,
             show=False,
             width=1400,
             height=1600,
             dendrogram=args.dendrogram,
+            **options,
         )
     finally:
         sparse.csr_matrix.toarray = original
     prepared = perf_counter()
-    _, peak = tracemalloc.get_traced_memory()
+    retained, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
     spec = chart.to_dict()
     spec["name"] = "benchmark"
@@ -84,8 +116,9 @@ def main() -> None:
     serialized = perf_counter()
     report = {
         "measured": date.today().isoformat(),
-        "plot": args.plot,
-        "preparation_scope": "Cold plotting call including optional Scanpy imports; matrix construction excluded.",
+        "plot": family,
+        "core": SCHEMA_VERSION,
+        "preparation_scope": "Cold plotting call including optional Scanpy imports; expression/ranking fixture construction excluded. Allocation tracing covers preparation only.",
         "system": platform.platform(),
         "python": platform.python_version(),
         "versions": {
@@ -95,6 +128,11 @@ def main() -> None:
             "seed": 0,
             "cells": cells,
             "genes": genes,
+            "nnz": matrix.nnz,
+            "stored_ranks_per_group": genes if args.ranked else None,
+            "values_to_plot": "scores"
+            if args.ranked and args.plot != "heatmap"
+            else None,
             "selected_genes": markers,
             "groups": groups,
             "summary_marks": markers * groups if args.plot != "heatmap" else None,
@@ -109,6 +147,7 @@ def main() -> None:
         },
         "bytes": {
             "python_preparation_peak_allocations": peak,
+            "python_preparation_retained_allocations": retained,
             "json": len(payload),
             "peak_process_rss": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
             * (1 if sys.platform == "darwin" else 1024),
@@ -144,15 +183,26 @@ def main() -> None:
             )
             canvas = page.locator("canvas").first.bounding_box()
             xpad, ypad = (0.3, 0.5) if args.plot == "dotplot" else (0, 0)
+            column, row, hover_gene = 0, 0, "g0"
+            if args.plot == "dotplot":
+                records = next(
+                    rows for rows in spec["datasets"].values() if "_percent" in rows[0]
+                )
+                probe = max(records, key=lambda row: row["_percent"])
+                assert probe["_percent"] > 0
+                column, row, hover_gene = probe["_x"], probe["_y"], probe["_gene"]
+                report["fixture"]["hover_probe"] = {
+                    key: probe[key] for key in ("_gene", "_group", "_percent")
+                }
             px = (
                 canvas["x"]
                 + bounds["x"]
-                + (0.5 + xpad) / (markers + 2 * xpad) * bounds["width"]
+                + (column + 0.5 + xpad) / (markers + 2 * xpad) * bounds["width"]
             )
             py = (
                 canvas["y"]
                 + bounds["y"]
-                + (0.5 + ypad) / (groups + 2 * ypad) * bounds["height"]
+                + (row + 0.5 + ypad) / (groups + 2 * ypad) * bounds["height"]
             )
             if args.plot == "heatmap":
                 py = canvas["y"] + bounds["y"] + bounds["height"] / 2
@@ -172,9 +222,19 @@ def main() -> None:
                 .locator("td")
                 .inner_text()
                 .strip()
-                == "g0"
+                == hover_gene
             )
+            zoom_elapsed = None
+            if args.ranked:
+                step = page.evaluate("api.getParam('grid_y_step').getValue()")
+                start = perf_counter()
+                page.mouse.wheel(0, -220)
+                page.wait_for_function(
+                    "step=>api.getParam('grid_y_step').getValue()>step", arg=step
+                )
+                zoom_elapsed = perf_counter() - start
             session = page.context.new_cdp_session(page)
+            session.send("HeapProfiler.collectGarbage")
             session.send("Performance.enable")
             metrics = {
                 item["name"]: item["value"]
@@ -187,7 +247,9 @@ def main() -> None:
                 "plot_area": [1400, 1600],
                 "first_paint_seconds_including_dispatch": elapsed,
                 "hover_roundtrip_seconds_excluding_pointer_pause": hover_elapsed,
+                "wheel_step_change_seconds": zoom_elapsed,
                 "js_heap_bytes": metrics["JSHeapUsedSize"],
+                "heap_scope": "Live chart/runtime after interaction and explicit garbage collection.",
             }
             browser.close()
     args.output.write_text(json.dumps(report, indent=2) + "\n")
