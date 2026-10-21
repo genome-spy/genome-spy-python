@@ -37,6 +37,9 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
     monkeypatch.setattr(sc.tl, "tsne", prepare_tsne)
     monkeypatch.setattr(sc.pp, "pca", lambda *a, **k: pytest.fail("Ran PCA"))
     monkeypatch.setattr(sc.tl, "pca", lambda *a, **k: pytest.fail("Ran PCA"))
+    monkeypatch.setattr(
+        sc.pp, "neighbors", lambda *a, **k: pytest.fail("Recomputed neighbors")
+    )
     namespace = {}
     path = NOTEBOOKS / "scanpy_umap.ipynb"
     try:
@@ -52,6 +55,19 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         )
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
+        edge_chart = namespace["edges_chart"]
+        assert edge_chart in charts
+        edge_spec = edge_chart.to_dict()
+        assert len(edge_spec["datasets"]) == 2
+        assert sorted(len(rows) for rows in edge_spec["datasets"].values()) == [
+            700,
+            4996,
+        ]
+        for panel in units(edge_spec):
+            assert leaf_marks(panel)[0]["mark"]["type"] == "rule"
+        np.testing.assert_array_equal(
+            pbmc.obsp["connectivities"].data, original.obsp["connectivities"].data
+        )
         centered = namespace["centered_chart"]
         assert centered in charts
         score = pbmc.obs["B_cell_score"]

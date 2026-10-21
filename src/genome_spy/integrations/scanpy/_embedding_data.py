@@ -50,6 +50,7 @@ class PreparedEmbedding:
     basis: str
     row_label: str = "Observation"
     show_ticks: bool = False
+    edges: pd.DataFrame | None = None
 
 
 def embedding_key(adata: Any, basis: str, *, context: str) -> str:
@@ -338,6 +339,62 @@ def _sizes(size: Any, count: int) -> np.ndarray:
     return values
 
 
+def _neighbor_edges(
+    adata: Any, table: pd.DataFrame, neighbors_key: str | None
+) -> pd.DataFrame:
+    """Return stored undirected edges as pairs of stable cell IDs, without analysis.
+
+    Match Scanpy's NetworkX conversion and legacy/current connectivity storage.
+    """
+    import networkx as nx
+    from scipy import sparse
+
+    key = "neighbors" if neighbors_key is None else neighbors_key
+    if not isinstance(key, str) or key not in adata.uns:
+        raise ValueError(
+            f"Scanpy embedding: missing neighbors metadata at uns[{key!r}]; "
+            "compute neighbors explicitly with Scanpy first."
+        )
+    metadata = adata.uns[key]
+    if not isinstance(metadata, Mapping):
+        raise ValueError(f"Scanpy embedding: uns[{key!r}] must be a neighbors mapping.")
+    connection_key = (
+        "connectivities" if key == "neighbors" else metadata.get("connectivities_key")
+    )
+    if not isinstance(connection_key, str):
+        raise ValueError(f"Scanpy embedding: uns[{key!r}] needs connectivities_key.")
+    matrix = (
+        adata.obsp[connection_key]
+        if connection_key in adata.obsp
+        else metadata.get(connection_key)
+    )
+    if matrix is None:
+        raise ValueError(
+            f"Scanpy embedding: missing stored {connection_key!r} connectivities."
+        )
+    if not isinstance(matrix, np.ndarray) and not sparse.issparse(matrix):
+        raise NotImplementedError(
+            "Scanpy embedding: connectivities require resident NumPy or SciPy arrays."
+        )
+    values = matrix.data if sparse.issparse(matrix) else matrix
+    if (
+        matrix.shape != (len(table), len(table))
+        or matrix.dtype.kind not in "biuf"
+        or not np.isfinite(values).all()
+    ):
+        raise ValueError(
+            "Scanpy embedding: connectivities must be a finite real square matrix matching the cells."
+        )
+    # NetworkX also preserves asymmetric entries and explicitly stored sparse zeros.
+    pairs = np.asarray(list(nx.Graph(matrix).edges()), dtype=np.int64).reshape(-1, 2)
+    if np.any(pairs[:, 0] == pairs[:, 1]):
+        raise NotImplementedError(
+            "Scanpy embedding: self-loop edges are not supported yet."
+        )
+    ids = table["_obs_id"].to_numpy()
+    return pd.DataFrame({"_source": ids[pairs[:, 0]], "_target": ids[pairs[:, 1]]})
+
+
 def _title(title: Any, key: str | None, index: int) -> str | None:
     """Return a panel title from a string or list, falling back to its color key."""
     if title is None:
@@ -380,6 +437,8 @@ def prepare_embedding(
     title: Any,
     obs_id: str | None,
     colorbar_loc: str | None,
+    edges: bool = False,
+    neighbors_key: str | None = None,
 ) -> PreparedEmbedding:
     """Return a shared cell table and panel settings from AnnData and embedding options.
 
@@ -397,6 +456,11 @@ def prepare_embedding(
     key = embedding_key(adata, basis, context="Scanpy embedding")
     count = adata.obsm[key].shape[1]
     inputs = _panel_inputs(count, color, components, dimensions, marker)
+    if edges and any(pair != (0, 1) for _, pair, _ in inputs):
+        raise NotImplementedError(
+            "Scanpy embedding: edges require the first two stored components, "
+            "dimensions=(0, 1); other pairs are not supported yet."
+        )
     needed = max(d for _, pair, _ in inputs for d in pair) + 1
     labels = _axis_labels(adata, basis, count, annotate_var_explained, needed)
     table = _observations(
@@ -465,4 +529,10 @@ def prepare_embedding(
                 _title(title, key, index),
             )
         )
-    return PreparedEmbedding(table, tuple(panels), labels, basis)
+    return PreparedEmbedding(
+        table,
+        tuple(panels),
+        labels,
+        basis,
+        edges=_neighbor_edges(adata, table, neighbors_key) if edges else None,
+    )

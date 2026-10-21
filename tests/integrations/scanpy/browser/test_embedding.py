@@ -17,6 +17,7 @@ from tests.integrations.scanpy.embedding_fixture import (
     make_embedding_adata,
 )
 from tests.integrations.scanpy.helpers import points
+from tests.integrations.scanpy.test_embedding_edges import graph_adata
 
 REFERENCE = json.loads(
     (Path(__file__).parents[1] / "fixtures/embedding.json").read_text()
@@ -107,11 +108,12 @@ def assert_complete_chart(page, tmp_path, chart, expected, reference_image, case
 @pytest.mark.parametrize("basis", ["tsne", "diffmap", "pca", "draw_graph_fa"])
 @pytest.mark.parametrize("location", ["left", "top"])
 def test_shared_hover_zoom_and_offline_delivery(page, tmp_path, basis, location):
-    a = make_embedding_adata()
+    a = graph_adata()
     chart = gsc.pl.embedding(
         a,
         basis,
         color="score",
+        edges=True,
         vcenter="p50",
         colorbar_loc=location,
         obs_id="cell_id",
@@ -152,11 +154,12 @@ def test_shared_hover_zoom_and_offline_delivery(page, tmp_path, basis, location)
 
 
 def test_pca_brush_count_and_python_membership_agree(page):
-    a = make_embedding_adata()
+    a = graph_adata()
     brush = gs.selection_interval("cells", encodings=["x", "y"])
     chart = gsc.pl.pca(
         a,
         color=["cell_type", "score"],
+        edges=True,
         vcenter=[None, 0],
         colorbar_loc="bottom",
         selection=brush,

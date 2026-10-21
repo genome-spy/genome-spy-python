@@ -581,6 +581,22 @@ commit evidence and unmet verification gates live in the
   packaged notebook execution and a realistic resource workload. The
   [centered-color record](STATUS.md#m07d-centered-embedding-colors) retains evidence.
   Matplotlib normalization objects remain outside the supported boundary.
+  Stored-edge acceptance: `gsc.pl.umap(pbmc, color="louvain", edges=True,
+  show=False)` reads stored connectivities, with default/custom neighbor keys
+  and legacy/current storage precedence. Reuse NetworkX's undirected ordering
+  rather than reimplementing sparse edge deduplication. Preserve asymmetric
+  entries, sparse zeros, stable cell IDs and endpoint padding. Require resident
+  NumPy/SciPy graph data, finite values and matching shape; never compute
+  neighbors or a new embedding. Render native rules beneath points/outlines,
+  using shared cell-coordinate lookups and native axes/navigation. The initial
+  scope is the first two components, scalar CSS colors and finite nonnegative
+  widths in points; other pairs, self-loops and per-edge/numeric colors must
+  fail clearly. Test graph order/styles against public Scanpy on stored 2D
+  positions, views/backed access without densification, inactive/empty graphs,
+  complete-chart overlays, stroke coverage, hover/zoom/brush/HTML and resources.
+  Keep explicit notebook sizes smaller while retaining the public size default.
+  The [edge delivery record](STATUS.md#m07d-stored-neighbor-graph-edges) owns evidence;
+  remaining edge forms retain M07.d/M14 owners.
 
 Targets: `gsc.pl.embedding(adata, basis="tsne", color="cell_type", show=False)`
 and `gsc.pl.pca_overview(adata, show=False)` after explicit Scanpy PCA.

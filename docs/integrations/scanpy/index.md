@@ -310,7 +310,8 @@ raise an error instead of being ignored.
 | show | False returns a native chart; True displays once through anywidget and returns None. None uses Scanpy settings.autoshow. |
 | save | None/False are supported when no automatic image save is requested. Image formats and automatic save currently error; native chart.save supports HTML/JSON. |
 | ax, return_fig | Omitted. Passing either, even ax=None, raises a targeted error. Use show=False and native chart composition/configuration. |
-| projection, edges/arrows, scale_factor | Only the ordinary 2D/no-graph defaults are supported yet. |
+| edges, edges_width, edges_color, neighbors_key | Optional stored undirected neighbor edges beneath the points and outlines. Width defaults to 0.1 points; color defaults to grey and accepts one opaque CSS color. The graph is read once, with native endpoint lookups into the shared cell table. Requires the first two components and a graph without self-loops. |
+| projection, arrows, scale_factor | Only the ordinary 2D/no-arrow defaults are supported yet; nondefault scale_factor remains unsupported. |
 | vcenter | None keeps a linear color scale. A number, percentile string or callable places that value at the native scheme midpoint; singleton/per-panel lists are supported. Automatic bounds expand if needed to enclose the center. Explicit bounds must strictly enclose it. |
 | norm | Matplotlib normalization objects remain unsupported and raise an error. |
 | add_outline, outline_width, outline_color | Optional two opaque outline layers behind the foreground, matching Scanpy’s relative widths and draw order. Widths are nonnegative pairs; colors are pairs of opaque CSS names/hex. Foreground opacity defaults to 0.7 only when outlines are enabled; explicit alpha (including None) retains its usual meaning. Foreground edges are disabled, while outline edges use the supplied scalar edge/linewidth options. |
@@ -335,6 +336,25 @@ level between WebGL, browser scaling and Matplotlib exports. Outline settings
 have no visual effect while `add_outline` is False or None. All shared embedding
 functions, including PCA overview's embedding panel, inherit this path; `scatter`
 keeps its own Scanpy signature and does not add outline arguments.
+
+`edges=True` reads the existing default neighbor connectivities from
+`obsp["connectivities"]`, requiring `uns["neighbors"]`. A custom `neighbors_key`
+uses that metadata's `connectivities_key`. Current storage takes precedence over
+the legacy matrix in the neighbors metadata. NetworkX supplies the same
+undirected edge order as Scanpy, including asymmetric entries and explicitly
+stored sparse zeros; weights do not change edge width or color. No neighbors,
+embedding or expression matrix is computed or densified. Missing, nonfinite,
+wrong-shaped or unsupported graph storage raises a named error.
+
+Edges share point navigation, use Scanpy's extra endpoint padding and remain
+unpickable behind the points. Cell hover, linked counts and Python retrieval
+still describe cells; brushing does not recolor graph edges. This increment
+supports `dimensions=(0, 1)` only. Additional stored coordinate columns are
+left intact and the first pair is used; Scanpy 1.11.5's edge renderer assumes its
+stored positions are already two dimensional and ignores requested component
+pairs. Other pairs, self-loops and per-edge/numeric colors currently error.
+Empty graphs render the ordinary point chart. Edge style/key options have no
+effect while `edges=False`, as in Scanpy.
 
 Callable `vmin`/`vmax`/`vcenter` run once per numeric panel when creating the chart. Use
 missing-aware functions such as `np.nanmin` or

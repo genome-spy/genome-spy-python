@@ -456,6 +456,8 @@ class EmbeddingStyle:
     ymargin: float = 0.05
     outline_width: tuple[float, float] | None = None
     outline_color: tuple[str, str] = ("black", "white")
+    edges_width: float = 0.1 * POINTS_TO_PIXELS
+    edges_color: str = "grey"
 
 
 def _number(value: Any, name: str, *, minimum: float = 0) -> float:
@@ -506,6 +508,8 @@ def embedding_style(
     add_outline: bool = False,
     outline_width: tuple[float, float] = (0.3, 0.05),
     outline_color: tuple[str, str] = ("black", "white"),
+    edges_width: float = 0.1,
+    edges_color: Any = "grey",
 ) -> EmbeddingStyle:
     """Return native embedding settings from plot options, using explicit defaults.
 
@@ -546,4 +550,6 @@ def embedding_style(
         * POINTS_TO_PIXELS,
         outline_width=(widths[0], widths[1]) if add_outline else None,
         outline_color=(colors[0], colors[1]),
+        edges_width=_number(edges_width, "edges_width") * POINTS_TO_PIXELS,
+        edges_color=native_color(edges_color, "edges_color"),
     )

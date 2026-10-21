@@ -184,7 +184,6 @@ def test_public_defaults_match_the_pinned_effective_signature() -> None:
         ({"ax": None}, TypeError),
         ({"return_fig": True}, TypeError),
         ({"projection": "3d"}, NotImplementedError),
-        ({"edges": True}, NotImplementedError),
         ({"arrows": True}, NotImplementedError),
         ({"save": "plot.png"}, NotImplementedError),
         ({"norm": object()}, NotImplementedError),

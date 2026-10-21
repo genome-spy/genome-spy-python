@@ -210,10 +210,6 @@ def _embedding(
         raise TypeError(f"{context}: annotate_var_explained must be boolean.")
     # Accept Scanpy defaults, but reject options we cannot render faithfully.
     unsupported = {
-        "edges": edges is not False,
-        "edges_width": edges_width != 0.1,
-        "edges_color": not isinstance(edges_color, str) or edges_color != "grey",
-        "neighbors_key": neighbors_key is not None,
         "arrows": arrows is not False,
         "arrows_kwds": arrows_kwds is not None,
         "projection": projection != "2d",
@@ -283,6 +279,7 @@ def _embedding(
         hover=hover,
         zoom=zoom,
         add_outline=False if add_outline is None else add_outline,
+        edges=edges,
     )
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._embedding_data import prepare_embedding
@@ -315,6 +312,8 @@ def _embedding(
         title=title,
         obs_id=obs_id,
         colorbar_loc=colorbar_loc,
+        edges=edges,
+        neighbors_key=neighbors_key,
     )
 
     # Keep appearance separate from the selected data.
@@ -336,6 +335,8 @@ def _embedding(
         add_outline=bool(add_outline),
         outline_width=outline_width,
         outline_color=outline_color,
+        edges_width=edges_width if edges else 0.1,
+        edges_color=edges_color if edges else "grey",
     )
     chart = build_embedding(
         prepared, style, hover=hover, zoom=zoom, selection=selection
@@ -534,6 +535,10 @@ def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
             panel's masked colors in painting order, including missing values.
             vcenter maps to the native color scheme's midpoint; automatic limits
             expand when needed to enclose it, while explicit limits must enclose it.
+            edges draws the stored undirected neighbor graph beneath points;
+            edges_width uses points and edges_color requires one opaque CSS color.
+            neighbors_key selects saved metadata. Edges currently require the
+            first two components and a graph without self-loops.
 
     Returns:
         A native chart when show=False, otherwise None after display.

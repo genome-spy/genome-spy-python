@@ -60,21 +60,20 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot,
 matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
-The current canonical workflows contain nineteen UMAP/embedding/scatter/PCA
+The current canonical workflows contain twenty UMAP/embedding/scatter/PCA
 code cells and fourteen expression/ranked code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M07.d, stored neighbor-graph edges.**
-Add `edges=True` to the shared embedding path using the stored neighbor graph,
-Scanpy's edge options and native segments beneath the existing points. Reuse
-coordinates, source access and chart composition; never compute neighbors or
-rerun a layout. Verify graph-key lookup, sparse edge selection, ordering,
-styles, navigation and a realistic resource workload before closure. Arrow
-overlays, other markers, scale-factor circles and broader compatibility retain
-M07.d/M14 owners. The [centered-color increment](#m07d-centered-embedding-colors)
-is closed; C11 still blocks full default categorical-guide fitting.
+**Next work: M07.d, additional native embedding markers.**
+Start with Scanpy's square marker (`marker="s"`), comparing native shape, area,
+edges, outlines, guides and picking against the pinned implementation. Reuse
+the existing marker broadcasting and embedding renderer. Expand other shapes
+only after their native geometry is verified. Remaining graph forms, arrow
+overlays, scale-factor circles and broader compatibility retain M07.d/M14
+owners. The [stored-edge increment](#m07d-stored-neighbor-graph-edges) is closed;
+C11 still blocks full default categorical-guide fitting.
 
 M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
 Heatmap and dotplot have four-pixel group gaps; matrixplot, generic matrix,
@@ -114,6 +113,7 @@ C12 remains a separate upstream straight-link issue.
 | M07.d point outlines increment | Closed (bounded increment) | [Contract, semantic/chart/workflow and resource checks](#m07d-embedding-point-outlines) | Broader markers, label outlines, normalization and C11 guide fitting remain M07.d/M14. |
 | M07.d callable bounds increment | Closed (bounded increment) | [Shared resolver, upstream comparisons, workflow and resource checks](#m07d-callable-color-bounds) | Center support is delivered below; normalization objects remain outside the native boundary. |
 | M07.d centered colors increment | Closed (bounded increment) | [Native domain, upstream paint/guide comparisons, workflow and resources](#m07d-centered-embedding-colors) | Other family options retain M07.d/M14 owners; scatter keeps its distinct signature. |
+| M07.d stored neighbor edges increment | Closed (bounded increment) | [Storage, native lookups, fidelity/workflow and resource checks](#m07d-stored-neighbor-graph-edges) | Other component pairs, self-loops and per-edge/numeric colors remain M07.d/M14; arrows remain separate. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -1275,8 +1275,69 @@ addition is the middle scale stop. Expression was unread and no full matrix was
 densified. These local observations bound this workload, without a speedup claim.
 The renderer, notebook delivery and transport retain their existing limits.
 
-Next: stored neighbor-graph edges in M07.d. C11/C13, broader storage/export and
+Stored neighbor-graph edges are delivered below. C11/C13, broader storage/export and
 other families' center/normalization options retain their existing owners.
+The full repository suite and docs build were not rerun. Clearance: retain;
+no plan is eligible for removal.
+
+## M07.d stored neighbor-graph edges
+
+Closed for the shared embedding entry points and PCA overview's embedding panel.
+`edges=True` reads saved connectivities once; the existing
+[embedding preparation](../../src/genome_spy/integrations/scanpy/_embedding_data.py)
+uses NetworkX's undirected conversion, as Scanpy does. Default/custom neighbor
+keys, current-over-legacy storage, asymmetric entries, negative weights and
+explicit sparse zeros retain their upstream meaning. Stable cell IDs connect
+each edge to its endpoints. No neighbors, embedding or expression analysis is
+run, no matrix is densified, and source arrays/metadata are left intact.
+
+The [shared renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
+draws native rules beneath points and outlines, with two native lookups into
+the existing cell table. Multi-panel charts serialize one cell table and one
+edge list. Endpoint padding matches Scanpy's initial limits; zoom, point hover,
+linked selection/count and Python membership use the existing paths. Edges
+are unpickable and brushing does not recolor them. Empty graphs retain the
+ordinary point chart, and inactive edge settings have no effect.
+
+This bounded increment supports the first component pair, finite nonnegative
+widths in points (default 0.1), and one opaque CSS color (default grey).
+Missing/invalid graphs fail clearly. Other component pairs, self-loops and
+per-edge/numeric colors remain M07.d/M14. Scanpy 1.11.5's renderer passes the
+whole stored coordinate array to NetworkX, ignores requested component pairs,
+and fails with more than two stored columns. Our adapter leaves extra columns
+intact and renders the first pair; it rejects other requested pairs rather
+than drawing misaligned edges. Scatter keeps its distinct upstream signature.
+
+Verification: **475 targeted Python checks**, followed by **38 edge checks**
+after adding coincident endpoints to the fixture; **37 browser checks**, Ruff
+and mypy pass. [Semantic comparisons](../../tests/integrations/scanpy/test_embedding_edges.py)
+use public Scanpy plots to verify edge order, styles and axis limits across
+dense/CSR/CSC matrices and arrays, plus views/backed access without densification.
+[Registered browser comparisons](../../tests/integrations/scanpy/browser/test_embedding_edges.py)
+cover zero/default/thick strokes, two colors, outlines and point draw order at
+150 export DPI and browser DPR 1.5. They compare interior paint positions within
+one logical pixel, total ink within 10%, point colors and every edge's presence
+and hue; boundary cropping excludes two physical pixels. Native title/axis
+labels and colorbar geometry are also checked. Existing interaction/HTML checks
+now exercise stored edges. The canonical packaged PBMC workflow and all twenty
+nonempty live notebook cells complete successfully. The graph example has 700
+cells and 4,996 edges. Explicit notebook marker sizes are now 20 (15 in the graph
+example); the public Scanpy size default is unchanged. Media and execution state
+remain local.
+
+Resource recipe: seed 17, 25,000 cells × 20,000-gene empty CSR, stored float32
+normal 2D coordinates, four-category labels and numeric observation scores;
+seven forward ring neighbors symmetrized into 350,000 CSR entries / 175,000
+undirected edges. Two 320 × 300 panels use size 4 and zoom. In one warmed local
+run on Python 3.11/macOS arm64 with Core 1.2.0, points-only/edges preparation
+took 0.019/1.726 s, validated JSON serialization 4.55/26.49 s, peak traced Python
+allocation 99.2/386.4 MB and browser first paint 4.18/12.80 s. Payloads were
+9,902,789/23,754,346 bytes and reported JS heaps 68/225 MB. Expression was unread;
+no graph sampling or full-matrix densification was used. These observations
+expose the cost of sending all edges; larger graph transport remains M14.
+
+Next: additional native embedding markers, starting with squares. C11/C13,
+broader storage/export and other graph forms retain their existing owners.
 The full repository suite and docs build were not rerun. Clearance: retain;
 no plan is eligible for removal.
 
@@ -2054,7 +2115,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Hover, optional zoom, first-owner interval, linked count and Python retrieval | Tested preview; no point selection or initial interval value | M01; broader native selections M14 |
 | Continuous colorbar placement | Four sides/None; native defaults and collection supported | M07.d placement increment closed |
 | Point outlines | Shared two-marker path, relative widths/CSS colors, scalar styles, hover/zoom/brush | [M07.d outline increment](#m07d-embedding-point-outlines) closed |
-| Graph edges/arrows, scale_factor, broader markers/categorical guide locations | Nondefault forms reject | M07.d |
+| Stored neighbor-graph edges | First component pair, native segments and endpoint lookups, scalar CSS styles; explicit restrictions on other forms | [M07.d edge increment](#m07d-stored-neighbor-graph-edges) closed |
+| Other graph forms, arrows, scale_factor, broader markers/categorical guide locations | Nondefault forms reject | M07.d/M14 |
 | Callable color bounds | Shared resolver with masked/sorted copies, per-panel lists and finite results | [M07.d callable increment](#m07d-callable-color-bounds) closed |
 | Centered numeric colors | Shared scalar/percentile/callable resolver, per-panel centers and native piecewise color scales | [M07.d center increment](#m07d-centered-embedding-colors) closed |
 | norm | Matplotlib normalization objects remain outside the native boundary | Maintained contract |

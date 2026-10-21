@@ -138,6 +138,7 @@ def _panel(
     hover: bool,
     zoom: bool,
     selection: gs.Parameter | None,
+    edges: gs.Chart | None,
 ) -> gs.TopLevelSpec:
     """Return one embedding panel from prepared cells, panel settings and style.
 
@@ -148,10 +149,19 @@ def _panel(
     visible = table
     if not panel.categorical and not panel.show_missing:
         visible = table.loc[table[f"_value_{index}"].notna()]
+    limits = visible[[x_field, y_field]].to_numpy()
+    if prepared.edges is not None and not prepared.edges.empty:
+        # NetworkX pads edge endpoints before applying the usual axis margins.
+        connected = table.loc[
+            table["_obs_id"].isin(prepared.edges.to_numpy().ravel()), [x_field, y_field]
+        ].to_numpy()
+        low, high = connected.min(axis=0), connected.max(axis=0)
+        padding = (high - low) * 0.05
+        limits = np.vstack([limits, low - padding, high + padding])
     x = _coordinate(
         x_field,
         panel.dimensions[0],
-        visible[x_field].to_numpy(),
+        limits[:, 0],
         style,
         zoom,
         horizontal=True,
@@ -162,7 +172,7 @@ def _panel(
     y = _coordinate(
         y_field,
         panel.dimensions[1],
-        visible[y_field].to_numpy(),
+        limits[:, 1],
         style,
         zoom,
         horizontal=False,
@@ -203,6 +213,15 @@ def _panel(
         .properties(width=style.width, height=style.height)
     )
     layers: list[gs.TopLevelSpec] = []
+    if edges is not None:
+        layers.append(
+            edges.encode(
+                x=x.field("_edge_x"),
+                x2=gs.X2("_edge_x2"),
+                y=y.field("_edge_y"),
+                y2=gs.Y2("_edge_y2"),
+            )
+        )
     source = {}
     if style.outline_width is not None:
         # Share one source and sort across both opaque outlines and the foreground.
@@ -370,8 +389,41 @@ def build_embedding(
     """
     if selection is not None:
         validate_brush(prepared)
+    edges = None
+    if prepared.edges is not None and not prepared.edges.empty:
+        # Both endpoints look up the shared cell table; coordinates are sent once.
+        cells = {"values": prepared.table.to_dict("records")}
+        edges = (
+            gs.Chart(prepared.edges)
+            .transform_lookup(
+                from_=cells,
+                key="_obs_id",
+                fields="_source",
+                values=["_coord_0", "_coord_1"],
+                as_=["_edge_x", "_edge_y"],
+            )
+            .transform_lookup(
+                from_=cells,
+                key="_obs_id",
+                fields="_target",
+                values=["_coord_0", "_coord_1"],
+                as_=["_edge_x2", "_edge_y2"],
+            )
+            .mark_rule(
+                color=style.edges_color, size=style.edges_width, clip=True, tooltip=None
+            )
+        )
     charts = [
-        _panel(prepared, panel, i, style, hover=hover, zoom=zoom, selection=selection)
+        _panel(
+            prepared,
+            panel,
+            i,
+            style,
+            hover=hover,
+            zoom=zoom,
+            selection=selection,
+            edges=edges,
+        )
         for i, panel in enumerate(prepared.panels)
     ]
     # Share zoom only when the panels show the same coordinate pair.

@@ -106,7 +106,7 @@ def test_stored_results_are_not_recomputed_mutated_or_read_from_expression(monke
         ({"return_fig": True}, TypeError, "return_fig is omitted"),
         ({"n_points": 2}, TypeError, "n_points"),
         ({"n_pcs": 2}, TypeError, "n_pcs"),
-        ({"edges": True}, NotImplementedError, "edges"),
+        ({"edges": True}, ValueError, "neighbors"),
     ],
 )
 def test_unsupported_kwargs_fail_before_any_display(
