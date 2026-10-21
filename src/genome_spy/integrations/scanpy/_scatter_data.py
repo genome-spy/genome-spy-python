@@ -230,9 +230,11 @@ def prepare_scatter(
     markers = [marker] * len(keys) if isinstance(marker, str) else list(marker)
     if len(markers) == 1:
         markers *= len(keys)
-    if len(markers) != len(keys) or any(value not in (".", "o") for value in markers):
+    if len(markers) != len(keys) or any(
+        value not in (".", "o", "s") for value in markers
+    ):
         raise NotImplementedError(
-            f"{_CONTEXT}: marker requires '.' or 'o', once or per panel."
+            f"{_CONTEXT}: marker requires '.', 'o' or 's', once or per panel."
         )
     titles = (
         [title]

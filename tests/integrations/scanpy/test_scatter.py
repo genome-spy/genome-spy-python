@@ -72,6 +72,20 @@ def test_many_categories_keep_scanpy_column_defaults():
     assert spec["encoding"]["color"]["legend"]["columns"] == 3
 
 
+@pytest.mark.parametrize("marker", ["s", ["o", "s"]])
+def test_square_markers_reuse_the_existing_scatter_data(marker):
+    data = make_scatter_adata()
+    options = dict(color=["cell_type", "score"], show=False)
+    plain = gsc.pl.scatter(data, "x_value", "y_value", marker="o", **options).to_dict()
+    squares = gsc.pl.scatter(
+        data, "x_value", "y_value", marker=marker, **options
+    ).to_dict()
+    assert squares["datasets"] == plain["datasets"]
+    assert points(units(squares)[1])["encoding"]["shape"] == {"value": "square"}
+    for panel, normal in zip(units(squares), units(plain), strict=True):
+        assert points(panel)["encoding"]["size"] == points(normal)["encoding"]["size"]
+
+
 def test_signature_preserves_scatter_defaults_and_adds_only_native_controls():
     actual = inspect.signature(gsc.pl.scatter).parameters
     upstream = inspect.signature(sc.pl.scatter).parameters

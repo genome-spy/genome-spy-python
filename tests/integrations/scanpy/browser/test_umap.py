@@ -139,7 +139,13 @@ def test_complete_chart_has_original_guides_labels_and_unclipped_layout(
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize(
     "marker,token,linewidth",
-    [(".", "dot", 0), ("o", "circle", 0), (".", "dot-stroke", 2)],
+    [
+        (".", "dot", 0),
+        ("o", "circle", 0),
+        (".", "dot-stroke", 2),
+        ("s", "square", 0),
+        ("s", "square-stroke", 2),
+    ],
 )
 def test_rendered_marker_footprint_matches_registered_scanpy_export(
     page, tmp_path, reference_images, marker, token, linewidth
@@ -187,6 +193,11 @@ def test_rendered_marker_footprint_matches_registered_scanpy_export(
     np.testing.assert_allclose(footprint(actual), [expected, expected], atol=2)
     # A fourfold size mistake doubles the diameter and cannot pass this oracle.
     assert np.all(np.abs(footprint(actual) * 2 - footprint(reference)) > 2)
+    if marker == "s":
+        mask = np.asarray(actual).max(axis=2) < 128
+        yy, xx = np.where(mask)
+        # A circle has the same bounding box, but leaves its corners unpainted.
+        assert mask[yy.min() : yy.max() + 1, xx.min() : xx.max() + 1].mean() > 0.95
     actual.save(tmp_path / f"native-{token}.png")
     Image.blend(
         reference.crop(

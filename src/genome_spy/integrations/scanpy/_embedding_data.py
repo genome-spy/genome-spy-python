@@ -228,9 +228,9 @@ def _panel_inputs(
         values * count if len(values) == 1 else values
         for values in (keys, pairs, markers)
     ]
-    if any(marker not in (".", "o") for marker in markers):
+    if any(marker not in (".", "o", "s") for marker in markers):
         raise NotImplementedError(
-            "Scanpy embedding: only '.' and 'o' markers are supported yet."
+            "Scanpy embedding: only '.', 'o' and 's' markers are supported yet."
         )
     return list(zip(keys, pairs, markers, strict=True))
 

@@ -212,6 +212,8 @@ def _panel(
         )
         .properties(width=style.width, height=style.height)
     )
+    if panel.marker == "s":
+        points = points.encode(shape=gs.value("square"))
     layers: list[gs.TopLevelSpec] = []
     if edges is not None:
         layers.append(

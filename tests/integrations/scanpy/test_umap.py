@@ -264,7 +264,7 @@ def test_invalid_data_errors_are_contextual(adata, options, message):
         gsc.pl.umap(adata, **options, show=False)
 
 
-@pytest.mark.parametrize("marker,factor", [(".", 0.25), ("o", 1)])
+@pytest.mark.parametrize("marker,factor", [(".", 0.25), ("o", 1), ("s", 1)])
 def test_sizes_include_physical_units_and_marker_path(adata, marker, factor):
     with mpl.rc_context({"figure.dpi": 150}):
         chart = gsc.pl.umap(adata, color="score", s=144, marker=marker, show=False)

@@ -1,12 +1,14 @@
 """Registered outline footprints and draw order in native WebGL rendering."""
 
 from io import BytesIO
+import xml.etree.ElementTree as ET
 
 import numpy as np
 import pandas as pd
 import pytest
 from PIL import Image
 from anndata import AnnData
+from scipy.ndimage import maximum_filter, minimum_filter
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
@@ -29,7 +31,7 @@ def _pixel_error(pixels, target, radius):
 
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)
-@pytest.mark.parametrize("marker", [".", "o"])
+@pytest.mark.parametrize("marker", [".", "o", "s"])
 @pytest.mark.parametrize("overlap", [False, True])
 @pytest.mark.parametrize("preset", ["default", "custom", "edge"])
 def test_outlined_points_match_registered_scanpy_paint(
@@ -129,13 +131,22 @@ def test_outlined_points_match_registered_scanpy_paint(
         err_msg=str((bounds, box.bounds, actual.size, reference.size)),
     )
     painted = masks[0] | masks[1]
-    # Allow one CSS pixel at antialiased edges, checking both occupied areas.
+    # Compare flat paint separately from each renderer's antialiasing transitions.
     radius = int(np.ceil(dpr))
     for first, second in ((pixels, target), (target, pixels)):
-        assert (_pixel_error(first, second, radius)[painted] > 32).mean() < 0.05
+        neighborhood = (2 * radius + 1, 2 * radius + 1, 1)
+        variation = maximum_filter(first, size=neighborhood) - minimum_filter(
+            first, size=neighborhood
+        )
+        interior = painted & (variation.max(axis=2) == 0)
+        assert interior.sum() > 200
+        assert (_pixel_error(first, second, radius)[interior] > 32).mean() < 0.05
 
 
-def test_outline_hover_linked_brush_navigation_and_offline_delivery(page, tmp_path):
+@pytest.mark.parametrize("marker", ["o", "s"])
+def test_outline_hover_linked_brush_navigation_and_offline_delivery(
+    page, tmp_path, marker
+):
     import genome_spy as gs
     from tests.integrations.scanpy.browser.test_umap import move_to
 
@@ -152,7 +163,7 @@ def test_outline_hover_linked_brush_navigation_and_offline_delivery(page, tmp_pa
         color="group",
         palette=["#4477aa", "#cc6677"],
         size=[0, 0, 144, 144],
-        marker="o",
+        marker=marker,
         add_outline=True,
         selection=brush,
         zoom=True,
@@ -190,6 +201,10 @@ def test_outline_hover_linked_brush_navigation_and_offline_delivery(page, tmp_pa
     assert gsc.selection_mask(data, selected).tolist() == [False, False, True, False]
     svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
     assert ">1 cells selected<" in svg
+    root = ET.fromstring(svg)
+    assert {"A", "B"} <= {e.text for e in root.iter() if e.tag.endswith("text")}
+    if marker == "s":
+        assert not any(e.tag.endswith("circle") for e in root.iter())
     page.mouse.move(1, 1)
     pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
     for x, expected in ((-0.4, 0), (0.4, 204)):

@@ -31,7 +31,7 @@ mpl.use("Agg")
         {"edgecolor": "none"},
     ],
 )
-@pytest.mark.parametrize("marker", [".", "o"])
+@pytest.mark.parametrize("marker", [".", "o", "s"])
 def test_outline_geometry_and_opacity_match_scanpy(monkeypatch, options, marker):
     import matplotlib.pyplot as plt
 
@@ -78,6 +78,8 @@ def test_outline_geometry_and_opacity_match_scanpy(monkeypatch, options, marker)
     for mark, (areas, alpha, widths, edges) in zip(
         [*marks[:2], marks[-1]], reference, strict=True
     ):
+        if marker == "s":
+            assert mark["encoding"]["shape"] == {"value": "square"}
         scale = mark["encoding"]["size"]["scale"]
         native = (
             np.array([row["_size_0"] for row in ordered])

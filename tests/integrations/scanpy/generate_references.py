@@ -151,6 +151,8 @@ def main(output: Path | None = None) -> None:
             (".", "dot", 0),
             ("o", "circle", 0),
             (".", "dot-stroke", 2),
+            ("s", "square", 0),
+            ("s", "square-stroke", 2),
         ]:
             a = make_adata()[:1].copy()
             a.obsm["X_umap"] = np.array([[0.0, 0.0]])

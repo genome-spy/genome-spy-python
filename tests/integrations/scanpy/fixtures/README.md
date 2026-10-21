@@ -152,6 +152,8 @@ uv run --no-sync python -m tests.integrations.scanpy.benchmark_grouped --plot he
 
 Full figures retain axes, titles and legends. Isolated marker crops use a known
 150/100 export/display ratio and supply an independent footprint oracle.
+Square cases cover plain/stroked sides and occupied corners, so an equal-width
+circle cannot pass the shape check.
 Browser tests retain measured captures/overlays in their pytest output directory;
 they do not fit image alignment or alter source measurements.
 

@@ -1085,6 +1085,32 @@
     "export_dpi": 150,
     "display_dpi": 100
   },
+  "footprint_square": {
+    "marker": "s",
+    "size": 144,
+    "path_width": 1.0,
+    "linewidth": 0,
+    "diameter_at_export": 25.0,
+    "plot_size_at_display": [
+      232.5,
+      231.0
+    ],
+    "export_dpi": 150,
+    "display_dpi": 100
+  },
+  "footprint_square-stroke": {
+    "marker": "s",
+    "size": 144,
+    "path_width": 1.0,
+    "linewidth": 2,
+    "diameter_at_export": 29.166666666666668,
+    "plot_size_at_display": [
+      232.5,
+      231.0
+    ],
+    "export_dpi": 150,
+    "display_dpi": 100
+  },
   "assets": {
     "categorical-panel-0.png": "a920e6cb40980b1e0b9dae36fc8b348c803f8c40852684c9bcfbe3298aa10c0f",
     "categorical.png": "b3c69b73f99f4c4364ff7d918ba67ffdbfeafabc3e35695aeef41db5f989d2ba",
@@ -1093,6 +1119,8 @@
     "footprint-circle.png": "fdb3cfeacea945706f2cbcc46f8ee24058dc9a135ade3023048310c1dfa27652",
     "footprint-dot-stroke.png": "8dc8fe48a059a24e90ec2847980d05155e9c127fa87adbde6e912d1784265af9",
     "footprint-dot.png": "6e4fa0e667c1c39dee6a0a811e6d09793b04c5e616a3af48741e9986ea77893e",
+    "footprint-square-stroke.png": "abb46d99bac90cd1f81bef9bfb28ca2bc601d25ff5dcb36dd8c534b80180df25",
+    "footprint-square.png": "e68388bf4283fcbf2de29cefde173cf91cb2dd2efdf177a0a6570e608192db0a",
     "grid-panel-0.png": "8050e1ac12e5dcdc8b3c5f043785b4c6de372de737bcb733bea4601113fd2e8f",
     "grid-panel-1.png": "145bb06a2ff0eed28ed452897c36d10e32ae4f7e56d2f96a97cce0b960417c87",
     "grid-panel-2.png": "145bb06a2ff0eed28ed452897c36d10e32ae4f7e56d2f96a97cce0b960417c87",

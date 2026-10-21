@@ -60,19 +60,19 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot,
 matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
-The current canonical workflows contain twenty UMAP/embedding/scatter/PCA
+The current canonical workflows contain twenty-one UMAP/embedding/scatter/PCA
 code cells and fourteen expression/ranked code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
 **Next work: M07.d, additional native embedding markers.**
-Start with Scanpy's square marker (`marker="s"`), comparing native shape, area,
+Next is Scanpy's diamond marker (`marker="D"`), comparing native shape, area,
 edges, outlines, guides and picking against the pinned implementation. Reuse
 the existing marker broadcasting and embedding renderer. Expand other shapes
 only after their native geometry is verified. Remaining graph forms, arrow
 overlays, scale-factor circles and broader compatibility retain M07.d/M14
-owners. The [stored-edge increment](#m07d-stored-neighbor-graph-edges) is closed;
+owners. The [square-marker increment](#m07d-square-markers) is closed;
 C11 still blocks full default categorical-guide fitting.
 
 M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
@@ -114,6 +114,7 @@ C12 remains a separate upstream straight-link issue.
 | M07.d callable bounds increment | Closed (bounded increment) | [Shared resolver, upstream comparisons, workflow and resource checks](#m07d-callable-color-bounds) | Center support is delivered below; normalization objects remain outside the native boundary. |
 | M07.d centered colors increment | Closed (bounded increment) | [Native domain, upstream paint/guide comparisons, workflow and resources](#m07d-centered-embedding-colors) | Other family options retain M07.d/M14 owners; scatter keeps its distinct signature. |
 | M07.d stored neighbor edges increment | Closed (bounded increment) | [Storage, native lookups, fidelity/workflow and resource checks](#m07d-stored-neighbor-graph-edges) | Other component pairs, self-loops and per-edge/numeric colors remain M07.d/M14; arrows remain separate. |
+| M07.d square marker increment | Closed (bounded increment) | [Native shape, geometry, guides, workflow and resource checks](#m07d-square-markers) | Other markers remain M07.d; categorical guide fitting stays C11. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -1350,6 +1351,47 @@ evidence is retained because graph conversion, serialization and rendering are
 unchanged; browser, notebook and resource runs were not repeated for this fix.
 Scope, next work and clearance remain unchanged.
 
+## M07.d square markers
+
+Closed for shared embeddings, PCA overview's embedding panel and scatter.
+`marker="s"` uses one native square encoding in the
+[shared renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py);
+missing-value points, outlines and legend symbols inherit it. The existing
+size conversion matches Scanpy's unit-width square path. Scalar/per-panel
+marker choices reuse each entry point's current broadcasting. Source data,
+draw order, color mapping, graph edges and interactions are unchanged; there
+are no new runtime helpers, layers, columns or dependencies.
+
+Verification: **417 targeted Python checks**, the canonical notebook workflow,
+**26 browser checks**, Ruff and mypy pass. The numerical outline tests now
+include squares and graph tests exercise mixed circle/square panels across all
+embedding entry points. Scatter checks retain the same table and size units.
+[Registered isolated squares](../../tests/integrations/scanpy/browser/test_umap.py)
+verify occupied corners and side lengths, including
+strokes, at 150 export DPI / browser DPR 1.5; a circle cannot pass the corner
+check. Overlapping outline comparisons retain the occupied-bound checks and
+compare flat paint outside each rasterizer's antialiasing transition, allowing
+one logical pixel of registration and 32 channel steps. Native square legend
+symbols, hover, linked brush/count/Python membership, zoom and offline HTML
+are observed through the existing interaction tests. Frozen reference metadata
+adds only square cases; images remain local. All twenty-one nonempty live UMAP
+notebook cells complete successfully, including a packaged PBMC square example.
+
+Resource recipe: seed 17, 25,000 cells × 20,000-gene empty CSR, stored float32
+normal 2D coordinates, four-category labels and numeric observation scores;
+two 320 × 300 panels, size 4 and zoom. In one warmed local Python 3.11/macOS
+arm64 / Core 1.2.0 run, circle/square preparation took 0.024/0.016 s, validated
+JSON serialization 5.79/4.82 s, peak traced Python allocation 99.2/98.0 MB and
+browser first paint 4.84/4.39 s. Payloads were 9,902,787/9,902,903 bytes and
+reported JS heaps 68/64 MB. Both charts send the same single cell table; square
+encodings add 116 bytes. These are workload observations, not a speedup claim.
+Expression was unread and no matrix was densified.
+
+Next: additional native markers, starting with diamonds. Other markers still
+error; C11/C13, broader storage/export and other graph forms retain their owners.
+The full repository suite and docs build were not rerun. Clearance: retain;
+no plan is eligible for removal.
+
 ## M07.d native colorbar placement
 
 Delivered in `730f9ce`. The shared `embedding`, `umap`, `tsne`, `diffmap`,
@@ -2123,7 +2165,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Existing 2D coordinates, raw/layer, symbols, masks, categories, sizes/order, native axes/guides | Tested supported subset; exact forms in user contract | M01 preview retained |
 | Hover, optional zoom, first-owner interval, linked count and Python retrieval | Tested preview; no point selection or initial interval value | M01; broader native selections M14 |
 | Continuous colorbar placement | Four sides/None; native defaults and collection supported | M07.d placement increment closed |
-| Point outlines | Shared two-marker path, relative widths/CSS colors, scalar styles, hover/zoom/brush | [M07.d outline increment](#m07d-embedding-point-outlines) closed |
+| Point outlines | Shared outline layers, relative widths/CSS colors, scalar styles, hover/zoom/brush | [M07.d outline increment](#m07d-embedding-point-outlines) closed; square support below |
+| Square markers | Native squares in shared embeddings/PCA overview/scatter, including outlines, legends and interactions | [M07.d square increment](#m07d-square-markers) closed |
 | Stored neighbor-graph edges | First component pair, native segments and endpoint lookups, scalar CSS styles; explicit restrictions on other forms | [M07.d edge increment](#m07d-stored-neighbor-graph-edges) closed |
 | Other graph forms, arrows, scale_factor, broader markers/categorical guide locations | Nondefault forms reject | M07.d/M14 |
 | Callable color bounds | Shared resolver with masked/sorted copies, per-panel lists and finite results | [M07.d callable increment](#m07d-callable-color-bounds) closed |

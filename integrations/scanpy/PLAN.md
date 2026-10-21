@@ -597,6 +597,13 @@ commit evidence and unmet verification gates live in the
   Keep explicit notebook sizes smaller while retaining the public size default.
   The [edge delivery record](STATUS.md#m07d-stored-neighbor-graph-edges) owns evidence;
   remaining edge forms retain M07.d/M14 owners.
+  Square-marker acceptance: `marker="s"` maps to native square points in shared
+  embeddings, PCA overview and scatter; existing scalar/per-panel broadcasting,
+  size units, missing values, outlines and native legend symbols are retained.
+  Verify occupied square corners as well as side lengths against Scanpy exports,
+  then test hover, linked brushing, zoom and HTML through the shared helpers.
+  Run the packaged notebook and a representative multi-panel resource comparison.
+  The [square-marker record](STATUS.md#m07d-square-markers) owns delivery evidence.
 
 Targets: `gsc.pl.embedding(adata, basis="tsne", color="cell_type", show=False)`
 and `gsc.pl.pca_overview(adata, show=False)` after explicit Scanpy PCA.
