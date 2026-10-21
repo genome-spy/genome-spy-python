@@ -436,6 +436,7 @@ def test_zero_height_attached_tree_stays_at_matrix_edge(page, horizontal):
 
 @pytest.mark.xfail(
     strict=True,
+    raises=AssertionError,
     reason="Core 1.2 centers zero in a viewport-derived [0, 0] height domain (C13).",
 )
 def test_native_zero_height_viewport_keeps_zero_at_leaf_edge(page):
@@ -457,7 +458,6 @@ def test_native_zero_height_viewport_keeps_zero_at_leaf_edge(page):
     )
     render(page, chart)
     page.evaluate("async () => api.getScaleResolutionByName('slots').zoomTo([0, 1])")
-    page.wait_for_function(
-        "api.getScaleResolutionByName('height').getDomain()[1] === 0"
-    )
+    # Let native fitting settle without requiring the broken domain value.
+    page.wait_for_timeout(700)
     assert page.evaluate("api.getScaleResolutionByName('height').getScale()(0)") == 0

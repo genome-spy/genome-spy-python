@@ -483,6 +483,12 @@ middle of the track. This strict expected failure is retained without custom
 browser logic or a Core patch. The fitting increment stays **Implemented** until
 that edge-case gate passes on a released capability; no plan is cleared.
 
+C13's recheck now waits independently of the broken domain value and limits
+expected failures to assertion errors. All **43 dendrogram browser checks** pass,
+with C12/C13 expected failures. A temporary expanded-domain control produces
+strict XPASS, while an injected setup timeout fails normally. Formatting and lint
+pass. This hardens the release gate; C13 and the fitting lifecycle state remain open.
+
 Validation: **190 targeted Python checks**, **143 browser checks** and the
 canonical expression workflow pass; C12 and C13 have separate strict expected
 failures. The live notebook completed 13 code cells and 11 widgets without errors;
