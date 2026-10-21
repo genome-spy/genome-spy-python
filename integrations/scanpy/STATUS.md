@@ -33,7 +33,7 @@ and Python subset retrieval. Dotplot includes index-scaled slots, grouped summar
 brackets, native size/color guides and optional summary hover. Matrixplot reuses
 grouped access/means and native layout, with one-pass scaling, authoritative
 `values_df`, tiles and optional summary hover. Trees reuse `sc.tl.dendrogram`
-computation/results, with structural checks and native branch rendering.
+computation/results, with structural checks and shared native orthogonal links.
 Heatmaps retain individual cells, shared marker/source/scaling helpers, unequal
 group spans, category strips and cell hover, with a 250,000-value limit. Optional
 zoom keeps their annotations aligned. All four expression grids now offer
@@ -74,8 +74,9 @@ Clustermap now uses native surround tracks with contiguous rows and columns;
 see the [clustermap delivery record](#m14b3-clustermap-native-tracks).
 Generic matrix and correlation charts retain their earlier layouts until their
 own [migration increment](PLAN.md#m14b-native-grid-layout-and-group-gaps) is verified.
-Core's separately reproduced SVG straight-link issue remains C12/M14 vector-export
-work; it does not close or block the native WebGL migration scope.
+All tree families now share [native orthogonal links](#shared-native-orthogonal-dendrograms),
+with complete SVG paths verified. C12's separately reproduced straight-link export
+bug remains upstream; the adapter no longer uses that shape for trees.
 
 M07.d's [native colorbar placement increment](#m07d-native-colorbar-placement) is
 closed in `730f9ce` for the four sides and None across shared embedding entry points.
@@ -90,7 +91,8 @@ Core 1.2.0, its generated composition APIs and the published heatmap example are
 now adopted; see the [upgrade record](#core-12-runtime-adoption). M14.b.1/b.2 are
 closed for their native layout scope. M14.b.3's clustermap increment now shares
 those track helpers; the tree-cut gap trial was withdrawn after visual review. Matrix and
-correlation migrations remain next; C12 remains a separate vector-export gate.
+correlation migrations remain next. Orthogonal trees pass their SVG fidelity gate;
+C12 remains a separate upstream straight-link issue.
 
 | Slice | Lifecycle state | Commit/evidence | Remaining work before Verified/Closed |
 | --- | --- | --- | --- |
@@ -103,9 +105,10 @@ correlation migrations remain next; C12 remains a separate vector-export gate.
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
-| M14.b.2 grouped summary layout | Closed (native WebGL/HTML layout) | [Delivery, browser/workflow and resource evidence](#m14b2-native-grouped-layout) | Vector tree-link export remains C12/M14; broader family options remain in their existing slices. |
-| M14.b.3 numeric/clustered layout | In progress; clustermap increment verified | [Clustermap delivery](#m14b3-clustermap-native-tracks) | Generic matrix/correlation native tracks and their own verification remain. C12 retains vector tree-link export. |
-| M05.f category-strip hover | Closed (native WebGL/notebook/HTML track scope) | C10; [heatmap](#m14b1-native-heatmap-tracks-and-gaps) and [clustermap evidence](#m14b3-clustermap-native-tracks) | C12 retains vector tree-link export independently. |
+| M14.b.2 grouped summary layout | Closed (native layout) | [Layout delivery](#m14b2-native-grouped-layout) and [orthogonal tree verification](#shared-native-orthogonal-dendrograms) | Broader family options remain in their existing slices. |
+| M14.b.3 numeric/clustered layout | In progress; clustermap increment verified | [Clustermap delivery](#m14b3-clustermap-native-tracks) and [shared trees](#shared-native-orthogonal-dendrograms) | Generic matrix/correlation native tracks and their own verification remain. |
+| M05.f category-strip hover | Closed (native WebGL/notebook/HTML track scope) | C10; [heatmap](#m14b1-native-heatmap-tracks-and-gaps) and [clustermap evidence](#m14b3-clustermap-native-tracks) | No remaining work within this track-hover scope. |
+| M14.b shared tree rendering | Closed (native orthogonal links) | [Contract, chart/workflow and resource evidence](#shared-native-orthogonal-dendrograms) | C12's straight-link SVG bug remains upstream; adapter trees use the verified orthogonal shape. |
 
 M07.d/M14 retain the explicitly unsupported options; dotplot brushing remains
 deferred pending review. **Clearance: retain; no working document is eligible for removal.**
@@ -123,7 +126,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M01 UMAP/linked preview | Closed (preview only) | Runtime modules, dedicated PBMC UMAP notebook, semantic/reference/browser tests and resource baseline listed below. Parameter debt remains explicitly assigned to M07/M14. |
 | M02 grouped access/dotplot | Closed (plain-chart preview with hover) | Shared access/statistics, public dotplot, index slots, native dots/labels/brackets/guides, summary hover, 11 complete frozen chart cases, real PBMC workflow and sparse/browser resource check. See retained evidence and explicit limits below; trees/builders/selections are not closed. |
 | M03 matrixplot | Closed (plain-chart preview with hover) | Shared grouped means/access/layout, one-pass scaling, authoritative values_df, native index tiles/edges, 13 frozen chart cases, packaged-PBMC workflow and sparse/browser resource observation. Trees, builders and broader normalization remain open. |
-| M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, native rules, shared leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
+| M04 trees/correlation | Closed (standalone/correlation and dot/matrix attachment preview) | Public Scanpy computation, stored-result validation, shared native orthogonal links, leaf/marker permutations, registered charts, resize/hover checks and resource observation below. Later-family attachments remain assigned. |
 | M05 heatmap/matrix/clustermap | In progress; bounded previews verified | Native heatmap/clustermap track migration and M05.f are closed for WebGL/notebook/HTML. M05.d and broader kwargs/delivery remain open. |
 | M06 ranking/ranked summaries | Closed (bounded preview) | M06.a–d have semantic/chart/workflow/interaction and resource evidence. Broader compatibility remains M14; native builders remain M13 and ranked distributions/tracks remain M08/M09. |
 | M07 embeddings/scatter/PCA | In progress | M07.a/b resource gates pass; categorical-guide rendering remains open under C11. M07.c loadings/variance/overview and M07.d colorbar placement are Closed for their stated scope; other options remain open. |
@@ -133,7 +136,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M11 trajectories/graphs/series | Planned | Stored DPT/PAGA, graph layouts, series/simulation, return/side-effect contracts; evaluate C04 paths. |
 | M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
-| M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout migrations are closed; M14.b.3 clustermap tracks are verified; matrix/correlation migrations remain. C12 retains vector tree-link export fidelity. Parameter/capability closure, workflow publication and full API evidence remain open. |
+| M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 clustermap tracks are verified; matrix/correlation migrations remain. Parameter/capability closure, workflow publication and full API evidence remain open. |
 
 ## M05.e shared grid interactions
 
@@ -400,14 +403,56 @@ These are observations, not CI limits; raw measurements and generated media stay
 local. M14.b.3 remains in progress for generic matrix/correlation migration; no
 plan is eligible for clearance.
 
-The released native `linkShape="orthogonal"` and its vertical/horizontal
-orientation are available in both the bundled runtime and Python schema.
-Current attached trees still use three straight link segments per merge;
-standalone/legacy trees use rule segments. Native parent-to-child orthogonal
-links are the next renderer simplification; their adoption and all-orientation,
-zoom/gap and SVG verification remain open. Clustering stays in Scanpy/SciPy.
-The existing C12 SVG straight-link export issue remains open until rechecked;
-shape availability alone does not close it.
+The shared renderer has since adopted native orthogonal links; see the following
+delivery record. The layout/resource measurements above describe the preceding
+contiguous clustermap checkpoint.
+
+## Shared native orthogonal dendrograms
+
+Closed for the shared renderer increment. Every existing tree path—standalone,
+dotplot, matrixplot, cell heatmap, correlation matrix and both clustermap axes—uses
+one native mark helper in
+[_dendrogram_chart.py](../../src/genome_spy/integrations/scanpy/_dendrogram_chart.py).
+Ranked variants inherit it through their parent expression plots. There are no
+public API changes, new dependencies or Core patches.
+
+Each stored SciPy/Scanpy merge becomes two parent-to-child endpoint rows instead
+of three separate segments. `linkShape="orthogonal"` and vertical/horizontal
+orientation draw the elbows at the parent's stored height. Existing fractional
+index offsets keep tracks aligned across native gaps and navigation. Parent
+positions are mapped before drawing, preserving connected branches for unequal
+heatmap group spans. Heights, leaf permutations, cached results and Python
+clustering remain unchanged. Unused legacy overlay projection options were removed;
+correlation's remaining layout migration still belongs to M14.b.3.
+
+Verification: **961 Python integration checks**, **133 browser checks** and the
+canonical expression workflow pass. SVG assertions inspect all three vertices
+of each right-angle path, including the elbow. Registered full-chart checks cover
+all four standalone orientations, normal/swapped attachments and both clustermap
+trees. Other browser checks retain zero-height/tied merges, unequal cell-group
+spans, native gaps, resizing, y/xy zoom, hover, fitted values and offline HTML.
+The live expression notebook completed all 13 code cells and 11 widgets without
+errors; only the explanatory Markdown changed. User's local plot settings remain
+intact. Test media, measurements and notebook outputs stay local.
+
+A fresh isolated `benchmark_clustermap` run covers the shared link/serialization
+path with 700 packaged PBMC cells × 40 genes, 28,000 tiles and 244,650 pairwise
+row distances, xy zoom and fitted values. Tree computation/chart preparation take
+0.930 s; validated JSON serialization takes 4.201 s with tracemalloc active.
+Peak traced Python allocations are 52.4 MiB; JSON is 4.20 MiB. First paint including
+dispatch is 4.213 s; hover including pointer pause/probes is 1.009 s; observed JS
+heap is 35.6 MiB. Runtime versions, allocation scope and browser dimensions match
+the preceding contiguous-clustermap checkpoint. These are observations, not CI
+limits or a controlled speed comparison. Numeric access, clustering, summaries
+and tile transport are unchanged, so their retained resource evidence still applies.
+Ruff formatting/lint and mypy pass; the full repository suite and documentation
+build were not rerun.
+
+The minimal C12 straight-link SVG reproducer still strictly xfails on Core 1.2.0.
+That upstream shape defect is unchanged; the adapter no longer uses straight links
+for trees. Complete orthogonal paths now pass the adapter's SVG gate. Generic
+matrix/correlation native layout and wider family compatibility remain open;
+**clearance: retain**.
 
 ## M06/M07 resource verification
 
@@ -498,7 +543,8 @@ The unrelated full repository/integration suites and Sphinx build were not rerun
 Current state: closed for native WebGL/notebook/HTML tracks after both
 [M14.b.1 heatmap](#m14b1-native-heatmap-tracks-and-gaps) and
 [M14.b.3 clustermap](#m14b3-clustermap-native-tracks) verification.
-C12 retains the independent SVG link-export limitation.
+The later [shared renderer delivery](#shared-native-orthogonal-dendrograms) verifies
+orthogonal tree SVG paths; C12's straight-link issue remains upstream.
 
 Design correction (October 20, before migration): heatmap used negative pixel
 offsets; clustermap used normalized positions below 0 or above 1. Both disabled
@@ -1787,12 +1833,12 @@ affected slice.
 | C04 | No dedicated line/path mark in bundled mark inventory | Series/graph/path M11 | Verify native rule/link segments can preserve required semantics; otherwise upstream released capability |
 | C05 | Font/outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
 | C06 | Core 1.2 typed surround/facet APIs and native index gaps available; Scanpy migration remains open | Heatmap/clustermap side tracks, related grids, UMAP/repeated panels; M14.b | Use the published heatmap example; verify viewport/scale/guide ownership, required heatmap group gaps and existing navigation/selection contracts |
-| C07 | Python linkage + native rule branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Shared geometry projects into equal summary slots or unequal cell-group centers; standalone/attached resize and registered path checks pass. M05.e verifies grouped and heatmap navigation; recheck later families. |
+| C07 | Python linkage + shared native orthogonal branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Stored parent/child edges project into equal summary slots or unequal cell-group centers. Complete SVG elbows, four orientations, zero heights, resize and navigation pass; recheck later families. |
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots, both orientations, optional zoom and duplicate-slot highlighting verified; extend checks with later families |
 | C09 | Core 1.0 band rulers failed during initial WebGL rendering; the adopted Core 1.2 capability needs a focused recheck | Optional shaded row/column guides | Keep the native center crosshair until shaded-guide behavior is verified against Core 1.2. [PR #586](https://github.com/genome-spy/genome-spy/pull/586) records the upstream fix and regression evidence. |
 | C10 | Heatmap/clustermap bands and native gap navigation verified in their own viewports. | Closed for M05.f native WebGL/notebook/HTML scope | Native clipped rects use the released Core; no patched bundle or custom listeners. C12 remains independent. |
 | C11 | Bundled Core 1.2 allocates one column's width to vertical multi-column legends; later columns clip. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | [Minimal native regression](../../tests/integrations/scanpy/browser/test_native_legend_extent.py) strictly xfails on 1.2.0. [Upstream fix PR #591](https://github.com/genome-spy/genome-spy/pull/591) includes before/after video comments; it is not adopted in the bundled runtime. Recheck after adopting a released Core fix before automatic column fitting; no local bundle patch. |
-| C12 | Core 1.2 SVG export bends `linkShape="line"` control points; WebGL tree rendering is unaffected. | M14 vector-export fidelity for native tree links | The minimal straight-link SVG check in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) strictly xfails. Keep this separate from verified WebGL/HTML layout; no local bundle patch. Upstream reproduction/fix and a released-runtime recheck remain open. |
+| C12 | Core 1.2 SVG export bends `linkShape="line"` control points. | Upstream straight-link export; adapter trees now use verified orthogonal links. | The minimal straight-link SVG check in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) still strictly xfails. No local bundle patch; recheck on a released fix. The [orthogonal renderer](#shared-native-orthogonal-dendrograms) passes complete-path SVG checks independently. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental

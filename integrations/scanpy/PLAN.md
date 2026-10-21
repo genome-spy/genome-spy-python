@@ -765,12 +765,13 @@ Deliver in small increments, updating the current queue in STATUS after each:
    sides. Keep supplied/SciPy linkage, masks, palettes and permutations intact.
    Reuse the same numeric tiles and interactions; clustermap stays contiguous.
    This completes M05.f only after both heatmap and clustermap pass its gates.
-   The released `linkShape="orthogonal"` supports native right-angle tree edges
-   with `orient="vertical"`/`"horizontal"`. The integration still uses line/rule
-   segments; migrate the shared renderer to parent-to-child links in a separate
-   increment, preserving stored merge heights, leaf order and Python clustering.
-   Verify all orientations, gapped heatmaps, zoom and SVG export before replacing
-   the current path or closing C12.
+   All tree families share native `linkShape="orthogonal"` edges with
+   `orient="vertical"`/`"horizontal"`. Emit two parent-to-child links per merge,
+   preserving stored heights, leaf order and Python clustering. Reuse the live
+   index-offset helper for fractional anchors on gapped tracks. Verify complete
+   SVG paths including elbows, all orientations, unequal heatmap group spans,
+   zero-height merges, resizing and zoom. The [shared renderer delivery](STATUS.md#shared-native-orthogonal-dendrograms)
+   closes this increment; C12's separate straight-link export bug remains upstream.
 
 Keep the data-access, grouped-summary, ranking and tree-preparation modules
 unchanged unless a focused failing semantic test requires a correction. In

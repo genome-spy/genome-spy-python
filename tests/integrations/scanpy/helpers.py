@@ -60,21 +60,30 @@ def index_position(slot, count, padding, extent, cuts=()):
     return (slot + padding) * step + 4 * sum(cut <= slot for cut in cuts)
 
 
-def tree_segments(root):
-    """Read straight tree endpoints from native links or legacy rules in an SVG."""
-    segments = []
+def tree_paths(root):
+    """Read complete native tree paths, checking that each elbow has two straight legs."""
+    paths = []
     for group in root.iter():
         if group.get("stroke") != "#555555":
             continue
         for element in group:
-            if element.tag.endswith("line"):
-                segments.append(
-                    [float(element.get(k)) for k in ("x1", "y1", "x2", "y2")]
-                )
-            else:
-                values = list(
-                    map(float, re.findall(r"[-+]?\d*\.?\d+", element.get("d", "")))
-                )
-                assert len(values) in (4, 8), element.attrib
-                segments.append([*values[:2], *values[-2:]])
-    return segments
+            path = element.get("d", "")
+            assert re.fullmatch(r"M[-+\d., eE]+L[-+\d., eE]+L[-+\d., eE]+", path), path
+            values = list(
+                map(float, re.findall(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", path))
+            )
+            assert len(values) == 6, element.attrib
+            points = [values[i : i + 2] for i in range(0, 6, 2)]
+            assert all(a[0] == b[0] or a[1] == b[1] for a, b in zip(points, points[1:]))
+            paths.append(points)
+    return paths
+
+
+def tree_segments(root):
+    """Return the nonzero legs of native tree paths for alignment checks."""
+    return [
+        [*start, *stop]
+        for path in tree_paths(root)
+        for start, stop in zip(path, path[1:])
+        if start != stop
+    ]

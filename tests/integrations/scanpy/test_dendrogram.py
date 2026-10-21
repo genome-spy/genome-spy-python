@@ -15,7 +15,11 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import points
 from genome_spy.integrations.scanpy import pl
 from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
-from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata, tree_cases
+from tests.integrations.scanpy.dendrogram_fixture import (
+    make_tree_adata,
+    tree_cases,
+    tree_plot_cases,
+)
 
 sc = pytest.importorskip("scanpy")
 REFERENCE = Path(__file__).with_name("fixtures") / "dendrogram.json"
@@ -369,3 +373,62 @@ def test_correlation_numbers_and_native_defaults():
     assert color["scheme"] == {"name": "redblue", "extent": [1, 0]}
     assert not color.get("reverse", False)
     assert spec["layer"][3]["mark"]["type"] == "text"
+
+
+def test_native_edges_preserve_parents_and_unequal_leaf_positions():
+    from genome_spy.integrations.scanpy._dendrogram_data import TreeData
+    from genome_spy.integrations.scanpy._dendrogram_chart import tree_records
+
+    tree = TreeData(
+        ("A", "B", "C"),
+        np.array([[5, 5, 15, 15], [10, 10, 25, 25]], dtype=float),
+        np.array([[0, 2, 2, 0], [2, 4, 4, 0]], dtype=float),
+    )
+    assert tree_records(tree) == [
+        {"leaf": 1.0, "leaf2": 0.5, "distance": 2.0, "distance2": 0.0},
+        {"leaf": 1.0, "leaf2": 1.5, "distance": 2.0, "distance2": 0.0},
+        {"leaf": 1.75, "leaf2": 1.0, "distance": 4.0, "distance2": 2.0},
+        {"leaf": 1.75, "leaf2": 2.5, "distance": 4.0, "distance2": 0.0},
+    ]
+    mapped = tree_records(tree, [0, 1, 9])
+    assert [(r["leaf"], r["leaf2"]) for r in mapped] == [
+        (0.5, 0),
+        (0.5, 1),
+        (3, 0.5),
+        (3, 9),
+    ]
+    # An upper edge meets the same stored parent after unequal groups move the leaves.
+    assert mapped[2]["leaf2"] == mapped[0]["leaf"]
+    np.testing.assert_array_equal(tree.icoord, [[5, 5, 15, 15], [10, 10, 25, 25]])
+    with pytest.raises(ValueError, match="leaf positions"):
+        tree_records(tree, [0, 1])
+
+
+@pytest.mark.parametrize("case", tree_plot_cases())
+def test_all_group_tree_callers_use_native_orthogonal_links(case):
+    from tests.integrations.scanpy.helpers import leaf_marks
+
+    family, options = tree_plot_cases()[case]
+    spec = getattr(gsc.pl, family)(
+        make_tree_adata(), groupby="group", show=False, **options
+    ).to_dict()
+    trees = [
+        mark
+        for mark in leaf_marks(spec)
+        if mark.get("mark", {}).get("color") == "#555555"
+    ]
+    if case == "correlation_no_tree":
+        assert not trees
+        return
+    assert len(trees) == 1
+    mark = trees[0]
+    vertical = (
+        options.get("orientation", "top") in ("top", "bottom")
+        if family == "dendrogram"
+        else options.get("swap_axes", False)
+    )
+    assert mark["mark"]["type"] == "link"
+    assert mark["mark"]["linkShape"] == "orthogonal"
+    assert mark["mark"]["orient"] == ("vertical" if vertical else "horizontal")
+    assert mark["mark"]["tooltip"] is None
+    assert len(spec["datasets"][mark["data"]["name"]]) == 6

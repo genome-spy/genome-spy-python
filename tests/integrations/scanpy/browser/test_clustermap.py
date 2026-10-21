@@ -22,7 +22,7 @@ from tests.integrations.scanpy.clustermap_fixture import (
     clustermap_cases,
 )
 
-from tests.integrations.scanpy.helpers import tree_segments
+from tests.integrations.scanpy.helpers import tree_segments, tree_paths
 
 REFERENCE = json.loads(
     (Path(__file__).parents[1] / "fixtures/clustermap.json").read_text()
@@ -71,7 +71,7 @@ def test_complete_registered_tiles_trees_and_labels(
         )
     # SVG checks positions exactly; raster checks visibility of the thin 0.5pt strokes.
     full = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
-    expected_segments = []
+    expected_paths = []
     for axis, count in (("row", 6), ("col", 4)):
         tree = reference[axis + "_tree"]
         if tree is None:
@@ -102,20 +102,27 @@ def test_complete_registered_tiles_trees_and_labels(
                     leaf,
                     distance,
                 )
-                endpoints = []
-                for j in (i, i + 1):
-                    center = leaves[j] / 10 / count
-                    depth = distances[j] / maximum * extent + track
-                    endpoints.extend(
-                        (bounds["x"] - depth, bounds["y"] + center * height)
+            parent_leaf = (leaves[1] + leaves[2]) / 2
+            for child in (0, 3):
+                vertices = []
+                for leaf_position, merge_height in (
+                    (parent_leaf, distances[1]),
+                    (leaves[child], distances[child]),
+                ):
+                    center = leaf_position / 10 / count
+                    depth = merge_height / maximum * extent + track
+                    vertices.append(
+                        [bounds["x"] - depth, bounds["y"] + center * height]
                         if axis == "row"
-                        else (bounds["x"] + center * width, bounds["y"] - depth)
+                        else [bounds["x"] + center * width, bounds["y"] - depth]
                     )
-                expected_segments.append(endpoints)
-    actual_segments = tree_segments(svg_root(page))
-    np.testing.assert_allclose(
-        sorted(actual_segments), sorted(expected_segments), atol=0.6
-    )
+                parent, target = vertices
+                elbow = (
+                    [parent[0], target[1]] if axis == "row" else [target[0], parent[1]]
+                )
+                expected_paths.append([parent, elbow, target])
+    actual_paths = tree_paths(svg_root(page))
+    np.testing.assert_allclose(sorted(actual_paths), sorted(expected_paths), atol=0.6)
     svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
     for label in reference["x_labels"] + reference["y_labels"]:
         assert f">{label}<" in svg

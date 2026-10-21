@@ -283,7 +283,7 @@ def test_two_groups_get_a_tree_and_many_genes_hide_labels(adata):
     a.obs["group"] = a.obs["group"].cat.remove_unused_categories()
     spec = plot(a, dendrogram=True).to_dict()
     tree = spec["surround"]["right"][0]
-    assert len(spec["datasets"][tree["data"]["name"]]) == 3
+    assert len(spec["datasets"][tree["data"]["name"]]) == 2
     hidden = plot(adata, var_names=["g1"] * 51).to_dict()
     shown = plot(adata, var_names=["g1"] * 51, show_gene_labels=True).to_dict()
     assert len(leaf_marks(hidden)) + 1 == len(leaf_marks(shown))

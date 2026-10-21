@@ -223,7 +223,8 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             if mark.get("mark", {}).get("color") == "#555555"
         )
         assert tree["mark"]["type"] == "link"
-        assert len(chart_spec["datasets"][tree["data"]["name"]]) == 3 * (len(order) - 1)
+        assert tree["mark"]["linkShape"] == "orthogonal"
+        assert len(chart_spec["datasets"][tree["data"]["name"]]) == 2 * (len(order) - 1)
     spec = charts[0].to_dict()
     dot = points(spec)
     assert len(spec["datasets"][dot["data"]["name"]]) == 100
@@ -312,8 +313,8 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         mark for mark in leaf_marks(clustered) if mark["mark"].get("color") == "#555555"
     ]
     assert [len(clustered["datasets"][mark["data"]["name"]]) for mark in branches] == [
-        3 * 699,
-        3 * 9,
+        2 * 699,
+        2 * 9,
     ]
     assert clustered["scales"]["y"]["gapPositions"] == []
     assert clustered["scales"]["x"]["gapPositions"] == []

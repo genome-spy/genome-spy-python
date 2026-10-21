@@ -20,20 +20,17 @@ Orientation = Literal["top", "bottom", "left", "right"]
 def tree_records(
     tree: TreeData, leaf_positions: list[float] | None = None
 ) -> list[dict[str, float]]:
-    """Turn stored tree branches into line segments with one position per group.
-
-    Return endpoint rows that GenomeSpy can draw without calculating a tree.
-    """
-    # Convert Scanpy's ten-unit leaf spacing into one slot per group.
+    """Return parent-to-child endpoint rows from stored tree coordinates."""
+    # Start at each parent so native elbows retain its stored merge height.
     records = [
         {
-            "leaf": float(leaves[i] / 10),
-            "leaf2": float(leaves[i + 1] / 10),
-            "distance": float(distances[i]),
-            "distance2": float(distances[i + 1]),
+            "leaf": float((leaves[1] + leaves[2]) / 20),
+            "leaf2": float(leaves[child] / 10),
+            "distance": float(distances[1]),
+            "distance2": float(distances[child]),
         }
         for leaves, distances in zip(tree.icoord, tree.dcoord, strict=True)
-        for i in range(3)
+        for child in (0, 3)
     ]
     if leaf_positions is not None:
         if len(leaf_positions) != len(tree.order):
@@ -44,6 +41,24 @@ def tree_records(
             for field in ("leaf", "leaf2"):
                 record[field] = float(np.interp(record[field], slots, positions))
     return records
+
+
+def _tree_links(
+    chart: gs.Chart,
+    *,
+    horizontal: bool,
+    linewidth: float = 1.5,
+    clip: bool | Literal["never"] = True,
+) -> gs.Chart:
+    """Apply the shared native tree mark to endpoint rows, keeping hover disabled."""
+    return chart.mark_link(
+        linkShape="orthogonal",
+        orient="vertical" if horizontal else "horizontal",
+        color="#555555",
+        size=linewidth * _PT,
+        clip=clip,
+        tooltip=None,
+    )
 
 
 def tree_track(
@@ -78,9 +93,7 @@ def tree_track(
         )
         .axis(None)
     )
-    chart = gs.Chart(records).mark_link(
-        linkShape="line", color="#555555", size=linewidth * _PT, clip=True, tooltip=None
-    )
+    chart = _tree_links(gs.Chart(records), horizontal=horizontal, linewidth=linewidth)
     if horizontal:
         return chart.encode(
             x=leaf,
@@ -107,49 +120,33 @@ def distance_domain(tree: TreeData) -> list[float]:
 
 
 def tree_overlay(
-    tree: TreeData,
-    *,
-    orientation: Orientation,
-    padding: float = 0,
-    reverse: bool = False,
-    size: float = 80,
-    offset: float = 0,
-    linewidth: float = 1.5,
-    leaf_projection: str | None = None,
+    tree: TreeData, *, orientation: Orientation, size: float = 80
 ) -> gs.LayerChart:
-    """Return branches outside a matrix, with an optional live slot projection.
+    """Place shared tree links beside the correlation matrix's existing label layout.
 
-    Align summary slots, with a live projection when navigation is enabled.
+    Its native surround migration remains separate from the shared mark change.
     """
-    # Recalculate positions in the browser so leaves stay aligned after resizing.
     n = len(tree.order)
     maximum = float(tree.dcoord.max()) or 1
-    leaf = f"(datum.leaf + {padding}) / {n + 2 * padding}"
-    leaf2 = leaf.replace("datum.leaf", "datum.leaf2")
+    leaf = f"datum.leaf / {n}"
+    leaf2 = f"datum.leaf2 / {n}"
     distance = f"datum.distance / {maximum} * {size}"
-    distance2 = distance.replace("datum.distance", "datum.distance2")
-    if offset:
-        distance, distance2 = f"({distance}) + {offset}", f"({distance2}) + {offset}"
-    records = tree_records(tree)
-    if leaf_projection is not None:
-        leaf = leaf_projection.format(field="leaf")
-        leaf2 = leaf_projection.format(field="leaf2")
-    rules = gs.Chart(records).mark_rule(
-        color="#555555", size=linewidth * _PT, clip="never", tooltip=None
-    )
-    if orientation in ("right", "left"):
-        side = "-" if orientation == "left" else "1 +"
-        xpos = f"{side} ({distance}) / width"
-        x2pos = f"{side} ({distance2}) / width"
-        ypos = f"1 - ({leaf})" if reverse else leaf
-        y2pos = f"1 - ({leaf2})" if reverse else leaf2
-    else:
+    distance2 = f"datum.distance2 / {maximum} * {size}"
+    horizontal = orientation in ("top", "bottom")
+    if horizontal:
         side = "1 +" if orientation == "top" else "-"
         xpos, x2pos = leaf, leaf2
         ypos = f"{side} ({distance}) / height"
         y2pos = f"{side} ({distance2}) / height"
-    # Branches sit outside the matrix and must not change its scale or axes.
-    rules = rules.transform_calculate(
+    else:
+        side = "-" if orientation == "left" else "1 +"
+        xpos = f"{side} ({distance}) / width"
+        x2pos = f"{side} ({distance2}) / width"
+        ypos, y2pos = leaf, leaf2
+    links = _tree_links(
+        gs.Chart(tree_records(tree)), horizontal=horizontal, clip="never"
+    )
+    links = links.transform_calculate(
         _tree_x=xpos,
         _tree_x2=x2pos,
         _tree_y=ypos,
@@ -160,19 +157,8 @@ def tree_overlay(
         y=gs.Y("_tree_y:Q").scale(None).axis(None),
         y2="_tree_y2:Q",
     )
-    if leaf_projection is not None:
-        channel = "x" if orientation in ("top", "bottom") else "y"
-        start, stop = f"datum._tree_{channel}", f"datum._tree_{channel}2"
-        rules = rules.transform_filter(
-            f"max({start}, {stop}) >= 0 && min({start}, {stop}) <= 1"
-        ).transform_calculate(
-            **{
-                f"_tree_{channel}": f"clamp({start}, 0, 1)",
-                f"_tree_{channel}2": f"clamp({stop}, 0, 1)",
-            }
-        )
     return (
-        gs.layer(rules)
+        gs.layer(links)
         .resolve_scale(x="excluded", y="excluded")
         .resolve_axis(x="excluded", y="excluded")
     )
@@ -216,14 +202,12 @@ def build_dendrogram(
         )
         .axis(None)
     )
-    rules = gs.Chart(tree_records(tree)).mark_rule(
-        color="#555555", size=1.5 * _PT, tooltip=None
-    )
+    links = _tree_links(gs.Chart(tree_records(tree)), horizontal=horizontal)
     if horizontal:
-        rules = rules.encode(x=leaf, x2="leaf2:Q", y=distance, y2="distance2:Q")
+        links = links.encode(x=leaf, x2="leaf2:Q", y=distance, y2="distance2:Q")
     else:
-        rules = rules.encode(y=leaf, y2="leaf2:Q", x=distance, x2="distance2:Q")
-    layers = [rules]
+        links = links.encode(y=leaf, y2="leaf2:Q", x=distance, x2="distance2:Q")
+    layers = [links]
     padding = {"left": 10.0, "right": 10.0, "top": 10.0, "bottom": 10.0}
     # Put labels on the leaf side and reserve room for their full length.
     if not remove_labels:

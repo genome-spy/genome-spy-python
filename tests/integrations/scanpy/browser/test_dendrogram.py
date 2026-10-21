@@ -11,7 +11,7 @@ from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
-from tests.integrations.scanpy.helpers import tree_segments, index_position
+from tests.integrations.scanpy.helpers import tree_paths, tree_segments, index_position
 from tests.integrations.scanpy.dendrogram_fixture import (
     make_tree_adata,
     tree_plot_cases,
@@ -163,7 +163,7 @@ def test_tree_alignment_survives_resizing_and_wheel(page, family, swapped, size)
             page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
         )
     )
-    assert len(svg) == 9
+    assert len(svg) == 12
     points = np.array(svg).reshape(-1, 2)
     pad = (0.3 if swapped else 0.5) if family == "dotplot" else 0
     axis = 0 if swapped else 1
@@ -289,3 +289,34 @@ def test_native_straight_link_export_keeps_control_points_on_the_line(page):
     ).reshape(-1, 2)
     assert len(vertices) in (2, 4)
     assert np.max(np.abs(vertices[:, 1] - vertices[0, 1])) <= 0.2
+
+
+@pytest.mark.parametrize("orientation", ["top", "bottom", "left", "right"])
+@pytest.mark.parametrize("case", ["ties", "identical"])
+def test_zero_height_merges_stay_native_and_connected(page, orientation, case):
+    bounds = render(
+        page,
+        gsc.pl.dendrogram(
+            make_tree_adata(case),
+            "group",
+            orientation=orientation,
+            width=240,
+            height=180,
+            show=False,
+        ),
+    )
+    paths = tree_paths(
+        ET.fromstring(
+            page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+        )
+    )
+    assert len(paths) == 6
+    assert any(path[1] == path[2] for path in paths)
+    if case == "identical":
+        axis = 1 if orientation in ("top", "bottom") else 0
+        start, extent = ("y", "height") if axis else ("x", "width")
+        points = np.asarray(paths).reshape(-1, 2)
+        np.testing.assert_allclose(
+            points[:, axis], bounds[start] + bounds[extent] / 2, atol=0.6
+        )
+        assert np.ptp(points[:, 1 - axis]) > bounds["width" if axis else "height"] / 2

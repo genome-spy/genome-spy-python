@@ -724,7 +724,7 @@ correlations = gsc.pl.correlation_matrix(
 ```
 
 All computations run in Python. GenomeSpy renders supplied branch coordinates
-with native rules; it does not calculate profiles, correlations or linkage.
+with native orthogonal links; it does not calculate profiles, correlations or linkage.
 A missing tree delegates to the public `sc.tl.dendrogram(..., inplace=False)`.
 Scanpy computes group means, Pearson correlations, `1 - correlation` distances,
 complete linkage and branch coordinates; the adapter does not implement these
@@ -762,9 +762,13 @@ does not infer staleness from expression values.
 Dotplot/matrixplot trees reserve an 80-pixel branch region; heatmaps use 100 pixels
 on the right or 80 above, and correlation trees use 180.
 Zero-distance leaves meet the matrix edge without a gap or distance-axis padding.
-Core 1.2 SVG export can bend straight tree links (C12 in the integration ledger);
-notebook WebGL and inline HTML use the verified branch geometry. Vector-export
-fidelity remains open until an upstream fix is adopted.
+All dendrograms share native orthogonal links, as in the
+[GenomeSpy clustered-heatmap example](https://genomespy.app/docs/examples/generic/clustered-heatmap/).
+Each stored merge becomes two parent-to-child links; the native vertical or
+horizontal elbow preserves its merge height. Python still computes the trees.
+Complete SVG paths, WebGL and inline HTML are verified across the four standalone
+orientations and attached trees. Core's separate straight-link SVG issue (C12 in
+the integration ledger) does not affect these orthogonal trees.
 Native dataflow projections follow the plot dimensions and fixed index-slot
 padding. Optional grouped navigation uses the same live index projection for
 branches and row/column labels. Summary hover remains available. Distances,

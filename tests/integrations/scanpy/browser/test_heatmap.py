@@ -14,6 +14,7 @@ import pytest
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render as render_chart
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata, heatmap_cases
+from tests.integrations.scanpy.helpers import tree_segments
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((FIXTURES / "heatmap.json").read_text())
@@ -149,12 +150,8 @@ def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover):
             if e.tag.endswith("text") and e.text in {"A", "B", "C", "D"}
         }
         tree = next(e for e in root.iter() if e.get("stroke") == "#555555")
-        vertices = [
-            list(map(float, re.findall(r"[-+]?\d*\.?\d+", path.get("d"))))
-            for path in tree
-        ]
-        endpoints = [xy for vertex in vertices for xy in (vertex[:2], vertex[-2:])]
-        segments = [(vertex[:2], vertex[-2:]) for vertex in vertices]
+        segments = [(row[:2], row[2:]) for row in tree_segments(tree)]
+        endpoints = [xy for segment in segments for xy in segment]
         for i, (start, stop) in enumerate(segments):
             for xy in (start, stop):
                 if abs(xy[1 if swapped else 0] - edge) < 1:
