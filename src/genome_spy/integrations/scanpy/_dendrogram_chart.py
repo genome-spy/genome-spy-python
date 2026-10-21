@@ -48,7 +48,6 @@ def _tree_links(
     *,
     horizontal: bool,
     linewidth: float = 1.5,
-    clip: bool | Literal["never"] = True,
 ) -> gs.Chart:
     """Apply the shared native tree mark to endpoint rows, keeping hover disabled."""
     return chart.mark_link(
@@ -56,7 +55,7 @@ def _tree_links(
         orient="vertical" if horizontal else "horizontal",
         color="#555555",
         size=linewidth * _PT,
-        clip=clip,
+        clip=True,
         tooltip=None,
     )
 
@@ -122,51 +121,6 @@ def distance_domain(tree: TreeData) -> list[float]:
     """Return padded distance limits from tree heights, including a zero-height tree."""
     high = float(tree.dcoord.max())
     return [-0.05 * high, 1.05 * high] if high else [-0.055, 0.055]
-
-
-def tree_overlay(
-    tree: TreeData, *, orientation: Orientation, size: float = 80
-) -> gs.LayerChart:
-    """Place shared tree links beside the correlation matrix's existing label layout.
-
-    Its native surround migration remains separate from the shared mark change.
-    """
-    n = len(tree.order)
-    maximum = float(tree.dcoord.max()) or 1
-    leaf = f"datum.leaf / {n}"
-    leaf2 = f"datum.leaf2 / {n}"
-    distance = f"datum.distance / {maximum} * {size}"
-    distance2 = f"datum.distance2 / {maximum} * {size}"
-    horizontal = orientation in ("top", "bottom")
-    if horizontal:
-        side = "1 +" if orientation == "top" else "-"
-        xpos, x2pos = leaf, leaf2
-        ypos = f"{side} ({distance}) / height"
-        y2pos = f"{side} ({distance2}) / height"
-    else:
-        side = "-" if orientation == "left" else "1 +"
-        xpos = f"{side} ({distance}) / width"
-        x2pos = f"{side} ({distance2}) / width"
-        ypos, y2pos = leaf, leaf2
-    links = _tree_links(
-        gs.Chart(tree_records(tree)), horizontal=horizontal, clip="never"
-    )
-    links = links.transform_calculate(
-        _tree_x=xpos,
-        _tree_x2=x2pos,
-        _tree_y=ypos,
-        _tree_y2=y2pos,
-    ).encode(
-        x=gs.X("_tree_x:Q").scale(None).axis(None),
-        x2="_tree_x2:Q",
-        y=gs.Y("_tree_y:Q").scale(None).axis(None),
-        y2="_tree_y2:Q",
-    )
-    return (
-        gs.layer(links)
-        .resolve_scale(x="excluded", y="excluded")
-        .resolve_axis(x="excluded", y="excluded")
-    )
 
 
 def build_dendrogram(

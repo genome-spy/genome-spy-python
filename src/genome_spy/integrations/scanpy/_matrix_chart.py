@@ -10,11 +10,14 @@ import genome_spy as gs
 from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
     with_values,
-    with_navigation,
 )
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._data import number, numeric_values
-from genome_spy.integrations.scanpy._grouped_chart import coordinate, _slot_labels
+from genome_spy.integrations.scanpy._grouped_chart import (
+    coordinate,
+    index_scales,
+    _slot_labels,
+)
 from genome_spy.integrations.scanpy._style import (
     FONT,
     GROUPED_FONT_SIZE as TICK,
@@ -78,17 +81,18 @@ def build_matrix(
     x = coordinate(gs.X, "_x", columns, 0)
     y = coordinate(gs.Y, "_y", rows, 0, reverse=True)
     x, y = zoom_axes(x, y, enabled=zoom, name="matrix")
-    xspace = max(map(len, xlabels)) * TICK * 0.65 + 12 if xticks is not None else 25
-    yspace = max(map(len, ylabels)) * TICK * 0.65 + 12 if yticks is not None else 25
+    scales = index_scales(x, y)
+    x, y = gs.X("_x:I"), gs.Y("_y:I")
     axes = []
-    for axis, labels, axis_title, horizontal, space in (
-        (x, xticks, xlabel, True, xspace),
-        (y, yticks, ylabel, False, yspace),
+    sides = {}
+    for axis, labels, names, axis_title, horizontal, side in (
+        (x, xticks, xlabels, xlabel, True, "bottom"),
+        (y, yticks, ylabels, ylabel, False, "left"),
     ):
         axes.append(
             axis.axis(
-                title=axis_title,
-                titlePadding=space + 8 if labels is not None else 8,
+                title=axis_title if labels is None else None,
+                titlePadding=8,
                 labels=labels is None,
                 values=list(range(columns if horizontal else rows))
                 if labels is not None
@@ -104,6 +108,21 @@ def build_matrix(
                 titleFontSize=10 * PT,
             )
         )
+        if labels is not None:
+            ticks = _slot_labels(names, axis.axis(None), horizontal=horizontal)
+            if axis_title is not None:
+                ticks = ticks.properties(
+                    title=gs.Title(
+                        text=axis_title,
+                        orient="bottom" if horizontal else "left",
+                        angle=0 if horizontal else -90,
+                        offset=8,
+                        font=FONT,
+                        fontSize=10 * PT,
+                        fontWeight="normal",
+                    )
+                )
+            sides[side] = [ticks]
     tiles = matrix_tiles(
         values,
         xlabels,
@@ -131,27 +150,13 @@ def build_matrix(
             )
         ),
     ).encode(x=axes[0], y=axes[1])
-    layers: list[gs.Chart | gs.LayerChart] = [
-        with_values(tiles, "_value") if show_values else tiles
-    ]
-    if xticks is not None:
-        layers.append(_slot_labels(xlabels, axes[0], horizontal=True, zoom=bool(zoom)))
-    if yticks is not None:
-        layers.append(_slot_labels(ylabels, axes[1], horizontal=False, zoom=bool(zoom)))
-    chart = gs.layer(*layers).properties(
-        width=width,
-        height=height,
-        padding={
-            # Titled axes already reserve the space for their labels.
-            "left": yspace if yticks is not None and not ylabel else 10,
-            "bottom": xspace if xticks is not None and not xlabel else 10,
-            "top": 10,
-            "right": 10,
-        },
-    )
+    center = with_values(tiles, "_value") if show_values else tiles
+    center = center.properties(width=width, height=height, name="matrix-cells")
+    chart = gs.surround(
+        center, surround=gs.SurroundSides(**sides), spacing=0
+    ).properties(scales=scales)
     if title is not None:
         chart = chart.properties(title=gs.title(title, font=FONT, fontSize=12 * PT))
-    chart = with_navigation(chart, enabled=bool(zoom))
     return chart.configure_view(stroke="transparent", strokeWidth=0).configure_legend(
         labelFont=FONT,
         labelFontSize=TICK,

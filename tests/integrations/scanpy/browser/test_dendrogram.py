@@ -12,6 +12,7 @@ from PIL import Image
 import genome_spy.integrations.scanpy as gsc
 import genome_spy as gs
 from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.test_grid_interactions import position
 from tests.integrations.scanpy.helpers import (
     leaf_marks,
     tree_paths,
@@ -156,7 +157,7 @@ def test_registered_branches_and_complete_charts(
                 1 - (y - yd[0]) / (yd[1] - yd[0])
             ) * height
         if family == "correlation_matrix":
-            return left - x / maximum * 180, top + height - y / n * height
+            return left - x / (maximum * 1.05) * 180, top + height - y / n * height
         if swapped:
             pad = 0.3 if family == "dotplot" else 0
             return left + index_position(x, n, pad, width), top - y / (
@@ -301,6 +302,76 @@ def test_correlation_hover_palette_direction_and_offline_output(page, tmp_path):
     page.goto(output.as_uri())
     page.locator("canvas").first.wait_for(state="visible")
     assert not requests and not page.locator(".message-box").count()
+
+
+@pytest.mark.parametrize("page", [1, 2], indirect=True)
+def test_correlation_tracks_keep_long_labels_and_branches_in_bounds(page):
+    data = make_tree_adata()
+    data.obs["group"] = data.obs.group.cat.rename_categories(
+        [
+            f"Cell group {name} with a long label"
+            for name in data.obs.group.cat.categories
+        ]
+    )
+    for width in (240, 400):
+        spec = gsc.pl.correlation_matrix(
+            data, "group", width=width, height=240, show=False
+        ).to_dict()
+        for side in ("top", "right", "left"):
+            spec["surround"][side][0]["name"] = f"test-{side}"
+        bounds = render(page, gs.TopLevelSpec.from_dict(spec))
+        tracks = {
+            side: page.evaluate(
+                "view=>api.views.getLayoutBounds({scope:[],view})", f"test-{side}"
+            )
+            for side in ("top", "right", "left")
+        }
+        assert tracks["left"]["x"] + tracks["left"]["width"] == pytest.approx(
+            bounds["x"]
+        )
+        assert tracks["top"]["y"] + tracks["top"]["height"] == pytest.approx(
+            bounds["y"]
+        )
+        root = ET.fromstring(
+            page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+        )
+        gradient = next(
+            e
+            for e in root.iter()
+            if e.tag.endswith("rect") and e.get("fill", "").startswith("url(")
+        )
+        assert float(gradient.get("x")) == pytest.approx(bounds["x"], abs=0.6)
+        assert float(gradient.get("width")) == pytest.approx(bounds["width"], abs=0.6)
+        labels = [
+            e
+            for e in root.iter()
+            if e.tag.endswith("text") and (e.text or "").startswith("Cell group")
+        ]
+        assert len(labels) == 8
+        for label in labels:
+            x, y = position(label)
+            track = tracks["top"] if y < bounds["y"] else tracks["right"]
+            assert track["x"] <= x <= track["x"] + track["width"]
+            assert track["y"] <= y <= track["y"] + track["height"]
+        paths = tree_paths(root)
+        assert len(paths) == 6
+        points = np.array(paths).reshape(-1, 2)
+        tree = tracks["left"]
+        assert np.all(
+            (tree["x"] - 0.1 <= points[:, 0]) & (points[:, 0] <= bounds["x"] + 0.1)
+        )
+        assert np.all(
+            (bounds["y"] <= points[:, 1])
+            & (points[:, 1] <= bounds["y"] + bounds["height"])
+        )
+        leaves = points[np.isclose(points[:, 0], bounds["x"], atol=0.1), 1]
+        row_centers = [
+            position(e)[1]
+            for e in labels
+            if position(e)[0] > bounds["x"] + bounds["width"]
+        ]
+        assert len(row_centers) == 4
+        assert all(np.any(np.isclose(leaves, y, atol=0.6)) for y in row_centers)
 
 
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])

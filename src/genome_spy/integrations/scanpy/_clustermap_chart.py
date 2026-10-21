@@ -62,9 +62,7 @@ def _tick_labels(
             )
         else:
             names = _labels(option, len(names), "tick labels", context=CONTEXT)
-    chart = _slot_labels(
-        names, axis, horizontal=horizontal, opposite=not horizontal, in_bounds=True
-    )
+    chart = _slot_labels(names, axis, horizontal=horizontal, opposite=not horizontal)
     if auto:
         # Measure the bands after gaps, including before any zoom.
         channel, extent = ("x", "width") if horizontal else ("y", "height")

@@ -368,11 +368,58 @@ def test_correlation_numbers_and_native_defaults():
     spec = gsc.pl.correlation_matrix(
         a, "group", show_correlation_numbers=True, show=False
     ).to_dict()
-    color = spec["layer"][0]["encoding"]["color"]["scale"]
+    color = spec["spec"]["layer"][0]["encoding"]["color"]["scale"]
     assert color["domain"] == [-1, 1]
     assert color["scheme"] == {"name": "redblue", "extent": [1, 0]}
     assert not color.get("reverse", False)
-    assert spec["layer"][3]["mark"]["type"] == "text"
+    assert spec["spec"]["layer"][1]["mark"]["type"] == "text"
+
+
+@pytest.mark.parametrize("dendrogram", [False, True])
+def test_correlation_tracks_keep_cached_order_and_numeric_records(
+    monkeypatch, dendrogram
+):
+    from tests.integrations.scanpy.helpers import leaf_marks
+
+    a = make_tree_adata()
+    sc.tl.dendrogram(a, "group")
+    stored = deepcopy(a.uns["dendrogram_group"])
+    monkeypatch.setattr(
+        sc.tl, "dendrogram", lambda *a, **k: pytest.fail("Recomputed tree")
+    )
+    spec = gsc.pl.correlation_matrix(
+        a, "group", dendrogram=dendrogram, show_correlation_numbers=True, show=False
+    ).to_dict()
+    assert set(spec["surround"]) == {"top", "right"} | (
+        {"left"} if dendrogram else set()
+    )
+    assert "padding" not in spec and spec["spacing"] == 0
+    for axis in ("x", "y"):
+        assert spec["scales"][axis]["gapPositions"] == []
+        assert spec["scales"][axis]["zoom"] is False
+    labels = (
+        stored["categories_ordered"] if dendrogram else list(a.obs.group.cat.categories)
+    )
+    order = [list(a.obs.group.cat.categories).index(label) for label in labels]
+    records = spec["datasets"][spec["spec"]["layer"][0]["data"]["name"]]
+    assert len(records) == len(labels) ** 2
+    assert [row["_column"] for row in records[: len(labels)]] == labels
+    np.testing.assert_allclose(
+        np.array([row["_correlation"] for row in records]).reshape(len(labels), -1),
+        np.asarray(stored["correlation_matrix"])[np.ix_(order, order)],
+    )
+    for mark in leaf_marks(spec):
+        for axis in ("x", "y"):
+            encoding = mark.get("encoding", {}).get(axis, {})
+            if encoding.get("type") == "index":
+                assert "scale" not in encoding
+    for views in spec["surround"].values():
+        assert all(
+            mark["mark"]["clip"] is True for view in views for mark in leaf_marks(view)
+        )
+    np.testing.assert_array_equal(
+        a.uns["dendrogram_group"]["linkage"], stored["linkage"]
+    )
 
 
 def test_native_edges_preserve_parents_and_unequal_leaf_positions():

@@ -7,7 +7,7 @@ import numpy as np
 import genome_spy as gs
 from genome_spy.schema.core import SchemeParams
 from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
-from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
+from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._style import (
     FONT as _FONT,
@@ -17,7 +17,11 @@ from genome_spy.integrations.scanpy._style import (
     native_color,
     native_scheme,
 )
-from genome_spy.integrations.scanpy._grouped_chart import coordinate
+from genome_spy.integrations.scanpy._grouped_chart import (
+    coordinate,
+    index_scales,
+    _slot_labels,
+)
 
 
 def build_correlation_matrix(
@@ -92,6 +96,8 @@ def build_correlation_matrix(
         for x, y in zip(xx.ravel(), yy.ravel(), strict=True)
     ]
     x, y = coordinate(gs.X, "_x", n, 0), coordinate(gs.Y, "_y", n, 0)
+    scales = index_scales(x, y)
+    x, y = gs.X("_x:I").axis(None), gs.Y("_y:I").axis(None)
     tiles = (
         gs.Chart(table)
         .mark_rect(
@@ -132,36 +138,17 @@ def build_correlation_matrix(
                 gs.Tooltip("_correlation:Q", title="Correlation", format=".4g"),
             ]
         )
-    # Reuse the tile positions for labels so they cannot drift from their groups.
-    label_table = [{"slot": i, "label": str(label)} for i, label in enumerate(labels)]
-    top_labels = (
-        gs.Chart(label_table)
-        .mark_text(
-            font=_FONT,
-            size=10 * _PT,
-            angle=-45,
-            align="left",
-            baseline="middle",
-            yOffset=-8,
-            clip="never",
-            tooltip=None,
-        )
-        .encode(x=x.field("slot"), y=gs.value(1), text="label:N")
-    )
-    right_labels = (
-        gs.Chart(label_table)
-        .mark_text(
-            font=_FONT,
-            size=10 * _PT,
-            align="left",
-            baseline="middle",
-            xOffset=8,
-            clip="never",
-            tooltip=None,
-        )
-        .encode(x=gs.value(1), y=y.field("slot"), text="label:N")
-    )
-    layers: list[gs.Chart | gs.LayerChart] = [tiles, top_labels, right_labels]
+    # Labels and branches own viewports and inherit the same ordered slots.
+    names = list(map(str, labels))
+    sides = {
+        "top": [
+            _slot_labels(names, x, horizontal=True, opposite=True, font_size=10 * _PT)
+        ],
+        "right": [
+            _slot_labels(names, y, horizontal=False, opposite=True, font_size=10 * _PT)
+        ],
+    }
+    layers = [tiles]
     if numbers:
         layers.append(
             gs.Chart(table)
@@ -169,20 +156,18 @@ def build_correlation_matrix(
             .encode(x=x, y=y, text=gs.Text("_correlation:Q", format=".2f"))
         )
     if dendrogram:
-        layers.append(tree_overlay(tree, orientation="left", size=180))
-    space = max(len(str(label)) for label in labels) * 10 * _PT * 0.65 + 12
+        sides["left"] = [
+            tree_track(tree, list(range(n)), horizontal=False, size=180, reverse=True)
+        ]
     return (
-        gs.layer(*layers)
-        .properties(
-            width=width,
-            height=height,
-            padding={
-                "left": 190 if dendrogram else 10,
-                "top": space,
-                "right": space,
-                "bottom": 10,
-            },
+        gs.surround(
+            gs.layer(*layers).properties(
+                width=width, height=height, name="correlation-cells"
+            ),
+            surround=gs.SurroundSides(**sides),
+            spacing=0,
         )
+        .properties(scales=scales)
         .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(labelFont=_FONT, labelFontSize=_TICK)
     )

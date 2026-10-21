@@ -482,9 +482,9 @@ tick labels reveal more names as slots grow. Defaults remain
 
 Category-strip tooltips use the native default handler and the same `hover` flag
 as tiles. They work with the bundled Core 1.2.0 runtime, including after zoom and
-pan. Dotplot, matrixplot and heatmap labels, brackets and trees use native
-`gs.surround` side tracks with shared index scales, as do clustermap's trees,
-labels and color tracks. There is no patched bundle or custom hover listener
+pan. All expression grids use native `gs.surround` side tracks with shared
+index scales for labels, brackets, trees and color tracks. Supplied matrices
+and correlation matrices use the same track helpers. There is no patched bundle or custom hover listener
 in the integration.
 
 `show_values` uses native `fitToBand` text, shared tile records and the plotted
@@ -569,7 +569,9 @@ chart.display(inline=True, controls=False)
 or DataFrame directly. It does not access AnnData, aggregate values, reorder axes,
 or compute linkage. DataFrame index/column labels are used only when supplied as
 `yticks`/`xticks`, matching Scanpy's array conversion. Explicit tick labels must
-match the axis length; repeated names retain separate index slots.
+match the axis length; repeated names retain separate index slots. Explicit
+labels and their titles occupy native side tracks and follow the same index
+scales during navigation; numeric defaults remain native axes.
 
 Colors use linear normalization over finite values, including negative values.
 Missing/masked entries stay blank; constant limits expand by 10% (or ±0.1 at
@@ -760,7 +762,7 @@ does not infer staleness from expression values.
 | Grouped `dendrogram` | False retains the original plot; True uses `uns["dendrogram_<groupby>"]`, and a string selects another key. Missing results delegate to Scanpy. Tree order overrides explicit `categories_order`, as in Scanpy. Dotplot/matrixplot warn and omit attachments with at most two groups; heatmap supports two-group attachments. |
 | Category and feature order | Carry the same leaf permutation through means, fractions, supplied tables and labels. When marker-block labels match the group categories, reorder their feature slots and brackets too; otherwise retain marker order. Multiple categorical string keys use Scanpy's lexically ordered joined tree groups. |
 | Standalone `dendrogram` | All four orientations and `remove_labels`, including a two-group tree. At least two observed categories are required. Unused categories, ambiguous joined/string labels, and undefined constant/missing profiles error explicitly. Native width/height default to 300 × 300 logical pixels. |
-| `correlation_matrix` | Cached or locally computed group correlations. None/True draws a left tree and orders both axes by leaves; a string selects the cache. False keeps current category order without drawing a tree. Optional two-decimal numbers and default summary hover are native marks. |
+| `correlation_matrix` | Cached or locally computed group correlations. None/True draws a left tree and orders both axes by leaves; a string selects the cache. False keeps current category order without drawing a tree. Optional two-decimal numbers and default summary hover are native marks. Native side tracks hold vertical column labels, right row labels and the optional left tree; the colorbar stays beneath the matrix. |
 | Correlation colors/style | Default native redblue with reversed scheme extent gives blue negatives and red positives; the guide increases from -1 to 1. Native cmap names, scalar edgecolors and linewidth are supported kwargs. Other kwargs, norm/vcenter and Matplotlib colormaps error. Native interpolation differs from Scanpy's default bwr. |
 | Correlation size/delivery | Default tile area is 60 pixels per group in each direction; width/height override it. Figsize uses a 100-pixels/inch budget, subtracting 180 pixels for a tree and 20 for the guide. Labels and padding add space. Existing show/save/native-return rules apply; ax is omitted. |
 

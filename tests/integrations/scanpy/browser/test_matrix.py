@@ -11,11 +11,90 @@ from PIL import Image
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
+import genome_spy as gs
 from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.test_grid_interactions import (
+    pointer,
+    position,
+    svg_root,
+)
 from tests.integrations.scanpy.matrix_fixture import matrix_cases
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((FIXTURES / "matrix.json").read_text())["cases"]
+
+
+@pytest.mark.parametrize("page", [1, 2], indirect=True)
+@pytest.mark.parametrize("zoom", [True, "xy"])
+def test_matrix_side_labels_follow_zoom_pan_and_resize(page, zoom):
+    spec = gsc.pl.matrix(
+        np.arange(144).reshape(12, 12),
+        xticks=[f"gene{i}" for i in range(12)],
+        yticks=[f"group{i}" for i in range(12)],
+        zoom=zoom,
+        show=False,
+    ).to_dict()
+    for side in ("bottom", "left"):
+        spec["surround"][side][0]["name"] = f"test-{side}"
+    for width, height in ((240, 200), (400, 280)):
+        spec["spec"].update(width=width, height=height)
+        bounds = render(page, gs.TopLevelSpec.from_dict(spec))
+        original = page.evaluate("api.getScaleResolutionByName('matrix-x').getDomain()")
+        for navigated in (False, True):
+            if navigated:
+                px, py = pointer(page, bounds)
+                page.mouse.wheel(0, -250)
+                page.wait_for_timeout(250)
+                page.mouse.down()
+                page.mouse.move(px + 15, py + 15, steps=5)
+                page.mouse.up()
+                page.wait_for_timeout(700)
+            root = svg_root(page)
+            for axis, side, prefix in (("x", "bottom", "gene"), ("y", "left", "group")):
+                track = page.evaluate(
+                    "view=>api.views.getLayoutBounds({scope:[],view})", f"test-{side}"
+                )
+                assert track["width" if axis == "x" else "height"] == pytest.approx(
+                    bounds["width" if axis == "x" else "height"]
+                )
+                centers = page.evaluate(
+                    """axis=>{const s=api.getScaleResolutionByName(`matrix-${axis}`).getScale();
+                    return Array.from({length:12},(_,i)=>axis==='x'
+                        ?s(i)+s.bandwidth()/2:1-s(i)+s.bandwidth()/2)}""",
+                    axis,
+                )
+                labels = [
+                    e
+                    for e in root.iter()
+                    if e.tag.endswith("text") and (e.text or "").startswith(prefix)
+                ]
+                assert labels
+                for label in labels:
+                    slot = int(label.text.removeprefix(prefix))
+                    xy = position(label)
+                    value = xy[0 if axis == "x" else 1]
+                    assert value == pytest.approx(
+                        bounds[axis]
+                        + centers[slot] * bounds["width" if axis == "x" else "height"],
+                        abs=0.6,
+                    ), (
+                        label.text,
+                        navigated,
+                        bounds,
+                        centers[slot],
+                        ET.tostring(label),
+                    )
+                    # Native clipping can retain a partly visible label's outside anchor.
+                    cross, extent = ("y", "height") if axis == "x" else ("x", "width")
+                    assert (
+                        track[cross]
+                        <= xy[1 if axis == "x" else 0]
+                        <= track[cross] + track[extent]
+                    )
+        assert (
+            page.evaluate("api.getScaleResolutionByName('matrix-x').getDomain()")
+            != original
+        ) is (zoom == "xy")
 
 
 @pytest.mark.parametrize("explicit_labels", [False, True])
@@ -115,6 +194,10 @@ def test_complete_matrix_tiles_and_labels(page, tmp_path, reference_images, case
         )
         < 2
     )
+    assert float(gradients[0].get("x")) > bounds["x"] + bounds["width"]
+    assert float(gradients[0].get("y")) + float(
+        gradients[0].get("height")
+    ) / 2 == pytest.approx(bounds["y"] + bounds["height"] / 2, abs=1)
     for label in (
         list(options.get("xticks", []))
         + list(options.get("yticks", []))

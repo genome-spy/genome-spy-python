@@ -11,10 +11,7 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
-from genome_spy.integrations.scanpy._grid_interactions import (
-    index_offset,
-    visible_slots,
-)
+from genome_spy.integrations.scanpy._grid_interactions import index_offset
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._style import (
     FONT as _FONT,
@@ -51,12 +48,11 @@ def _slot_labels(
     coordinate: Any,
     *,
     horizontal: bool,
-    zoom: bool = False,
     opposite: bool = False,
-    in_bounds: bool = False,
     positions: Sequence[float] | None = None,
+    font_size: float = _TICK,
 ) -> gs.Chart:
-    """Return a text layer placing labels at the supplied row or column positions.
+    """Return a side view placing labels at the supplied row or column positions.
 
     Separate text avoids merging repeated names into a single axis tick.
     """
@@ -67,44 +63,40 @@ def _slot_labels(
             for slot, label in zip(positions, labels, strict=True)
         ]
     chart = gs.Chart(table)
-    if zoom and not in_bounds:
-        chart = visible_slots(chart, "x" if horizontal else "y", "datum.slot + 0.5")
     if positions is not None:
         axis = "x" if horizontal else "y"
         chart = chart.encode(**{f"{axis}Offset": index_offset(axis, "fraction")})
-    space = max(map(len, labels), default=0) * _TICK * 0.65 + 12
+    space = max(map(len, labels), default=0) * font_size * 0.65 + 12
     if horizontal:
         chart = chart.mark_text(
             font=_FONT,
-            size=_TICK,
+            size=font_size,
             angle=-90,
-            align="right",
+            align="left" if opposite else "right",
             baseline="middle",
-            yOffset=8,
-            clip=True if in_bounds else "never",
+            yOffset=-8 if opposite else 8,
+            clip=True,
             tooltip=None,
         ).encode(
             x=coordinate.field("slot"),
-            y=gs.value(1 if in_bounds else 0),
+            y=gs.value(0 if opposite else 1),
             text="label:N",
         )
-        return chart.properties(height=space) if in_bounds else chart
+        return chart.properties(height=space)
     chart = chart.mark_text(
         font=_FONT,
-        size=_TICK,
+        size=font_size,
         align="left" if opposite else "right",
         baseline="middle",
         xOffset=8 if opposite else -8,
-        clip=True if in_bounds else "never",
+        clip=True,
         tooltip=None,
     ).encode(
-        x=gs.value(0 if opposite else 1)
-        if in_bounds
-        else gs.value(1 if opposite else 0),
+        x=gs.value(0 if opposite else 1),
         y=coordinate.field("slot"),
         text="label:N",
     )
-    return chart.properties(width=space) if in_bounds else chart
+    return chart.properties(width=space)
 
 
 def _brackets(
@@ -394,10 +386,8 @@ def finish_grouped_chart(
     )
     # Each annotation owns a viewport and inherits the center's aligned scale.
     sides: dict[str, Any] = {
-        "bottom": [
-            _slot_labels(xlabels, x.axis(None), horizontal=True, in_bounds=True)
-        ],
-        "left": [_slot_labels(ylabels, y.axis(None), horizontal=False, in_bounds=True)],
+        "bottom": [_slot_labels(xlabels, x.axis(None), horizontal=True)],
+        "left": [_slot_labels(ylabels, y.axis(None), horizontal=False)],
     }
     if groups:
         brackets = gs.layer(

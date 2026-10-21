@@ -18,11 +18,6 @@ def zoom_axes(
     )
 
 
-def slot_position(axis: str, value: str) -> str:
-    """Project a slot expression from the top or left through the live index scale."""
-    return f"grid_{axis}_origin + ({value}) * grid_{axis}_step"
-
-
 def index_offset(axis: str, field: str) -> Any:
     """Turn a fractional slot field into a live within-band pixel offset.
 
@@ -33,30 +28,6 @@ def index_offset(axis: str, field: str) -> Any:
     return (gs.XOffset if axis == "x" else gs.YOffset)(f"{field}:Q").scale(
         domain=[0, 1],
         range=[0, gs.expr(f"{sign}{extent} * bandstep('{axis}', {extent})")],
-    )
-
-
-def visible_slots(
-    chart: gs.Chart, axis: str, start: str, stop: str | None = None
-) -> gs.Chart:
-    """Hide outside labels or incomplete brackets using their slot expressions."""
-    position = slot_position(axis, start)
-    predicate = f"inrange({position}, [0, 1])"
-    if stop is not None:
-        predicate = f"({position}) >= 0 && ({slot_position(axis, stop)}) <= 1"
-    return chart.transform_filter(predicate)
-
-
-def with_navigation(chart: gs.LayerChart, *, enabled: bool) -> gs.LayerChart:
-    """Expose live x/y origins and band widths to the grid's outside annotations."""
-    if not enabled:
-        return chart
-    # Read scales at their owner; outside annotations have excluded scales.
-    return chart.add_params(
-        gs.param("grid_x_origin", expr="scale('x', 0)"),
-        gs.param("grid_y_origin", expr="1 - scale('y', 0)"),
-        gs.param("grid_x_step", expr="bandwidth('x')"),
-        gs.param("grid_y_step", expr="bandwidth('y')"),
     )
 
 

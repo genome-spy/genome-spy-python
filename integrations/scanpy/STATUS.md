@@ -61,19 +61,20 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain sixteen UMAP/embedding/scatter/PCA
-code cells and thirteen expression/ranked code cells. Public availability does not mean
+code cells and fourteen expression/ranked code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M14.b.3, remaining matrix/correlation native tracks.**
-M14.b.1 and M14.b.2 are closed for native WebGL/notebook/HTML layout;
-[the grouped-layout record](#m14b2-native-grouped-layout) retains the new evidence.
-Heatmap and dotplot have four-pixel group gaps; matrixplot tiles remain contiguous.
-Clustermap now uses native surround tracks with contiguous rows and columns;
-see the [clustermap delivery record](#m14b3-clustermap-native-tracks).
-Generic matrix and correlation charts retain their earlier layouts until their
-own [migration increment](PLAN.md#m14b-native-grid-layout-and-group-gaps) is verified.
+**Next work: M07.d, native 2D point styling, starting with outlines.**
+Reuse the shared embedding renderer for `add_outline=True`; preserve point order,
+coordinates, size semantics and existing hover/zoom. Keep broader marker/graph
+options in M07.d and the full compatibility inventory in M14.
+
+M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
+Heatmap and dotplot have four-pixel group gaps; matrixplot, generic matrix,
+correlation and clustermap tiles remain contiguous. All these grids now use
+native surround tracks; see the [numeric-layout completion](#m14b3-matrix-and-correlation-native-tracks).
 All tree families now share [native orthogonal links](#shared-native-orthogonal-dendrograms),
 with complete SVG paths verified. C12's separately reproduced straight-link export
 bug remains upstream; the adapter no longer uses that shape for trees.
@@ -92,9 +93,9 @@ does not close M07.a/b's newly observed categorical-guide rendering gap.
 
 Core 1.2.0, its generated composition APIs and the published heatmap example are
 now adopted; see the [upgrade record](#core-12-runtime-adoption). M14.b.1/b.2 are
-closed for their native layout scope. M14.b.3's clustermap increment now shares
-those track helpers; the tree-cut gap trial was withdrawn after visual review. Matrix and
-correlation migrations remain next. Orthogonal trees pass their SVG fidelity gate;
+closed for their native layout scope. M14.b.3 now shares
+those track helpers across clustermap, generic matrix and correlation; the tree-cut
+gap trial was withdrawn after visual review. Orthogonal trees pass their SVG fidelity gate;
 C12 remains a separate upstream straight-link issue.
 
 | Slice | Lifecycle state | Commit/evidence | Remaining work before Verified/Closed |
@@ -109,7 +110,7 @@ C12 remains a separate upstream straight-link issue.
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
 | M14.b.2 grouped summary layout | Closed (native layout) | [Layout delivery](#m14b2-native-grouped-layout) and [orthogonal tree verification](#shared-native-orthogonal-dendrograms) | Broader family options remain in their existing slices. |
-| M14.b.3 numeric/clustered layout | In progress; clustermap increment verified | [Clustermap delivery](#m14b3-clustermap-native-tracks) and [shared trees](#shared-native-orthogonal-dendrograms) | Generic matrix/correlation native tracks and their own verification remain. |
+| M14.b.3 numeric/clustered layout | Closed (native layout) | [Clustermap delivery](#m14b3-clustermap-native-tracks), [numeric tracks](#m14b3-matrix-and-correlation-native-tracks) and [shared trees](#shared-native-orthogonal-dendrograms) | Broader parameters/transport remain M05.d/M14; zero-only viewport fitting remains C13. |
 | M05.f category-strip hover | Closed (native WebGL/notebook/HTML track scope) | C10; [heatmap](#m14b1-native-heatmap-tracks-and-gaps) and [clustermap evidence](#m14b3-clustermap-native-tracks) | No remaining work within this track-hover scope. |
 | M14.b shared tree rendering | Closed (native orthogonal links) | [Contract, chart/workflow and resource evidence](#shared-native-orthogonal-dendrograms) | C12's straight-link SVG bug remains upstream; adapter trees use the verified orthogonal shape. |
 | M14.b viewport tree-height fitting | Implemented; positive-height fitting verified | [Shared scale definition and checks](#shared-viewport-height-fitting) | C13 blocks zero-only visible subtrees within larger trees; whole zero-height trees retain their stable range. |
@@ -140,7 +141,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M11 trajectories/graphs/series | Planned | Stored DPT/PAGA, graph layouts, series/simulation, return/side-effect contracts; evaluate C04 paths. |
 | M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
-| M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 clustermap tracks are verified; matrix/correlation migrations remain. Parameter/capability closure, workflow publication and full API evidence remain open. |
+| M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
 
 ## M05.e shared grid interactions
 
@@ -414,12 +415,69 @@ heap is 35.6 MiB. Source construction is excluded. The 2026-10-21 environment is
 macOS 26.6.2 arm64, Python 3.11.15, Scanpy 1.11.5, AnnData 0.12.19, NumPy 2.4.6,
 pandas 2.3.3, SciPy 1.17.1, Chromium 156.0.8078.4 at 1800 × 1400 / DPR 1.
 These are observations, not CI limits; raw measurements and generated media stay
-local. M14.b.3 remains in progress for generic matrix/correlation migration; no
-plan is eligible for clearance.
+local. Generic matrix/correlation were still pending at this checkpoint; the
+[completion record](#m14b3-matrix-and-correlation-native-tracks) covers their migration. No plan is eligible for clearance.
 
 The shared renderer has since adopted native orthogonal links; see the following
 delivery record. The layout/resource measurements above describe the preceding
 contiguous clustermap checkpoint.
+
+## M14.b.3 matrix and correlation native tracks
+
+Closed for native WebGL/notebook/HTML layout. Generic `matrix` reuses shared
+slot labels in left/bottom side views, with native titles outside those tracks;
+unsupplied numeric ticks remain native axes. `correlation_matrix` reuses the same
+labels and `tree_track` for its right/top labels and optional 180-pixel left tree.
+Column labels are vertical so long names fit inside the aligned track; trees use
+the shared five-percent root headroom. Its native colorbar stays with the center,
+beneath the tiles. Matrix area and figsize budgets, contiguous slots, frameless
+defaults, tile edges, masks, duplicate labels, color bounds, supplied order and
+cached correlation/tree permutations remain unchanged. No public options or
+analysis computations were added.
+
+The last outside-viewport tree renderer and uniform slot projection/navigation
+helpers were removed. All grid labels now have native viewports and shared index
+scales; no fallback overlay mode remains. Data/summary/tree preparation modules
+are unchanged, and side tracks contain only labels or branch endpoints.
+
+Verification: **964 Python integration checks**, the canonical expression workflow
+and **100 browser checks** pass; C12/C13 remain the two expected Core failures.
+Checks include all frozen numeric-matrix and tree charts, complete registered tile
+colors/axes/titles/legends/branches, native matrix hover and fitted values, y/xy
+zoom and pan, label/leaf registration after resize, DPR 1/2, long correlation
+labels and offline HTML. Shared heatmap/dotplot/matrixplot/clustermap navigation
+and tree checks also pass. Ruff formatting/lint and mypy pass. The live packaged-PBMC
+workflow completes **14 code cells / 12 widgets**, including the added stored
+correlation example, without errors. Local notebook customizations remain local;
+committed sources contain no outputs or widget state.
+
+A sequential before/after local measurement uses a seed-0, float32 normal
+200 × 1,000 supplied matrix with explicit numeric labels and xy zoom at
+1,200 × 450 pixels. The same RNG then supplies 3,000 × 20 stored PCA coordinates
+for 50 groups of 60 cells in a 3,000 × 20,000 sparse AnnData; Scanpy prepares its
+group tree before timing. Correlation renders 50 × 50 cached values with numbers
+at 600 × 600. Imports and source construction are excluded; tracemalloc covers
+chart preparation and validated JSON. Chromium 156.0.8078.4 runs at 2,000 × 1,800,
+DPR 1, on the same macOS/Python/scientific-stack versions recorded above.
+
+| Workload | Prepare s | JSON s | Python peak MiB | JSON MiB | Paint s | JS heap MiB |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| matrix, before | 2.907 | 11.875 | 328.34 | 26.882 | 11.177 | 159.26 |
+| matrix, native tracks | 0.096 | 18.005 | 328.14 | 26.856 | 13.093 | 159.26 |
+| correlation, before | 0.027 | 0.948 | 4.59 | 0.369 | 1.555 | 20.69 |
+| correlation, native tracks | 0.028 | 1.039 | 4.73 | 0.374 | 1.608 | 23.37 |
+
+Observed native hover, including pointer pause/probes, is 0.675 s for the matrix
+and 0.696 s for correlation. The large matrix keeps the same payload/memory
+scale and prepares faster, but validated serialization remains slower (18.0 s
+versus 11.9 s with tracing active). These are observations, not CI limits or a
+performance improvement claim. Large-payload validation/transport remains
+M05.d/M14 work. Raw measurements, media and exports stay local.
+
+The next ready increment is M07.d point outlines. C11 categorical-guide fitting,
+C13 zero-only viewport fitting, M05.d larger transport and wider family options
+retain their existing owners. Unrelated full-repository tests and the docs build
+were not rerun. Clearance: retain; no plan is eligible for removal.
 
 ## Shared native orthogonal dendrograms
 
@@ -437,7 +495,7 @@ index offsets keep tracks aligned across native gaps and navigation. Parent
 positions are mapped before drawing, preserving connected branches for unequal
 heatmap group spans. Heights, leaf permutations, cached results and Python
 clustering remain unchanged. Unused legacy overlay projection options were removed;
-correlation's remaining layout migration still belongs to M14.b.3.
+correlation's subsequent layout migration is recorded in [M14.b.3](#m14b3-matrix-and-correlation-native-tracks).
 
 Verification: **961 Python integration checks**, **133 browser checks** and the
 canonical expression workflow pass. SVG assertions inspect all three vertices
@@ -465,7 +523,7 @@ build were not rerun.
 The minimal C12 straight-link SVG reproducer still strictly xfails on Core 1.2.0.
 That upstream shape defect is unchanged; the adapter no longer uses straight links
 for trees. Complete orthogonal paths now pass the adapter's SVG gate. Generic
-matrix/correlation native layout and wider family compatibility remain open;
+matrix/correlation native layout was still pending at this checkpoint; wider family compatibility remains open;
 **clearance: retain**.
 
 ## Shared viewport height fitting
@@ -481,7 +539,8 @@ provides the stored endpoint coordinates. No clustering or heights are recompute
 Zero remains pinned to the matrix edge. Native symmetric padding of `1 / 22`
 with that bound preserves the previous five-percent root headroom and overview
 geometry. Entirely zero-height trees retain their existing nonzero domain.
-Standalone and correlation trees retain their existing non-navigable layouts.
+Standalone trees retain their existing non-navigable layout. Correlation now uses
+the shared side-tree scale through M14.b.3, without adding a navigation option.
 
 The new browser checks reproduce the fixed-domain difference, verify the settled
 height against contained stored endpoints across all four families and both

@@ -763,7 +763,10 @@ Deliver in small increments, updating the current queue in STATUS after each:
 3. **M14.b.3 — matrix, clustermap and correlation.** Reuse the migrated labels
    and tree views for both axes, moving clustermap color tracks into native
    sides. Keep supplied/SciPy linkage, masks, palettes and permutations intact.
-   Reuse the same numeric tiles and interactions; clustermap stays contiguous.
+   Reuse the same numeric tiles and interactions; all three stay contiguous.
+   Generic matrix titles belong to their label tracks; retain numeric native axes
+   when labels are omitted. Correlation uses vertical top labels, right row labels,
+   the shared left tree and a native colorbar beneath the tile area.
    This completes M05.f only after both heatmap and clustermap pass its gates.
    All tree families share native `linkShape="orthogonal"` edges with
    `orient="vertical"`/`"horizontal"`. Emit two parent-to-child links per merge,

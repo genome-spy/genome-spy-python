@@ -11,8 +11,39 @@ from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.matrix_fixture import matrix_cases
+from tests.integrations.scanpy.helpers import leaf_marks
 
 FIXTURES = Path(__file__).with_name("fixtures")
+
+
+def test_matrix_tracks_share_contiguous_scales_without_copying_values():
+    spec = gsc.pl.matrix(
+        [[1, np.nan, 3], [4, 5, 6]],
+        xticks=["same", "same", "last"],
+        yticks=["first", "last"],
+        xlabel="Genes",
+        ylabel="Groups",
+        zoom="xy",
+        show_values=True,
+        show=False,
+    ).to_dict()
+    assert set(spec["surround"]) == {"bottom", "left"}
+    assert spec["spec"]["width"] == 400
+    assert "padding" not in spec and "params" not in spec
+    for axis, count in (("x", 3), ("y", 2)):
+        assert spec["scales"][axis]["domain"] == [0, count - 1]
+        assert spec["scales"][axis]["gapPositions"] == []
+        assert spec["scales"][axis]["zoom"] is True
+    for mark in leaf_marks(spec):
+        for axis in ("x", "y"):
+            assert "scale" not in mark.get("encoding", {}).get(axis, {})
+    assert sum("_value" in rows[0] for rows in spec["datasets"].values()) == 1
+    labels = spec["datasets"][spec["surround"]["bottom"][0]["data"]["name"]]
+    assert labels == [
+        {"slot": 0, "label": "same"},
+        {"slot": 1, "label": "same"},
+        {"slot": 2, "label": "last"},
+    ]
 
 
 def test_matrix_keeps_scanpy_defaults_without_matplotlib_axes():
@@ -49,7 +80,7 @@ def test_supplied_matrix_matches_frozen_scanpy_without_plotting(monkeypatch, cas
     original = values.copy()
     chart = gsc.pl.matrix(values, show=False, **options)
     spec = chart.to_dict()
-    tiles = spec["layer"][0]
+    tiles = spec["spec"]
     records = spec["datasets"][tiles["data"]["name"]]
     actual = np.array([row["_value"] for row in records], dtype=float).reshape(
         values.shape
@@ -61,7 +92,7 @@ def test_supplied_matrix_matches_frozen_scanpy_without_plotting(monkeypatch, cas
     np.testing.assert_allclose(
         tiles["encoding"]["color"]["scale"]["domain"], reference["color_domain"]
     )
-    assert tiles["encoding"]["color"]["legend"]["gradientLength"] == spec[
+    assert tiles["encoding"]["color"]["legend"]["gradientLength"] == spec["spec"][
         "height"
     ] * options.get("colorbar_shrink", 0.5)
     np.testing.assert_array_equal(values, original)
@@ -78,7 +109,7 @@ def test_dataframe_labels_are_used_only_when_explicitly_requested():
         ({"xticks": values.columns, "yticks": values.index}, ["B", "A"]),
     ):
         spec = gsc.pl.matrix(values, show=False, **options).to_dict()
-        table = spec["datasets"][spec["layer"][0]["data"]["name"]]
+        table = spec["datasets"][spec["spec"]["data"]["name"]]
         assert [row["_column"] for row in table[:2]] == expected
         assert table[2]["_value"] is None
 

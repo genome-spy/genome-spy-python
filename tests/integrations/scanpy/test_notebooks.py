@@ -200,6 +200,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["matrixplot"],
         namespace["heatmap"],
         namespace["matrix"],
+        namespace["correlations"],
         namespace["clustermap"],
         namespace["rank_scores"],
         namespace["ranked_dotplot"],
@@ -267,7 +268,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         for name in namespace["pbmc"].obs_names
     )
     spec = charts[3].to_dict()
-    records = spec["datasets"][spec["layer"][0]["data"]["name"]]
+    records = spec["datasets"][spec["spec"]["data"]["name"]]
     np.testing.assert_array_equal(
         np.array([row["_value"] for row in records]).reshape(10, 10),
         namespace["pbmc"].uns["dendrogram_bulk_labels"]["correlation_matrix"],
@@ -278,7 +279,9 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert len(rulers) == 1
     assert rulers[0]["ruler"]["encodings"] == ["x", "y"]
     assert rulers[0]["ruler"]["display"] == "center"
-    for chart in charts[1:5]:
+    for chart in (
+        namespace[name] for name in ("matrixplot", "heatmap", "matrix", "clustermap")
+    ):
         spec = chart.to_dict()
         grid = spec["spec"] if "surround" in spec else spec["layer"][0]
         text = grid["layer"][1]["layer"][0]
@@ -292,7 +295,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             is (axis == "y")
             for axis in ("x", "y")
         )
-    clustered = charts[4].to_dict()
+    clustered = namespace["clustermap"].to_dict()
     tiles = points(clustered)
     cells = clustered["datasets"][clustered["spec"]["data"]["name"]]
     assert len(cells) == 700 * 10
@@ -319,7 +322,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert clustered["scales"]["y"]["gapPositions"] == []
     assert clustered["scales"]["x"]["gapPositions"] == []
 
-    scores = charts[5].to_dict()
+    scores = namespace["rank_scores"].to_dict()
     assert len(units(scores)) == 2
     assert sum(len(rows) for rows in scores["datasets"].values()) == 10
     expected_genes = [
@@ -327,7 +330,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         for group in namespace["ranked_groups"]
         for gene in namespace["pbmc"].uns[namespace["rank_key"]]["names"][group][:3]
     ]
-    for chart in charts[6:9]:
+    for chart in charts[7:10]:
         spec = chart.to_dict()
         records = next(
             rows
@@ -338,12 +341,15 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         assert {r["_group"] for r in records} == set(namespace["group_labels"])
     heatmap_rows = next(
         rows
-        for rows in charts[8].to_dict()["datasets"].values()
+        for rows in namespace["ranked_heatmap"].to_dict()["datasets"].values()
         if "_obs_id" in rows[0]
     )
     assert len(heatmap_rows) == 700 * 6
     stored = namespace["pbmc"].uns["rank_stats"]
-    for chart, metric in [(charts[9], "logfoldchanges"), (charts[10], "pvals_adj")]:
+    for chart, metric in [
+        (namespace["statistic_dotplot"], "logfoldchanges"),
+        (namespace["statistic_matrixplot"], "pvals_adj"),
+    ]:
         spec = chart.to_dict()
         rows = next(rows for rows in spec["datasets"].values() if "_mean" in rows[0])
         assert {r["_group"] for r in rows} == set(namespace["group_labels"])

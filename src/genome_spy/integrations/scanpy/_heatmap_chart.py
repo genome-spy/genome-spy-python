@@ -203,7 +203,6 @@ def build_heatmap(
                 list(values.columns.astype(str)),
                 gene_axis,
                 horizontal=not swap_axes,
-                in_bounds=True,
             ).properties(name="heatmap-genes")
         ]
 
@@ -231,7 +230,6 @@ def build_heatmap(
             cell_axis,
             horizontal=swap_axes,
             positions=centers,
-            in_bounds=True,
         ).properties(
             name="heatmap-groups",
             title=gs.Title(
