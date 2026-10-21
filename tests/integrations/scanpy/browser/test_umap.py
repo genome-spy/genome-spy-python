@@ -27,7 +27,8 @@ def fixture():
 
 
 def render(page, chart, *, renderer="webgl"):
-    spec = chart.to_dict()
+    """Render a chart or prepared spec; return its first panel's native bounds."""
+    spec = chart if isinstance(chart, dict) else chart.to_dict()
     for i, panel in enumerate(units(spec)):
         panel["name"] = f"panel-{i}"
     page.set_content(

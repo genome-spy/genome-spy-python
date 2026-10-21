@@ -248,6 +248,11 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         return ranking(*args, **kwargs)
 
     monkeypatch.setattr(sc.tl, "rank_genes_groups", prepare_ranking)
+    monkeypatch.setattr(
+        sc.pp,
+        "highly_variable_genes",
+        lambda *a, **k: pytest.fail("Reran gene selection"),
+    )
     run_notebook(NOTEBOOKS / "scanpy_expression.ipynb", namespace)
     assert charts == [
         namespace["dotplot"],
@@ -262,7 +267,15 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["ranked_heatmap"],
         namespace["statistic_dotplot"],
         namespace["statistic_matrixplot"],
+        namespace["variable_genes"],
     ]
+    qc = namespace["variable_genes"].to_dict()
+    genes = next(iter(qc["datasets"].values()))
+    assert len(genes) == 765 and sum(g["_selected"] for g in genes) == 309
+    assert [g["_obs_label"] for g in genes] == list(namespace["pbmc"].var_names)
+    assert all(
+        p["encoding"][axis]["scale"]["zoom"] for p in units(qc) for axis in ("x", "y")
+    )
     assert len(calls) == 1 and calls[0]["n_genes"] == 765
     assert namespace["pbmc"].shape == (700, 765)
     order = namespace["pbmc"].uns["dendrogram_bulk_labels"]["categories_ordered"]

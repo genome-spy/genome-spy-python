@@ -664,6 +664,11 @@ not an accepted replacement.
 
 ### M10 — quality-control diagnostics
 
+Prioritize new plot families over remaining marker-shape details; those stay in
+M14's compatibility backlog. Start M10.b with stored-statistic scatter panels,
+then M10.a's highest-expression summaries and M10.c's histograms. M08/M09 keep
+their native filled-geometry gate; this order does not close those milestones.
+
 - M10.a: `highest_expr_genes` preserves source/layer/symbol rules, per-cell total
   denominators, zero totals, percentage summaries, top-n selection and log axes.
   Reuse distribution authoring after verifying its needed geometry.
@@ -671,6 +676,14 @@ not an accepted replacement.
   supplied result/var fields, preserve selected versus other genes, normalized
   versus raw dispersions/variance, flavor-dependent labels and logarithmic axes.
   No variable-gene selection is rerun for missing results.
+  Accept AnnData.var with stored hvg flavor, supplied DataFrames and legacy record
+  arrays. Preserve the exact flavor lookup and selection-field switch from
+  Scanpy 1.11.5, group draw order and log limits (both panels use raw-statistic y
+  limits). Keep one native collected bottom legend. Reuse existing numeric,
+  identity and coordinate-limit helpers; a dedicated chart module owns the two
+  point panels. Test metadata-only views/backed data, missing pairs, duplicate
+  labels, native hover/per-panel zoom, complete references, the packaged notebook
+  and a large gene-metadata workload. Reject unsupported log bounds explicitly.
 - M10.c: `scrublet_score_distribution` reads observed/simulated scores, thresholds
   and batch keys; verify histogram bins, count/density normalization and axis-scale
   aliases. Do not rerun Scrublet or silently pool batches.

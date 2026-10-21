@@ -232,6 +232,48 @@ bins. Native axes/guide ticks and layout are not pixel-identical to Matplotlib;
 explicit opaque palettes preserve category paints. Other color forms, 3D, marker,
 margin, label and storage limits retain M07.d/M14 owners.
 
+## Variable-gene diagnostics
+
+```python
+pbmc = sc.datasets.pbmc68k_reduced()
+chart = gsc.pl.highly_variable_genes(
+    pbmc.var, zoom=True, width=280, height=240, show=False
+)
+```
+
+This plots the stored normalized and raw dispersion against mean expression.
+Black points are selected genes; gray points are other genes. Native tooltips
+show gene identity and original values, and `zoom=True` enables independent x/y
+navigation in each panel. One native legend is collected below the pair.
+
+Pass AnnData after explicitly running `sc.pp.highly_variable_genes` in your
+analysis workflow, or supply its result DataFrame/record array. The packaged PBMC
+table already has statistics but predates `uns["hvg"]` metadata, so this example
+passes `pbmc.var` directly. Plotting never computes a new selection or reads
+expression. Repeated gene labels retain separate point identities.
+
+| Input/option | Supported behavior |
+| --- | --- |
+| AnnData | Read `var` and stored `uns["hvg"]["flavor"]`; views and backed metadata are supported without reading X/raw/layers. Missing analysis errors clearly. |
+| DataFrame | Read supplied columns; `variances_norm` selects variance fields, otherwise dispersion fields, as in Scanpy. |
+| Record array | Use supplied dispersion fields and positional gene identities, preserving the pinned legacy behavior. |
+| `highly_variable_genes` | True reads the boolean `highly_variable` column; False reads `gene_subset`. Selected genes draw first, then other genes. |
+| `log` | Use log axes without transforming stored values. As in 1.11.5, both panels use raw-statistic y limits. Means must be finite and positive; raw statistics must be finite with positive increasing limits. Other forms fail explicitly. |
+| Missing values | Omit missing coordinate pairs independently per panel; retain their stored values. Infinity, ambiguous columns and missing/nonboolean selection flags error. |
+| `show`, `save` | Common native display behavior; save only None/False, with HTML/JSON available through the chart. |
+| Native additions | Keyword-only `hover=True`, `zoom=False`, `width=None`, `height=None`; default plot areas are 300 × 300 logical pixels. |
+
+`filter_genes_dispersion(result, ...)` delegates to the same implementation with
+`highly_variable_genes=False` and preserves the upstream deprecation warning.
+Its `show=False` returns a native chart, rather than the old wrapper's None.
+AnnData flavor detection follows Scanpy 1.11.5 exactly: only `seurat_v3` selects
+variance columns; a supplied DataFrame selects them by the column's presence.
+No cached statistics or caller data are changed.
+
+Native fonts, ticks and the collected bottom guide use GenomeSpy layout. The
+plotting data, draw order, point units and axis limits are checked independently
+against Scanpy; this does not claim identical Matplotlib guide placement.
+
 ## Installation and version contract
 
 ```sh
@@ -979,6 +1021,7 @@ Two notebooks run independently:
   marker dotplot, per-gene scaled matrixplot, zoomable individual-cell heatmap and supplied matrix on
   `bulk_labels`, clustermap, stored score panels and ranked expression variants,
   with aligned dendrograms and value hover.
+  A final variable-gene QC section reads the packaged selection and statistics.
 
 These adapt supported UMAP, dotplot, matrixplot and heatmap sections of Scanpy's
 [core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
@@ -1123,6 +1166,10 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.dendrogram
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.correlation_matrix
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.highly_variable_genes
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.filter_genes_dispersion
 
 .. autofunction:: genome_spy.integrations.scanpy.selection_mask
 ```

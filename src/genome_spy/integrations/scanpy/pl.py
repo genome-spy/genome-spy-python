@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any, Literal
 if TYPE_CHECKING:
     from anndata import AnnData
     from numpy.typing import ArrayLike
+    import numpy as np
     import pandas as pd
 
     from genome_spy import Parameter, TopLevelSpec
@@ -39,6 +40,8 @@ __all__ = [
     "pca_variance_ratio",
     "pca_overview",
     "scatter",
+    "highly_variable_genes",
+    "filter_genes_dispersion",
 ]
 
 _BoundValue = float | str | Callable[[Any], float]
@@ -493,6 +496,124 @@ def scatter(
     style = replace(style, legend_symbol_size=300)
     return _finish_plot(
         build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
+    )
+
+
+def highly_variable_genes(
+    adata_or_result: AnnData | pd.DataFrame | np.recarray,
+    *,
+    log: bool = False,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    highly_variable_genes: bool = True,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Plot stored gene means against normalized and raw dispersion or variance.
+
+    Reads AnnData.var or supplied results without selecting genes or accessing
+    expression. The two panels share native colors and keep their own axis limits.
+
+    Args:
+        adata_or_result: AnnData with stored hvg flavor, a DataFrame or record array.
+        log: Use logarithmic axes, retaining Scanpy's raw-statistic limits.
+        show: Display once, return a chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        highly_variable_genes: Use highly_variable; False reads legacy gene_subset.
+        hover: Show gene identity and the stored plotted statistics.
+        zoom: Enable native x/y zoom independently in each panel.
+        width: Plot width per panel, default 300 logical pixels.
+        height: Plot height per panel, default 300 logical pixels.
+
+    Returns:
+        A native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        TypeError: If result storage, flags or selected-gene values are invalid.
+        ValueError: If stored fields or dimensions are missing or invalid.
+        NotImplementedError: If log bounds or saving need unsupported behavior.
+
+    Example:
+        >>> chart = gsc.pl.highly_variable_genes(adata, zoom=True, show=False)
+    """
+    context = "gsc.pl.highly_variable_genes"
+    _check_point_options(
+        context=context,
+        width=width,
+        height=height,
+        frameon=None,
+        log=log,
+        highly_variable_genes=highly_variable_genes,
+        hover=hover,
+        zoom=zoom,
+    )
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._scatter_data import prepare_variable_genes
+    from genome_spy.integrations.scanpy._hvg_chart import build_variable_genes
+
+    table, statistic = prepare_variable_genes(adata_or_result, highly_variable_genes)
+    chart = build_variable_genes(
+        table, statistic, log=log, hover=hover, zoom=zoom, width=width, height=height
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def filter_genes_dispersion(
+    result: np.recarray,
+    *,
+    log: bool = False,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Plot legacy stored dispersions through highly_variable_genes.
+
+    Reads gene_subset instead of highly_variable. As with other native plots,
+    show=False returns a chart rather than the legacy wrapper's None.
+
+    Args:
+        result: Stored record array with means, dispersions and gene_subset.
+        log: Use logarithmic axes with Scanpy's stored-statistic limits.
+        show: Display once, return a chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Show gene identity and stored statistics.
+        zoom: Enable native x/y zoom independently in each panel.
+        width: Plot width per panel, default 300 logical pixels.
+        height: Plot height per panel, default 300 logical pixels.
+
+    Returns:
+        A native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        TypeError: If result storage or flags are invalid.
+        ValueError: If stored fields or dimensions are missing or invalid.
+        NotImplementedError: If log bounds or saving need unsupported behavior.
+
+    Example:
+        >>> chart = gsc.pl.filter_genes_dispersion(result, show=False)
+    """
+    import warnings
+
+    warnings.warn(
+        "Use gsc.pl.highly_variable_genes instead", DeprecationWarning, stacklevel=2
+    )
+    return highly_variable_genes(
+        result,
+        log=log,
+        show=show,
+        save=save,
+        highly_variable_genes=False,
+        hover=hover,
+        zoom=zoom,
+        width=width,
+        height=height,
     )
 
 

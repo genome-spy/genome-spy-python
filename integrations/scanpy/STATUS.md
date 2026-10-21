@@ -28,6 +28,9 @@ Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
 Stored PCA loadings and variance ratios reuse the ranking preparation and native
 text panels; PCA overview composes these with the existing embedding chart.
+Variable-gene QC panels read stored selection/statistics from AnnData, result
+tables or legacy records, with native hover, optional per-panel zoom and one
+collected bottom legend.
 UMAP includes native sizing, optional hover/zoom, linked interval highlighting/count
 and Python subset retrieval. Dotplot includes index-scaled slots, grouped summaries,
 brackets, native size/color guides and optional summary hover. Matrixplot reuses
@@ -61,22 +64,27 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-one UMAP/embedding/scatter/PCA
-code cells and fourteen expression/ranked code cells. Public availability does not mean
+code cells and fifteen expression/ranked/QC code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M07.d, remaining marker geometry audit.**
-The [triangular-marker audit](#m07d-triangular-marker-audit) is complete; support
-is blocked by C14's native geometry difference. Next inspect thin diamonds
-(`marker="d"`), comparing native paths, aspect ratios, size and stroke conventions
-against Scanpy before enabling them. Reuse
-the shared marker definitions and renderer only where the geometry matches;
-record native capability gaps instead of introducing custom shapes. Expand other
-forms only after their geometry is verified. Remaining graph forms, arrow
-overlays, scale-factor circles and broader compatibility retain M07.d/M14
-owners. The [diamond-marker increment](#m07d-diamond-markers) is closed;
-C11 still blocks full default categorical-guide fitting.
+**Next work: M10.a, highest-expression summaries.** Target
+`highest_expr_genes(adata, n_top=20)` in a count-input QC workflow, with per-cell
+percentages, shared source/layer access and native box/whisker marks. First audit
+the public normalization path,
+zero totals, gene ranking and box statistics. M10.c Scrublet histograms follow;
+M08/M09 filled plots still require C01. The
+[M10.b variable-gene increment](#m10b-variable-gene-diagnostics) is closed for
+its stored-statistic/native-chart scope.
+
+Remaining marker details are deferred to M14's compatibility backlog by user
+priority. They must not precede new plot families. The
+[triangular-marker audit](#m07d-triangular-marker-audit) remains retained evidence,
+with C14 recording its geometry difference; no further marker audit is queued.
+Existing marker support and explicit unsupported-case errors are unchanged.
+Other embedding options retain M07.d/M14 owners; C11 still owns default
+categorical-guide fitting.
 
 M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
 Heatmap and dotplot have four-pixel group gaps; matrixplot, generic matrix,
@@ -120,6 +128,7 @@ C12 remains a separate upstream straight-link issue.
 | M07.d square marker increment | Closed (bounded increment) | [Native shape, geometry, guides, workflow and resource checks](#m07d-square-markers) | Other markers remain M07.d; categorical guide fitting stays C11. |
 | M07.d diamond marker increment | Closed (bounded increment) | [Shared marker widths, legend parity, workflow and resource checks](#m07d-diamond-markers) | Thin diamonds and other marker geometry remain M07.d; C11 still owns full categorical-guide fitting. |
 | M07.d triangular marker audit | Closed (audit); support Blocked | [Native paths, paint and rejection checks](#m07d-triangular-marker-audit) | C14: native equilateral triangles cannot reproduce Scanpy's equal-width/height triangles through uniform sizing. |
+| M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a/c remain planned. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -151,7 +160,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M07 embeddings/scatter/PCA | In progress | M07.a/b resource gates pass; categorical-guide rendering remains open under C11. M07.c loadings/variance/overview and M07.d colorbar placement are Closed for their stated scope; other options remain open. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
-| M10 QC diagnostics | Planned | Highest expression, variable genes, legacy dispersion and Scrublet distributions. |
+| M10 QC diagnostics | In progress | M10.b variable-gene/legacy dispersion preview is closed; highest-expression and Scrublet plots remain planned. |
 | M11 trajectories/graphs/series | Planned | Stored DPT/PAGA, graph layouts, series/simulation, return/side-effect contracts; evaluate C04 paths. |
 | M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
@@ -1443,8 +1452,8 @@ Circle/diamond preparation took 0.029/0.020 s, validated JSON serialization
 These local observations share a host with tests and are not a speedup claim.
 Expression was unread and no matrix was densified. Media/reports remain local.
 
-Next: audit remaining marker geometry, starting with triangles, before enabling
-more forms. Unsupported markers still fail clearly. C11/C13, larger transport
+The subsequent triangle audit is retained below; further marker work is now
+deferred to M14. Unsupported markers still fail clearly. C11/C13, larger transport
 and broader storage/export retain their owners. The full suite and docs build
 were not rerun. Clearance: retain; no plan is eligible for removal.
 
@@ -1497,8 +1506,64 @@ the expected-failure assertion; unrelated setup failures remain errors. A future
 native match raises an unexpected pass, prompting a support review. Ruff and
 mypy pass. Runtime code and the notebook are unchanged, so no notebook example
 was added or rerun. Full-suite, docs and resource checks were not run for this
-audit. Next: thin-diamond geometry audit; triangle support reopens on matching
-released native geometry/aspect control. Clearance: retain.
+audit. Remaining marker work is now deferred to M14's compatibility backlog;
+it does not precede new plot families. Clearance: retain.
+
+## M10.b variable-gene diagnostics
+
+Closed for the stored-statistic preview. `highly_variable_genes` and the legacy
+`filter_genes_dispersion` share a thin metadata preparation function in
+[_scatter_data.py](../../src/genome_spy/integrations/scanpy/_scatter_data.py)
+and a dedicated [_hvg_chart.py](../../src/genome_spy/integrations/scanpy/_hvg_chart.py).
+They reuse numeric checks, point IDs, coordinate limits, font/point units and
+common optional-dependency/display/save handling. No new data module or adapter
+framework is introduced. The adapter reads three plotted vectors and a boolean
+selection flag; X/raw/layers and gene-selection analysis are never accessed.
+Caller data stay unchanged, and charts keep detached snapshots.
+
+Supported input is AnnData.var with stored hvg flavor, a DataFrame or a legacy
+record array. The pinned flavor lookup and highly_variable/gene_subset switch
+are preserved, including different variance detection for AnnData versus tables.
+Duplicate labels keep distinct IDs; views/backed metadata and missing coordinate
+pairs retain their order. Selected genes draw before other genes. Log axes keep
+stored values and Scanpy's raw-statistic limits on both panels. Native config
+domains serialize as ordinary JSON numbers even for float32 inputs. Invalid
+flags/fields and unsupported log bounds fail clearly; there is no analysis fallback.
+
+The pair uses native points, explicit fill/stroke scales and one native bottom
+fill legend, with actual black/gray guide colors checked. Hover reports gene
+identity and original statistics. Optional x/y zoom is independent per panel,
+preserving differing initial limits when missing pairs remove different genes.
+Native fonts/ticks/guide placement remain deliberate renderer boundaries.
+The legacy wrapper preserves its deprecation warning and returns a native chart
+for show=False, rather than the old wrapper's None. See the
+[maintained contract](../../docs/integrations/scanpy/index.md#variable-gene-diagnostics).
+
+Verification: **299 targeted Python tests** and the canonical expression workflow
+pass, plus **seven browser checks**. The
+[semantic tests](../../tests/integrations/scanpy/test_hvg.py) compare public Scanpy
+coordinates, limits, labels, units, masks and ordering across inputs/flavors/log
+modes, guard expression/analysis access and test snapshots. The
+[browser tests](../../tests/integrations/scanpy/browser/test_hvg.py) register both
+panels against 150-DPI references at browser DPR 1.5, including labels, native
+guide colors, hover, zoom and offline HTML. Existing scatter rendering also
+passes through the reused test helper. All fifteen live expression notebook cells
+complete without errors; committed source excludes outputs and widget state.
+Ruff and mypy pass. The full repository suite and docs build were not rerun.
+
+Resource recipe: [benchmark_hvg.py](../../tests/integrations/scanpy/benchmark_hvg.py)
+uses seed 17, 20,000 gene metadata rows, two panels and an empty-CSR AnnData shape
+of 100,000 × 20,000. Expression access raises; the workload measures metadata,
+not expression computation. On Python 3.11.15/macOS arm64/Core 1.2.0, preparation
+took 0.024 s, validated JSON 3.03 s and browser first paint 2.90 s. The single
+20,000-row table produces a 3,847,678-byte payload, 34.3 MB peak traced Python
+allocation and 53.5 MB reported JS heap. Imports/fixture are excluded; allocation
+tracing is enabled during Python timings. This is one local observation, not a
+portable time limit or speedup claim. Generated reports/images remain local.
+
+Next: highest-expression summaries, then Scrublet histograms. Other QC families
+are not closed by this increment; remaining compatibility belongs to M14.
+Clearance: retain; no working plan is eligible for removal.
 
 ## M07.d native colorbar placement
 
@@ -2204,7 +2269,7 @@ changed; unrelated tests and the full documentation build were not rerun.
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 23 functions are available as partial previews; 25 plot/builder
+helpers. 25 functions are available as partial previews; 23 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -2224,10 +2289,10 @@ No placeholder functions are exported for planned work.
 | `draw_graph` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `embedding` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `embedding_density` | Not implemented | M12 |
-| `filter_genes_dispersion` | Not implemented; legacy | M10 |
+| `filter_genes_dispersion` | Partial stored-results preview available; legacy | M10.b; remaining compatibility M14 |
 | `heatmap` | Partial cell-level preview available | M05.a/b preview; larger transport M05.d; normalization/options M14 |
 | `highest_expr_genes` | Not implemented | M10 |
-| `highly_variable_genes` | Not implemented | M10 |
+| `highly_variable_genes` | Partial stored-results preview available | M10.b; remaining compatibility M14 |
 | `matrix` | Partial supplied-numeric preview available | M05.b preview; broader sources/layout M14; transport M05.d |
 | `matrixplot` | Partial preview available | M03 preview; trees M04; methods M13; normalization/options M14 |
 | `paga` | Not implemented | M11 |

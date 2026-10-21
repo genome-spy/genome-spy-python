@@ -10,6 +10,8 @@ the ranked dotplot/matrixplot/heatmap wrappers.
 `gsc.pl.pca_loadings(...)` and `gsc.pl.pca_variance_ratio(...)` reuse the ranking
 panels for stored PCA results.
 `gsc.pl.pca_overview(...)` composes these diagnostics with the existing PCA scatter.
+`gsc.pl.highly_variable_genes(...)` and the legacy `filter_genes_dispersion(...)`
+show stored gene-selection diagnostics without rerunning analysis.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 
 When resuming work in another chat, read [the current queue](STATUS.md#current-work-queue)
@@ -41,7 +43,8 @@ not in this workspace or the documentation:
 | [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles and native surround tracks with shared index gaps, category bands, centered labels and stored tree links; reuses grouped labels/brackets and fitted values, with optional aligned zoom (y-only by default). |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_embedding_data.py](../../src/genome_spy/integrations/scanpy/_embedding_data.py) | Resolve stored bases, shared coordinate labels and selected expression/metadata; retain row identity, masks, sizes and draw order. |
-| [_scatter_data.py](../../src/genome_spy/integrations/scanpy/_scatter_data.py) | Scatter-specific cell/gene orientation, per-axis layers, selected public vectors and legacy basis/order rules. Reuses embedding identities, panel fields, colors and rendering. |
+| [_scatter_data.py](../../src/genome_spy/integrations/scanpy/_scatter_data.py) | Scatter-specific cell/gene orientation, per-axis layers, selected public vectors and legacy basis/order rules; detached variable-gene QC metadata. Reuses shared numeric checks and embedding identities. |
+| [_hvg_chart.py](../../src/genome_spy/integrations/scanpy/_hvg_chart.py) | Native paired QC point panels, stored-statistic axis limits, shared bottom legend and optional hover/zoom; no analysis or expression access. |
 | [_embedding_chart.py](../../src/genome_spy/integrations/scanpy/_embedding_chart.py) | Native points, axes, legends, labels, and panel composition. |
 | [_grid_interactions.py](../../src/genome_spy/integrations/scanpy/_grid_interactions.py) | Shared index navigation/projection and native fitted values/contrast; no AnnData access. Dotplot highlighting uses a native ruler. |
 | [_embedding_interactions.py](../../src/genome_spy/integrations/scanpy/_embedding_interactions.py) | Optional hover, linked brush highlighting, ownership, and count. |
@@ -105,6 +108,7 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
   SciPy linkage, rather than reusing a group-profile tree.
   A final section reads packaged logreg scores and explicitly computes a separate
   ranking for statistic colors, reusing summaries, trees and interactions.
+  Variable-gene QC panels then inspect the packaged stored selection and statistics.
 
 These adapt supported portions of the official core and advanced tutorials.
 Keep related examples together within each workflow, without placeholder cells

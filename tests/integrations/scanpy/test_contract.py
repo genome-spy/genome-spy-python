@@ -88,6 +88,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.pca_fixture import make_pca_adata
 
         a, options = make_pca_adata(), {}
+    if family in {"highly_variable_genes", "filter_genes_dispersion"}:
+        from tests.integrations.scanpy.hvg_fixture import make_hvg_result
+
+        a, options = make_hvg_result("records"), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -126,11 +130,16 @@ def test_shared_display_validation_precedes_optional_imports(
         "pca_loadings",
         "pca_variance_ratio",
         "pca_overview",
+        "highly_variable_genes",
+        "filter_genes_dispersion",
     } and not family.startswith("rank_genes_groups"):
         args += ("group",)
+    context = {
+        "pca_scatter": "pca",
+        "filter_genes_dispersion": "highly_variable_genes",
+    }.get(family, family)
     with pytest.raises(
-        error,
-        match=f"gsc.pl.{'pca' if family == 'pca_scatter' else family}.*{'show' if 'show' in options else 'save'}",
+        error, match=f"gsc.pl.{context}.*{'show' if 'show' in options else 'save'}"
     ):
         getattr(pl, family)(*args, **options)
 

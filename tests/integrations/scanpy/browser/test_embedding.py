@@ -50,9 +50,15 @@ def test_complete_embedding_matches_registered_points_guides_and_axis_labels(
     )
 
 
-def assert_complete_chart(page, tmp_path, chart, expected, reference_image, case):
+def assert_complete_chart(
+    page, tmp_path, chart, expected, reference_image, case, *, panel_index=0
+):
     """Compare registered point footprints, paints and complete native labels to an oracle."""
     bounds = render(page, chart)
+    if panel_index:
+        bounds = page.evaluate(
+            "i=>api.views.getLayoutBounds({scope:[],view:'panel-'+i})", panel_index
+        )
     canvas = page.locator("canvas").first.bounding_box()
     actual = Image.open(
         BytesIO(
@@ -77,6 +83,9 @@ def assert_complete_chart(page, tmp_path, chart, expected, reference_image, case
     for x, y in expected["coordinates"]:
         x0, x1 = expected["x_domain"]
         y0, y1 = expected["y_domain"]
+        if expected.get("log", False):
+            x, x0, x1 = np.log10([x, x0, x1])
+            y, y0, y1 = np.log10([y, y0, y1])
         px, py = (
             round((x - x0) / (x1 - x0) * actual.width),
             round((y1 - y) / (y1 - y0) * actual.height),

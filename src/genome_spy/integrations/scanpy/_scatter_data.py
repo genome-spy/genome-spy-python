@@ -1,8 +1,8 @@
-"""Scanpy scatter's axis, layer and color lookup over the shared point renderer."""
+"""Shared point-data access for Scanpy scatter and variable-gene QC."""
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from typing import Any
 
@@ -33,6 +33,51 @@ from genome_spy.integrations.scanpy._style import (
 )
 
 _CONTEXT = "gsc.pl.scatter"
+
+
+def prepare_variable_genes(result: Any, selected: bool) -> tuple[pd.DataFrame, str]:
+    """Copy stored gene statistics and identities; return the table and statistic name."""
+    from anndata import AnnData
+
+    context = "gsc.pl.highly_variable_genes"
+    # Scanpy infers variance results differently for AnnData, tables and records.
+    if isinstance(result, AnnData):
+        metadata = result.uns.get("hvg", {})
+        if not isinstance(metadata, Mapping) or "flavor" not in metadata:
+            raise ValueError(
+                f"{context}: missing uns['hvg']['flavor']; run sc.pp.highly_variable_genes explicitly or supply the result DataFrame."
+            )
+        variance = metadata["flavor"] == "seurat_v3"
+        result = result.var
+    elif isinstance(result, pd.DataFrame):
+        variance = "variances_norm" in result
+    elif isinstance(result, np.recarray):
+        result, variance = pd.DataFrame.from_records(result), False
+    else:
+        raise TypeError(f"{context}: expected AnnData, a DataFrame or a record array.")
+    statistic = "variances" if variance else "dispersions"
+    flag = "highly_variable" if selected else "gene_subset"
+    columns = ["means", statistic, f"{statistic}_norm", flag]
+    for column in columns:
+        if list(result.columns).count(column) != 1:
+            raise ValueError(
+                f"{context}: missing or ambiguous stored field {column!r}."
+            )
+    if result.empty:
+        raise ValueError(f"{context}: at least one gene is required.")
+    if not pd.api.types.is_bool_dtype(result[flag]) or result[flag].isna().any():
+        raise TypeError(f"{context}: {flag} must contain nonmissing boolean values.")
+    if result.index.hasnans:
+        raise ValueError(f"{context}: gene labels must be nonmissing.")
+    # Copy only the plotted metadata; no expression vector is needed.
+    table = result[columns[:3]].reset_index(drop=True).copy()
+    numeric_values(table, context=context)
+    table = pd.concat([table, point_ids(result.index)], axis=1)
+    table["_selected"] = result[flag].to_numpy(dtype=bool)
+    table["_status"] = np.where(
+        table["_selected"], "highly variable genes", "other genes"
+    )
+    return table, statistic
 
 
 def _layers(adata: Any, layers: Any, use_raw: bool) -> tuple[Any, ...]:
