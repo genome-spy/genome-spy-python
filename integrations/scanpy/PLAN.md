@@ -538,6 +538,18 @@ commit evidence and unmet verification gates live in the
 - M07.d: complete the remaining 2D options rejected by UMAP: graph/arrow overlays,
   scale factor, supported marker/style forms, outlines,
   numeric normalization/center/callable bounds and missing-category schemes.
+  The outline increment retains `add_outline=False` (None also disables it),
+  `outline_width=(0.3, 0.05)` and `outline_color=("black", "white")`. Render two
+  opaque point layers behind the foreground, preserving relative area, marker
+  geometry, supplied/reordered sizes, missing observations and draw order.
+  With outlines, an omitted alpha becomes 0.7; explicit alpha, including None,
+  keeps its upstream meaning. Reuse the existing point interactions; backgrounds
+  have no tooltips, and all layers follow the same brush, count and stable IDs.
+  Share one source/sort per panel; preparation and cached analysis stay unchanged.
+  Verify Scanpy numerical geometry/opacity, registered isolated/overlapping
+  marks, dot/circle markers, custom widths/colors/edges, native guides,
+  hover/zoom/brush and offline HTML. Run the packaged UMAP notebook and measure
+  a representative multi-panel payload/render/memory workload before closure.
   Recheck native primitives and add focused tests per option; do not sample
   Matplotlib colors or accept its normalization objects.
   The colorbar-placement contract covers `colorbar_loc=None` and all four sides

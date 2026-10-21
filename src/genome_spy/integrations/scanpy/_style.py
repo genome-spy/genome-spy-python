@@ -386,6 +386,8 @@ class EmbeddingStyle:
     frame_width: float = 0.8 * POINTS_TO_PIXELS
     xmargin: float = 0.05
     ymargin: float = 0.05
+    outline_width: tuple[float, float] | None = None
+    outline_color: tuple[str, str] = ("black", "white")
 
 
 def _number(value: Any, name: str, *, minimum: float = 0) -> float:
@@ -433,6 +435,9 @@ def embedding_style(
     edgecolor: Any,
     linewidth: Any,
     na_color: Any,
+    add_outline: bool = False,
+    outline_width: tuple[float, float] = (0.3, 0.05),
+    outline_color: tuple[str, str] = ("black", "white"),
 ) -> EmbeddingStyle:
     """Return native embedding settings from plot options, using explicit defaults.
 
@@ -445,6 +450,16 @@ def embedding_style(
         raise ValueError("Scanpy embedding: alpha must be a scalar between 0 and 1.")
     no_edge = isinstance(edgecolor, str) and edgecolor.lower() == "none"
     edge = "black" if no_edge else native_color(edgecolor, "edgecolor")
+    for name, pair in (
+        ("outline_width", outline_width),
+        ("outline_color", outline_color),
+    ):
+        if not isinstance(pair, (tuple, list)) or len(pair) != 2:
+            raise ValueError(f"Scanpy embedding: {name} needs a pair of values.")
+    widths = tuple(_number(value, "outline_width") for value in outline_width)
+    diameter = POINTS_TO_PIXELS * (1 + 2 * sum(widths))
+    _number(diameter * diameter, "outline_width")
+    colors = tuple(native_color(value, "outline_color") for value in outline_color)
     return EmbeddingStyle(
         width=300 if width is None else width,
         height=300 if height is None else height,
@@ -458,7 +473,9 @@ def embedding_style(
         alpha=opacity,
         stroke=edge,
         na_color=native_color(na_color, "na_color"),
-        stroke_opacity=0 if no_edge else opacity,
+        stroke_opacity=0 if no_edge else 1 if add_outline else opacity,
         stroke_width=_number(1.5 if linewidth is None else linewidth, "linewidth")
         * POINTS_TO_PIXELS,
+        outline_width=(widths[0], widths[1]) if add_outline else None,
+        outline_color=(colors[0], colors[1]),
     )

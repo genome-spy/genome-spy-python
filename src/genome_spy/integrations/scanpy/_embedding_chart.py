@@ -7,6 +7,7 @@ from typing import Literal
 import numpy as np
 
 import genome_spy as gs
+from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._embedding_data import Panel, PreparedEmbedding
 from genome_spy.integrations.scanpy._embedding_interactions import (
     brush_owner,
@@ -85,7 +86,7 @@ def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
         legend = gs.Legend(
             title=None,
             values=list(panel.legend_values),
-            symbolOpacity=style.alpha,
+            symbolOpacity=1 if style.outline_width is not None else style.alpha,
             labelLimit=1000,
         )
         # Moving the continuous guide must not move categorical legends.
@@ -177,8 +178,10 @@ def _panel(
             filled=True,
             fillOpacity=style.alpha,
             stroke=style.stroke,
-            strokeOpacity=style.stroke_opacity,
-            strokeWidth=style.stroke_width,
+            strokeOpacity=0
+            if style.outline_width is not None
+            else style.stroke_opacity,
+            strokeWidth=0 if style.outline_width is not None else style.stroke_width,
             inwardStroke=False,
             tooltip={"handler": "default"} if hover else None,
         )
@@ -197,6 +200,55 @@ def _panel(
         )
         .properties(width=style.width, height=style.height)
     )
+    layers: list[gs.TopLevelSpec] = []
+    source = {}
+    if style.outline_width is not None:
+        # Share one source and sort across both opaque outlines and the foreground.
+        source = {"data": points._kwds["data"], "transform": points._kwds["transform"]}
+        points = points._copy(deep=False, data=Undefined, transform=Undefined)
+        background, gap = style.outline_width
+        for factor, color in zip(
+            (1 + 2 * gap + 2 * background, 1 + 2 * gap),
+            style.outline_color,
+            strict=True,
+        ):
+            # Zero-size observations must not leave a painted outline edge.
+            outline = (
+                points.transform_filter(f"datum._size_{index} > 0")
+                .mark_point(
+                    filled=True,
+                    fillOpacity=1,
+                    stroke=style.stroke,
+                    strokeOpacity=style.stroke_opacity,
+                    strokeWidth=style.stroke_width if style.stroke_opacity else 0,
+                    inwardStroke=False,
+                    tooltip=None,
+                )
+                .encode(
+                    color=gs.value(color),
+                    size=gs.Size(f"_size_{index}:Q")
+                    .scale(
+                        domain=[0, maximum_size],
+                        range=[0, maximum_size * (diameter * factor) ** 2],
+                        nice=False,
+                        zero=True,
+                    )
+                    .legend(None),
+                )
+            )
+            layers.append(
+                point_interactions(
+                    outline,
+                    panel,
+                    index,
+                    axis_labels=prepared.axis_labels,
+                    row_label=prepared.row_label,
+                    hover=False,
+                    selection=selection,
+                    opacity=1,
+                    stroke_opacity=style.stroke_opacity,
+                )
+            )
     points = point_interactions(
         points,
         panel,
@@ -206,10 +258,9 @@ def _panel(
         hover=hover,
         selection=selection,
         opacity=style.alpha,
-        stroke_opacity=style.stroke_opacity,
+        stroke_opacity=0 if style.outline_width is not None else style.stroke_opacity,
     )
     colored = points.encode(color=_color(panel, index, style))
-    layers: list[gs.TopLevelSpec] = []
     # Draw missing values separately because numeric color scales cannot color them.
     separate_missing = (
         panel.scheme is not None and table[f"_value_{index}"].isna().any()
@@ -246,6 +297,8 @@ def _panel(
     result = (gs.layer(*layers) if len(layers) > 1 else colored).properties(
         width=style.width, height=style.height
     )
+    if style.outline_width is not None:
+        result = result.properties(**source).resolve_scale(size="independent")
     # Only the first panel edits the brush; other panels show its selection.
     if selection is not None and index == 0:
         result = brush_owner(result, selection, prepared.basis)

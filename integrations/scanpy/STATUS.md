@@ -60,16 +60,18 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot,
 matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
-The current canonical workflows contain sixteen UMAP/embedding/scatter/PCA
+The current canonical workflows contain seventeen UMAP/embedding/scatter/PCA
 code cells and fourteen expression/ranked code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M07.d, native 2D point styling, starting with outlines.**
-Reuse the shared embedding renderer for `add_outline=True`; preserve point order,
-coordinates, size semantics and existing hover/zoom. Keep broader marker/graph
-options in M07.d and the full compatibility inventory in M14.
+**Next work: M07.d, callable numeric color bounds.**
+Reuse the existing embedding bound resolver for callable `vmin`/`vmax`, checking
+masked/missing values, per-panel inputs and clear invalid-result errors. Keep
+centered normalization, remaining markers/graphs and broader compatibility in
+M07.d/M14. The [point-outline increment](#m07d-embedding-point-outlines) is closed
+for the tested two-marker native scope; C11 still blocks full default guide fitting.
 
 M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
 Heatmap and dotplot have four-pixel group gaps; matrixplot, generic matrix,
@@ -106,6 +108,7 @@ C12 remains a separate upstream straight-link issue.
 | M07.c loadings increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-stored-pca-loadings) | Broader storage/typography/export remain M14. Variance and overview are separate increments; this does not close M07. |
 | M07.c variance increment | Closed (bounded preview) | [Contract, tests and resources](#m07c-stored-pca-variance-ratios) | Broader storage/typography/export remain M14; this does not close the overview or M07. |
 | M07.c overview increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-pca-overview) | Parent storage, typography and export limits remain M14; broader embedding options remain M07.d and C11 retains their categorical-guide gate. |
+| M07.d point outlines increment | Closed (bounded increment) | [Contract, semantic/chart/workflow and resource checks](#m07d-embedding-point-outlines) | Broader markers, label outlines, normalization and C11 guide fitting remain M07.d/M14. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -478,7 +481,7 @@ versus 11.9 s with tracing active). These are observations, not CI limits or a
 performance improvement claim. Large-payload validation/transport remains
 M05.d/M14 work. Raw measurements, media and exports stay local.
 
-The next ready increment is M07.d point outlines. C11 categorical-guide fitting,
+Point outlines were next at this checkpoint; their [delivery record](#m07d-embedding-point-outlines) is below. C11 categorical-guide fitting,
 C13 zero-only viewport fitting, M05.d larger transport and wider family options
 retain their existing owners. Unrelated full-repository tests and the docs build
 were not rerun. Clearance: retain; no plan is eligible for removal.
@@ -1113,6 +1116,58 @@ The subsequent resource verification closes gate 4; C11 retains the separate
 categorical-guide rendering gate. Parent storage, typography and export limits remain M14. Clearance:
 retain the live plan/status and permanent source/tests/contracts; no working
 document is eligible for removal.
+
+## M07.d embedding point outlines
+
+Closed for the two-marker native increment. The [shared embedding renderer](../../src/genome_spy/integrations/scanpy/_embedding_chart.py)
+adds opaque outer/inner point layers behind the existing foreground. All shared
+embedding entry points and PCA overview inherit it; scatter retains its separate
+Scanpy signature. Public names/defaults stay `add_outline=False`,
+`outline_width=(0.3, 0.05)` and `outline_color=("black", "white")`; None also
+disables outlines. Widths are finite nonnegative pairs and colors reuse the
+existing CSS validator. An omitted alpha becomes 0.7 only with outlines;
+explicit alpha, including None, is retained. Foreground edges are disabled;
+outline edges honor the existing scalar edge/linewidth options. Zero-size cells
+paint no outline edge. Category guides stay opaque.
+
+Each panel shares one source and sort. Coordinates, observation IDs, masks,
+missing colors, reordered size vectors, palettes and analysis caches are unchanged.
+Only the foreground handles hover; all layers reuse the existing brush opacity
+helper and count/membership path. No analysis, Matplotlib imports, dependencies,
+new data columns or framework abstractions were added to production code.
+
+Verification: **366 Python checks**, **43 browser checks**, the canonical UMAP workflow,
+Ruff formatting/lint and mypy pass. The [numerical checks](../../tests/integrations/scanpy/test_embedding_outlines.py)
+compare sizes, opacity and edges with Scanpy 1.11.5 and prove unchanged source
+records across every embedding entry point. [Registered browser checks](../../tests/integrations/scanpy/browser/test_embedding_outlines.py)
+cover isolated/overlapping dots and circles, custom widths/colors/edges, zero-area
+cells, hover, native brush/count/Python membership, layer dimming, zoom and offline
+HTML. Reference export is 150 DPI for a 100-DPI figure against browser DPR 1.5.
+WebGL/Agg comparisons check occupied bounds and painted colors in both directions,
+allowing a one-CSS-pixel antialiasing neighborhood with at least 95% painted-color
+agreement within 32 channel steps; tiny halo edges are not claimed
+to be pixel-identical across rasterizers. Existing embedding, brushing and native
+guide tests retain their own full-chart coverage. The canonical and live packaged
+UMAP workflows complete 17 code cells; committed notebooks have no outputs/state,
+and local notebook customizations are preserved.
+
+A local 100,000-cell × 20,000-gene sparse AnnData workload (seed 17, stored float32
+UMAP coordinates, four categories plus a numeric score, two 320 × 300 panels,
+size 4, alpha 0.7 and xy zoom) sends the same 100,000-row dataset with or without
+outlines. Imports/source construction are excluded; tracemalloc covers preparation
+and validated JSON. Chromium 156.0.8078.4 runs at 1,400 × 900 / DPR 1 on the same
+macOS/Python/scientific-stack versions as the preceding records.
+
+| Chart | Prepare s | JSON s | Python peak MiB | JSON MiB | Paint s | JS heap MiB |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Plain | 0.048 | 16.425 | 377.03 | 37.808 | 14.661 | 189.78 |
+| Outlined | 0.070 | 16.729 | 374.49 | 37.819 | 13.780 | 202.18 |
+
+These are local observations, not CI limits or a speedup claim. Large JSON
+validation/transport remains M05.d/M14 work; generated media and raw reports stay
+local. The next ready increment is callable `vmin`/`vmax`; C11, C13 and wider
+family limits retain their existing owners. Unrelated repository tests and the
+docs build were not rerun. Clearance: retain; no plan is eligible for removal.
 
 ## M07.d native colorbar placement
 
@@ -1887,7 +1942,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Existing 2D coordinates, raw/layer, symbols, masks, categories, sizes/order, native axes/guides | Tested supported subset; exact forms in user contract | M01 preview retained |
 | Hover, optional zoom, first-owner interval, linked count and Python retrieval | Tested preview; no point selection or initial interval value | M01; broader native selections M14 |
 | Continuous colorbar placement | Four sides/None; native defaults and collection supported | M07.d placement increment closed |
-| Graph edges/arrows, scale_factor, outlines, broader markers/categorical guide locations | Nondefault forms reject | M07.d |
+| Point outlines | Shared two-marker path, relative widths/CSS colors, scalar styles, hover/zoom/brush | [M07.d outline increment](#m07d-embedding-point-outlines) closed |
+| Graph edges/arrows, scale_factor, broader markers/categorical guide locations | Nondefault forms reject | M07.d |
 | norm/vcenter/callable bounds | Nondefault forms reject; Matplotlib objects remain outside boundary | M07.d/M14.c |
 | Backed/lazy expression; named scheme with NA legend; category/NA label collision | Explicit current restrictions | M14.c |
 | 3D, font atlas/weight/outline and complete typography | Native gaps/limits | M14.a; C03/C05 |
@@ -1954,7 +2010,7 @@ affected slice.
 | C02 | No native raster/image primitive | Full spatial M12 | Released image capability with crop/aspect/zoom registration tests |
 | C03 | No native 3D projection | 3D embedding options M07/M14 | Released capability or explicit product scope decision; keep unresolved until then |
 | C04 | No dedicated line/path mark in bundled mark inventory | Series/graph/path M11 | Verify native rule/link segments can preserve required semantics; otherwise upstream released capability |
-| C05 | Font/outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
+| C05 | Font/text-outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
 | C06 | Core 1.2 typed surround/facet APIs and native index gaps available; Scanpy migration remains open | Heatmap/clustermap side tracks, related grids, UMAP/repeated panels; M14.b | Use the published heatmap example; verify viewport/scale/guide ownership, required heatmap group gaps and existing navigation/selection contracts |
 | C07 | Python linkage + shared native orthogonal branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Stored parent/child edges project into equal summary slots or unequal cell-group centers. Complete SVG elbows, four orientations, zero heights, resize and navigation pass; recheck later families. |
 | C08 | Native index slots plus label layers retain repeated dotplot/matrixplot labels | Heatmap/ranked families; wider navigation | Dot/matrix slots, both orientations, optional zoom and duplicate-slot highlighting verified; extend checks with later families |

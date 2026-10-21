@@ -312,9 +312,28 @@ raise an error instead of being ignored.
 | ax, return_fig | Omitted. Passing either, even ax=None, raises a targeted error. Use show=False and native chart composition/configuration. |
 | projection, edges/arrows, scale_factor | Only the ordinary 2D/no-graph defaults are supported yet. |
 | norm, vcenter, callable color bounds | Not implemented yet. Their nondefault forms raise errors. |
-| add_outline, legend_fontoutline, nondefault outline settings | Not implemented yet; no silent approximation with unoutlined points/text. |
+| add_outline, outline_width, outline_color | Optional two opaque outline layers behind the foreground, matching Scanpy’s relative widths and draw order. Widths are nonnegative pairs; colors are pairs of opaque CSS names/hex. Foreground opacity defaults to 0.7 only when outlines are enabled; explicit alpha (including None) retains its usual meaning. Foreground edges are disabled, while outline edges use the supplied scalar edge/linewidth options. |
+| legend_fontoutline | Not implemented yet; unsupported values fail by name. |
 | colorbar_loc | `"right"` (default), `"left"`, `"top"`, `"bottom"`, or None to hide continuous colorbars. Categorical legends retain `legend_loc`. |
 | Arbitrary scatter kwargs, other markers/legend locations | Error with the unsupported argument named. |
+
+```python
+chart = gsc.pl.umap(
+    pbmc, color=["louvain", "CD79A"], add_outline=True,
+    outline_width=(0.3, 0.05), outline_color=("black", "white"),
+    zoom=True, show=False,
+)
+```
+
+Outlines reuse the same observation records, sorted sizes and coordinate scales;
+they add no data extraction or analysis. Outer outlines draw first, inner outlines
+second, and colored/missing points last. Only foreground points provide tooltips.
+Linked brushing dims all three layers and retains the same stable IDs and count.
+Category legends stay opaque, as in Scanpy. Thin edges can differ at the pixel
+level between WebGL, browser scaling and Matplotlib exports. Outline settings
+have no visual effect while `add_outline` is False or None. All shared embedding
+functions, including PCA overview's embedding panel, inherit this path; `scatter`
+keeps its own Scanpy signature and does not add outline arguments.
 
 Continuous colorbars span the plot height on the left/right and the plot width
 on the top/bottom, including non-square panels. These are native guide defaults,

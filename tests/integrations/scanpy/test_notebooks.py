@@ -52,6 +52,14 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         )
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
+        outlined = namespace["outline_chart"]
+        assert outlined in charts
+        outline_spec = outlined.to_dict()
+        assert len(outline_spec["datasets"]) == 1
+        for panel in units(outline_spec):
+            marks = leaf_marks(panel)
+            assert len(marks) == 3
+            assert [mark["mark"]["fillOpacity"] for mark in marks] == [1, 1, 0.7]
         loadings = namespace["loadings_chart"]
         assert loadings in charts
         variance = namespace["variance_chart"]

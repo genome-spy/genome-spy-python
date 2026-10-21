@@ -224,9 +224,6 @@ def _embedding(
         "colorbar_loc": colorbar_loc not in (None, "right", "left", "top", "bottom"),
         "vcenter": vcenter is not None,
         "norm": norm is not None,
-        "add_outline": add_outline not in (False, None),
-        "outline_width": outline_width != (0.3, 0.05),
-        "outline_color": outline_color != ("black", "white"),
     }
 
     # Linked panels must share one brush over the same two coordinates.
@@ -285,6 +282,7 @@ def _embedding(
         na_in_legend=na_in_legend,
         hover=hover,
         zoom=zoom,
+        add_outline=False if add_outline is None else add_outline,
     )
     sc = _prepare_plot(show, save, context=context)
     from genome_spy.integrations.scanpy._embedding_data import prepare_embedding
@@ -330,10 +328,13 @@ def _embedding(
         ncols=ncols,
         hspace=hspace,
         wspace=wspace,
-        alpha=kwargs.get("alpha"),
+        alpha=kwargs.get("alpha", 0.7 if add_outline else None),
         edgecolor=kwargs.get("edgecolor", kwargs.get("edgecolors", "none")),
         linewidth=kwargs.get("linewidth", kwargs.get("linewidths")),
         na_color=na_color,
+        add_outline=bool(add_outline),
+        outline_width=outline_width,
+        outline_color=outline_color,
     )
     chart = build_embedding(
         prepared, style, hover=hover, zoom=zoom, selection=selection
@@ -526,6 +527,8 @@ def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
             are one-based strings; dimensions are zero-based pairs. Raw/layer
             lookup, colors, defaults and native controls match pl.umap.
             colorbar_loc accepts right, left, top, bottom, or None to hide it.
+            add_outline draws two background outlines with outline_width and
+            outline_color; the foreground then defaults to alpha=0.7.
 
     Returns:
         A native chart when show=False, otherwise None after display.

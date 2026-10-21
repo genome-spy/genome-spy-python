@@ -191,7 +191,7 @@ def test_public_defaults_match_the_pinned_effective_signature() -> None:
         ({"vcenter": 0}, NotImplementedError),
         ({"legend_fontoutline": 2}, NotImplementedError),
         ({"legend_loc": "on data"}, NotImplementedError),
-        ({"add_outline": True}, NotImplementedError),
+        ({"add_outline": "yes"}, TypeError),
         ({"selection": object()}, TypeError),
         ({"selection": gs.selection_point()}, NotImplementedError),
         ({"selection": gs.param("cells", value=1)}, NotImplementedError),
