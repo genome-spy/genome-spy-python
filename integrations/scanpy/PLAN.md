@@ -614,6 +614,13 @@ commit evidence and unmet verification gates live in the
   and a representative resource workload. Do not enable thin diamonds or other
   markers merely because a similarly named native shape exists. The
   [diamond-marker record](STATUS.md#m07d-diamond-markers) owns delivery evidence.
+  Triangle audit: compare `"^"`, `"v"`, `"<"`, `">"` with their native shapes,
+  using Scanpy paths and rendered footprints with/without strokes. Enable them
+  through the shared marker table only if both paths and paint match; scalar
+  resizing must not hide different aspect ratios. The
+  [audit record](STATUS.md#m07d-triangular-marker-audit) retains the native gap
+  and a strict expected-failure check. Support stays blocked by C14 until a
+  released native shape or aspect control preserves Scanpy's geometry.
 
 Targets: `gsc.pl.embedding(adata, basis="tsne", color="cell_type", show=False)`
 and `gsc.pl.pca_overview(adata, show=False)` after explicit Scanpy PCA.

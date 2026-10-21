@@ -67,8 +67,10 @@ all slice gates or full-family compatibility are closed.
 ### Current work queue
 
 **Next work: M07.d, remaining marker geometry audit.**
-Start with triangular markers (`marker="^"`), comparing native paths, aspect
-ratios, size and stroke conventions against Scanpy before enabling them. Reuse
+The [triangular-marker audit](#m07d-triangular-marker-audit) is complete; support
+is blocked by C14's native geometry difference. Next inspect thin diamonds
+(`marker="d"`), comparing native paths, aspect ratios, size and stroke conventions
+against Scanpy before enabling them. Reuse
 the shared marker definitions and renderer only where the geometry matches;
 record native capability gaps instead of introducing custom shapes. Expand other
 forms only after their geometry is verified. Remaining graph forms, arrow
@@ -117,6 +119,7 @@ C12 remains a separate upstream straight-link issue.
 | M07.d stored neighbor edges increment | Closed (bounded increment) | [Storage, native lookups, fidelity/workflow and resource checks](#m07d-stored-neighbor-graph-edges) | Other component pairs, self-loops and per-edge/numeric colors remain M07.d/M14; arrows remain separate. |
 | M07.d square marker increment | Closed (bounded increment) | [Native shape, geometry, guides, workflow and resource checks](#m07d-square-markers) | Other markers remain M07.d; categorical guide fitting stays C11. |
 | M07.d diamond marker increment | Closed (bounded increment) | [Shared marker widths, legend parity, workflow and resource checks](#m07d-diamond-markers) | Thin diamonds and other marker geometry remain M07.d; C11 still owns full categorical-guide fitting. |
+| M07.d triangular marker audit | Closed (audit); support Blocked | [Native paths, paint and rejection checks](#m07d-triangular-marker-audit) | C14: native equilateral triangles cannot reproduce Scanpy's equal-width/height triangles through uniform sizing. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -1463,6 +1466,40 @@ No data preparation or point geometry changed, so the diamond resource workload
 above remains applicable. The full suite and docs build were not rerun. Next work
 remains the marker geometry audit above. Clearance: retain.
 
+## M07.d triangular marker audit
+
+Closed for the audit; support remains blocked by C14. All four Scanpy triangles
+(`"^"`, `"v"`, `"<"`, `">"`) have equal path width and height. Native triangles
+in the bundled Core 1.2.0 are equilateral: at 100 logical pixels of width the
+upright/downward paths are 86.6 pixels tall; horizontal shapes exchange these
+dimensions. Source checks confirm the same geometry in WebGL and SVG. The released
+point API has uniform size and rotation, without separate width/height controls.
+Changing the scalar size cannot preserve both dimensions or the corner angles.
+This is a compatibility limit, not evidence that an equilateral native shape is
+incorrect. No marker approximation, custom shape or Core patch was introduced.
+
+The [native comparison](../../tests/integrations/scanpy/browser/test_native_triangles.py)
+reuses the existing renderer and original observation fixture. It compares public
+`sc.pl.umap` paths and painted footprints with native shapes in four directions,
+with zero- and two-point strokes. A 72-point marker is 100 logical pixels wide;
+references export at 150 DPI from a 100-DPI figure and browser DPR is 1.5. For
+the upright case without a stroke, native/reference painted bounds are 148 × 130 /
+149 × 150 physical pixels; with a two-point stroke they are 156 × 136 /
+155 × 155. One-pixel rasterization differences cannot explain the height gap.
+SVG vertices independently show the aspect difference. Generated PNGs and reports
+stay in pytest temporary directories.
+
+Verification: **141 targeted Python tests pass**, including explicit triangular
+marker rejection across all embedding entry points and scatter. **Eight native
+browser comparisons strictly xfail** on the measured geometry mismatch. Their
+fixture validates successful rendering, triangle paths and nonempty paint before
+the expected-failure assertion; unrelated setup failures remain errors. A future
+native match raises an unexpected pass, prompting a support review. Ruff and
+mypy pass. Runtime code and the notebook are unchanged, so no notebook example
+was added or rerun. Full-suite, docs and resource checks were not run for this
+audit. Next: thin-diamond geometry audit; triangle support reopens on matching
+released native geometry/aspect control. Clearance: retain.
+
 ## M07.d native colorbar placement
 
 Delivered in `730f9ce`. The shared `embedding`, `umap`, `tsne`, `diffmap`,
@@ -2239,6 +2276,7 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Point outlines | Shared outline layers, relative widths/CSS colors, scalar styles, hover/zoom/brush | [M07.d outline increment](#m07d-embedding-point-outlines) closed; square support below |
 | Square markers | Native squares in shared embeddings/PCA overview/scatter, including outlines, legends and interactions | [M07.d square increment](#m07d-square-markers) closed |
 | Diamond markers and category keys | Native diamonds with Scanpy path widths; keys inherit each panel's marker shape | [M07.d diamond increment](#m07d-diamond-markers) and [legend follow-up](#marker-legend-follow-up) closed |
+| Triangular markers | Clear rejection; native equilateral paths cannot preserve Scanpy's width and height | [M07.d audit](#m07d-triangular-marker-audit) closed; support Blocked by C14 |
 | Stored neighbor-graph edges | First component pair, native segments and endpoint lookups, scalar CSS styles; explicit restrictions on other forms | [M07.d edge increment](#m07d-stored-neighbor-graph-edges) closed |
 | Other graph forms, arrows, scale_factor, broader markers/categorical guide locations | Nondefault forms reject | M07.d/M14 |
 | Callable color bounds | Shared resolver with masked/sorted copies, per-panel lists and finite results | [M07.d callable increment](#m07d-callable-color-bounds) closed |
@@ -2318,6 +2356,7 @@ affected slice.
 | C11 | Bundled Core 1.2 allocates one column's width to vertical multi-column legends; later columns clip. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | [Minimal native regression](../../tests/integrations/scanpy/browser/test_native_legend_extent.py) strictly xfails on 1.2.0. [Upstream fix PR #591](https://github.com/genome-spy/genome-spy/pull/591) includes before/after video comments; it is not adopted in the bundled runtime. Recheck after adopting a released Core fix before automatic column fitting; no local bundle patch. |
 | C12 | Core 1.2 SVG export bends `linkShape="line"` control points. | Upstream straight-link export; adapter trees now use verified orthogonal links. | The minimal straight-link SVG check in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) still strictly xfails. No local bundle patch; recheck on a released fix. The [orthogonal renderer](#shared-native-orthogonal-dendrograms) passes complete-path SVG checks independently. |
 | C13 | A viewport containing only zero-height merges gives a degenerate `[0, 0]` height domain, centering zero in the track. | Native fitting of tied subtrees within larger trees | Minimal native regression in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) strictly xfails on Core 1.2.0. Whole zero-height trees retain their previous nonzero range. Recheck a released native solution; no custom browser logic or patched bundle. |
+| C14 | Native equilateral triangles differ from Scanpy's equal-width/height triangles; uniform sizing cannot match both dimensions. | Triangular markers in M07.d | [Native SVG/WebGL comparison](../../tests/integrations/scanpy/browser/test_native_triangles.py) strictly xfails for four orientations, with/without strokes. Recheck a released matching shape or native aspect control, including guides and outlines, before enabling support; no custom geometry. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental

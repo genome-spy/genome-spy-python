@@ -22,6 +22,16 @@ sc = pytest.importorskip("scanpy")
 FAMILIES = ["embedding", "umap", "tsne", "diffmap", "draw_graph", "pca", "pca_scatter"]
 
 
+@pytest.mark.parametrize("family", FAMILIES)
+@pytest.mark.parametrize("marker", ["^", "v", "<", ">"])
+def test_triangular_markers_reject_until_native_geometry_matches(family, marker):
+    options = {"basis": "custom"} if family == "embedding" else {}
+    with pytest.raises(NotImplementedError, match="marker"):
+        getattr(gsc.pl, family)(
+            make_embedding_adata(), marker=marker, show=False, **options
+        )
+
+
 @pytest.mark.parametrize("case", embedding_cases())
 def test_complete_embedding_specs_match_pinned_reference_coordinates_and_labels(case):
     from matplotlib.colors import to_hex

@@ -336,6 +336,11 @@ is a rotated square: its horizontal/vertical width is √2 times the square's at
 the same size. The native size encoding accounts for this without changing the
 supplied sizes. Thin diamond (`"d"`) and other unsupported markers still error.
 
+Triangle markers (`"^"`, `"v"`, `"<"`, `">"`) remain unsupported: Core 1.2.0's
+native triangles are equilateral, while Scanpy's triangles have equal width and
+height. Uniform sizing cannot match both dimensions; the adapter does not
+approximate this geometry.
+
 Category keys follow each panel's marker shape through native legend inheritance.
 This deliberately differs from Scanpy 1.11.5's circular embedding keys; scatter
 keys already follow their points upstream. Diamond keys include their converted
