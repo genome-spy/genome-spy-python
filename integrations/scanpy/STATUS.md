@@ -77,6 +77,9 @@ own [migration increment](PLAN.md#m14b-native-grid-layout-and-group-gaps) is ver
 All tree families now share [native orthogonal links](#shared-native-orthogonal-dendrograms),
 with complete SVG paths verified. C12's separately reproduced straight-link export
 bug remains upstream; the adapter no longer uses that shape for trees.
+Attached trees now also use [viewport height fitting](#shared-viewport-height-fitting).
+C13 retains the zero-only visible-subtree edge case; ordinary fitting and reset
+are verified separately from the earlier orthogonal-mark increment.
 
 M07.d's [native colorbar placement increment](#m07d-native-colorbar-placement) is
 closed in `730f9ce` for the four sides and None across shared embedding entry points.
@@ -109,6 +112,7 @@ C12 remains a separate upstream straight-link issue.
 | M14.b.3 numeric/clustered layout | In progress; clustermap increment verified | [Clustermap delivery](#m14b3-clustermap-native-tracks) and [shared trees](#shared-native-orthogonal-dendrograms) | Generic matrix/correlation native tracks and their own verification remain. |
 | M05.f category-strip hover | Closed (native WebGL/notebook/HTML track scope) | C10; [heatmap](#m14b1-native-heatmap-tracks-and-gaps) and [clustermap evidence](#m14b3-clustermap-native-tracks) | No remaining work within this track-hover scope. |
 | M14.b shared tree rendering | Closed (native orthogonal links) | [Contract, chart/workflow and resource evidence](#shared-native-orthogonal-dendrograms) | C12's straight-link SVG bug remains upstream; adapter trees use the verified orthogonal shape. |
+| M14.b viewport tree-height fitting | Implemented; positive-height fitting verified | [Shared scale definition and checks](#shared-viewport-height-fitting) | C13 blocks zero-only visible subtrees within larger trees; whole zero-height trees retain their stable range. |
 
 M07.d/M14 retain the explicitly unsupported options; dotplot brushing remains
 deferred pending review. **Clearance: retain; no working document is eligible for removal.**
@@ -453,6 +457,46 @@ That upstream shape defect is unchanged; the adapter no longer uses straight lin
 for trees. Complete orthogonal paths now pass the adapter's SVG gate. Generic
 matrix/correlation native layout and wider family compatibility remain open;
 **clearance: retain**.
+
+## Shared viewport height fitting
+
+The official clustered-heatmap example uses `ViewportDomainRef(mode="contain")`
+on each tree's independent height scale. The integration previously fixed this
+domain to the full tree. `tree_track` now shares the native viewport reference
+across dotplot, matrixplot, heatmap and both clustermap axes; ranked plots inherit
+it through their parent functions. Native fitting runs after navigation pauses.
+The separate `transform_dendrogram` is unnecessary here because Python already
+provides the stored endpoint coordinates. No clustering or heights are recomputed.
+
+Zero remains pinned to the matrix edge. Native symmetric padding of `1 / 22`
+with that bound preserves the previous five-percent root headroom and overview
+geometry. Entirely zero-height trees retain their existing nonzero domain.
+Standalone and correlation trees retain their existing non-navigable layouts.
+
+The new browser checks reproduce the fixed-domain difference, verify the settled
+height against contained stored endpoints across all four families and both
+directions, and restore the full height on reset. Existing checks retain actual
+wheel/pan interaction, native gaps, aligned leaves/labels, SVG paths and hover.
+An independent minimal native check reproduces C13: when a viewport contains only
+zero-height merges from a larger tree, Core produces `[0, 0]` and maps zero to the
+middle of the track. This strict expected failure is retained without custom
+browser logic or a Core patch. The fitting increment stays **Implemented** until
+that edge-case gate passes on a released capability; no plan is cleared.
+
+Validation: **190 targeted Python checks**, **143 browser checks** and the
+canonical expression workflow pass; C12 and C13 have separate strict expected
+failures. The live notebook completed 13 code cells and 11 widgets without errors;
+wheel zoom and settled tree fitting were observed on the packaged PBMC clustermap.
+Formatting, lint and mypy pass. The full repository suite and docs build were not
+rerun. Notebook outputs and generated images remain local.
+
+The isolated 700 × 40 clustermap benchmark, with the same workload/environment as
+the orthogonal-link record above, takes 0.842 s for preparation and 3.491 s for
+validated JSON serialization with tracemalloc active. Peak traced allocations are
+52.4 MiB; JSON is 4.20 MiB. First paint including dispatch is 3.425 s; hover including
+pointer pause/probes is 1.011 s; observed JS heap is 35.6 MiB. These are local
+observations, not timing limits or evidence of a controlled speed improvement.
+Data extraction, clustering and tile transport are unchanged.
 
 ## M06/M07 resource verification
 
@@ -1839,6 +1883,7 @@ affected slice.
 | C10 | Heatmap/clustermap bands and native gap navigation verified in their own viewports. | Closed for M05.f native WebGL/notebook/HTML scope | Native clipped rects use the released Core; no patched bundle or custom listeners. C12 remains independent. |
 | C11 | Bundled Core 1.2 allocates one column's width to vertical multi-column legends; later columns clip. Large Scanpy scatter symbols also overflow a single column in short panels. | M07.a/b complete-chart closure, default legend fitting and M14.a guide layout | [Minimal native regression](../../tests/integrations/scanpy/browser/test_native_legend_extent.py) strictly xfails on 1.2.0. [Upstream fix PR #591](https://github.com/genome-spy/genome-spy/pull/591) includes before/after video comments; it is not adopted in the bundled runtime. Recheck after adopting a released Core fix before automatic column fitting; no local bundle patch. |
 | C12 | Core 1.2 SVG export bends `linkShape="line"` control points. | Upstream straight-link export; adapter trees now use verified orthogonal links. | The minimal straight-link SVG check in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) still strictly xfails. No local bundle patch; recheck on a released fix. The [orthogonal renderer](#shared-native-orthogonal-dendrograms) passes complete-path SVG checks independently. |
+| C13 | A viewport containing only zero-height merges gives a degenerate `[0, 0]` height domain, centering zero in the track. | Native fitting of tied subtrees within larger trees | Minimal native regression in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) strictly xfails on Core 1.2.0. Whole zero-height trees retain their previous nonzero range. Recheck a released native solution; no custom browser logic or patched bundle. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental

@@ -772,6 +772,11 @@ Deliver in small increments, updating the current queue in STATUS after each:
    SVG paths including elbows, all orientations, unequal heatmap group spans,
    zero-height merges, resizing and zoom. The [shared renderer delivery](STATUS.md#shared-native-orthogonal-dendrograms)
    closes this increment; C12's separate straight-link export bug remains upstream.
+   Side tracks use native viewport-contained height domains to expand visible
+   subtrees after navigation, with zero pinned at the matrix edge. Preserve the
+   initial root margin, cached heights, and reset behavior. Entirely zero-height
+   trees retain a nonzero range; C13 tracks native fitting of zero-only subtrees
+   within larger trees and keeps that edge-case gate open.
 
 Keep the data-access, grouped-summary, ranking and tree-preparation modules
 unchanged unless a focused failing semantic test requires a correction. In

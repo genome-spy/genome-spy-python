@@ -762,6 +762,13 @@ does not infer staleness from expression values.
 Dotplot/matrixplot trees reserve an 80-pixel branch region; heatmaps use 100 pixels
 on the right or 80 above, and correlation trees use 180.
 Zero-distance leaves meet the matrix edge without a gap or distance-axis padding.
+Attached trees share native viewport-based height fitting: after zooming or panning,
+`gs.ViewportDomainRef(mode="contain")` fits the height scale to branches whose
+endpoints lie in the visible slots. This expands local tree detail without
+recomputing heights or clusters. The full overview retains its original root margin.
+Entirely zero-height trees keep a fixed nonzero range. A released Core limitation
+remains when only a zero-height subtree is visible inside a larger tree: its
+degenerate height range centers the branches (C13 in the integration ledger).
 All dendrograms share native orthogonal links, as in the
 [GenomeSpy clustered-heatmap example](https://genomespy.app/docs/examples/generic/clustered-heatmap/).
 Each stored merge becomes two parent-to-child links; the native vertical or

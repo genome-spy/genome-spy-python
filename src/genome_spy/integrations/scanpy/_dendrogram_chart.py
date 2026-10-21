@@ -73,6 +73,7 @@ def tree_track(
     """Return an in-bounds side tree using stored branches and final slot centers.
 
     Integer anchors and fractional offsets share the matrix's gapped index scale.
+    Fit visible heights; zero-only trees keep a nonzero range with zero at the edge.
     """
     records = tree_records(tree, leaf_positions)
     for record in records:
@@ -81,13 +82,17 @@ def tree_track(
             record[field] = float(np.floor(record[field]))
     axis = "x" if horizontal else "y"
     leaf = (gs.X if horizontal else gs.Y)("leaf:I", band=0.5).axis(None)
-    # Leave room for the root stroke inside the tree's viewport.
+    # Fit visible branches, retaining zero at the matrix edge and 5% root headroom.
     distance = (
         (gs.Y if horizontal else gs.X)("distance:Q")
         .scale(
-            domain=[0, distance_domain(tree)[1]],
+            domain=gs.ViewportDomainRef(source="viewport", mode="contain")
+            if tree.dcoord.max()
+            else [0, distance_domain(tree)[1]],
+            domainMin=0,
+            padding=1 / 22,
             nice=False,
-            zero=False,
+            zero=True,
             zoom=False,
             reverse=reverse,
         )
