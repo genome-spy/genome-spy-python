@@ -490,7 +490,7 @@ def scatter(
         linewidth=None,
         na_color="lightgrey",
     )
-    style = replace(style, legend_symbol_size=300, legend_symbol_type=None)
+    style = replace(style, legend_symbol_size=300)
     return _finish_plot(
         build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
     )

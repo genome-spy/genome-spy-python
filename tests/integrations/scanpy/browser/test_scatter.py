@@ -17,22 +17,29 @@ REFERENCE = json.loads(
 
 
 @pytest.mark.parametrize("family", ["umap", "scatter"])
-def test_diamond_category_legend_matches_upstream_shape_and_width(page, family):
+@pytest.mark.parametrize(
+    "marker,shape", [("o", "circle"), ("s", "rect"), ("D", "path")]
+)
+def test_category_legend_matches_panel_marker_and_expected_width(
+    page, family, marker, shape
+):
     import scanpy as sc
     import matplotlib.pyplot as plt
+    from matplotlib.markers import MarkerStyle
 
     data = make_scatter_adata()
     data.obs["two"] = ["A", "B"] * (data.n_obs // 2)
     args = (data, "x_value", "y_value") if family == "scatter" else (data,)
-    options = dict(color="two", marker="D", show=False)
+    options = dict(color="two", marker=marker, show=False)
     ax = getattr(sc.pl, family)(*args, **options)
     handle = ax.get_legend().legend_handles[0]
-    expected_width = (
-        handle.get_sizes()[0] ** 0.5
-        * handle.get_paths()[0].get_extents().width
-        * 100
-        / 72
+    reference_marker = MarkerStyle(marker)
+    path = (
+        reference_marker.get_path().transformed(reference_marker.get_transform())
+        if family == "umap"
+        else handle.get_paths()[0]
     )
+    expected_width = handle.get_sizes()[0] ** 0.5 * path.get_extents().width * 100 / 72
     plt.close(ax.figure)
     bounds = render(page, getattr(gsc.pl, family)(*args, **options))
     svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
@@ -41,7 +48,7 @@ def test_diamond_category_legend_matches_upstream_shape_and_width(page, family):
         const root = new DOMParser().parseFromString(svg,'image/svg+xml').documentElement;
         root.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
         document.body.append(root);
-        const symbols = [...root.querySelectorAll('circle,path')].flatMap(n => {
+        const symbols = [...root.querySelectorAll('circle,rect,path')].flatMap(n => {
             const b=n.getBoundingClientRect();
             return b.x > edge ? [{shape:n.tagName,width:b.width}] : [];
         });
@@ -51,9 +58,7 @@ def test_diamond_category_legend_matches_upstream_shape_and_width(page, family):
         {"svg": svg, "edge": bounds["x"] + bounds["width"]},
     )
     assert len(symbols) == 2
-    assert all(
-        s["shape"] == ("circle" if family == "umap" else "path") for s in symbols
-    )
+    assert all(s["shape"] == shape for s in symbols)
     assert all(s["width"] == pytest.approx(expected_width, abs=0.1) for s in symbols)
 
 

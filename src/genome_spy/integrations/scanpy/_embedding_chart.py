@@ -93,8 +93,8 @@ def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
             symbolOpacity=1 if style.outline_width is not None else style.alpha,
             labelLimit=1000,
         )
-        if style.legend_symbol_type is None and panel.marker == "D":
-            # Scatter legends retain the diamond path's diagonal width too.
+        if panel.marker == "D":
+            # Legend diamonds retain the point path's diagonal width too.
             legend = legend.symbolSize(
                 style.legend_symbol_size
                 * (POINTS_TO_PIXELS * EMBEDDING_MARKERS[panel.marker][1]) ** 2
@@ -452,9 +452,6 @@ def build_embedding(
         orient=style.colorbar_loc or "right",
         direction="horizontal" if horizontal else "vertical",
         symbolSize=style.legend_symbol_size * POINTS_TO_PIXELS**2,
-        symbolType=style.legend_symbol_type
-        if style.legend_symbol_type is not None
-        else Undefined,
         gradientLength=gradient_length,
         gradientThickness=gradient_length / 30,
         gradientStrokeColor=style.frame_color,

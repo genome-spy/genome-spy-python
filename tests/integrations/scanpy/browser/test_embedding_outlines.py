@@ -204,8 +204,7 @@ def test_outline_hover_linked_brush_navigation_and_offline_delivery(
     root = ET.fromstring(svg)
     assert {"A", "B"} <= {e.text for e in root.iter() if e.tag.endswith("text")}
     if marker in ("s", "D"):
-        # Scanpy embedding legends use circles even for other point shapes.
-        assert sum(e.tag.endswith("circle") for e in root.iter()) == 2
+        assert not any(e.tag.endswith("circle") for e in root.iter())
     page.mouse.move(1, 1)
     pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
     for x, expected in ((-0.4, 0), (0.4, 204)):

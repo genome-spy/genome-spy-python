@@ -336,9 +336,10 @@ is a rotated square: its horizontal/vertical width is √2 times the square's at
 the same size. The native size encoding accounts for this without changing the
 supplied sizes. Thin diamond (`"d"`) and other unsupported markers still error.
 
-Embedding category keys use circles, as in Scanpy 1.11.5, including when points
-are squares or diamonds. Scatter keys retain their marker shape. Diamond scatter
-keys include their converted size on the color legend; customize that legend's
+Category keys follow each panel's marker shape through native legend inheritance.
+This deliberately differs from Scanpy 1.11.5's circular embedding keys; scatter
+keys already follow their points upstream. Diamond keys include their converted
+size on the color legend; customize that legend's
 `symbolSize` directly to override it. Other native legend defaults remain
 available through chart configuration.
 

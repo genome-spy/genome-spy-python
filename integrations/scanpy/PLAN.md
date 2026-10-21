@@ -606,9 +606,10 @@ commit evidence and unmet verification gates live in the
   The [square-marker record](STATUS.md#m07d-square-markers) owns delivery evidence.
   Diamond-marker acceptance: `marker="D"` uses native diamonds with Scanpy's
   √2 path-width conversion, including outlines and scalar/per-panel inputs.
-  Share marker definitions across validation, points and guide sizing. Preserve
-  circular embedding keys and shape-matched scatter keys; compare their shapes
-  and widths against public Scanpy. Verify plain/stroked diamond bounds and
+  Share marker definitions across validation, points and guide sizing. Category
+  keys follow each panel's marker shape through native legend inheritance;
+  this deliberately differs from Scanpy's circular embedding keys. Compare sizes
+  in Scanpy's units. Verify plain/stroked diamond bounds and
   occupied area, hover/brush/zoom/HTML, unchanged data, the packaged workflow
   and a representative resource workload. Do not enable thin diamonds or other
   markers merely because a similarly named native shape exists. The

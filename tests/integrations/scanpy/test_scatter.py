@@ -72,6 +72,7 @@ def test_many_categories_keep_scanpy_column_defaults():
     assert spec["encoding"]["color"]["legend"]["columns"] == 3
 
 
+@pytest.mark.parametrize("family", ["umap", "scatter"])
 @pytest.mark.parametrize(
     "marker,shapes,factors",
     [
@@ -81,14 +82,15 @@ def test_many_categories_keep_scanpy_column_defaults():
         (["s", "D"], ["square", "diamond"], [1, 2]),
     ],
 )
-def test_marker_shapes_reuse_scatter_data_and_units(marker, shapes, factors):
+def test_marker_shapes_reuse_embedding_data_and_units(family, marker, shapes, factors):
     data = make_scatter_adata()
+    args = (data, "x_value", "y_value") if family == "scatter" else (data,)
     options = dict(color=["cell_type", "score"], show=False)
-    plain = gsc.pl.scatter(data, "x_value", "y_value", marker="o", **options).to_dict()
-    marked = gsc.pl.scatter(
-        data, "x_value", "y_value", marker=marker, **options
-    ).to_dict()
+    plot = getattr(gsc.pl, family)
+    plain = plot(*args, marker="o", **options).to_dict()
+    marked = plot(*args, marker=marker, **options).to_dict()
     assert marked["datasets"] == plain["datasets"]
+    assert "symbolType" not in marked["config"]["legend"]
     for panel, normal, shape, factor in zip(
         units(marked), units(plain), shapes, factors, strict=True
     ):
@@ -103,7 +105,7 @@ def test_marker_shapes_reuse_scatter_data_and_units(marker, shapes, factors):
 
 @pytest.mark.parametrize("family", ["umap", "scatter"])
 @pytest.mark.parametrize("marker", ["o", "s", "D"])
-def test_categorical_legend_shapes_and_sizes_match_scanpy(family, marker):
+def test_category_legends_follow_panel_markers_in_native_units(family, marker):
     import matplotlib.pyplot as plt
     from matplotlib.markers import MarkerStyle
 
@@ -112,7 +114,13 @@ def test_categorical_legend_shapes_and_sizes_match_scanpy(family, marker):
     options = dict(color="cell_type", marker=marker, show=False)
     ax = getattr(sc.pl, family)(*args, **options)
     handle = ax.get_legend().legend_handles[0]
-    path = handle.get_paths()[0]
+    # Embedding keys deliberately follow the points instead of Scanpy's circles.
+    reference_marker = MarkerStyle(marker)
+    path = (
+        reference_marker.get_path().transformed(reference_marker.get_transform())
+        if family == "umap"
+        else handle.get_paths()[0]
+    )
     width = path.get_extents().width
     expected_width = np.sqrt(handle.get_sizes()[0]) * width * 100 / 72
     plt.close(ax.figure)

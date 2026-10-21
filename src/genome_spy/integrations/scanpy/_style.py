@@ -456,7 +456,6 @@ class EmbeddingStyle:
     title_fontsize: float = 12 * POINTS_TO_PIXELS
     tick_fontsize: float = 10 * POINTS_TO_PIXELS
     legend_symbol_size: float = 36
-    legend_symbol_type: str | None = "circle"
     legend_labelspacing: float = 0.5
     legend_handletextpad: float = 0.8
     frame_color: str = "#000000"
