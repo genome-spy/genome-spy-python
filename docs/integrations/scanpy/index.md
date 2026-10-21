@@ -478,9 +478,9 @@ tick labels reveal more names as slots grow. Defaults remain
 Category-strip tooltips use the native default handler and the same `hover` flag
 as tiles. They work with the bundled Core 1.2.0 runtime, including after zoom and
 pan. Dotplot, matrixplot and heatmap labels, brackets and trees use native
-`gs.surround` side tracks with shared index scales. Clustermap still uses its
-earlier outside-plot tracks; its native layout migration remains M14.b.3. There is no patched bundle
-or custom hover listener in the integration.
+`gs.surround` side tracks with shared index scales, as do clustermap's trees,
+labels and color tracks. There is no patched bundle or custom hover listener
+in the integration.
 
 `show_values` uses native `fitToBand` text, shared tile records and the plotted
 value after any log transform/scaling. Values fade in as cells become large
@@ -613,6 +613,7 @@ Plotting-only linkage is local and never written to AnnData.
 | `use_raw` | Defaults to raw when present. The entire supplied matrix is requested, so subset AnnData first. Scanpy 1.11.5 labels raw columns with `adata.var_names`; differing raw/X variable counts raise a clear error. No layer/symbol extensions are added. |
 | `method`, `metric`, `row_cluster`, `col_cluster` | SciPy string names, default average linkage and Euclidean distance. Disabling an axis keeps its supplied order. No embedding, group analysis or ranking runs. |
 | `row_linkage`, `col_linkage` | Finite valid linkage with the matching leaf count. Supplied trees are authoritative and are not recomputed; each axis can use a different method/metric. |
+| `row_gap_threshold`, `col_gap_threshold` | Optional finite, nonnegative distance cuts through public SciPy `fcluster`. None keeps an axis contiguous. Cuts preserve leaf order and separate tree clusters with 4 CSS-pixel gaps shared by tiles, trees, labels and strips. They require clustering on the matching axis; too many gaps for the plot size reject clearly. These are not annotation-category boundaries. |
 | `z_score`, `standard_scale` | None, 0 (rows), or 1 (columns); mutually exclusive. Scaling precedes linkage. Z-scores use sample standard deviation, matching Seaborn; constant ranges become missing rather than the zero convention of grouped expression plots. Missing distances fail. |
 | `mask` | Matching boolean array or identically indexed DataFrame. Masks affect display and color bounds, never linkage. Missing values may be displayed blank when clustering is disabled or valid linkage is supplied. At least one unmasked finite value is required. |
 | `obs_keys`, `row_colors`, `col_colors` | One categorical observation key, or explicit CSS color tracks. `obs_keys` gives the strip a native category legend using saved order and palette, independent of the expression colorbar. Pandas Series/DataFrames align by index; lists are positional, with nested lists representing tracks. Missing annotations are white and omitted from the legend. Explicit CSS tracks have no category labels or legend. Saved category palettes/order are reused without mutation. `obs_keys` conflicts with explicit row colors. |
@@ -633,7 +634,10 @@ axis**. Both guards run before expression access. Supplying linkage avoids the
 distance allocation, but not the tile limit. Backed/lazy matrices reject before
 reading expression; no silent sampling, aggregation or full unrelated matrix
 densification occurs. The expression notebook uses all 700 packaged PBMC cells
-and the same ten marker genes.
+and the same ten marker genes. Its explicit SciPy linkage is reused by plotting;
+the trial cuts both trees at 70% of their maximum merge distance. Remove the
+two gap-threshold arguments to restore a contiguous matrix. Native surround
+tracks keep branches and color strips adjacent with zero track spacing.
 
 ## Stored rankings and ranked expression plots
 

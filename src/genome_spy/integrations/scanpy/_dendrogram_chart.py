@@ -38,18 +38,22 @@ def tree_records(
     if leaf_positions is not None:
         if len(leaf_positions) != len(tree.order):
             raise ValueError("Tree leaf positions must match the number of groups.")
+        slots = np.arange(len(tree.order)) + 0.5
+        positions = np.asarray(leaf_positions)
         for record in records:
             for field in ("leaf", "leaf2"):
-                record[field] = float(
-                    np.interp(
-                        record[field], np.arange(len(tree.order)) + 0.5, leaf_positions
-                    )
-                )
+                record[field] = float(np.interp(record[field], slots, positions))
     return records
 
 
 def tree_track(
-    tree: TreeData, leaf_positions: list[float], *, horizontal: bool, size: float
+    tree: TreeData,
+    leaf_positions: list[float],
+    *,
+    horizontal: bool,
+    size: float,
+    reverse: bool = False,
+    linewidth: float = 1.5,
 ) -> gs.Chart:
     """Return an in-bounds side tree using stored branches and final slot centers.
 
@@ -70,11 +74,12 @@ def tree_track(
             nice=False,
             zero=False,
             zoom=False,
+            reverse=reverse,
         )
         .axis(None)
     )
     chart = gs.Chart(records).mark_link(
-        linkShape="line", color="#555555", size=1.5 * _PT, clip=True, tooltip=None
+        linkShape="line", color="#555555", size=linewidth * _PT, clip=True, tooltip=None
     )
     if horizontal:
         return chart.encode(

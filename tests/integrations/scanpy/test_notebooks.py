@@ -293,7 +293,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         )
     clustered = charts[4].to_dict()
     tiles = points(clustered)
-    cells = clustered["datasets"][clustered["layer"][0]["data"]["name"]]
+    cells = clustered["datasets"][clustered["spec"]["data"]["name"]]
     assert len(cells) == 700 * 10
     assert {row["_row"] for row in cells} == set(namespace["pbmc"].obs_names)
     assert {row["_column"] for row in cells} == set(namespace["marker_names"])
@@ -308,11 +308,15 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert annotation["scale"]["range"] == list(
         namespace["pbmc"].uns["bulk_labels_colors"]
     )
-    branches = [mark for mark in clustered["layer"] if "layer" in mark]
-    assert [
-        len(clustered["datasets"][mark["layer"][0]["data"]["name"]])
-        for mark in branches[-2:]
-    ] == [3 * 699, 3 * 9]
+    branches = [
+        mark for mark in leaf_marks(clustered) if mark["mark"].get("color") == "#555555"
+    ]
+    assert [len(clustered["datasets"][mark["data"]["name"]]) for mark in branches] == [
+        3 * 699,
+        3 * 9,
+    ]
+    assert len(clustered["scales"]["y"]["gapPositions"]) == 6
+    assert len(clustered["scales"]["x"]["gapPositions"]) == 1
 
     scores = charts[5].to_dict()
     assert len(units(scores)) == 2

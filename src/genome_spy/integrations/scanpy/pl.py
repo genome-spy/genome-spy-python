@@ -1329,6 +1329,8 @@ def clustermap(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    row_gap_threshold: float | None = None,
+    col_gap_threshold: float | None = None,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -1349,10 +1351,12 @@ def clustermap(
         use_raw: Use raw expression when present by default, matching Scanpy.
         show: Display once if true; return a chart if false; None uses Scanpy's setting.
         save: None or False; use chart.save for HTML or JSON.
-        hover: Show the cell ID, gene and plotted value in a native tooltip.
-            Native obs_keys strip tooltip settings await Core PR #587's picking fix.
+        hover: Show native tile and observation-strip tooltips.
         zoom: Enable y-only zoom and pan with True, or both axes with "xy".
         show_values: Show plotted values when enough space is available in each tile.
+        row_gap_threshold: Optional row-tree distance cut for gaps between clusters.
+        col_gap_threshold: Optional column-tree distance cut for gaps between clusters.
+            Both cuts preserve leaf order; None leaves the axis contiguous.
         width: Matrix width in logical pixels, excluding trees and labels.
         height: Matrix height in logical pixels, excluding trees and labels.
         **kwds: Supported Seaborn options: method, metric, z_score,
@@ -1420,6 +1424,8 @@ def clustermap(
         adata,
         obs_keys,
         use_raw,
+        row_gap_threshold=row_gap_threshold,
+        col_gap_threshold=col_gap_threshold,
         **{key: value for key, value in kwds.items() if key in data_options},
     )
     chart = build_clustermap(

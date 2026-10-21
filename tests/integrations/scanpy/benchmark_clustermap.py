@@ -18,19 +18,29 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     import scanpy as sc
+    from scipy.cluster.hierarchy import linkage
     from playwright.sync_api import sync_playwright
 
     import genome_spy.integrations.scanpy as gsc
-    from tests.integrations.scanpy.browser.test_umap import render
+    from tests.integrations.scanpy.browser.test_heatmap import render, hover_at
 
     # A transport/clustering workload, without interpreting the first genes as markers.
     data = sc.datasets.pbmc68k_reduced().raw[:, :40].to_adata()
     tracemalloc.start()
     start = perf_counter()
+    values = data.X.toarray()
+    row_linkage = linkage(values, method="average")
+    col_linkage = linkage(values.T, method="average")
     chart = gsc.pl.clustermap(
         data,
         obs_keys="bulk_labels",
         use_raw=False,
+        row_linkage=row_linkage,
+        col_linkage=col_linkage,
+        row_gap_threshold=0.9 * row_linkage[:, 2].max(),
+        col_gap_threshold=0.9 * col_linkage[:, 2].max(),
+        zoom="xy",
+        show_values=True,
         yticklabels=False,
         width=550,
         height=550,
@@ -41,6 +51,7 @@ def main() -> None:
     serialized = perf_counter()
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
+    spec = json.loads(payload)
     report = {
         "measured": date.today().isoformat(),
         "system": platform.platform(),
@@ -56,7 +67,12 @@ def main() -> None:
             "matrix_values": data.n_obs * data.n_vars,
             "row_distances": data.n_obs * (data.n_obs - 1) // 2,
         },
-        "scope": "Warm plotting and validated JSON serialization; source construction excluded; tracemalloc active.",
+        "scope": "Dependencies loaded; linkage, chart preparation and validated JSON serialization measured; source construction excluded; tracemalloc active.",
+        "gap_cut": "90% of each tree's maximum merge distance; linkage included in preparation.",
+        "gap_counts": {
+            axis: len(spec["scales"][axis]["gapPositions"]) for axis in ("x", "y")
+        },
+        "interactions": {"zoom": "xy", "show_values": True},
         "seconds": {
             "preparation": prepared - start,
             "serialization": serialized - prepared,
@@ -69,13 +85,17 @@ def main() -> None:
         start = perf_counter()
         bounds = render(page, chart)
         elapsed = perf_counter() - start
-        canvas = page.locator("canvas").first.bounding_box()
-        x = canvas["x"] + bounds["x"] + bounds["width"] / 80
-        y = canvas["y"] + bounds["y"] + bounds["height"] / 1400
-        page.mouse.move(x - 2, y - 2)
-        page.wait_for_timeout(450)
+        fractions = page.evaluate("""() => ['x','y'].map(axis=>{
+            const s=api.getScaleResolutionByName(`clustermap-${axis}`).getScale();
+            const i=axis==='x'?20:350;
+            return (axis==='x'?s(i):1-s(i))+s.bandwidth()/2;
+        })""")
         start = perf_counter()
-        page.mouse.move(x, y)
+        hover_at(
+            page,
+            bounds["x"] + fractions[0] * bounds["width"],
+            bounds["y"] + fractions[1] * bounds["height"],
+        )
         page.locator("table.attributes").wait_for(state="visible")
         hover = perf_counter() - start
         report["browser"] = {
@@ -83,7 +103,7 @@ def main() -> None:
             "viewport": [1800, 1400],
             "dpr": 1,
             "first_paint_seconds_including_dispatch": elapsed,
-            "hover_seconds_excluding_pointer_pause": hover,
+            "hover_seconds_including_pointer_pause_and_probes": hover,
             "js_heap_bytes": page.evaluate("performance.memory.usedJSHeapSize"),
         }
         browser.close()

@@ -12,6 +12,7 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.browser.test_heatmap import hover_at
 from tests.integrations.scanpy.helpers import tree_segments
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
 from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
@@ -80,7 +81,7 @@ def test_clustermap_strip_hover_before_and_after_navigation(page, hover):
         show=False,
     )
     spec = chart.to_dict()
-    records = spec["datasets"][spec["layer"][0]["data"]["name"]]
+    records = spec["datasets"][spec["spec"]["layer"][0]["data"]["name"]]
     groups = [
         data.obs.loc[name, "group"]
         for name in dict.fromkeys(row["_row"] for row in records)
@@ -95,21 +96,17 @@ def test_clustermap_strip_hover_before_and_after_navigation(page, hover):
             page.mouse.move(px + 12, py + 10, steps=5)
             page.mouse.up()
             page.wait_for_timeout(700)
-        origin, step = page.evaluate(
-            "['grid_y_origin','grid_y_step'].map(n=>api.getParam(n).getValue())"
-        )
-        slot = min(
-            range(len(groups)), key=lambda i: abs(origin + (i + 0.5) * step - 0.5)
-        )
-        fraction = origin + (slot + 0.5) * step
+        centers = page.evaluate("""() => {
+            const s=api.getScaleResolutionByName('clustermap-y').getScale();
+            return Array.from({length:6},(_,i)=>1-s(i)+s.bandwidth()/2);
+        }""")
+        slot = min(range(len(groups)), key=lambda i: abs(centers[i] - 0.5))
+        fraction = centers[slot]
         assert 0 < fraction < 1
         canvas = page.locator("canvas").first.bounding_box()
         px = canvas["x"] + bounds["x"] - 360 * 0.03 / 0.77 / 2
         py = canvas["y"] + bounds["y"] + fraction * bounds["height"]
-        page.mouse.move(px - 2, py - 2)
-        page.wait_for_timeout(450)
-        page.mouse.move(px, py)
-        page.wait_for_timeout(100)
+        hover_at(page, px - canvas["x"], py - canvas["y"])
         if hover:
             page.locator("table.attributes").wait_for(state="visible", timeout=2000)
             assert [

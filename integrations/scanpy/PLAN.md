@@ -739,10 +739,15 @@ Scanpy-specific layout configuration system.
   their slots; repeated gene labels retain distinct integer slots. Do not insert
   dummy rows, mask out real cells, or paint white rules over tiles to imitate gaps.
 - A supplied numeric matrix has no inferred groups. Clustermap must support
-  gaps between selected row/column groups. Define whether these come from an
-  explicit dendrogram cut or annotation boundaries before implementing them;
-  do not select a cut threshold/count or reorder leaves silently. Keep native
-  gap positions shared by the tiles, trees, labels and annotation tracks.
+  gaps between selected row/column groups. Use opt-in keyword-only
+  `row_gap_threshold` / `col_gap_threshold` distance cuts through public SciPy
+  `fcluster(..., criterion="distance")`; None preserves contiguous slots.
+  Keep the existing leaf order and shared native gap positions across tiles,
+  trees, labels and annotation tracks. The notebook trial explicitly chooses
+  70% of each tree's maximum merge distance (user-authorized on 2026-10-21),
+  independent of `bulk_labels`. No default scientific cut or category-change
+  grouping is inferred. Invalid cuts or cuts on a disabled axis reject clearly;
+  reject layouts where the gaps leave no room for tiles.
 
 Deliver in small increments, updating the current queue in STATUS after each:
 

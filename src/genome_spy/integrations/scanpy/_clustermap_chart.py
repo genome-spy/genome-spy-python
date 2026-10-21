@@ -1,6 +1,5 @@
 """Native clustered tiles with two attached trees and ordered color tracks."""
 
-from math import ceil
 from typing import Any, Literal
 
 import numpy as np
@@ -9,12 +8,14 @@ import pandas as pd
 import genome_spy as gs
 from genome_spy.integrations.scanpy._clustermap_data import ClusteredMatrix, CONTEXT
 from genome_spy.integrations.scanpy._data import number, numeric_values
-from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
-from genome_spy.integrations.scanpy._grouped_chart import coordinate, _slot_labels
+from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
+from genome_spy.integrations.scanpy._grouped_chart import (
+    coordinate,
+    index_scales,
+    _slot_labels,
+)
 from genome_spy.integrations.scanpy._grid_interactions import (
-    slot_position,
     zoom_axes,
-    with_navigation,
     with_values,
 )
 from genome_spy.integrations.scanpy._matrix_chart import matrix_tiles, _labels
@@ -45,177 +46,110 @@ def _tick_labels(
     axis: Any,
     *,
     horizontal: bool,
-    size: float,
-    zoom: bool,
-) -> tuple[gs.Chart | None, float]:
-    """Return labels at ordered slots and their outside space, skipping crowded ticks."""
+) -> gs.Chart | None:
+    """Return in-bounds slot labels, skipping crowded ticks until zoom reveals them."""
     if option is False:
-        return None, 10
+        return None
     names = list(map(str, labels))
     step = 1
-    if isinstance(option, str) and option == "auto":
-        step = max(1, ceil(len(names) * TICK / size))
-    elif isinstance(option, int) and not isinstance(option, bool) and option > 0:
-        step = option
-    elif option is None or isinstance(option, (str, int)) and option is not True:
-        raise ValueError(
-            f"{CONTEXT}: tick labels need auto, a boolean, a positive stride, or a label list."
-        )
-    elif option is not True:
-        names = _labels(option, len(names), "tick labels", context=CONTEXT)
-    layer = _slot_labels(
-        names, axis, horizontal=horizontal, opposite=not horizontal, zoom=zoom
+    auto = isinstance(option, str) and option == "auto"
+    if not auto and option is not True:
+        if isinstance(option, int) and not isinstance(option, bool) and option > 0:
+            step = option
+        elif option is None or isinstance(option, (str, int)):
+            raise ValueError(
+                f"{CONTEXT}: tick labels need auto, a boolean, a positive stride, or a label list."
+            )
+        else:
+            names = _labels(option, len(names), "tick labels", context=CONTEXT)
+    chart = _slot_labels(
+        names, axis, horizontal=horizontal, opposite=not horizontal, in_bounds=True
     )
-    if zoom and isinstance(option, str) and option == "auto":
-        # Reveal more tick labels as their slots grow.
+    if auto:
+        # Measure the bands after gaps, including before any zoom.
         channel, extent = ("x", "width") if horizontal else ("y", "height")
-        layer = layer.transform_filter(
-            f"datum.slot % max(1, ceil({TICK} / (grid_{channel}_step * {extent}))) == 0"
+        chart = chart.transform_filter(
+            f"datum.slot % max(1, ceil({TICK} / (bandwidth('{channel}') * {extent}))) == 0"
         )
     elif step > 1:
-        layer = layer.transform_filter(f"datum.slot % {step} == 0")
-    space = max(map(len, names[::step])) * TICK * 0.65 + 12
-    return layer, space
+        chart = chart.transform_filter(f"datum.slot % {step} == 0")
+    return chart
 
 
-def _color_strip(
+def _color_tracks(
     colors: pd.DataFrame,
     axis: Any,
     *,
     horizontal: bool,
     size: float,
-    extent: float,
-    zoom: bool,
     hover: bool,
     categories: pd.Series | None = None,
     palette: tuple[str, ...] = (),
-) -> gs.LayerChart:
-    """Return ordered color tracks, using category names for a native legend if supplied."""
-    tracks = colors.shape[1]
-    rows = [
-        {
-            "slot": i,
-            "_color": categories.iloc[i] if categories is not None else color,
-            "start": (tracks - j - 1) * size / extent,
-            "end": (tracks - j) * size / extent,
-        }
-        for j in range(tracks)
-        for i, color in enumerate(colors.iloc[:, j])
-    ]
-    strip = gs.Chart(rows).mark_rect(
-        tooltip={"handler": "default"} if hover and categories is not None else None,
-        clip="never",
-    )
-    if horizontal:
-        strip = strip.transform_calculate(
-            _start="1 + datum.start", _end="1 + datum.end"
-        ).encode(
-            x=axis.field("slot"),
-            y=gs.Y("_start:Q").scale(None).axis(None),
-            y2="_end:Q",
+) -> list[gs.Chart]:
+    """Return one native side view per color track, with a category legend if known."""
+    tracks = []
+    for index, name in enumerate(colors.columns):
+        labels = categories if categories is not None else colors.iloc[:, index]
+        chart = gs.Chart(
+            [{"slot": i, "_color": value} for i, value in enumerate(labels)]
         )
-    else:
-        strip = strip.transform_calculate(
-            _start="-datum.end", _end="-datum.start"
-        ).encode(
-            y=axis.field("slot"),
-            x=gs.X("_start:Q").scale(None).axis(None),
-            x2="_end:Q",
-        )
-    if zoom:
-        # Clip only the scrolling direction; strips remain outside the matrix.
-        channel = "x" if horizontal else "y"
-        strip = strip.transform_filter(
-            f"{slot_position(channel, 'datum.slot + 1')} > 0 && "
-            f"{slot_position(channel, 'datum.slot')} < 1"
-        )
-        start = f"clamp({slot_position(channel, 'datum.slot')}, 0, 1)"
-        stop = f"clamp({slot_position(channel, 'datum.slot + 1')}, 0, 1)"
-        strip = strip.transform_calculate(
-            _slot_start=start if horizontal else f"1 - ({start})",
-            _slot_stop=stop if horizontal else f"1 - ({stop})",
-        ).encode(
-            **{
-                channel: (gs.X if horizontal else gs.Y)("_slot_start:Q")
-                .scale(None)
-                .axis(None),
-                channel + "2": "_slot_stop:Q",
-            }
-        )
-    # Named categories generate a native legend; plain CSS tracks have no labels.
-    color = gs.Color("_color:N")
-    if categories is not None:
-        color = color.scale(
-            type="ordinal",
-            domain=categories.cat.categories.tolist(),
-            range=list(palette),
-        ).legend(
-            gs.Legend(
-                title=str(categories.name),
-                orient="right",
-                symbolType="square",
-                labelLimit=1000,
+        chart = chart.mark_rect(
+            clip=True,
+            tooltip={"handler": "default"}
+            if hover and categories is not None
+            else None,
+        ).encode(**{"x" if horizontal else "y": axis.field("slot")})
+        color = gs.Color("_color:N")
+        if categories is not None:
+            color = color.scale(
+                type="ordinal",
+                domain=categories.cat.categories.tolist(),
+                range=list(palette),
+            ).legend(
+                gs.Legend(
+                    title=str(categories.name),
+                    orient="right",
+                    symbolType="square",
+                    labelLimit=1000,
+                )
             )
+            # Missing annotations leave the white track background visible.
+            chart = chart.transform_filter("isValid(datum._color)")
+            if hover:
+                chart = chart.encode(
+                    tooltip=[gs.Tooltip("_color:N", title=str(categories.name))]
+                )
+        else:
+            css_colors = list(dict.fromkeys(labels))
+            color = color.scale(
+                type="ordinal", domain=css_colors, range=css_colors
+            ).legend(None)
+        chart = chart.encode(color=color)
+        chart = (
+            chart.properties(height=size)
+            if horizontal
+            else chart.properties(width=size)
         )
-        # Missing annotations leave the white strip background visible.
-        strip = strip.transform_filter("isValid(datum._color)")
-        if hover:
-            strip = strip.encode(
-                tooltip=[gs.Tooltip("_color:N", title=str(categories.name))]
+        chart = chart.properties(
+            name=f"clustermap-{'top' if horizontal else 'left'}-colors-{index}"
+        )
+        if name != "":
+            chart = chart.properties(
+                title=gs.Title(
+                    text=str(name),
+                    orient="right" if horizontal else "bottom",
+                    angle=0 if horizontal else -90,
+                    anchor="middle",
+                    align="left" if horizontal else "right",
+                    baseline="middle",
+                    offset=8,
+                    font=FONT,
+                    fontSize=min(TICK, size),
+                    fontWeight="normal",
+                )
             )
-    else:
-        css_colors = list(dict.fromkeys(colors.to_numpy().ravel()))
-        color = color.scale(type="ordinal", domain=css_colors, range=css_colors).legend(
-            None
-        )
-    strip = strip.encode(color=color)
-    labels = [
-        {"label": str(name), "position": (tracks - i - 0.5) * size / extent}
-        for i, name in enumerate(colors.columns)
-        if name != ""
-    ]
-    text = gs.Chart(labels).mark_text(
-        font=FONT,
-        size=TICK,
-        align="left" if horizontal else "right",
-        angle=0 if horizontal else -90,
-        baseline="middle",
-        xOffset=8 if horizontal else 0,
-        yOffset=0 if horizontal else 8,
-        clip="never",
-        tooltip=None,
-    )
-    if horizontal:
-        text = text.transform_calculate(_position="1 + datum.position").encode(
-            x=gs.value(1), y=gs.Y("_position:Q").scale(None).axis(None), text="label:N"
-        )
-    else:
-        text = text.transform_calculate(_position="-datum.position").encode(
-            y=gs.value(0), x=gs.X("_position:Q").scale(None).axis(None), text="label:N"
-        )
-    outside_labels = (
-        gs.layer(text)
-        .resolve_scale(x="excluded", y="excluded")
-        .resolve_axis(x="excluded", y="excluded")
-    )
-    layers = [strip, outside_labels] if labels else [strip]
-    if zoom:
-        return (
-            gs.layer(*layers)
-            .resolve_scale(x="excluded", y="excluded", color="excluded")
-            .resolve_axis(x="excluded", y="excluded")
-        )
-    if horizontal:
-        return (
-            gs.layer(*layers)
-            .resolve_scale(y="excluded", color="excluded")
-            .resolve_axis(y="excluded")
-        )
-    return (
-        gs.layer(*layers)
-        .resolve_scale(x="excluded", color="excluded")
-        .resolve_axis(x="excluded")
-    )
+        tracks.append(chart)
+    return tracks
 
 
 def build_clustermap(
@@ -273,6 +207,14 @@ def build_clustermap(
     )
     if min(width, height) <= 0:
         raise ValueError(f"{CONTEXT}: width and height must be positive.")
+    for axis_name, gaps, extent in (
+        ("row", data.row_gaps, height),
+        ("col", data.col_gaps, width),
+    ):
+        if 4 * len(gaps) >= extent:
+            raise ValueError(
+                f"{CONTEXT}: {axis_name}_gap_threshold leaves no room for tiles; increase the threshold or plot size."
+            )
     # Keep only color-guide options that the native renderer can honor.
     if cbar_pos is not None and (
         not isinstance(cbar_pos, (list, tuple))
@@ -321,6 +263,7 @@ def build_clustermap(
         .legend(guide),
     )
     tiles = tiles.mark_rect(
+        clip=True,
         tooltip={"handler": "default"} if hover else None,
         stroke=native_color(linecolor, "linecolor", context=CONTEXT),
         strokeWidth=number(linewidths, "linewidths", context=CONTEXT) * PT,
@@ -331,100 +274,58 @@ def build_clustermap(
         coordinate(gs.Y, "_y", nrows, 0, reverse=True),
     )
     x, y = zoom_axes(x, y, enabled=zoom, name="clustermap")
+    scales = index_scales(x, y, xgaps=data.col_gaps, ygaps=data.row_gaps)
+    # The surround owns both scales; tiles and side views only declare fields.
+    x, y = gs.X("_x:I").axis(None), gs.Y("_y:I").axis(None)
     tiles = tiles.encode(x=x, y=y)
-    layers: list[gs.Chart | gs.LayerChart] = [
-        with_values(tiles, "_value") if show_values else tiles
-    ]
-    xlabels, bottom = _tick_labels(
-        data.values.columns,
-        xticklabels,
-        x,
-        horizontal=True,
-        size=width,
-        zoom=bool(zoom),
-    )
-    ylabels, right = _tick_labels(
-        data.values.index,
-        yticklabels,
-        y,
-        horizontal=False,
-        size=height,
-        zoom=bool(zoom),
-    )
-    # Track titles can be longer than the matrix's visible tick labels.
-    for names, horizontal in (
-        (data.row_colors.columns, False),
-        (data.col_colors.columns, True),
+    center = with_values(tiles, "_value") if show_values else gs.layer(tiles)
+    center = center.properties(name="clustermap-cells", width=width, height=height)
+    sides: dict[str, Any] = {}
+    for labels, option, axis, horizontal, side in (
+        (data.values.columns, xticklabels, x, True, "bottom"),
+        (data.values.index, yticklabels, y, False, "right"),
     ):
-        space = max((len(str(name)) for name in names), default=0) * TICK * 0.65 + 12
-        if horizontal:
-            right = max(right, space)
-        else:
-            bottom = max(bottom, space)
-    layers.extend(layer for layer in (xlabels, ylabels) if layer is not None)
-    # Strips stay between the matrix and tree leaves, with no spare panel gap.
-    row_track, col_track = (
-        width * colors[0] / fractions[0],
-        height * colors[1] / fractions[1],
-    )
-    row_space, col_space = (
-        row_track * data.row_colors.shape[1],
-        col_track * data.col_colors.shape[1],
-    )
-    for tracks, axis, horizontal, size, extent in (
-        (data.row_colors, y, False, row_track, width),
-        (data.col_colors, x, True, col_track, height),
+        ticks = _tick_labels(labels, option, axis, horizontal=horizontal)
+        if ticks is not None:
+            sides[side] = [ticks]
+    # Trees and strips each own a viewport and share the center's gapped slots.
+    for index, (tree, tracks, slot_axis, horizontal, extent) in enumerate(
+        (
+            (data.row_tree, data.row_colors, y, False, width),
+            (data.col_tree, data.col_colors, x, True, height),
+        )
     ):
-        if tracks.shape[1]:
-            layers.append(
-                _color_strip(
-                    tracks,
-                    axis,
+        side = "top" if horizontal else "left"
+        fraction = fractions[index]
+        views: list[gs.Chart] = []
+        if tree is not None:
+            views.append(
+                tree_track(
+                    tree,
+                    list(range(len(tracks))),
                     horizontal=horizontal,
-                    size=size,
-                    extent=extent,
-                    zoom=bool(zoom),
-                    hover=hover,
-                    categories=data.obs_labels if not horizontal else None,
-                    palette=data.obs_palette if not horizontal else (),
-                )
+                    size=extent * trees[index] / fraction,
+                    reverse=not horizontal,
+                    linewidth=0.5,
+                ).properties(name=f"clustermap-{side}-tree")
             )
-    left, top = width * trees[0] / fractions[0], height * trees[1] / fractions[1]
-    if data.row_tree is not None:
-        layers.append(
-            tree_overlay(
-                data.row_tree,
-                orientation="left",
-                reverse=True,
-                size=left,
-                offset=row_space,
-                linewidth=0.5,
-                leaf_projection=slot_position("y", "datum.{field}") if zoom else None,
+        views.extend(
+            _color_tracks(
+                tracks,
+                slot_axis,
+                horizontal=horizontal,
+                size=extent * colors[index] / fraction,
+                hover=hover,
+                categories=data.obs_labels if not horizontal else None,
+                palette=data.obs_palette if not horizontal else (),
             )
         )
-    if data.col_tree is not None:
-        layers.append(
-            tree_overlay(
-                data.col_tree,
-                orientation="top",
-                size=top,
-                offset=col_space,
-                linewidth=0.5,
-                leaf_projection=slot_position("x", "datum.{field}") if zoom else None,
-            )
-        )
-    chart = (
-        gs.layer(*layers)
-        .properties(
-            width=width,
-            height=height,
-            padding={
-                "left": left + row_space + 10,
-                "top": top + col_space + 10,
-                "bottom": bottom,
-                "right": right,
-            },
-        )
+        if views:
+            sides[side] = gs.SurroundSideSpec(views=views, spacing=0)
+    return (
+        gs.surround(center, surround=gs.SurroundSides(**sides), spacing=0)
+        .properties(scales=scales)
+        .resolve_legend(color="collected")
         .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(
             labelFont=FONT,
@@ -433,4 +334,3 @@ def build_clustermap(
             layout={"anchor": "start", "direction": "vertical", "wrap": False},
         )
     )
-    return with_navigation(chart, enabled=bool(zoom))

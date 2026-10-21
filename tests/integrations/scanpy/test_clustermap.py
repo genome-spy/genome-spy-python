@@ -36,7 +36,102 @@ def test_clustermap_signature_preserves_scanpy_contract():
         "show_values",
         "width",
         "height",
+        "row_gap_threshold",
+        "col_gap_threshold",
     }
+    for name in ("row_gap_threshold", "col_gap_threshold"):
+        assert actual[name].kind is inspect.Parameter.KEYWORD_ONLY
+        assert actual[name].default is None
+
+
+def test_tree_cuts_only_insert_gaps_and_reuse_supplied_linkage(monkeypatch):
+    adata = make_cluster_adata()
+    original = prepare_clustermap(adata, "group", False)
+    row = hierarchy.linkage(adata.X, method="average")
+    col = hierarchy.linkage(adata.X.T, method="average")
+    monkeypatch.setattr(
+        hierarchy, "linkage", lambda *a, **k: pytest.fail("Recomputed supplied tree")
+    )
+    data = prepare_clustermap(
+        adata,
+        "group",
+        False,
+        row_linkage=row,
+        col_linkage=col,
+        row_gap_threshold=3,
+        col_gap_threshold=10,
+    )
+    assert data.row_gaps == (2, 4)
+    assert data.col_gaps == (1,)
+    assert original.row_gaps == original.col_gaps == ()
+    assert data.row_order == original.row_order and data.col_order == original.col_order
+    pd.testing.assert_frame_equal(data.values, original.values)
+    pd.testing.assert_frame_equal(data.row_colors, original.row_colors)
+    np.testing.assert_array_equal(data.mask, original.mask)
+    for threshold, expected in ((0, (1, 2, 3, 4, 5)), (row[-1, 2], ())):
+        cut = prepare_clustermap(
+            adata,
+            None,
+            False,
+            row_linkage=row,
+            col_linkage=col,
+            row_gap_threshold=threshold,
+        )
+        assert cut.row_gaps == expected
+
+
+def test_zero_cut_keeps_zero_distance_leaves_together():
+    adata = make_cluster_adata()[:4].copy()
+    adata.X[1] = adata.X[0]
+    adata.X[3] = adata.X[2]
+    data = prepare_clustermap(
+        adata, None, False, row_gap_threshold=0, col_cluster=False
+    )
+    assert data.row_gaps == (2,)
+    assert data.col_gaps == ()
+
+
+@pytest.mark.parametrize("axis", ["row", "col"])
+@pytest.mark.parametrize("threshold", [-1, np.nan, np.inf, True, "auto"])
+def test_bad_cuts_fail_before_expression_access(monkeypatch, axis, threshold):
+    from anndata import AnnData
+
+    adata = make_cluster_adata()
+    monkeypatch.setattr(
+        AnnData, "X", property(lambda _: pytest.fail("Read expression"))
+    )
+    with pytest.raises(ValueError, match=f"{axis}_gap_threshold"):
+        prepare_clustermap(adata, None, False, **{f"{axis}_gap_threshold": threshold})
+
+
+@pytest.mark.parametrize("axis", ["row", "col"])
+def test_cuts_require_the_matching_tree(axis):
+    with pytest.raises(ValueError, match=f"{axis}_gap_threshold requires clustering"):
+        gsc.pl.clustermap(
+            make_cluster_adata(),
+            show=False,
+            **{f"{axis}_cluster": False, f"{axis}_gap_threshold": 1},
+        )
+
+
+def test_native_tracks_and_gap_scales_have_one_owner():
+    spec = gsc.pl.clustermap(
+        make_cluster_adata(),
+        obs_keys="group",
+        row_gap_threshold=3,
+        col_gap_threshold=10,
+        show=False,
+    ).to_dict()
+    assert spec["scales"]["x"]["gapPositions"] == [1]
+    assert spec["scales"]["y"]["gapPositions"] == [2, 4]
+    assert spec["spacing"] == 0
+    assert set(spec["surround"]) == {"top", "bottom", "left", "right"}
+    for mark in leaf_marks(spec):
+        assert mark["mark"].get("clip") != "never"
+        for axis in ("x", "y"):
+            assert "scale" not in mark.get("encoding", {}).get(axis, {}) or (
+                mark["encoding"][axis]["type"] != "index"
+            )
 
 
 @pytest.mark.parametrize("case", clustermap_cases())
@@ -304,6 +399,7 @@ def test_limits_reject_before_expression_access(monkeypatch, shape, match):
         ({"cbar_kws": {"ticks": [0, 1]}}, TypeError, "cbar_kws"),
         ({"cbar_pos": (0, 0, 1, 1)}, NotImplementedError, "cbar_pos"),
         ({"dendrogram_ratio": 1}, ValueError, "ratio"),
+        ({"row_gap_threshold": 0, "height": 20}, ValueError, "no room for tiles"),
     ],
 )
 def test_unsupported_options_fail_clearly(options, error, match):

@@ -182,9 +182,8 @@ def test_category_strip_uses_native_tooltip_and_respects_hover(family, field, ho
         for mark in leaf_marks(spec)
         if mark.get("encoding", {}).get("color", {}).get("field") == field
     )
-    assert strip["mark"]["clip"] == (True if family == "heatmap" else "never")
-    if family == "heatmap":
-        assert "xOffset" not in strip["mark"] and "x2Offset" not in strip["mark"]
+    assert strip["mark"]["clip"] is True
+    assert "xOffset" not in strip["mark"] and "x2Offset" not in strip["mark"]
     if hover:
         assert strip["mark"]["tooltip"] == {"handler": "default"}
         assert strip["encoding"]["tooltip"] == [
