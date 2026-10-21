@@ -188,7 +188,6 @@ def test_public_defaults_match_the_pinned_effective_signature() -> None:
         ({"arrows": True}, NotImplementedError),
         ({"save": "plot.png"}, NotImplementedError),
         ({"norm": object()}, NotImplementedError),
-        ({"vcenter": 0}, NotImplementedError),
         ({"legend_fontoutline": 2}, NotImplementedError),
         ({"legend_loc": "on data"}, NotImplementedError),
         ({"add_outline": "yes"}, TypeError),

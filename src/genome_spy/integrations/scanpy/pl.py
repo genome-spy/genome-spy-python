@@ -185,7 +185,7 @@ def _embedding(
     colorbar_loc: str | None = "right",
     vmax: _Bound = None,
     vmin: _Bound = None,
-    vcenter: Any = None,
+    vcenter: _Bound = None,
     norm: Any = None,
     add_outline: bool | None = False,
     outline_width: tuple[float, float] = (0.3, 0.05),
@@ -223,7 +223,6 @@ def _embedding(
         and legend_fontweight not in (400, "normal", "regular"),
         "legend_loc": legend_loc not in (None, "none", "right margin", "on data"),
         "colorbar_loc": colorbar_loc not in (None, "right", "left", "top", "bottom"),
-        "vcenter": vcenter is not None,
         "norm": norm is not None,
     }
 
@@ -312,6 +311,7 @@ def _embedding(
         sort_order=sort_order,
         vmin=vmin,
         vmax=vmax,
+        vcenter=vcenter,
         title=title,
         obs_id=obs_id,
         colorbar_loc=colorbar_loc,
@@ -530,8 +530,10 @@ def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
             colorbar_loc accepts right, left, top, bottom, or None to hide it.
             add_outline draws two background outlines with outline_width and
             outline_color; the foreground then defaults to alpha=0.7.
-            vmin/vmax also accept callables returning a finite number from each
+            vmin/vmax/vcenter also accept callables returning a finite number from each
             panel's masked colors in painting order, including missing values.
+            vcenter maps to the native color scheme's midpoint; automatic limits
+            expand when needed to enclose it, while explicit limits must enclose it.
 
     Returns:
         A native chart when show=False, otherwise None after display.

@@ -152,11 +152,11 @@ def _bound(
     index: int,
     count: int,
     values: np.ndarray,
-    default: float,
+    default: float | None,
     *,
     name: str,
     sort_order: bool,
-) -> float:
+) -> float | None:
     """Return one panel's bound from a number, percentile, callable or list.
 
     Callables receive copied colors in painting order; unset bounds use default.
@@ -360,6 +360,7 @@ def continuous_colors(
     count: int,
     colorbar: bool,
     sort_order: bool = True,
+    vcenter: Any = None,
 ) -> ColorData:
     """Return copied numeric colors, bounds and scheme for one panel.
 
@@ -367,7 +368,12 @@ def continuous_colors(
     """
     # Use a copy so masking colors never changes the source expression values.
     if isinstance(values, pd.Series):
-        values = values.to_numpy(na_value=np.nan)
+        # Nullable columns need an NA replacement; ordinary integer arrays do not.
+        values = (
+            values.to_numpy(na_value=np.nan)
+            if isinstance(values.dtype, pd.api.extensions.ExtensionDtype)
+            else values.to_numpy()
+        )
     values = np.asarray(values).copy()
     if values.dtype.kind not in "fiu" or (
         mask is not None and values.dtype.kind != "f"
@@ -385,7 +391,7 @@ def continuous_colors(
         index,
         count,
         values,
-        float(np.nanmin(values)),
+        None,
         name="vmin",
         sort_order=sort_order,
     )
@@ -394,15 +400,31 @@ def continuous_colors(
         index,
         count,
         values,
-        float(np.nanmax(values)),
+        None,
         name="vmax",
         sort_order=sort_order,
     )
+    center = _bound(
+        vcenter, index, count, values, None, name="vcenter", sort_order=sort_order
+    )
+    if center is not None:
+        # Explicit bounds must enclose the center; automatic bounds may expand.
+        if low is not None and low >= center:
+            raise ValueError("Scanpy embedding: vmin must be less than vcenter.")
+        if high is not None and high <= center:
+            raise ValueError("Scanpy embedding: vmax must be greater than vcenter.")
+        low = float(np.nanmin(values)) if low is None else low
+        high = float(np.nanmax(values)) if high is None else high
+        if low >= center:
+            low = center - (high - center)
+        if high <= center:
+            high = center + (center - low)
     low, high, _ = color_bounds(
         values, low, high, context="Scanpy embedding", expand_constant=colorbar
     )
     scheme = native_scheme("viridis" if cmap is None else cmap, "cmap")
-    return ColorData(values, (low, high), (), scheme, (), False)
+    domain = (low, high) if center is None else (low, center, high)
+    return ColorData(values, domain, (), scheme, (), False)
 
 
 @dataclass(frozen=True, slots=True)

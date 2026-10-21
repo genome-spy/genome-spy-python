@@ -52,6 +52,17 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         )
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
+        centered = namespace["centered_chart"]
+        assert centered in charts
+        score = pbmc.obs["B_cell_score"]
+        for panel, domain in zip(
+            units(centered.to_dict()),
+            [[score.min(), score.max()], [score.min(), 0, score.max()]],
+            strict=True,
+        ):
+            np.testing.assert_allclose(
+                points(panel)["encoding"]["color"]["scale"]["domain"], domain
+            )
         bounds_chart = namespace["bounds_chart"]
         assert bounds_chart in charts
         for panel, gene in zip(

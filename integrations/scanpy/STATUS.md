@@ -60,20 +60,21 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot,
 matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
-The current canonical workflows contain eighteen UMAP/embedding/scatter/PCA
+The current canonical workflows contain nineteen UMAP/embedding/scatter/PCA
 code cells and fourteen expression/ranked code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M07.d, centered numeric colors (`vcenter`).**
-Check native `domainMid` against Scanpy's centered normalization, then reuse the
-bound resolver for supported scalar, percentile, callable and per-panel centers.
-Verify domains, clamping, missing values and native guides before enabling this
-option. Matplotlib normalization objects, remaining markers/graphs and broader
-compatibility retain M07.d/M14 owners. The
-[callable-bound increment](#m07d-callable-color-bounds) is closed; C11 still blocks
-full default categorical-guide fitting.
+**Next work: M07.d, stored neighbor-graph edges.**
+Add `edges=True` to the shared embedding path using the stored neighbor graph,
+Scanpy's edge options and native segments beneath the existing points. Reuse
+coordinates, source access and chart composition; never compute neighbors or
+rerun a layout. Verify graph-key lookup, sparse edge selection, ordering,
+styles, navigation and a realistic resource workload before closure. Arrow
+overlays, other markers, scale-factor circles and broader compatibility retain
+M07.d/M14 owners. The [centered-color increment](#m07d-centered-embedding-colors)
+is closed; C11 still blocks full default categorical-guide fitting.
 
 M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
 Heatmap and dotplot have four-pixel group gaps; matrixplot, generic matrix,
@@ -111,7 +112,8 @@ C12 remains a separate upstream straight-link issue.
 | M07.c variance increment | Closed (bounded preview) | [Contract, tests and resources](#m07c-stored-pca-variance-ratios) | Broader storage/typography/export remain M14; this does not close the overview or M07. |
 | M07.c overview increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-pca-overview) | Parent storage, typography and export limits remain M14; broader embedding options remain M07.d and C11 retains their categorical-guide gate. |
 | M07.d point outlines increment | Closed (bounded increment) | [Contract, semantic/chart/workflow and resource checks](#m07d-embedding-point-outlines) | Broader markers, label outlines, normalization and C11 guide fitting remain M07.d/M14. |
-| M07.d callable bounds increment | Closed (bounded increment) | [Shared resolver, upstream comparisons, workflow and resource checks](#m07d-callable-color-bounds) | Centers/normalization and other family options retain M07.d/M14 owners; scatter keeps its distinct signature. |
+| M07.d callable bounds increment | Closed (bounded increment) | [Shared resolver, upstream comparisons, workflow and resource checks](#m07d-callable-color-bounds) | Center support is delivered below; normalization objects remain outside the native boundary. |
+| M07.d centered colors increment | Closed (bounded increment) | [Native domain, upstream paint/guide comparisons, workflow and resources](#m07d-centered-embedding-colors) | Other family options retain M07.d/M14 owners; scatter keeps its distinct signature. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -167,7 +169,7 @@ Dotplot-frame follow-up: **155 dotplot/matrixplot/ranked Python checks** and
 **six grouped browser layout checks** pass. The frame is a native property of
 the dotplot center, so the existing shared layout and side tracks are unchanged.
 The expression notebook reran successfully; its saved outputs remain local.
-The next work queue remains M07.d centered colors.
+The centered-color follow-up is recorded below; the current queue owns next work.
 
 Verified (interaction preview): [_grid_interactions.py](../../src/genome_spy/integrations/scanpy/_grid_interactions.py)
 shares live index positions, annotation visibility, fitted value text/native
@@ -1223,9 +1225,60 @@ transport therefore use the unchanged numeric chart path; reuse the
 this increment's browser checks. Callback cost depends on the supplied function;
 there is no performance claim for arbitrary user code. Reports/media stay local.
 
-Next: centered numeric colors in M07.d. C11/C13 and broader storage/export options
+Centered numeric colors are delivered below. C11/C13 and broader storage/export options
 retain their existing owners. The full repository suite and docs build were not
 rerun. Clearance: retain; no plan is eligible for removal.
+
+## M07.d centered embedding colors
+
+Closed for shared 2D embeddings and PCA overview's embedding panel. `vcenter`
+uses the existing [color-bound resolver](../../src/genome_spy/integrations/scanpy/_style.py)
+for numbers, percentiles, callables and singleton/per-panel lists; None keeps
+the original linear scale. The prepared domain becomes `[low, center, high]`,
+which GenomeSpy renders as a native diverging scale, equivalent to `domainMid`.
+Source measurements, coordinates, IDs, masks, sizes and drawing order stay intact.
+No normalized data columns, renderer layers, runtime modules or dependencies
+were added. Categorical panels skip centers and scatter keeps its own signature.
+
+Automatic bounds expand to enclose a center outside the observed range;
+explicit bounds must strictly enclose it. The shared constant-range expansion
+still supplies the visible colorbar. When every value equals the center and
+the colorbar is hidden, Scanpy 1.11.5 uses the last scheme color; the existing
+constant-color encoding now handles this case too. Integer observation colors
+also retain their NumPy dtype instead of attempting to insert NaN into an
+ordinary integer array; nullable pandas columns keep their NA conversion path.
+Matplotlib normalization objects remain explicitly unsupported.
+
+Verification: **438 targeted Python checks**, **33 browser checks**, Ruff and mypy
+pass. [Semantic checks](../../tests/integrations/scanpy/test_color_bounds.py)
+compare public Scanpy callback inputs/dtypes and limits for masks, raw/layers,
+per-panel settings, centers outside the data, explicit limits and constant
+values. Complete chart equality verifies the shared embedding aliases.
+[Registered browser comparisons](../../tests/integrations/scanpy/browser/test_color_bounds.py)
+cover asymmetric/clipped colors, percentile centers, expanded limits and
+constant colors with/without a guide, at 150 export DPI and browser DPR 1.5.
+They reuse the existing complete-chart/overlay helper and check that zero's
+guide tick and midpoint color align even with unequal bounds. Existing embedding
+hover, zoom, linked brush/count/Python membership, four-side guides and offline
+HTML checks pass with centered colors. The canonical PBMC workflow test and all
+nineteen nonempty UMAP notebook cells complete successfully. Media and notebook
+execution state remain local.
+
+Resource recipe: seed 17, 100,000 observations × 20,000-gene empty CSR, stored
+float32 normal 2D coordinates, four-category labels and normal observation scores;
+two 320 × 300 panels, size 4, alpha 0.7 and zoom. In one warmed run on Python
+3.11.15/macOS arm64 with bundled Core 1.2.0, linear/centered preparation took
+49.9/52.2 ms, validated JSON serialization 17.33/16.90 s, peak traced Python
+allocation 395.5/392.8 MB and browser first paint 14.78/14.49 s. Reported JS heaps
+were 212/199 MB. Payloads were 39,717,366/39,717,385 bytes; the only data-path
+addition is the middle scale stop. Expression was unread and no full matrix was
+densified. These local observations bound this workload, without a speedup claim.
+The renderer, notebook delivery and transport retain their existing limits.
+
+Next: stored neighbor-graph edges in M07.d. C11/C13, broader storage/export and
+other families' center/normalization options retain their existing owners.
+The full repository suite and docs build were not rerun. Clearance: retain;
+no plan is eligible for removal.
 
 ## M07.d native colorbar placement
 
@@ -2003,7 +2056,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Point outlines | Shared two-marker path, relative widths/CSS colors, scalar styles, hover/zoom/brush | [M07.d outline increment](#m07d-embedding-point-outlines) closed |
 | Graph edges/arrows, scale_factor, broader markers/categorical guide locations | Nondefault forms reject | M07.d |
 | Callable color bounds | Shared resolver with masked/sorted copies, per-panel lists and finite results | [M07.d callable increment](#m07d-callable-color-bounds) closed |
-| norm/vcenter | Nondefault forms reject; Matplotlib objects remain outside boundary | M07.d/M14.c |
+| Centered numeric colors | Shared scalar/percentile/callable resolver, per-panel centers and native piecewise color scales | [M07.d center increment](#m07d-centered-embedding-colors) closed |
+| norm | Matplotlib normalization objects remain outside the native boundary | Maintained contract |
 | Backed/lazy expression; named scheme with NA legend; category/NA label collision | Explicit current restrictions | M14.c |
 | 3D, font atlas/weight/outline and complete typography | Native gaps/limits | M14.a; C03/C05 |
 | Image save/autosave | Inactive form only; use native HTML/JSON save | M14.c |

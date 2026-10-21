@@ -570,7 +570,17 @@ commit evidence and unmet verification gates live in the
   interactions, run the packaged UMAP workflow and measure callback preparation
   overhead without full expression-matrix reads. The
   [delivery record](STATUS.md#m07d-callable-color-bounds) retains evidence;
-  `vcenter` and Matplotlib normalization objects are separate remaining options.
+  Centered-color acceptance: reuse this resolver for `vcenter=None`, numbers,
+  percentiles, callables and singleton/per-panel lists. Match Scanpy's two linear
+  slopes around the center through a native three-value domain (equivalent to
+  `domainMid`), retaining source values. Automatic limits expand symmetrically
+  when all values lie on one side; explicit limits must strictly enclose the
+  center. Preserve constant colors with/without a guide, masks, callback inputs,
+  clipping and numeric guide positions. Compare public Scanpy limits and painted
+  points, including asymmetric ranges, and verify native hover/zoom/brush/HTML,
+  packaged notebook execution and a realistic resource workload. The
+  [centered-color record](STATUS.md#m07d-centered-embedding-colors) retains evidence.
+  Matplotlib normalization objects remain outside the supported boundary.
 
 Targets: `gsc.pl.embedding(adata, basis="tsne", color="cell_type", show=False)`
 and `gsc.pl.pca_overview(adata, show=False)` after explicit Scanpy PCA.

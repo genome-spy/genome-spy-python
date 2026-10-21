@@ -112,6 +112,7 @@ def test_shared_hover_zoom_and_offline_delivery(page, tmp_path, basis, location)
         a,
         basis,
         color="score",
+        vcenter="p50",
         colorbar_loc=location,
         obs_id="cell_id",
         size=100,
@@ -156,6 +157,7 @@ def test_pca_brush_count_and_python_membership_agree(page):
     chart = gsc.pl.pca(
         a,
         color=["cell_type", "score"],
+        vcenter=[None, 0],
         colorbar_loc="bottom",
         selection=brush,
         show=False,

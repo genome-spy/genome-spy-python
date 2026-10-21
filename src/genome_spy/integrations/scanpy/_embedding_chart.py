@@ -115,9 +115,11 @@ def _color(panel: Panel, index: int, style: EmbeddingStyle) -> gs.Color:
         color = color.scale(range=list(panel.palette))
     if not panel.categorical:
         color = color.scale(zero=False, clamp=True)
-        # Without a colorbar, Scanpy maps a constant range to its first color.
-        if panel.domain[0] == panel.domain[1] and panel.scheme is not None:
-            return gs.Color({"datum": 0, "type": "quantitative"}).scale(
+        # Without a guide, a constant range uses the last color only when centered.
+        if panel.domain[0] == panel.domain[-1] and panel.scheme is not None:
+            return gs.Color(
+                {"datum": 1 if len(panel.domain) == 3 else 0, "type": "quantitative"}
+            ).scale(
                 type="linear",
                 domain=[0, 1],
                 scheme=panel.scheme,

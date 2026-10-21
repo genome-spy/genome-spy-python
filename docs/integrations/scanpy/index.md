@@ -311,7 +311,8 @@ raise an error instead of being ignored.
 | save | None/False are supported when no automatic image save is requested. Image formats and automatic save currently error; native chart.save supports HTML/JSON. |
 | ax, return_fig | Omitted. Passing either, even ax=None, raises a targeted error. Use show=False and native chart composition/configuration. |
 | projection, edges/arrows, scale_factor | Only the ordinary 2D/no-graph defaults are supported yet. |
-| norm, vcenter | Not implemented yet. Their nondefault forms raise errors. |
+| vcenter | None keeps a linear color scale. A number, percentile string or callable places that value at the native scheme midpoint; singleton/per-panel lists are supported. Automatic bounds expand if needed to enclose the center. Explicit bounds must strictly enclose it. |
+| norm | Matplotlib normalization objects remain unsupported and raise an error. |
 | add_outline, outline_width, outline_color | Optional two opaque outline layers behind the foreground, matching Scanpy’s relative widths and draw order. Widths are nonnegative pairs; colors are pairs of opaque CSS names/hex. Foreground opacity defaults to 0.7 only when outlines are enabled; explicit alpha (including None) retains its usual meaning. Foreground edges are disabled, while outline edges use the supplied scalar edge/linewidth options. |
 | legend_fontoutline | Not implemented yet; unsupported values fail by name. |
 | colorbar_loc | `"right"` (default), `"left"`, `"top"`, `"bottom"`, or None to hide continuous colorbars. Categorical legends retain `legend_loc`. |
@@ -335,7 +336,7 @@ have no visual effect while `add_outline` is False or None. All shared embedding
 functions, including PCA overview's embedding panel, inherit this path; `scatter`
 keeps its own Scanpy signature and does not add outline arguments.
 
-Callable `vmin`/`vmax` run once per numeric panel when creating the chart. Use
+Callable `vmin`/`vmax`/`vcenter` run once per numeric panel when creating the chart. Use
 missing-aware functions such as `np.nanmin` or
 `lambda values: np.nanpercentile(values, 99)`. Callbacks receive copied values
 after masking and sorting; `sort_order=False` keeps source order. They can also
@@ -343,6 +344,14 @@ appear in singleton or per-panel lists mixed with numeric/percentile bounds and
 None. Categorical panels skip bounds. Invalid results raise a named error;
 exceptions from the callback propagate. Hover, zoom and HTML delivery use the
 resolved numeric limits without calling Python again.
+
+For example, `vcenter=0, cmap="redblue"` assigns half the color scheme to each
+side of zero, preserving unequal observed limits. The existing measurements
+stay in the chart; a native three-value domain, equivalent to `domainMid`,
+controls interpolation and guide positions. This applies to all shared embedding
+functions and PCA overview's embedding panel; scatter keeps its own signature.
+For constant values equal to the center, a visible colorbar expands and uses
+the midpoint color; without a colorbar Scanpy 1.11.5 uses the last scheme color.
 
 Continuous colorbars span the plot height on the left/right and the plot width
 on the top/bottom, including non-square panels. These are native guide defaults,
