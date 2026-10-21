@@ -315,8 +315,8 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         3 * 699,
         3 * 9,
     ]
-    assert len(clustered["scales"]["y"]["gapPositions"]) == 6
-    assert len(clustered["scales"]["x"]["gapPositions"]) == 1
+    assert clustered["scales"]["y"]["gapPositions"] == []
+    assert clustered["scales"]["x"]["gapPositions"] == []
 
     scores = charts[5].to_dict()
     assert len(units(scores)) == 2

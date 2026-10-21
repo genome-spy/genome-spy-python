@@ -1329,8 +1329,6 @@ def clustermap(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
-    row_gap_threshold: float | None = None,
-    col_gap_threshold: float | None = None,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -1354,9 +1352,6 @@ def clustermap(
         hover: Show native tile and observation-strip tooltips.
         zoom: Enable y-only zoom and pan with True, or both axes with "xy".
         show_values: Show plotted values when enough space is available in each tile.
-        row_gap_threshold: Optional row-tree distance cut for gaps between clusters.
-        col_gap_threshold: Optional column-tree distance cut for gaps between clusters.
-            Both cuts preserve leaf order; None leaves the axis contiguous.
         width: Matrix width in logical pixels, excluding trees and labels.
         height: Matrix height in logical pixels, excluding trees and labels.
         **kwds: Supported Seaborn options: method, metric, z_score,
@@ -1424,8 +1419,6 @@ def clustermap(
         adata,
         obs_keys,
         use_raw,
-        row_gap_threshold=row_gap_threshold,
-        col_gap_threshold=col_gap_threshold,
         **{key: value for key, value in kwds.items() if key in data_options},
     )
     chart = build_clustermap(

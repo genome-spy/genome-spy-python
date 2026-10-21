@@ -70,8 +70,8 @@ all slice gates or full-family compatibility are closed.
 M14.b.1 and M14.b.2 are closed for native WebGL/notebook/HTML layout;
 [the grouped-layout record](#m14b2-native-grouped-layout) retains the new evidence.
 Heatmap and dotplot have four-pixel group gaps; matrixplot tiles remain contiguous.
-Clustermap now uses native surround tracks and opt-in row/column tree-cut gaps;
-see the [clustermap delivery record](#m14b3-clustermap-native-tracks-and-tree-cut-gaps).
+Clustermap now uses native surround tracks with contiguous rows and columns;
+see the [clustermap delivery record](#m14b3-clustermap-native-tracks).
 Generic matrix and correlation charts retain their earlier layouts until their
 own [migration increment](PLAN.md#m14b-native-grid-layout-and-group-gaps) is verified.
 Core's separately reproduced SVG straight-link issue remains C12/M14 vector-export
@@ -89,7 +89,7 @@ does not close M07.a/b's newly observed categorical-guide rendering gap.
 Core 1.2.0, its generated composition APIs and the published heatmap example are
 now adopted; see the [upgrade record](#core-12-runtime-adoption). M14.b.1/b.2 are
 closed for their native layout scope. M14.b.3's clustermap increment now shares
-those track helpers and uses the user-authorized explicit tree cuts. Matrix and
+those track helpers; the tree-cut gap trial was withdrawn after visual review. Matrix and
 correlation migrations remain next; C12 remains a separate vector-export gate.
 
 | Slice | Lifecycle state | Commit/evidence | Remaining work before Verified/Closed |
@@ -104,8 +104,8 @@ correlation migrations remain next; C12 remains a separate vector-export gate.
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
 | M14.b.2 grouped summary layout | Closed (native WebGL/HTML layout) | [Delivery, browser/workflow and resource evidence](#m14b2-native-grouped-layout) | Vector tree-link export remains C12/M14; broader family options remain in their existing slices. |
-| M14.b.3 numeric/clustered layout | In progress; clustermap increment verified | [Clustermap delivery](#m14b3-clustermap-native-tracks-and-tree-cut-gaps) | Generic matrix/correlation native tracks and their own verification remain. C12 retains vector tree-link export. |
-| M05.f category-strip hover | Closed (native WebGL/notebook/HTML track scope) | C10; [heatmap](#m14b1-native-heatmap-tracks-and-gaps) and [clustermap evidence](#m14b3-clustermap-native-tracks-and-tree-cut-gaps) | C12 retains vector tree-link export independently. |
+| M14.b.3 numeric/clustered layout | In progress; clustermap increment verified | [Clustermap delivery](#m14b3-clustermap-native-tracks) | Generic matrix/correlation native tracks and their own verification remain. C12 retains vector tree-link export. |
+| M05.f category-strip hover | Closed (native WebGL/notebook/HTML track scope) | C10; [heatmap](#m14b1-native-heatmap-tracks-and-gaps) and [clustermap evidence](#m14b3-clustermap-native-tracks) | C12 retains vector tree-link export independently. |
 
 M07.d/M14 retain the explicitly unsupported options; dotplot brushing remains
 deferred pending review. **Clearance: retain; no working document is eligible for removal.**
@@ -360,65 +360,54 @@ The four grouped resource workloads above already had no matrixplot marker cuts
 (one ranked marker list or a plain feature list); their data/layout paths are
 unchanged, so those observations are reused rather than remeasured.
 
-Clustermap gaps are requested for M14.b.3. Its current tree order can interleave
-annotation categories, so a dendrogram cut and category-change gaps are different
-contracts. The user subsequently authorized choosing explicit distance cuts for the trial;
-see the clustermap increment below. Defaults remain gapless and leaf order is unchanged.
+The later clustermap distance-cut trial was withdrawn after visual review;
+see the native-track record below. Rows and columns now stay contiguous.
 
-## M14.b.3 clustermap native tracks and tree-cut gaps
+## M14.b.3 clustermap native tracks
 
-Clustermap reuses the native label, tree, index-scale and fitted-value helpers.
-Trees, color tracks and labels own surround viewports; all old clustermap
-outside-coordinate/projection overlays are removed. Explicit zero side-track
-spacing keeps tree leaves, strips and matrix adjacent. Native titles fit their
-track thickness; category legends stay native and retain saved palettes/order.
+Native layout was delivered in `624e16b`: clustermap reuses the shared label,
+tree, index-scale and fitted-value helpers. Trees, color tracks and labels own
+surround viewports; old clustermap outside-coordinate/projection overlays are
+removed. Explicit zero side-track spacing keeps tree leaves, strips and matrix
+adjacent. Native titles fit their track thickness; category legends retain saved
+palettes/order.
 
-The user authorized a row/column tree-cut trial on 2026-10-21. Keyword-only
-`row_gap_threshold` and `col_gap_threshold` use SciPy's public distance cut and
-preserve leaf order; defaults are None. No category-based regrouping or extra
-linkage computation is introduced. The 700 × 10 packaged-PBMC notebook explicitly
-supplies both SciPy trees and cuts at 70% of their maximum merge distances:
-seven row clusters and two column clusters, separated by four-pixel native gaps.
-The trial is reversible by removing those two threshold arguments. Matrixplot
-and ranked matrixplot stay gapless.
+The row/column distance-cut trial was withdrawn after user review on 2026-10-21.
+Its two threshold parameters, `fcluster` computation and notebook tree-cut setup
+are removed. Clustermap returns to contiguous rows/columns while retaining the
+native layout, hover, zoom and values. Matrixplot remains contiguous too;
+heatmap cell-group gaps and dotplot marker gaps are unchanged. The original
+cut-specific test counts and resource observation in `624e16b` describe that
+withdrawn configuration, not the current plot.
 
-Verification: **292 targeted Python checks**, the independent canonical
-expression workflow, and **88 browser checks** pass. The browser suite retains
-one strict expected C12 SVG-link failure. Checks cover seven frozen complete
-charts, CSS/category palettes and legends, supplied trees, masks, cut boundaries
-and zero-distance ties, y-only/xy navigation, resize, both DPRs, aligned leaves,
-labels and strips, blank-gap picking, tile/strip hover, fitted values and offline
-HTML. Automatic tick spacing uses the band width remaining after gaps even before
-zoom. The live notebook completed all 13 code cells and 11 widgets without errors.
-Ruff formatting/lint and mypy pass. The full repository suite and documentation
-build were not rerun. Runtime sources are `_clustermap_data.py` and
-`_clustermap_chart.py`; maintained cases are in `test_clustermap.py`,
-`browser/test_clustermap.py` and the shared interaction/workflow tests.
+Current verification: **76 targeted Python checks**, **14 complete-chart/browser
+checks**, and the canonical expression workflow pass. The live notebook completed
+13 code cells and 11 widgets without errors. Ruff formatting/lint and mypy pass.
+These checks retain frozen values/order, native tracks, palettes/legends, hover,
+resize, y-only/xy navigation, fitted values and offline HTML. The broader shared
+renderer suite is unchanged from `624e16b`; the full repository suite and docs
+build were not rerun.
 
-The isolated `benchmark_clustermap` workload uses the packaged raw subset of
-700 cells × 40 genes (28,000 values, 244,650 row distances), supplied SciPy trees,
-90% cuts (ten row clusters, two column clusters), xy zoom and fitted values.
-Source construction is excluded; linkage is included in preparation and
-tracemalloc is active. This separate fixture needs a higher threshold than the
-notebook: its 70% cut creates 145 row clusters and is correctly rejected when
-fixed-width gaps leave no tile space.
+A fresh isolated `benchmark_clustermap` run uses 700 packaged PBMC cells × 40 genes,
+xy zoom and fitted values, with no tree cuts. Linkage and chart preparation take
+0.925 s; validated JSON serialization takes 3.760 s with tracemalloc active.
+Peak traced Python allocations are 54.7 MiB; JSON is 4.34 MiB. First paint including
+dispatch is 4.423 s; hover including pointer pause/probes is 0.979 s; observed JS
+heap is 35.6 MiB. Source construction is excluded. The 2026-10-21 environment is
+macOS 26.6.2 arm64, Python 3.11.15, Scanpy 1.11.5, AnnData 0.12.19, NumPy 2.4.6,
+pandas 2.3.3, SciPy 1.17.1, Chromium 156.0.8078.4 at 1800 × 1400 / DPR 1.
+These are observations, not CI limits; raw measurements and generated media stay
+local. M14.b.3 remains in progress for generic matrix/correlation migration; no
+plan is eligible for clearance.
 
-| Observation (2026-10-21) | Result |
-| --- | --- |
-| Linkage and chart preparation / validated JSON serialization | 0.950 s / 3.579 s |
-| Peak traced Python allocations / JSON payload | 54.2 MiB / 4.34 MiB |
-| First paint including dispatch / hover including pointer pause and probes | 3.910 s / 1.033 s |
-| Observed JS heap | 35.6 MiB |
-
-Environment: macOS 26.6.2 arm64, Python 3.11.15, Scanpy 1.11.5, AnnData 0.12.19,
-NumPy 2.4.6, pandas 2.3.3, SciPy 1.17.1; Chromium 156.0.8078.4 at 1800 × 1400,
-DPR 1. These are observations, not CI performance limits; the harness is tracked,
-while its raw JSON and all generated media stay local.
-
-M14.b.3 stays in progress for generic matrix/correlation migration. The existing
-Core C12 SVG straight-link export issue remains open; this increment claims
-native WebGL/notebook/HTML geometry, not vector parity. No plan is eligible for
-clearance.
+The released native `linkShape="orthogonal"` and its vertical/horizontal
+orientation are available in both the bundled runtime and Python schema.
+Current attached trees still use three straight link segments per merge;
+standalone/legacy trees use rule segments. Native parent-to-child orthogonal
+links are the next renderer simplification; their adoption and all-orientation,
+zoom/gap and SVG verification remain open. Clustering stays in Scanpy/SciPy.
+The existing C12 SVG straight-link export issue remains open until rechecked;
+shape availability alone does not close it.
 
 ## M06/M07 resource verification
 
@@ -508,7 +497,7 @@ The unrelated full repository/integration suites and Sphinx build were not rerun
 
 Current state: closed for native WebGL/notebook/HTML tracks after both
 [M14.b.1 heatmap](#m14b1-native-heatmap-tracks-and-gaps) and
-[M14.b.3 clustermap](#m14b3-clustermap-native-tracks-and-tree-cut-gaps) verification.
+[M14.b.3 clustermap](#m14b3-clustermap-native-tracks) verification.
 C12 retains the independent SVG link-export limitation.
 
 Design correction (October 20, before migration): heatmap used negative pixel

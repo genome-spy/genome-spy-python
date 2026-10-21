@@ -207,14 +207,6 @@ def build_clustermap(
     )
     if min(width, height) <= 0:
         raise ValueError(f"{CONTEXT}: width and height must be positive.")
-    for axis_name, gaps, extent in (
-        ("row", data.row_gaps, height),
-        ("col", data.col_gaps, width),
-    ):
-        if 4 * len(gaps) >= extent:
-            raise ValueError(
-                f"{CONTEXT}: {axis_name}_gap_threshold leaves no room for tiles; increase the threshold or plot size."
-            )
     # Keep only color-guide options that the native renderer can honor.
     if cbar_pos is not None and (
         not isinstance(cbar_pos, (list, tuple))
@@ -274,7 +266,7 @@ def build_clustermap(
         coordinate(gs.Y, "_y", nrows, 0, reverse=True),
     )
     x, y = zoom_axes(x, y, enabled=zoom, name="clustermap")
-    scales = index_scales(x, y, xgaps=data.col_gaps, ygaps=data.row_gaps)
+    scales = index_scales(x, y)
     # The surround owns both scales; tiles and side views only declare fields.
     x, y = gs.X("_x:I").axis(None), gs.Y("_y:I").axis(None)
     tiles = tiles.encode(x=x, y=y)

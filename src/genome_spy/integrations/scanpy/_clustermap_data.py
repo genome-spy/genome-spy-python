@@ -9,7 +9,6 @@ from scipy.cluster import hierarchy
 from scipy import sparse
 
 from genome_spy.integrations.scanpy._data import (
-    number,
     numeric_values,
     require_resident_expression,
     resolve_use_raw,
@@ -36,19 +35,10 @@ class ClusteredMatrix:
     col_colors: pd.DataFrame
     obs_labels: pd.Series | None
     obs_palette: tuple[str, ...]
-    row_gaps: tuple[int, ...]
-    col_gaps: tuple[int, ...]
 
 
-def _tree(
-    values: np.ndarray,
-    linkage: Any,
-    *,
-    method: str,
-    metric: str,
-    gap_threshold: float | None,
-) -> tuple[TreeData, tuple[int, ...]]:
-    """Return ordered branches and optional gap slots from supplied or public SciPy linkage.
+def _tree(values: np.ndarray, linkage: Any, *, method: str, metric: str) -> TreeData:
+    """Return ordered branches from supplied linkage or SciPy's public computation.
 
     Validate supplied leaves instead of recomputing a caller's tree.
     """
@@ -65,16 +55,9 @@ def _tree(
                 f"{CONTEXT}: supplied linkage must match the axis length and be finite."
             )
     info = hierarchy.dendrogram(linkage, no_plot=True, color_threshold=-np.inf)
-    tree = TreeData(
+    return TreeData(
         tuple(info["leaves"]), np.asarray(info["icoord"]), np.asarray(info["dcoord"])
     )
-    # Cut the existing tree without changing its leaf order.
-    gaps: tuple[int, ...] = ()
-    if gap_threshold is not None:
-        groups = hierarchy.fcluster(linkage, gap_threshold, criterion="distance")
-        ordered = groups[list(tree.order)]
-        gaps = tuple((np.flatnonzero(ordered[1:] != ordered[:-1]) + 1).tolist())
-    return tree, gaps
 
 
 def _annotation_colors(colors: Any, index: pd.Index, name: str) -> pd.DataFrame:
@@ -122,8 +105,6 @@ def prepare_clustermap(
     col_cluster: bool = True,
     row_linkage: Any = None,
     col_linkage: Any = None,
-    row_gap_threshold: float | None = None,
-    col_gap_threshold: float | None = None,
     row_colors: Any = None,
     col_colors: Any = None,
     mask: Any = None,
@@ -146,14 +127,6 @@ def prepare_clustermap(
     for name, enabled in (("row_cluster", row_cluster), ("col_cluster", col_cluster)):
         if not isinstance(enabled, bool):
             raise TypeError(f"{CONTEXT}: {name} must be boolean.")
-    for name, threshold, enabled in (
-        ("row_gap_threshold", row_gap_threshold, row_cluster),
-        ("col_gap_threshold", col_gap_threshold, col_cluster),
-    ):
-        if threshold is not None:
-            number(threshold, name, context=CONTEXT)
-            if not enabled:
-                raise ValueError(f"{CONTEXT}: {name} requires clustering on that axis.")
     for name, value in (("z_score", z_score), ("standard_scale", standard_scale)):
         if value is not None and (isinstance(value, bool) or value not in (0, 1)):
             raise ValueError(
@@ -237,27 +210,15 @@ def prepare_clustermap(
     columns = _annotation_colors(col_colors, values.columns, "col_colors")
     # Linkage sees scaled values, including cells hidden by a display mask.
     try:
-        row_tree, row_gaps = (
-            _tree(
-                values.to_numpy(),
-                row_linkage,
-                method=method,
-                metric=metric,
-                gap_threshold=row_gap_threshold,
-            )
+        row_tree = (
+            _tree(values.to_numpy(), row_linkage, method=method, metric=metric)
             if row_cluster
-            else (None, ())
+            else None
         )
-        col_tree, col_gaps = (
-            _tree(
-                values.to_numpy().T,
-                col_linkage,
-                method=method,
-                metric=metric,
-                gap_threshold=col_gap_threshold,
-            )
+        col_tree = (
+            _tree(values.to_numpy().T, col_linkage, method=method, metric=metric)
             if col_cluster
-            else (None, ())
+            else None
         )
     except ValueError as error:
         raise ValueError(
@@ -276,6 +237,4 @@ def prepare_clustermap(
         columns.iloc[list(col_order)],
         obs_labels.iloc[list(row_order)].copy() if obs_labels is not None else None,
         obs_palette,
-        row_gaps,
-        col_gaps,
     )

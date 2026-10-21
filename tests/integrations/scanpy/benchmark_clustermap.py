@@ -18,7 +18,6 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     import scanpy as sc
-    from scipy.cluster.hierarchy import linkage
     from playwright.sync_api import sync_playwright
 
     import genome_spy.integrations.scanpy as gsc
@@ -28,17 +27,10 @@ def main() -> None:
     data = sc.datasets.pbmc68k_reduced().raw[:, :40].to_adata()
     tracemalloc.start()
     start = perf_counter()
-    values = data.X.toarray()
-    row_linkage = linkage(values, method="average")
-    col_linkage = linkage(values.T, method="average")
     chart = gsc.pl.clustermap(
         data,
         obs_keys="bulk_labels",
         use_raw=False,
-        row_linkage=row_linkage,
-        col_linkage=col_linkage,
-        row_gap_threshold=0.9 * row_linkage[:, 2].max(),
-        col_gap_threshold=0.9 * col_linkage[:, 2].max(),
         zoom="xy",
         show_values=True,
         yticklabels=False,
@@ -51,7 +43,6 @@ def main() -> None:
     serialized = perf_counter()
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
-    spec = json.loads(payload)
     report = {
         "measured": date.today().isoformat(),
         "system": platform.platform(),
@@ -68,10 +59,6 @@ def main() -> None:
             "row_distances": data.n_obs * (data.n_obs - 1) // 2,
         },
         "scope": "Dependencies loaded; linkage, chart preparation and validated JSON serialization measured; source construction excluded; tracemalloc active.",
-        "gap_cut": "90% of each tree's maximum merge distance; linkage included in preparation.",
-        "gap_counts": {
-            axis: len(spec["scales"][axis]["gapPositions"]) for axis in ("x", "y")
-        },
         "interactions": {"zoom": "xy", "show_values": True},
         "seconds": {
             "preparation": prepared - start,

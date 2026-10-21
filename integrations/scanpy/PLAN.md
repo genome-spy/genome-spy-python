@@ -738,16 +738,10 @@ Scanpy-specific layout configuration system.
 - A single group has no internal cut. Missing cells and masked tiles retain
   their slots; repeated gene labels retain distinct integer slots. Do not insert
   dummy rows, mask out real cells, or paint white rules over tiles to imitate gaps.
-- A supplied numeric matrix has no inferred groups. Clustermap must support
-  gaps between selected row/column groups. Use opt-in keyword-only
-  `row_gap_threshold` / `col_gap_threshold` distance cuts through public SciPy
-  `fcluster(..., criterion="distance")`; None preserves contiguous slots.
-  Keep the existing leaf order and shared native gap positions across tiles,
-  trees, labels and annotation tracks. The notebook trial explicitly chooses
-  70% of each tree's maximum merge distance (user-authorized on 2026-10-21),
-  independent of `bulk_labels`. No default scientific cut or category-change
-  grouping is inferred. Invalid cuts or cuts on a disabled axis reject clearly;
-  reject layouts where the gaps leave no room for tiles.
+- Supplied numeric matrices and clustermaps keep rows and columns contiguous.
+  The clustermap tree-cut gap trial was withdrawn after visual review on
+  2026-10-21; remove its cut parameters and grouping computations. Heatmap
+  cell-group gaps and dotplot marker gaps remain unchanged.
 
 Deliver in small increments, updating the current queue in STATUS after each:
 
@@ -769,9 +763,14 @@ Deliver in small increments, updating the current queue in STATUS after each:
 3. **M14.b.3 — matrix, clustermap and correlation.** Reuse the migrated labels
    and tree views for both axes, moving clustermap color tracks into native
    sides. Keep supplied/SciPy linkage, masks, palettes and permutations intact.
-   Reuse the same numeric tiles and interactions, adding clustermap gaps from
-   the agreed grouping input without manufacturing groups.
+   Reuse the same numeric tiles and interactions; clustermap stays contiguous.
    This completes M05.f only after both heatmap and clustermap pass its gates.
+   The released `linkShape="orthogonal"` supports native right-angle tree edges
+   with `orient="vertical"`/`"horizontal"`. The integration still uses line/rule
+   segments; migrate the shared renderer to parent-to-child links in a separate
+   increment, preserving stored merge heights, leaf order and Python clustering.
+   Verify all orientations, gapped heatmaps, zoom and SVG export before replacing
+   the current path or closing C12.
 
 Keep the data-access, grouped-summary, ranking and tree-preparation modules
 unchanged unless a focused failing semantic test requires a correction. In
