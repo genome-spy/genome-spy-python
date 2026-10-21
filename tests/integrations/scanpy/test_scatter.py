@@ -72,18 +72,68 @@ def test_many_categories_keep_scanpy_column_defaults():
     assert spec["encoding"]["color"]["legend"]["columns"] == 3
 
 
-@pytest.mark.parametrize("marker", ["s", ["o", "s"]])
-def test_square_markers_reuse_the_existing_scatter_data(marker):
+@pytest.mark.parametrize(
+    "marker,shapes,factors",
+    [
+        ("s", ["square", "square"], [1, 1]),
+        (["o", "s"], ["circle", "square"], [1, 1]),
+        ("D", ["diamond", "diamond"], [2, 2]),
+        (["s", "D"], ["square", "diamond"], [1, 2]),
+    ],
+)
+def test_marker_shapes_reuse_scatter_data_and_units(marker, shapes, factors):
     data = make_scatter_adata()
     options = dict(color=["cell_type", "score"], show=False)
     plain = gsc.pl.scatter(data, "x_value", "y_value", marker="o", **options).to_dict()
-    squares = gsc.pl.scatter(
+    marked = gsc.pl.scatter(
         data, "x_value", "y_value", marker=marker, **options
     ).to_dict()
-    assert squares["datasets"] == plain["datasets"]
-    assert points(units(squares)[1])["encoding"]["shape"] == {"value": "square"}
-    for panel, normal in zip(units(squares), units(plain), strict=True):
-        assert points(panel)["encoding"]["size"] == points(normal)["encoding"]["size"]
+    assert marked["datasets"] == plain["datasets"]
+    for panel, normal, shape, factor in zip(
+        units(marked), units(plain), shapes, factors, strict=True
+    ):
+        encoding = points(panel)["encoding"]
+        assert encoding.get("shape", {"value": "circle"}) == {"value": shape}
+        original = points(normal)["encoding"]["size"]["scale"]
+        assert encoding["size"]["scale"]["domain"] == original["domain"]
+        np.testing.assert_allclose(
+            encoding["size"]["scale"]["range"], np.array(original["range"]) * factor
+        )
+
+
+@pytest.mark.parametrize("family", ["umap", "scatter"])
+@pytest.mark.parametrize("marker", ["o", "s", "D"])
+def test_categorical_legend_shapes_and_sizes_match_scanpy(family, marker):
+    import matplotlib.pyplot as plt
+    from matplotlib.markers import MarkerStyle
+
+    data = make_scatter_adata()
+    args = (data, "x_value", "y_value") if family == "scatter" else (data,)
+    options = dict(color="cell_type", marker=marker, show=False)
+    ax = getattr(sc.pl, family)(*args, **options)
+    handle = ax.get_legend().legend_handles[0]
+    path = handle.get_paths()[0]
+    width = path.get_extents().width
+    expected_width = np.sqrt(handle.get_sizes()[0]) * width * 100 / 72
+    plt.close(ax.figure)
+
+    spec = getattr(gsc.pl, family)(*args, **options).to_dict()
+    mark = points(spec)
+    guide = mark["encoding"]["color"]["legend"]
+    config = spec["config"]["legend"]
+    shape = config.get(
+        "symbolType", mark["encoding"].get("shape", {}).get("value", "circle")
+    )
+    native_marker = MarkerStyle({"circle": "o", "square": "s", "diamond": "D"}[shape])
+    native_path = native_marker.get_path().transformed(native_marker.get_transform())
+    np.testing.assert_allclose(
+        native_path.vertices / native_path.get_extents().width,
+        path.vertices / width,
+        atol=1e-15,
+    )
+    np.testing.assert_allclose(
+        np.sqrt(guide.get("symbolSize", config["symbolSize"])), expected_width
+    )
 
 
 def test_signature_preserves_scatter_defaults_and_adds_only_native_controls():

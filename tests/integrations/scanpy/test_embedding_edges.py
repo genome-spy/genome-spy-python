@@ -131,7 +131,7 @@ def test_shared_embeddings_reuse_points_and_read_graph_without_analysis(
     options = dict(
         color=["cell_type", "score"],
         dimensions=(0, 1),
-        marker=["o", "s"],
+        marker=["s", "D"],
         add_outline=outline,
         size=20,
         show=False,
@@ -145,7 +145,7 @@ def test_shared_embeddings_reuse_points_and_read_graph_without_analysis(
             m["mark"] for m in leaf_marks(normal)
         ]
     assert all(
-        mark["encoding"]["shape"] == {"value": "square"}
+        mark["encoding"]["shape"] == {"value": "diamond"}
         for mark in leaf_marks(units(spec)[1])[1:]
     )
     assert all(rows in spec["datasets"].values() for rows in plain["datasets"].values())

@@ -217,7 +217,7 @@ open under C11 in the integration status ledger; point data and hover are unaffe
 | `use_raw`, `layers` | Cell expression defaults to raw if present. One layer or an x/y/color triple; None/`"X"` chooses X. When raw is present, nondefault layers require explicit `use_raw=False`. Variable orientation drops automatic raw as Scanpy's transpose does; no physical transpose is used here. |
 | `groups`, `palette` | Saved category order and CSS palettes; gray background for missing/excluded groups without an NA legend. Explicit group order controls painting and the legend. Nested palettes follow categorical panels, even after numeric panels. For several categorical panels, use nested palettes; a flat list currently errors because pinned Scanpy applies it only to the first. |
 | `sort_order` | Pinned 1.11.5 does not forward this flag: numeric colors use NumPy's ascending sort for both values. Categories paint gray background first, then groups; source order is preserved within a group. |
-| `size`, `marker`, `alpha` | Scalar area, default 120000 / point count; dot, circle or square, once or per panel; scalar opacity. Same native point units as UMAP. |
+| `size`, `marker`, `alpha` | Scalar area, default 120000 / point count; dot, circle, square or diamond, once or per panel; scalar opacity. Same native point units as UMAP. |
 | `frameon`, `title` | x/y plots retain numeric axes/frame, as in Scanpy; basis frames follow the setting/request. Default titles replace key underscores with spaces; flat colors have no title. All color panels occupy one row. |
 | `legend_loc`, `legend_fontsize`, `legend_fontweight`, `color_map` | Right-margin or no legend; native font sizing and continuous scheme. Font weight has no effect on these external legends upstream. On-data label positions/weight and other legend locations remain M07.d/M14. |
 | `hover`, `zoom`, `width`, `height` | Four keyword-only native additions. Hover defaults True, zoom False; panel size defaults to 300 × 300 logical pixels. Scatter does not yet expose linked brushing or Python membership retrieval. |
@@ -300,7 +300,7 @@ raise an error instead of being ignored.
 | palette, na_color, na_in_legend | Opaque CSS color sequences/mappings, GenomeSpy scheme names, stored CSS category colors, or Scanpy default palette values. Preserve categorical order and unused categories. Named schemes with missing values require na_in_legend=False; use an explicit CSS palette for an NA legend. |
 | cmap, color_map, vmin, vmax | GenomeSpy scheme names (default viridis) and numeric, percentile or callable bounds, including per-panel lists. Callables receive a copy of the masked numeric colors in painting order, including missing values, and must return a finite real number. Conflicting aliases error. GenomeSpy maps the retained measurements and draws the numeric guide. Unsupported names such as coolwarm and Matplotlib colormap objects error. |
 | sort_order | Scanpy's continuous sort, including reversed equal-value ties; missing points draw first. Categorical source order is retained apart from moving missing points behind other points. |
-| size, s, marker | Scalar or observation-length sizes in points squared; dot (`"."`), circle (`"o"`) and square (`"s"`) markers, once or per panel. Conversion accounts for marker path width, using a fixed 100/72 logical pixels per point. As in 1.11.5, an observation-size vector is carried in its reordered form between panels; reference tests cover this version-specific behavior. |
+| size, s, marker | Scalar or observation-length sizes in points squared; dot (`"."`), circle (`"o"`), square (`"s"`) and diamond (`"D"`) markers, once or per panel. Conversion accounts for marker path width, using a fixed 100/72 logical pixels per point. As in 1.11.5, an observation-size vector is carried in its reordered form between panels; reference tests cover this version-specific behavior. |
 | mask_obs, groups | Recolor observations without dropping coordinates. Masks can be boolean arrays or an observation-column key. Groups and masks are mutually exclusive. |
 | components, dimensions | One-based component pairs or zero-based dimension pairs; broadcasting follows Scanpy. Both cannot be supplied together. |
 | frameon, title, ncols, hspace, wspace | Frame defaults to Scanpy's frame setting; panel layout uses explicit native defaults. Titles and guides remain per panel; guides are not automatically collected. |
@@ -327,11 +327,20 @@ chart = gsc.pl.umap(
 )
 ```
 
-Square markers use native `shape="square"` encodings, including missing-value
-points, outlines and category legend symbols. They reuse the same colors, hover,
+Square and diamond markers use native `square` and `diamond` shape encodings,
+including missing-value points and outlines. They reuse the same colors, hover,
 navigation and selection paths, without extra data or layers. For example,
-`gsc.pl.umap(pbmc, color=["louvain", "CD79A"], marker="s", size=20, show=False)`
-uses squares in both panels; `marker=["o", "s"]` chooses a shape for each panel.
+`gsc.pl.umap(pbmc, color=["louvain", "CD79A"], marker=["s", "D"], size=20, show=False)`
+uses a square in the first panel and a diamond in the second. Scanpy's diamond
+is a rotated square: its horizontal/vertical width is √2 times the square's at
+the same size. The native size encoding accounts for this without changing the
+supplied sizes. Thin diamond (`"d"`) and other unsupported markers still error.
+
+Embedding category keys use circles, as in Scanpy 1.11.5, including when points
+are squares or diamonds. Scatter keys retain their marker shape. Diamond scatter
+keys include their converted size on the color legend; customize that legend's
+`symbolSize` directly to override it. Other native legend defaults remain
+available through chart configuration.
 
 Outlines reuse the same observation records, sorted sizes and coordinate scales;
 they add no data extraction or analysis. Outer outlines draw first, inner outlines
@@ -956,7 +965,7 @@ Two notebooks run independently:
 - {download}`UMAP <../../../integrations/scanpy/notebooks/scanpy_umap.ipynb>`:
   basic categorical/continuous UMAP, linked brushing/count/Python retrieval, then
   customization with subsets, titles/frames, categorical order/palettes, square
-  markers, outlines, stored neighbor edges, an explicit Scanpy gene score and
+  and diamond markers, outlines, stored neighbor edges, an explicit Scanpy gene score and
   the eight-panel marker overview, followed by
   stored PCA with variance labels/loadings, variance ratios and the composed overview,
   explicitly prepared t-SNE and cell/gene scatter.

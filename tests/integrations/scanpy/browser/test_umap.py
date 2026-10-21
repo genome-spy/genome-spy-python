@@ -145,6 +145,8 @@ def test_complete_chart_has_original_guides_labels_and_unclipped_layout(
         (".", "dot-stroke", 2),
         ("s", "square", 0),
         ("s", "square-stroke", 2),
+        ("D", "diamond", 0),
+        ("D", "diamond-stroke", 2),
     ],
 )
 def test_rendered_marker_footprint_matches_registered_scanpy_export(
@@ -193,11 +195,12 @@ def test_rendered_marker_footprint_matches_registered_scanpy_export(
     np.testing.assert_allclose(footprint(actual), [expected, expected], atol=2)
     # A fourfold size mistake doubles the diameter and cannot pass this oracle.
     assert np.all(np.abs(footprint(actual) * 2 - footprint(reference)) > 2)
-    if marker == "s":
+    if marker in ("s", "D"):
         mask = np.asarray(actual).max(axis=2) < 128
         yy, xx = np.where(mask)
-        # A circle has the same bounding box, but leaves its corners unpainted.
-        assert mask[yy.min() : yy.max() + 1, xx.min() : xx.max() + 1].mean() > 0.95
+        coverage = mask[yy.min() : yy.max() + 1, xx.min() : xx.max() + 1].mean()
+        # Equal bounds alone cannot distinguish circles, squares and diamonds.
+        assert coverage > 0.95 if marker == "s" else 0.45 < coverage < 0.6
     actual.save(tmp_path / f"native-{token}.png")
     Image.blend(
         reference.crop(

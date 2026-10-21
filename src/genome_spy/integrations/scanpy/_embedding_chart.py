@@ -15,7 +15,11 @@ from genome_spy.integrations.scanpy._embedding_interactions import (
     validate_brush,
     with_brush_count,
 )
-from genome_spy.integrations.scanpy._style import POINTS_TO_PIXELS, EmbeddingStyle
+from genome_spy.integrations.scanpy._style import (
+    EMBEDDING_MARKERS,
+    POINTS_TO_PIXELS,
+    EmbeddingStyle,
+)
 
 
 def coordinate_domain(values: np.ndarray, margin: float) -> tuple[float, float]:
@@ -89,6 +93,12 @@ def _legend(panel: Panel, style: EmbeddingStyle) -> gs.Legend | None:
             symbolOpacity=1 if style.outline_width is not None else style.alpha,
             labelLimit=1000,
         )
+        if style.legend_symbol_type is None and panel.marker == "D":
+            # Scatter legends retain the diamond path's diagonal width too.
+            legend = legend.symbolSize(
+                style.legend_symbol_size
+                * (POINTS_TO_PIXELS * EMBEDDING_MARKERS[panel.marker][1]) ** 2
+            )
         # Moving the continuous guide must not move categorical legends.
         if style.colorbar_loc not in (None, "right"):
             legend = legend.orient("right").direction("vertical")
@@ -182,7 +192,8 @@ def _panel(
     )
     # Scanpy uses square points for size; GenomeSpy uses square pixels.
     maximum_size = max(1.0, float(table[f"_size_{index}"].max()))
-    diameter = POINTS_TO_PIXELS * (0.5 if panel.marker == "." else 1)
+    shape, path_width = EMBEDDING_MARKERS[panel.marker]
+    diameter = POINTS_TO_PIXELS * path_width
     points = (
         gs.Chart(table)
         .transform_collect(sort={"field": f"_order_{index}", "order": "ascending"})
@@ -212,8 +223,8 @@ def _panel(
         )
         .properties(width=style.width, height=style.height)
     )
-    if panel.marker == "s":
-        points = points.encode(shape=gs.value("square"))
+    if shape != "circle":
+        points = points.encode(shape=gs.value(shape))
     layers: list[gs.TopLevelSpec] = []
     if edges is not None:
         layers.append(
@@ -441,6 +452,9 @@ def build_embedding(
         orient=style.colorbar_loc or "right",
         direction="horizontal" if horizontal else "vertical",
         symbolSize=style.legend_symbol_size * POINTS_TO_PIXELS**2,
+        symbolType=style.legend_symbol_type
+        if style.legend_symbol_type is not None
+        else Undefined,
         gradientLength=gradient_length,
         gradientThickness=gradient_length / 30,
         gradientStrokeColor=style.frame_color,

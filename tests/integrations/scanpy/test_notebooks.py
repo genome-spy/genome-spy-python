@@ -55,15 +55,15 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         )
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
-        square_chart = namespace["square_chart"]
-        assert square_chart in charts
-        square_spec = square_chart.to_dict()
-        assert square_spec["datasets"] == charts[0].to_dict()["datasets"]
-        assert all(
-            mark["encoding"]["shape"] == {"value": "square"}
-            for panel in units(square_spec)
-            for mark in leaf_marks(panel)
-        )
+        marker_chart = namespace["marker_chart"]
+        assert marker_chart in charts
+        marker_spec = marker_chart.to_dict()
+        assert marker_spec["datasets"] == charts[0].to_dict()["datasets"]
+        for panel, shape in zip(units(marker_spec), ["square", "diamond"], strict=True):
+            assert all(
+                mark["encoding"]["shape"] == {"value": shape}
+                for mark in leaf_marks(panel)
+            )
         edge_chart = namespace["edges_chart"]
         assert edge_chart in charts
         edge_spec = edge_chart.to_dict()

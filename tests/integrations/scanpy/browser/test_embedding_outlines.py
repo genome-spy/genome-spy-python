@@ -31,7 +31,7 @@ def _pixel_error(pixels, target, radius):
 
 
 @pytest.mark.parametrize("page", [1.5], indirect=True)
-@pytest.mark.parametrize("marker", [".", "o", "s"])
+@pytest.mark.parametrize("marker", [".", "o", "s", "D"])
 @pytest.mark.parametrize("overlap", [False, True])
 @pytest.mark.parametrize("preset", ["default", "custom", "edge"])
 def test_outlined_points_match_registered_scanpy_paint(
@@ -143,7 +143,7 @@ def test_outlined_points_match_registered_scanpy_paint(
         assert (_pixel_error(first, second, radius)[interior] > 32).mean() < 0.05
 
 
-@pytest.mark.parametrize("marker", ["o", "s"])
+@pytest.mark.parametrize("marker", ["o", "s", "D"])
 def test_outline_hover_linked_brush_navigation_and_offline_delivery(
     page, tmp_path, marker
 ):
@@ -203,8 +203,9 @@ def test_outline_hover_linked_brush_navigation_and_offline_delivery(
     assert ">1 cells selected<" in svg
     root = ET.fromstring(svg)
     assert {"A", "B"} <= {e.text for e in root.iter() if e.tag.endswith("text")}
-    if marker == "s":
-        assert not any(e.tag.endswith("circle") for e in root.iter())
+    if marker in ("s", "D"):
+        # Scanpy embedding legends use circles even for other point shapes.
+        assert sum(e.tag.endswith("circle") for e in root.iter()) == 2
     page.mouse.move(1, 1)
     pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
     for x, expected in ((-0.4, 0), (0.4, 204)):
@@ -212,7 +213,7 @@ def test_outline_hover_linked_brush_navigation_and_offline_delivery(
         # Sample the outer black halo, clear of the white gap and foreground.
         # The native brush overlay can lightly tint the selected halo.
         np.testing.assert_allclose(
-            pixels[round(py), round(px + 11)],
+            pixels[round(py), round(px + 11 * (np.sqrt(2) if marker == "D" else 1))],
             [expected] * 3,
             atol=15 if x < 0 else 5,
         )

@@ -66,13 +66,14 @@ all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M07.d, additional native embedding markers.**
-Next is Scanpy's diamond marker (`marker="D"`), comparing native shape, area,
-edges, outlines, guides and picking against the pinned implementation. Reuse
-the existing marker broadcasting and embedding renderer. Expand other shapes
-only after their native geometry is verified. Remaining graph forms, arrow
+**Next work: M07.d, remaining marker geometry audit.**
+Start with triangular markers (`marker="^"`), comparing native paths, aspect
+ratios, size and stroke conventions against Scanpy before enabling them. Reuse
+the shared marker definitions and renderer only where the geometry matches;
+record native capability gaps instead of introducing custom shapes. Expand other
+forms only after their geometry is verified. Remaining graph forms, arrow
 overlays, scale-factor circles and broader compatibility retain M07.d/M14
-owners. The [square-marker increment](#m07d-square-markers) is closed;
+owners. The [diamond-marker increment](#m07d-diamond-markers) is closed;
 C11 still blocks full default categorical-guide fitting.
 
 M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
@@ -115,6 +116,7 @@ C12 remains a separate upstream straight-link issue.
 | M07.d centered colors increment | Closed (bounded increment) | [Native domain, upstream paint/guide comparisons, workflow and resources](#m07d-centered-embedding-colors) | Other family options retain M07.d/M14 owners; scatter keeps its distinct signature. |
 | M07.d stored neighbor edges increment | Closed (bounded increment) | [Storage, native lookups, fidelity/workflow and resource checks](#m07d-stored-neighbor-graph-edges) | Other component pairs, self-loops and per-edge/numeric colors remain M07.d/M14; arrows remain separate. |
 | M07.d square marker increment | Closed (bounded increment) | [Native shape, geometry, guides, workflow and resource checks](#m07d-square-markers) | Other markers remain M07.d; categorical guide fitting stays C11. |
+| M07.d diamond marker increment | Closed (bounded increment) | [Shared marker widths, legend parity, workflow and resource checks](#m07d-diamond-markers) | Thin diamonds and other marker geometry remain M07.d; C11 still owns full categorical-guide fitting. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -1387,10 +1389,59 @@ reported JS heaps 68/64 MB. Both charts send the same single cell table; square
 encodings add 116 bytes. These are workload observations, not a speedup claim.
 Expression was unread and no matrix was densified.
 
-Next: additional native markers, starting with diamonds. Other markers still
-error; C11/C13, broader storage/export and other graph forms retain their owners.
+The diamond increment below extends this renderer and corrects embedding category
+keys to Scanpy's circles. Other markers, C11/C13, broader storage/export and
+other graph forms retain their owners.
 The full repository suite and docs build were not rerun. Clearance: retain;
 no plan is eligible for removal.
+
+## M07.d diamond markers
+
+Closed for shared embeddings, PCA overview's embedding panel and scatter.
+`marker="D"` uses the existing native diamond point shape. Its path width is
+√2 times the unit-width square, so the native size encoding receives twice
+the nominal area, preserving Scanpy's rotated-square footprint. Stored size
+columns, coordinates, colors, point order and graph data are unchanged. One
+small [marker table](../../src/genome_spy/integrations/scanpy/_style.py) now serves
+validation, point geometry and guide conversion; no new runtime helper or
+renderer layer was introduced.
+
+Public Scanpy comparisons exposed an earlier legend assumption: embedding
+category keys are circles even for square/diamond points, while scatter keys
+retain their actual marker. The existing style distinguishes those behaviors.
+Diamond scatter keys carry their converted size on the color legend; a native
+size override belongs on that legend's `symbolSize`. This corrects the square
+embedding guide too; it does not claim complete scatter legend compatibility.
+
+Verification: **432 targeted Python checks**, the canonical notebook workflow,
+**40 browser checks**, Ruff and mypy pass. Existing tests now cover diamonds
+across numeric/categorical panels, missing points, outlines, size vectors, mixed
+shapes, every embedding alias and stored graph edges. Public artist geometry
+remains confined to tests. Registered plain/stroked diamond exports check both
+bounds and occupied area, so a same-width circle/square fails the oracle.
+Overlapping outlines retain the existing two-way paint comparisons. Native
+hover, linked brush/count/Python membership, zoom and offline HTML pass.
+[Observed legend comparisons](../../tests/integrations/scanpy/browser/test_scatter.py)
+also match public Scanpy's circular embedding keys and diamond scatter keys,
+including rendered widths; compact native legend collection remains verified.
+The existing PBMC marker cell now compares squares and diamonds instead of adding
+another plotting cell. All twenty-one nonempty
+live notebook cells complete without errors; committed source excludes outputs.
+
+Resource recipe repeats the square increment's seed-17, 25,000-cell × 20,000-gene
+empty-CSR workload, stored float32 coordinates, four labels/numeric scores and
+two 320 × 300 panels with size 4/zoom, on Python 3.11/macOS arm64 and Core 1.2.0.
+Circle/diamond preparation took 0.029/0.020 s, validated JSON serialization
+7.09/5.96 s, peak traced Python allocation 99.2/98.0 MB and first paint
+6.17/6.39 s. Payloads were 9,902,817/9,902,933 bytes and reported JS heaps
+68/64 MB. Both send the same cell table; native diamond encodings add 116 bytes.
+These local observations share a host with tests and are not a speedup claim.
+Expression was unread and no matrix was densified. Media/reports remain local.
+
+Next: audit remaining marker geometry, starting with triangles, before enabling
+more forms. Unsupported markers still fail clearly. C11/C13, larger transport
+and broader storage/export retain their owners. The full suite and docs build
+were not rerun. Clearance: retain; no plan is eligible for removal.
 
 ## M07.d native colorbar placement
 
@@ -2167,6 +2218,7 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Continuous colorbar placement | Four sides/None; native defaults and collection supported | M07.d placement increment closed |
 | Point outlines | Shared outline layers, relative widths/CSS colors, scalar styles, hover/zoom/brush | [M07.d outline increment](#m07d-embedding-point-outlines) closed; square support below |
 | Square markers | Native squares in shared embeddings/PCA overview/scatter, including outlines, legends and interactions | [M07.d square increment](#m07d-square-markers) closed |
+| Diamond markers and category keys | Native diamonds with Scanpy path widths; circular embedding keys and shape-matched scatter keys | [M07.d diamond increment](#m07d-diamond-markers) closed |
 | Stored neighbor-graph edges | First component pair, native segments and endpoint lookups, scalar CSS styles; explicit restrictions on other forms | [M07.d edge increment](#m07d-stored-neighbor-graph-edges) closed |
 | Other graph forms, arrows, scale_factor, broader markers/categorical guide locations | Nondefault forms reject | M07.d/M14 |
 | Callable color bounds | Shared resolver with masked/sorted copies, per-panel lists and finite results | [M07.d callable increment](#m07d-callable-color-bounds) closed |

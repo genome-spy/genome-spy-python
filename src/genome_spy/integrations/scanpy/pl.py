@@ -490,7 +490,7 @@ def scatter(
         linewidth=None,
         na_color="lightgrey",
     )
-    style = replace(style, legend_symbol_size=300)
+    style = replace(style, legend_symbol_size=300, legend_symbol_type=None)
     return _finish_plot(
         build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
     )
@@ -528,7 +528,7 @@ def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
         **kwargs: Shared embedding options shown in the signature. Components
             are one-based strings; dimensions are zero-based pairs. Raw/layer
             lookup, colors, defaults and native controls match pl.umap.
-            marker accepts '.', 'o' and 's', once or per panel.
+            marker accepts '.', 'o', 's' and 'D', once or per panel.
             colorbar_loc accepts right, left, top, bottom, or None to hide it.
             add_outline draws two background outlines with outline_width and
             outline_color; the foreground then defaults to alpha=0.7.

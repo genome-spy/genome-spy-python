@@ -27,7 +27,15 @@ def test_reference_image_inventory_and_checksums_are_recorded() -> None:
     )
     expected.update(
         f"footprint-{marker}.png"
-        for marker in ("dot", "circle", "dot-stroke", "square", "square-stroke")
+        for marker in (
+            "dot",
+            "circle",
+            "dot-stroke",
+            "square",
+            "square-stroke",
+            "diamond",
+            "diamond-stroke",
+        )
     )
     assert set(manifest["assets"]) == expected
     assert all(

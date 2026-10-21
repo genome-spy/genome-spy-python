@@ -18,6 +18,7 @@ from genome_spy.integrations.scanpy._data import (
     resolve_use_raw,
 )
 from genome_spy.integrations.scanpy._style import (
+    EMBEDDING_MARKERS,
     _categorical,
     ColorData,
     categorical_colors,
@@ -228,9 +229,12 @@ def _panel_inputs(
         values * count if len(values) == 1 else values
         for values in (keys, pairs, markers)
     ]
-    if any(marker not in (".", "o", "s") for marker in markers):
+    if any(
+        not isinstance(marker, str) or marker not in EMBEDDING_MARKERS
+        for marker in markers
+    ):
         raise NotImplementedError(
-            "Scanpy embedding: only '.', 'o' and 's' markers are supported yet."
+            f"Scanpy embedding: marker must be one of {tuple(EMBEDDING_MARKERS)}."
         )
     return list(zip(keys, pairs, markers, strict=True))
 

@@ -16,6 +16,47 @@ REFERENCE = json.loads(
 )["cases"]
 
 
+@pytest.mark.parametrize("family", ["umap", "scatter"])
+def test_diamond_category_legend_matches_upstream_shape_and_width(page, family):
+    import scanpy as sc
+    import matplotlib.pyplot as plt
+
+    data = make_scatter_adata()
+    data.obs["two"] = ["A", "B"] * (data.n_obs // 2)
+    args = (data, "x_value", "y_value") if family == "scatter" else (data,)
+    options = dict(color="two", marker="D", show=False)
+    ax = getattr(sc.pl, family)(*args, **options)
+    handle = ax.get_legend().legend_handles[0]
+    expected_width = (
+        handle.get_sizes()[0] ** 0.5
+        * handle.get_paths()[0].get_extents().width
+        * 100
+        / 72
+    )
+    plt.close(ax.figure)
+    bounds = render(page, getattr(gsc.pl, family)(*args, **options))
+    svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    symbols = page.evaluate(
+        """({svg,edge}) => {
+        const root = new DOMParser().parseFromString(svg,'image/svg+xml').documentElement;
+        root.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden';
+        document.body.append(root);
+        const symbols = [...root.querySelectorAll('circle,path')].flatMap(n => {
+            const b=n.getBoundingClientRect();
+            return b.x > edge ? [{shape:n.tagName,width:b.width}] : [];
+        });
+        root.remove();
+        return symbols;
+        }""",
+        {"svg": svg, "edge": bounds["x"] + bounds["width"]},
+    )
+    assert len(symbols) == 2
+    assert all(
+        s["shape"] == ("circle" if family == "umap" else "path") for s in symbols
+    )
+    assert all(s["width"] == pytest.approx(expected_width, abs=0.1) for s in symbols)
+
+
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 @pytest.mark.parametrize("case", scatter_cases())
 def test_complete_scatter_matches_registered_points_axes_labels_and_guides(

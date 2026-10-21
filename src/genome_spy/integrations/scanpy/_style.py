@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from math import isfinite
+from math import isfinite, sqrt
 from numbers import Integral, Real
 from typing import Any
 import warnings
@@ -18,6 +18,14 @@ from genome_spy.integrations.scanpy._data import number
 FONT = "Lato"
 POINTS_TO_PIXELS = 100 / 72
 GROUPED_FONT_SIZE = 10 * 0.833 * POINTS_TO_PIXELS
+
+# Scanpy scales each marker's path width by the square root of its size.
+EMBEDDING_MARKERS = {
+    ".": ("circle", 0.5),
+    "o": ("circle", 1.0),
+    "s": ("square", 1.0),
+    "D": ("diamond", sqrt(2)),
+}
 
 
 # Color scheme names supported by the bundled GenomeSpy version.
@@ -448,6 +456,7 @@ class EmbeddingStyle:
     title_fontsize: float = 12 * POINTS_TO_PIXELS
     tick_fontsize: float = 10 * POINTS_TO_PIXELS
     legend_symbol_size: float = 36
+    legend_symbol_type: str | None = "circle"
     legend_labelspacing: float = 0.5
     legend_handletextpad: float = 0.8
     frame_color: str = "#000000"

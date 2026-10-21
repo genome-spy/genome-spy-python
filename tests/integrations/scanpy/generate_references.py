@@ -153,6 +153,8 @@ def main(output: Path | None = None) -> None:
             (".", "dot-stroke", 2),
             ("s", "square", 0),
             ("s", "square-stroke", 2),
+            ("D", "diamond", 0),
+            ("D", "diamond-stroke", 2),
         ]:
             a = make_adata()[:1].copy()
             a.obsm["X_umap"] = np.array([[0.0, 0.0]])
@@ -184,7 +186,11 @@ def main(output: Path | None = None) -> None:
                 "size": 144,
                 "path_width": path_width,
                 "linewidth": linewidth,
-                "diameter_at_export": (12 * path_width + linewidth) * 150 / 72,
+                "diameter_at_export": (
+                    12 * path_width + linewidth * (np.sqrt(2) if marker == "D" else 1)
+                )
+                * 150
+                / 72,
                 "plot_size_at_display": [box.width, box.height],
                 "export_dpi": 150,
                 "display_dpi": 100,

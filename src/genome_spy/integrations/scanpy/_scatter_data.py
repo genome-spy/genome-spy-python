@@ -24,6 +24,7 @@ from genome_spy.integrations.scanpy._embedding_data import (
     point_ids,
 )
 from genome_spy.integrations.scanpy._style import (
+    EMBEDDING_MARKERS,
     ColorData,
     _categorical,
     categorical_colors,
@@ -231,10 +232,11 @@ def prepare_scatter(
     if len(markers) == 1:
         markers *= len(keys)
     if len(markers) != len(keys) or any(
-        value not in (".", "o", "s") for value in markers
+        not isinstance(value, str) or value not in EMBEDDING_MARKERS
+        for value in markers
     ):
         raise NotImplementedError(
-            f"{_CONTEXT}: marker requires '.', 'o' or 's', once or per panel."
+            f"{_CONTEXT}: marker requires {tuple(EMBEDDING_MARKERS)}, once or per panel."
         )
     titles = (
         [title]

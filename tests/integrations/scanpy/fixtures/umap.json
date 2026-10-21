@@ -1111,12 +1111,40 @@
     "export_dpi": 150,
     "display_dpi": 100
   },
+  "footprint_diamond": {
+    "marker": "D",
+    "size": 144,
+    "path_width": 1.414213562373095,
+    "linewidth": 0,
+    "diameter_at_export": 35.35533905932737,
+    "plot_size_at_display": [
+      232.5,
+      231.0
+    ],
+    "export_dpi": 150,
+    "display_dpi": 100
+  },
+  "footprint_diamond-stroke": {
+    "marker": "D",
+    "size": 144,
+    "path_width": 1.414213562373095,
+    "linewidth": 2,
+    "diameter_at_export": 41.247895569215274,
+    "plot_size_at_display": [
+      232.5,
+      231.0
+    ],
+    "export_dpi": 150,
+    "display_dpi": 100
+  },
   "assets": {
     "categorical-panel-0.png": "a920e6cb40980b1e0b9dae36fc8b348c803f8c40852684c9bcfbe3298aa10c0f",
     "categorical.png": "b3c69b73f99f4c4364ff7d918ba67ffdbfeafabc3e35695aeef41db5f989d2ba",
     "continuous-panel-0.png": "da60ab91f0b06532f91c336a222875a50e58076f2ae49cc3579170a510c0571d",
     "continuous.png": "6288660c5e60bc78db9b570dd5e234096db0096439fbc1d7e1b79a931a83bf32",
     "footprint-circle.png": "fdb3cfeacea945706f2cbcc46f8ee24058dc9a135ade3023048310c1dfa27652",
+    "footprint-diamond-stroke.png": "6858c32beafb87b6ab6955b28972ad50fe892216d600bf264dd3c7e8a3af0e34",
+    "footprint-diamond.png": "7c1e57fa9905ff7b15b646caa4518f7ebf57e190a976e15c957a41fba329844c",
     "footprint-dot-stroke.png": "8dc8fe48a059a24e90ec2847980d05155e9c127fa87adbde6e912d1784265af9",
     "footprint-dot.png": "6e4fa0e667c1c39dee6a0a811e6d09793b04c5e616a3af48741e9986ea77893e",
     "footprint-square-stroke.png": "abb46d99bac90cd1f81bef9bfb28ca2bc601d25ff5dcb36dd8c534b80180df25",

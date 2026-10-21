@@ -604,6 +604,15 @@ commit evidence and unmet verification gates live in the
   then test hover, linked brushing, zoom and HTML through the shared helpers.
   Run the packaged notebook and a representative multi-panel resource comparison.
   The [square-marker record](STATUS.md#m07d-square-markers) owns delivery evidence.
+  Diamond-marker acceptance: `marker="D"` uses native diamonds with Scanpy's
+  √2 path-width conversion, including outlines and scalar/per-panel inputs.
+  Share marker definitions across validation, points and guide sizing. Preserve
+  circular embedding keys and shape-matched scatter keys; compare their shapes
+  and widths against public Scanpy. Verify plain/stroked diamond bounds and
+  occupied area, hover/brush/zoom/HTML, unchanged data, the packaged workflow
+  and a representative resource workload. Do not enable thin diamonds or other
+  markers merely because a similarly named native shape exists. The
+  [diamond-marker record](STATUS.md#m07d-diamond-markers) owns delivery evidence.
 
 Targets: `gsc.pl.embedding(adata, basis="tsne", color="cell_type", show=False)`
 and `gsc.pl.pca_overview(adata, show=False)` after explicit Scanpy PCA.
