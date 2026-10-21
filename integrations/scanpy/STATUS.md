@@ -69,9 +69,10 @@ all slice gates or full-family compatibility are closed.
 **Next work: M14.b.3, matrix/clustermap/correlation native tracks.**
 M14.b.1 and M14.b.2 are closed for native WebGL/notebook/HTML layout;
 [the grouped-layout record](#m14b2-native-grouped-layout) retains the new evidence.
-Heatmap, matrixplot and dotplot now share four-pixel group gaps. Numeric/clustered
-grids retain their earlier layouts until their own
+Heatmap and dotplot have four-pixel group gaps; matrixplot tiles remain contiguous.
+Numeric/clustered grids retain their earlier layouts until their own
 [migration increment](PLAN.md#m14b-native-grid-layout-and-group-gaps) is verified.
+Clustermap must gain group gaps; the grouping/cut input is awaiting clarification.
 Core's separately reproduced SVG straight-link issue remains C12/M14 vector-export
 work; it does not close or block the native WebGL migration scope.
 
@@ -86,7 +87,8 @@ does not close M07.a/b's newly observed categorical-guide rendering gap.
 
 Core 1.2.0, its generated composition APIs and the published heatmap example are
 now adopted; see the [upgrade record](#core-12-runtime-adoption). M14.b.1/b.2 are
-closed for their native layout scope and M14.b.3 is ready. Heatmap bands are
+closed for their native layout scope. M14.b.3 has released native track APIs;
+its clustermap group-gap input still needs a decision. Heatmap bands are
 verified inside native track viewports; clustermap still needs its own M05.f migration and checks.
 
 | Slice | Lifecycle state | Commit/evidence | Remaining work before Verified/Closed |
@@ -101,7 +103,7 @@ verified inside native track viewports; clustermap still needs its own M05.f mig
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
 | M14.b.2 grouped summary layout | Closed (native WebGL/HTML layout) | [Delivery, browser/workflow and resource evidence](#m14b2-native-grouped-layout) | Vector tree-link export remains C12/M14; broader family options remain in their existing slices. |
-| M14.b.3 numeric/clustered layout | Ready | [Native numeric grid scope](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Migrate matrix/clustermap/correlation labels, trees and color tracks; verify both axes without inventing cluster groups. |
+| M14.b.3 numeric/clustered layout | Ready for native tracks; group-gap input pending | [Native numeric grid scope](PLAN.md#m14b-native-grid-layout-and-group-gaps) | Migrate matrix/clustermap/correlation labels, trees and color tracks. Define the requested clustermap group gaps before choosing any tree cut or annotation boundaries. |
 | M05.f category-strip hover | Heatmap track migration verified; clustermap migration ready | C10; [heatmap evidence](#m14b1-native-heatmap-tracks-and-gaps); [layout route](#m05f-category-strip-tooltips--layout-migration) | Clustermap viewport migration and verification remain M14.b.3. Legacy hover already works on Core 1.2. |
 
 M07.d/M14 retain the explicitly unsupported options; dotplot brushing remains
@@ -130,7 +132,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M11 trajectories/graphs/series | Planned | Stored DPT/PAGA, graph layouts, series/simulation, return/side-effect contracts; evaluate C04 paths. |
 | M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
-| M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout migrations are closed; M14.b.3 is ready. C12 retains vector tree-link export fidelity. Parameter/capability closure, workflow publication and full API evidence remain open. |
+| M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout migrations are closed; M14.b.3 native tracks are ready, with clustermap gap inputs pending. C12 retains vector tree-link export fidelity. Parameter/capability closure, workflow publication and full API evidence remain open. |
 
 ## M05.e shared grid interactions
 
@@ -342,6 +344,25 @@ Ruff formatting/lint and mypy pass. Full unrelated repository/JavaScript suites
 and the documentation build were not rerun. C12 keeps SVG tree-link fidelity
 open; no Core bundle was patched. Parameter/storage/transport limits retain
 M05.d/M14 owners. M14.b.3 is ready. Clearance: retain; no plan is eligible for removal.
+
+### Matrixplot gap correction
+
+Matrixplot and ranked matrixplot keep their tiles contiguous across marker
+blocks, as requested after the native migration. Native surround tracks, brackets,
+trees, guides, fitted values and hover are retained; heatmap/dotplot gaps are
+unchanged. The expression notebook and compatibility contract reflect this rule.
+Verification: **146 targeted Python checks, 35 browser checks and the canonical
+expression workflow** pass; Ruff formatting/lint and mypy pass. The live notebook
+completed 13 code cells and 11 widgets without errors. Broader suites and the
+documentation build were not rerun.
+The four grouped resource workloads above already had no matrixplot marker cuts
+(one ranked marker list or a plain feature list); their data/layout paths are
+unchanged, so those observations are reused rather than remeasured.
+
+Clustermap gaps are requested for M14.b.3. Its current tree order can interleave
+annotation categories, so a dendrogram cut and category-change gaps are different
+contracts. The group source/cut inputs are awaiting the user's choice; no cut,
+reordering or new clustering analysis is selected silently.
 
 ## M06/M07 resource verification
 

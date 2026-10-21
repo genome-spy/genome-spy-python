@@ -546,7 +546,7 @@ def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
 @pytest.mark.parametrize("page", [1, 1.5], indirect=True)
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
 @pytest.mark.parametrize("swapped", [False, True])
-def test_summary_marker_gaps_survive_navigation(page, family, swapped):
+def test_summary_feature_spacing_survives_navigation(page, family, swapped):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
         chart = getattr(gsc.pl, family)(
@@ -602,7 +602,16 @@ def test_summary_marker_gaps_survive_navigation(page, family, swapped):
         }""",
             {"family": family, "axis": axis, "extent": bounds[extent]},
         )
-        assert live["gap"] == pytest.approx(4, abs=0.05)
+        assert live["gap"] == pytest.approx(4 if family == "dotplot" else 0, abs=0.05)
+        # The tree remains inside its native side and touches the matrix edge.
+        tree = page.evaluate(
+            "name=>api.views.getLayoutBounds({scope:[],view:name})", f"{family}-tree"
+        )
+        assert (tree["y"] + tree["height"] if swapped else tree["x"]) == pytest.approx(
+            bounds["y"] if swapped else bounds["x"] + bounds["width"], abs=0.5
+        )
+        if family == "matrixplot":
+            continue
         fractions = (0.5, live["center"]) if swapped else (live["center"], 0.5)
         pointer(page, bounds, *fractions)
         page.wait_for_timeout(450)
@@ -627,11 +636,4 @@ def test_summary_marker_gaps_survive_navigation(page, family, swapped):
                 round(px * page.evaluate("devicePixelRatio")),
             ].min()
             > 245
-        )
-        # The tree remains inside its native side and touches the matrix edge.
-        tree = page.evaluate(
-            "name=>api.views.getLayoutBounds({scope:[],view:name})", f"{family}-tree"
-        )
-        assert (tree["y"] + tree["height"] if swapped else tree["x"]) == pytest.approx(
-            bounds["y"] if swapped else bounds["x"] + bounds["width"], abs=0.5
         )

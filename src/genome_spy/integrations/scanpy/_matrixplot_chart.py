@@ -14,7 +14,6 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     finish_grouped_chart,
     grouped_axes,
     index_scales,
-    feature_gaps,
     plot_dimensions,
     summary_records,
 )
@@ -89,10 +88,7 @@ def build_matrixplot(
     # Tiles fill their slots; missing means leave an empty slot with its label.
     x, y = grouped_axes(rows, columns, xpadding=0, ypadding=0)
     x, y = zoom_axes(x, y, enabled=zoom, name="matrixplot")
-    gaps = feature_gaps(feature_groups, rows if swap_axes else columns)
-    scales = index_scales(
-        x, y, xgaps=[] if swap_axes else gaps, ygaps=gaps if swap_axes else []
-    )
+    scales = index_scales(x, y)
     # The surround owns the scale definitions; marks retain fields and ticks.
     x, y = (
         gs.X("_x:I", axis=x.to_dict()["axis"]),

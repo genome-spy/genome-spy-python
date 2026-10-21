@@ -738,10 +738,11 @@ Scanpy-specific layout configuration system.
 - A single group has no internal cut. Missing cells and masked tiles retain
   their slots; repeated gene labels retain distinct integer slots. Do not insert
   dummy rows, mask out real cells, or paint white rules over tiles to imitate gaps.
-- A supplied numeric matrix has no inferred groups. Clustermap currently has no
-  cluster-cut contract: do not guess cuts from merge heights or category colors.
-  Explicit cluster-cut support needs its own reviewed input/ordering contract;
-  it is not required to migrate existing clustermap tracks into native viewports.
+- A supplied numeric matrix has no inferred groups. Clustermap must support
+  gaps between selected row/column groups. Define whether these come from an
+  explicit dendrogram cut or annotation boundaries before implementing them;
+  do not select a cut threshold/count or reorder leaves silently. Keep native
+  gap positions shared by the tiles, trees, labels and annotation tracks.
 
 Deliver in small increments, updating the current queue in STATUS after each:
 
@@ -755,14 +756,16 @@ Deliver in small increments, updating the current queue in STATUS after each:
    clustering or justify recomputation. Preserve merge heights and final leaf
    order, including unequal cell-group spans and fractional branch positions.
 2. **M14.b.2 — matrixplot and dotplot.** Apply the same side-view layout through
-   `finish_grouped_chart`, including marker-group gaps. Retain the existing
+   `finish_grouped_chart`. Dotplot has marker-group gaps; matrixplot keeps its
+   tiles contiguous across marker blocks. Retain the existing
    summary records, means/fractions, authoritative `values_df`, dot footprints,
    native guides, fitted values and ruler. Ranked variants inherit the migration
    through their parent chart paths; do not implement them separately.
 3. **M14.b.3 — matrix, clustermap and correlation.** Reuse the migrated labels
    and tree views for both axes, moving clustermap color tracks into native
    sides. Keep supplied/SciPy linkage, masks, palettes and permutations intact.
-   Reuse the same numeric tiles and interactions without manufacturing groups.
+   Reuse the same numeric tiles and interactions, adding clustermap gaps from
+   the agreed grouping input without manufacturing groups.
    This completes M05.f only after both heatmap and clustermap pass its gates.
 
 Keep the data-access, grouped-summary, ranking and tree-preparation modules

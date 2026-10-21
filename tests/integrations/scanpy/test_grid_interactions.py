@@ -204,7 +204,7 @@ def test_zoom_rejects_other_modes_before_optional_dependencies(monkeypatch, inva
 
 @pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
 @pytest.mark.parametrize("swapped", [False, True])
-def test_summary_tracks_share_gaps_without_copying_measurements(family, swapped):
+def test_summary_tracks_share_positions_without_copying_measurements(family, swapped):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
         spec = getattr(gsc.pl, family)(
@@ -217,7 +217,9 @@ def test_summary_tracks_share_gaps_without_copying_measurements(family, swapped)
             show=False,
         ).to_dict()
     gene_axis = "y" if swapped else "x"
-    assert spec["scales"][gene_axis]["gapPositions"] == [2]
+    assert spec["scales"][gene_axis]["gapPositions"] == (
+        [2] if family == "dotplot" else []
+    )
     assert spec["scales"]["x" if swapped else "y"]["gapPositions"] == []
     assert all(spec["scales"][axis]["gapWidth"] == 4 for axis in ("x", "y"))
     assert set(spec["surround"]) == {"top", "bottom", "left", "right"}
