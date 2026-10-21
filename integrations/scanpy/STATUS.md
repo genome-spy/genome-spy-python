@@ -424,6 +424,10 @@ contiguous clustermap checkpoint.
 
 ## M14.b.3 matrix and correlation native tracks
 
+Implemented in `c2b5b79`; retained checks cover [matrix data/API](../../tests/integrations/scanpy/test_matrix.py),
+[matrix charts/navigation](../../tests/integrations/scanpy/browser/test_matrix.py)
+and [correlation/tree charts](../../tests/integrations/scanpy/browser/test_dendrogram.py).
+
 Closed for native WebGL/notebook/HTML layout. Generic `matrix` reuses shared
 slot labels in left/bottom side views, with native titles outside those tracks;
 unsupplied numeric ticks remain native axes. `correlation_matrix` reuses the same
