@@ -140,7 +140,6 @@ def build_matrixplot(
         height=height,
         scales=scales,
         name="matrixplot",
-        frame_width=1.5,
         tree=tree,
         zoom=bool(zoom),
     )

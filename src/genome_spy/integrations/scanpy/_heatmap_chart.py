@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.schema import ViewBackground
 from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
     with_values,
@@ -194,7 +193,6 @@ def build_heatmap(
         name="heatmap-cells",
         width=width,
         height=height,
-        view=ViewBackground(stroke="black", strokeWidth=0.8 * PT),
     )
     sides: dict[str, Any] = {}
     gene_axis, cell_axis = (y.axis(None), x) if swap_axes else (x.axis(None), y)
@@ -297,6 +295,7 @@ def build_heatmap(
         gs.surround(center, surround=gs.SurroundSides(**sides), spacing=0)
         .properties(scales=scales)
         .resolve_legend(color="collected")
+        .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(
             labelFont=FONT,
             labelFontSize=TICK,

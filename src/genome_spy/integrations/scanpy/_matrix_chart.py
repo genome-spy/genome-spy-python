@@ -152,7 +152,7 @@ def build_matrix(
     if title is not None:
         chart = chart.properties(title=gs.title(title, font=FONT, fontSize=12 * PT))
     chart = with_navigation(chart, enabled=bool(zoom))
-    return chart.configure_view(stroke="black", strokeWidth=0.8 * PT).configure_legend(
+    return chart.configure_view(stroke="transparent", strokeWidth=0).configure_legend(
         labelFont=FONT,
         labelFontSize=TICK,
         layout={"anchor": "middle", "direction": "vertical", "wrap": False},

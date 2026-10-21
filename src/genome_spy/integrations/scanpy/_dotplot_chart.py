@@ -237,7 +237,6 @@ def build_dotplot(
         height=height,
         scales=scales,
         name="dotplot",
-        frame_width=0.8,
         tree=tree,
         zoom=bool(zoom),
     )

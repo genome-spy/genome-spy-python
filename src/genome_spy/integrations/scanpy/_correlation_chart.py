@@ -183,6 +183,6 @@ def build_correlation_matrix(
                 "bottom": 10,
             },
         )
-        .configure_view(stroke="black", strokeWidth=0.8 * _PT)
+        .configure_view(stroke="transparent", strokeWidth=0)
         .configure_legend(labelFont=_FONT, labelFontSize=_TICK)
     )

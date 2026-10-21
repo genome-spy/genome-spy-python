@@ -9,7 +9,6 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.schema import ViewBackground
 from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._grid_interactions import (
@@ -378,7 +377,6 @@ def finish_grouped_chart(
     title: str | None,
     width: float,
     height: float,
-    frame_width: float,
     scales: ScalesKwds,
     name: str,
     tree: DendrogramData | None = None,
@@ -393,7 +391,6 @@ def finish_grouped_chart(
         width=width,
         height=height,
         name=f"{name}-cells",
-        view=ViewBackground(stroke="black", strokeWidth=frame_width * _PT),
     )
     # Each annotation owns a viewport and inherits the center's aligned scale.
     sides: dict[str, Any] = {
@@ -432,13 +429,17 @@ def finish_grouped_chart(
         chart = chart.properties(
             title=gs.title(title, font=_FONT, fontSize=12 * _PT, offset=10)
         )
-    return chart.resolve_legend(color="collected", size="collected").configure_legend(
-        labelFont=_FONT,
-        labelFontSize=_TICK,
-        titleFont=_FONT,
-        titleFontSize=_TICK,
-        titleFontWeight="normal",
-        titleOrient="top",
-        layout={"anchor": "end", "direction": "vertical", "wrap": False},
-        spacing=25,
+    return (
+        chart.resolve_legend(color="collected", size="collected")
+        .configure_view(stroke="transparent", strokeWidth=0)
+        .configure_legend(
+            labelFont=_FONT,
+            labelFontSize=_TICK,
+            titleFont=_FONT,
+            titleFontSize=_TICK,
+            titleFontWeight="normal",
+            titleOrient="top",
+            layout={"anchor": "end", "direction": "vertical", "wrap": False},
+            spacing=25,
+        )
     )

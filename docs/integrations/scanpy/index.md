@@ -443,7 +443,7 @@ computed. It performs no analysis or AnnData/cache writes.
 | `log`, `standard_scale`, `swap_axes` | Apply log1p to selected observations, aggregate means, then min–max scale per gene (`"var"`) or group (`"group"`) once before an optional transpose. Constant ranges become zero. Matrixplot does not use dotplot's second scaling pass. |
 | `values_df` | Authoritative real numeric table. Preserve supplied values and row/column order; only explicit `categories_order` reindexes its rows. `log` and `standard_scale` do not transform the supplied table. Require exactly the plotted groups and feature multiplicities, with unique group labels. Repeated supplied feature columns retain their own slot values. Missing/extra labels, unexpected duplicates, infinities and nonnumeric entries error. |
 | `cmap`, `vmin`, `vmax` | Native scheme (default viridis) with finite numeric bounds and clipping. Constant bounds expand the guide by 10%, or ±0.1 at zero; tiles map against that expanded domain, unlike dotplot's frozen constant colors. Missing tiles are unpainted but retain their slots; all-missing values error. |
-| `title`, `colorbar_title`, `var_group_*`, `width`, `height`, `figsize` | Shared native grouped layout and horizontal color guide. Index slots have no outer padding or group gaps; tiles remain adjacent across marker blocks. Default cells are 37 × 35 logical pixels, exchanged when axes swap. Frame width follows matrixplot's 1.5-point default. |
+| `title`, `colorbar_title`, `var_group_*`, `width`, `height`, `figsize` | Shared native grouped layout and horizontal color guide. Index slots have no outer padding or group gaps; tiles remain adjacent across marker blocks. Default cells are 37 × 35 logical pixels, exchanged when axes swap. The outer frame is omitted. |
 | `edgecolor`, `linewidth` in kwargs | Scalar opaque CSS edge color and nonnegative width in points; defaults are gray and 0.1. `edgecolor="none"` disables edges. Plural aliases error: Scanpy 1.11.5 overwrites those forwarded forms with its defaults; use the singular forms explicitly. Other pcolor kwargs error. |
 | `zoom`, `show_values` | Both default False. `zoom=True` enables y-only navigation; `zoom="xy"` enables both axes. Enable fitted two-decimal plotted values; see [shared grid interactions](#shared-grid-interactions). |
 | `hover` | Enabled by default; show gene, group and displayed mean/scaled mean or supplied value. `hover=False` disables picking without changing tile geometry. Summary tiles do not identify individual cells. |
@@ -451,10 +451,15 @@ computed. It performs no analysis or AnnData/cache writes.
 
 Native palette interpolation, fonts and guide layout have the same documented
 fidelity boundaries as dotplot. Complete-chart checks cover labels, brackets,
-frame and guide placement; registered tile comparisons use 150 export DPI and
+plot and guide placement; registered tile comparisons use 150 export DPI and
 DPR 1.5. The production adapter never imports upstream plotting or Matplotlib.
 
 ## Shared grid interactions
+
+Expression grids omit the outer frame, including across group gaps. This is a
+deliberate visual difference from Scanpy; dot outlines and tile-edge options are
+preserved. Native `chart.configure_view(stroke="black", strokeWidth=1)` can add a
+frame when wanted. Ranked variants inherit the same defaults.
 
 Grid interactions are optional additions to the Scanpy signatures:
 
