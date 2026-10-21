@@ -376,7 +376,7 @@ def _neighbor_edges(
         raise NotImplementedError(
             "Scanpy embedding: connectivities require resident NumPy or SciPy arrays."
         )
-    values = matrix.data if sparse.issparse(matrix) else matrix
+    values = matrix.tocoo(copy=False).data if sparse.issparse(matrix) else matrix
     if (
         matrix.shape != (len(table), len(table))
         or matrix.dtype.kind not in "biuf"

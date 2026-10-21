@@ -1341,6 +1341,15 @@ broader storage/export and other graph forms retain their existing owners.
 The full repository suite and docs build were not rerun. Clearance: retain;
 no plan is eligible for removal.
 
+Sparse-validation follow-up: sparse values are read through COO for the finite
+check, leaving the original matrix and NetworkX edge conversion intact. Legacy
+LIL graphs now match public Scanpy geometry, order and styles under default and
+custom neighbor keys; nonfinite LIL values still raise a named validation error.
+**263 targeted Python checks**, Ruff and mypy pass. Earlier browser/workflow
+evidence is retained because graph conversion, serialization and rendering are
+unchanged; browser, notebook and resource runs were not repeated for this fix.
+Scope, next work and clearance remain unchanged.
+
 ## M07.d native colorbar placement
 
 Delivered in `730f9ce`. The shared `embedding`, `umap`, `tsne`, `diffmap`,

@@ -32,14 +32,20 @@ def graph_adata(storage="csr", key="neighbors"):
             "csc": sparse.csc_matrix,
             "csr_array": sparse.csr_array,
             "csc_array": sparse.csc_array,
+            "legacy_lil": sparse.lil_matrix,
         }[storage](matrix)
     name = "connectivities" if key == "neighbors" else "saved_connectivities"
     data.uns[key] = {"connectivities_key": name, "distances_key": "unused_distances"}
-    data.obsp[name] = matrix
+    if storage == "legacy_lil":
+        data.uns[key][name] = matrix
+    else:
+        data.obsp[name] = matrix
     return data
 
 
-@pytest.mark.parametrize("storage", ["csr", "csc", "csr_array", "csc_array", "dense"])
+@pytest.mark.parametrize(
+    "storage", ["csr", "csc", "csr_array", "csc_array", "dense", "legacy_lil"]
+)
 @pytest.mark.parametrize("key", ["neighbors", "saved"])
 def test_graph_geometry_order_and_style_match_public_scanpy(storage, key):
     import matplotlib
@@ -63,7 +69,8 @@ def test_graph_geometry_order_and_style_match_public_scanpy(storage, key):
     reference_options = {
         k: v for k, v in options.items() if k not in {"obs_id", "zoom"}
     }
-    axes = sc.pl.umap(data.copy(), **reference_options)
+    # AnnData.copy() migrates legacy graphs to obsp, which rejects LIL storage.
+    axes = sc.pl.umap(deepcopy(data), **reference_options)
     references = [
         next(c for c in ax.collections if isinstance(c, LineCollection)) for ax in axes
     ]
@@ -211,6 +218,13 @@ def test_empty_graph_retains_points_without_an_edge_layer_failure():
     data.obsp["connectivities"] = sparse.csr_matrix((8, 8))
     spec = gsc.pl.umap(data, edges=True, show=False).to_dict()
     assert spec == gsc.pl.umap(data, show=False).to_dict()
+
+
+def test_nonfinite_legacy_lil_graph_is_rejected():
+    data = graph_adata("legacy_lil")
+    data.uns["neighbors"]["connectivities"][0, 1] = np.nan
+    with pytest.raises(ValueError, match="finite real square matrix"):
+        gsc.pl.umap(data, edges=True, show=False)
 
 
 def test_views_and_backed_graphs_keep_cell_identity_without_densifying(
