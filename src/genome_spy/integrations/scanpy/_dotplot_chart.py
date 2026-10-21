@@ -15,7 +15,8 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     color_legend,
     finish_grouped_chart,
     grouped_axes,
-    guide_offset,
+    index_scales,
+    feature_gaps,
     plot_dimensions,
     summary_records,
 )
@@ -146,7 +147,15 @@ def build_dotplot(
         table["_paint"] = low
     x, y = grouped_axes(rows, columns, xpadding=0.3, ypadding=0.5)
     x, y = zoom_axes(x, y, enabled=zoom, name="dotplot")
-    offset = guide_offset(feature_groups, swap_axes=swap_axes, tree=tree is not None)
+    gaps = feature_gaps(feature_groups, rows if swap_axes else columns)
+    scales = index_scales(
+        x, y, xgaps=[] if swap_axes else gaps, ygaps=gaps if swap_axes else []
+    )
+    # The surround owns the scale definitions; marks retain fields and ticks.
+    x, y = (
+        gs.X("_x:I", axis=x.to_dict()["axis"]),
+        gs.Y("_y:I", axis=y.to_dict()["axis"]),
+    )
     dots = (
         gs.Chart(table)
         .transform_filter("isValid(datum._mean) && isValid(datum._percent)")
@@ -169,14 +178,7 @@ def build_dotplot(
                 clamp=True,
                 scheme=scheme,
             )
-            .legend(
-                color_legend(
-                    colorbar_title,
-                    feature_groups,
-                    swap_axes=swap_axes,
-                    tree=tree is not None,
-                )
-            ),
+            .legend(color_legend(colorbar_title)),
             size=gs.Size("_percent:Q")
             .scale(type="ordinal", domain=domain, range=areas)
             .legend(
@@ -189,7 +191,7 @@ def build_dotplot(
                     symbolFillColor="gray",
                     symbolStrokeColor="black",
                     symbolStrokeWidth=linewidth * _PT,
-                    offset=offset,
+                    offset=12,
                 )
             ),
         )
@@ -207,24 +209,10 @@ def build_dotplot(
                 gs.Tooltip("_percent:Q", title="Expressing cells (%)", format=".1f"),
             ]
         )
-    chart = finish_grouped_chart(
-        [dots],
-        colors,
-        feature_groups,
-        x,
-        y,
-        swap_axes=swap_axes,
-        rotation=rotation,
-        title=title,
-        width=width,
-        height=height,
-        frame_width=0.8,
-        tree=tree,
-        zoom=bool(zoom),
-    )
+    center = gs.layer(dots)
     if highlight:
         # The plot container owns the ruler so it also tracks gaps between dots.
-        chart = chart.add_params(
+        center = center.add_params(
             gs.ruler(
                 "grid_cursor",
                 encodings=["x", "y"],
@@ -236,4 +224,21 @@ def build_dotplot(
                 ),
             )
         )
+    chart = finish_grouped_chart(
+        center,
+        colors,
+        feature_groups,
+        x,
+        y,
+        swap_axes=swap_axes,
+        rotation=rotation,
+        title=title,
+        width=width,
+        height=height,
+        scales=scales,
+        name="dotplot",
+        frame_width=0.8,
+        tree=tree,
+        zoom=bool(zoom),
+    )
     return chart

@@ -11,6 +11,7 @@ from PIL import Image
 import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
 from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.helpers import index_position
 from tests.integrations.scanpy.matrixplot_fixture import matrixplot_cases
 
 REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
@@ -56,21 +57,81 @@ def test_registered_matrixplot_tiles_paint_and_grid(
     values = np.array(reference["values"], dtype=float)
     pixels = np.array(actual).astype(int)
     rows, columns = values.shape
+    cuts = chart.to_dict()["scales"]
+    registered = Image.new("RGB", actual.size, "white")
     for row, column in np.ndindex(values.shape):
         px, py = (
             round((column + 0.5) / columns * actual.width),
             round((row + 0.5) / rows * actual.height),
         )
         target = np.asarray(expected)[py, px].astype(int)
+        px = round(
+            index_position(
+                column + 0.5, columns, 0, bounds["width"], cuts["x"]["gapPositions"]
+            )
+            * 1.5
+        )
+        py = round(
+            index_position(
+                row + 0.5, rows, 0, bounds["height"], cuts["y"]["gapPositions"]
+            )
+            * 1.5
+        )
         # Palette bins/interpolation differ slightly; missing cells remain white.
         assert np.abs(pixels[py, px] - target).max() <= 12
         if np.isnan(values[row, column]):
             assert pixels[py, px].tolist() == [255, 255, 255]
         # Sample both tile interiors to catch gaps and incorrect band endpoints.
         for fraction in (0.1, 0.9):
-            x = round((column + fraction) / columns * actual.width)
-            y = round((row + fraction) / rows * actual.height)
+            x = round(
+                index_position(
+                    column + fraction,
+                    columns,
+                    0,
+                    bounds["width"],
+                    cuts["x"]["gapPositions"],
+                )
+                * 1.5
+            )
+            y = round(
+                index_position(
+                    row + fraction, rows, 0, bounds["height"], cuts["y"]["gapPositions"]
+                )
+                * 1.5
+            )
             assert np.abs(pixels[y, x] - target).max() <= 12
+        # Register each frozen tile with its gapped slot for the temporary overlay.
+        left = (
+            index_position(
+                column, columns, 0, bounds["width"], cuts["x"]["gapPositions"]
+            )
+            * 1.5
+        )
+        top = (
+            index_position(row, rows, 0, bounds["height"], cuts["y"]["gapPositions"])
+            * 1.5
+        )
+        tile_width = (
+            (bounds["width"] - 4 * len(cuts["x"]["gapPositions"])) / columns * 1.5
+        )
+        tile_height = (
+            (bounds["height"] - 4 * len(cuts["y"]["gapPositions"])) / rows * 1.5
+        )
+        box = (
+            round(left),
+            round(top),
+            round(left + tile_width),
+            round(top + tile_height),
+        )
+        source = expected.crop(
+            (
+                round(column / columns * expected.width),
+                round(row / rows * expected.height),
+                round((column + 1) / columns * expected.width),
+                round((row + 1) / rows * expected.height),
+            )
+        )
+        registered.paste(source.resize((box[2] - box[0], box[3] - box[1])), box)
     if case == "bounds_edges":
         # Compare one isolated vertical grid stroke at the reference export DPI.
         px, py = round(actual.width / columns), round(actual.height / (2 * rows))
@@ -85,7 +146,7 @@ def test_registered_matrixplot_tiles_paint_and_grid(
         min(actual.width, expected.width),
         min(actual.height, expected.height),
     )
-    Image.blend(actual.crop(extent), expected.crop(extent), 0.5).save(
+    Image.blend(actual.crop(extent), registered.crop(extent), 0.5).save(
         tmp_path / f"{case}-registered-overlay.png"
     )
 
@@ -142,7 +203,7 @@ def test_matrixplot_plain_navigation_and_offline_html(page, adata, tmp_path):
     chart = gsc.pl.matrixplot(adata, ["g1", "g2"], "group", use_raw=False, show=False)
     spec = chart.to_dict()
     for axis in ("x", "y"):
-        spec["layer"][0]["encoding"][axis]["scale"]["name"] = f"matrix-{axis}"
+        spec["scales"][axis]["name"] = f"matrix-{axis}"
     bounds = render(page, TopLevelSpec.from_dict(spec))
     expression = (
         "['matrix-x','matrix-y'].map(n=>api.getScaleResolutionByName(n).getDomain())"

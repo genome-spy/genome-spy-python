@@ -22,6 +22,7 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     bracket_space,
     coordinate,
     feature_gaps,
+    index_scales,
 )
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup, HeatmapData
 from genome_spy.integrations.scanpy._style import (
@@ -119,19 +120,11 @@ def build_heatmap(
     x, y = zoom_axes(x, y, enabled=zoom, name="heatmap")
     cell_gaps = prepared.intervals["stop"].iloc[:-1].tolist()
     gene_gaps = feature_gaps(feature_groups, genes)
-    scales = gs.scales(
-        x=gs.Scale(
-            type="index",
-            **x.scale(gapPositions=cell_gaps if swap_axes else gene_gaps).to_dict()[
-                "scale"
-            ],
-        ),
-        y=gs.Scale(
-            type="index",
-            **y.scale(gapPositions=gene_gaps if swap_axes else cell_gaps).to_dict()[
-                "scale"
-            ],
-        ),
+    scales = index_scales(
+        x,
+        y,
+        xgaps=cell_gaps if swap_axes else gene_gaps,
+        ygaps=gene_gaps if swap_axes else cell_gaps,
     )
     # The surround owns the scales; marks only declare fields and axes.
     x, y = gs.X("_x:I").axis(None), gs.Y("_y:I").axis(None)
@@ -287,7 +280,6 @@ def build_heatmap(
                     rotation=rotation,
                     end_band=0.8,
                     zoom=bool(zoom),
-                    in_bounds=True,
                 )
             ).properties(height=bracket_space(feature_groups), name="heatmap-brackets")
         ]

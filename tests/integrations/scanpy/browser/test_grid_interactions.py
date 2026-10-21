@@ -12,6 +12,7 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.helpers import tree_segments
 from tests.integrations.scanpy.heatmap_fixture import make_heatmap_adata
 from tests.integrations.scanpy.clustermap_fixture import make_cluster_adata
 
@@ -412,13 +413,10 @@ def test_summary_zoom_and_pan_keep_tree_leaves_and_labels_aligned(
             if e.tag.endswith("text") and e.text in {"A", "B", "C", "D"}
         }
         assert labels
-        tree = next(e for e in root.iter() if e.get("stroke") == "#555555")
         edge = bounds["y"] if swapped else bounds["x"] + bounds["width"]
-        leaves = [
-            float(line.get(("x" if swapped else "y") + endpoint))
-            for line in tree
-            for endpoint in ("1", "2")
-            if abs(float(line.get(("y" if swapped else "x") + endpoint)) - edge) < 1
+        endpoints = np.array(tree_segments(root)).reshape(-1, 2)
+        leaves = endpoints[
+            np.abs(endpoints[:, 1 if swapped else 0] - edge) < 1, 0 if swapped else 1
         ]
         assert all(
             any(abs(leaf - xy[0 if swapped else 1]) < 0.2 for leaf in leaves)
@@ -509,15 +507,14 @@ def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
         float(e.get("r")) for e in svg_root(page).iter() if e.tag.endswith("circle")
     )
     assert after == radii
-    origins = page.evaluate(
-        "['grid_x_origin','grid_y_origin','grid_x_step','grid_y_step'].map(n=>api.getParam(n).getValue())"
+    fractions = page.evaluate(
+        """([column,row])=>['x','y'].map((axis,i)=>{
+        const s=api.getScaleResolutionByName(`dotplot-${axis}`).getScale();
+        return axis==='x' ? s(column)+s.bandwidth()/2 : 1-s(row)+s.bandwidth()/2;
+    })""",
+        [column, row],
     )
-    px, py = pointer(
-        page,
-        bounds,
-        origins[0] + (column + 0.5) * origins[2],
-        origins[1] + (row + 0.5) * origins[3],
-    )
+    px, py = pointer(page, bounds, *fractions)
     for dx in (0, 1, -1):
         page.mouse.move(px + dx, py)
         page.wait_for_timeout(100)
@@ -544,3 +541,97 @@ def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
         after = np.asarray(Image.open(BytesIO(page.screenshot()))).astype(int)
         assert (np.abs(after - before).max(axis=2) > 10).sum() > 200
         assert page.locator(".message-box").count() == 0
+
+
+@pytest.mark.parametrize("page", [1, 1.5], indirect=True)
+@pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
+@pytest.mark.parametrize("swapped", [False, True])
+def test_summary_marker_gaps_survive_navigation(page, family, swapped):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        chart = getattr(gsc.pl, family)(
+            make_heatmap_adata(),
+            {"First": ["g2", "g1"], "Again": ["g2"]},
+            "group",
+            dendrogram=True,
+            swap_axes=swapped,
+            zoom="xy",
+            width=450,
+            height=300,
+            show=False,
+            **({"highlight": True} if family == "dotplot" else {"show_values": True}),
+        )
+    bounds = render(page, chart)
+    axis = "y" if swapped else "x"
+    extent = "height" if swapped else "width"
+    for navigated in (False, True):
+        if navigated:
+            px, py = pointer(page, bounds)
+            page.mouse.wheel(0, -180)
+            page.wait_for_timeout(200)
+            page.mouse.down()
+            page.mouse.move(px + 8, py + 8, steps=5)
+            page.mouse.up()
+        # Wait for the live scale transition before targeting a narrow gap.
+        page.evaluate(
+            """async family=>{
+            const sample=()=>['x','y'].flatMap(axis=>{
+                const s=api.getScaleResolutionByName(`${family}-${axis}`).getScale();
+                return [...s.domain(),s(0),s(2)];
+            });
+            let previous=sample(), stable=0;
+            const deadline=performance.now()+3000;
+            while(performance.now()<deadline){
+                await new Promise(requestAnimationFrame);
+                const current=sample();
+                stable=current.every((v,i)=>Math.abs(v-previous[i])<1e-7)?stable+1:0;
+                if(stable>=3)return;
+                previous=current;
+            }
+            throw Error('Navigation did not settle');
+        }""",
+            family,
+        )
+        live = page.evaluate(
+            """({family,axis,extent})=>{
+            const s=api.getScaleResolutionByName(`${family}-${axis}`).getScale();
+            const sign=axis==='x'?1:-1;
+            const edge=s(1)+sign*s.bandwidth();
+            return {gap:Math.abs(s(2)-edge)*extent,
+                center:axis==='x'?(edge+s(2))/2:1-(edge+s(2))/2};
+        }""",
+            {"family": family, "axis": axis, "extent": bounds[extent]},
+        )
+        assert live["gap"] == pytest.approx(4, abs=0.05)
+        fractions = (0.5, live["center"]) if swapped else (live["center"], 0.5)
+        pointer(page, bounds, *fractions)
+        page.wait_for_timeout(450)
+        pointer(page, bounds, *fractions)
+        page.wait_for_timeout(100)
+        assert not page.locator("table.attributes").is_visible()
+        page.mouse.move(1, 1)
+        page.wait_for_timeout(100)
+        pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
+        canvas = page.locator("canvas").first.bounding_box()
+        px, py = (
+            round(
+                canvas[coordinate] + bounds[coordinate] + fraction * bounds[dimension]
+            )
+            for coordinate, dimension, fraction in zip(
+                ("x", "y"), ("width", "height"), fractions, strict=True
+            )
+        )
+        assert (
+            pixels[
+                round(py * page.evaluate("devicePixelRatio")),
+                round(px * page.evaluate("devicePixelRatio")),
+            ].min()
+            > 245
+        )
+        # The tree remains inside its native side and touches the matrix edge.
+        tree = page.evaluate(
+            "name=>api.views.getLayoutBounds({scope:[],view:name})", f"{family}-tree"
+        )
+        assert (tree["y"] + tree["height"] if swapped else tree["x"]) == pytest.approx(
+            bounds["y"] if swapped else bounds["x"] + bounds["width"], abs=0.5
+        )

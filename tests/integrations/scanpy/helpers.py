@@ -1,6 +1,7 @@
 """Chart traversal and reference paths shared by integration tests and generators."""
 
 from pathlib import Path
+import re
 from typing import Any
 
 
@@ -51,3 +52,29 @@ def points(panel: dict[str, Any]) -> dict[str, Any]:
         for layer in leaf_marks(panel)
         if "scale" in layer.get("encoding", {}).get("color", {})
     )
+
+
+def index_position(slot, count, padding, extent, cuts=()):
+    """Project an expected slot through fixed four-pixel gaps, independently of Core."""
+    step = (extent - 4 * len(cuts)) / (count + 2 * padding)
+    return (slot + padding) * step + 4 * sum(cut <= slot for cut in cuts)
+
+
+def tree_segments(root):
+    """Read straight tree endpoints from native links or legacy rules in an SVG."""
+    segments = []
+    for group in root.iter():
+        if group.get("stroke") != "#555555":
+            continue
+        for element in group:
+            if element.tag.endswith("line"):
+                segments.append(
+                    [float(element.get(k)) for k in ("x1", "y1", "x2", "y2")]
+                )
+            else:
+                values = list(
+                    map(float, re.findall(r"[-+]?\d*\.?\d+", element.get("d", "")))
+                )
+                assert len(values) in (4, 8), element.attrib
+                segments.append([*values[:2], *values[-2:]])
+    return segments

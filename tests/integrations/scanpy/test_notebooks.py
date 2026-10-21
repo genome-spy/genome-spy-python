@@ -222,9 +222,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             for mark in leaf_marks(chart_spec)
             if mark.get("mark", {}).get("color") == "#555555"
         )
-        assert tree["mark"]["type"] == (
-            "link" if chart is namespace["heatmap"] else "rule"
-        )
+        assert tree["mark"]["type"] == "link"
         assert len(chart_spec["datasets"][tree["data"]["name"]]) == 3 * (len(order) - 1)
     spec = charts[0].to_dict()
     dot = points(spec)
@@ -239,7 +237,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     ]
     spec = charts[1].to_dict()
     tiles = points(spec)
-    records = spec["datasets"][spec["layer"][0]["data"]["name"]]
+    records = spec["datasets"][spec["spec"]["data"]["name"]]
     assert tiles["mark"]["type"] == "rect"
     assert len(records) == 100
     assert tiles["encoding"]["color"]["scale"]["scheme"] == "blues"
@@ -275,7 +273,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     )
     assert [row["_column"] for row in records[:10]] == namespace["group_labels"]
 
-    rulers = [p for p in charts[0].to_dict()["params"] if "ruler" in p]
+    rulers = [p for p in charts[0].to_dict()["spec"]["params"] if "ruler" in p]
     assert len(rulers) == 1
     assert rulers[0]["ruler"]["encodings"] == ["x", "y"]
     assert rulers[0]["ruler"]["display"] == "center"

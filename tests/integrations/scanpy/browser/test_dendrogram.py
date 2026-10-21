@@ -3,6 +3,7 @@
 from io import BytesIO
 import json
 from pathlib import Path
+import xml.etree.ElementTree as ET
 
 import numpy as np
 import pytest
@@ -10,6 +11,7 @@ from PIL import Image
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
+from tests.integrations.scanpy.helpers import tree_segments, index_position
 from tests.integrations.scanpy.dendrogram_fixture import (
     make_tree_adata,
     tree_plot_cases,
@@ -70,9 +72,13 @@ def test_registered_branches_and_complete_charts(
             return left - x / maximum * 180, top + height - y / n * height
         if swapped:
             pad = 0.3 if family == "dotplot" else 0
-            return left + (x + pad) / (n + 2 * pad) * width, top - y / maximum * 80
+            return left + index_position(x, n, pad, width), top - y / (
+                maximum * 1.05
+            ) * 80
         pad = 0.5 if family == "dotplot" else 0
-        return left + width + x / maximum * 80, top + (y + pad) / (n + 2 * pad) * height
+        return left + width + x / (maximum * 1.05) * 80, top + index_position(
+            y, n, pad, height
+        )
 
     for path in reference["tree_paths"]:
         for start, end in zip(path[:-1], path[1:], strict=True):
@@ -152,11 +158,11 @@ def test_tree_alignment_survives_resizing_and_wheel(page, family, swapped, size)
         page.evaluate("async () => (await api.imageExport.svg()).blob.text()") == before
     )
     # Leaves meet the plot edge at the same centers as summary marks.
-    svg = page.evaluate("""async () => {
-        const text=await (await api.imageExport.svg()).blob.text();
-        const host=document.createElement('div');host.innerHTML=text;
-        return [...host.querySelectorAll('line')].filter(e=>e.closest('[stroke]')?.getAttribute('stroke')==='#555555').map(e=>[+e.getAttribute('x1'),+e.getAttribute('y1'),+e.getAttribute('x2'),+e.getAttribute('y2')]);
-    }""")
+    svg = tree_segments(
+        ET.fromstring(
+            page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+        )
+    )
     assert len(svg) == 9
     points = np.array(svg).reshape(-1, 2)
     pad = (0.3 if swapped else 0.5) if family == "dotplot" else 0
@@ -250,3 +256,36 @@ def test_attached_tree_keeps_summary_hover_aligned(page, family, swapped):
         REFERENCE["computations"]["default"]["categories_ordered"][0],
         "2.000",
     ]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Core 1.2 SVG export moves straight-link control points twice; WebGL is unaffected.",
+)
+def test_native_straight_link_export_keeps_control_points_on_the_line(page):
+    import re
+
+    import genome_spy as gs
+
+    chart = (
+        gs.Chart([{"start": 0.2, "end": 0.8}])
+        .mark_link(linkShape="line")
+        .encode(
+            x=gs.X("start:Q").scale(domain=[0, 1]).axis(None),
+            x2=gs.X2("end:Q"),
+            y=gs.value(0.5),
+            y2=gs.value(0.5),
+        )
+        .properties(width=200, height=100)
+    )
+    render(page, chart)
+    root = ET.fromstring(
+        page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
+    )
+    path = next(e for e in root.iter() if e.tag.endswith("path"))
+    vertices = np.array(
+        list(map(float, re.findall(r"[-+]?\d*\.?\d+", path.get("d"))))
+    ).reshape(-1, 2)
+    assert len(vertices) in (2, 4)
+    assert np.max(np.abs(vertices[:, 1] - vertices[0, 1])) <= 0.2

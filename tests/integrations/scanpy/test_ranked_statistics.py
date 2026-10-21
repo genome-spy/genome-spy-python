@@ -191,7 +191,8 @@ def test_explicit_symbols_custom_key_tail_and_threshold_only_select_slots():
     chart = gsc.pl.rank_genes_groups_matrixplot(
         a, var_names={"manual": ["S2", "S2"]}, min_logfoldchange=99, **options
     )
-    assert len(next(iter(chart.to_dict()["datasets"].values()))) == 8
+    spec = chart.to_dict()
+    assert len(spec["datasets"][points(spec)["data"]["name"]]) == 8
 
 
 @pytest.mark.parametrize(

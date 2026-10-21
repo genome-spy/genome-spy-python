@@ -112,6 +112,8 @@ def main() -> None:
     tracemalloc.stop()
     spec = chart.to_dict()
     spec.get("spec", spec)["name"] = "benchmark"
+    for axis in ("x", "y"):
+        spec["scales"][axis].setdefault("name", f"{args.plot}-{axis}")
     payload = json.dumps(spec, separators=(",", ":")).encode()
     serialized = perf_counter()
     report = {
@@ -182,7 +184,6 @@ def main() -> None:
                 "api.views.getLayoutBounds({scope:[],view:'benchmark'})"
             )
             canvas = page.locator("canvas").first.bounding_box()
-            xpad, ypad = (0.3, 0.5) if args.plot == "dotplot" else (0, 0)
             column, row, hover_gene = 0, 0, "g0"
             if args.plot == "dotplot":
                 records = next(
@@ -194,26 +195,18 @@ def main() -> None:
                 report["fixture"]["hover_probe"] = {
                     key: probe[key] for key in ("_gene", "_group", "_percent")
                 }
-            px = (
-                canvas["x"]
-                + bounds["x"]
-                + (column + 0.5 + xpad) / (markers + 2 * xpad) * bounds["width"]
-            )
-            py = (
-                canvas["y"]
-                + bounds["y"]
-                + (row + 0.5 + ypad) / (groups + 2 * ypad) * bounds["height"]
-            )
             if args.plot == "heatmap":
-                cuts = spec["scales"]["y"]["gapPositions"]
                 row = cells // 2
-                step = (bounds["height"] - 6 * len(cuts)) / cells
-                py = (
-                    canvas["y"]
-                    + bounds["y"]
-                    + (row + 0.5) * step
-                    + 6 * sum(cut <= row for cut in cuts)
-                )
+            fractions = page.evaluate(
+                """({family,column,row})=>['x','y'].map(axis=>{
+                const scale=api.getScaleResolutionByName(`${family}-${axis}`).getScale();
+                return axis==='x' ? scale(column)+scale.bandwidth()/2
+                    : 1-scale(row)+scale.bandwidth()/2;
+            })""",
+                {"family": args.plot, "column": column, "row": row},
+            )
+            px = canvas["x"] + bounds["x"] + fractions[0] * bounds["width"]
+            py = canvas["y"] + bounds["y"] + fractions[1] * bounds["height"]
             page.mouse.move(px - 2, py - 2)
             page.wait_for_timeout(450)
             start = perf_counter()

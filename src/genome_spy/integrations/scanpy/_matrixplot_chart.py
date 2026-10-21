@@ -13,6 +13,8 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     color_legend,
     finish_grouped_chart,
     grouped_axes,
+    index_scales,
+    feature_gaps,
     plot_dimensions,
     summary_records,
 )
@@ -87,6 +89,15 @@ def build_matrixplot(
     # Tiles fill their slots; missing means leave an empty slot with its label.
     x, y = grouped_axes(rows, columns, xpadding=0, ypadding=0)
     x, y = zoom_axes(x, y, enabled=zoom, name="matrixplot")
+    gaps = feature_gaps(feature_groups, rows if swap_axes else columns)
+    scales = index_scales(
+        x, y, xgaps=[] if swap_axes else gaps, ygaps=gaps if swap_axes else []
+    )
+    # The surround owns the scale definitions; marks retain fields and ticks.
+    x, y = (
+        gs.X("_x:I", axis=x.to_dict()["axis"]),
+        gs.Y("_y:I", axis=y.to_dict()["axis"]),
+    )
     tiles = (
         gs.Chart(summary_records(colors, swap_axes=swap_axes, context=context))
         .transform_filter("isValid(datum._mean)")
@@ -108,14 +119,7 @@ def build_matrixplot(
                 clamp=True,
                 scheme=scheme,
             )
-            .legend(
-                color_legend(
-                    colorbar_title,
-                    feature_groups,
-                    swap_axes=swap_axes,
-                    tree=tree is not None,
-                )
-            ),
+            .legend(color_legend(colorbar_title)),
         )
     )
     if hover:
@@ -128,7 +132,7 @@ def build_matrixplot(
         )
     # Reuse the dotplot's labels, marker brackets, guides and tree placement.
     return finish_grouped_chart(
-        [with_values(tiles, "_mean") if show_values else tiles],
+        with_values(tiles, "_mean") if show_values else gs.layer(tiles),
         colors,
         feature_groups,
         x,
@@ -138,6 +142,8 @@ def build_matrixplot(
         title=title,
         width=width,
         height=height,
+        scales=scales,
+        name="matrixplot",
         frame_width=1.5,
         tree=tree,
         zoom=bool(zoom),

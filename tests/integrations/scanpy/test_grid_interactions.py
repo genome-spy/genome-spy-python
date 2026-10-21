@@ -54,12 +54,12 @@ def test_grid_options_are_keyword_only_and_off_by_default(family):
     for axis in ("x", "y"):
         assert (
             plain["scales"][axis]
-            if family == "heatmap"
+            if "surround" in plain
             else plain_mark["encoding"][axis]["scale"]
         )["zoom"] is False
         assert (
             active["scales"][axis]
-            if family == "heatmap"
+            if "surround" in active
             else active_mark["encoding"][axis]["scale"]
         )["zoom"] is (axis == "y")
     for channel in ("color", "size"):
@@ -93,7 +93,7 @@ def test_invalid_interaction_options_fail_before_loading_scanpy(
 def test_value_marks_share_one_source_and_keep_plotted_values(family):
     options = {} if family in ("matrix", "clustermap") else {"standard_scale": "var"}
     spec = grid_chart(family, show_values=True, **options).to_dict()
-    values = spec["spec"] if family == "heatmap" else spec["layer"][0]
+    values = spec["spec"] if "surround" in spec else spec["layer"][0]
     tiles, text_group = values["layer"]
     text = text_group["layer"][0]
     assert "data" not in tiles and "data" not in text
@@ -127,9 +127,9 @@ def test_value_marks_share_one_source_and_keep_plotted_values(family):
 def test_highlight_uses_native_ruler_without_extra_marks_or_data():
     plain = grid_chart("dotplot", hover=False).to_dict()
     spec = grid_chart("dotplot", highlight=True, hover=False).to_dict()
-    dots = spec["layer"][0]
+    dots = spec["spec"]["layer"][0]
     assert dots["mark"]["type"] == "point" and dots["mark"]["tooltip"] is None
-    assert spec["params"] == [
+    assert spec["spec"]["params"] == [
         {
             "name": "grid_cursor",
             "persist": False,
@@ -147,7 +147,7 @@ def test_highlight_uses_native_ruler_without_extra_marks_or_data():
         }
     ]
     assert spec["datasets"] == plain["datasets"]
-    del spec["params"]
+    del spec["spec"]["params"]
     assert spec == plain
 
 
@@ -160,7 +160,7 @@ def test_grid_can_explicitly_enable_both_axes(family):
     for axis in ("x", "y"):
         assert (
             spec["scales"][axis]
-            if family == "heatmap"
+            if "surround" in spec
             else mark["encoding"][axis]["scale"]
         )["zoom"] is True
 
@@ -200,3 +200,35 @@ def test_zoom_rejects_other_modes_before_optional_dependencies(monkeypatch, inva
     monkeypatch.setattr(gsc.pl, "_require_scanpy", lambda: pytest.fail("Loaded Scanpy"))
     with pytest.raises(TypeError, match="zoom must be False, True.*or 'xy'"):
         gsc.pl.matrix(object(), zoom=invalid)
+
+
+@pytest.mark.parametrize("family", ["dotplot", "matrixplot"])
+@pytest.mark.parametrize("swapped", [False, True])
+def test_summary_tracks_share_gaps_without_copying_measurements(family, swapped):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", UserWarning)
+        spec = getattr(gsc.pl, family)(
+            make_heatmap_adata(),
+            {"First": ["g2", "g1"], "Again": ["g2"]},
+            "group",
+            dendrogram=True,
+            swap_axes=swapped,
+            zoom="xy",
+            show=False,
+        ).to_dict()
+    gene_axis = "y" if swapped else "x"
+    assert spec["scales"][gene_axis]["gapPositions"] == [2]
+    assert spec["scales"]["x" if swapped else "y"]["gapPositions"] == []
+    assert all(spec["scales"][axis]["gapWidth"] == 4 for axis in ("x", "y"))
+    assert set(spec["surround"]) == {"top", "bottom", "left", "right"}
+    assert "padding" not in spec and spec["spacing"] == 0
+    assert "params" not in spec
+    measurements = [rows for rows in spec["datasets"].values() if "_mean" in rows[0]]
+    assert len(measurements) == 1 and len(measurements[0]) == 12
+    for mark in leaf_marks(spec):
+        for axis in ("x", "y"):
+            encoding = mark.get("encoding", {}).get(axis, {})
+            if encoding.get("type") == "index":
+                assert "scale" not in encoding
+        if mark.get("mark", {}).get("type") == "link":
+            assert mark["mark"]["clip"] is True

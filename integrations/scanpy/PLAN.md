@@ -722,7 +722,7 @@ negative coordinates to reserve room for tracks. Preserve the documented
 `width`/`height` and `figsize` budget semantics during this change.
 
 Heatmap cell groups must have real blank space between them. Use native index
-`gapPositions`, with Core's default `gapWidth` of 6 CSS pixels, which stays fixed
+`gapPositions`, with a `gapWidth` of 4 CSS pixels, which stays fixed
 under zoom and device-pixel-ratio changes. These gaps are a deliberate requested
 appearance change; values, ordering and scientific meaning stay unchanged.
 Ordinary native scale configuration owns gap styling; do not add a parallel

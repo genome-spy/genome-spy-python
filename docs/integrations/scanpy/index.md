@@ -407,8 +407,10 @@ ranking, palette write, or cached-result mutation occurs.
 | `dendrogram`, `norm`, `vcenter`, other forwarded kwargs | Trees accept True or a stored key; see the tree contract below. Nondefault norm/vcenter and other kwargs error; `DotPlot`, supplied `dot_size_df`, and builder styling are M13. Only scalar `linewidth` is accepted from scatter kwargs. |
 
 Rows and columns use integer index-scale slots with padding that preserves the
-initial Scanpy spacing. Repeated gene labels retain separate slots. Hover
-describes group/feature summaries; these dots do not identify individual cells.
+initial Scanpy spacing. Marker blocks that partition the genes have four-pixel
+gaps, fixed under zoom. Labels, brackets and trees use aligned `gs.surround`
+side tracks; native guides sit outside the whole chart. Repeated gene labels
+retain separate slots. Hover describes group/feature summaries; these dots do not identify individual cells.
 Brushes and individual-cell selection remain deferred.
 
 Native labels use portable Lato Regular and native guides. Line breaks in guide
@@ -441,7 +443,7 @@ computed. It performs no analysis or AnnData/cache writes.
 | `log`, `standard_scale`, `swap_axes` | Apply log1p to selected observations, aggregate means, then min–max scale per gene (`"var"`) or group (`"group"`) once before an optional transpose. Constant ranges become zero. Matrixplot does not use dotplot's second scaling pass. |
 | `values_df` | Authoritative real numeric table. Preserve supplied values and row/column order; only explicit `categories_order` reindexes its rows. `log` and `standard_scale` do not transform the supplied table. Require exactly the plotted groups and feature multiplicities, with unique group labels. Repeated supplied feature columns retain their own slot values. Missing/extra labels, unexpected duplicates, infinities and nonnumeric entries error. |
 | `cmap`, `vmin`, `vmax` | Native scheme (default viridis) with finite numeric bounds and clipping. Constant bounds expand the guide by 10%, or ±0.1 at zero; tiles map against that expanded domain, unlike dotplot's frozen constant colors. Missing tiles are unpainted but retain their slots; all-missing values error. |
-| `title`, `colorbar_title`, `var_group_*`, `width`, `height`, `figsize` | Shared native grouped layout and horizontal color guide. Index slots have no outer padding, so adjacent tiles fill the matrix. Default cells are 37 × 35 logical pixels, exchanged when axes swap. Frame width follows matrixplot's 1.5-point default. |
+| `title`, `colorbar_title`, `var_group_*`, `width`, `height`, `figsize` | Shared native grouped layout and horizontal color guide. Index slots have no outer padding; tiles fill their slots with four-pixel gaps between partitioned marker blocks. Default cells are 37 × 35 logical pixels, exchanged when axes swap. Frame width follows matrixplot's 1.5-point default. |
 | `edgecolor`, `linewidth` in kwargs | Scalar opaque CSS edge color and nonnegative width in points; defaults are gray and 0.1. `edgecolor="none"` disables edges. Plural aliases error: Scanpy 1.11.5 overwrites those forwarded forms with its defaults; use the singular forms explicitly. Other pcolor kwargs error. |
 | `zoom`, `show_values` | Both default False. `zoom=True` enables y-only navigation; `zoom="xy"` enables both axes. Enable fitted two-decimal plotted values; see [shared grid interactions](#shared-grid-interactions). |
 | `hover` | Enabled by default; show gene, group and displayed mean/scaled mean or supplied value. `hover=False` disables picking without changing tile geometry. Summary tiles do not identify individual cells. |
@@ -475,9 +477,9 @@ tick labels reveal more names as slots grow. Defaults remain
 
 Category-strip tooltips use the native default handler and the same `hover` flag
 as tiles. They work with the bundled Core 1.2.0 runtime, including after zoom and
-pan. Heatmap bands, labels, brackets and trees use native `gs.surround` side
-tracks with shared index scales. Clustermap still uses its earlier outside-plot
-tracks; its native layout migration remains M14.b.3. There is no patched bundle
+pan. Dotplot, matrixplot and heatmap labels, brackets and trees use native
+`gs.surround` side tracks with shared index scales. Clustermap still uses its
+earlier outside-plot tracks; its native layout migration remains M14.b.3. There is no patched bundle
 or custom hover listener in the integration.
 
 `show_values` uses native `fitToBand` text, shared tile records and the plotted
@@ -521,7 +523,7 @@ means or changes AnnData.
 | `dendrogram` | False, True or a stored-result key. Reuse Scanpy's stored result or the guarded public computation. Heatmap supports two-group trees. Interpolate stored branches to the centers of unequal cell-group spans; native link endpoints keep them connected across gaps. Group labels share those centers, correcting the old half-row offset. Matching marker blocks follow tree order too. |
 | `swap_axes`, `show_gene_labels`, `var_group_*` | Ordinary heatmaps use gene brackets above the matrix; swapped heatmaps use a colored gene-group strip on the right, as Scanpy does. Show gene labels by default for at most 50 slots. `var_group_rotation` affects ordinary brackets. |
 | `cmap`, `vmin`, `vmax`, `alpha`, `interpolation` | Native scheme (default viridis), numeric bounds, scalar opacity and nearest-neighbor tiles. Missing values keep their positions but are unpainted; all-missing colors error. Other interpolation, norm/vcenter, Matplotlib colormaps and unsupported imshow kwargs error by name. |
-| Group gaps/layout | Native surround side tracks share the tile index scales. Cell groups have 6 CSS-pixel gaps that stay fixed under zoom and DPR changes; marker blocks also have gaps when their spans partition the genes. A single group has no internal gap. Arbitrary/overlapping brackets do not invent groups. Native scale settings can customize gaps. |
+| Group gaps/layout | Native surround side tracks share the tile index scales. Cell groups have 4 CSS-pixel gaps that stay fixed under zoom and DPR changes; marker blocks also have gaps when their spans partition the genes. A single group has no internal gap. Arbitrary/overlapping brackets do not invent groups. Native scale settings can customize gaps. |
 | Category colors | Reuse saved AnnData colors or the shared Scanpy default palettes without writing them back. Numeric and multi-key strips use native category20, currently limited to 20 groups. |
 | `width`, `height`, `figsize` | Width/height control the tile area in logical pixels. Defaults follow Scanpy's gene-label size rules; figsize uses 100 pixels per inch with space reserved for strips/trees. Native text and outer layout differ from Matplotlib. The vertical color guide uses at most 400 pixels. |
 | `zoom` | Defaults False. `True` enables y-only wheel zoom and drag panning; `"xy"` enables both index axes. Bands, gaps, tree leaves and gene labels follow the visible cells/genes. Clip branches and strips at the plot extent; hide offscreen labels and gene brackets whose whole span is not visible. |
@@ -758,6 +760,9 @@ does not infer staleness from expression values.
 Dotplot/matrixplot trees reserve an 80-pixel branch region; heatmaps use 100 pixels
 on the right or 80 above, and correlation trees use 180.
 Zero-distance leaves meet the matrix edge without a gap or distance-axis padding.
+Core 1.2 SVG export can bend straight tree links (C12 in the integration ledger);
+notebook WebGL and inline HTML use the verified branch geometry. Vector-export
+fidelity remains open until an upstream fix is adopted.
 Native dataflow projections follow the plot dimensions and fixed index-slot
 padding. Optional grouped navigation uses the same live index projection for
 branches and row/column labels. Summary hover remains available. Distances,

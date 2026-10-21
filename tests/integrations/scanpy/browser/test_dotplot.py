@@ -12,7 +12,7 @@ import genome_spy.integrations.scanpy as gsc
 from genome_spy.chart import TopLevelSpec
 from tests.integrations.scanpy.browser.test_umap import render
 from tests.integrations.scanpy.dotplot_fixture import dotplot_cases
-from tests.integrations.scanpy.helpers import points
+from tests.integrations.scanpy.helpers import index_position
 
 REFERENCE_DIR = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((REFERENCE_DIR / "dotplot.json").read_text())
@@ -91,9 +91,8 @@ def test_complete_grouped_labels_guides_and_brackets(
             slot = 0.95 if label["text"] == "first markers" else 2.45
             if swapped:
                 padding = 0.5 if family == "dotplot" else 0
-                expected = (
-                    bounds["y"]
-                    + (slot + padding) / (3 + 2 * padding) * bounds["height"]
+                expected = bounds["y"] + index_position(
+                    slot, 3, padding, bounds["height"], [2]
                 )
                 assert label["y"] + label["height"] / 2 == pytest.approx(
                     expected, abs=2
@@ -102,8 +101,8 @@ def test_complete_grouped_labels_guides_and_brackets(
                 px, py = round(right + 4), round(expected)
             else:
                 padding = 0.3 if family == "dotplot" else 0
-                expected = (
-                    bounds["x"] + (slot + padding) / (3 + 2 * padding) * bounds["width"]
+                expected = bounds["x"] + index_position(
+                    slot, 3, padding, bounds["width"], [2]
                 )
                 assert label["x"] + label["width"] / 2 == pytest.approx(expected, abs=2)
                 assert label["y"] + label["height"] <= bounds["y"] - 6
@@ -184,9 +183,11 @@ def test_pbmc_marker_brackets_paint_single_and_multiple_gene_spans(page):
     bounds = render(page, chart)
     pixels = np.asarray(Image.open(BytesIO(page.screenshot())).convert("RGB"))
     start = 0
-    for genes in markers.values():
+    for i, genes in enumerate(markers.values()):
         midpoint = start + (len(genes) - 1) / 2 + 0.45
-        px = round(bounds["x"] + (midpoint + 0.3) / 10.6 * bounds["width"])
+        px = round(
+            bounds["x"] + (midpoint + 0.3) / 10.6 * (bounds["width"] - 24) + 4 * i
+        )
         py = round(bounds["y"] - 4)
         assert pixels[py - 1 : py + 2, px - 1 : px + 2].min() < 64, genes
         start += len(genes)
@@ -229,12 +230,36 @@ def test_registered_dotplot_positions_paints_and_footprints(
     ).convert("RGB")
     assert abs(actual.width - expected.width) <= 2
     assert abs(actual.height - expected.height) <= 2
+    registered = expected.copy()
+    registered.paste("white", (2, 2, expected.width - 2, expected.height - 2))
     for (x, y), color, area in zip(
         reference["positions"], reference["colors"], reference["sizes"], strict=True
     ):
         xd, yd = reference["x_domain"], reference["y_domain"]
         px = round((x - xd[0]) / (xd[1] - xd[0]) * bounds["width"] * 1.5)
         py = round((1 - (y - yd[0]) / (yd[1] - yd[0])) * bounds["height"] * 1.5)
+        original = (px, py)
+        scales = chart.to_dict()["scales"]
+        px = round(
+            index_position(
+                x,
+                scales["x"]["domain"][1] + 1,
+                0.3,
+                bounds["width"],
+                scales["x"]["gapPositions"],
+            )
+            * 1.5
+        )
+        py = round(
+            index_position(
+                y,
+                scales["y"]["domain"][1] + 1,
+                0.5,
+                bounds["height"],
+                scales["y"]["gapPositions"],
+            )
+            * 1.5
+        )
         expected_color = np.round(np.array(color[:3]) * 255)
         native = np.asarray(actual).astype(int)
         if area == 0:
@@ -248,9 +273,11 @@ def test_registered_dotplot_positions_paints_and_footprints(
         )
 
         # Isolated dots occupy at most 31 backing pixels at 150 DPI.
-        def diameter(image):
+        def diameter(image, center):
             pixels = np.asarray(
-                image.crop((px - 20, py - 20, px + 21, py + 21))
+                image.crop(
+                    (center[0] - 20, center[1] - 20, center[0] + 21, center[1] + 21)
+                )
             ).astype(int)
             ink = (pixels.max(axis=2) - pixels.min(axis=2) > 5) | (
                 pixels.min(axis=2) < 220
@@ -259,9 +286,18 @@ def test_registered_dotplot_positions_paints_and_footprints(
             assert len(xx) > 0
             return np.array([xx.max() - xx.min() + 1, yy.max() - yy.min() + 1])
 
-        np.testing.assert_allclose(diameter(actual), diameter(expected), atol=2)
         np.testing.assert_allclose(
-            diameter(actual), np.sqrt(area) * 150 / 72 + 0.2 * 150 / 72, atol=2
+            diameter(actual, (px, py)), diameter(expected, original), atol=2
+        )
+        # Move the reference footprint without resizing it when groups gain gaps.
+        ox, oy = original
+        registered.paste(
+            expected.crop((ox - 20, oy - 20, ox + 21, oy + 21)), (px - 20, py - 20)
+        )
+        np.testing.assert_allclose(
+            diameter(actual, (px, py)),
+            np.sqrt(area) * 150 / 72 + 0.2 * 150 / 72,
+            atol=2,
         )
     actual.save(tmp_path / f"{case}-native.png")
     extent = (
@@ -270,7 +306,7 @@ def test_registered_dotplot_positions_paints_and_footprints(
         min(actual.width, expected.width),
         min(actual.height, expected.height),
     )
-    Image.blend(actual.crop(extent), expected.crop(extent), 0.5).save(
+    Image.blend(actual.crop(extent), registered.crop(extent), 0.5).save(
         tmp_path / f"{case}-registered-overlay.png"
     )
 
@@ -279,7 +315,7 @@ def test_dotplot_offline_html_and_plain_navigation(page, adata, tmp_path):
     chart = gsc.pl.dotplot(adata, ["g1", "g2"], "group", use_raw=False, show=False)
     spec = chart.to_dict()
     for channel in ("x", "y"):
-        points(spec)["encoding"][channel]["scale"]["name"] = f"dotplot-{channel}"
+        spec["scales"][channel]["name"] = f"dotplot-{channel}"
     bounds = render(page, TopLevelSpec.from_dict(spec))
     domains = page.evaluate(
         "['dotplot-x','dotplot-y'].map(n=>api.getScaleResolutionByName(n).getDomain())"

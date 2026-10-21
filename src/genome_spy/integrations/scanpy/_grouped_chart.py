@@ -9,13 +9,12 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._dendrogram_chart import tree_overlay
+from genome_spy.schema import ViewBackground
+from genome_spy.integrations.scanpy._dendrogram_chart import tree_track
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._grid_interactions import (
     index_offset,
-    slot_position,
     visible_slots,
-    with_navigation,
 )
 from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._style import (
@@ -25,6 +24,7 @@ from genome_spy.integrations.scanpy._style import (
 )
 
 if TYPE_CHECKING:
+    from genome_spy.schema._kwds import ScalesKwds
     from genome_spy.integrations.scanpy._dendrogram_data import DendrogramData
 
 
@@ -116,9 +116,8 @@ def _brackets(
     rotation: float | None,
     end_band: float = 0.7,
     zoom: bool = False,
-    in_bounds: bool = False,
 ) -> list[gs.Chart]:
-    """Return rule and text layers for marker groups at the supplied positions.
+    """Return native rules and labels for marker groups at the supplied positions.
 
     Match bracket spans and label placement in either plot orientation.
     """
@@ -134,36 +133,28 @@ def _brackets(
         }
         for group in groups
     ]
-    axis, extent = ("y", "height") if swapped else ("x", "width")
-    end_offset = (
-        0
-        if in_bounds
-        else gs.expr(f"{end_band - 1:g} * bandwidth('{axis}') * {extent}")
-    )
-    edge = gs.value(0 if in_bounds else 1)
+    edge = gs.value(0)
     chart = gs.Chart(table)
-    # Links anchor both bracket endpoints to their slots across gaps.
-    draw = chart.mark_link if in_bounds else chart.mark_rule
-    mark_options: dict[str, Any] = {"linkShape": "line"} if in_bounds else {}
-    line = draw(
+    # A span ends before the next slot's gap; caps use single slot anchors.
+    axis, extent = ("y", "height") if swapped else ("x", "width")
+    end_offset = gs.expr(f"{end_band - 1:g} * bandwidth('{axis}') * {extent}")
+    line = chart.mark_rule(
         color="black",
         size=1.5 * _PT,
-        clip=True if in_bounds else "never",
+        clip=True,
         tooltip=None,
         xOffset=4 if swapped else 0,
         x2Offset=4 if swapped else end_offset,
         yOffset=0 if swapped else -4,
         y2Offset=end_offset if swapped else -4,
-        **mark_options,
     )
-    caps = draw(
+    caps = chart.mark_rule(
         color="black",
         size=1.5 * _PT,
-        clip=True if in_bounds else "never",
+        clip=True,
         tooltip=None,
         x2Offset=4 if swapped else 0,
         y2Offset=0 if swapped else -4,
-        **mark_options,
     )
     if rotation is None:
         # Long labels need rotation to clear neighboring brackets.
@@ -181,25 +172,22 @@ def _brackets(
         # Offsets keep the label clear of the bracket after rotation.
         xOffset=16 if swapped else 0,
         yOffset=0 if swapped else -8,
-        clip=True if in_bounds else "never",
+        clip=True,
         tooltip=None,
     )
     if swapped:
         line = line.encode(
             y=coordinate.field("start").band(0.2),
-            y2=gs.Y2("end:I").band(end_band) if in_bounds else gs.Y2("stop:I").band(0),
+            y2=gs.Y2("stop:I").band(0),
             x=edge,
             x2=edge,
         )
         left = caps.encode(
             y=coordinate.field("start").band(0.2),
-            y2=gs.Y2("start:I").band(0.2),
             x=edge,
             x2=edge,
         )
-        right = left.encode(
-            y=coordinate.field("end").band(end_band), y2=gs.Y2("end:I").band(end_band)
-        )
+        right = left.encode(y=coordinate.field("end").band(end_band))
         text = text.encode(
             y=coordinate.field("slot").band(0),
             yOffset=gs.YOffset(
@@ -211,19 +199,16 @@ def _brackets(
     else:
         line = line.encode(
             x=coordinate.field("start").band(0.2),
-            x2=gs.X2("end:I").band(end_band) if in_bounds else gs.X2("stop:I").band(0),
+            x2=gs.X2("stop:I").band(0),
             y=edge,
             y2=edge,
         )
         left = caps.encode(
             x=coordinate.field("start").band(0.2),
-            x2=gs.X2("start:I").band(0.2),
             y=edge,
             y2=edge,
         )
-        right = left.encode(
-            x=coordinate.field("end").band(end_band), x2=gs.X2("end:I").band(end_band)
-        )
+        right = left.encode(x=coordinate.field("end").band(end_band))
         text = text.encode(
             x=coordinate.field("slot").band(0),
             xOffset=gs.XOffset(
@@ -233,19 +218,13 @@ def _brackets(
             text="label:N",
         )
     layers = [line, left, right, text]
-    if zoom and in_bounds:
+    if zoom:
         predicate = (
             "scale('y', datum.end) - bandwidth('y') >= 0 && scale('y', datum.start) <= 1"
             if swapped
             else "scale('x', datum.start) >= 0 && scale('x', datum.end) + bandwidth('x') <= 1"
         )
         layers = [chart.transform_filter(predicate) for chart in layers]
-    elif zoom:
-        axis = "y" if swapped else "x"
-        layers = [
-            visible_slots(chart, axis, "datum.start", "datum.end + 1")
-            for chart in layers
-        ]
     return layers
 
 
@@ -330,35 +309,34 @@ def feature_gaps(groups: tuple[FeatureGroup, ...], count: int) -> list[int]:
     return ends[:-1] if ends and ends[-1] == count and starts == [0, *ends[:-1]] else []
 
 
-def guide_offset(
-    groups: tuple[FeatureGroup, ...], *, swap_axes: bool, tree: bool = False
-) -> float:
-    """Return guide spacing in pixels, allowing for marker brackets and a tree."""
-    return (
-        12
-        + (bracket_space(groups) if groups and swap_axes else 0)
-        + (80 if tree and not swap_axes else 0)
+def index_scales(
+    x: Any, y: Any, *, xgaps: Sequence[int] = (), ygaps: Sequence[int] = ()
+) -> ScalesKwds:
+    """Move the supplied index definitions to a surround's shared scale owner.
+
+    Native four-pixel gaps keep every aligned track on the same slot positions.
+    """
+    return gs.scales(
+        x=gs.Scale(
+            type="index",
+            **x.scale(gapPositions=list(xgaps), gapWidth=4).to_dict()["scale"],
+        ),
+        y=gs.Scale(
+            type="index",
+            **y.scale(gapPositions=list(ygaps), gapWidth=4).to_dict()["scale"],
+        ),
     )
 
 
-def color_legend(
-    title: str | None,
-    groups: tuple[FeatureGroup, ...],
-    *,
-    swap_axes: bool,
-    tree: bool = False,
-) -> gs.Legend:
-    """Return a color guide from its title and neighboring bracket/tree layout.
-
-    Keep dotplot and matrixplot guides consistent and clear of annotations.
-    """
+def color_legend(title: str | None) -> gs.Legend:
+    """Return a native color guide; surround layout reserves its track space."""
     return gs.Legend(
         title=title.replace("\n", " ") if title else title,
         orient="right",
         direction="horizontal",
         gradientLength=150,
         gradientThickness=15,
-        offset=guide_offset(groups, swap_axes=swap_axes, tree=tree),
+        offset=12,
     )
 
 
@@ -389,7 +367,7 @@ def grouped_axes(
 
 
 def finish_grouped_chart(
-    marks: Sequence[gs.Chart | gs.LayerChart],
+    center: gs.LayerChart,
     colors: pd.DataFrame,
     groups: tuple[FeatureGroup, ...],
     x: Any,
@@ -401,6 +379,8 @@ def finish_grouped_chart(
     width: float,
     height: float,
     frame_width: float,
+    scales: ScalesKwds,
+    name: str,
     tree: DendrogramData | None = None,
     zoom: bool = False,
 ) -> gs.TopLevelSpec:
@@ -409,73 +389,50 @@ def finish_grouped_chart(
     Use the supplied axes and size to align layers and leave room for annotations.
     """
     xlabels, ylabels = [str(v) for v in colors.columns], [str(v) for v in colors.index]
-    # Draw labels separately so repeated names do not collapse into one axis tick.
-    layers: list[gs.Chart | gs.LayerChart] = [
-        *marks,
-        _slot_labels(xlabels, x.axis(None), horizontal=True, zoom=zoom),
-        _slot_labels(ylabels, y.axis(None), horizontal=False, zoom=zoom),
-    ]
+    center = center.properties(
+        width=width,
+        height=height,
+        name=f"{name}-cells",
+        view=ViewBackground(stroke="black", strokeWidth=frame_width * _PT),
+    )
+    # Each annotation owns a viewport and inherits the center's aligned scale.
+    sides: dict[str, Any] = {
+        "bottom": [
+            _slot_labels(xlabels, x.axis(None), horizontal=True, in_bounds=True)
+        ],
+        "left": [_slot_labels(ylabels, y.axis(None), horizontal=False, in_bounds=True)],
+    }
     if groups:
-        layers.extend(
-            _brackets(
+        brackets = gs.layer(
+            *_brackets(
                 groups,
-                y if swap_axes else x,
+                (y if swap_axes else x).axis(None),
                 swapped=swap_axes,
                 rotation=rotation,
                 zoom=zoom,
             )
         )
-
-    # Tree leaves must use the same row or column spacing as the matrix.
-    if tree is not None:
-        padding = (
-            x.to_dict()["scale"]["paddingOuter"]
+        brackets = brackets.properties(name=f"{name}-brackets")
+        sides["right" if swap_axes else "top"] = [
+            brackets.properties(width=bracket_space(groups))
             if swap_axes
-            else y.to_dict()["scale"]["paddingOuter"]
-        )
-        layers.append(
-            tree_overlay(
-                tree,
-                orientation="top" if swap_axes else "right",
-                padding=padding,
-                reverse=not swap_axes,
-                leaf_projection=slot_position(
-                    "x" if swap_axes else "y", "datum.{field}"
-                )
-                if zoom
-                else None,
-            )
-        )
-
-    # Leave room above the plot for either a tree or marker brackets.
-    top_space = 10.0
-    if tree is not None and swap_axes:
-        top_space = 90
-    elif groups and not swap_axes:
-        top_space = bracket_space(groups)
-    chart = gs.layer(*layers).properties(
-        width=width,
-        height=height,
-        padding={
-            "left": max(map(len, ylabels)) * _TICK * 0.65 + 12,
-            "bottom": max(map(len, xlabels)) * _TICK * 0.65 + 12,
-            "top": top_space,
-            "right": 10,
-        },
-    )
+            else brackets.properties(height=bracket_space(groups))
+        ]
+    if tree is not None:
+        count = len(xlabels) if swap_axes else len(ylabels)
+        sides["top" if swap_axes else "right"] = [
+            tree_track(
+                tree, list(range(count)), horizontal=swap_axes, size=80
+            ).properties(name=f"{name}-tree")
+        ]
+    chart = gs.surround(
+        center, surround=gs.SurroundSides(**sides), spacing=0
+    ).properties(scales=scales)
     if title:
         chart = chart.properties(
-            title=gs.title(
-                title,
-                font=_FONT,
-                fontSize=12 * _PT,
-                offset=top_space + 10 if top_space > 10 else 10,
-            )
+            title=gs.title(title, font=_FONT, fontSize=12 * _PT, offset=10)
         )
-    chart = with_navigation(chart, enabled=zoom)
-    return chart.configure_view(
-        stroke="black", strokeWidth=frame_width * _PT
-    ).configure_legend(
+    return chart.resolve_legend(color="collected", size="collected").configure_legend(
         labelFont=_FONT,
         labelFontSize=_TICK,
         titleFont=_FONT,

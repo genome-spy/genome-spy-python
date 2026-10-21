@@ -83,10 +83,10 @@ def test_displayed_geometry_matches_frozen_scanpy_exports(adata, case):
     for channel, padding in [("x", 0.3), ("y", 0.5)]:
         encoding = unit["encoding"][channel]
         assert encoding["type"] == "index"
-        assert encoding["scale"]["domain"] == [0, int(data[f"_{channel}"].max())]
-        assert encoding["scale"]["paddingOuter"] == padding
-        assert encoding["scale"]["zoom"] is False
-    assert unit["encoding"]["y"]["scale"]["reverse"] is True
+        assert spec["scales"][channel]["domain"] == [0, int(data[f"_{channel}"].max())]
+        assert spec["scales"][channel]["paddingOuter"] == padding
+        assert spec["scales"][channel]["zoom"] is False
+    assert spec["scales"]["y"]["reverse"] is True
     size_labels = [
         str(round(value)) for value in unit["encoding"]["size"]["legend"]["values"]
     ]
@@ -133,9 +133,9 @@ def test_repeated_feature_slots_keep_distinct_coordinates_and_labels(adata):
     assert data["_x"].tolist() == [0, 1, 2] * 2
     np.testing.assert_allclose(data["_mean"], [1, 1, 1, 1.5, 0.5, 1.5])
     spec = result.to_dict()
-    labels = spec["datasets"][spec["layer"][1]["data"]["name"]]
+    labels = spec["datasets"][spec["surround"]["bottom"][0]["data"]["name"]]
     assert [v["label"] for v in labels] == ["g2", "g1", "g2"]
-    assert spec["layer"][3]["mark"]["type"] == "rule"
+    assert spec["surround"]["top"][0]["layer"][0]["mark"]["type"] == "rule"
 
 
 @pytest.mark.parametrize("swapped", [False, True])
@@ -284,7 +284,7 @@ def test_native_dimensions_and_figsize(adata):
         ({"figsize": (6, 3)}, (450, 300)),
     ]:
         spec = chart(adata, **options).to_dict()
-        assert (spec["width"], spec["height"]) == expected
+        assert (spec["spec"]["width"], spec["spec"]["height"]) == expected
 
 
 def test_default_raw_lookup_and_selected_sparse_columns(adata, monkeypatch):

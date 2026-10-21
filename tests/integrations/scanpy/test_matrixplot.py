@@ -10,6 +10,7 @@ import pandas as pd
 import pytest
 
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.helpers import points
 from genome_spy.integrations.scanpy import _grouped_data, pl
 from tests.integrations.scanpy.grouped_fixture import make_grouped_adata
 from tests.integrations.scanpy.matrixplot_fixture import matrixplot_cases
@@ -37,7 +38,7 @@ def chart(adata, **options):
 
 def table(chart):
     spec = chart.to_dict()
-    return pd.DataFrame(spec["datasets"][spec["layer"][0]["data"]["name"]])
+    return pd.DataFrame(spec["datasets"][points(spec)["data"]["name"]])
 
 
 def test_signature_preserves_pinned_defaults_and_native_boundary():
@@ -70,17 +71,17 @@ def test_displayed_table_and_labels_match_frozen_scanpy(adata, case):
         Path(__file__).with_name("fixtures").joinpath("matrixplot.json").read_text()
     )["cases"][case]
     spec = chart(adata, **matrixplot_cases()[case]).to_dict()
-    data = pd.DataFrame(spec["datasets"][spec["layer"][0]["data"]["name"]])
+    data = pd.DataFrame(spec["datasets"][points(spec)["data"]["name"]])
     np.testing.assert_allclose(
         data["_mean"].to_numpy(dtype=float),
         np.array(reference["values"], dtype=float).ravel(),
         equal_nan=True,
     )
-    for i, axis in [(1, "x"), (2, "y")]:
-        labels = spec["datasets"][spec["layer"][i]["data"]["name"]]
+    for side, axis in [("bottom", "x"), ("left", "y")]:
+        labels = spec["datasets"][spec["surround"][side][0]["data"]["name"]]
         assert [row["label"] for row in labels] == reference[f"{axis}_labels"]
     np.testing.assert_allclose(
-        spec["layer"][0]["encoding"]["color"]["scale"]["domain"],
+        points(spec)["encoding"]["color"]["scale"]["domain"],
         reference["color_domain"],
     )
 
@@ -264,7 +265,7 @@ def test_missing_cells_constant_color_and_unused_categories(adata):
     )
     spec = chart(adata, values_df=values).to_dict()
     assert pd.isna(table(chart(adata, values_df=values))["_mean"].iloc[1])
-    assert spec["layer"][0]["encoding"]["color"]["scale"]["domain"] == [3.6, 4.4]
+    assert points(spec)["encoding"]["color"]["scale"]["domain"] == [3.6, 4.4]
     assert "_paint" not in table(chart(adata, values_df=values))
     adata.obs["group"] = adata.obs["group"].cat.add_categories(["unused"])
     with pytest.raises(ValueError, match="unused categories"):
@@ -279,9 +280,9 @@ def test_dimensions_edges_and_hover(adata):
         ({"figsize": (6, 3)}, (450, 300)),
     ]:
         spec = chart(adata, **options).to_dict()
-        assert (spec["width"], spec["height"]) == expected
+        assert (spec["spec"]["width"], spec["spec"]["height"]) == expected
     spec = chart(adata, edgecolor="none", linewidth=2, hover=False).to_dict()
-    tiles = spec["layer"][0]
+    tiles = points(spec)
     assert tiles["mark"]["strokeOpacity"] == 0
     assert tiles["mark"]["strokeWidth"] == pytest.approx(2 * 100 / 72)
     assert tiles["mark"]["tooltip"] is None and "tooltip" not in tiles["encoding"]

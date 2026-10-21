@@ -28,8 +28,8 @@ def render(page, chart):
 
 def slot_bounds(slot, count, cuts, origin, extent):
     """Compute expected band edges independently from the native exported marks."""
-    step = (extent - 6 * len(cuts)) / count
-    start = origin + slot * step + 6 * sum(cut <= slot for cut in cuts)
+    step = (extent - 4 * len(cuts)) / count
+    start = origin + slot * step + 4 * sum(cut <= slot for cut in cuts)
     return start, start + step
 
 
@@ -236,7 +236,7 @@ def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover):
         a, b = gaps[0]
         assert float(b.get(cell_axis)) - float(a.get(cell_axis)) - float(
             a.get(cell_extent)
-        ) == pytest.approx(6, abs=0.31)
+        ) == pytest.approx(4, abs=0.31)
         fraction = next(f for f in live["gaps"] if 0.05 < f < 0.95)
         middle = bounds[cell_axis] + fraction * bounds[cell_extent]
         hover_at(page, middle if swapped else x, y if swapped else middle, probe=False)

@@ -14,7 +14,7 @@ import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
 from tests.integrations.scanpy.browser.test_grid_interactions import pointer
 from tests.integrations.scanpy.ranked_fixture import make_ranked_adata, ranked_cases
-from tests.integrations.scanpy.helpers import points
+from tests.integrations.scanpy.helpers import points, index_position
 
 REFERENCE = json.loads(
     (Path(__file__).parents[1] / "fixtures/ranked.json").read_text()
@@ -226,16 +226,14 @@ def test_ranked_expression_uses_existing_y_navigation_and_guides(page, family):
         **options,
     )
     bounds = render(page, chart)
-    before = page.evaluate(
-        "['grid_x_step','grid_y_step'].map(n=>api.getParam(n).getValue())"
-    )
+    domains = f"['x','y'].map(axis=>api.getScaleResolutionByName('{family}-'+axis).getDomain())"
+    before = page.evaluate(domains)
     pointer(page, bounds)
     page.mouse.wheel(0, -260)
     page.wait_for_timeout(700)
-    after = page.evaluate(
-        "['grid_x_step','grid_y_step'].map(n=>api.getParam(n).getValue())"
-    )
-    assert after[0] == before[0] and after[1] > before[1]
+    after = page.evaluate(domains)
+    assert after[0] == before[0]
+    assert after[1][1] - after[1][0] < before[1][1] - before[1][0]
     svg = page.evaluate("async () => (await api.imageExport.svg()).blob.text()")
     assert all(text in svg for text in ("g1", "g2", "g3", "g4"))
 
@@ -293,10 +291,32 @@ def test_statistic_colors_labels_and_complete_guides_match_scanpy(
             round((x - x0) / (x1 - x0) * actual.width),
             round((y - y0) / (y1 - y0) * actual.height),
         )
+        original = (px, py)
+        xscale, yscale = spec["scales"]["x"], spec["scales"]["y"]
+        px = round(
+            index_position(
+                x,
+                xscale["domain"][1] + 1,
+                xscale["paddingOuter"],
+                bounds["width"],
+                xscale["gapPositions"],
+            )
+            * 1.5
+        )
+        py = round(
+            index_position(
+                y,
+                yscale["domain"][1] + 1,
+                yscale["paddingOuter"],
+                bounds["height"],
+                yscale["gapPositions"],
+            )
+            * 1.5
+        )
         assert (
             np.abs(
                 np.asarray(actual)[py, px].astype(int)
-                - np.asarray(expected)[py, px].astype(int)
+                - np.asarray(expected)[original[1], original[0]].astype(int)
             ).max()
             <= 12
         ), row
@@ -350,16 +370,14 @@ def test_statistic_hover_zoom_and_offline_delivery(page, family, tmp_path):
     )
     if family == "dotplot":
         assert float(values[-1]) == 100
-    before = page.evaluate(
-        "['grid_x_step','grid_y_step'].map(n=>api.getParam(n).getValue())"
-    )
+    domains = f"['x','y'].map(axis=>api.getScaleResolutionByName('{family}-'+axis).getDomain())"
+    before = page.evaluate(domains)
     pointer(page, bounds)
     page.mouse.wheel(0, -300)
     page.wait_for_timeout(500)
-    after = page.evaluate(
-        "['grid_x_step','grid_y_step'].map(n=>api.getParam(n).getValue())"
-    )
-    assert after[0] == before[0] and after[1] > before[1]
+    after = page.evaluate(domains)
+    assert after[0] == before[0]
+    assert after[1][1] - after[1][0] < before[1][1] - before[1][0]
     path = tmp_path / f"statistic-{family}.html"
     chart.save(path, inline=True, controls=False)
     page.context.set_offline(True)

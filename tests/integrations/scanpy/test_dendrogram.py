@@ -12,6 +12,7 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
+from tests.integrations.scanpy.helpers import points
 from genome_spy.integrations.scanpy import pl
 from genome_spy.integrations.scanpy._dendrogram_data import prepare_dendrogram
 from tests.integrations.scanpy.dendrogram_fixture import make_tree_adata, tree_cases
@@ -289,13 +290,15 @@ def test_summary_rows_features_brackets_and_values_share_tree_order(family, swap
         show=False,
     )
     spec = c.to_dict()
-    records = spec["datasets"][spec["layer"][0]["data"]["name"]]
+    records = spec["datasets"][points(spec)["data"]["name"]]
     assert list(dict.fromkeys(row["_group"] for row in records)) == order
     expected_genes = [gene for category in order for gene in markers[category]]
     assert list(dict.fromkeys(row["_gene"] for row in records)) == list(
         dict.fromkeys(expected_genes)
     )
-    bracket = spec["datasets"][spec["layer"][3]["data"]["name"]]
+    bracket = spec["datasets"][
+        spec["surround"]["right" if swapped else "top"][0]["layer"][0]["data"]["name"]
+    ]
     assert [row["label"] for row in bracket] == order
     for row in records:
         expected = a[a.obs["group"] == row["_group"], row["_gene"]].X.mean()
@@ -311,7 +314,7 @@ def test_two_group_attachment_matches_scanpy_skip_and_standalone_tree_works():
             c = getattr(gsc.pl, family)(
                 a, ["g1", "g2"], "group", dendrogram=True, show=False
             )
-        assert len(c.to_dict()["layer"]) == 3
+        assert set(c.to_dict()["surround"]) == {"left", "bottom"}
     assert len(gsc.pl.dendrogram(a, "group", show=False).to_dict()["datasets"])
 
 
