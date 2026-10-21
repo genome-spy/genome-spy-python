@@ -41,7 +41,8 @@ __all__ = [
     "scatter",
 ]
 
-_Bound = float | str | Sequence[float | str | None] | None
+_BoundValue = float | str | Callable[[Any], float]
+_Bound = _BoundValue | Sequence[_BoundValue | None] | None
 
 
 def _require_scanpy(context: str = "gsc.pl.umap") -> Any:
@@ -529,6 +530,8 @@ def embedding(adata: AnnData, basis: str, **kwargs: Any) -> TopLevelSpec | None:
             colorbar_loc accepts right, left, top, bottom, or None to hide it.
             add_outline draws two background outlines with outline_width and
             outline_color; the foreground then defaults to alpha=0.7.
+            vmin/vmax also accept callables returning a finite number from each
+            panel's masked colors in painting order, including missing values.
 
     Returns:
         A native chart when show=False, otherwise None after display.

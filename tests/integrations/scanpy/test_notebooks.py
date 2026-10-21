@@ -52,6 +52,16 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
         )
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
+        bounds_chart = namespace["bounds_chart"]
+        assert bounds_chart in charts
+        for panel, gene in zip(
+            units(bounds_chart.to_dict()), ["CD79A", "MS4A1"], strict=True
+        ):
+            values = original.raw[:, gene].X.toarray().ravel()
+            np.testing.assert_allclose(
+                points(panel)["encoding"]["color"]["scale"]["domain"],
+                [np.nanmin(values), np.nanpercentile(values, 99)],
+            )
         outlined = namespace["outline_chart"]
         assert outlined in charts
         outline_spec = outlined.to_dict()

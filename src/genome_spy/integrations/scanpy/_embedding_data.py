@@ -22,6 +22,7 @@ from genome_spy.integrations.scanpy._style import (
     ColorData,
     categorical_colors,
     continuous_colors,
+    draw_order,
     native_color,
 )
 
@@ -145,19 +146,6 @@ def dimensions_for(
             f"Scanpy embedding: expected valid 2D components in an embedding with {count} columns."
         )
     return [(int(p[0]), int(p[1])) for p in pairs]
-
-
-def draw_order(values: np.ndarray, *, categorical: bool, sort: bool) -> np.ndarray:
-    """Return row positions in Scanpy's painting order for the supplied color values.
-
-    Match Scanpy's order for missing values and ties so overlapping points agree.
-    """
-    if not sort:
-        return np.arange(len(values))
-    if categorical:
-        return np.argsort(~pd.isna(values), kind="stable")
-    # Reversing a stable descending sort also reverses equal-value ties.
-    return np.argsort(-values, kind="stable")[::-1]
 
 
 def _expression(
@@ -451,6 +439,7 @@ def prepare_embedding(
                 index=index,
                 count=len(inputs),
                 colorbar=colorbar_loc is not None,
+                sort_order=sort_order,
             )
 
         order = draw_order(

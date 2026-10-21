@@ -298,7 +298,7 @@ raise an error instead of being ignored.
 | color | None, one key, or multiple observation/gene keys. Each panel retains its original numeric measurements and supplied coordinates. |
 | use_raw, layer, gene_symbols | raw.X by default if available; a layer overrides the automatic raw choice. Explicit use_raw=True plus a layer is an error. Symbol lookup follows UMAP's adata.var lookup before selected expression extraction. |
 | palette, na_color, na_in_legend | Opaque CSS color sequences/mappings, GenomeSpy scheme names, stored CSS category colors, or Scanpy default palette values. Preserve categorical order and unused categories. Named schemes with missing values require na_in_legend=False; use an explicit CSS palette for an NA legend. |
-| cmap, color_map, vmin, vmax | GenomeSpy scheme names (default viridis) and numeric or percentile bounds, including per-panel bounds. Conflicting aliases error. GenomeSpy maps the retained measurements and draws the numeric guide. Unsupported names such as coolwarm and Matplotlib colormap objects error. |
+| cmap, color_map, vmin, vmax | GenomeSpy scheme names (default viridis) and numeric, percentile or callable bounds, including per-panel lists. Callables receive a copy of the masked numeric colors in painting order, including missing values, and must return a finite real number. Conflicting aliases error. GenomeSpy maps the retained measurements and draws the numeric guide. Unsupported names such as coolwarm and Matplotlib colormap objects error. |
 | sort_order | Scanpy's continuous sort, including reversed equal-value ties; missing points draw first. Categorical source order is retained apart from moving missing points behind other points. |
 | size, s, marker | Scalar or observation-length sizes in points squared; dot and circle markers. Conversion accounts for marker path width, using a fixed 100/72 logical pixels per point. As in 1.11.5, an observation-size vector is carried in its reordered form between panels; reference tests cover this version-specific behavior. |
 | mask_obs, groups | Recolor observations without dropping coordinates. Masks can be boolean arrays or an observation-column key. Groups and masks are mutually exclusive. |
@@ -311,7 +311,7 @@ raise an error instead of being ignored.
 | save | None/False are supported when no automatic image save is requested. Image formats and automatic save currently error; native chart.save supports HTML/JSON. |
 | ax, return_fig | Omitted. Passing either, even ax=None, raises a targeted error. Use show=False and native chart composition/configuration. |
 | projection, edges/arrows, scale_factor | Only the ordinary 2D/no-graph defaults are supported yet. |
-| norm, vcenter, callable color bounds | Not implemented yet. Their nondefault forms raise errors. |
+| norm, vcenter | Not implemented yet. Their nondefault forms raise errors. |
 | add_outline, outline_width, outline_color | Optional two opaque outline layers behind the foreground, matching Scanpy’s relative widths and draw order. Widths are nonnegative pairs; colors are pairs of opaque CSS names/hex. Foreground opacity defaults to 0.7 only when outlines are enabled; explicit alpha (including None) retains its usual meaning. Foreground edges are disabled, while outline edges use the supplied scalar edge/linewidth options. |
 | legend_fontoutline | Not implemented yet; unsupported values fail by name. |
 | colorbar_loc | `"right"` (default), `"left"`, `"top"`, `"bottom"`, or None to hide continuous colorbars. Categorical legends retain `legend_loc`. |
@@ -334,6 +334,15 @@ level between WebGL, browser scaling and Matplotlib exports. Outline settings
 have no visual effect while `add_outline` is False or None. All shared embedding
 functions, including PCA overview's embedding panel, inherit this path; `scatter`
 keeps its own Scanpy signature and does not add outline arguments.
+
+Callable `vmin`/`vmax` run once per numeric panel when creating the chart. Use
+missing-aware functions such as `np.nanmin` or
+`lambda values: np.nanpercentile(values, 99)`. Callbacks receive copied values
+after masking and sorting; `sort_order=False` keeps source order. They can also
+appear in singleton or per-panel lists mixed with numeric/percentile bounds and
+None. Categorical panels skip bounds. Invalid results raise a named error;
+exceptions from the callback propagate. Hover, zoom and HTML delivery use the
+resolved numeric limits without calling Python again.
 
 Continuous colorbars span the plot height on the left/right and the plot width
 on the top/bottom, including non-square panels. These are native guide defaults,

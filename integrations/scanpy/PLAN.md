@@ -558,6 +558,19 @@ commit evidence and unmet verification gates live in the
   records. Its [completed increment](STATUS.md#m07d-native-colorbar-placement)
   does not alter scatter's distinct signature or resolve C11's categorical
   multi-column extent bug.
+  Callable-bound acceptance: `gsc.pl.umap(pbmc, color=["CD79A", "MS4A1"],
+  vmin=np.nanmin, vmax=lambda values: np.nanpercentile(values, 99), show=False)`
+  evaluates each numeric panel independently. Preserve scalar, singleton-list and
+  per-panel-list forms, masks, missing values and `sort_order` in callback inputs.
+  Evaluate once per bound/panel in Python; pass a copy so callbacks cannot change
+  plotted measurements, other bounds or AnnData. Require finite real scalar
+  results, retain callback exceptions and the existing lower/upper validation and
+  constant-range behavior. Categorical panels skip callbacks. Compare inputs and
+  limits against public Scanpy, reuse complete numeric charts and native
+  interactions, run the packaged UMAP workflow and measure callback preparation
+  overhead without full expression-matrix reads. The
+  [delivery record](STATUS.md#m07d-callable-color-bounds) retains evidence;
+  `vcenter` and Matplotlib normalization objects are separate remaining options.
 
 Targets: `gsc.pl.embedding(adata, basis="tsne", color="cell_type", show=False)`
 and `gsc.pl.pca_overview(adata, show=False)` after explicit Scanpy PCA.

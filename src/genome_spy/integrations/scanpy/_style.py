@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from numbers import Integral
+from math import isfinite
+from numbers import Integral, Real
 from typing import Any
 import warnings
 
@@ -133,12 +134,32 @@ class ColorData:
     categorical: bool
 
 
-def _bound(
-    bound: Any, index: int, count: int, values: np.ndarray, default: float
-) -> float:
-    """Resolve one panel's numeric bound from a scalar, list or percentile string.
+def draw_order(values: np.ndarray, *, categorical: bool, sort: bool) -> np.ndarray:
+    """Return row positions in Scanpy's painting order for the supplied color values.
 
-    Return default when unset, keeping multi-panel limits consistent with Scanpy.
+    Match Scanpy's order for missing values and ties so overlapping points agree.
+    """
+    if not sort:
+        return np.arange(len(values))
+    if categorical:
+        return np.argsort(~pd.isna(values), kind="stable")
+    # Reversing a stable descending sort also reverses equal-value ties.
+    return np.argsort(-values, kind="stable")[::-1]
+
+
+def _bound(
+    bound: Any,
+    index: int,
+    count: int,
+    values: np.ndarray,
+    default: float,
+    *,
+    name: str,
+    sort_order: bool,
+) -> float:
+    """Return one panel's bound from a number, percentile, callable or list.
+
+    Callables receive copied colors in painting order; unset bounds use default.
     """
     # A single bound applies to every panel; a list may set one per panel.
     if isinstance(bound, Sequence) and not isinstance(bound, str):
@@ -150,9 +171,17 @@ def _bound(
     if bound is None:
         return default
     if callable(bound):
-        raise NotImplementedError(
-            "Scanpy embedding: callable color bounds are not supported yet."
-        )
+        # Match Scanpy's callback order without exposing the plotted values to edits.
+        order = draw_order(values, categorical=False, sort=sort_order)
+        bound = bound(values[order])
+        if (
+            isinstance(bound, bool)
+            or not isinstance(bound, Real)
+            or not isfinite(bound)
+        ):
+            raise ValueError(
+                f"Scanpy embedding: {name} callable for panel {index + 1} must return a finite number."
+            )
     if isinstance(bound, str):
         if not bound.startswith("p"):
             raise ValueError("Scanpy embedding: percentile bounds must start with 'p'.")
@@ -330,6 +359,7 @@ def continuous_colors(
     index: int,
     count: int,
     colorbar: bool,
+    sort_order: bool = True,
 ) -> ColorData:
     """Return copied numeric colors, bounds and scheme for one panel.
 
@@ -349,9 +379,25 @@ def continuous_colors(
         raise ValueError(
             "Scanpy embedding: continuous colors require finite values and at least one nonmissing value."
         )
-    # Resolve per-panel or percentile bounds before choosing the native color scale.
-    low = _bound(vmin, index, count, values, float(np.nanmin(values)))
-    high = _bound(vmax, index, count, values, float(np.nanmax(values)))
+    # Resolve Python bounds before choosing the native color scale.
+    low = _bound(
+        vmin,
+        index,
+        count,
+        values,
+        float(np.nanmin(values)),
+        name="vmin",
+        sort_order=sort_order,
+    )
+    high = _bound(
+        vmax,
+        index,
+        count,
+        values,
+        float(np.nanmax(values)),
+        name="vmax",
+        sort_order=sort_order,
+    )
     low, high, _ = color_bounds(
         values, low, high, context="Scanpy embedding", expand_constant=colorbar
     )

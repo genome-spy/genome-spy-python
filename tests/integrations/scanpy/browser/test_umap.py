@@ -212,9 +212,21 @@ def test_rendered_marker_footprint_matches_registered_scanpy_export(
 def test_wheel_navigation_changes_coordinates_and_offline_html_needs_no_network(
     page, tmp_path
 ):
+    calls = []
+
+    def upper(values):
+        calls.append(values.copy())
+        return float(np.nanmax(values))
+
     with mpl.rc_context({"figure.figsize": (3, 3), "figure.dpi": 100}):
         chart = gsc.pl.umap(
-            fixture(), color="score", size=100, zoom=True, frameon=False, show=False
+            fixture(),
+            color="score",
+            vmax=upper,
+            size=100,
+            zoom=True,
+            frameon=False,
+            show=False,
         )
     bounds = render(page, chart)
     canvas = page.locator("canvas").first.bounding_box()
@@ -256,6 +268,8 @@ def test_wheel_navigation_changes_coordinates_and_offline_html_needs_no_network(
     page.locator("canvas").first.wait_for(state="visible")
     assert not requests
     assert page.locator(".message-box").count() == 0
+    assert len(calls) == 1
+    np.testing.assert_array_equal(calls[0], [np.nan, -1, 0, 0, 1, 1, 2, 4])
 
 
 @pytest.mark.parametrize("color", ["cell_type", "score"])

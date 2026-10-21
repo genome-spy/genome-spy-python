@@ -60,18 +60,20 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot,
 matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
-The current canonical workflows contain seventeen UMAP/embedding/scatter/PCA
+The current canonical workflows contain eighteen UMAP/embedding/scatter/PCA
 code cells and fourteen expression/ranked code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M07.d, callable numeric color bounds.**
-Reuse the existing embedding bound resolver for callable `vmin`/`vmax`, checking
-masked/missing values, per-panel inputs and clear invalid-result errors. Keep
-centered normalization, remaining markers/graphs and broader compatibility in
-M07.d/M14. The [point-outline increment](#m07d-embedding-point-outlines) is closed
-for the tested two-marker native scope; C11 still blocks full default guide fitting.
+**Next work: M07.d, centered numeric colors (`vcenter`).**
+Check native `domainMid` against Scanpy's centered normalization, then reuse the
+bound resolver for supported scalar, percentile, callable and per-panel centers.
+Verify domains, clamping, missing values and native guides before enabling this
+option. Matplotlib normalization objects, remaining markers/graphs and broader
+compatibility retain M07.d/M14 owners. The
+[callable-bound increment](#m07d-callable-color-bounds) is closed; C11 still blocks
+full default categorical-guide fitting.
 
 M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
 Heatmap and dotplot have four-pixel group gaps; matrixplot, generic matrix,
@@ -109,6 +111,7 @@ C12 remains a separate upstream straight-link issue.
 | M07.c variance increment | Closed (bounded preview) | [Contract, tests and resources](#m07c-stored-pca-variance-ratios) | Broader storage/typography/export remain M14; this does not close the overview or M07. |
 | M07.c overview increment | Closed (bounded preview) | [Contract, tests and resource evidence](#m07c-pca-overview) | Parent storage, typography and export limits remain M14; broader embedding options remain M07.d and C11 retains their categorical-guide gate. |
 | M07.d point outlines increment | Closed (bounded increment) | [Contract, semantic/chart/workflow and resource checks](#m07d-embedding-point-outlines) | Broader markers, label outlines, normalization and C11 guide fitting remain M07.d/M14. |
+| M07.d callable bounds increment | Closed (bounded increment) | [Shared resolver, upstream comparisons, workflow and resource checks](#m07d-callable-color-bounds) | Centers/normalization and other family options retain M07.d/M14 owners; scatter keeps its distinct signature. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -1165,9 +1168,56 @@ macOS/Python/scientific-stack versions as the preceding records.
 
 These are local observations, not CI limits or a speedup claim. Large JSON
 validation/transport remains M05.d/M14 work; generated media and raw reports stay
-local. The next ready increment is callable `vmin`/`vmax`; C11, C13 and wider
-family limits retain their existing owners. Unrelated repository tests and the
+local. Callable `vmin`/`vmax` is delivered in the following increment; C11, C13 and
+wider family limits retain their existing owners. Unrelated repository tests and the
 docs build were not rerun. Clearance: retain; no plan is eligible for removal.
+
+## M07.d callable color bounds
+
+Closed for shared 2D embeddings and PCA overview's embedding panel. The existing
+[bound resolver](../../src/genome_spy/integrations/scanpy/_style.py) accepts
+callable `vmin`/`vmax`, alone, in singleton lists or in panel-length lists mixed
+with numbers, percentiles and None. Categorical panels skip bounds. Each callable
+runs once per numeric panel and receives a copied NumPy vector after masking,
+in Scanpy's painting order, with missing values retained. `sort_order=False`
+retains source order. The same draw-order helper serves callbacks and points.
+Callback edits cannot affect plotted colors, subsequent bounds or AnnData.
+Finite real scalar results, including NumPy scalars, are accepted; invalid
+results name the bound and panel. Callback exceptions propagate. Existing
+lower/upper and constant-colorbar handling is unchanged. No new renderer,
+dependencies, Matplotlib use or analysis computation was added. Scatter's
+distinct upstream signature remains unchanged.
+
+Verification: **363 targeted Python checks**, **46 browser checks**, Ruff and mypy
+pass. [Semantic tests](../../tests/integrations/scanpy/test_color_bounds.py)
+compare callback arrays, dtypes and resulting domains against public Scanpy
+1.11.5 for sorted/source order, masks, missing values, raw and layers. Every
+shared embedding entry point produces the same complete spec as explicit numeric
+bounds, including axes, labels, guides, point sizes and native interactions.
+Invalid outputs, isolation, constant limits and reversed bounds have focused
+checks. [Browser tests](../../tests/integrations/scanpy/browser/test_umap.py)
+exercise callable bounds through zoom/reset and offline HTML without rerunning
+Python callbacks. Existing registered overlays, footprints, categorical/numeric
+guides, embedding hover/zoom and browser rasterization checks passed unchanged.
+The canonical packaged-PBMC workflow test passes; Jupyter executed all eighteen
+nonempty UMAP notebook cells without errors, including the two-gene callable example.
+
+Resource recipe: Python 3.11.15 on macOS arm64, seed 17, 100,000 observations,
+20,000-gene empty CSR, stored float32 2D coordinates, four-group categorical and
+numeric observation colors; two 320 × 300 panels, size 4, alpha 0.7 and zoom.
+After imports were warmed, five preparation runs under tracemalloc had median
+45.6 ms for explicit numeric bounds and 54.8 ms for `nanmin`/99th-percentile
+callbacks, with peak preparation allocations 13.0/12.4 MB. Each callback saw
+100,000 values once per chart; no expression columns or full matrix were read.
+Both versions serialized to byte-identical 39,644,504-byte JSON. Rendering and
+transport therefore use the unchanged numeric chart path; reuse the
+[100k-cell rendering/memory envelope](#m07d-embedding-point-outlines), alongside
+this increment's browser checks. Callback cost depends on the supplied function;
+there is no performance claim for arbitrary user code. Reports/media stay local.
+
+Next: centered numeric colors in M07.d. C11/C13 and broader storage/export options
+retain their existing owners. The full repository suite and docs build were not
+rerun. Clearance: retain; no plan is eligible for removal.
 
 ## M07.d native colorbar placement
 
@@ -1944,7 +1994,8 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Continuous colorbar placement | Four sides/None; native defaults and collection supported | M07.d placement increment closed |
 | Point outlines | Shared two-marker path, relative widths/CSS colors, scalar styles, hover/zoom/brush | [M07.d outline increment](#m07d-embedding-point-outlines) closed |
 | Graph edges/arrows, scale_factor, broader markers/categorical guide locations | Nondefault forms reject | M07.d |
-| norm/vcenter/callable bounds | Nondefault forms reject; Matplotlib objects remain outside boundary | M07.d/M14.c |
+| Callable color bounds | Shared resolver with masked/sorted copies, per-panel lists and finite results | [M07.d callable increment](#m07d-callable-color-bounds) closed |
+| norm/vcenter | Nondefault forms reject; Matplotlib objects remain outside boundary | M07.d/M14.c |
 | Backed/lazy expression; named scheme with NA legend; category/NA label collision | Explicit current restrictions | M14.c |
 | 3D, font atlas/weight/outline and complete typography | Native gaps/limits | M14.a; C03/C05 |
 | Image save/autosave | Inactive form only; use native HTML/JSON save | M14.c |
