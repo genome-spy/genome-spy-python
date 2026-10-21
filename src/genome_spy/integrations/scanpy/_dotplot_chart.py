@@ -209,7 +209,9 @@ def build_dotplot(
                 gs.Tooltip("_percent:Q", title="Expressing cells (%)", format=".1f"),
             ]
         )
-    center = gs.layer(dots)
+    center = gs.layer(dots).properties(
+        view=gs.view(stroke="black", strokeWidth=1.5 * _PT)
+    )
     if highlight:
         # The plot container owns the ruler so it also tracks gaps between dots.
         center = center.add_params(

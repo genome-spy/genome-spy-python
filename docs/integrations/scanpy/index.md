@@ -426,7 +426,7 @@ ranking, palette write, or cached-result mutation occurs.
 | `dot_color_df` | Labeled authoritative table, aligned by group/feature. Repeated feature slots use its first matching column. No means are substituted. As upstream, supplied colors skip constructor scaling but receive render-time scaling. Missing/extra labels, duplicate group labels and nonnumeric values error. |
 | `dot_min`, `dot_max`, `smallest_dot` | Clip fractions, normalize to the specified interval, raise to 1.5, then map area from `smallest_dot` to 200 points squared. Default upper limit rounds the observed maximum up to 0.1. Exact native area lookup also drives the percentage guide. Degenerate/inverted limits error; for all-zero fractions pass `dot_max=1` to retain invisible zero-area dots. |
 | `cmap`, `vmin`, `vmax` | Native schemes (default `Reds` selects Vega `reds`) and finite numeric bounds. Constant bounds paint the first palette color; the guide expands by 10%, or ±0.1 at zero, matching Scanpy's precomputed dot colors. Missing values are omitted from painting without removing their slots; infinities and all-missing colors error. |
-| `title`, `colorbar_title`, `size_title`, `var_group_*` | Native labels, bracket rules and size/color guides. Mapping features supply brackets directly. Scalar `linewidth` styles dot edges. |
+| `title`, `colorbar_title`, `size_title`, `var_group_*` | Native labels, bracket rules and size/color guides. Mapping features supply brackets directly. Scalar `linewidth` styles dot edges. The matrix viewport has a black 1.5-point frame; side tracks remain unframed. |
 | `width`, `height` | Plot-area logical pixels; defaults are 37 pixels per feature column and 35 per group row, exchanged with the axes. Labels and guides add space. |
 | `zoom`, `highlight` | Both default False. `zoom=True` enables y-only navigation; `zoom="xy"` enables both axes. Zoom/panning retain aligned labels and tree branches; highlighting uses a native crosshair ruler at the row and column centers under the pointer, including gaps between dots. Dot sizes and both guides keep their original mapping. Repeated labels retain separate integer slots. |
 | `hover` | Enabled by default. Tooltips show gene, group, displayed mean/color value and actual expressing-cell percentage, before dot-size clipping. Use `hover=False` to disable them. Scaled means and supplied color values are labeled explicitly. |
@@ -484,10 +484,12 @@ DPR 1.5. The production adapter never imports upstream plotting or Matplotlib.
 
 ## Shared grid interactions
 
-Expression grids omit the outer frame, including across group gaps. This is a
-deliberate visual difference from Scanpy; dot outlines and tile-edge options are
-preserved. Native `chart.configure_view(stroke="black", strokeWidth=1)` can add a
-frame when wanted. Ranked variants inherit the same defaults.
+Dotplots retain a black frame around the matrix viewport, including across group
+gaps; labels, brackets and trees remain unframed. Heatmaps and matrix plots omit
+the outer frame, a deliberate visual difference from Scanpy. Dot outlines and
+tile-edge options are preserved. Native
+`chart.configure_view(stroke="black", strokeWidth=1)` can add a frame to unframed
+plots. Ranked variants inherit the same defaults.
 
 Grid interactions are optional additions to the Scanpy signatures:
 

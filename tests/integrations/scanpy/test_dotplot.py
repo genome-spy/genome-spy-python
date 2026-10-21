@@ -72,6 +72,11 @@ def test_displayed_geometry_matches_frozen_scanpy_exports(adata, case):
     )["cases"][case]
     result = chart(adata, **dotplot_cases()[case])
     spec, data = result.to_dict(), table(result)
+    assert spec["spec"]["view"] == {
+        "stroke": "black",
+        "strokeWidth": pytest.approx(1.5 * 100 / 72),
+    }
+    assert spec["config"]["view"] == {"stroke": "transparent", "strokeWidth": 0}
     unit = points(spec)
     np.testing.assert_allclose(data[["_x", "_y"]] + 0.5, reference["positions"])
     size = unit["encoding"]["size"]["scale"]

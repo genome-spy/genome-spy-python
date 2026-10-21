@@ -151,15 +151,23 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 
 ## M05.e shared grid interactions
 
-Visual default update (2026-10-21): expression grids omit the outer frame,
-including gapped heatmaps/dotplots, matrices, correlation grids and ranked
-variants. The shared grouped renderer no longer takes a frame-width option;
-native view configuration controls framing. Dot and tile-edge settings remain
+Visual default update (2026-10-21): dotplots retain a black 1.5-point frame on
+their matrix viewport through native view properties; side tracks stay unframed.
+Ranked dotplots inherit the shared renderer. Heatmaps, matrices, correlation
+grids and their ranked variants omit the outer frame. The shared grouped renderer
+has no frame-width option; native view configuration controls framing. Dot and
+tile-edge settings remain
 unchanged. **337 targeted Python checks** and **63 complete-chart/gap-navigation
 browser checks** pass, along with formatting, lint and mypy. The live expression
 notebook completed 13 code cells and 11 widgets without errors. Data preparation
 and transport are unchanged; existing resource evidence still applies. The full
 repository suite and docs build were not rerun. No plan is eligible for clearance.
+
+Dotplot-frame follow-up: **155 dotplot/matrixplot/ranked Python checks** and
+**six grouped browser layout checks** pass. The frame is a native property of
+the dotplot center, so the existing shared layout and side tracks are unchanged.
+The expression notebook reran successfully; its saved outputs remain local.
+The next work queue remains M07.d centered colors.
 
 Verified (interaction preview): [_grid_interactions.py](../../src/genome_spy/integrations/scanpy/_grid_interactions.py)
 shares live index positions, annotation visibility, fitted value text/native
