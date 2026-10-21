@@ -92,6 +92,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.hvg_fixture import make_hvg_result
 
         a, options = make_hvg_result("records"), {}
+    if family == "highest_expr_genes":
+        from tests.integrations.scanpy.highest_expr_fixture import make_counts
+
+        a, options = make_counts(), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -132,6 +136,7 @@ def test_shared_display_validation_precedes_optional_imports(
         "pca_overview",
         "highly_variable_genes",
         "filter_genes_dispersion",
+        "highest_expr_genes",
     } and not family.startswith("rank_genes_groups"):
         args += ("group",)
     context = {

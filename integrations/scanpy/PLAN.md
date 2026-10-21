@@ -671,7 +671,15 @@ their native filled-geometry gate; this order does not close those milestones.
 
 - M10.a: `highest_expr_genes` preserves source/layer/symbol rules, per-cell total
   denominators, zero totals, percentage summaries, top-n selection and log axes.
-  Reuse distribution authoring after verifying its needed geometry.
+  Reuse public `sc.pp.normalize_total(target_sum=100, inplace=False)` on a
+  metadata-free AnnData shell, preserving caller views. Reuse shared resident
+  source checks; densify only one selected column at a time. Native rect/rule/
+  point marks show quartiles, 1.5-IQR whiskers and outliers with gene band labels.
+  Verify reverse-argsort ties, zero-cell denominators, source/layer precedence,
+  linear summaries on log axes, complete registered charts and sparse resources.
+  Keyword-only hover and percentage-axis zoom keep initial statistics unchanged.
+  The PBMC3k workflow uses counts, not scaled PBMC68k expression. Ambiguous
+  labels, backed/lazy counts and forwarded styling remain explicit M14 limits.
 - M10.b: `highly_variable_genes` and legacy `filter_genes_dispersion` consume
   supplied result/var fields, preserve selected versus other genes, normalized
   versus raw dispersions/variance, flavor-dependent labels and logarithmic axes.

@@ -268,7 +268,15 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["statistic_dotplot"],
         namespace["statistic_matrixplot"],
         namespace["variable_genes"],
+        namespace["highest_expression"],
     ]
+    counts = namespace["counts"]
+    assert counts.shape == (2700, 32738) and counts.X.min() == 0
+    assert counts.X.max() == 419 and not counts.uns
+    highest = namespace["highest_expression"].to_dict()
+    boxes = next(rows for rows in highest["datasets"].values() if "q1" in rows[0])
+    assert len(boxes) == 20 and boxes[0]["gene"] == "MALAT1"
+    assert highest["layer"][0]["encoding"]["x"]["scale"]["zoom"] is True
     qc = namespace["variable_genes"].to_dict()
     genes = next(iter(qc["datasets"].values()))
     assert len(genes) == 765 and sum(g["_selected"] for g in genes) == 309

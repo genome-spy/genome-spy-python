@@ -28,6 +28,8 @@ Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
 Stored PCA loadings and variance ratios reuse the ranking preparation and native
 text panels; PCA overview composes these with the existing embedding chart.
+Highest-expression QC ranks per-cell count percentages using public Scanpy normalization
+and draws native boxes, whiskers and outliers without changing the input.
 Variable-gene QC panels read stored selection/statistics from AnnData, result
 tables or legacy records, with native hover, optional per-panel zoom and one
 collected bottom legend.
@@ -64,19 +66,17 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-one UMAP/embedding/scatter/PCA
-code cells and fifteen expression/ranked/QC code cells. Public availability does not mean
+code cells and sixteen expression/ranked/QC code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M10.a, highest-expression summaries.** Target
-`highest_expr_genes(adata, n_top=20)` in a count-input QC workflow, with per-cell
-percentages, shared source/layer access and native box/whisker marks. First audit
-the public normalization path,
-zero totals, gene ranking and box statistics. M10.c Scrublet histograms follow;
-M08/M09 filled plots still require C01. The
-[M10.b variable-gene increment](#m10b-variable-gene-diagnostics) is closed for
-its stored-statistic/native-chart scope.
+**Next work: M10.c, Scrublet score distributions.** Read stored observed/simulated
+scores, thresholds and batches; audit histogram bins, count/density normalization
+and axis-scale aliases before authoring native bars. Do not rerun Scrublet.
+M08/M09 filled plots still require C01. The M10.a highest-expression and
+[M10.b variable-gene](#m10b-variable-gene-diagnostics) increments are bounded QC
+previews; neither closes the full diagnostic family.
 
 Remaining marker details are deferred to M14's compatibility backlog by user
 priority. They must not precede new plot families. The
@@ -128,7 +128,8 @@ C12 remains a separate upstream straight-link issue.
 | M07.d square marker increment | Closed (bounded increment) | [Native shape, geometry, guides, workflow and resource checks](#m07d-square-markers) | Other markers remain M07.d; categorical guide fitting stays C11. |
 | M07.d diamond marker increment | Closed (bounded increment) | [Shared marker widths, legend parity, workflow and resource checks](#m07d-diamond-markers) | Thin diamonds and other marker geometry remain M07.d; C11 still owns full categorical-guide fitting. |
 | M07.d triangular marker audit | Closed (audit); support Blocked | [Native paths, paint and rejection checks](#m07d-triangular-marker-audit) | C14: native equilateral triangles cannot reproduce Scanpy's equal-width/height triangles through uniform sizing. |
-| M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a/c remain planned. |
+| M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
+| M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a is delivered separately; M10.c remains planned. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -160,7 +161,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M07 embeddings/scatter/PCA | In progress | M07.a/b resource gates pass; categorical-guide rendering remains open under C11. M07.c loadings/variance/overview and M07.d colorbar placement are Closed for their stated scope; other options remain open. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
-| M10 QC diagnostics | In progress | M10.b variable-gene/legacy dispersion preview is closed; highest-expression and Scrublet plots remain planned. |
+| M10 QC diagnostics | In progress | M10.a highest-expression and M10.b variable-gene/legacy dispersion previews are delivered; Scrublet remains planned. |
 | M11 trajectories/graphs/series | Planned | Stored DPT/PAGA, graph layouts, series/simulation, return/side-effect contracts; evaluate C04 paths. |
 | M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
@@ -1509,6 +1510,62 @@ was added or rerun. Full-suite, docs and resource checks were not run for this
 audit. Remaining marker work is now deferred to M14's compatibility backlog;
 it does not precede new plot families. Clearance: retain.
 
+## M10.a highest-expression summaries
+
+Closed for the count-percentage preview. `highest_expr_genes` reads X or a requested
+layer, never raw, and reuses `sc.pp.normalize_total(target_sum=100, inplace=False)`.
+An AnnData shell shares the selected matrix, so Scanpy cannot materialize the
+caller's view. Normalization copies counts; only one selected gene column is
+made dense at a time. Ranking uses the pinned reverse-argsort mean order,
+including ties and zero-total cells in the denominator. NumPy percentiles and
+1.5-IQR whiskers are tested independently against public Scanpy output.
+
+Native rectangles, rules and points retain linear percentage summaries, including
+on logarithmic axes. Native band labels preserve gene order; log limits depend
+on drawn coordinates. Optional box/outlier hover and percentage-axis zoom use
+Core directly, with existing stable observation IDs for outliers. Source/layer
+checks, identity, fonts, units, display and coordinate-domain helpers are reused.
+No plotting artists, benchmark code or Matplotlib utilities enter the adapter.
+
+The PBMC3k notebook example loads actual counts via `sc.datasets.pbmc3k()` rather
+than applying percentages to the earlier scaled dataset. The downloaded dataset,
+notebook outputs, references, overlays and resource reports stay local.
+
+Boundary: resident finite nonnegative counts, positive n_top, and unique
+nonmissing selected labels. Backed/lazy counts, ambiguous selected labels and all
+forwarded Seaborn/Matplotlib styling options fail clearly; remaining compatibility
+belongs to M14. Boxes use native category10 colors, repeating after ten genes,
+without Seaborn saturation adjustments. Fonts/ticks are independent of Matplotlib
+global settings. No embeddings, selection or DE are recomputed.
+
+Verification: **270 targeted Python/workflow checks** pass across the new
+[semantic tests](../../tests/integrations/scanpy/test_highest_expr.py), shared
+contract, stored-variable-gene tests and canonical expression notebook. Tests
+compare public Scanpy boxes, quartiles, whiskers, fliers, labels, source precedence,
+reverse-argsort order, linear/log limits (including constants), mutation and sparse
+column access. **Three browser checks** register linear/log boxes against 150-DPI
+Scanpy references at DPR 1.5, check native palette bins and labels, and observe
+box/outlier hover, percentage-axis zoom and offline HTML. Source:
+[test_highest_expr.py](../../tests/integrations/scanpy/browser/test_highest_expr.py).
+References, complete exports and registered overlays are generated only in pytest
+temporary directories. All sixteen live notebook code cells run without errors,
+producing fourteen widgets; tracked source excludes outputs and widget state.
+Ruff and mypy pass. The full repository suite and docs build were not rerun.
+
+Resource recipe: [benchmark_highest_expr.py](../../tests/integrations/scanpy/benchmark_highest_expr.py)
+uses seed 17 and 50,000 × 20,000 sparse count data with 1,000,000 stored values,
+selecting twenty genes. It enforces exactly twenty dense 50,000 × 1 accesses;
+full-matrix densification fails the check. With Python 3.11.15/macOS arm64/Core
+1.2.0, preparation took 0.480 s, validated JSON 0.895 s and browser first paint
+1.98 s. Payload is 118,801 bytes, peak traced Python allocation 36.0 MB, reported
+JS heap 19.3 MB. Imports, fixture and one-time warm-up are excluded; Python timings
+include allocation tracing and normalization. The final constant-domain refinement
+does not affect this nonconstant workload. These are local observations, not
+portable performance guarantees. Reports stay local.
+
+Next: M10.c Scrublet histograms. Broader compatibility remains M14; the QC family
+is not closed. Clearance: retain; no working document is eligible for removal.
+
 ## M10.b variable-gene diagnostics
 
 Closed for the stored-statistic preview. `highly_variable_genes` and the legacy
@@ -2269,7 +2326,7 @@ changed; unrelated tests and the full documentation build were not rerun.
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 25 functions are available as partial previews; 23 plot/builder
+helpers. 26 functions are available as partial previews; 22 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -2291,7 +2348,7 @@ No placeholder functions are exported for planned work.
 | `embedding_density` | Not implemented | M12 |
 | `filter_genes_dispersion` | Partial stored-results preview available; legacy | M10.b; remaining compatibility M14 |
 | `heatmap` | Partial cell-level preview available | M05.a/b preview; larger transport M05.d; normalization/options M14 |
-| `highest_expr_genes` | Not implemented | M10 |
+| `highest_expr_genes` | Partial count-percentage preview available | M10.a; remaining compatibility M14 |
 | `highly_variable_genes` | Partial stored-results preview available | M10.b; remaining compatibility M14 |
 | `matrix` | Partial supplied-numeric preview available | M05.b preview; broader sources/layout M14; transport M05.d |
 | `matrixplot` | Partial preview available | M03 preview; trees M04; methods M13; normalization/options M14 |

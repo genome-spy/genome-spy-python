@@ -232,6 +232,39 @@ bins. Native axes/guide ticks and layout are not pixel-identical to Matplotlib;
 explicit opaque palettes preserve category paints. Other color forms, 3D, marker,
 margin, label and storage limits retain M07.d/M14 owners.
 
+## Highest-expression genes
+
+```python
+counts = sc.datasets.pbmc3k()  # Count data; downloads on first use.
+chart = gsc.pl.highest_expr_genes(counts, n_top=20, zoom=True, show=False)
+chart.display(inline=True, controls=False)
+```
+
+The adapter calls public `sc.pp.normalize_total` on a detached AnnData shell to
+calculate each gene's percentage of each cell's **total across all genes**.
+It ranks genes by mean percentage, including zero-total cells, and preserves
+Scanpy's reverse-argsort tie order. X is used unless `layer` is given; `raw` is
+ignored. Counts, metadata and views stay unchanged. Sparse counts stay sparse
+except for one selected gene column at a time.
+
+Native boxes show the 25th/50th/75th percentiles, 1.5-IQR whiskers and individual
+outliers. `log=True` changes the percentage axis after computing linear summaries.
+Hover reports box statistics or outlier cell IDs and percentages; `zoom=True`
+enables navigation along the percentage axis. The returned native chart supports
+notebook rendering and standalone HTML through the common display/save contract.
+
+The Scanpy defaults are retained (`n_top=30`, `layer=None`, `gene_symbols=None`,
+`log=False`). Native keyword-only additions are `hover=True`, `zoom=False`,
+`width=None`, `height=None`. Default width is 387.5 logical pixels; height follows
+Scanpy's requested gene count. `gene_symbols` reads a var column; selected labels
+must be unique and nonmissing. Counts must be finite, nonnegative and resident;
+zero-total cells produce Scanpy's warning and remain zero. An all-zero log plot
+errors clearly. Backed/lazy counts, duplicate/missing selected labels and all
+forwarded Seaborn styling options fail explicitly. Matplotlib `ax`/`return_fig`
+are omitted. Native boxes use the built-in category10 palette (repeating after ten genes),
+without Seaborn saturation adjustments. Fonts/ticks do not follow Matplotlib
+global settings.
+
 ## Variable-gene diagnostics
 
 ```python
@@ -1021,7 +1054,7 @@ Two notebooks run independently:
   marker dotplot, per-gene scaled matrixplot, zoomable individual-cell heatmap and supplied matrix on
   `bulk_labels`, clustermap, stored score panels and ranked expression variants,
   with aligned dendrograms and value hover.
-  A final variable-gene QC section reads the packaged selection and statistics.
+  QC sections inspect the packaged variable-gene statistics and load PBMC3k counts for highest-expression percentages.
 
 These adapt supported UMAP, dotplot, matrixplot and heatmap sections of Scanpy's
 [core](https://scanpy.scverse.org/en/stable/tutorials/plotting/core.html) and
@@ -1166,6 +1199,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.dendrogram
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.correlation_matrix
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.highest_expr_genes
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.highly_variable_genes
 

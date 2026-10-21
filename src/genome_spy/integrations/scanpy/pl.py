@@ -42,6 +42,7 @@ __all__ = [
     "scatter",
     "highly_variable_genes",
     "filter_genes_dispersion",
+    "highest_expr_genes",
 ]
 
 _BoundValue = float | str | Callable[[Any], float]
@@ -497,6 +498,94 @@ def scatter(
     return _finish_plot(
         build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
     )
+
+
+def highest_expr_genes(
+    adata: AnnData,
+    n_top: int = 30,
+    *,
+    layer: str | None = None,
+    gene_symbols: str | None = None,
+    log: bool = False,
+    show: bool | None = None,
+    save: str | bool | None = None,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **kwds: Any,
+) -> TopLevelSpec | None:
+    """Plot per-cell count percentages for genes with the highest mean percentage.
+
+    Reuses Scanpy's public total normalization on X or a layer, ignoring raw.
+    Native boxes show quartiles, 1.5-IQR whiskers and individual outliers.
+    Expression and metadata are never changed, including for AnnData views.
+
+    Args:
+        adata: AnnData with resident, finite, nonnegative counts.
+        n_top: Number of genes ranked by mean percentage, default 30.
+        layer: Count layer instead of X; raw is never selected implicitly.
+        gene_symbols: Optional var column for unique, nonmissing display labels.
+        log: Use a logarithmic percentage axis; summaries remain in linear units.
+        show: Display once, return a chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Show box summaries and outlier cell identities.
+        zoom: Enable native zoom along the percentage axis.
+        width: Plot width, default 387.5 logical pixels.
+        height: Plot height, default Scanpy's gene-count-dependent panel height.
+        **kwds: Seaborn styling and Matplotlib options are currently unsupported.
+
+    Returns:
+        A native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        TypeError: If arguments or expression storage are unsupported.
+        ValueError: If counts, labels, dimensions or n_top are invalid.
+        NotImplementedError: If labels are ambiguous or styling/saving is unsupported.
+
+    Example:
+        >>> chart = gsc.pl.highest_expr_genes(counts, n_top=20, show=False)
+    """
+    context = "gsc.pl.highest_expr_genes"
+    _check_kwargs(kwds, set(), context=context)
+    _check_point_options(
+        context=context,
+        width=width,
+        height=height,
+        frameon=None,
+        log=log,
+        hover=hover,
+        zoom=zoom,
+    )
+    if isinstance(n_top, bool) or not isinstance(n_top, Integral) or n_top <= 0:
+        raise ValueError(f"{context}: n_top must be a positive integer.")
+    for name, value in (("layer", layer), ("gene_symbols", gene_symbols)):
+        if value is not None and not isinstance(value, str):
+            raise TypeError(f"{context}: {name} must be a string or None.")
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._highest_expr_data import (
+        prepare_highest_expression,
+    )
+    from genome_spy.integrations.scanpy._highest_expr_chart import (
+        build_highest_expression,
+    )
+
+    boxes, outliers, limits = prepare_highest_expression(
+        adata, n_top, layer, gene_symbols
+    )
+    chart = build_highest_expression(
+        boxes,
+        outliers,
+        limits,
+        n_top=n_top,
+        log=log,
+        hover=hover,
+        zoom=zoom,
+        width=width,
+        height=height,
+    )
+    return _finish_plot(chart, show, sc)
 
 
 def highly_variable_genes(
