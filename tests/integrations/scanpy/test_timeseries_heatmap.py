@@ -141,6 +141,14 @@ def test_nan_and_masked_inputs_follow_scanpy_conversion_without_mutation():
         (sparse.eye(2), {}, TypeError, "resident 2D"),
         ([[1j]], {}, TypeError, "real numbers"),
         ([["abc"]], {}, TypeError, "real numbers"),
+        (pd.DataFrame({"A": ["1", "2"]}), {}, TypeError, "real numbers"),
+        (pd.DataFrame({"A": [1j, 2j]}), {}, TypeError, "real numbers"),
+        (
+            pd.DataFrame({"A": pd.array([1, np.inf], dtype="Float64")}),
+            {},
+            ValueError,
+            "finite or missing",
+        ),
         ([[np.inf]], {}, ValueError, "finite or missing"),
         ([[np.nan]], {}, ValueError, "finite value"),
         ([[1, 2]], {"var_names": ["one"]}, ValueError, "2 labels"),
@@ -168,6 +176,61 @@ def test_dataframe_metadata_does_not_implicitly_supply_labels():
     table = next(rows for rows in spec["datasets"].values() if "_value" in rows[0])
     assert [r["_row"] for r in table] == ["0", "0", "1", "1"]
     assert [r["_value"] for r in table] == [1, 2, 3, 4]
+
+
+@pytest.mark.parametrize(
+    "columns,expected",
+    [
+        (
+            {
+                "B": pd.array([1, 2, 3], dtype="Int64"),
+                "A": pd.array([4, 5, 6], dtype="Int64"),
+            },
+            [[1, 2, 3], [4, 5, 6]],
+        ),
+        (
+            {
+                "B": pd.array([1, 2, 3], dtype="Float64"),
+                "A": pd.array([4, 5, 6], dtype="Float64"),
+            },
+            [[1, 2, 3], [4, 5, 6]],
+        ),
+        (
+            {"B": [True, False, True], "A": [4.5, 5.5, 6.5]},
+            [[1, 0, 1], [4.5, 5.5, 6.5]],
+        ),
+        (
+            {"B": pd.array([1, None, 3], dtype="Int64"), "A": [4, 5, 6]},
+            [[1, np.nan, 3], [4, 5, 6]],
+        ),
+        (
+            {"B": pd.array([1, None, 3], dtype="Float64"), "A": [4, 5, 6]},
+            [[1, np.nan, 3], [4, 5, 6]],
+        ),
+    ],
+    ids=[
+        "nullable-int",
+        "nullable-float",
+        "mixed-bool-float",
+        "missing-int",
+        "missing-float",
+    ],
+)
+def test_numeric_dataframe_types_preserve_values_and_input(columns, expected):
+    frame = pd.DataFrame(columns, index=["z", "a", "m"])
+    original = frame.copy(deep=True)
+    spec = gsc.pl.timeseries_as_heatmap(
+        frame, var_names=frame.columns, show=False
+    ).to_dict()
+    table = next(rows for rows in spec["datasets"].values() if "_value" in rows[0])
+    np.testing.assert_allclose(
+        np.array([row["_value"] for row in table], dtype=float).reshape(2, 3),
+        expected,
+        equal_nan=True,
+    )
+    assert [row["_row"] for row in table] == ["B"] * 3 + ["A"] * 3
+    assert [row["_column"] for row in table] == ["0", "1", "2"] * 2
+    pd.testing.assert_frame_equal(frame, original)
 
 
 def test_readonly_noncontiguous_view_keeps_supplied_order_and_data():

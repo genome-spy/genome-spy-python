@@ -272,6 +272,9 @@ def build_timeseries_heatmap(
     ]
     # Scanpy's explicit center limits crop outer cells and expand singletons by 0.05.
     limits = tuple(coordinate_domain(np.array([0, n - 1]), 0) for n in array.shape)
+    # Convert pandas columns before transposing so mixed numeric types stay numeric.
+    if isinstance(array, pd.DataFrame):
+        array = numeric_values(array, context=context)
     return build_matrix(
         np.asarray(array).T,
         xlabel=None,

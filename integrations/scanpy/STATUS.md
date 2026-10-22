@@ -2494,6 +2494,15 @@ clustermap and shared-grid browser regressions passed. The 20-cell canonical
 expression workflow passed and ran in Jupyter; Ruff formatting/lint and mypy passed.
 Test images/overlays and notebook outputs remain temporary or local, outside Git.
 
+DataFrame review follow-up (2026-10-22): normalize pandas columns through the
+existing `numeric_values` helper before transposing. Nullable Int64/Float64,
+mixed boolean/float columns and missing entries now retain their numeric values;
+strings, complex values and infinities still reject. Regression checks verify
+transposed values, labels and unchanged inputs. All 68 focused time-series/matrix
+tests, Ruff formatting/lint and mypy passed, including the masked-array checks.
+Browser, notebook and resource checks were not rerun: chart construction and the
+NumPy path are unchanged, so their earlier evidence remains applicable.
+
 Resource observation: warm the import/schema path, then supply
 `np.random.default_rng(0).normal(size=(20000, 10)).astype("float32")`, ten gene
 labels, a midpoint highlight, xy zoom and fitted values at 700 × 280 pixels.
