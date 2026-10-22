@@ -25,6 +25,7 @@ __all__ = [
     "matrix",
     "timeseries_as_heatmap",
     "timeseries",
+    "timeseries_subplot",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2066,12 +2067,130 @@ def timeseries(
         ... )
         >>> chart.display(inline=True)
     """
-    context = "gsc.pl.timeseries"
+    return _timeseries_plot(
+        X,
+        kwargs,
+        context="gsc.pl.timeseries",
+        show=show,
+        save=save,
+        hover=hover,
+        zoom=zoom,
+        width=width,
+        height=height,
+    )
+
+
+def timeseries_subplot(
+    X: ArrayLike,
+    *,
+    time: ArrayLike | None = None,
+    color: ArrayLike | None = None,
+    var_names: Collection[str] = (),
+    highlights_x: Collection[float] = (),
+    xlabel: str | None = "",
+    ylabel: str | None = "gene expression",
+    yticks: Collection[float] | None = None,
+    xlim: Collection[float] | None = None,
+    legend: bool = True,
+    palette: Any = None,
+    color_map: Any = "viridis",
+    marker: str | Sequence[str] = ".",
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **kwargs: Any,
+) -> TopLevelSpec | None:
+    """Build a supplied-profile point panel for native chart composition.
+
+    Description:
+        Use the same preparation and renderer as timeseries, preserving supplied
+        time, sample order and color subsets. Compose returned panels with
+        genome_spy.hconcat/vconcat; no current figure or Matplotlib axes are used.
+
+    Args:
+        X: Resident numeric vector or samples-by-variables matrix/table.
+        time: Supplied sample coordinates; None uses positions.
+        color: Single-variable sample colors; floating first values are continuous.
+        var_names: Distinct series or category labels; empty hides the legend.
+        highlights_x: Finite positions for clipped dashed vertical rules.
+        xlabel: Horizontal axis label.
+        ylabel: Vertical axis label.
+        yticks: Explicit finite ticks, expanding the vertical limits if needed.
+        xlim: Explicit finite horizontal limits, including reversed limits.
+        legend: Show the native series guide when var_names is supplied.
+        palette: CSS color sequence for variables or single-variable categories.
+        color_map: Native scheme for continuous single-variable colors.
+        marker: Shared native marker, or an identical marker per subset.
+        show: Use Scanpy autoshow when unset; False returns a composable chart.
+        save: Only None/False; use the native chart's HTML/JSON export.
+        hover: Show series, source position, time, value and numeric color.
+        zoom: Enable native wheel zoom and panning on both axes.
+        width: Native plot-area width in pixels, default 496.
+        height: Native plot-area height in pixels, default 369.6.
+        **kwargs: Unsupported keywords fail clearly; ax and return_fig are omitted.
+
+    Returns:
+        A native chart for show=False, otherwise displays it and returns None.
+
+    Raises:
+        ImportError: If the optional Scanpy version is unavailable.
+        TypeError: If arguments, sources or plotting options are unsupported.
+        ValueError: If shapes, labels, bounds or dimensions are invalid.
+        NotImplementedError: If native rendering cannot preserve an option.
+
+    Example:
+        >>> left = gsc.pl.timeseries_subplot(profiles, show=False)
+        >>> right = gsc.pl.timeseries_subplot(other_profiles, show=False)
+        >>> chart = gs.hconcat(left, right).resolve_scale(default="independent")
+    """
+    return _timeseries_plot(
+        X,
+        dict(
+            time=time,
+            color=color,
+            var_names=var_names,
+            highlights_x=highlights_x,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            yticks=yticks,
+            xlim=xlim,
+            legend=legend,
+            palette=palette,
+            color_map=color_map,
+            marker=marker,
+            **kwargs,
+        ),
+        context="gsc.pl.timeseries_subplot",
+        show=show,
+        save=save,
+        hover=hover,
+        zoom=zoom,
+        width=496 if width is None else width,
+        height=369.6 if height is None else height,
+    )
+
+
+def _timeseries_plot(
+    X: Any,
+    options: dict[str, Any],
+    *,
+    context: str,
+    show: bool | None,
+    save: bool | str | None,
+    hover: bool,
+    zoom: bool,
+    width: float | None,
+    height: float | None,
+) -> TopLevelSpec | None:
+    """Validate either time-series entry and deliver its shared native point chart."""
     for name, value in {"hover": hover, "zoom": zoom}.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
     _check_kwargs(
-        kwargs,
+        options,
         {
             "time",
             "color",
@@ -2092,7 +2211,13 @@ def timeseries(
     from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
 
     chart = build_timeseries(
-        X, hover=hover, zoom=zoom, width=width, height=height, **kwargs
+        X,
+        hover=hover,
+        zoom=zoom,
+        width=width,
+        height=height,
+        context=context,
+        **options,
     )
     return _finish_plot(chart, show, sc)
 

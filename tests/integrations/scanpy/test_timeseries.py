@@ -14,9 +14,10 @@ from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.timeseries_fixture import timeseries_cases
 
 
+@pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
 @pytest.mark.parametrize("case", timeseries_cases())
 def test_profiles_match_scanpy_positions_limits_colors_and_draw_order(
-    case, monkeypatch
+    family, case, monkeypatch
 ):
     import matplotlib.pyplot as plt
     import scanpy as sc
@@ -25,7 +26,7 @@ def test_profiles_match_scanpy_positions_limits_colors_and_draw_order(
     original = X.copy()
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        sc.pl.timeseries(X, **options)
+        getattr(sc.pl, family)(X, **options)
     fig, ax = plt.gcf(), plt.gcf().axes[0]
     fig.canvas.draw()
     expected = np.ma.concatenate([c.get_offsets() for c in ax.collections])
@@ -43,9 +44,9 @@ def test_profiles_match_scanpy_positions_limits_colors_and_draw_order(
     rule_limits = [line.get_ydata().tolist() for line in ax.lines]
     plt.close(fig)
     monkeypatch.setattr(
-        sc.pl, "timeseries", lambda *a, **k: pytest.fail("Called upstream plot")
+        sc.pl, family, lambda *a, **k: pytest.fail("Called upstream plot")
     )
-    chart = gsc.pl.timeseries(X, show=False, **options)
+    chart = getattr(gsc.pl, family)(X, show=False, **options)
     spec = chart.to_dict()
     points = next(
         m for m in leaf_marks(spec) if m.get("mark", {}).get("type") == "point"
@@ -98,6 +99,56 @@ def test_forwarded_defaults_match_the_pinned_subplot_signature():
             assert actual[name].default == p.default
 
 
+def test_subplot_keeps_explicit_upstream_arguments_and_native_defaults():
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+    import scanpy as sc
+
+    native = inspect.signature(gsc.pl.timeseries_subplot).parameters
+    upstream = inspect.signature(sc.pl.timeseries_subplot).parameters
+    for name, parameter in upstream.items():
+        if name == "ax":
+            assert name not in native
+        else:
+            assert native[name].kind == parameter.kind
+            assert native[name].default == parameter.default
+    assert set(native) - set(upstream) == {
+        "show",
+        "save",
+        "hover",
+        "zoom",
+        "width",
+        "height",
+        "kwargs",
+    }
+    plt.close("all")
+    with (
+        mpl.rc_context({"figure.figsize": (6.4, 4.8), "figure.dpi": 100}),
+        warnings.catch_warnings(),
+    ):
+        warnings.simplefilter("ignore")
+        sc.pl.timeseries_subplot(np.array([[1, 2], [3, 4]]))
+    fig = plt.gcf()
+    fig.canvas.draw()
+    bounds = fig.axes[0].get_window_extent()
+    spec = gsc.pl.timeseries_subplot([[1, 2], [3, 4]], show=False).to_dict()
+    np.testing.assert_allclose(
+        [spec["width"], spec["height"]], [bounds.width, bounds.height]
+    )
+    plt.close(fig)
+
+
+def test_subplot_errors_name_the_requested_entry():
+    for options, error in [
+        ({"time": [1]}, ValueError),
+        ({"marker": "^"}, NotImplementedError),
+        ({"ax": None}, TypeError),
+        ({"return_fig": True}, TypeError),
+    ]:
+        with pytest.raises(error, match=r"gsc\.pl\.timeseries_subplot:"):
+            gsc.pl.timeseries_subplot([[1, 2], [3, 4]], show=False, **options)
+
+
 def test_numeric_tables_masks_missingness_and_ids_are_preserved():
     frame = pd.DataFrame(
         {"B": pd.array([1, None, 3], dtype="Int64"), "A": [True, False, True]}
@@ -125,6 +176,7 @@ def test_numeric_tables_masks_missingness_and_ids_are_preserved():
     assert [r["_value"] for r in records] == [1, 3, None, 4]
 
 
+@pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
 @pytest.mark.parametrize(
     "values,options,error,match",
     [
@@ -158,6 +210,8 @@ def test_numeric_tables_masks_missingness_and_ids_are_preserved():
         ([[1, 2]], {"unknown": True}, TypeError, "unknown"),
     ],
 )
-def test_unsupported_profiles_and_options_fail_clearly(values, options, error, match):
+def test_unsupported_profiles_and_options_fail_clearly(
+    family, values, options, error, match
+):
     with pytest.raises(error, match=match):
-        gsc.pl.timeseries(values, show=False, **options)
+        getattr(gsc.pl, family)(values, show=False, **options)

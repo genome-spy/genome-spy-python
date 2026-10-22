@@ -30,15 +30,17 @@ class TimeseriesData:
     highlight_y: tuple[float, float]
 
 
-def _vector(values: Any, name: str, count: int | None = None) -> pd.Series:
+def _vector(
+    values: Any, name: str, count: int | None = None, *, context: str = CONTEXT
+) -> pd.Series:
     """Return a resident positional vector, rejecting lazy inputs and wrong lengths."""
     if (
         not isinstance(values, (np.ndarray, pd.Series, pd.Index, list, tuple))
         or np.ndim(values) != 1
     ):
-        raise TypeError(f"{CONTEXT}: {name} must be a resident one-dimensional vector.")
+        raise TypeError(f"{context}: {name} must be a resident one-dimensional vector.")
     if count is not None and len(values) != count:
-        raise ValueError(f"{CONTEXT}: {name} must contain {count} values.")
+        raise ValueError(f"{context}: {name} must contain {count} values.")
     return pd.Series(values).reset_index(drop=True)
 
 
@@ -53,16 +55,17 @@ def prepare_timeseries(
     yticks: Any,
     palette: Any,
     legend: bool,
+    context: str = CONTEXT,
 ) -> tuple[TimeseriesData, list[float]]:
     """Return detached points, initial limits and highlights without sorting samples or analysis."""
-    array = matrix_array(X, context=CONTEXT, allow_vector=True)
-    values = numeric_values(pd.DataFrame(array), context=CONTEXT)
+    array = matrix_array(X, context=context, allow_vector=True)
+    values = numeric_values(pd.DataFrame(array), context=context)
     rows, columns = values.shape
     times = (
         np.arange(rows, dtype=float)
         if time is None
         else numeric_values(
-            _vector(time, "time", rows).to_frame(), context=CONTEXT
+            _vector(time, "time", rows, context=context).to_frame(), context=context
         ).ravel()
     )
     continuous = False
@@ -77,26 +80,26 @@ def prepare_timeseries(
     else:
         if color is None:
             raise ValueError(
-                f"{CONTEXT}: one variable requires color, as in Scanpy's helper."
+                f"{context}: one variable requires color, as in Scanpy's helper."
             )
-        source = _vector(color, "color", rows)
+        source = _vector(color, "color", rows, context=context)
         # Check the supplied type before pandas promotes mixed integer/float lists.
         first_color = color.iloc[0] if isinstance(color, pd.Series) else color[0]
         continuous = isinstance(first_color, (float, np.floating))
         if continuous:
-            colors = numeric_values(source.to_frame(), context=CONTEXT).ravel()
+            colors = numeric_values(source.to_frame(), context=context).ravel()
             sample, subset = np.arange(rows), np.zeros(rows, dtype=int)
             count, fallback = 1, ["0"]
         else:
             if source.isna().any():
                 raise ValueError(
-                    f"{CONTEXT}: categorical color cannot contain missing values."
+                    f"{context}: categorical color cannot contain missing values."
                 )
             try:
                 levels, inverse = np.unique(source.to_numpy(), return_inverse=True)
             except TypeError as error:
                 raise TypeError(
-                    f"{CONTEXT}: categorical color values must have a common sortable type."
+                    f"{context}: categorical color values must have a common sortable type."
                 ) from error
             # Scanpy draws sorted categories, retaining sample order inside each one.
             sample = np.argsort(inverse, kind="stable")
@@ -105,14 +108,14 @@ def prepare_timeseries(
             colors = None
         plotted = values[sample, 0]
     if isinstance(var_names, (str, bytes)) or not isinstance(var_names, Collection):
-        raise TypeError(f"{CONTEXT}: var_names must be a collection of labels.")
+        raise TypeError(f"{context}: var_names must be a collection of labels.")
     names = list(var_names)
     if names and (len(names) < count or any(not isinstance(v, str) for v in names)):
-        raise ValueError(f"{CONTEXT}: var_names needs at least {count} string labels.")
+        raise ValueError(f"{context}: var_names needs at least {count} string labels.")
     labels = names[:count] if names else fallback
     if len(set(labels)) != len(labels):
         raise NotImplementedError(
-            f"{CONTEXT}: repeated series labels are unsupported; use distinct var_names."
+            f"{context}: repeated series labels are unsupported; use distinct var_names."
         )
     selected: tuple[str, ...] = ()
     if not continuous:
@@ -122,12 +125,12 @@ def prepare_timeseries(
             palette = sc.pl.palettes.vega_10
         if isinstance(palette, str) or not isinstance(palette, (Sequence, np.ndarray)):
             raise NotImplementedError(
-                f"{CONTEXT}: palette requires a sequence of CSS colors; cyclers are unsupported."
+                f"{context}: palette requires a sequence of CSS colors; cyclers are unsupported."
             )
         if len(palette) < count:
-            raise ValueError(f"{CONTEXT}: palette needs at least {count} colors.")
+            raise ValueError(f"{context}: palette needs at least {count} colors.")
         selected = tuple(
-            native_color(c, "palette", context=CONTEXT) for c in palette[:count]
+            native_color(c, "palette", context=context) for c in palette[:count]
         )
     table = pd.DataFrame(
         {
@@ -144,23 +147,23 @@ def prepare_timeseries(
         table["_color"] = colors
         valid &= np.isfinite(colors)
         low, high, _ = color_bounds(
-            colors[valid], None, None, context=CONTEXT, expand_constant=False
+            colors[valid], None, None, context=context, expand_constant=False
         )
         domain = (low, high)
     if not valid.any():
         raise ValueError(
-            f"{CONTEXT}: at least one point needs finite time, value and color."
+            f"{context}: at least one point needs finite time, value and color."
         )
     highlights = [
-        number(v, "highlights_x", context=CONTEXT, minimum=-np.inf)
-        for v in _vector(highlights_x, "highlights_x")
+        number(v, "highlights_x", context=context, minimum=-np.inf)
+        for v in _vector(highlights_x, "highlights_x", context=context)
     ]
     x_values = np.concatenate([table.loc[valid, "_time"].to_numpy(), highlights])
     x_domain = coordinate_domain(x_values, 0.05)
     if xlim is not None:
         limits = [
-            number(v, "xlim", context=CONTEXT, minimum=-np.inf)
-            for v in _vector(xlim, "xlim", 2)
+            number(v, "xlim", context=context, minimum=-np.inf)
+            for v in _vector(xlim, "xlim", 2, context=context)
         ]
         x_domain = (
             (limits[0], limits[1])
@@ -174,8 +177,8 @@ def prepare_timeseries(
         None
         if yticks is None
         else tuple(
-            number(v, "yticks", context=CONTEXT, minimum=-np.inf)
-            for v in _vector(yticks, "yticks")
+            number(v, "yticks", context=context, minimum=-np.inf)
+            for v in _vector(yticks, "yticks", context=context)
         )
     )
     if ticks:

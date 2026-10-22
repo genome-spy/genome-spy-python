@@ -297,6 +297,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["scrublet_scores"],
         namespace["timeseries_heatmap"],
         namespace["time_series"],
+        namespace["time_series_subplots"],
     ]
     profiles = namespace["profiles"]
     expected_order = namespace["pbmc"].obs["S_score"].sort_values(kind="stable").index
@@ -334,6 +335,29 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["pbmc"].obs.loc[expected_order, "S_score"],
     )
     assert len({r["_id"] for r in records}) == len(records)
+    panels = namespace["time_series_subplots"].to_dict()
+    assert len(panels["hconcat"]) == 2
+    assert panels["resolve"]["scale"]["default"] == "independent"
+    assert panels["resolve"]["legend"]["default"] == "independent"
+    for chart in (namespace["phase_panel"], namespace["score_panel"]):
+        spec = chart.to_dict()
+        rows = next(iter(spec["datasets"].values()))
+        assert len(rows) == 700 and len({r["_id"] for r in rows}) == 700
+        sample = [r["_sample"] for r in rows]
+        np.testing.assert_allclose(
+            [r["_value"] for r in rows], profiles["GNLY"].to_numpy()[sample]
+        )
+        np.testing.assert_allclose(
+            [r["_time"] for r in rows],
+            namespace["pbmc"].obs.loc[expected_order, "S_score"].to_numpy()[sample],
+        )
+    phase_rows = next(iter(namespace["phase_panel"].to_dict()["datasets"].values()))
+    assert list(dict.fromkeys(r["_series"] for r in phase_rows)) == ["G1", "G2M", "S"]
+    score_rows = next(iter(namespace["score_panel"].to_dict()["datasets"].values()))
+    np.testing.assert_allclose(
+        [r["_color"] for r in score_rows],
+        namespace["pbmc"].obs.loc[expected_order, "G2M_score"],
+    )
     assert scrublet_calls == [
         {
             "threshold": 0.25,

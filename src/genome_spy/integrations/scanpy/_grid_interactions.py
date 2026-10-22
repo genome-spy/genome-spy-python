@@ -29,14 +29,14 @@ def vertical_highlights(
 
 
 def zoom_axes(
-    x: Any, y: Any, *, enabled: bool | Literal["xy"], name: str
+    x: Any, y: Any, *, enabled: bool | Literal["xy"], name: str | None
 ) -> tuple[Any, Any]:
-    """Enable y navigation by default, or both named index axes for 'xy'."""
+    """Enable y navigation or both axes, naming scales only when requested."""
     if not enabled:
         return x, y
-    return x.scale(zoom=enabled == "xy", name=f"{name}-x"), y.scale(
-        zoom=True, name=f"{name}-y"
-    )
+    return x.scale(
+        zoom=enabled == "xy", name=f"{name}-x" if name is not None else Undefined
+    ), y.scale(zoom=True, name=f"{name}-y" if name is not None else Undefined)
 
 
 def index_offset(axis: str, field: str) -> Any:

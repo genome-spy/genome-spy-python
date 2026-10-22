@@ -118,6 +118,8 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
   Variable-gene QC panels then inspect the packaged stored selection and statistics.
   Supplied time-series heatmaps and point plots reuse the PBMC markers, explicitly
   ordered by the stored S-phase score; neither chart infers time or pseudotime.
+  Two native time-series subplots compare stored phase and G2M-score colors,
+  reusing the same GNLY values with independent scales, guides and navigation.
 
 These adapt supported portions of the official core and advanced tutorials.
 Keep related examples together within each workflow, without placeholder cells

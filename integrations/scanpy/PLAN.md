@@ -742,7 +742,17 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   explicit renderer boundary as other previews. Completion evidence is retained
   in [STATUS](STATUS.md#m11a-supplied-time-series-points).
   Per-subset marker differences, repeated legend labels and broader storage
-  remain explicit M14 restrictions; subplot entry reuse is the next increment.
+  remain explicit M14 restrictions.
+- M11.a subplot increment: expose `timeseries_subplot` with the pinned explicit
+  plotting arguments/defaults, omitting Matplotlib `ax`. Reuse the same preparation,
+  renderer and native delivery; errors name the requested entry. The default
+  native subplot area is 496 × 369.6 pixels at 100 logical pixels/inch. Native
+  `hconcat`/`vconcat` replaces current-figure mutation; explicit independent scale
+  and guide resolution supports panels with different color modes. Acceptance:
+  pinned signature/default and semantic comparisons, complete chart references,
+  observed independent hover/zoom/pan and offline composition, a composed PBMC
+  notebook example and a measured two-panel resource workload. This increment
+  closes the subplot preview; simulation, DPT/PAGA and full M11 remain open.
 - M11.a: `timeseries`, `timeseries_subplot`, `timeseries_as_heatmap` accept supplied
   matrices/time values, variable order, highlights, labels, color maps, limits and
   markers. Use shared heatmap or point authoring according to the pinned callable;

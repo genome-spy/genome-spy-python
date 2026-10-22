@@ -904,7 +904,40 @@ density, bottom legend layout, palette sampling and browser rasterization follow
 GenomeSpy rather than Matplotlib's figure system. Global Matplotlib settings,
 axes/cycler/colormap objects, sparse/lazy sources, complex/infinite values,
 repeated series labels and differing per-subset marker shapes fail clearly.
-The separate `timeseries_subplot` entry is not implemented yet.
+
+### Compose time-series subplots
+
+`timeseries_subplot` exposes the pinned helper's explicit plotting arguments and
+uses the same preparation, points, guides and interactions as `timeseries`.
+Its default native plot area is 496 × 369.6 pixels, matching an ordinary upstream
+subplot at 100 logical pixels/inch. It uses no current figure or axes state.
+`ax` is omitted and errors if supplied; use native composition instead:
+
+```python
+import genome_spy as gs
+
+left = gsc.pl.timeseries_subplot(
+    profiles_a, time=times, var_names=genes_a, zoom=True,
+    width=280, height=220, show=False,
+)
+right = gsc.pl.timeseries_subplot(
+    profiles_b, time=times, var_names=genes_b, zoom=True,
+    width=280, height=220, show=False,
+)
+chart = (
+    gs.hconcat(left, right, spacing=30)
+    .resolve_scale(default="independent")
+    .resolve_legend(default="independent")
+)
+chart.display(inline=True, controls=False)
+```
+
+Scales and guides stay independent when panels use different color modes or
+ranges. Hover, wheel zoom and drag panning operate within each panel. The added
+`show`/`save` keywords follow the shared native delivery contract; use `show=False`
+to obtain a chart for composition. Data, marker, palette and storage restrictions
+are identical to `timeseries`. This returns a native chart rather than mutating
+a supplied Matplotlib subplot; unknown options fail by name.
 
 ## Clustermap compatibility
 
@@ -1249,10 +1282,10 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Simulation | sim |
-| Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries_subplot |
+| Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
@@ -1348,6 +1381,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.timeseries_as_heatmap
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.timeseries
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.timeseries_subplot
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 

@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 import pytest
 
+import genome_spy as gs
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.browser.test_umap import render
 from tests.integrations.scanpy.browser.test_heatmap import hover_at
@@ -16,9 +17,19 @@ from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.timeseries_fixture import timeseries_cases
 
 
+def point_coordinates(page):
+    """Read exported circle centers to observe navigation without naming scales."""
+    return [
+        np.array([[float(p.get("cx")), float(p.get("cy"))] for p in group])
+        for group in svg_root(page).iter()
+        if group.get("data-mark-type") == "point" and group.get("clip-path")
+    ]
+
+
+@pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
 @pytest.mark.parametrize("case", timeseries_cases())
 @pytest.mark.parametrize("page", [1.5], indirect=True)
-def test_complete_time_series_native_points_and_guides(page, tmp_path, case):
+def test_complete_time_series_native_points_and_guides(page, tmp_path, case, family):
     import matplotlib as mpl
     import matplotlib.pyplot as plt
     import scanpy as sc
@@ -29,7 +40,7 @@ def test_complete_time_series_native_points_and_guides(page, tmp_path, case):
         warnings.catch_warnings(),
     ):
         warnings.simplefilter("ignore")
-        sc.pl.timeseries(values, **options)
+        getattr(sc.pl, family)(values, **options)
         fig, ax = plt.gcf(), plt.gcf().axes[0]
         # Fixed plot dimensions register the renderer's pixels independently of outer fonts.
         fig.set_size_inches(6, 4)
@@ -54,7 +65,7 @@ def test_complete_time_series_native_points_and_guides(page, tmp_path, case):
             [t.get_text() for t in ax.get_legend().texts] if ax.get_legend() else []
         )
         plt.close(fig)
-    chart = gsc.pl.timeseries(
+    chart = getattr(gsc.pl, family)(
         values, width=bbox.width, height=bbox.height, show=False, **options
     )
     bounds = render(page, chart)
@@ -133,9 +144,10 @@ def test_complete_time_series_native_points_and_guides(page, tmp_path, case):
     page.screenshot(path=str(tmp_path / "complete.png"), full_page=True)
 
 
-def test_hover_and_both_native_axes_navigate_and_export_offline(page, tmp_path):
+@pytest.mark.parametrize("family", ["timeseries", "timeseries_subplot"])
+def test_hover_and_both_native_axes_navigate_and_export_offline(page, tmp_path, family):
     values = np.arange(60, dtype=float).reshape(30, 2)
-    chart = gsc.pl.timeseries(
+    chart = getattr(gsc.pl, family)(
         values,
         var_names=["A", "B"],
         time=np.arange(30) * 2,
@@ -161,26 +173,81 @@ def test_hover_and_both_native_axes_navigate_and_export_offline(page, tmp_path):
     page.locator("table.attributes").wait_for(state="visible")
     cells = [s.strip() for s in page.locator("table.attributes td").all_text_contents()]
     assert cells == ["A", "10", "20.00", "20.00"]
+    before = point_coordinates(page)[0]
     page.mouse.wheel(0, -300)
     page.wait_for_timeout(700)
-    moved = {
-        axis: page.evaluate(
-            "a=>api.getScaleResolutionByName(`timeseries-${a}`).getDomain()", axis
-        )
-        for axis in ("x", "y")
-    }
-    assert all(np.ptp(moved[a]) < np.ptp(domains[a]) for a in ("x", "y"))
+    moved = point_coordinates(page)[0]
+    assert all(np.ptp(moved[:, i]) > np.ptp(before[:, i]) for i in (0, 1))
     canvas = page.locator("canvas").first.bounding_box()
     page.mouse.move(canvas["x"] + x, canvas["y"] + y)
     page.mouse.down()
     page.mouse.move(canvas["x"] + x + 20, canvas["y"] + y + 15, steps=5)
     page.mouse.up()
     page.wait_for_timeout(700)
-    assert (
-        page.evaluate("api.getScaleResolutionByName('timeseries-x').getDomain()")
-        != moved["x"]
-    )
+    assert not np.array_equal(point_coordinates(page)[0], moved)
     path = tmp_path / "timeseries.html"
+    chart.save(path, inline=True, controls=False)
+    page.context.set_offline(True)
+    page.goto(path.as_uri())
+    page.locator("canvas").first.wait_for(state="visible")
+    assert not page.locator(".message-box").count()
+
+
+def test_subplot_composition_keeps_colors_hover_and_navigation_independent(
+    page, tmp_path
+):
+    values = np.arange(30, dtype=float)
+    options = dict(marker="o", zoom=True, width=280, height=220, show=False)
+    left = gsc.pl.timeseries_subplot(
+        values,
+        color=np.where(values % 2 == 0, "A", "B"),
+        var_names=["A", "B"],
+        **options,
+    )
+    right = gsc.pl.timeseries_subplot(
+        values, color=values / 29, var_names=["Value"], **options
+    )
+    chart = (
+        gs.hconcat(left, right, spacing=30)
+        .resolve_scale(default="independent")
+        .resolve_legend(default="independent")
+    )
+    bounds = render(page, chart)
+    other = page.evaluate("api.views.getLayoutBounds({scope:[],view:'panel-1'})")
+
+    before = point_coordinates(page)
+    assert len(before) == 2 and all(len(points) == 30 for points in before)
+    fraction = (10 + 1.45) / 31.9
+    x = bounds["x"] + fraction * bounds["width"]
+    y = bounds["y"] + (1 - fraction) * bounds["height"]
+    hover_at(page, x, y)
+    page.locator("table.attributes").wait_for(state="visible")
+    cells = [v.strip() for v in page.locator("table.attributes td").all_text_contents()]
+    assert cells == ["A", "10", "10.00", "10.00"]
+    page.mouse.wheel(0, -300)
+    page.wait_for_timeout(700)
+    zoomed = point_coordinates(page)
+    assert not np.array_equal(zoomed[0], before[0])
+    np.testing.assert_allclose(zoomed[1], before[1])
+    canvas = page.locator("canvas").first.bounding_box()
+    page.mouse.move(canvas["x"] + x, canvas["y"] + y)
+    page.mouse.down()
+    page.mouse.move(canvas["x"] + x + 20, canvas["y"] + y + 15, steps=5)
+    page.mouse.up()
+    page.wait_for_timeout(700)
+    panned = point_coordinates(page)
+    assert not np.array_equal(panned[0], zoomed[0])
+    np.testing.assert_allclose(panned[1], before[1])
+    hover_at(
+        page,
+        other["x"] + fraction * other["width"],
+        other["y"] + (1 - fraction) * other["height"],
+    )
+    page.locator("table.attributes").wait_for(state="visible")
+    cells = [v.strip() for v in page.locator("table.attributes td").all_text_contents()]
+    assert cells[:4] == ["Value", "10", "10.00", "10.00"]
+    assert float(cells[4]) == pytest.approx(10 / 29, rel=0.001)
+    path = tmp_path / "timeseries-subplots.html"
     chart.save(path, inline=True, controls=False)
     page.context.set_offline(True)
     page.goto(path.as_uri())

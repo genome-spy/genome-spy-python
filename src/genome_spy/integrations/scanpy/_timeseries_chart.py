@@ -40,33 +40,34 @@ def build_timeseries(
     zoom: bool,
     width: float | None,
     height: float | None,
+    context: str = CONTEXT,
 ) -> gs.TopLevelSpec:
     """Return native points and guides from supplied profiles using Scanpy's defaults."""
     for name, value in {"xlabel": xlabel, "ylabel": ylabel}.items():
         if value is not None and not isinstance(value, str):
-            raise TypeError(f"{CONTEXT}: {name} must be a string or None.")
+            raise TypeError(f"{context}: {name} must be a string or None.")
     if not isinstance(legend, bool):
-        raise TypeError(f"{CONTEXT}: legend must be boolean.")
+        raise TypeError(f"{context}: legend must be boolean.")
     marker_count = 1
     if not isinstance(marker, str) and isinstance(marker, (Sequence, np.ndarray)):
         marker = list(marker)
         marker_count = len(marker)
         if not marker or any(v != marker[0] for v in marker):
             raise NotImplementedError(
-                f"{CONTEXT}: per-subset marker shapes are unsupported."
+                f"{context}: per-subset marker shapes are unsupported."
             )
         marker = marker[0]
     if not isinstance(marker, str) or marker not in EMBEDDING_MARKERS:
         raise NotImplementedError(
-            f"{CONTEXT}: marker must be one of {tuple(EMBEDDING_MARKERS)}."
+            f"{context}: marker must be one of {tuple(EMBEDDING_MARKERS)}."
         )
     scheme = native_scheme(
-        "viridis" if color_map is None else color_map, "color_map", context=CONTEXT
+        "viridis" if color_map is None else color_map, "color_map", context=context
     )
-    width = number(992 if width is None else width, "width", context=CONTEXT)
-    height = number(739.2 if height is None else height, "height", context=CONTEXT)
+    width = number(992 if width is None else width, "width", context=context)
+    height = number(739.2 if height is None else height, "height", context=context)
     if not width or not height:
-        raise ValueError(f"{CONTEXT}: width and height must be positive.")
+        raise ValueError(f"{context}: width and height must be positive.")
     prepared, highlights = prepare_timeseries(
         X,
         time=time,
@@ -77,9 +78,10 @@ def build_timeseries(
         yticks=yticks,
         palette=palette,
         legend=legend,
+        context=context,
     )
     if marker_count not in (1, prepared.table["_series"].nunique()):
-        raise ValueError(f"{CONTEXT}: marker needs one value or one per subset.")
+        raise ValueError(f"{context}: marker needs one value or one per subset.")
     x = (
         gs.X("_time:Q")
         .scale(
@@ -100,8 +102,8 @@ def build_timeseries(
             domain=False,
         )
     )
-    # Point plots use both axes for navigation, unlike the y-first matrix helper.
-    x, y = zoom_axes(x, y, enabled="xy" if zoom else False, name="timeseries")
+    # Unnamed scales let independent panels compose without global name collisions.
+    x, y = zoom_axes(x, y, enabled="xy" if zoom else False, name=None)
     shape, path_width = EMBEDDING_MARKERS[marker]
     size = 6 * (PT * path_width) ** 2
     guide = (
