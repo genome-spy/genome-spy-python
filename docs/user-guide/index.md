@@ -23,7 +23,8 @@ scales](genomic-axes.md) to learn GenomeSpy's genomic extensions.
 
 ## Larger and genomic views
 
-- [Composition](composition.md) layers charts and arranges linked panels.
+- [Composition](composition.md) layers charts, arranges panels, and adds plots
+  around a main chart with `gs.surround()`.
 - [Import remote view specifications](importing-specifications.md) reuses
   published JSON views by URL.
 - [Configuration](configuration.md) sets dimensions, titles, and shared visual

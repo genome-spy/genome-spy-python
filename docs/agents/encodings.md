@@ -104,6 +104,60 @@ Methods return new charts; retain the result. Confirm interactions in the browse
 Use the same intended axis title on layers sharing a scale; otherwise helper
 fields such as `cutoff` can appear in the combined title.
 
+## Marginal panels with surround
+
+Use `gs.surround()` to place plots around a main chart. Use it for matrix
+annotations and row or column summaries.
+
+```python
+import genome_spy as gs
+
+rows = [{"position": 1, "signal": 2}, {"position": 2, "signal": 7}]
+center = (
+    gs.Chart().mark_point(filled=True)
+    .encode(x="position:Q", y="signal:Q")
+    .properties(width=320, height=180)
+)
+top = (
+    gs.Chart().mark_tick(orient="vertical")
+    .encode(x=gs.X("position:Q").axis(None))
+    .properties(height=24)
+)
+right = (
+    gs.Chart().mark_tick(orient="horizontal")
+    .encode(y=gs.Y("signal:Q").axis(None))
+    .properties(width=24)
+)
+chart = gs.surround(
+    center,
+    surround=gs.SurroundSides(
+        top=gs.SurroundSideSpec(views=[top], spacing=4),
+        right=[right],
+    ),
+    data=rows,
+    spacing=8,
+).with_scales(
+    x=gs.Scale(domain=[0, 3], zoom=True),
+    y=gs.Scale(domain=[0, 8], zoom=True),
+)
+chart.to_dict()
+```
+
+Expected: two points, two ticks above, and two ticks on the right. Top/bottom
+plots share x with the center; left/right plots share y. Zoom keeps them aligned.
+Other scales stay independent unless shared explicitly.
+
+Set the center's width and height. Set only height on top/bottom plots and width
+on left/right plots. Outer `spacing` separates sides from the center. Side-group
+`spacing` separates tracks. Outer data and settings apply to all charts unless
+overridden. Use outer `.with_scales(...)` for shared domains and zoom.
+
+The center accepts unit, layer, and multiscale charts or imports of these.
+Sides also accept surrounds. Put selections and rulers on individual plots.
+See [the user guide](../user-guide/composition.md#add-plots-with-surround) for
+examples and [the surround reference](https://genomespy.app/docs/grammar/composition/surround/)
+for nesting and limits.
+
 ## Browser transforms
 
 Use when the browser should filter or derive a visualization field:

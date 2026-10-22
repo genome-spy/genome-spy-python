@@ -9,10 +9,9 @@ uses three concise operators for the most common layouts:
 | `a & b`  | Vertical concatenation   | Place `a` above `b`                     |
 | `a \| b` | Horizontal concatenation | Place `a` to the left of `b`            |
 
-Use {py:func}`~genome_spy.concat` when the layout is an explicit wrapping grid.
-Composition is hierarchical, so layers and concatenations can be nested. The
-GenomeSpy documentation introduces the same model in
-[view composition](https://genomespy.app/docs/grammar/composition/).
+Use {py:func}`~genome_spy.concat` for a grid,
+{py:func}`~genome_spy.facet` to repeat a plot by category, and
+{py:func}`~genome_spy.surround` to place plots around a main chart.
 
 
 ## Layer complementary marks
@@ -110,12 +109,11 @@ single field for a wrapped layout; `FacetMapping` specifies rows and columns.
 Header, spacing and field options use named Python arguments. See the upstream
 [facet guide](https://genomespy.app/docs/grammar/facet/) for layout constraints.
 
-## Align marginal panels with surround
+## Add plots with surround
 
-Use {py:func}`~genome_spy.surround` for a central plot with marginal panels.
-Top and bottom panels share the center's x scale; left and right panels share
-its y scale. Each side accepts a list of plots or `SurroundSideSpec` with named
-`views` and shared settings.
+Use {py:func}`~genome_spy.surround` to add plots above, below, or beside a main
+chart. Pass the main chart first. Choose sides with
+{py:class}`~genome_spy.SurroundSides`:
 
 ```{literalinclude} ../tutorials/composition.py
 :language: python
@@ -125,8 +123,47 @@ its y scale. Each side accepts a list of plots or `SurroundSideSpec` with named
 
 ```{genomespy-chart} composition:surround_chart
 :height: 330
-:title: Points with an aligned marginal tick track
+:title: Points with average signal bars above
 ```
+
+The bars show average signal at each position. GenomeSpy calculates the averages
+in the browser. Bars line up with the points below.
+
+| Side | Aligns with | Set each side plot's |
+| --- | --- | --- |
+| `top`, `bottom` | Main chart's x positions | `height` |
+| `left`, `right` | Main chart's y positions | `width` |
+
+Set the main chart's `width` and `height` to size its plot area. Use `spacing`
+to set the gap around it. Each side takes a list of charts.
+
+For several plots on one side, `gs.SurroundSideSpec(views=[...], spacing=4)`
+sets their gap. It can also give them shared data or settings.
+See the [surround reference](https://genomespy.app/docs/grammar/composition/surround/)
+for nested layouts and supported chart types.
+
+## Add row and column totals
+
+This UpSet-style example uses `gs.surround()` to place bars above and beside a
+matrix. The fictional data includes the totals. GenomeSpy filters repeated
+totals and draws the charts in the browser.
+
+```{literalinclude} ../tutorials/composition.py
+:language: python
+:start-after: composition-matrix-start
+:end-before: composition-matrix-end
+```
+
+```{genomespy-chart} composition:matrix_summary_chart
+:height: 390
+:title: A matrix with aligned top and left summaries
+```
+
+Top bars follow the matrix columns. Left bars follow its rows. Each bar chart
+has its own count scale.
+
+See the [UpSet gallery example](../gallery/upset_mutations.md) for a complete
+plot using mutation data.
 
 ## Shared, independent, and excluded resolution
 
@@ -153,38 +190,3 @@ and the aligned-axis case in
 dedicated page in this guide. It provides semantic zoom between detail levels
 through {py:func}`~genome_spy.multiscale`. To reuse a view stored in another JSON file, see
 [Import remote view specifications](importing-specifications.md).
-
-## Advanced grid layouts
-
-An UpSet-style layout combines a top summary, a left summary, and a matrix. A
-two-column grid needs an empty top-left cell so the summaries align with the
-matrix:
-
-```{literalinclude} ../tutorials/composition.py
-:language: python
-:start-after: composition-grid-start
-:end-before: composition-grid-end
-```
-
-```{genomespy-chart} composition:grid_chart
-:height: 390
-:title: A two-column grid with an empty top-left cell
-```
-
-The child order fills the grid row by row:
-
-| Empty placeholder | Column summary    |
-| ----------------- | ----------------- |
-| Row summary       | Membership matrix |
-
-The column summary shares its `x` index scale with the matrix but excludes its
-quantitative `y` scale. The row summary does the converse. The matrix and
-summaries therefore stay aligned without forcing row counts, column counts,
-and matrix indices into incompatible resolutions.
-
-The parent owns the data and shared index-scale domains. This keeps row and
-column order in one place and links later zooming or panning across the matrix
-and its summaries.
-
-The [UpSet plot](../gallery/upset_mutations.md) and
-[oncoprint](../gallery/oncoprint.md) examples use this layout at full size.

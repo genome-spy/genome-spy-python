@@ -73,7 +73,7 @@ specialized chart form. See [capability boundaries](grouped-charts.md#supplied-o
 
 | Next task | Guide |
 | --- | --- |
-| Fields, transforms, layers, panels | [Encodings and composition](encodings.md) |
+| Fields, transforms, layers, panels, surround margins | [Encodings and composition](encodings.md) |
 | Color, size, order, guides | [Scales, axes, legends](scales-axes-legends.md) |
 | Notebook display, export, recovery | [Rendering](rendering.md) |
 | Python callbacks and live chart updates | [Embed API](embed-api.md) |
