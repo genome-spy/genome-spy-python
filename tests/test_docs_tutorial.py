@@ -405,19 +405,34 @@ def test_composition_guide_examples_serialize_inherited_properties() -> None:
     assert horizontal_spec["resolve"]["scale"] == {"x": "shared", "y": "shared"}
 
 
-def test_composition_grid_uses_placeholder_and_excluded_summaries() -> None:
-    tutorial = _load_module("_composition_grid_tutorial", COMPOSITION_TUTORIAL_PATH)
-    spec = tutorial.grid_chart.to_dict()
+@pytest.mark.parametrize("chart_name", ["surround_chart", "matrix_summary_chart"])
+def test_composition_surround_examples_disable_zoom(chart_name: str) -> None:
+    tutorial = _load_module("_composition_surround_tutorial", COMPOSITION_TUTORIAL_PATH)
+    spec = getattr(tutorial, chart_name).to_dict()
 
-    assert spec["columns"] == 2
-    assert len(spec["concat"]) == 4
-    assert spec["datasets"][spec["concat"][0]["data"]["name"]] == []
-    assert spec["concat"][1]["resolve"]["scale"] == {"y": "excluded"}
-    assert spec["concat"][2]["resolve"]["scale"] == {"x": "excluded"}
-    assert spec["resolve"]["scale"] == {"x": "shared", "y": "shared"}
-    assert spec["scales"]["x"]["domain"] == [-0.5, 2.5]
-    assert spec["scales"]["y"]["domain"] == [-0.5, 2.5]
-    assert "data" in spec
+    assert spec["config"]["scale"]["zoom"] is False
+    assert all(scale["zoom"] is False for scale in spec["scales"].values())
+
+
+def test_composition_matrix_uses_surround_with_local_count_scales() -> None:
+    tutorial = _load_module("_composition_matrix_tutorial", COMPOSITION_TUTORIAL_PATH)
+    spec = tutorial.matrix_summary_chart.to_dict()
+
+    assert set(spec["surround"]) == {"top", "left"}
+    assert len(spec["surround"]["top"]) == len(spec["surround"]["left"]) == 1
+    top = spec["surround"]["top"][0]
+    left = spec["surround"]["left"][0]
+    assert top["height"] == 90 and "width" not in top
+    assert left["width"] == 110 and "height" not in left
+    assert top["layer"][0]["encoding"]["y"]["field"] == "columnTotal"
+    assert left["layer"][0]["encoding"]["x"]["field"] == "rowTotal"
+    assert all("resolve" not in view for view in (spec, top, left))
+    assert spec["spec"]["width"] == spec["spec"]["height"] == "container"
+    assert spec["spec"]["encoding"]["x"]["type"] == "index"
+    assert spec["spec"]["encoding"]["y"]["type"] == "index"
+    assert spec["scales"]["x"]["domain"] == [0, 2]
+    assert spec["scales"]["y"]["domain"] == [0, 2]
+    assert spec["datasets"][spec["data"]["name"]] == tutorial.memberships
 
 
 def test_composition_guide_embeds_only_named_tutorial_charts() -> None:
@@ -431,7 +446,7 @@ def test_composition_guide_embeds_only_named_tutorial_charts() -> None:
         "horizontal_chart",
         "facet_chart",
         "surround_chart",
-        "grid_chart",
+        "matrix_summary_chart",
     ]
     assert set(targets) <= tutorial.CHARTS.keys()
 

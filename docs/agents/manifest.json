@@ -32,7 +32,7 @@
     "source": "docs/agents/encodings.md",
     "title": "Encodings and composition",
     "section": "Author charts",
-    "description": "Typed fields, repeated labels with stable position IDs, panels, collected guides and browser transforms."
+    "description": "Typed fields, stable position IDs, panels, surround margins and sizing, collected guides and browser transforms."
   },
   {
     "path": "scales-axes-legends.md",
@@ -52,7 +52,7 @@
     "title": "Chart authoring signatures",
     "section": "API details",
     "api_section": "Chart authoring",
-    "description": "Construct charts and marks, encode fields, configure views, and resolve composition scales."
+    "description": "Construct charts and marks, encode fields, configure surround containers and sides, and resolve composition scales."
   },
   {
     "path": "api-encodings.md",

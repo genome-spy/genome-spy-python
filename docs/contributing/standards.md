@@ -37,6 +37,9 @@ Required public API sections:
 
 ## Documentation gallery
 
+- Write user-facing guides for first-time users. Use plain words, short sentences,
+  and short paragraphs. Avoid jargon and tangents. Keep only what helps readers
+  understand or use the example. Link to references for advanced details.
 - Keep documentation examples focused on the GenomeSpy visualization API, not
   statistical analysis or general-purpose data wrangling. Prepare derived
   example datasets, including p-values, adjusted p-values, transformed values,

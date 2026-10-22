@@ -87,7 +87,9 @@ horizontal_chart = (
 facet_chart = gs.facet(
     gs.Chart().mark_point(filled=True, size=90).encode(x="position:Q", y="signal:Q"),
     facet=gs.FacetMapping().column(
-        field="group", header=gs.FacetHeader(fontSize=13, color="#444444")
+        field="group",
+        title=gs.Title(text="group", reserve=False, offset=19, baseline="middle"),
+        header=gs.FacetHeader(fontSize=13, color="#444444"),
     ),
     data=measurements,
     spacing=gs.FacetSpacing(column=18),
@@ -96,26 +98,39 @@ facet_chart = gs.facet(
 
 
 # composition-surround-start
-surround_chart = gs.surround(
-    gs.Chart().mark_point(filled=True, size=90).encode(x="position:Q", y="signal:Q"),
-    surround=gs.SurroundSides(
-        top=gs.SurroundSideSpec(
-            views=[
+surround_chart = (
+    gs.surround(
+        gs.Chart()
+        .mark_point(filled=True, size=90)
+        .encode(x="position:I", y="signal:Q"),
+        surround=gs.SurroundSides(
+            top=[
                 gs.Chart()
-                .mark_tick(orient="vertical")
-                .encode(x="position:Q")
-                .properties(height=25)
-            ],
-            spacing=4,
-        )
-    ),
-    data=measurements,
-    spacing=8,
+                .transform_aggregate(
+                    groupby=["position"],
+                    fields=["signal"],
+                    ops=["mean"],
+                    as_=["meanSignal"],
+                )
+                .mark_rect()
+                .encode(
+                    x=gs.X("position:I").axis(None),
+                    y=gs.Y("meanSignal:Q").axis(title="Mean signal"),
+                    tooltip=["position:I", gs.Tooltip("meanSignal:Q", format=".2f")],
+                )
+                .properties(height=80)
+            ]
+        ),
+        data=measurements,
+        spacing=8,
+    )
+    .with_scales(x=gs.Scale(domain=[1, 3], paddingInner=0.25, zoom=False))
+    .configure_scale(zoom=False)
 )
 # composition-surround-end
 
 
-# composition-grid-start
+# composition-matrix-start
 memberships = [
     {"column": 0, "row": 0, "member": True, "columnTotal": 2, "rowTotal": 2},
     {"column": 0, "row": 1, "member": True, "columnTotal": 2, "rowTotal": 2},
@@ -149,7 +164,6 @@ column_summary = (
     (column_bars + column_labels)
     .transform_filter(gs.datum.row == 0)
     .properties(height=90)
-    .resolve_scale(y="excluded")
 )
 
 row_bars = (
@@ -170,10 +184,7 @@ row_labels = (
     )
 )
 row_summary = (
-    (row_bars + row_labels)
-    .transform_filter(gs.datum.column == 0)
-    .properties(width=110)
-    .resolve_scale(x="excluded")
+    (row_bars + row_labels).transform_filter(gs.datum.column == 0).properties(width=110)
 )
 
 matrix = (
@@ -186,27 +197,24 @@ matrix = (
         .scale(domain=[False, True], range=["#d8d8d8", "#333333"])
         .legend(None),
     )
-    .properties(width=gs.step(34), height=gs.step(34))
+    .properties(width="container", height="container")
 )
 
-empty_cell = gs.Chart([]).mark_point().properties(width=0, height=0)
-
-grid_chart = (
-    gs.concat(
-        empty_cell,
-        column_summary,
-        row_summary,
+matrix_summary_chart = (
+    gs.surround(
         matrix,
-        columns=2,
+        surround=gs.SurroundSides(top=[column_summary], left=[row_summary]),
+        data=memberships,
+        spacing=8,
+        title="Aligned summaries and matrix",
     )
-    .properties(data=memberships, spacing=4, title="Aligned summaries and matrix")
     .with_scales(
-        x=gs.Scale(domain=[-0.5, 2.5], paddingInner=0.15, paddingOuter=0.1),
-        y=gs.Scale(domain=[-0.5, 2.5], paddingInner=0.15, paddingOuter=0.1),
+        x=gs.Scale(domain=[0, 2], paddingInner=0.15, paddingOuter=0.1, zoom=False),
+        y=gs.Scale(domain=[0, 2], paddingInner=0.15, paddingOuter=0.1, zoom=False),
     )
-    .resolve_scale(x="shared", y="shared")
+    .configure_scale(zoom=False)
 )
-# composition-grid-end
+# composition-matrix-end
 
 
 CHARTS = {
@@ -215,5 +223,5 @@ CHARTS = {
     "layered_chart": layered_chart,
     "vertical_chart": vertical_chart,
     "horizontal_chart": horizontal_chart,
-    "grid_chart": grid_chart,
+    "matrix_summary_chart": matrix_summary_chart,
 }

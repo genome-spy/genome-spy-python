@@ -46,7 +46,10 @@ def test_all_indexed_pages_and_links_exist_with_correct_subpath(tmp_path: Path) 
     import genome_spy as gs
 
     assert f"Chart.save{inspect.signature(gs.Chart.save)}" in api
-    assert "Chart.mark_point" in (tmp_path / "agents/api-chart.md").read_text()
+    chart_api = (tmp_path / "agents/api-chart.md").read_text()
+    assert "Chart.mark_point" in chart_api
+    for name in ("surround", "SurroundSides", "SurroundSideSpec"):
+        assert f"gs.{name}{inspect.signature(getattr(gs, name))}" in chart_api
     assert "focused subset" in api
     from genome_spy.embed import ParamApi
 

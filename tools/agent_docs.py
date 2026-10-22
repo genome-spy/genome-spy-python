@@ -34,6 +34,9 @@ def _api(section: str | None = None) -> str:
                 )
             },
             "LayerChart.resolve_scale": gs.LayerChart.resolve_scale,
+            "gs.surround": gs.surround,
+            "gs.SurroundSides": gs.SurroundSides,
+            "gs.SurroundSideSpec": gs.SurroundSideSpec,
         },
         "Fields and guides": {
             **{
