@@ -119,7 +119,8 @@ Other embedding options retain M07.d/M14 owners; C11 still owns default
 categorical-guide fitting.
 
 M14.b.1, M14.b.2 and M14.b.3 are closed for native WebGL/notebook/HTML layout.
-Heatmap and dotplot have four-pixel group gaps; matrixplot, generic matrix,
+Heatmap and dotplot default to four-pixel group gaps; heatmap's `group_gap` also
+accepts zero for contiguous tiles or a custom width. Matrixplot, generic matrix,
 correlation and clustermap tiles remain contiguous. All these grids now use
 native surround tracks; see the [numeric-layout completion](#m14b3-matrix-and-correlation-native-tracks).
 All tree families now share [native orthogonal links](#shared-native-orthogonal-dendrograms),
@@ -384,6 +385,28 @@ suites and documentation build were not rerun. The 250,000-value budget remains;
 larger/chunked transport stays M05.d, parameter/storage/export closure stays M14,
 and clustermap's track migration stays M14.b.3. Clearance: retain; no working
 document becomes eligible for removal from this increment.
+
+### Optional heatmap group spacing
+
+Closed (2026-10-23). `heatmap` and `rank_genes_groups_heatmap` expose keyword-only
+`group_gap=4` in CSS pixels. Zero removes the spaces; finite nonnegative widths
+apply to both cell groups and partitioned marker blocks. The existing
+[`index_scales`](../../src/genome_spy/integrations/scanpy/_grouped_chart.py)
+helper passes the width to native scale gaps, keeping category bands, labels,
+brackets and trees aligned without extra layers or data copies.
+
+Verification: **398 targeted Python checks**, **42 heatmap browser checks**, and
+the canonical expression workflow test pass, along with Ruff formatting/lint
+and mypy. The tests cover unchanged values, ordering and IDs; zero and fractional
+widths; ranked-wrapper reuse; early invalid-option errors; complete default
+charts; and zero/default/custom spacing with hover, zoom and pan in both
+orientations at DPR 1 and 1.5. Generated references remain in temporary paths.
+
+The live notebook, full repository suite, docs build and resource benchmark were
+not rerun. Existing workflow delivery and resource evidence above remain valid:
+measurement tables, data access, transport and chart structure are unchanged;
+only native scale gap widths vary. Other grids retain their defaults. The next
+queue item remains M11.c PAGA node colors. Clearance: retain.
 
 ## M14.b.2 native grouped layout
 

@@ -742,7 +742,8 @@ use the same native specifications.
 ```python
 heatmap = gsc.pl.heatmap(
     pbmc, marker_genes, "bulk_labels", dendrogram=True,
-    standard_scale="var", cmap="viridis", width=400, height=450, zoom=True, show=False,
+    standard_scale="var", cmap="viridis", group_gap=4,
+    width=400, height=450, zoom=True, show=False,
 )
 heatmap.display(inline=True, controls=False)
 ```
@@ -761,7 +762,7 @@ means or changes AnnData.
 | `dendrogram` | False, True or a stored-result key. Reuse Scanpy's stored result or the guarded public computation. Heatmap supports two-group trees. Interpolate stored branches to the centers of unequal cell-group spans; native link endpoints keep them connected across gaps. Group labels share those centers, correcting the old half-row offset. Matching marker blocks follow tree order too. |
 | `swap_axes`, `show_gene_labels`, `var_group_*` | Ordinary heatmaps use gene brackets above the matrix; swapped heatmaps use a colored gene-group strip on the right, as Scanpy does. Show gene labels by default for at most 50 slots. `var_group_rotation` affects ordinary brackets. |
 | `cmap`, `vmin`, `vmax`, `alpha`, `interpolation` | Native scheme (default viridis), numeric bounds, scalar opacity and nearest-neighbor tiles. Missing values keep their positions but are unpainted; all-missing colors error. Other interpolation, norm/vcenter, Matplotlib colormaps and unsupported imshow kwargs error by name. |
-| Group gaps/layout | Native surround side tracks share the tile index scales. Cell groups have 4 CSS-pixel gaps that stay fixed under zoom and DPR changes; marker blocks also have gaps when their spans partition the genes. A single group has no internal gap. Arbitrary/overlapping brackets do not invent groups. Native scale settings can customize gaps. |
+| `group_gap` | Space between cell groups and partitioned marker blocks in CSS pixels, default 4. Set `group_gap=0` to remove the spaces, or choose another finite nonnegative width. The same option works in `rank_genes_groups_heatmap`. Native surround tracks share the tile scales, keeping bands, labels and trees aligned. Gap widths stay fixed under zoom and DPR changes. A single group has no internal gap; arbitrary or overlapping brackets do not create groups. |
 | Category colors | Reuse saved AnnData colors or the shared Scanpy default palettes without writing them back. Numeric and multi-key strips use native category20, currently limited to 20 groups. |
 | `width`, `height`, `figsize` | Width/height control the tile area in logical pixels. Defaults follow Scanpy's gene-label size rules; figsize uses 100 pixels per inch with space reserved for strips/trees. Native text and outer layout differ from Matplotlib. The vertical color guide uses at most 400 pixels. |
 | `zoom` | Defaults False. `True` enables y-only wheel zoom and drag panning; `"xy"` enables both index axes. Bands, gaps, tree leaves and gene labels follow the visible cells/genes. Clip branches and strips at the plot extent; hide offscreen labels and gene brackets whose whole span is not visible. |

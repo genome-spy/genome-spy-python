@@ -53,7 +53,8 @@ def hover_at(page, x, y, *, probe=True):
 @pytest.mark.parametrize("page", [1, 1.5], indirect=True)
 @pytest.mark.parametrize("swapped", [False, True])
 @pytest.mark.parametrize("hover", [False, True])
-def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover):
+@pytest.mark.parametrize("group_gap", [0, 4, 7])
+def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover, group_gap):
     chart = gsc.pl.heatmap(
         make_heatmap_adata(),
         {"First": ["g1", "g2"], "Last": ["g3"]},
@@ -61,6 +62,7 @@ def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover):
         dendrogram=True,
         swap_axes=swapped,
         hover=hover,
+        group_gap=group_gap,
         zoom="xy",
         width=450,
         height=300,
@@ -218,13 +220,24 @@ def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover):
             assert not page.locator("table.attributes").is_visible()
         # Empty native gaps must not pick an adjacent category or measurement.
         ordered = sorted(strip_group, key=lambda r: float(r.get(cell_axis)))
+        if group_gap == 0:
+            assert all(
+                abs(
+                    float(b.get(cell_axis))
+                    - float(a.get(cell_axis))
+                    - float(a.get(cell_extent))
+                )
+                < 0.31
+                for a, b in zip(ordered[:-1], ordered[1:], strict=True)
+            )
+            continue
         gaps = [
             (a, b)
             for a, b in zip(ordered[:-1], ordered[1:], strict=True)
             if float(b.get(cell_axis))
             - float(a.get(cell_axis))
             - float(a.get(cell_extent))
-            > 3
+            > group_gap / 2
             and bounds[cell_axis]
             < float(b.get(cell_axis))
             < bounds[cell_axis] + bounds[cell_extent]
@@ -233,7 +246,7 @@ def test_native_tracks_gaps_hover_and_navigation(page, swapped, hover):
         a, b = gaps[0]
         assert float(b.get(cell_axis)) - float(a.get(cell_axis)) - float(
             a.get(cell_extent)
-        ) == pytest.approx(4, abs=0.31)
+        ) == pytest.approx(group_gap, abs=0.31)
         fraction = next(f for f in live["gaps"] if 0.05 < f < 0.95)
         middle = bounds[cell_axis] + fraction * bounds[cell_extent]
         hover_at(page, middle if swapped else x, y if swapped else middle, probe=False)

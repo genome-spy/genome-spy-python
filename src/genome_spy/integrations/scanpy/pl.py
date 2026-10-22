@@ -1638,6 +1638,7 @@ def heatmap(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    group_gap: float = 4,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -1675,10 +1676,12 @@ def heatmap(
         vmax: Upper continuous color bound.
         vcenter: Nondefault values are unsupported.
         norm: Matplotlib normalization objects are unsupported.
-        hover: Include cell ID, gene, group and expression tooltips. Native
-            category-strip tooltip settings await the Core picking fix in PR #587.
+        hover: Include cell ID, gene, group and expression tooltips, including
+            category-strip tooltips.
         zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
         show_values: Show plotted values to two decimals when cells have enough room.
+        group_gap: Space between cell groups and marker blocks in CSS pixels;
+            defaults to 4. Set to 0 for contiguous tiles.
         width: Native tile-area width in pixels.
         height: Native tile-area height in pixels.
         **kwds: Native cmap scheme, scalar alpha and interpolation="nearest".
@@ -1721,6 +1724,9 @@ def heatmap(
     if standard_scale not in (None, "var", "obs"):
         raise ValueError(f"{context}: standard_scale must be 'var', 'obs' or None.")
     _check_grid_zoom(zoom, context=context)
+    from genome_spy.integrations.scanpy._data import number
+
+    group_gap = number(group_gap, "group_gap", context=context)
     sc = _prepare_plot(show, save, context=context)
     import numpy as np
     import pandas as pd
@@ -1813,6 +1819,7 @@ def heatmap(
         alpha=kwds.get("alpha", 1),
         hover=hover,
         show_values=show_values,
+        group_gap=group_gap,
         zoom=zoom,
         scaled=standard_scale is not None,
         width=width,
@@ -3715,6 +3722,7 @@ def rank_genes_groups_heatmap(
     hover: bool = True,
     zoom: bool | Literal["xy"] = False,
     show_values: bool = False,
+    group_gap: float = 4,
     width: float | None = None,
     height: float | None = None,
     **kwds: Any,
@@ -3737,6 +3745,7 @@ def rank_genes_groups_heatmap(
         hover: Enable native cell tooltips.
         zoom: True navigates y only; "xy" navigates both axes.
         show_values: Show fitted plotted values when tiles have room.
+        group_gap: Space between groups in CSS pixels; 0 removes gaps, default 4.
         width: Parent heatmap width in logical pixels.
         height: Parent heatmap height in logical pixels.
         **kwds: Existing heatmap options; dendrogram defaults True.
@@ -3769,6 +3778,7 @@ def rank_genes_groups_heatmap(
         hover=hover,
         zoom=zoom,
         show_values=show_values,
+        group_gap=group_gap,
         width=width,
         height=height,
         **kwds,

@@ -302,20 +302,25 @@ def feature_gaps(groups: tuple[FeatureGroup, ...], count: int) -> list[int]:
 
 
 def index_scales(
-    x: Any, y: Any, *, xgaps: Sequence[int] = (), ygaps: Sequence[int] = ()
+    x: Any,
+    y: Any,
+    *,
+    xgaps: Sequence[int] = (),
+    ygaps: Sequence[int] = (),
+    gap_width: float = 4,
 ) -> ScalesKwds:
     """Move the supplied index definitions to a surround's shared scale owner.
 
-    Native four-pixel gaps keep every aligned track on the same slot positions.
+    Native gaps keep every aligned track on the same slot positions.
     """
     return gs.scales(
         x=gs.Scale(
             type="index",
-            **x.scale(gapPositions=list(xgaps), gapWidth=4).to_dict()["scale"],
+            **x.scale(gapPositions=list(xgaps), gapWidth=gap_width).to_dict()["scale"],
         ),
         y=gs.Scale(
             type="index",
-            **y.scale(gapPositions=list(ygaps), gapWidth=4).to_dict()["scale"],
+            **y.scale(gapPositions=list(ygaps), gapWidth=gap_width).to_dict()["scale"],
         ),
     )
 

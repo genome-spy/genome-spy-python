@@ -59,6 +59,7 @@ def test_signature_retains_upstream_defaults_and_native_additions():
         "hover",
         "zoom",
         "show_values",
+        "group_gap",
         "width",
         "height",
     }
@@ -219,6 +220,22 @@ def test_native_tracks_share_authoritative_gapped_slot_scales(adata, swapped):
     )
 
 
+@pytest.mark.parametrize("swapped", [False, True])
+@pytest.mark.parametrize("group_gap", [0, 2.5, 8])
+def test_group_gap_changes_only_shared_scale_widths(adata, swapped, group_gap):
+    options = {
+        "var_names": {"First": ["g2", "g2"], "Last": ["g1"]},
+        "dendrogram": True,
+        "swap_axes": swapped,
+        "zoom": "xy",
+    }
+    expected = plot(adata, **options).to_dict()
+    assert all(expected["scales"][axis]["gapWidth"] == 4 for axis in ("x", "y"))
+    for axis in ("x", "y"):
+        expected["scales"][axis]["gapWidth"] = group_gap
+    assert plot(adata, group_gap=group_gap, **options).to_dict() == expected
+
+
 @pytest.mark.parametrize(
     "spans,cuts",
     [
@@ -369,6 +386,12 @@ def test_invalid_groups_fail_explicitly(adata, kind):
         ({"dendrogram": ""}, TypeError, "dendrogram"),
         ({"hover": "yes"}, TypeError, "hover"),
         ({"zoom": "yes"}, TypeError, "zoom"),
+        ({"group_gap": -1}, ValueError, "group_gap"),
+        ({"group_gap": float("nan")}, ValueError, "group_gap"),
+        ({"group_gap": float("inf")}, ValueError, "group_gap"),
+        ({"group_gap": True}, ValueError, "group_gap"),
+        ({"group_gap": "4"}, ValueError, "group_gap"),
+        ({"group_gap": None}, ValueError, "group_gap"),
     ],
 )
 def test_bad_options_fail_before_optional_import(monkeypatch, options, error, match):

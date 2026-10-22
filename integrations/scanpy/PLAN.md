@@ -937,12 +937,14 @@ native legends and layout spacing rather than compensating legend offsets or
 negative coordinates to reserve room for tracks. Preserve the documented
 `width`/`height` and `figsize` budget semantics during this change.
 
-Heatmap cell groups must have real blank space between them. Use native index
-`gapPositions`, with a `gapWidth` of 4 CSS pixels, which stays fixed
+Heatmap cell groups have real blank space between them by default. Use native index
+`gapPositions`, with a default `gapWidth` of 4 CSS pixels, which stays fixed
 under zoom and device-pixel-ratio changes. These gaps are a deliberate requested
 appearance change; values, ordering and scientific meaning stay unchanged.
-Ordinary native scale configuration owns gap styling; do not add a parallel
-Scanpy-specific layout configuration system.
+Expose keyword-only `group_gap=4` on heatmap and its ranked wrapper: zero removes
+the spacing, and finite nonnegative widths apply to both cell and marker groups.
+Reuse the shared index-scale helper so every side track follows the same gaps;
+do not add a parallel layout configuration system.
 
 - Cell-group cuts come from the final ordered `HeatmapData.intervals` exclusive
   stops, excluding the last stop. For group sizes 2, 3 and 1, use cuts `[2, 5]`:

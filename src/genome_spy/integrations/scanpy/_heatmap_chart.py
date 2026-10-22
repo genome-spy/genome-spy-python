@@ -53,6 +53,7 @@ def build_heatmap(
     hover: bool,
     zoom: bool | Literal["xy"],
     show_values: bool,
+    group_gap: float,
     scaled: bool,
     width: float | None,
     height: float | None,
@@ -124,6 +125,7 @@ def build_heatmap(
         y,
         xgaps=cell_gaps if swap_axes else gene_gaps,
         ygaps=gene_gaps if swap_axes else cell_gaps,
+        gap_width=group_gap,
     )
     # The surround owns the scales; marks only declare fields and axes.
     x, y = gs.X("_x:I").axis(None), gs.Y("_y:I").axis(None)

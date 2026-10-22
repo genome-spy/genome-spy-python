@@ -117,6 +117,8 @@ def test_ranked_wrapper_is_the_parent_chart_with_selected_markers(
         "show": False,
         **flags,
     }
+    if family == "heatmap":
+        options["group_gap"] = 0 if tail else 7
     ranked = getattr(gsc.pl, f"rank_genes_groups_{family}")(a, n_genes=count, **options)
     parent = getattr(gsc.pl, family)(a, markers, groupby, **options)
     assert ranked.to_dict() == parent.to_dict()
