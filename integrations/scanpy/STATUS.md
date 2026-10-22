@@ -2691,6 +2691,10 @@ from all 640 samples and shows four supplied 160-sample realizations as points
 and a heatmap. All 24 cells ran in Jupyter with no errors; both outputs were
 inspected. Its duplicate observation names are retained from Scanpy's dataset;
 positions, not those names, identify time-series samples. No data is vendored.
+Review cleanup: the notebook keeps the selected genes as a read-only AnnData
+view, avoiding the second duplicate-name warning from an unnecessary copy. The
+remaining dataset-loader warning is explained in the example; the workflow check
+verifies the same values in both renderers.
 Tracked notebook content excludes execution outputs/widget state; all browser
 images, overlays, HTML exports and local measurement scripts stay outside Git.
 The full test suite and documentation build were not rerun.
