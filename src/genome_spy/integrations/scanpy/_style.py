@@ -46,6 +46,8 @@ darkblue darkgold darkgreen darkmulti darkred
 
 def native_scheme(value: Any, name: str, *, context: str = "Scanpy embedding") -> str:
     """Return a supported color scheme name in lowercase, rejecting other forms."""
+    if isinstance(value, str) and value.lower() == "ylorrd":
+        value = "yelloworangered"
     if not isinstance(value, str) or value.lower() not in _SCHEMES:
         raise NotImplementedError(
             f"{context}: {name} requires a GenomeSpy scheme name, such as "

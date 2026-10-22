@@ -32,6 +32,8 @@ Highest-expression QC ranks per-cell count percentages using public Scanpy norma
 and draws native boxes, whiskers and outliers without changing the input.
 Stored Scrublet scores produce separate observed/simulated native density
 histograms per batch, with thresholds, hover and optional score-axis zoom.
+Stored embedding-density panels reuse the embedding renderer and metadata-only
+access, with native gray/continuous/black point layers, hover and linked zoom.
 Variable-gene QC panels read stored selection/statistics from AnnData, result
 tables or legacy records, with native hover, optional per-panel zoom and one
 collected bottom legend.
@@ -67,18 +69,17 @@ UMAP keeps basic plotting, linked selection and customization together. Dotplot,
 matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
-The current canonical workflows contain twenty-one UMAP/embedding/scatter/PCA
+The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
 code cells and eighteen expression/ranked/QC code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M12.a, stored embedding-density plots.** Audit the public
-`embedding_density` signature and stored obs/uns contract, then reuse the existing
-embedding renderer for supported 2D panels. M10.c's stored-score/native-histogram
-increment is closed below. M11 series retain C04's native-path review; M08/M09
-filled plots still require C01. QC functions remain bounded previews, not full
-diagnostic compatibility.
+**Next work: M11.a, supplied time-series and heatmap inputs.** Start with its public
+contract and C04's released native-path review; reuse the existing matrix renderer
+where the supplied arrays match its semantics. M12.a's stored-density native
+preview is closed below. M08/M09 filled plots still require C01. Available
+functions remain bounded previews, not full-family compatibility.
 
 Remaining marker details are deferred to M14's compatibility backlog by user
 priority. They must not precede new plot families. The
@@ -131,8 +132,9 @@ C12 remains a separate upstream straight-link issue.
 | M07.d diamond marker increment | Closed (bounded increment) | [Shared marker widths, legend parity, workflow and resource checks](#m07d-diamond-markers) | Thin diamonds and other marker geometry remain M07.d; C11 still owns full categorical-guide fitting. |
 | M07.d triangular marker audit | Closed (audit); support Blocked | [Native paths, paint and rejection checks](#m07d-triangular-marker-audit) | C14: native equilateral triangles cannot reproduce Scanpy's equal-width/height triangles through uniform sizing. |
 | M10.c Scrublet score distributions | Closed (stored-score linear/log preview) | [Contract, workflow and verification](#m10c-scrublet-score-distributions) | Broader axis modes and unused batch categories remain M14. |
+| M12.a embedding density | Closed (stored-density native preview) | [Shared embedding path, contract and verification](#m12a-stored-embedding-density) | Broader groups/missing densities and unsorted mixed color ranges remain M14; large JSON export costs are measured below. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
-| M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a is delivered separately; M10.c remains planned. |
+| M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
 | M05.d larger/chunked tile transport | Planned | Existing tile budget and [heatmap resource envelope](#m05ab-cell-heatmap-preview) | Design/test chunked access and 100k × 50 behavior. This does not own missing resource verification of M06/M07 previews. |
 | M14.b.1 heatmap side tracks/gaps | Closed (native heatmap migration) | [Delivery and validation](#m14b1-native-heatmap-tracks-and-gaps) | Wider transport, storage and option closure remain M05.d/M14; other grid families retain their own migration slices. |
@@ -1513,6 +1515,71 @@ was added or rerun. Full-suite, docs and resource checks were not run for this
 audit. Remaining marker work is now deferred to M14's compatibility backlog;
 it does not precede new plot families. Clearance: retain.
 
+## M12.a stored embedding density
+
+Closed for the bounded stored finite 2D density preview. The public function retains
+Scanpy 1.11.5's argument names/defaults, omitting ax/return_fig at the maintained
+native boundary. It reads obs density values and uns components/covariate only;
+never computes KDE, accesses expression, mutates AnnData or creates temporary
+columns. Stored coordinates/components and the pinned default-key/FA alias rules
+are retained. String categories, supplied group order/repeats, unused levels,
+ungrouped results, metadata-only views and backed AnnData are supported.
+
+The density-specific module only prepares metadata and group masks. It reuses
+embedding key lookup, coordinate projection/labels, stable IDs, marker validation,
+sizes, color bounds, draw order, panel composition and native hover/zoom. No
+separate density renderer or adapter framework was added. Shared points project
+their own eight fields before native picking makes row copies, avoiding copies
+of all other panels' columns. The data source is still serialized once.
+
+Native filtered point layers share geometry, source and sort: gray below range,
+continuous colors within range and black above range. They preserve sorted
+overlap order. Unsorted mixed ranges fail clearly; native datum predicates or
+under/over scale colors would be needed to preserve arbitrary mixed point order
+in one mark. A one-element marker list retains the shared helper's normalized
+marker; multiple markers fail explicitly. No invalid conditions, hidden guide
+marks, Python colormap sampling, custom browser listeners or Core patches remain.
+
+YlOrRd selects the native yelloworangered scheme with different stops from
+Matplotlib. Complete chart comparisons use shared viridis; native default
+endpoints and under/over colors are checked separately. Numeric/percentile/
+callable bounds, centered colors, sizes, coordinate limits, titles and point
+order compare to public Scanpy. Hover retains the original stored density for
+gray cells; x/y zoom links panels and exported HTML works offline. The packaged
+PBMC68k notebook explicitly computes density once, then plots it with smaller
+markers; all twenty-three code cells execute. Committed source excludes outputs
+and widget state.
+
+Verification: 629 targeted Python/workflow checks and 46 shared embedding browser
+checks pass, including seven density browser cases. Schema validation is enabled.
+Ruff and mypy pass. The full repository suite and documentation build were not
+run for this slice.
+
+Retained evidence: [semantic tests](../../tests/integrations/scanpy/test_embedding_density.py),
+[browser comparisons and interactions](../../tests/integrations/scanpy/browser/test_embedding_density.py),
+[workflow guard](../../tests/integrations/scanpy/test_notebooks.py),
+the existing [embedding benchmark](../../tests/integrations/scanpy/benchmark.py)
+with --plot embedding_density, and the
+[user contract](../../docs/integrations/scanpy/index.md#stored-embedding-density).
+Generated reference images, overlays, exports and resource reports stay in
+temporary directories. Broader group types, missing densities, unsorted mixed
+colors, typography and image export retain M14 owners; native brushing is not
+offered by this preview. No working plan is eligible for clearance.
+
+Resource evidence (Chromium 156, local Apple Silicon, 20,000 sparse genes):
+100,000 observations across eight density panels prepare in 0.049 s and produce
+29.2 MB Arrow in 1.14 s without densification. Validated JSON is 75.2 MB and takes
+124.6 s with allocation tracing; the Python peak of 713.8 MB includes both
+transports. This slow large-JSON export remains a measured M14.c limit, not a
+promise of interactive serialization. Native inline HTML first paints in 6.84 s,
+all sixteen isolated-ID hover probes pass (median 0.064 s, p95 0.100 s after native
+dwell), and linked wheel zoom updates in 0.71 s. Retained JS heap is 237.1 MB after
+garbage collection. Separate 100,000 × one-panel and 10,000 × eight-panel browser
+workloads also pass. These are local observations, not portable timing limits.
+The benchmark loads its native HTML file rather than sending this large JSON
+through browser automation; earlier dispatch attempts closed without browser
+measurements. No Core defect or local patch is inferred from those attempts.
+
 ## M10.c Scrublet score distributions
 
 Closed for the stored-score linear/log preview. The new public function preserves
@@ -2394,7 +2461,7 @@ changed; unrelated tests and the full documentation build were not rerun.
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 27 functions are available as partial previews; 21 plot/builder
+helpers. 28 functions are available as partial previews; 20 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -2413,7 +2480,7 @@ No placeholder functions are exported for planned work.
 | `dpt_timeseries` | Not implemented | M11 |
 | `draw_graph` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `embedding` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
-| `embedding_density` | Not implemented | M12 |
+| `embedding_density` | Partial stored-density preview available | M12.a; broader groups, missing values and unsorted mixed ranges M14 |
 | `filter_genes_dispersion` | Partial stored-results preview available; legacy | M10.b; remaining compatibility M14 |
 | `heatmap` | Partial cell-level preview available | M05.a/b preview; larger transport M05.d; normalization/options M14 |
 | `highest_expr_genes` | Partial count-percentage preview available | M10.a; remaining compatibility M14 |

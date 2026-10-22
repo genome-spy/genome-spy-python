@@ -29,12 +29,18 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
     )
     original = sc.datasets.pbmc68k_reduced()
     tsne, analyses = sc.tl.tsne, []
+    density, density_calls = sc.tl.embedding_density, []
 
     def prepare_tsne(*args, **kwargs):
         analyses.append(kwargs)
         return tsne(*args, **kwargs)
 
+    def prepare_density(*args, **kwargs):
+        density_calls.append(kwargs)
+        return density(*args, **kwargs)
+
     monkeypatch.setattr(sc.tl, "tsne", prepare_tsne)
+    monkeypatch.setattr(sc.tl, "embedding_density", prepare_density)
     monkeypatch.setattr(sc.pp, "pca", lambda *a, **k: pytest.fail("Ran PCA"))
     monkeypatch.setattr(sc.tl, "pca", lambda *a, **k: pytest.fail("Ran PCA"))
     monkeypatch.setattr(
@@ -54,6 +60,14 @@ def test_umap_workflow_preserves_embedding_and_retrieves_selected_cells(monkeypa
             pbmc.uns["pca"]["variance_ratio"], original.uns["pca"]["variance_ratio"]
         )
         assert analyses == [{"use_rep": "X_pca", "random_state": 0, "n_jobs": 1}]
+        assert density_calls == [{"basis": "umap", "groupby": "phase"}]
+        assert namespace["density_chart"] in charts
+        density_spec = namespace["density_chart"].to_dict()
+        assert len(units(density_spec)) == len(pbmc.obs["phase"].cat.categories)
+        rows = next(iter(density_spec["datasets"].values()))
+        np.testing.assert_array_equal(
+            [r["_value_0"] for r in rows], pbmc.obs["umap_density_phase"]
+        )
         assert namespace["pca_chart"] in charts and namespace["tsne_chart"] in charts
         marker_chart = namespace["marker_chart"]
         assert marker_chart in charts

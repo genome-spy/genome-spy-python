@@ -41,6 +41,7 @@ class Panel:
     marker: str
     title: str | None
     show_missing: bool = True
+    color_extremes: tuple[str, str] | None = None
 
 
 @dataclass(frozen=True, slots=True)

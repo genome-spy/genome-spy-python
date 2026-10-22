@@ -187,6 +187,19 @@ def _panel(
     diameter = POINTS_TO_PIXELS * path_width
     points = (
         gs.Chart(table)
+        # Keep browser-side row copies small by dropping other panels' fields.
+        .transform_project(
+            fields=[
+                "_obs_id",
+                "_obs_label",
+                x_field,
+                y_field,
+                f"_value_{index}",
+                f"_color_{index}",
+                f"_size_{index}",
+                f"_order_{index}",
+            ]
+        )
         .transform_collect(sort={"field": f"_order_{index}", "order": "ascending"})
         .mark_point(
             filled=True,
@@ -216,7 +229,7 @@ def _panel(
     )
     if shape != "circle":
         points = points.encode(shape=gs.value(shape))
-    layers: list[gs.TopLevelSpec] = []
+    layers: list[gs.Chart] = []
     if edges is not None:
         layers.append(
             edges.encode(
@@ -227,10 +240,11 @@ def _panel(
             )
         )
     source = {}
-    if style.outline_width is not None:
-        # Share one source and sort across both opaque outlines and the foreground.
+    if style.outline_width is not None or panel.color_extremes is not None:
+        # Point layers share one source and the prepared draw order.
         source = {"data": points._kwds["data"], "transform": points._kwds["transform"]}
         points = points._copy(deep=False, data=Undefined, transform=Undefined)
+    if style.outline_width is not None:
         background, gap = style.outline_width
         for factor, color in zip(
             (1 + 2 * gap + 2 * background, 1 + 2 * gap),
@@ -298,7 +312,26 @@ def _panel(
                 )
             )
         colored = colored.transform_filter(f"isValid(datum._value_{index})")
-    layers.append(colored)
+    if panel.color_extremes is not None:
+        field = f"datum._color_{index}"
+        low, high = panel.domain[0], panel.domain[-1]
+        if (table[f"_color_{index}"] < low).any():
+            layers.append(
+                points.transform_filter(f"{field} < {low!r}").encode(
+                    color=gs.value(panel.color_extremes[0])
+                )
+            )
+        layers.append(
+            colored.transform_filter(f"{low!r} <= {field} && {field} <= {high!r}")
+        )
+        if (table[f"_color_{index}"] > high).any():
+            layers.append(
+                points.transform_filter(f"{field} > {high!r}").encode(
+                    color=gs.value(panel.color_extremes[1])
+                )
+            )
+    else:
+        layers.append(colored)
     # Place each group label at the middle of its cells, as Scanpy does.
     if panel.categorical and style.legend_loc == "on data":
         labels = [
@@ -319,11 +352,13 @@ def _panel(
             .mark_text(size=style.legend_fontsize, font=style.font, fontWeight="normal")
             .encode(x=x.field("x"), y=y.field("y"), text="label:N")
         )
-    result = (gs.layer(*layers) if len(layers) > 1 else colored).properties(
+    result = (gs.layer(*layers) if len(layers) > 1 else layers[0]).properties(
         width=style.width, height=style.height
     )
+    if source:
+        result = result.properties(**source)
     if style.outline_width is not None:
-        result = result.properties(**source).resolve_scale(size="independent")
+        result = result.resolve_scale(size="independent")
     # Only the first panel edits the brush; other panels show its selection.
     if selection is not None and index == 0:
         result = brush_owner(result, selection, prepared.basis)

@@ -100,6 +100,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.scrublet_fixture import make_scrublet
 
         a, options = make_scrublet(), {}
+    if family == "embedding_density":
+        from tests.integrations.scanpy.embedding_density_fixture import make_density
+
+        a, options = make_density(), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -142,6 +146,7 @@ def test_shared_display_validation_precedes_optional_imports(
         "filter_genes_dispersion",
         "highest_expr_genes",
         "scrublet_score_distribution",
+        "embedding_density",
     } and not family.startswith("rank_genes_groups"):
         args += ("group",)
     context = {

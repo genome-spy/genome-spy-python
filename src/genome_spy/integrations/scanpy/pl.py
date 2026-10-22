@@ -44,6 +44,7 @@ __all__ = [
     "filter_genes_dispersion",
     "highest_expr_genes",
     "scrublet_score_distribution",
+    "embedding_density",
 ]
 
 _BoundValue = float | str | Callable[[Any], float]
@@ -496,6 +497,178 @@ def scatter(
         na_color="lightgrey",
     )
     style = replace(style, legend_symbol_size=300)
+    return _finish_plot(
+        build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
+    )
+
+
+def embedding_density(
+    adata: AnnData,
+    basis: str = "umap",
+    *,
+    key: str | None = None,
+    groupby: str | None = None,
+    group: str | Sequence[str] | None = "all",
+    color_map: Any = "YlOrRd",
+    bg_dotsize: int | None = 80,
+    fg_dotsize: int | None = 180,
+    vmax: _Bound = 1,
+    vmin: _Bound = 0,
+    vcenter: _Bound = None,
+    norm: Any = None,
+    ncols: int | None = 4,
+    hspace: float | None = 0.25,
+    wspace: float | None = None,
+    title: str | None = None,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    zoom: bool = False,
+    obs_id: str | None = None,
+    width: float | None = None,
+    height: float | None = None,
+    **kwargs: Any,
+) -> TopLevelSpec | None:
+    """Plot stored embedding densities using the shared native point renderer.
+
+    Reads density values and their stored component/covariate metadata. Group
+    panels preserve background cells, sizes and under/over colors without KDE,
+    temporary observation columns or changes to the supplied coordinates.
+
+    Args:
+        adata: AnnData containing explicitly computed embedding-density results.
+        basis: Stored X_ embedding; lowercase names and the fa alias match Scanpy.
+        key: Stored obs density key with a matching uns key_params mapping.
+        groupby: Append this suffix to the pinned default umap_density key.
+        group: All stored categories by default; select a string/list, or None for ungrouped results.
+        color_map: GenomeSpy continuous scheme, default YlOrRd.
+        bg_dotsize: Background point area in squared points, default 80.
+        fg_dotsize: Foreground point area in squared points, default 180.
+        vmax: Upper color bound, default 1; accepts shared bound forms.
+        vmin: Lower color bound, default 0; accepts shared bound forms.
+        vcenter: Optional numeric, percentile or callable color center.
+        norm: Only None; Matplotlib normalization objects are unsupported.
+        ncols: Maximum panels per row, default 4.
+        hspace: Vertical spacing relative to panel height, default 0.25.
+        wspace: Horizontal spacing relative to width; native default 0.2.
+        title: Optional common panel title; otherwise the selected group.
+        show: Display once, return a chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Show stable cell identity, stored density and coordinates.
+        zoom: Enable shared x/y zoom across density panels.
+        obs_id: Optional unique, nonmissing obs column for stable cell IDs.
+        width: Plot width per panel, default 300 logical pixels.
+        height: Plot height per panel, default 300 logical pixels.
+        **kwargs: Supported embedding styles: frameon, sort_order, marker, alpha,
+            edgecolor/edgecolors, linewidth/linewidths and colorbar_loc.
+            Unsorted points must stay within one color range; native under/over
+            layers otherwise change their overlap order. One marker serves all groups.
+
+    Returns:
+        A native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        TypeError: If arguments or stored data are invalid.
+        ValueError: If density values, params, groups or dimensions are invalid.
+        NotImplementedError: If options require unsupported normalization or rendering.
+
+    Example:
+        >>> sc.tl.embedding_density(adata, basis="umap", groupby="phase")
+        >>> chart = gsc.pl.embedding_density(adata, groupby="phase", show=False)
+    """
+    context = "gsc.pl.embedding_density"
+    _check_kwargs(
+        kwargs,
+        {
+            "frameon",
+            "sort_order",
+            "marker",
+            "alpha",
+            "edgecolor",
+            "edgecolors",
+            "linewidth",
+            "linewidths",
+            "colorbar_loc",
+        },
+        context=context,
+    )
+    _check_point_options(
+        context=context,
+        width=width,
+        height=height,
+        frameon=kwargs.get("frameon"),
+        sort_order=kwargs.get("sort_order", True),
+        hover=hover,
+        zoom=zoom,
+    )
+    if not isinstance(basis, str) or not basis:
+        raise ValueError(f"{context}: basis must be a nonempty string.")
+    for name, value in (("key", key), ("groupby", groupby), ("title", title)):
+        if value is not None and not isinstance(value, str):
+            raise TypeError(f"{context}: {name} must be a string or None.")
+    if key is not None and groupby is not None:
+        raise ValueError(f"{context}: pass key or groupby, not both.")
+    if group is not None and not isinstance(group, (str, list, tuple)):
+        raise TypeError(
+            f"{context}: group must be a string, list/tuple of strings or None."
+        )
+    if norm is not None or ncols is None or hspace is None:
+        raise NotImplementedError(
+            f"{context}: norm requires None; ncols and hspace require numeric values."
+        )
+    for left, right in (("edgecolor", "edgecolors"), ("linewidth", "linewidths")):
+        if left in kwargs and right in kwargs:
+            raise TypeError(f"{context}: pass only one of {left} and {right}.")
+    colorbar = kwargs.get("colorbar_loc", "right")
+    if colorbar not in (None, "right", "left", "top", "bottom"):
+        raise NotImplementedError(f"{context}: unsupported colorbar_loc.")
+    from genome_spy.integrations.scanpy._data import number
+
+    bg = number(bg_dotsize, "bg_dotsize", context=context)
+    fg = number(fg_dotsize, "fg_dotsize", context=context)
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._embedding_density_data import prepare_density
+    from genome_spy.integrations.scanpy._embedding_chart import build_embedding
+    from genome_spy.integrations.scanpy._style import embedding_style
+
+    basis = "draw_graph_fa" if basis.lower() == "fa" else basis.lower()
+    prepared = prepare_density(
+        adata,
+        basis,
+        key=key,
+        groupby=groupby,
+        group=group,
+        color_map=color_map,
+        bg_dotsize=bg,
+        fg_dotsize=fg,
+        vmin=vmin,
+        vmax=vmax,
+        vcenter=vcenter,
+        title=title,
+        marker=kwargs.get("marker", "."),
+        sort_order=kwargs.get("sort_order", True),
+        obs_id=obs_id,
+        colorbar_loc=colorbar,
+    )
+    style = embedding_style(
+        count=len(prepared.panels),
+        width=width,
+        height=height,
+        frameon=sc.settings._frameon
+        if kwargs.get("frameon") is None
+        else kwargs["frameon"],
+        legend_loc="right margin",
+        colorbar_loc=colorbar,
+        legend_fontsize=None,
+        ncols=ncols,
+        hspace=hspace,
+        wspace=wspace,
+        alpha=kwargs.get("alpha"),
+        edgecolor=kwargs.get("edgecolor", kwargs.get("edgecolors", "none")),
+        linewidth=kwargs.get("linewidth", kwargs.get("linewidths")),
+        na_color="lightgray",
+    )
     return _finish_plot(
         build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
     )

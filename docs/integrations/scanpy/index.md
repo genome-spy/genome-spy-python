@@ -70,6 +70,47 @@ The supported controls and visual limits below apply to all these embeddings.
 3D, other graph forms/arrows and remaining marker/normalization options stay in M07.d/M14.
 The UMAP notebook now includes packaged PCA and explicitly prepared t-SNE examples.
 
+## Stored embedding density
+
+Compute density explicitly with Scanpy on an existing embedding, then plot its
+stored result. Plotting never runs KDE, recomputes coordinates, reads expression
+or adds temporary observation columns.
+
+```python
+sc.tl.embedding_density(pbmc, basis="umap", groupby="phase")
+density = gsc.pl.embedding_density(
+    pbmc, groupby="phase", bg_dotsize=8, fg_dotsize=20,
+    width=150, height=240, wspace=0.05, zoom=True, show=False,
+)
+density.display(inline=True, controls=False)
+```
+
+The adapter reuses the embedding coordinate, identity, size, color-bound,
+point-rendering and interaction helpers. Its small preparation module only
+resolves density-specific stored metadata and foreground/background groups.
+
+| Parameters | Current behavior |
+| --- | --- |
+| `basis`, `key`, `groupby` | Basis is lowercased; `fa` selects `draw_graph_fa`. Pinned Scanpy 1.11.5 always defaults to `umap_density`, even for another basis; groupby appends its suffix. Pass key or groupby, not both. Require matching obs values and uns key_params. |
+| Coordinates | Require the named X_ embedding, then retain the shared direct-name-before-X_ lookup used by Scanpy plotting. The two one-based stored components are authoritative. components/dimensions kwargs reject rather than overriding them. |
+| `group` | All stored categorical levels by default, including unused categories; select one string or a list/tuple in supplied order, including repeats. None requires an ungrouped result. Explicit groups for an ungrouped result error rather than being silently ignored. Numeric categories are outside this preview. |
+| `bg_dotsize`, `fg_dotsize` | Original defaults 80 and 180 squared points; finite nonnegative scalars. A zero size hides that point. Smaller values in the notebook are explicit customization. |
+| `color_map`, bounds | YlOrRd selects the native yelloworangered scheme, whose stops differ from Matplotlib. Other supported GenomeSpy scheme names work; colormap objects and unsupported names error. Default bounds remain 0–1. Shared numeric/percentile/callable bounds and vcenter retain the background sentinel in their inputs, as Scanpy does. |
+| Under/over colors and order | Native filtered point layers paint lightgray below the lower bound, the continuous scheme within the bounds, and black above the upper bound. They share data, styling and the prepared sort. sort_order=False errors when values span multiple color ranges, because layering would change overlaps; it works within one range. |
+| Style | Shared frame, one supported marker (including a one-element list), scalar alpha/edge/linewidth styles, four colorbar sides/None, titles, ncols, hspace and wspace. norm objects, multiple markers and unknown kwargs reject clearly. |
+| Native delivery | hover=True reports stable cell ID, original stored density and coordinates, including for background cells. zoom=False by default; True links x/y navigation. Width/height default to 300 pixels per panel. show/save follow the common native contract; no ax/return_fig or Matplotlib objects. |
+
+Stored densities must be finite numeric values in [0, 1], with a categorical
+covariate and valid stored component pair. Views and backed AnnData work when
+their observation metadata and embedding are resident. Results are detached
+snapshots; callers must explicitly recompute density after changing its analysis
+inputs. Missing or malformed results never trigger automatic analysis.
+
+Complete reference comparisons use viridis to separate geometry, bounds and draw
+order from differing native palette stops. The default native palette and its
+under/over colors are checked separately. Fonts, outer layout and guide tick
+spacing retain the shared native rendering boundary.
+
 ## PCA loadings
 
 `pca_loadings` reads stored `varm["PCs"]` and `var_names`. It reuses the same
@@ -1132,11 +1173,11 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Diagnostics and simulation | highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, sim |
+| Simulation | sim |
 | Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_as_heatmap, timeseries_subplot |
-| Spatial and density | spatial, embedding_density |
+| Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
 

@@ -744,6 +744,12 @@ where marks represent cells; nodes/edges carry group/edge IDs instead.
   `uns` params for basis/group; preserve supplied groups, background/foreground
   dots, coordinate choice, bounds, color scales and multiple panels. Never rerun
   `sc.tl.embedding_density` on missing/stale input.
+  The bounded native preview reuses embedding preparation/rendering and filtered
+  point layers for under/in/over-range colors. Its YlOrRd default selects native
+  yelloworangered stops; shared-palette fidelity uses viridis. Reject unsorted
+  points spanning those layers instead of changing their overlap order. Broader
+  categories, missing-density forms and unsorted mixed ranges retain M14 owners;
+  [STATUS](STATUS.md#m12a-stored-embedding-density) records verification and limits.
 - M12.b: `spatial` reuses point/color access but resolves library/image keys,
   spot diameter, scale factors, crop, coordinate origin/aspect, background image,
   alpha and black/white image behavior. Image decode/coordinates are independently

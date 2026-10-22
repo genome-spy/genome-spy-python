@@ -6,6 +6,8 @@ Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
 `gsc.pl.scatter(...)`, `gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.heatmap(...)`, `gsc.pl.matrix(...)`, `gsc.pl.dendrogram(...)` or
 `gsc.pl.correlation_matrix(...)` or `gsc.pl.clustermap(...)`.
 Stored doublet-score QC uses `gsc.pl.scrublet_score_distribution(...)`.
+Stored embedding density uses `gsc.pl.embedding_density(...)` after explicit
+`sc.tl.embedding_density(...)` preparation.
 Highest-expression QC uses `gsc.pl.highest_expr_genes(...)` on count data.
 Stored rankings add `gsc.pl.rank_genes_groups(...)`, `gsc.pl.ranking(...)`, and
 the ranked dotplot/matrixplot/heatmap wrappers.
@@ -45,6 +47,7 @@ not in this workspace or the documentation:
 | [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles and native surround tracks with shared index gaps, category bands, centered labels and stored tree links; reuses grouped labels/brackets and fitted values, with optional aligned zoom (y-only by default). |
 | [_dotplot_chart.py](../../src/genome_spy/integrations/scanpy/_dotplot_chart.py) | Native dots, exact area/percentage lookup, size guide and summary hover on the shared grouped layout. |
 | [_embedding_data.py](../../src/genome_spy/integrations/scanpy/_embedding_data.py) | Resolve stored bases, shared coordinate labels and selected expression/metadata; retain row identity, masks, sizes and draw order. |
+| [_embedding_density_data.py](../../src/genome_spy/integrations/scanpy/_embedding_density_data.py) | Read stored density metadata and group masks into the existing embedding table/panels; no KDE, expression access or independent renderer. |
 | [_scatter_data.py](../../src/genome_spy/integrations/scanpy/_scatter_data.py) | Scatter-specific cell/gene orientation, per-axis layers, selected public vectors and legacy basis/order rules; detached variable-gene QC metadata. Reuses shared numeric checks and embedding identities. |
 | [_hvg_chart.py](../../src/genome_spy/integrations/scanpy/_hvg_chart.py) | Native paired QC point panels, stored-statistic axis limits, shared bottom legend and optional hover/zoom; no analysis or expression access. |
 | [_embedding_chart.py](../../src/genome_spy/integrations/scanpy/_embedding_chart.py) | Native points, axes, legends, labels, and panel composition. |

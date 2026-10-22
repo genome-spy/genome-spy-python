@@ -25,7 +25,9 @@ def main() -> None:
     parser.add_argument("--cells", type=int, default=100_000)
     parser.add_argument("--panels", type=int, choices=[1, 8], default=1)
     parser.add_argument(
-        "--plot", choices=["umap", "pca", "scatter", "scatter-genes"], default="umap"
+        "--plot",
+        choices=["umap", "pca", "scatter", "scatter-genes", "embedding_density"],
+        default="umap",
     )
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--browser", action="store_true")
@@ -61,6 +63,15 @@ def main() -> None:
     a.var_names = [f"g{i}" for i in range(genes)]
     a.obs["group"] = pd.Categorical(rng.integers(0, 12, n).astype(str))
     a.obs["score"] = rng.standard_normal(n).astype(np.float32)
+    if args.plot == "embedding_density":
+        a.obs["density_group"] = pd.Categorical(
+            np.arange(n) % 8, categories=range(8)
+        ).rename_categories(str)
+        a.obs["umap_density"] = rng.random(n)
+        a.uns["umap_density_params"] = {
+            "components": [1, 2],
+            "covariate": "density_group",
+        }
     a.obsm["X_umap"] = rng.standard_normal((n, 2)).astype(np.float32)
     coordinates = a.obsm["X_umap"]
     labels = a.obs_names[:16].tolist()
@@ -94,20 +105,29 @@ def main() -> None:
     sparse.csr_matrix.toarray = selected_only
     keys = ["group", "score", "g0", "g1", "g2", "g3", "group", "score"]
     options = {}
+    if args.plot == "embedding_density":
+        options.update(
+            group=list(a.obs["density_group"].cat.categories[: args.panels]),
+            bg_dotsize=16,
+            fg_dotsize=36,
+        )
     if args.plot == "pca":
         options["components"] = "2,50"
     elif args.plot.startswith("scatter"):
         options.update(x="x", y="y")
         if args.plot == "scatter-genes":
             keys[2:6] = a.obs_names[:4].tolist()
+    if args.plot != "embedding_density":
+        options.update(
+            color=keys if args.panels == 8 else keys[2],
+            size=36 if args.browser else None,
+        )
     tracemalloc.start()
     start = perf_counter()
     try:
         chart = getattr(gsc.pl, args.plot.split("-")[0])(
             a,
-            color=keys if args.panels == 8 else keys[2],
             zoom=args.browser,
-            size=36 if args.browser else None,
             show=False,
             **options,
         )
@@ -174,11 +194,12 @@ def main() -> None:
             "reference_font": "DejaVu Sans",
         },
     }
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(report, indent=2) + "\n")
     if args.browser:
         report["browser"] = _measure_browser(
             spec, coordinates[:16], args.output, labels
         )
-    args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n")
 
 
@@ -186,10 +207,19 @@ def _measure_browser(spec, coordinates, output, labels):
     import numpy as np
     from playwright.sync_api import sync_playwright
     from genome_spy._embed import bundled_module_url
+    from genome_spy._utils import compact_json
     from tests.integrations.scanpy.helpers import points, units
 
     for i, unit in enumerate(units(spec)):
         unit["name"] = f"panel-{i}"
+    # Load the native HTML through a file rather than copying large JSON through automation.
+    document = output.with_suffix(".html")
+    document.write_text(
+        '<style>body{margin:0}</style><div id="chart"></div><script type="module">'
+        f"const {{embed}}=await import({compact_json(bundled_module_url('embed'))});"
+        f'window.api=await embed(document.getElementById("chart"),{compact_json(spec)});'
+        "</script>"
+    )
     with sync_playwright() as runtime:
         browser = runtime.chromium.launch()
         viewport = [max(2800, len(spec.get("hconcat", [])) * 500), 1800]
@@ -199,16 +229,14 @@ def _measure_browser(spec, coordinates, output, labels):
         )
         errors = []
         page.on("pageerror", lambda error: errors.append(str(error)))
-        page.set_content('<style>body{margin:0}</style><div id="chart"></div>')
         started = perf_counter()
+        page.goto(document.as_uri())
+        page.wait_for_function("window.api", timeout=60000)
         page.evaluate(
-            """async ({url,spec})=>{
-            const {embed}=await import(url);
-            window.api=await embed(document.querySelector('#chart'),spec);
+            """async ()=>{
             await new Promise(requestAnimationFrame);
             await new Promise(requestAnimationFrame);
-        }""",
-            {"url": bundled_module_url("embed"), "spec": spec},
+        }"""
         )
         first_paint = perf_counter() - started
         assert not page.locator(".message-box").count()
@@ -279,6 +307,7 @@ def _measure_browser(spec, coordinates, output, labels):
         }
         report = {
             "chromium": browser.version,
+            "delivery": "Native inline HTML loaded from a local file; API exposed for observation only.",
             "viewport": viewport,
             "dpr": 1,
             "isolated_probe_points": 16,
