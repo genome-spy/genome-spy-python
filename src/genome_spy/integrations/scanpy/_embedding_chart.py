@@ -8,6 +8,7 @@ import numpy as np
 
 import genome_spy as gs
 from genome_spy.schemapi import Undefined
+from genome_spy.integrations.scanpy._data import coordinate_domain
 from genome_spy.integrations.scanpy._embedding_data import Panel, PreparedEmbedding
 from genome_spy.integrations.scanpy._embedding_interactions import (
     brush_owner,
@@ -20,16 +21,6 @@ from genome_spy.integrations.scanpy._style import (
     POINTS_TO_PIXELS,
     EmbeddingStyle,
 )
-
-
-def coordinate_domain(values: np.ndarray, margin: float) -> tuple[float, float]:
-    """Return coordinate limits with the requested margin, widening constant values."""
-    low, high = float(values.min()), float(values.max())
-    if low == high:
-        padding = abs(low) * 0.05 or 0.05
-        low, high = low - padding, high + padding
-    padding = (high - low) * margin
-    return low - padding, high + padding
 
 
 def _coordinate(

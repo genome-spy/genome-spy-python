@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._embedding_chart import coordinate_domain
+from genome_spy.integrations.scanpy._data import coordinate_domain
 from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS
 
 

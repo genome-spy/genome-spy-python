@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
-from genome_spy.integrations.scanpy._embedding_chart import coordinate_domain
+from genome_spy.integrations.scanpy._data import coordinate_domain
 from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS as PT
 
 
@@ -27,11 +27,7 @@ def build_highest_expression(
             raise ValueError(
                 "gsc.pl.highest_expr_genes: log=True needs positive percentages."
             )
-        ends = np.log10([positive, high])
-        # A constant log axis expands to the adjacent decades before adding margins.
-        if positive == high:
-            ends = np.array([np.ceil(ends[0]) - 1, np.floor(ends[1]) + 1])
-        domain = np.power(10.0, coordinate_domain(ends, 0.05)).tolist()
+        domain = list(coordinate_domain(np.array([positive, high]), 0.05, log=True))
     else:
         domain = list(coordinate_domain(np.array([low, high]), 0.05))
     x = (

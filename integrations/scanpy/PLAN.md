@@ -694,7 +694,18 @@ their native filled-geometry gate; this order does not close those milestones.
   and a large gene-metadata workload. Reject unsupported log bounds explicitly.
 - M10.c: `scrublet_score_distribution` reads observed/simulated scores, thresholds
   and batch keys; verify histogram bins, count/density normalization and axis-scale
-  aliases. Do not rerun Scrublet or silently pool batches.
+  aliases. Reuse NumPy histogram counts and the shared numeric/coordinate-domain
+  helpers; retain the 50 fixed edges and separate in-range density denominators.
+  Read `batched_by`/`batches` in category order, including missing-label behavior;
+  never pool batches or recompute Scrublet. Native rectangles and full-height
+  threshold rules use independent density scales within each pair and across
+  batches. Offer populated-bin hover and optional independent score-axis zoom.
+  Verify linear/log modes, bin boundaries, missing/out-of-range scores, thresholds,
+  constants, read-only views/backed metadata, registered geometry/overlays and a
+  large stored-score workload with forbidden expression access. The PBMC3k
+  notebook computes Scrublet explicitly before plotting. Other scale modes,
+  unused batch categories and physical typography/export remain explicit M14
+  limits. Do not silently map symlog/logit to a different native transform.
 
 Acceptance: hand-checked denominators/bins/ranks plus complete references on real
 QC workflows. Upstream deprecated aliases remain visible in the version contract;

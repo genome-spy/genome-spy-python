@@ -96,6 +96,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.highest_expr_fixture import make_counts
 
         a, options = make_counts(), {}
+    if family == "scrublet_score_distribution":
+        from tests.integrations.scanpy.scrublet_fixture import make_scrublet
+
+        a, options = make_scrublet(), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -137,6 +141,7 @@ def test_shared_display_validation_precedes_optional_imports(
         "highly_variable_genes",
         "filter_genes_dispersion",
         "highest_expr_genes",
+        "scrublet_score_distribution",
     } and not family.startswith("rank_genes_groups"):
         args += ("group",)
     context = {

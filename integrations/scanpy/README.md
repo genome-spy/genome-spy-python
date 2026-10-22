@@ -5,6 +5,7 @@ Start with [status and next work](STATUS.md), the [implementation plan](PLAN.md)
 Use `import genome_spy.integrations.scanpy as gsc`, then `gsc.pl.umap(...)`,
 `gsc.pl.scatter(...)`, `gsc.pl.dotplot(...)`, `gsc.pl.matrixplot(...)`, `gsc.pl.heatmap(...)`, `gsc.pl.matrix(...)`, `gsc.pl.dendrogram(...)` or
 `gsc.pl.correlation_matrix(...)` or `gsc.pl.clustermap(...)`.
+Stored doublet-score QC uses `gsc.pl.scrublet_score_distribution(...)`.
 Highest-expression QC uses `gsc.pl.highest_expr_genes(...)` on count data.
 Stored rankings add `gsc.pl.rank_genes_groups(...)`, `gsc.pl.ranking(...)`, and
 the ranked dotplot/matrixplot/heatmap wrappers.

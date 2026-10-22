@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-21. This is the current progress ledger; [PLAN.md](PLAN.md)
+Updated: 2026-10-22. This is the current progress ledger; [PLAN.md](PLAN.md)
 describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
@@ -30,6 +30,8 @@ Stored PCA loadings and variance ratios reuse the ranking preparation and native
 text panels; PCA overview composes these with the existing embedding chart.
 Highest-expression QC ranks per-cell count percentages using public Scanpy normalization
 and draws native boxes, whiskers and outliers without changing the input.
+Stored Scrublet scores produce separate observed/simulated native density
+histograms per batch, with thresholds, hover and optional score-axis zoom.
 Variable-gene QC panels read stored selection/statistics from AnnData, result
 tables or legacy records, with native hover, optional per-panel zoom and one
 collected bottom legend.
@@ -66,17 +68,17 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-one UMAP/embedding/scatter/PCA
-code cells and sixteen expression/ranked/QC code cells. Public availability does not mean
+code cells and eighteen expression/ranked/QC code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M10.c, Scrublet score distributions.** Read stored observed/simulated
-scores, thresholds and batches; audit histogram bins, count/density normalization
-and axis-scale aliases before authoring native bars. Do not rerun Scrublet.
-M08/M09 filled plots still require C01. The M10.a highest-expression and
-[M10.b variable-gene](#m10b-variable-gene-diagnostics) increments are bounded QC
-previews; neither closes the full diagnostic family.
+**Next work: M12.a, stored embedding-density plots.** Audit the public
+`embedding_density` signature and stored obs/uns contract, then reuse the existing
+embedding renderer for supported 2D panels. M10.c's stored-score/native-histogram
+increment is closed below. M11 series retain C04's native-path review; M08/M09
+filled plots still require C01. QC functions remain bounded previews, not full
+diagnostic compatibility.
 
 Remaining marker details are deferred to M14's compatibility backlog by user
 priority. They must not precede new plot families. The
@@ -128,6 +130,7 @@ C12 remains a separate upstream straight-link issue.
 | M07.d square marker increment | Closed (bounded increment) | [Native shape, geometry, guides, workflow and resource checks](#m07d-square-markers) | Other markers remain M07.d; categorical guide fitting stays C11. |
 | M07.d diamond marker increment | Closed (bounded increment) | [Shared marker widths, legend parity, workflow and resource checks](#m07d-diamond-markers) | Thin diamonds and other marker geometry remain M07.d; C11 still owns full categorical-guide fitting. |
 | M07.d triangular marker audit | Closed (audit); support Blocked | [Native paths, paint and rejection checks](#m07d-triangular-marker-audit) | C14: native equilateral triangles cannot reproduce Scanpy's equal-width/height triangles through uniform sizing. |
+| M10.c Scrublet score distributions | Closed (stored-score linear/log preview) | [Contract, workflow and verification](#m10c-scrublet-score-distributions) | Broader axis modes and unused batch categories remain M14. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a is delivered separately; M10.c remains planned. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
@@ -161,7 +164,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M07 embeddings/scatter/PCA | In progress | M07.a/b resource gates pass; categorical-guide rendering remains open under C11. M07.c loadings/variance/overview and M07.d colorbar placement are Closed for their stated scope; other options remain open. |
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
-| M10 QC diagnostics | In progress | M10.a highest-expression and M10.b variable-gene/legacy dispersion previews are delivered; Scrublet remains planned. |
+| M10 QC diagnostics | In progress | M10.a/b/c bounded previews are verified; broader scale/option compatibility remains M14. This does not close the full family. |
 | M11 trajectories/graphs/series | Planned | Stored DPT/PAGA, graph layouts, series/simulation, return/side-effect contracts; evaluate C04 paths. |
 | M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
@@ -1510,6 +1513,71 @@ was added or rerun. Full-suite, docs and resource checks were not run for this
 audit. Remaining marker work is now deferred to M14's compatibility backlog;
 it does not precede new plot families. Clearance: retain.
 
+## M10.c Scrublet score distributions
+
+Closed for the stored-score linear/log preview. The new public function preserves
+Scanpy 1.11.5's names/defaults, including `show=True`, while omitting Matplotlib
+`return_fig`/`ax`. It reads `obs.doublet_score`, `uns.scrublet` simulated scores,
+optional thresholds and `batched_by`/`batches` metadata. Plotting never reads
+expression, runs Scrublet or modifies obs/uns. Metadata-only views and backed
+AnnData work. Category order and missing-batch-label behavior follow Scanpy;
+missing results fail rather than pooling or triggering analysis.
+
+Pure preparation uses `np.histogram` with the pinned 50 edges/49 bins from 0 to 1.
+Separate observed/simulated denominators include only in-range scores; missing
+and finite out-of-range entries are omitted, and the final bin includes 1.
+Native rectangles and full-height black threshold rules preserve initial limits,
+including thresholds outside the score range. Each pair explicitly keeps its
+linear/log density scales independent, as do the batch rows. The existing limit
+helper now lives beside numeric validation and handles log constants once for
+both Scrublet and highest-expression plots; embeddings/HVG reuse its unchanged
+linear path. There is no general histogram/adapter framework.
+
+Keyword-only hover reports populated-bin boundaries, count, density, batch and
+sample. Optional score-axis zoom is independent per panel; threshold rules stay
+on the same score scale and bins remain fixed. Aggregate marks do not claim cell
+selection. Native width/height set panel areas; figsize reserves native title/axis
+space at 100 logical pixels per inch. Fonts/ticks/export sizing retain the native
+renderer boundary. See the [user contract](../../docs/integrations/scanpy/index.md#scrublet-score-distributions).
+
+Verification: **522 distinct targeted Python/workflow checks** pass across the new
+[semantic tests](../../tests/integrations/scanpy/test_scrublet.py), shared contract,
+UMAP/embedding/scatter/HVG/highest-expression tests and canonical expression
+workflow. Public Scanpy comparisons cover both scales, single/two-batch layouts,
+exact density statistics, titles, thresholds and limits. Tests guard expression
+and analysis access, validate read-only views/backed metadata, malformed inputs,
+duplicate columns and detached chart snapshots. The notebook test permits gene
+selection only inside its explicit Scanpy Scrublet preparation call; plot calls
+remain guarded. All eighteen live code cells run without errors and produce
+fifteen widgets. Tracked source has no outputs or widget state.
+
+**Five new browser checks** register every populated native bar and threshold
+against public Scanpy geometry, compare 150-DPI images at DPR 1.5, check labels
+and actual scale domains, and observe bin hover, independent zoom and offline
+HTML. Registration uses rendered SVG clip bounds to account for viewport
+rounding; raster limits allow fractional bin-edge antialiasing. Complete charts,
+references and overlays are generated only in temporary directories. Source:
+[browser/test_scrublet.py](../../tests/integrations/scanpy/browser/test_scrublet.py).
+**Nine existing highest-expression/HVG browser checks** also pass through the
+shared limit helper. Ruff and mypy pass; the full repository suite and docs build
+were not rerun.
+
+Resource recipe: [benchmark_scrublet.py](../../tests/integrations/scanpy/benchmark_scrublet.py)
+uses seed 17, 100,000 observed cells, 200,000 simulated scores, four batches/eight
+panels and an empty sparse AnnData shape of 100,000 × 20,000. Expression access
+raises. Preparation took 0.024 s, validated JSON 1.01 s and browser first paint
+4.36 s on Python 3.11.15/macOS arm64/Core 1.2.0. The payload is 84,610 bytes;
+peak traced Python allocation is 5.83 MB and reported JS heap 35.1 MB. Imports,
+fixture and warm-up are excluded; Python timings include allocation tracing.
+These are local observations, not portable speed guarantees. Reports stay local.
+
+Boundary: only linear/log scales; unsupported Matplotlib modes (including
+symlog/logit), unused batch categories, infinite scores and score vectors with no
+in-range values fail explicitly. The PBMC3k example computes Scrublet explicitly
+with Scanpy, seed 0 and a demonstration threshold of 0.25 on a copy of the counts.
+No datasets are vendored. Remaining compatibility stays M14. Next: M12.a stored
+embedding-density audit. Clearance: retain; no working plan is eligible for removal.
+
 ## M10.a highest-expression summaries
 
 Closed for the count-percentage preview. `highest_expr_genes` reads X or a requested
@@ -2326,7 +2394,7 @@ changed; unrelated tests and the full documentation build were not rerun.
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 26 functions are available as partial previews; 22 plot/builder
+helpers. 27 functions are available as partial previews; 21 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -2370,7 +2438,7 @@ No placeholder functions are exported for planned work.
 | `rank_genes_groups_violin` | Not implemented | M08; rank access M06 |
 | `ranking` | Preview: supplied score attributes/dictionaries | M06.c; shared native rank labels, dense indices only |
 | `scatter` | Cell/gene x/y and stored-basis preview | M07.b; remaining options M07.d/M14 |
-| `scrublet_score_distribution` | Not implemented | M10 |
+| `scrublet_score_distribution` | Partial stored-score preview available | M10.c; remaining compatibility M14 |
 | `set_rcParams_defaults` | External: use Scanpy | Renderer exception, M00 |
 | `set_rcParams_scanpy` | External: use Scanpy | Renderer exception, M00 |
 | `sim` | Not implemented | M11 |

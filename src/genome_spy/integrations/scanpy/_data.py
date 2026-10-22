@@ -11,6 +11,25 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
+def coordinate_domain(
+    values: np.ndarray, margin: float, *, log: bool = False
+) -> tuple[float, float]:
+    """Return padded coordinate limits; widen constants in linear units or log decades."""
+    import numpy as np
+
+    low, high = float(values.min()), float(values.max())
+    if log:
+        low, high = float(np.log10(low)), float(np.log10(high))
+        if low == high:
+            low, high = float(np.ceil(low) - 1), float(np.floor(high) + 1)
+    elif low == high:
+        padding = abs(low) * 0.05 or 0.05
+        low, high = low - padding, high + padding
+    padding = (high - low) * margin
+    low, high = low - padding, high + padding
+    return (10**low, 10**high) if log else (low, high)
+
+
 def number(value: Any, name: str, *, context: str, minimum: float = 0) -> float:
     """Return a finite numeric option at or above minimum, or raise a named error."""
     if (

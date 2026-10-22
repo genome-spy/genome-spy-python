@@ -248,6 +248,17 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         return ranking(*args, **kwargs)
 
     monkeypatch.setattr(sc.tl, "rank_genes_groups", prepare_ranking)
+    scrublet, scrublet_calls = sc.pp.scrublet, []
+    select_genes = sc.pp.highly_variable_genes
+
+    def prepare_doublets(*args, **kwargs):
+        scrublet_calls.append(kwargs)
+        # Gene selection belongs to the explicit Scanpy analysis, never the plotting calls.
+        with monkeypatch.context() as analysis:
+            analysis.setattr(sc.pp, "highly_variable_genes", select_genes)
+            return scrublet(*args, **kwargs)
+
+    monkeypatch.setattr(sc.pp, "scrublet", prepare_doublets)
     monkeypatch.setattr(
         sc.pp,
         "highly_variable_genes",
@@ -269,7 +280,26 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["statistic_matrixplot"],
         namespace["variable_genes"],
         namespace["highest_expression"],
+        namespace["scrublet_scores"],
     ]
+    assert scrublet_calls == [
+        {
+            "threshold": 0.25,
+            "random_state": 0,
+            "use_approx_neighbors": False,
+            "verbose": False,
+        }
+    ]
+    doublets = namespace["doublet_data"]
+    assert doublets.shape == (2700, 32738)
+    assert len(doublets.uns["scrublet"]["doublet_scores_sim"]) == 5400
+    scrublet_spec = namespace["scrublet_scores"].to_dict()
+    bins = next(
+        rows for rows in scrublet_spec["datasets"].values() if "density" in rows[0]
+    )
+    assert len(bins) == 98
+    assert sum(row["count"] for row in bins if row["panel"] == 0) == 2700
+    assert sum(row["count"] for row in bins if row["panel"] == 1) == 5400
     counts = namespace["counts"]
     assert counts.shape == (2700, 32738) and counts.X.min() == 0
     assert counts.X.max() == 419 and not counts.uns

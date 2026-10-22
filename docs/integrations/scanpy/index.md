@@ -232,6 +232,42 @@ bins. Native axes/guide ticks and layout are not pixel-identical to Matplotlib;
 explicit opaque palettes preserve category paints. Other color forms, 3D, marker,
 margin, label and storage limits retain M07.d/M14 owners.
 
+## Scrublet score distributions
+
+```python
+counts = sc.datasets.pbmc3k()
+sc.pp.scrublet(counts, threshold=0.25, random_state=0, use_approx_neighbors=False)
+chart = gsc.pl.scrublet_score_distribution(counts, zoom=True, show=False)
+chart.display(inline=True, controls=False)
+```
+
+The threshold above is a demonstration setting; use your chosen analysis
+threshold. Plotting only reads `obs["doublet_score"]` and stored `uns["scrublet"]`
+results. It never runs Scrublet, reads expression or modifies the supplied data.
+Metadata-only AnnData views and backed objects are supported.
+
+Each batch gets an observed/simulated pair. Histograms use NumPy with Scanpy's
+fixed **50 edges / 49 bins** from 0 to 1. Each density divides by its own number
+of scores falling in that range and by bin width. Missing and finite out-of-range
+scores are excluded; 1 belongs to the final bin. A score vector with no in-range
+values fails clearly. Native gray bars and a black stored-threshold rule retain
+their initial score/density limits, including thresholds outside [0, 1].
+
+| Option/storage | Supported behavior |
+| --- | --- |
+| `scale_hist_obs`, `scale_hist_sim` | Defaults `"log"` / `"linear"`; either panel accepts either scale. Density values stay unchanged. Other Matplotlib scale names, including symlog/logit, fail explicitly. |
+| Single result | Read `uns["scrublet"]["doublet_scores_sim"]` and optional `threshold`. |
+| Batched result | Read `batched_by`, the named obs column and each `batches[batch]` result. Preserve categorical order, or Scanpy's category conversion for other labels; missing batch labels are omitted. No pooling. |
+| `figsize=(8, 3)` | Approximate per-batch figure dimensions at 100 logical pixels/inch, reserving space for axes/titles. Native layout controls fonts/ticks; physical export DPI is independent. |
+| Native additions | Keyword-only `hover=True`, `zoom=False`, `width=None`, `height=None`. Width/height set plot area per panel (default 340 × 210); they cannot be mixed with a nondefault figsize. |
+| Hover/zoom | Populated-bin hover shows batch, sample, boundaries, count and density. Optional score-axis zoom is independent per panel, with thresholds following the same score scale. Bins stay fixed. |
+| Display | Scanpy's `show=True` default is retained; False returns one native chart for the full layout. Common native save/HTML rules apply; `return_fig`/`ax` are omitted. |
+
+Scores must be resident one-dimensional numeric vectors. Infinity, malformed
+results and unused batch categories fail clearly. Unused categories can be
+removed explicitly before plotting; they are not silently pooled or discarded.
+Histograms are aggregate marks, so hover describes bins rather than cell IDs.
+
 ## Highest-expression genes
 
 ```python
@@ -1199,6 +1235,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.dendrogram
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.correlation_matrix
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.scrublet_score_distribution
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.highest_expr_genes
 

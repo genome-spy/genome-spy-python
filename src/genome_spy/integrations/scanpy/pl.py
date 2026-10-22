@@ -43,6 +43,7 @@ __all__ = [
     "highly_variable_genes",
     "filter_genes_dispersion",
     "highest_expr_genes",
+    "scrublet_score_distribution",
 ]
 
 _BoundValue = float | str | Callable[[Any], float]
@@ -498,6 +499,103 @@ def scatter(
     return _finish_plot(
         build_embedding(prepared, style, hover=hover, zoom=zoom), show, sc
     )
+
+
+def scrublet_score_distribution(
+    adata: AnnData,
+    *,
+    scale_hist_obs: str = "log",
+    scale_hist_sim: str = "linear",
+    figsize: tuple[float, float] = (8, 3),
+    show: bool | None = True,
+    save: str | bool | None = None,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **kwargs: Any,
+) -> TopLevelSpec | None:
+    """Plot stored observed and simulated Scrublet score densities by batch.
+
+    Reads obs.doublet_score and uns.scrublet without running Scrublet or reading
+    expression. Each pair retains Scanpy's fixed bins and stored threshold.
+
+    Args:
+        adata: AnnData with previously computed Scrublet results.
+        scale_hist_obs: Observed density scale, linear or log (default).
+        scale_hist_sim: Simulated density scale, linear (default) or log.
+        figsize: Approximate figure size per batch in inches, default (8, 3).
+        show: Display once by default; False returns a native chart.
+        save: None or False; use native chart.save for HTML/JSON.
+        hover: Show each populated bin's boundaries, count and density.
+        zoom: Enable independent score-axis zoom in each panel.
+        width: Plot width per panel, default 340 logical pixels.
+        height: Plot height per panel, default 210 logical pixels.
+        **kwargs: Matplotlib ax/return_fig and other options are omitted.
+
+    Returns:
+        A native chart when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported Scanpy version is unavailable.
+        TypeError: If arguments or score storage are invalid.
+        ValueError: If results, scores, thresholds or dimensions are invalid.
+        NotImplementedError: If scales, unused batch categories or saving are unsupported.
+
+    Example:
+        >>> sc.pp.scrublet(counts, threshold=0.25, random_state=0)
+        >>> chart = gsc.pl.scrublet_score_distribution(counts, show=False)
+    """
+    context = "gsc.pl.scrublet_score_distribution"
+    _check_kwargs(kwargs, set(), context=context)
+    _check_point_options(
+        context=context,
+        width=width,
+        height=height,
+        frameon=None,
+        hover=hover,
+        zoom=zoom,
+    )
+    for name, scale in (
+        ("scale_hist_obs", scale_hist_obs),
+        ("scale_hist_sim", scale_hist_sim),
+    ):
+        if not isinstance(scale, str) or scale not in {"linear", "log"}:
+            raise NotImplementedError(
+                f"{context}: {name} supports 'linear' and 'log' only."
+            )
+    from genome_spy.integrations.scanpy._data import number
+
+    if not isinstance(figsize, (tuple, list)) or len(figsize) != 2:
+        raise TypeError(
+            f"{context}: figsize requires two positive dimensions in inches."
+        )
+    figure_width, figure_height = [
+        number(v, "figsize", context=context) for v in figsize
+    ]
+    if figure_width * 50 <= 60 or figure_height * 100 <= 90:
+        raise ValueError(
+            f"{context}: figsize is too small to reserve space for axes and titles."
+        )
+    if tuple(figsize) != (8, 3) and (width is not None or height is not None):
+        raise TypeError(
+            f"{context}: nondefault figsize cannot be combined with width or height."
+        )
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._scrublet_data import prepare_scrublet
+    from genome_spy.integrations.scanpy._scrublet_chart import build_scrublet
+
+    bins, thresholds = prepare_scrublet(adata)
+    chart = build_scrublet(
+        bins,
+        thresholds,
+        scales=(scale_hist_obs, scale_hist_sim),
+        hover=hover,
+        zoom=zoom,
+        width=figure_width * 50 - 60 if width is None else width,
+        height=figure_height * 100 - 90 if height is None else height,
+    )
+    return _finish_plot(chart, show, sc)
 
 
 def highest_expr_genes(
