@@ -121,6 +121,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.dpt_fixture import make_dpt_profiles
 
         a, options = make_dpt_profiles(), {}
+    if family == "paga":
+        from tests.integrations.scanpy.paga_fixture import make_paga
+
+        a, options = make_paga(), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -161,6 +165,7 @@ def test_shared_display_validation_precedes_optional_imports(
         "sim",
         "dpt_groups_pseudotime",
         "dpt_timeseries",
+        "paga",
         "clustermap",
         "pca_loadings",
         "pca_variance_ratio",

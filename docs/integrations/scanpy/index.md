@@ -1045,6 +1045,48 @@ two distinctly named genes and the ten-color default palette limit; heatmaps can
 show a single gene. The direct public Scanpy reference works for this entry;
 the Series-indexing limitation above affects the separate group diagnostic.
 
+## Stored PAGA graphs
+
+Compute group connectivity explicitly with Scanpy, using an existing neighbor
+graph, then replace the plotting call:
+
+```python
+sc.tl.paga(pbmc, groups="bulk_labels")
+chart = gsc.pl.paga(
+    pbmc, threshold=0.03, fontsize=9, width=700, height=460,
+    hover=True, zoom=True, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`uns['paga']` supplies the categorical grouping and sparse connectivity matrices.
+Plotting never computes neighbors or PAGA analysis and never reads X/raw/layers.
+When pos=None, it reuses public `sc.pl.paga(plot=False)` on metadata-only AnnData
+for **layout computation only**, without a Matplotlib figure. This recomputes the
+layout even when positions are cached, as upstream. Pass
+`pos=pbmc.uns['paga']['pos']` to reuse coordinates. Missing results fail clearly.
+
+| Parameters | Current behavior |
+| --- | --- |
+| threshold, solid_edges, dashed_edges | Read copies of stored sparse graphs. None uses 0.01; positive thresholds remove strictly smaller weights. Zero/negative thresholds do not filter, including explicitly stored zeros. NetworkX retains upstream undirected edge order. Self-loops and retained negative/nonfinite weights reject. |
+| layout, layout_kwds, init_pos, root, random_state | Passed to Scanpy only when pos is None. Explicit finite n-by-2 positions are authoritative; file-based coordinates are unsupported. The optional Scanpy dependency includes its PAGA/igraph extra. |
+| color, colors | Default/group key uses existing group colors or shared Scanpy defaults; a CSS string or one CSS string per node is supported. The legacy colors alias overrides color. Palettes are read without writing a color cache; a cached palette with the wrong length errors. Numeric/gene/degree colors, other categorical annotations, mixtures/pies and multiple color panels are not yet supported. |
+| labels, groups | One string label per node, defaulting to category names. The deprecated groups alias overrides labels with Scanpy's warning. |
+| node_size_scale, node_size_power | Preserve Scanpy's areas from stored group sizes divided by their median. Missing sizes use ones. Nodes retain fixed pixel sizes while zooming. |
+| edge_width_scale, min_edge_width, max_edge_width | Preserve the default 7.5-point weight multiplier; solid edges clamp both bounds, dashed edges clamp only the maximum. Native dashed rules are gray at half opacity. Their fixed pixel dash pattern differs from Matplotlib's width-scaled dashes; widths and weights remain faithful. |
+| add_pos, plot | add_pos=True stores successful coordinates, the only caller mutation. False leaves the cache untouched. plot=False computes/caches layout and returns None without a chart. Errors do not write positions. |
+| fontsize, fontweight, title, frameon | Native Lato labels use 10 points and bold by default; normal/bold and a string title are supported. frameon=None follows Scanpy's frame setting. Global Matplotlib styling and exact font metrics are outside this preview. |
+| Native delivery | hover=True shows group/label/cell counts and edge indices/weights. zoom=False by default; True enables both-axis wheel zoom and drag pan. width/height set plot area (default 548 by 384 pixels). Native charts compose and save to HTML/JSON. show/save follow the shared contract; ax/cax are omitted and reject. |
+
+single_component=True, transitions, label outlines/text kwargs, nondefault
+left_margin, colorbar=True/colorbar kwargs and export_to_gexf=True reject clearly.
+use_raw, normalize_to_color and arrowsize are inactive in the supported group/CSS
+undirected modes, as upstream; cmap accepts only native schemes and is inactive
+for these colors. No cell-selection brush is attached to aggregated group nodes.
+The expression notebook demonstrates the packaged PBMC data with explicit analysis.
+The broader PAGA milestone remains open; see the maintained
+[status and remaining scope](../../../integrations/scanpy/STATUS.md#current-work-queue).
+
 ## Clustermap compatibility
 
 ```python
@@ -1388,9 +1430,9 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Trajectories and graphs | paga, paga_adjacency, paga_compare, paga_path |
+| Trajectories and graphs | paga_adjacency, paga_compare, paga_path; broader paga options |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
@@ -1494,6 +1536,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.dpt_groups_pseudotime
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.dpt_timeseries
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.paga
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 

@@ -6,6 +6,7 @@ from collections.abc import Callable, Collection, Mapping, Sequence
 from importlib.metadata import PackageNotFoundError, version
 from math import isfinite
 from numbers import Integral, Real
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
@@ -29,6 +30,7 @@ __all__ = [
     "sim",
     "dpt_groups_pseudotime",
     "dpt_timeseries",
+    "paga",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2019,6 +2021,232 @@ def matrix(
         height=height,
     )
     return _finish_plot(chart, show, sc)
+
+
+def paga(
+    adata: AnnData,
+    *,
+    threshold: float | None = None,
+    color: Any = None,
+    layout: str | None = None,
+    layout_kwds: Mapping[str, Any] = MappingProxyType({}),
+    init_pos: Any = None,
+    root: Any = 0,
+    labels: Any = None,
+    single_component: bool = False,
+    solid_edges: str = "connectivities",
+    dashed_edges: str | None = None,
+    transitions: str | None = None,
+    fontsize: int | None = None,
+    fontweight: str = "bold",
+    fontoutline: int | None = None,
+    text_kwds: Mapping[str, Any] = MappingProxyType({}),
+    node_size_scale: float = 1.0,
+    node_size_power: float = 0.5,
+    edge_width_scale: float = 1.0,
+    min_edge_width: float | None = None,
+    max_edge_width: float | None = None,
+    arrowsize: int = 30,
+    title: str | None = None,
+    left_margin: float = 0.01,
+    random_state: int | None = 0,
+    pos: Any = None,
+    normalize_to_color: bool = False,
+    cmap: Any = None,
+    colorbar: bool | None = None,
+    cb_kwds: Mapping[str, Any] = MappingProxyType({}),
+    frameon: bool | None = None,
+    add_pos: bool = True,
+    export_to_gexf: bool = False,
+    use_raw: bool = True,
+    colors: Any = None,
+    groups: Any = None,
+    plot: bool = True,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **kwargs: Any,
+) -> TopLevelSpec | None:
+    """Draw stored undirected PAGA connectivity graphs with native nodes and edges.
+
+    Description:
+        Read saved PAGA matrices and categorical groups, never expression or PAGA
+        analysis. Supplied positions are retained; otherwise Scanpy's public
+        plot=False path computes the layout on a metadata-only object, without
+        creating a figure. Native rules, points and text draw the result.
+
+    Args:
+        adata: AnnData with stored PAGA graphs and categorical observation groups.
+        threshold: Drop weights below this value; None uses 0.01, zero retains zeros.
+        color: Group key, CSS color or one CSS color per node; None uses group colors.
+        layout: Scanpy layout, computed only when pos is None.
+        layout_kwds: Keywords passed to Scanpy's public layout computation.
+        init_pos: Initial layout coordinates; unused when pos is supplied.
+        root: Scanpy tree-layout root; unused when pos is supplied.
+        labels: One string per node; None uses category labels.
+        single_component: Only False in this undirected preview.
+        solid_edges: Stored PAGA matrix key for black solid edges.
+        dashed_edges: Optional stored matrix key for gray dashed edges.
+        transitions: Unsupported directed-edge mode.
+        fontsize: Native label size in points; None uses 10.
+        fontweight: Native 'normal' or 'bold' label weight.
+        fontoutline: Unsupported label outline.
+        text_kwds: Only empty; use native chart styling for supported customization.
+        node_size_scale: Multiply Scanpy's node areas by this nonnegative value.
+        node_size_power: Exponent of stored size divided by its median.
+        edge_width_scale: Multiply default 7.5-point weight-scaled widths.
+        min_edge_width: Minimum solid-edge width in points.
+        max_edge_width: Maximum solid/dashed width in points.
+        arrowsize: Inactive without transitions.
+        title: Optional plot title.
+        left_margin: Only the pinned default; width/height set native dimensions.
+        random_state: Scanpy layout seed.
+        pos: Two coordinates per node; file-based positions are unsupported.
+        normalize_to_color: Inactive for the supported group/CSS color modes.
+        cmap: Native scheme name; inactive for the supported categorical colors.
+        colorbar: Only None/False for the supported categorical colors.
+        cb_kwds: Only empty in this preview.
+        frameon: Draw the native view frame; None uses Scanpy's frame setting.
+        add_pos: Store successful positions in uns['paga']['pos'], as in Scanpy.
+        export_to_gexf: Unsupported; never writes an implicit graph file.
+        use_raw: Inactive for the supported metadata-only color modes.
+        colors: Legacy alias overriding color when supplied.
+        groups: Deprecated alias overriding labels when supplied.
+        plot: False computes/caches positions without constructing a chart.
+        show: Use Scanpy autoshow when unset; False returns the native chart.
+        save: Only None/False; use native HTML/JSON saving.
+        hover: Show group/cell counts and edge weights.
+        zoom: Enable native x/y wheel zoom and pan.
+        width: Native plot width in pixels, default 548.
+        height: Native plot height in pixels, default 384.
+        **kwargs: Unsupported keywords fail clearly, including ax/cax.
+
+    Returns:
+        A native chart for show=False; otherwise None, including plot=False.
+
+    Raises:
+        ImportError: If the optional Scanpy/PAGA dependencies are unavailable.
+        TypeError: If flags, metadata or native options are unsupported.
+        ValueError: If stored graphs, positions, sizes or labels are invalid.
+        NotImplementedError: If a requested color, edge or styling mode is unsupported.
+
+    Example:
+        >>> sc.tl.paga(adata, groups="louvain")
+        >>> chart = gsc.pl.paga(adata, zoom=True, show=False)
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.paga"
+    _check_kwargs(kwargs, set(), context=context)
+    _check_point_options(
+        context=context,
+        width=width,
+        height=height,
+        frameon=frameon,
+        hover=hover,
+        zoom=zoom,
+    )
+    for name, value in {
+        "single_component": single_component,
+        "add_pos": add_pos,
+        "export_to_gexf": export_to_gexf,
+        "plot": plot,
+        "normalize_to_color": normalize_to_color,
+        "use_raw": use_raw,
+    }.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    unsupported = {
+        "single_component": single_component,
+        "transitions": transitions is not None,
+        "fontoutline": fontoutline is not None,
+        "text_kwds": bool(text_kwds),
+        "cb_kwds": bool(cb_kwds),
+        "export_to_gexf": export_to_gexf,
+        "left_margin": left_margin != 0.01,
+        "colorbar": colorbar is not None and colorbar is not False,
+    }
+    if any(unsupported.values()):
+        raise NotImplementedError(
+            f"{context}: unsupported option(s): {', '.join(k for k, v in unsupported.items() if v)}."
+        )
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._paga_data import (
+        prepare_paga,
+        paga_nodes,
+        paga_edges,
+    )
+
+    key, positions, solid, dashed = prepare_paga(
+        adata,
+        threshold=threshold,
+        solid_edges=solid_edges,
+        dashed_edges=dashed_edges,
+        pos=pos,
+        layout=layout,
+        layout_kwds=layout_kwds,
+        init_pos=init_pos,
+        root=root,
+        random_state=random_state,
+    )
+    chart = None
+    if plot:
+        from genome_spy.integrations.scanpy._paga_chart import build_paga
+        from genome_spy.integrations.scanpy._style import native_scheme
+        import pandas as pd
+
+        if cmap is not None:
+            native_scheme(cmap, "cmap", context=context)
+        if groups is not None:
+            labels = groups
+            sc.logging.warning(
+                "`groups` is deprecated in `pl.paga`: use `labels` instead"
+            )
+        nodes = paga_nodes(
+            adata,
+            key,
+            positions,
+            color=colors if colors is not None else color,
+            labels=labels,
+            node_size_scale=node_size_scale,
+            node_size_power=node_size_power,
+        )
+        solid_table = paga_edges(
+            solid,
+            positions,
+            edge_width_scale=edge_width_scale,
+            min_edge_width=min_edge_width,
+            max_edge_width=max_edge_width,
+        )
+        dashed_table = (
+            paga_edges(
+                dashed,
+                positions,
+                edge_width_scale=edge_width_scale,
+                min_edge_width=None,
+                max_edge_width=max_edge_width,
+            )
+            if dashed is not None
+            else pd.DataFrame()
+        )
+        chart = build_paga(
+            nodes,
+            solid_table,
+            dashed_table,
+            fontsize=fontsize,
+            fontweight=fontweight,
+            frameon=sc.settings._frameon if frameon is None else frameon,
+            title=title,
+            hover=hover,
+            zoom=zoom,
+            width=width,
+            height=height,
+        )
+    if add_pos:
+        adata.uns["paga"]["pos"] = positions.copy()
+    return _finish_plot(chart, show, sc) if chart is not None else None
 
 
 def dpt_timeseries(

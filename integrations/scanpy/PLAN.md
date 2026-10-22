@@ -806,6 +806,28 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   `pos`, threshold inclusion, roots, components, node-size powers, normalization,
   solid/dashed/directed edges, labels and scales. Explicitly handle `plot`,
   `add_pos` and `export_to_gexf` side effects; user-requested writes only.
+  The first bounded increment renders undirected graphs with group/CSS colors,
+  supplied positions or Scanpy-computed layouts, thresholded solid/dashed edges,
+  node-size powers, edge-width clipping and native labels, hover and x/y navigation.
+  Reuse public `sc.pl.paga(plot=False)` on metadata-only AnnData for layouts; never
+  call private layout functions, copy expression or extract artists. With pos=None,
+  recompute layout even when cached positions exist, as upstream; explicit pos skips
+  layout. Cache positions only after success when add_pos=True; plot=False creates
+  no chart. Missing results require explicit sc.tl.paga. Reuse shared numeric,
+  CSS/palette, coordinate-domain, point-unit, navigation and delivery helpers;
+  graph nodes represent groups, so no observation brush is added.
+  Acceptance: public Scanpy references for thresholds, layout seeds/initialization,
+  positions, sizes, colors, aliases, labels, edge order/widths and bounds; sparse
+  formats/invalid-result and mutation guards; registered DPI-aware complete-chart
+  overlays and point footprints; observed node/edge hover, zoom/pan, composition
+  and offline HTML; independent packaged-data notebook execution and metadata-only
+  resources. Keep Scanpy's PAGA extra optional and base imports lightweight.
+  This does not close M11.c: numeric/gene/degree colors, categorical mixtures/pies,
+  multiple color panels, single-component filtering, directed transitions, file
+  positions and GEXF export remain explicit unsupported cases. M14 owns font/global
+  style parity and the native fixed dash pattern versus Matplotlib's per-width
+  dash lengths. Audit these before claiming full PAGA compatibility. C04's missing
+  dedicated path mark does not block straight undirected rule segments.
 - M11.d: `paga_adjacency`, `paga_compare` and `paga_path` reuse matrix/embedding/
   graph authoring. Preserve supplied adjacency/tree/positions, panel alignment,
   ordered paths, `n_avg` window/end behavior, annotations, source selection and

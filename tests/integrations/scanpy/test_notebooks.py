@@ -255,6 +255,13 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     )
     namespace = {}
     dpt_calls = []
+    paga, paga_calls = sc.tl.paga, []
+
+    def prepare_paga(*args, **kwargs):
+        paga_calls.append(kwargs)
+        return paga(*args, **kwargs)
+
+    monkeypatch.setattr(sc.tl, "paga", prepare_paga)
     for name, owner in [("neighbors", sc.pp), ("diffmap", sc.tl), ("dpt", sc.tl)]:
         original = getattr(owner, name)
 
@@ -311,7 +318,26 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["simulation_heatmap"],
         namespace["dpt_groups_chart"],
         namespace["dpt_expression"],
+        namespace["paga_graph"],
     ]
+    assert paga_calls == [{"groups": "bulk_labels"}]
+    pbmc = namespace["pbmc"]
+    paga_spec = namespace["paga_graph"].to_dict()
+    nodes = next(rows for rows in paga_spec["datasets"].values() if "_cells" in rows[0])
+    assert [r["_group"] for r in nodes] == list(pbmc.obs["bulk_labels"].cat.categories)
+    assert [r["_cells"] for r in nodes] == list(pbmc.uns["bulk_labels_sizes"])
+    np.testing.assert_array_equal(
+        [[r["_x"], r["_y"]] for r in nodes], pbmc.uns["paga"]["pos"]
+    )
+    edges = next(
+        rows for rows in paga_spec["datasets"].values() if "_weight" in rows[0]
+    )
+    assert edges and all(r["_weight"] >= 0.03 for r in edges)
+    for row in edges:
+        assert (
+            row["_weight"]
+            == pbmc.uns["paga"]["connectivities"][row["_source"], row["_target"]]
+        )
     assert dpt_calls == [
         ("neighbors", {"n_neighbors": 10, "use_rep": "X", "random_state": 0}),
         ("diffmap", {"random_state": 0}),

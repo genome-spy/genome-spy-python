@@ -36,6 +36,8 @@ Stored DPT group/pseudotime diagnostics compose two of those panels from metadat
 alone, preserving category codes, saved order coordinates and branching boundaries.
 Stored DPT expression profiles index X by saved row indices and reuse the existing
 heatmap/point renderers without trajectory inference.
+Stored undirected PAGA graphs now reuse Scanpy's public no-plot layout computation
+and native rules, points and labels, with node/edge hover and optional x/y zoom.
 Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
 Stored PCA loadings and variance ratios reuse the ranking preparation and native
@@ -82,14 +84,19 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and twenty-seven expression/ranked/QC/profile/simulation/DPT code cells. Public availability does not mean
+code cells and twenty-nine expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next: M11.c, `paga` stored graph/layout audit.** Check public Scanpy thresholds,
-positions, node sizing and side effects against the released native grammar before
-implementing its chart. Plotting must not recompute DPT/PAGA analysis.
+**Next: M11.c, PAGA node-color expansion audit.** The
+[undirected group-graph preview](#m11c-stored-undirected-paga-graphs) is closed within its declared bounds;
+its acceptance evidence and deliberate limits are recorded below. Audit numeric,
+gene and degree node colors using the shared grouped access/color-bound helpers,
+with public Scanpy references before extending rendering. Mixtures/pies, directed
+transitions, component filtering, multi-color panels and file/export behavior
+remain M11.c; subsequent PAGA adjacency/compare/path entries remain M11.d.
+Plotting must not recompute DPT/PAGA analysis.
 The [DPT expression preview](#m11b-stored-dpt-expression-profiles) is closed for
 resident dense X with shared heatmap/point rendering, native interactions,
 workflow and resource verification.
@@ -99,8 +106,9 @@ Its direct parent-entry comparison remains blocked by Scanpy 1.11.5 indexing a
 pandas Series as a NumPy array; carry that gate forward independently.
 The [simulation preview](#m11a-stored-simulation-plots), supplied heatmap/point
 previews and native subplot preview are closed within their declared bounds.
-DPT/PAGA keep M11 open. C04 applies only to functions that actually connect
-samples; M08/M09 filled plots still require C01.
+The DPT parent-reference gate and broader PAGA options keep M11 open. C04
+does not block native straight undirected rule segments; connected-path audits
+remain plot-specific; M08/M09 filled plots still require C01.
 
 Remaining marker details are deferred to M14's compatibility backlog by user
 priority. They must not precede new plot families. The
@@ -160,6 +168,7 @@ C12 remains a separate upstream straight-link issue.
 | M11.a subplot entry | Closed (native panel preview) | [Explicit signature, shared renderer, independent composition and resource evidence](#m11a-native-time-series-subplots) | Simulation is delivered below; broader storage/markers/layout remain M14. |
 | M11.b group/pseudotime entry | Implemented; component/chart/workflow/resource checks verified | `733b04e`, filtered-view fix `5219e3a`; [stored metadata, shared panels and verification](#m11b-stored-dpt-groups-and-pseudotime) | Direct parent-entry comparison blocked by the pinned Scanpy/pandas indexing error; expression entry is independently verified below. |
 | M11.b expression entry | Closed (resident dense-X heatmap/point preview) | [Direct public reference, shared renderers, workflow and resources](#m11b-stored-dpt-expression-profiles) | Parent storage/style/export limits remain M14; group-reference gate and PAGA keep M11 open. |
+| M11.c undirected graph entry | Closed (bounded group/CSS-color preview) | [Public layout reuse, native charts and evidence](#m11c-stored-undirected-paga-graphs) | Full M11.c stays open for node-color modes, components, directed edges and file/export behavior. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
@@ -194,7 +203,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
 | M10 QC diagnostics | In progress | M10.a/b/c bounded previews are verified; broader scale/option compatibility remains M14. This does not close the full family. |
-| M11 trajectories/graphs/series | In progress; supplied-series/simulation and DPT-expression previews closed | DPT group direct-reference gate remains open; PAGA and graph layouts remain. C04 applies only where connected paths are required. |
+| M11 trajectories/graphs/series | In progress; supplied-series/simulation and DPT-expression previews closed; undirected PAGA available | DPT group direct-reference gate and broader PAGA options/entries remain open. Native rules handle straight undirected edges; C04 is limited to unverified connected paths. |
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
 | M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
@@ -2873,11 +2882,75 @@ the group-reference gate and PAGA keep M11 open. The next audit is only in the
 current queue. The full repository suite and documentation build were not rerun.
 Clearance: **retain**; no live plan is eligible for removal.
 
+## M11.c stored undirected PAGA graphs
+
+`gsc.pl.paga` now renders stored undirected group connectivity with native rules,
+points and text. [Data preparation](../../src/genome_spy/integrations/scanpy/_paga_data.py)
+reads sparse graph copies, categorical metadata and stored group sizes. It reuses
+public `sc.pl.paga(plot=False)` on metadata-only AnnData when positions are absent;
+no private layout code, expression copy/access, Matplotlib figures, artist
+recovery or PAGA analysis is involved. Supplied coordinates skip layout. None
+recomputes layout even with cached positions, matching Scanpy. add_pos=True writes
+successful coordinates only after chart preparation; plot=False creates no chart.
+
+[Chart construction](../../src/genome_spy/integrations/scanpy/_paga_chart.py) reuses
+shared numeric validation, palettes/CSS colors, coordinate domains, point units,
+navigation and delivery. Size scales are independent between edge widths and node
+areas, while coordinates are shared. Group nodes use group IDs/counts, without an
+observation brush or generic graph framework. The Scanpy extra now includes
+Scanpy's PAGA/igraph extra; base dependencies and lightweight imports are unchanged.
+
+Verification: **413 targeted Python checks, two workflow tests and nine browser checks**
+passed, along with Ruff formatting/lint and mypy. The full repository suite and
+documentation build were not rerun. Retained reproduction:
+
+- [Public reference/guard cases](../../tests/integrations/scanpy/test_paga.py) cover
+  default, circle and seeded/initialized layouts; authoritative positions and cache
+  flags; threshold ties, empty/asymmetric graphs; aliases, node areas and edge
+  widths/order; labels, colors and bounds. Caller expression reads, analysis and
+  figure creation are guarded. CSR/CSC/LIL inputs validate without densifying;
+  missing/stale/nonfinite/self-loop graphs fail clearly.
+- [Native browser checks](../../tests/integrations/scanpy/browser/test_paga.py) compare
+  six complete charts against Scanpy at display DPI 100, export DPI/DPR 150/1.5.
+  They register positions, dimensions, labels and colored point footprints, and
+  retain overlays only in temporary directories. Node/edge hover, both-axis zoom,
+  pan, ordinary native composition, offline HTML, zero-size nodes and disabled
+  hover are observed. Native viewport culling can sort SVG output, so hover uses
+  projected known group coordinates rather than assuming export row order.
+- Both canonical workflow tests pass. The expression notebook has **29 code cells
+  and 23 charts**, including explicit `sc.tl.paga(pbmc, groups="bulk_labels")` on
+  packaged PBMC neighbors. Plotting never calls that analysis again. The local
+  notebook's unrelated edits are preserved; the committed source has no outputs.
+- A seeded metadata-only 100,000-observation / 100-group / 500-edge workload used
+  the default Scanpy layout and native 700 by 450 chart. Warm preparation including
+  layout took **0.031 s**, Arrow **0.750 s**, validated compact JSON **0.828 s**;
+  payloads were **46,828 / 112,018 bytes** and peak traced Python allocation **3.19 MB**.
+  Chromium first paint including dispatch took **1.67 s**; a known exposed group
+  reported 1,000 cells, navigation changed the graph and no page errors occurred.
+  Post-GC JS heap was **7.03 MB**. Reproduce using seed-0 upper-triangle selection
+  of 500 edges among 100 groups, uniform weights 0.02–1 and 1,000 cells per group.
+  These are local Python 3.11/Core 1.2.0 observations, not portable limits.
+
+Native font metrics differ from Matplotlib, and native dashed rules use one fixed
+pixel pattern rather than per-width dash lengths; M14 owns exact style parity.
+The palette helper reads rather than writes color caches; mismatched cached
+palette lengths error. Numeric/gene/degree colors, other categorical mixtures/pies,
+multiple color panels, component filtering, directed transitions, file positions
+and GEXF export remain M11.c, with explicit unsupported errors. The full M11
+milestone and DPT's direct parent-reference gate remain open. C04 does not block
+these straight native rule segments; other connected paths need separate audits.
+
+Plan reconciliation updates the active queue, milestone, callable/parameter
+inventory, source map, optional dependency and user guide together. There are now
+35 partial plotting entries and 13 unimplemented plot/builder entries; availability
+is not full-family compatibility. Next is the PAGA node-color audit in the current
+queue. Clearance: **retain**; no live plan is eligible for removal.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 34 functions are available as partial previews; 14 plot/builder
+helpers. 35 functions are available as partial previews; 13 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -2903,7 +2976,7 @@ No placeholder functions are exported for planned work.
 | `highly_variable_genes` | Partial stored-results preview available | M10.b; remaining compatibility M14 |
 | `matrix` | Partial supplied-numeric preview available | M05.b preview; broader sources/layout M14; transport M05.d |
 | `matrixplot` | Partial preview available | M03 preview; trees M04; methods M13; normalization/options M14 |
-| `paga` | Not implemented | M11 |
+| `paga` | Stored undirected group-graph preview available | M11.c; remaining color/component/directed/export modes open |
 | `paga_adjacency` | Not implemented | M11 |
 | `paga_compare` | Not implemented | M11 |
 | `paga_path` | Not implemented | M11 |
@@ -3012,6 +3085,7 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Simulation entry, metadata precedence, boundaries, one-based labels and exact local shuffle | Tested bounded preview; points/heatmaps reuse existing preparation/rendering | M11.a simulation preview retained; parent storage/markers/layout M14 |
 | DPT group/pseudotime panels, stored codes/ranks/boundaries and missing-time masking | Metadata-only composition with shared points, hover and independent navigation | M11.b implemented; direct parent-reference gate remains open |
 | DPT expression entry, saved row indices, X-only access, mode-specific colors/markers and native interactions | Shared heatmap/point preparation and rendering, with direct upstream verification | M11.b expression preview retained; broader storage/style/export M14 |
+| PAGA stored undirected graphs, group/CSS colors, public layout computation, sizes, widths, labels and cache controls | Shared validation/colors/domains/units/navigation/delivery; native rules/points/text | M11.c bounded increment; remaining node/edge/export modes open |
 | Sparse/lazy inputs, repeated labels, differing per-subset shapes, global styles and image export | Explicit restrictions | M14; Matplotlib objects remain outside boundary |
 
 | Builder surface (all three classes) | Current state | Completion evidence required |
@@ -3035,7 +3109,7 @@ affected slice.
 | C01 | No native filled-area/polygon primitive in bundled schema | Full violin/stacked/tracks M08/M09 | Released filled geometry and density/profile chart tests; no custom trial geometry promotion |
 | C02 | No native raster/image primitive | Full spatial M12 | Released image capability with crop/aspect/zoom registration tests |
 | C03 | No native 3D projection | 3D embedding options M07/M14 | Released capability or explicit product scope decision; keep unresolved until then |
-| C04 | No dedicated line/path mark in bundled mark inventory | Connected graph/path cases in M11; timeseries helpers are scatter points | Verify native rule/link segments only for functions that actually connect samples; otherwise upstream released capability |
+| C04 | No dedicated line/path mark in bundled mark inventory | Unverified connected path cases in M11; timeseries helpers are scatter points | PAGA undirected straight edges use native rules and are not blocked. Audit each connected-path entry separately; otherwise await a released capability. |
 | C05 | Font/text-outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
 | C06 | Core 1.2 typed surround/facet APIs and native index gaps available; Scanpy migration remains open | Heatmap/clustermap side tracks, related grids, UMAP/repeated panels; M14.b | Use the published heatmap example; verify viewport/scale/guide ownership, required heatmap group gaps and existing navigation/selection contracts |
 | C07 | Python linkage + shared native orthogonal branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Stored parent/child edges project into equal summary slots or unequal cell-group centers. Complete SVG elbows, four orientations, zero heights, resize and navigation pass; recheck later families. |
