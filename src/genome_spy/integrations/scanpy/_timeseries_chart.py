@@ -1,6 +1,6 @@
 """Native points, guides and navigation for supplied time-series profiles."""
 
-from collections.abc import Collection, Sequence
+from collections.abc import Collection, Mapping, Sequence
 from typing import Any
 
 import numpy as np
@@ -11,6 +11,7 @@ from genome_spy.integrations.scanpy._data import number
 from genome_spy.integrations.scanpy._grid_interactions import (
     vertical_highlights,
     zoom_axes,
+    horizontal_tick_labels,
 )
 from genome_spy.integrations.scanpy._style import (
     EMBEDDING_MARKERS,
@@ -41,6 +42,7 @@ def build_timeseries(
     width: float | None,
     height: float | None,
     context: str = CONTEXT,
+    xtick_labels: Mapping[float, str] | None = None,
 ) -> gs.TopLevelSpec:
     """Return native points and guides from supplied profiles using Scanpy's defaults."""
     for name, value in {"xlabel": xlabel, "ylabel": ylabel}.items():
@@ -91,7 +93,12 @@ def build_timeseries(
             nice=False,
             zoom=False,
         )
-        .axis(title=xlabel, domain=False)
+        .axis(
+            title=xlabel if xtick_labels is None else None,
+            domain=False,
+            labels=xtick_labels is None,
+            values=list(xtick_labels) if xtick_labels is not None else Undefined,
+        )
     )
     y = (
         gs.Y("_value:Q")
@@ -195,15 +202,23 @@ def build_timeseries(
     chart = gs.layer(points)
     if highlights:
         chart = chart + vertical_highlights(highlights, *prepared.highlight_y)
-    return (
-        chart.properties(width=width, height=height)
-        .configure_axis(
-            labelFont=FONT,
-            titleFont=FONT,
-            labelFontSize=10 * PT,
-            titleFontSize=10 * PT,
-            titleFontWeight="normal",
-        )
-        .configure_legend(disable=True, labelFont=FONT, labelFontSize=10 * PT)
-        .configure_view(stroke="black", strokeWidth=0.8 * PT)
+    result: gs.LayerChart | gs.SurroundChart = chart.properties(
+        width=width,
+        height=height,
+        view={"stroke": "black", "strokeWidth": 0.8 * PT},
     )
+    if xtick_labels is not None:
+        result = gs.surround(
+            result,
+            surround=gs.SurroundSides(
+                bottom=[horizontal_tick_labels(xtick_labels, xlabel)]
+            ),
+            spacing=0,
+        )
+    return result.configure_axis(
+        labelFont=FONT,
+        titleFont=FONT,
+        labelFontSize=10 * PT,
+        titleFontSize=10 * PT,
+        titleFontWeight="normal",
+    ).configure_legend(disable=True, labelFont=FONT, labelFontSize=10 * PT)

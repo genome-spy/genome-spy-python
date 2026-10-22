@@ -757,8 +757,19 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   matrices/time values, variable order, highlights, labels, color maps, limits and
   markers. Use shared heatmap or point authoring according to the pinned callable;
   review connected paths only for functions that actually connect samples.
-  `sim` reads supplied simulation outputs and preserves time
-  truncation, `shuffle`, markers and heatmap choice without rerunning simulation.
+  `sim` reads supplied simulation outputs without rerunning simulation. The pinned
+  helper never truncates X: `tmax_realization`, then `uns['tmax_write']`, then
+  `n_obs` chooses boundary spacing and one-based realization ticks. Include a
+  partial final realization. Points preserve the [0, 1.25 * n_obs] x limits;
+  heatmaps keep the time-series crop. Shuffle matches the seed-1 legacy NumPy
+  permutation using a local RandomState and always draws points, including when
+  `as_heatmap=True`. Reuse both time-series renderers and the shared native side
+  tracks for named numeric ticks. Reject backed/lazy/sparse expression before
+  loading or densifying; keep parent marker/palette limits explicit. Acceptance:
+  compare metadata precedence, ticks, values, limits, boundaries and permutation
+  independently, prove input/global RNG preservation, register complete charts
+  and observed hover/zoom/label alignment/offline export, run a packaged simulation
+  notebook example and measure a realistic resident simulation workload.
 - M11.b: `dpt_groups_pseudotime` and `dpt_timeseries` consume stored DPT groups,
   order, pseudotime and highlights, with heatmap/series modes and exact alignment.
   Missing DPT analysis errors; no trajectory inference in plotting.

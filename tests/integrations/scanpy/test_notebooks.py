@@ -298,8 +298,45 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["timeseries_heatmap"],
         namespace["time_series"],
         namespace["time_series_subplots"],
+        namespace["simulation_points"],
+        namespace["simulation_heatmap"],
     ]
     profiles = namespace["profiles"]
+    simulation = namespace["simulation"]
+    assert simulation.shape == (640, 11)
+    sim_profiles = namespace["sim_profiles"]
+    assert sim_profiles.var_names.tolist() == [
+        "Gata2",
+        "Gata1",
+        "Cebpa",
+        "Pu.1",
+        "Gfi1",
+    ]
+    for name, heatmap in [("simulation_points", False), ("simulation_heatmap", True)]:
+        spec = namespace[name].to_dict()
+        assert any(
+            m.get("mark", {}).get("type") == ("rect" if heatmap else "point")
+            for m in leaf_marks(spec)
+        )
+        tables = [rows for rows in spec["datasets"].values() if "_value" in rows[0]]
+        assert len(tables) == 1
+        rows = tables[0]
+        np.testing.assert_allclose(
+            np.array([r["_value"] for r in rows]).reshape(5, 640), sim_profiles.X.T
+        )
+        rule = next(
+            m for m in leaf_marks(spec) if m.get("mark", {}).get("type") == "rule"
+        )
+        assert [r["position"] for r in spec["datasets"][rule["data"]["name"]]] == [
+            160,
+            320,
+            480,
+        ]
+        ticks = spec["surround"]["bottom"][0]
+        assert spec["datasets"][ticks["data"]["name"]] == [
+            {"position": x, "label": str(i + 1)}
+            for i, x in enumerate([0, 160, 320, 480])
+        ]
     expected_order = namespace["pbmc"].obs["S_score"].sort_values(kind="stable").index
     assert profiles.index.equals(expected_order)
     assert list(profiles.columns) == namespace["marker_names"]

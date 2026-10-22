@@ -1,6 +1,6 @@
 """Native tiles for a supplied numeric matrix, without AnnData computations."""
 
-from collections.abc import Collection
+from collections.abc import Collection, Mapping
 from typing import Any, Literal
 
 import numpy as np
@@ -11,6 +11,7 @@ from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
     with_values,
     vertical_highlights,
+    horizontal_tick_labels,
 )
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._data import (
@@ -52,6 +53,7 @@ def build_matrix(
     reverse_y: bool = True,
     highlights_x: Collection[float] = (),
     context: str = "gsc.pl.matrix",
+    xtick_labels: Mapping[float, str] | None = None,
 ) -> gs.TopLevelSpec:
     """Return native tiles, labels and a color guide from a resident numeric matrix.
 
@@ -131,6 +133,11 @@ def build_matrix(
                 titleFontSize=10 * PT,
             )
         )
+        if horizontal and xtick_labels is not None:
+            axes[-1] = axes[-1].axis(
+                title=None, labels=False, values=list(xtick_labels)
+            )
+            sides[side] = [horizontal_tick_labels(xtick_labels, xlabel)]
         if labels is not None:
             ticks = _slot_labels(
                 names,
@@ -226,9 +233,10 @@ def build_timeseries_heatmap(
     show_values: bool,
     width: float | None,
     height: float | None,
+    context: str = "gsc.pl.timeseries_as_heatmap",
+    xtick_labels: Mapping[float, str] | None = None,
 ) -> gs.TopLevelSpec:
     """Transpose supplied samples into variable rows, then reuse native matrix rendering."""
-    context = "gsc.pl.timeseries_as_heatmap"
     array = matrix_array(X, context=context)
     if isinstance(var_names, (str, bytes)) or not isinstance(var_names, Collection):
         raise TypeError(
@@ -278,6 +286,7 @@ def build_timeseries_heatmap(
         reverse_y=False,
         highlights_x=positions,
         context=context,
+        xtick_labels=xtick_labels,
     )
 
 

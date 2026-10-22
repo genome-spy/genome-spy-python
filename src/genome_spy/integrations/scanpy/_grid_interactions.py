@@ -1,11 +1,44 @@
-"""Native navigation and value labels for the expression grids."""
+"""Native navigation, named ticks and fitted values for expression plots."""
 
-from collections.abc import Collection
+from collections.abc import Collection, Mapping
 from typing import Any, Literal
 
 import genome_spy as gs
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS as PT
+
+
+def horizontal_tick_labels(ticks: Mapping[float, str], title: str | None) -> gs.Chart:
+    """Return a native side track for named numeric ticks, following the shared x scale."""
+    chart = (
+        gs.Chart(
+            [{"position": value, "label": label} for value, label in ticks.items()]
+        )
+        .mark_text(
+            font=FONT,
+            size=10 * PT,
+            align="center",
+            baseline="top",
+            yOffset=8,
+            clip="y",
+            cullByVisibleRange="x",
+            tooltip=None,
+        )
+        .encode(x=gs.X("position:Q").axis(None), y=gs.value(1), text="label:N")
+        .properties(height=24)
+    )
+    if title:
+        chart = chart.properties(
+            title=gs.Title(
+                text=title,
+                orient="bottom",
+                offset=4,
+                font=FONT,
+                fontSize=10 * PT,
+                fontWeight="normal",
+            )
+        )
+    return chart
 
 
 def vertical_highlights(

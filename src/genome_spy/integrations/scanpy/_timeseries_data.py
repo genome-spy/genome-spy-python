@@ -12,10 +12,46 @@ from genome_spy.integrations.scanpy._data import (
     matrix_array,
     number,
     numeric_values,
+    require_resident_expression,
 )
 from genome_spy.integrations.scanpy._style import color_bounds, native_color
 
 CONTEXT = "gsc.pl.timeseries"
+
+
+def prepare_sim(
+    adata: Any, tmax_realization: int | None, shuffle: bool
+) -> tuple[Any, list[float], dict[float, str]]:
+    """Read X and return ordered profiles, boundaries and named ticks without running simulation."""
+    from anndata import AnnData
+
+    context = "gsc.pl.sim"
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: adata must be AnnData.")
+    values = matrix_array(
+        require_resident_expression(adata, False, None, context=context),
+        context=context,
+    )
+    length = number(
+        tmax_realization
+        if tmax_realization is not None
+        else adata.uns.get("tmax_write", adata.n_obs),
+        "tmax_realization/tmax_write",
+        context=context,
+    )
+    if length == 0:
+        raise ValueError(f"{context}: tmax_realization/tmax_write must be positive.")
+    starts = np.arange(0, adata.n_obs, length).tolist()
+    # RandomState preserves Scanpy's seed-1 permutation without touching global state.
+    if shuffle:
+        values = values[
+            np.random.RandomState(1).choice(adata.n_obs, adata.n_obs, replace=False)
+        ]
+    return (
+        values,
+        starts[1:],
+        {} if shuffle else {v: str(i + 1) for i, v in enumerate(starts)},
+    )
 
 
 @dataclass(frozen=True, slots=True)

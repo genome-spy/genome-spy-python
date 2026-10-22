@@ -26,6 +26,7 @@ __all__ = [
     "timeseries_as_heatmap",
     "timeseries",
     "timeseries_subplot",
+    "sim",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2015,6 +2016,114 @@ def matrix(
         width=width,
         height=height,
     )
+    return _finish_plot(chart, show, sc)
+
+
+def sim(
+    adata: AnnData,
+    *,
+    tmax_realization: int | None = None,
+    as_heatmap: bool = False,
+    shuffle: bool = False,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    marker: str | Sequence[str] = ".",
+    hover: bool = True,
+    zoom: bool | Literal["xy"] = False,
+    show_values: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Plot supplied simulation realizations with the existing time-series charts.
+
+    Description:
+        Read X and var_names without running simulation or changing AnnData.
+        Realization length comes from tmax_realization, then uns['tmax_write'],
+        then n_obs. It sets boundaries and one-based tick labels, never truncates
+        X. Shuffle uses Scanpy's seed-1 permutation without changing global random
+        state; as in Scanpy, shuffled output is always points.
+
+    Args:
+        adata: AnnData containing resident dense samples-by-variables X.
+        tmax_realization: Positive observations per realization; None uses metadata.
+        as_heatmap: Use the existing heatmap renderer unless shuffle is True.
+        shuffle: Permute all observations deterministically before point plotting.
+        show: Display according to Scanpy's autoshow when unset.
+        save: Only None/False; use native chart HTML/JSON saving.
+        marker: Supported shared point marker; unused for heatmap output.
+        hover: Show the existing time-series value tooltips.
+        zoom: True navigates both point axes or heatmap y; 'xy' navigates both.
+        show_values: Fit numeric labels inside heatmap cells; points reject True.
+        width: Native plot-area width; defaults to the selected time-series chart.
+        height: Native plot-area height; defaults to the selected time-series chart.
+
+    Returns:
+        A native chart for show=False, otherwise displays it and returns None.
+
+    Raises:
+        ImportError: If the optional Scanpy version is unavailable.
+        TypeError: If flags, AnnData or expression storage are unsupported.
+        ValueError: If realization length, profiles, labels or dimensions are invalid.
+        NotImplementedError: If a requested native style or delivery is unsupported.
+
+    Example:
+        >>> simulation = sc.datasets.krumsiek11()[:, ["Gata2", "Gata1", "Pu.1"]]
+        >>> chart = gsc.pl.sim(simulation, tmax_realization=160, show=False)
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.sim"
+    for name, value in {
+        "as_heatmap": as_heatmap,
+        "shuffle": shuffle,
+        "hover": hover,
+        "show_values": show_values,
+    }.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    _check_grid_zoom(zoom, context=context)
+    if show_values and (not as_heatmap or shuffle):
+        raise NotImplementedError(
+            f"{context}: show_values requires unshuffled heatmap output."
+        )
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._timeseries_data import prepare_sim
+
+    values, highlights, ticks = prepare_sim(adata, tmax_realization, shuffle)
+    if as_heatmap and not shuffle:
+        from genome_spy.integrations.scanpy._matrix_chart import (
+            build_timeseries_heatmap,
+        )
+
+        chart = build_timeseries_heatmap(
+            values,
+            var_names=adata.var_names,
+            highlights_x=highlights,
+            color_map=None,
+            hover=hover,
+            zoom=zoom,
+            show_values=show_values,
+            width=width,
+            height=height,
+            context=context,
+            xtick_labels=ticks,
+        )
+    else:
+        from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
+
+        chart = build_timeseries(
+            values,
+            var_names=adata.var_names,
+            highlights_x=highlights,
+            xlabel="index (arbitrary order)" if shuffle else "realizations",
+            xlim=[0, 1.25 * adata.n_obs],
+            marker=marker,
+            hover=hover,
+            zoom=bool(zoom),
+            width=width,
+            height=height,
+            context=context,
+            xtick_labels=None if shuffle else ticks,
+        )
     return _finish_plot(chart, show, sc)
 
 

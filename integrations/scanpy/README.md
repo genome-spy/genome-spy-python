@@ -17,6 +17,8 @@ panels for stored PCA results.
 `gsc.pl.highly_variable_genes(...)` and the legacy `filter_genes_dispersion(...)`
 show stored gene-selection diagnostics without rerunning analysis.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
+`gsc.pl.sim(...)` displays stored simulation realizations using the time-series
+point and heatmap renderers; it never runs simulation.
 
 When resuming work in another chat, read [the current queue](STATUS.md#current-work-queue)
 and inspect recent commits and uncommitted changes first. STATUS owns the active

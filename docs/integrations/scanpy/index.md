@@ -939,6 +939,37 @@ to obtain a chart for composition. Data, marker, palette and storage restriction
 are identical to `timeseries`. This returns a native chart rather than mutating
 a supplied Matplotlib subplot; unknown options fail by name.
 
+### Plot stored simulation realizations
+
+```python
+simulation = sc.datasets.krumsiek11()[:, ["Gata2", "Gata1", "Pu.1"]]
+chart = gsc.pl.sim(
+    simulation, tmax_realization=160, as_heatmap=True,
+    zoom="xy", show_values=True, width=480, height=230, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`sim` reads `adata.X` and `var_names`; it never runs simulation, normalizes,
+sorts or truncates observations. Realization length uses `tmax_realization`, then
+`uns['tmax_write']`, then `n_obs`. It places boundaries and one-based run labels,
+including an incomplete final run. Positive fractional stored lengths are accepted.
+Points keep Scanpy's `[0, 1.25 * n_obs]` horizontal limits; heatmaps keep the
+existing time-series cell crop. Hover and value labels use the shared renderers.
+
+`shuffle=True` preserves Scanpy's exact seed-1 permutation without changing global
+NumPy random state. As upstream, this always draws points even with
+`as_heatmap=True`, with an ordinary numeric index axis. `marker` is unused for
+unshuffled heatmaps. `zoom=True` enables both point axes or heatmap y;
+`zoom="xy"` enables both axes. `show_values=True` requires heatmap output.
+
+The preview supports resident dense AnnData and read-only views; it rejects
+backed, lazy and sparse X before loading or densifying. Point output retains the
+time-series limits: multiple genes, distinct labels, sufficient native palette
+colors and supported shared markers. Choose at most ten genes for the default
+point palette. Heatmaps also accept a single gene and repeated names. Explicit
+`show=False` returns a native chart; `save` has the shared HTML/JSON boundary.
+
 ## Clustermap compatibility
 
 ```python
@@ -1282,9 +1313,8 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Simulation | sim |
 | Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
@@ -1383,6 +1413,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.timeseries
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.timeseries_subplot
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.sim
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 

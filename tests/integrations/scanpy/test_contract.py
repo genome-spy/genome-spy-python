@@ -109,6 +109,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.embedding_density_fixture import make_density
 
         a, options = make_density(), {}
+    if family == "sim":
+        from tests.integrations.scanpy.sim_fixture import make_sim
+
+        a, options = make_sim(), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -146,6 +150,7 @@ def test_shared_display_validation_precedes_optional_imports(
         "timeseries_as_heatmap",
         "timeseries",
         "timeseries_subplot",
+        "sim",
         "clustermap",
         "pca_loadings",
         "pca_variance_ratio",
