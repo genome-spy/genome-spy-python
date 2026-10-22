@@ -9,7 +9,11 @@ from genome_spy.schemapi import Undefined
 
 from genome_spy.integrations.scanpy._data import coordinate_domain, number
 from genome_spy.integrations.scanpy._grid_interactions import zoom_axes
-from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS as PT
+from genome_spy.integrations.scanpy._style import (
+    FONT,
+    POINTS_TO_PIXELS as PT,
+    color_bounds,
+)
 
 CONTEXT = "gsc.pl.paga"
 
@@ -27,6 +31,8 @@ def build_paga(
     zoom: bool,
     width: float | None,
     height: float | None,
+    cmap: str,
+    colorbar: bool,
 ) -> gs.TopLevelSpec:
     """Return native graph layers with shared coordinates, fixed marker sizes and optional navigation."""
     width = number(548 if width is None else width, "width", context=CONTEXT)
@@ -105,13 +111,50 @@ def build_paga(
                 ]
             )
         charts.append(rules)
-    colors = dict(
-        type="ordinal", domain=nodes["_id"].tolist(), range=nodes["_color"].tolist()
-    )
+    numeric = pd.api.types.is_numeric_dtype(nodes["_color"])
+    colors: dict[str, Any]
+    fill, stroke = gs.Fill("_id:N"), gs.Stroke("_id:N")
+    legend = None
+    if numeric:
+        low, high, constant = color_bounds(
+            nodes["_color"].to_numpy(),
+            None,
+            None,
+            context=CONTEXT,
+            expand_constant=colorbar,
+        )
+        fill, stroke = gs.Fill("_color:Q"), gs.Stroke("_color:Q")
+        if constant and not colorbar:
+            # Scanpy maps a constant range without a guide to the first palette color.
+            _, high, _ = color_bounds(
+                nodes["_color"].to_numpy(), None, None, context=CONTEXT
+            )
+        colors = dict(
+            type="linear",
+            domain=[low, high],
+            scheme=cmap,
+            zero=False,
+            nice=False,
+            clamp=True,
+        )
+        if colorbar:
+            legend = gs.Legend(
+                title=None,
+                gradientLength=height,
+                gradientThickness=4,
+                gradientStrokeColor="black",
+                gradientStrokeWidth=0.8 * PT,
+            )
+    else:
+        colors = dict(
+            type="ordinal", domain=nodes["_id"].tolist(), range=nodes["_color"].tolist()
+        )
     maximum = max(1.0, float(nodes["_area"].max()))
     points = (
         gs.Chart(nodes)
-        .transform_filter("datum._area > 0")
+        .transform_filter(
+            "datum._area > 0 && isValid(datum._color)" if numeric else "datum._area > 0"
+        )
         .mark_point(
             filled=True,
             strokeWidth=PT,
@@ -123,8 +166,8 @@ def build_paga(
             x=x,
             y=y,
             key=gs.Key("_id"),
-            fill=gs.Fill("_id:N").scale(**colors).legend(None),
-            stroke=gs.Stroke("_id:N").scale(**colors).legend(None),
+            fill=fill.scale(**colors).legend(legend),
+            stroke=stroke.scale(**colors).legend(None),
             size=gs.Size("_area:Q")
             .scale(
                 domain=[0, maximum], range=[0, maximum * PT**2], zero=True, nice=False
@@ -133,13 +176,14 @@ def build_paga(
         )
     )
     if hover:
-        points = points.encode(
-            tooltip=[
-                gs.Tooltip("_group:N", title="Group"),
-                gs.Tooltip("_label:N", title="Label"),
-                gs.Tooltip("_cells:Q", title="Cells", format="d"),
-            ]
-        )
+        tooltips = [
+            gs.Tooltip("_group:N", title="Group"),
+            gs.Tooltip("_label:N", title="Label"),
+            gs.Tooltip("_cells:Q", title="Cells", format="d"),
+        ]
+        if numeric:
+            tooltips.append(gs.Tooltip("_color:Q", title="Color value", format=".4g"))
+        points = points.encode(tooltip=tooltips)
     labels = (
         gs.Chart(nodes)
         .mark_text(
@@ -164,6 +208,7 @@ def build_paga(
                 "strokeWidth": 0.8 * PT if frameon else 0,
             },
         )
+        .configure_legend(labelFont=FONT, labelFontSize=10 * PT)
     )
     if title is not None:
         result = result.properties(title=gs.title(title, font=FONT, fontSize=12 * PT))

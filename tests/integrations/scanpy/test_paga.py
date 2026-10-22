@@ -45,10 +45,14 @@ def test_nodes_edges_labels_bounds_and_cache_match_public_scanpy(case, monkeypat
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         ax = sc.pl.paga(reference, show=False, **options)
+        ax.figure.canvas.draw()
     point = next(c for c in ax.collections if isinstance(c, PathCollection))
     positions = np.asarray(point.get_offsets())
     areas = point.get_sizes()
     colors = point.get_facecolors()
+    values = point.get_array()
+    domain = [point.norm.vmin, point.norm.vmax]
+    colorbar = len(ax.figure.axes) > 1
     expected_edges = [
         (c.get_segments(), c.get_linewidths())
         for c in ax.collections
@@ -86,7 +90,22 @@ def test_nodes_edges_labels_bounds_and_cache_match_public_scanpy(case, monkeypat
         [[r["_x"], r["_y"]] for r in rows], positions, atol=1e-10
     )
     np.testing.assert_allclose([r["_area"] for r in rows], areas)
-    np.testing.assert_allclose([to_rgba(r["_color"]) for r in rows], colors)
+    if values is None:
+        np.testing.assert_allclose([to_rgba(r["_color"]) for r in rows], colors)
+    else:
+        np.testing.assert_allclose(
+            [np.nan if r["_color"] is None else r["_color"] for r in rows],
+            values.filled(np.nan),
+            equal_nan=True,
+        )
+        fill = mark["encoding"]["fill"]
+        assert bool(fill["legend"]) == colorbar
+        if domain[0] == domain[1]:
+            assert fill["scale"]["domain"][0] == domain[0]
+            assert fill["scale"]["domain"][1] > domain[1]
+        else:
+            np.testing.assert_allclose(fill["scale"]["domain"], domain)
+        assert fill["scale"]["scheme"] == "viridis"
     assert [r["_label"] for r in rows] == labels
     for axis, domain in zip(("x", "y"), bounds, strict=True):
         np.testing.assert_allclose(mark["encoding"][axis]["scale"]["domain"], domain)
@@ -163,7 +182,6 @@ def test_supplied_positions_skip_layout_and_failures_leave_caches_unchanged(
         {"text_kwds": {"color": "red"}},
         {"left_margin": 0.2},
         {"cb_kwds": {"ticks": []}},
-        {"colorbar": True},
     ],
 )
 def test_unsupported_options_fail_before_imports_or_writes(option, monkeypatch):
@@ -176,7 +194,14 @@ def test_unsupported_options_fail_before_imports_or_writes(option, monkeypatch):
 
 @pytest.mark.parametrize(
     "option",
-    [{"ax": object()}, {"cax": object()}, {"plot": 1}, {"add_pos": 1}, {"zoom": "xy"}],
+    [
+        {"ax": object()},
+        {"cax": object()},
+        {"plot": 1},
+        {"add_pos": 1},
+        {"zoom": "xy"},
+        {"colorbar": 1},
+    ],
 )
 def test_invalid_flags_and_axes_fail_clearly(option):
     with pytest.raises(TypeError, match="gsc.pl.paga:"):
@@ -266,3 +291,119 @@ def test_tree_layout_retains_the_unfiltered_source(format):
     np.testing.assert_allclose(a.uns["paga"]["pos"], reference.uns["paga"]["pos"])
     assert a.uns["paga"]["connectivities_tree"].format == format
     assert (a.uns["paga"]["connectivities_tree"] != tree).nnz == 0
+
+
+@pytest.mark.parametrize("storage", ["csr", "csc"])
+@pytest.mark.parametrize("use_raw", [True, False])
+def test_gene_colors_read_one_sparse_column_without_changing_sources(
+    storage, use_raw, monkeypatch
+):
+    from scipy import sparse
+    import scanpy as sc
+
+    a = make_paga("gene_raw")
+    a.X = getattr(sparse, f"{storage}_matrix")(a.X)
+    raw = a.raw.to_adata()
+    raw.X = getattr(sparse, f"{storage}_matrix")(raw.X)
+    a.raw = raw
+    # Exercise a view while keeping the existing graph's group order and slots.
+    a = a[:18]
+    before = (a.X.copy(), a.raw.X.copy())
+    read, dense = sc.get.obs_df, []
+    reads = []
+
+    def getter(*args, **kwargs):
+        reads.append(kwargs)
+        return read(*args, **kwargs)
+
+    def toarray(self, *args, **kwargs):
+        dense.append(self.shape)
+        assert self.shape[1] == 1
+        return original(self, *args, **kwargs)
+
+    cls = getattr(sparse, f"{storage}_matrix")
+    original = cls.toarray
+    monkeypatch.setattr(cls, "toarray", toarray)
+    monkeypatch.setattr(sc.get, "obs_df", getter)
+    spec = gsc.pl.paga(
+        a, color="g1", use_raw=use_raw, pos=POSITIONS, add_pos=False, show=False
+    ).to_dict()
+    assert len(reads) == 1 and reads[0]["keys"] == ["cluster", "g1"]
+    assert reads[0]["use_raw"] is use_raw and dense == [(a.n_obs, 1)]
+    rows = next(rows for rows in spec["datasets"].values() if "_cells" in rows[0])
+    expected = np.arange(0, 54, 3, dtype=float) + (0 if use_raw else 100)
+    for row in rows:
+        np.testing.assert_allclose(
+            row["_color"], expected[a.obs["cluster"] == row["_group"]].mean()
+        )
+    assert (a.X != before[0]).nnz == 0 and (a.raw.X != before[1]).nnz == 0
+
+
+def test_gene_colors_fall_back_to_x_without_raw_and_keep_missing_group_labels():
+    a = make_paga("gene_missing")
+    a.raw = None
+    spec = gsc.pl.paga(a, color="g1", pos=POSITIONS, show=False).to_dict()
+    nodes = next(rows for rows in spec["datasets"].values() if "_cells" in rows[0])
+    assert nodes[0]["_color"] is None
+    np.testing.assert_allclose(
+        [row["_color"] for row in nodes[1:]], [131.5, 139, 149.5]
+    )
+    marks = leaf_marks(spec)
+    assert any(
+        mark["encoding"].get("text", {}).get("field") == "_label" for mark in marks
+    )
+    point = next(mark for mark in marks if mark["mark"]["type"] == "point")
+    assert "isValid(datum._color)" in point["transform"][0]["expr"]
+
+
+@pytest.mark.parametrize(
+    "color,options,match",
+    [
+        ("degree_dashed", {}, "requires dashed_edges"),
+        ("degree_unknown", {}, "degree_solid.*degree_dashed"),
+        ("missing", {}, "not a gene"),
+        ("score", {}, "at least one finite"),
+        ("degree_solid", {"threshold": 1}, "equal weighted degrees"),
+    ],
+)
+def test_invalid_color_inputs_never_write_positions(color, options, match):
+    a = make_paga("obs_score")
+    a.obs["score"] = np.nan
+    before = a.uns["paga"]["pos"].copy()
+    with pytest.raises(ValueError, match=match):
+        gsc.pl.paga(a, color=color, pos=POSITIONS, show=False, **options)
+    np.testing.assert_array_equal(a.uns["paga"]["pos"], before)
+
+
+@pytest.mark.parametrize("color", ["score", "degree_solid", "degree_dashed"])
+def test_numeric_metadata_and_degrees_do_not_read_expression_or_draw_figures(
+    color, monkeypatch
+):
+    from anndata import AnnData
+    import matplotlib.pyplot as plt
+    import scanpy as sc
+
+    a = make_paga("obs_score")
+    original = inspect.getattr_static(AnnData, "X")
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Read expression, drew a figure or reran analysis")
+
+    monkeypatch.setattr(AnnData, "X", property(forbidden, original.__set__))
+    raw = type(a.raw)
+    monkeypatch.setattr(raw, "X", property(forbidden))
+    monkeypatch.setattr(plt, "figure", forbidden)
+    monkeypatch.setattr(sc.tl, "paga", forbidden)
+    monkeypatch.setattr(sc.pl, "paga", forbidden)
+    assert (
+        gsc.pl.paga(a, color=color, dashed_edges="weak", pos=POSITIONS, show=False)
+        is not None
+    )
+
+
+@pytest.mark.parametrize("color", ["red", "other_category"])
+def test_unsupported_color_collisions_and_categorical_mixtures_fail_clearly(color):
+    a = make_paga("obs_score")
+    a.obs["other_category"] = a.obs["cluster"]
+    with pytest.raises(NotImplementedError, match="gsc.pl.paga:.*unsupported"):
+        gsc.pl.paga(a, color=color, pos=POSITIONS, show=False)

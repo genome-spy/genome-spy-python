@@ -38,6 +38,9 @@ Stored DPT expression profiles index X by saved row indices and reuse the existi
 heatmap/point renderers without trajectory inference.
 Stored undirected PAGA graphs now reuse Scanpy's public no-plot layout computation
 and native rules, points and labels, with node/edge hover and optional x/y zoom.
+Numeric annotation/gene means reuse grouped data access; solid/dashed weighted
+degrees use the displayed thresholded graphs. Native color guides follow Scanpy's
+automatic guide choices without creating Matplotlib figures.
 Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
 Stored PCA loadings and variance ratios reuse the ranking preparation and native
@@ -84,17 +87,19 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and twenty-nine expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
+code cells and thirty-two expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next: M11.c, PAGA node-color expansion audit.** The
+**Next: M11.c, PAGA single-component filtering audit.** The
 [undirected group-graph preview](#m11c-stored-undirected-paga-graphs) is closed within its declared bounds;
-its acceptance evidence and deliberate limits are recorded below. Audit numeric,
-gene and degree node colors using the shared grouped access/color-bound helpers,
-with public Scanpy references before extending rendering. Mixtures/pies, directed
-transitions, component filtering, multi-color panels and file/export behavior
+its acceptance evidence and deliberate limits are recorded below. The
+[numeric/gene/degree color increment](#paga-numeric-gene-and-degree-colors) reuses
+shared grouped access and color bounds. Audit single_component=True against public
+Scanpy's largest-component/tie, node-order, size and position behavior before
+extending the existing graph path. Mixtures/pies, directed transitions,
+multi-color panels and file/export behavior
 remain M11.c; subsequent PAGA adjacency/compare/path entries remain M11.d.
 Plotting must not recompute DPT/PAGA analysis.
 The [DPT expression preview](#m11b-stored-dpt-expression-profiles) is closed for
@@ -170,6 +175,7 @@ C12 remains a separate upstream straight-link issue.
 | M11.b group/pseudotime entry | Implemented; component/chart/workflow/resource checks verified | `733b04e`, filtered-view fix `5219e3a`; [stored metadata, shared panels and verification](#m11b-stored-dpt-groups-and-pseudotime) | Direct parent-entry comparison blocked by the pinned Scanpy/pandas indexing error; expression entry is independently verified below. |
 | M11.b expression entry | Closed (resident dense-X heatmap/point preview) | [Direct public reference, shared renderers, workflow and resources](#m11b-stored-dpt-expression-profiles) | Parent storage/style/export limits remain M14; group-reference gate and PAGA keep M11 open. |
 | M11.c undirected graph entry | Closed (bounded group/CSS-color preview) | [Public layout reuse and native charts](#m11c-stored-undirected-paga-graphs); [sparse graph fixes](#paga-sparse-graph-corrections) | Full M11.c stays open for node-color modes, components, directed edges and file/export behavior. |
+| M11.c numeric node colors | Closed (numeric annotations, genes and weighted degrees) | [Shared computation and native color guides](#paga-numeric-gene-and-degree-colors) | Other categorical mixtures/pies, direct numeric vectors, CSS-name collisions and broader M11.c remain open. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
@@ -2967,8 +2973,8 @@ these straight native rule segments; other connected paths need separate audits.
 Plan reconciliation updates the active queue, milestone, callable/parameter
 inventory, source map, optional dependency and user guide together. There are now
 35 partial plotting entries and 13 unimplemented plot/builder entries; availability
-is not full-family compatibility. Next is the PAGA node-color audit in the current
-queue. Clearance: **retain**; no live plan is eligible for removal.
+is not full-family compatibility. The current queue above owns next work.
+Clearance: **retain**; no live plan is eligible for removal.
 
 ### PAGA sparse graph corrections
 
@@ -2998,6 +3004,61 @@ errors, producing the same 23 charts. Rendering, transport and workload dimensio
 are unchanged; the retained resource baseline above still covers those paths.
 The full repository suite, docs build and resource benchmark were not rerun.
 Scope, next work and clearance remain unchanged.
+
+### PAGA numeric, gene and degree colors
+
+Closed (2026-10-23) for single-key numeric observation, gene and solid/dashed degree
+colors. [`_paga_data`](../../src/genome_spy/integrations/scanpy/_paga_data.py)
+reuses the grouped public getter and group-mean helpers. Observation means skip
+missing values; gene means retain Scanpy's missing-value propagation. Gene colors
+use raw when present by default, otherwise X; False chooses X. Only one gene
+column is materialized, and source data stay unchanged. Degrees use the existing
+thresholded NetworkX graphs, preserving weights/order for CSR/CSC and the shared
+LIL conversion. Weighted degrees normalize to 0–1; missing dashed graphs and
+equal-degree normalization error explicitly instead of creating substitute values.
+
+[`_paga_chart`](../../src/genome_spy/integrations/scanpy/_paga_chart.py) uses shared
+color bounds and native fill/stroke scales and legends. Finite nodes keep the
+existing size/position/edge mapping; missing means omit point paint, leaving
+labels and edges intact. Hover adds the plotted numeric value. Public Scanpy
+1.11.5 references verify its automatic observation/gene guide, absent degree
+guide and suppression for explicit colorbar=True/False. Constant means use the
+first palette color without a guide and the midpoint with one. Native guide
+ticks/fonts/outer layout remain M14 differences.
+
+Verification: **328 targeted Python checks**, **22 PAGA browser checks**, both
+canonical workflow tests, Ruff formatting/lint and mypy pass. Tests cover raw/X
+fallback, sparse CSR/CSC views and one-column densification, missing means,
+constant colors, thresholded solid/dashed degrees, CSC edge order, aliases,
+unchanged caches on error, and metadata/degree paths without expression reads,
+figures or analysis. Complete registered charts compare colors, footprints,
+labels, guide presence and edges at 100 display / 150 export DPI. Point positions
+use independently projected stored coordinates through SVG's rounded viewport,
+checked against public layout bounds within half a CSS pixel. Native value hover,
+zoom/pan, composition, missing-node paint and offline HTML are observed. Generated
+references and overlays stay in temporary directories.
+
+The expression notebook adds S-score, raw GNLY and weighted-degree examples using
+the same saved graph coordinates. Its live Jupyter run completed **32 code cells
+and 26 charts with no errors**, preserving unrelated local notebook edits. The
+committed notebook keeps source only, without outputs or widget state.
+
+A seed-0 sparse workload uses 100,000 cells, 20,000 genes, 200,000 sampled nonzero
+entries, 100 uniform groups, 500 symmetric edges with weights 0.02–1 and supplied
+unit-circle coordinates. Warm observation/gene/degree preparation took
+**0.019/0.023/0.013 s**, validated JSON **0.798/0.787/0.783 s**, and peak traced
+Python allocation **2.67/2.66/1.88 MiB**. JSON was about **168–169 kB**. The native
+700 × 450 gene graph rendered/dispatched in **1.80 s**, showed all 100 nodes and
+reported the known 1,000-cell count plus numeric value on hover. JS heap at that
+point was **19.55 MiB before explicit GC**. These are local observations, not
+portable limits. Base graph layout/geometry and transport code are unchanged;
+the earlier group-graph resource evidence remains applicable to those paths.
+
+CSS names that also name genes/annotations, ambiguous getter names, direct numeric
+vectors, all-missing colors, other categorical mixtures/pies and broader PAGA
+options remain explicit limits. Next is the single-component audit above; M11
+stays open. The full repository suite and docs build were not rerun. Clearance:
+**retain**; no live plan is eligible for removal.
 
 ## Public callable coverage
 
@@ -3029,7 +3090,7 @@ No placeholder functions are exported for planned work.
 | `highly_variable_genes` | Partial stored-results preview available | M10.b; remaining compatibility M14 |
 | `matrix` | Partial supplied-numeric preview available | M05.b preview; broader sources/layout M14; transport M05.d |
 | `matrixplot` | Partial preview available | M03 preview; trees M04; methods M13; normalization/options M14 |
-| `paga` | Stored undirected group-graph preview available | M11.c; remaining color/component/directed/export modes open |
+| `paga` | Stored undirected graphs with group, numeric, gene and degree colors | M11.c; other color/component/directed/export modes open |
 | `paga_adjacency` | Not implemented | M11 |
 | `paga_compare` | Not implemented | M11 |
 | `paga_path` | Not implemented | M11 |

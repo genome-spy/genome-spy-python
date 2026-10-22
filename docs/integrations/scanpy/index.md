@@ -1061,7 +1061,8 @@ chart.display(inline=True, controls=False)
 ```
 
 `uns['paga']` supplies the categorical grouping and sparse connectivity matrices.
-Plotting never computes neighbors or PAGA analysis and never reads X/raw/layers.
+Plotting never computes neighbors or PAGA analysis. Gene colors read one selected
+expression column; metadata and degree colors do not read expression matrices.
 When pos=None, it reuses public `sc.pl.paga(plot=False)` on metadata-only AnnData
 for **layout computation only**, without a Matplotlib figure. This recomputes the
 layout even when positions are cached, as upstream. Pass
@@ -1073,20 +1074,24 @@ after SciPy prepares compatible sparse storage; stored graphs remain unchanged.
 | --- | --- |
 | threshold, solid_edges, dashed_edges | Read copies of stored sparse graphs. None uses 0.01; positive thresholds remove strictly smaller weights. Zero/negative thresholds do not filter, including explicitly stored zeros. NetworkX retains upstream undirected edge order. Self-loops and retained negative/nonfinite weights reject. |
 | layout, layout_kwds, init_pos, root, random_state | Passed to Scanpy only when pos is None. Explicit finite n-by-2 positions are authoritative; file-based coordinates are unsupported. The optional Scanpy dependency includes its PAGA/igraph extra. |
-| color, colors | Default/group key uses existing group colors or shared Scanpy defaults; a CSS string or one CSS string per node is supported. The legacy colors alias overrides color. Palettes are read without writing a color cache; a cached palette with the wrong length errors. Numeric/gene/degree colors, other categorical annotations, mixtures/pies and multiple color panels are not yet supported. |
+| color, colors | Default/group key uses existing group colors or shared Scanpy defaults; a CSS string or one CSS string per node is supported. Numeric observation keys show group means, skipping missing values. Gene keys show mean expression; a missing gene value makes that group's mean missing, as in Scanpy. Missing means omit the node's paint while retaining its label and edges. The legacy colors alias overrides color. Palettes are read without writing a color cache; a cached palette with the wrong length errors. Other categorical annotations, mixtures/pies, numeric lists and multiple color panels remain unsupported. |
+| degree_solid, degree_dashed | Use these strings as color keys. Compute weighted degrees from the displayed solid or dashed graph after thresholding, then normalize to 0–1. degree_dashed requires dashed_edges. Equal degrees have undefined normalization in Scanpy and raise a clear error. The existing graph helper preserves CSR/CSC edge order, including asymmetric weights. |
+| use_raw | Gene colors default to raw when present, otherwise X; False uses X. No layer or gene-symbol option is added. Reuse the grouped public getter and mean helpers; only the selected gene column is materialized. Resident dense/CSR/CSC and views follow the shared getter's limits. Ambiguous observation/gene names and CSS colors that also name annotations/genes reject. |
+| cmap, colorbar | Native continuous scheme, default viridis. colorbar=None automatically adds a guide for numeric observation and gene colors. Degree colors have no default guide. Explicit True or False both suppress the guide, matching Scanpy 1.11.5's behavior. Constant numeric means match Scanpy's first palette color without a guide and midpoint with a guide. All-missing/nonfinite color data reject; no values are filled in. |
 | labels, groups | One string label per node, defaulting to category names. The deprecated groups alias overrides labels with Scanpy's warning. |
 | node_size_scale, node_size_power | Preserve Scanpy's areas from stored group sizes divided by their median. Missing sizes use ones. Nodes retain fixed pixel sizes while zooming. |
 | edge_width_scale, min_edge_width, max_edge_width | Preserve the default 7.5-point weight multiplier; solid edges clamp both bounds, dashed edges clamp only the maximum. Native dashed rules are gray at half opacity. Their fixed pixel dash pattern differs from Matplotlib's width-scaled dashes; widths and weights remain faithful. |
 | add_pos, plot | add_pos=True stores successful coordinates, the only caller mutation. False leaves the cache untouched. plot=False computes/caches layout and returns None without a chart. Errors do not write positions. |
 | fontsize, fontweight, title, frameon | Native Lato labels use 10 points and bold by default; normal/bold and a string title are supported. frameon=None follows Scanpy's frame setting. Global Matplotlib styling and exact font metrics are outside this preview. |
-| Native delivery | hover=True shows group/label/cell counts and edge indices/weights. zoom=False by default; True enables both-axis wheel zoom and drag pan. width/height set plot area (default 548 by 384 pixels). Native charts compose and save to HTML/JSON. show/save follow the shared contract; ax/cax are omitted and reject. |
+| Native delivery | hover=True shows group/label/cell counts, numeric color values and edge indices/weights. zoom=False by default; True enables both-axis wheel zoom and drag pan. width/height set plot area (default 548 by 384 pixels). Native charts compose and save to HTML/JSON. show/save follow the shared contract; ax/cax are omitted and reject. |
 
 single_component=True, transitions, label outlines/text kwargs, nondefault
-left_margin, colorbar=True/colorbar kwargs and export_to_gexf=True reject clearly.
-use_raw, normalize_to_color and arrowsize are inactive in the supported group/CSS
-undirected modes, as upstream; cmap accepts only native schemes and is inactive
-for these colors. No cell-selection brush is attached to aggregated group nodes.
-The expression notebook demonstrates the packaged PBMC data with explicit analysis.
+left_margin, colorbar kwargs and export_to_gexf=True reject clearly.
+normalize_to_color and arrowsize are inactive in the supported undirected modes,
+as upstream; cmap is inactive for CSS colors. Native guide ticks, fonts and outer
+spacing can differ from Matplotlib. No cell-selection brush is attached to
+aggregated group nodes. The expression notebook compares group, numeric, gene
+and degree colors on packaged PBMC data using the same stored coordinates.
 The broader PAGA milestone remains open; see the maintained
 [status and remaining scope](../../../integrations/scanpy/STATUS.md#current-work-queue).
 

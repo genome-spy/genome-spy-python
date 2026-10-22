@@ -2080,15 +2080,17 @@ def paga(
     """Draw stored undirected PAGA connectivity graphs with native nodes and edges.
 
     Description:
-        Read saved PAGA matrices and categorical groups, never expression or PAGA
-        analysis. Supplied positions are retained; otherwise Scanpy's public
-        plot=False path computes the layout on a metadata-only object, without
-        creating a figure. Native rules, points and text draw the result.
+        Read saved PAGA matrices and groups; gene colors read only the requested
+        expression column. Never rerun PAGA analysis. Supplied positions are retained;
+        otherwise Scanpy's public plot=False path computes the layout on a
+        metadata-only object without creating a figure. Native rules, points
+        and text draw the result.
 
     Args:
         adata: AnnData with stored PAGA graphs and categorical observation groups.
         threshold: Drop weights below this value; None uses 0.01, zero retains zeros.
-        color: Group key, CSS color or one CSS color per node; None uses group colors.
+        color: Group key, numeric observation key, gene, degree_solid/degree_dashed,
+            CSS color or one CSS color per node. None uses group colors.
         layout: Scanpy layout, computed only when pos is None.
         layout_kwds: Keywords passed to Scanpy's public layout computation.
         init_pos: Initial layout coordinates; unused when pos is supplied.
@@ -2112,20 +2114,22 @@ def paga(
         left_margin: Only the pinned default; width/height set native dimensions.
         random_state: Scanpy layout seed.
         pos: Two coordinates per node; file-based positions are unsupported.
-        normalize_to_color: Inactive for the supported group/CSS color modes.
-        cmap: Native scheme name; inactive for the supported categorical colors.
-        colorbar: Only None/False for the supported categorical colors.
+        normalize_to_color: Inactive without categorical mixtures.
+        cmap: Native continuous scheme, default viridis; inactive for CSS colors.
+        colorbar: None adds a native guide for numeric annotations and genes.
+            Explicit True/False suppress it, matching Scanpy 1.11.5.
         cb_kwds: Only empty in this preview.
         frameon: Draw the native view frame; None uses Scanpy's frame setting.
         add_pos: Store successful positions in uns['paga']['pos'], as in Scanpy.
         export_to_gexf: Unsupported; never writes an implicit graph file.
-        use_raw: Inactive for the supported metadata-only color modes.
+        use_raw: Use raw gene expression when present, otherwise X; False uses X.
+            Inactive for metadata and degree colors.
         colors: Legacy alias overriding color when supplied.
         groups: Deprecated alias overriding labels when supplied.
         plot: False computes/caches positions without constructing a chart.
         show: Use Scanpy autoshow when unset; False returns the native chart.
         save: Only None/False; use native HTML/JSON saving.
-        hover: Show group/cell counts and edge weights.
+        hover: Show group/cell counts, numeric color values and edge weights.
         zoom: Enable native x/y wheel zoom and pan.
         width: Native plot width in pixels, default 548.
         height: Native plot height in pixels, default 384.
@@ -2165,6 +2169,8 @@ def paga(
     }.items():
         if not isinstance(value, bool):
             raise TypeError(f"{context}: {name} must be boolean.")
+    if colorbar is not None and not isinstance(colorbar, bool):
+        raise TypeError(f"{context}: colorbar must be boolean or None.")
     unsupported = {
         "single_component": single_component,
         "transitions": transitions is not None,
@@ -2173,7 +2179,6 @@ def paga(
         "cb_kwds": bool(cb_kwds),
         "export_to_gexf": export_to_gexf,
         "left_margin": left_margin != 0.01,
-        "colorbar": colorbar is not None and colorbar is not False,
     }
     if any(unsupported.values()):
         raise NotImplementedError(
@@ -2204,14 +2209,15 @@ def paga(
         from genome_spy.integrations.scanpy._style import native_scheme
         import pandas as pd
 
-        if cmap is not None:
-            native_scheme(cmap, "cmap", context=context)
+        cmap = native_scheme(
+            "viridis" if cmap is None else cmap, "cmap", context=context
+        )
         if groups is not None:
             labels = groups
             sc.logging.warning(
                 "`groups` is deprecated in `pl.paga`: use `labels` instead"
             )
-        nodes = paga_nodes(
+        nodes, automatic_colorbar = paga_nodes(
             adata,
             key,
             positions,
@@ -2219,6 +2225,9 @@ def paga(
             labels=labels,
             node_size_scale=node_size_scale,
             node_size_power=node_size_power,
+            solid=solid,
+            dashed=dashed,
+            use_raw=use_raw,
         )
         solid_table = paga_edges(
             solid,
@@ -2250,6 +2259,8 @@ def paga(
             zoom=zoom,
             width=width,
             height=height,
+            cmap=cmap,
+            colorbar=colorbar is None and automatic_colorbar,
         )
     if add_pos:
         adata.uns["paga"]["pos"] = positions.copy()

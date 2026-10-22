@@ -9,10 +9,16 @@ POSITIONS = np.array([[0.0, 0.0], [1.3, 0.2], [0.7, 1.4], [-0.4, 0.8]])
 
 
 def make_paga(case="default"):
-    """Return a metadata-only graph; a cached position intentionally differs from requested layouts."""
+    """Return a stored graph; cached positions intentionally differ from requested layouts."""
     categories = ["A", "B", "C", "D"]
     sizes = [9, 4, 1, 6]
     a = AnnData(
+        X=np.arange(sum(sizes) * 3, dtype=float).reshape(-1, 3)
+        if case in paga_color_cases()
+        else None,
+        var=pd.DataFrame(index=["g1", "g2", "red"])
+        if case in paga_color_cases()
+        else None,
         obs=pd.DataFrame(
             {
                 "cluster": pd.Categorical(
@@ -49,7 +55,43 @@ def make_paga(case="default"):
             a.uns["paga"]["connectivities"] = a.uns["paga"]["connectivities"].tocsc()
     elif case == "uniform_sizes":
         del a.uns["cluster_sizes"]
+    if case in paga_color_cases():
+        a.obs["score"] = np.arange(a.n_obs, dtype=float) - 5
+        if case == "obs_missing":
+            a.obs.loc["cell-1", "score"] = np.nan
+        if case == "gene_missing":
+            a.X[1, 0] = np.nan
+        if case.startswith("constant"):
+            a.obs["score"] = 7.0
+        a.raw = a.copy()
+        a.X = a.X + 100
+        if case == "degree_csc":
+            a.uns["paga"]["connectivities"][0, 1] = 0.7
+            a.uns["paga"]["connectivities"] = a.uns["paga"]["connectivities"].tocsc()
     return a
+
+
+def paga_color_cases():
+    """Cover annotation/gene means, thresholded degrees and Scanpy's guide choices."""
+    return {
+        "obs_score": {"color": "score"},
+        "obs_missing": {"color": "score"},
+        "gene_raw": {"color": "g1"},
+        "gene_x": {"color": "g1", "use_raw": False},
+        "gene_missing": {"color": "g1"},
+        "degree_solid": {"color": "degree_solid", "threshold": 0.1},
+        "degree_dashed": {
+            "color": "degree_dashed",
+            "dashed_edges": "weak",
+            "threshold": 0.25,
+        },
+        "degree_csc": {"color": "degree_solid", "threshold": 0},
+        "no_guide": {"color": "score", "colorbar": False},
+        "colorbar_true": {"color": "score", "colorbar": True},
+        "constant": {"color": "score"},
+        "constant_no_guide": {"color": "score", "colorbar": False},
+        "numeric_alias": {"color": "red", "colors": "score"},
+    }
 
 
 def paga_cases():
@@ -92,4 +134,8 @@ def paga_cases():
         "asymmetric_csc": {"pos": POSITIONS, "threshold": 0},
         "uniform_sizes": {"pos": POSITIONS, "color": "purple"},
         "zero_sizes": {"pos": POSITIONS, "node_size_scale": 0},
+        **{
+            key: {"pos": POSITIONS, **options}
+            for key, options in paga_color_cases().items()
+        },
     }

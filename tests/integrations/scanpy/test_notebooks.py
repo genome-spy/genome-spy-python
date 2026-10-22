@@ -319,6 +319,9 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["dpt_groups_chart"],
         namespace["dpt_expression"],
         namespace["paga_graph"],
+        namespace["paga_numeric"],
+        namespace["paga_gene"],
+        namespace["paga_degree"],
     ]
     assert paga_calls == [{"groups": "bulk_labels"}]
     pbmc = namespace["pbmc"]
@@ -337,6 +340,30 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         assert (
             row["_weight"]
             == pbmc.uns["paga"]["connectivities"][row["_source"], row["_target"]]
+        )
+    expected_colors = [
+        pbmc.obs.groupby("bulk_labels", observed=True)["S_score"].mean().to_numpy(),
+        [
+            float(pbmc.raw[pbmc.obs["bulk_labels"] == group, "GNLY"].X.mean())
+            for group in pbmc.obs["bulk_labels"].cat.categories
+        ],
+    ]
+    import networkx as nx
+
+    adjacency = pbmc.uns["paga"]["connectivities"].copy()
+    adjacency.data[adjacency.data < 0.03] = 0
+    adjacency.eliminate_zeros()
+    degree = np.array([d for _, d in nx.Graph(adjacency).degree(weight="weight")])
+    expected_colors.append((degree - degree.min()) / np.ptp(degree))
+    for name, values in zip(
+        ("paga_numeric", "paga_gene", "paga_degree"), expected_colors, strict=True
+    ):
+        spec = namespace[name].to_dict()
+        rows = next(rows for rows in spec["datasets"].values() if "_cells" in rows[0])
+        # Float32 group means can differ slightly with summation order.
+        np.testing.assert_allclose([row["_color"] for row in rows], values, rtol=5e-7)
+        np.testing.assert_array_equal(
+            [[row["_x"], row["_y"]] for row in rows], pbmc.uns["paga"]["pos"]
         )
     assert dpt_calls == [
         ("neighbors", {"n_neighbors": 10, "use_rep": "X", "random_state": 0}),

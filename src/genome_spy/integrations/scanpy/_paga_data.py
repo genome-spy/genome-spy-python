@@ -123,8 +123,11 @@ def paga_nodes(
     labels: Any,
     node_size_scale: float,
     node_size_power: float,
-) -> pd.DataFrame:
-    """Return node labels, CSS colors and Scanpy-sized areas using stored group sizes."""
+    solid: Any,
+    dashed: Any,
+    use_raw: bool,
+) -> tuple[pd.DataFrame, bool]:
+    """Return node values, labels and areas, plus Scanpy's automatic colorbar choice."""
     categories = adata.obs[key].cat.categories
     count = len(categories)
     if labels is None:
@@ -137,21 +140,7 @@ def paga_nodes(
         raise ValueError(f"{CONTEXT}: labels requires one string label per group.")
     if any(not isinstance(label, str) for label in labels):
         raise TypeError(f"{CONTEXT}: labels must be strings.")
-    if color is None or isinstance(color, str) and color == key:
-        cached = adata.uns.get(f"{key}_colors")
-        if cached is not None and len(cached) != count:
-            raise ValueError(
-                f"{CONTEXT}: cached group palette must match the group count."
-            )
-        colors, _ = _palette(adata, key, categories, None, context=CONTEXT)
-    elif isinstance(color, str):
-        colors = (native_color(color, "color", context=CONTEXT),) * count
-    elif isinstance(color, (Sequence, np.ndarray)) and len(color) == count:
-        colors = tuple(native_color(c, "color", context=CONTEXT) for c in color)
-    else:
-        raise NotImplementedError(
-            f"{CONTEXT}: color supports the PAGA grouping, one CSS color or one CSS color per node; numeric annotations, other categorical annotations and pies are unsupported."
-        )
+    colors, colorbar = _node_colors(adata, key, color, solid, dashed, use_raw)
     sizes = numeric_values(
         pd.DataFrame(adata.uns.get(f"{key}_sizes", np.ones(count))), context=CONTEXT
     ).ravel()
@@ -172,7 +161,7 @@ def paga_nodes(
         )
     if not np.isfinite(areas).all():
         raise ValueError(f"{CONTEXT}: node sizing must produce finite areas.")
-    return pd.DataFrame(
+    nodes = pd.DataFrame(
         {
             "_id": np.arange(count),
             "_group": list(map(str, categories)),
@@ -187,6 +176,85 @@ def paga_nodes(
             .to_numpy(),
         }
     )
+    return nodes, colorbar
+
+
+def _node_colors(
+    adata: Any, key: str, color: Any, solid: Any, dashed: Any, use_raw: bool
+) -> tuple[Any, bool]:
+    """Return per-group colors and the default guide flag from a color key or CSS colors."""
+    from genome_spy.integrations.scanpy._grouped_data import (
+        grouped_expression,
+        group_means,
+    )
+
+    categories = adata.obs[key].cat.categories
+    count = len(categories)
+    if color is None or isinstance(color, str) and color == key:
+        cached = adata.uns.get(f"{key}_colors")
+        if cached is not None and len(cached) != count:
+            raise ValueError(
+                f"{CONTEXT}: cached group palette must match the group count."
+            )
+        colors, _ = _palette(adata, key, categories, None, context=CONTEXT)
+        return colors, False
+    if not isinstance(color, str):
+        if isinstance(color, (Sequence, np.ndarray)) and len(color) == count:
+            return tuple(
+                native_color(c, "color", context=CONTEXT) for c in color
+            ), False
+        raise NotImplementedError(
+            f"{CONTEXT}: mixtures/pies and multiple color panels are unsupported."
+        )
+    # CSS colors take precedence over annotation and gene names in Scanpy.
+    try:
+        css = native_color(color, "color", context=CONTEXT)
+    except NotImplementedError:
+        pass
+    else:
+        genes = adata.var_names if adata.raw is None else adata.raw.var_names
+        if color in adata.obs or color in genes:
+            raise NotImplementedError(
+                f"{CONTEXT}: CSS colors that also name annotations or genes are unsupported."
+            )
+        return (css,) * count, False
+    if color.startswith("degree"):
+        if color not in {"degree_solid", "degree_dashed"}:
+            raise ValueError(f"{CONTEXT}: use 'degree_solid' or 'degree_dashed'.")
+        graph = solid if color == "degree_solid" else dashed
+        if graph is None:
+            raise ValueError(f"{CONTEXT}: degree_dashed requires dashed_edges.")
+        degrees = np.array([d for _, d in graph.degree(weight="weight")], dtype=float)
+        if np.ptp(degrees) == 0:
+            raise ValueError(
+                f"{CONTEXT}: equal weighted degrees have undefined 0–1 normalization."
+            )
+        return (degrees - degrees.min()) / np.ptp(degrees), False
+
+    genes = adata.var_names if adata.raw is None else adata.raw.var_names
+    gene = color in genes
+    if not gene and color not in adata.obs:
+        raise ValueError(
+            f"{CONTEXT}: color {color!r} is not a gene, observation key or CSS color."
+        )
+    if not gene and isinstance(adata.obs[color].dtype, pd.CategoricalDtype):
+        raise NotImplementedError(
+            f"{CONTEXT}: other categorical annotations and mixtures/pies are unsupported."
+        )
+    table = grouped_expression(
+        adata, [color], key, use_raw=gene and use_raw and adata.raw is not None
+    ).values
+    means = group_means(table).reindex(categories)[color]
+    if gene:
+        # Gene means propagate missing values; annotation means skip them in Scanpy.
+        missing = (
+            table.isna()
+            .groupby(level=0, observed=True)
+            .any()
+            .reindex(categories, fill_value=False)[color]
+        )
+        means = means.mask(missing)
+    return numeric_values(means.to_frame(), context=CONTEXT).ravel(), True
 
 
 def paga_edges(

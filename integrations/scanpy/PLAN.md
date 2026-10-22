@@ -824,7 +824,22 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   resources. Keep Scanpy's PAGA extra optional and base imports lightweight.
   Sparse regressions cover asymmetric CSC weights/order, computed LIL layouts,
   custom solid-edge keys and preservation of stored matrix values and formats.
-  This does not close M11.c: numeric/gene/degree colors, categorical mixtures/pies,
+  The numeric-color increment reuses grouped_expression/sc.get.obs_df and
+  group_means for observation and gene means. Gene colors use raw when present
+  by default, otherwise X; use_raw=False uses X. Only one gene column is loaded.
+  Observation means skip missing values; gene means propagate them, as in Scanpy.
+  Weighted degrees come from the same thresholded solid/dashed graphs and are
+  normalized to 0–1. Reuse shared color bounds and native scales/guides; test
+  constant and missing means, sparse views, raw/X fallback and graph edge order.
+  Preserve Scanpy 1.11.5's automatic annotation/gene colorbar and suppression
+  for explicit True/False; degree colors have no automatic guide. All-missing
+  data and equal-degree normalization fail clearly instead of inventing values.
+  CSS/annotation-name collisions, numeric vectors and other categorical colors
+  remain explicit limits. Packaged-data examples reuse supplied positions.
+  The next bounded increment audits single_component=True against public Scanpy:
+  retain the largest component with its tie/order, position and size semantics,
+  using the existing graph/data/rendering paths and no hidden analysis.
+  This does not close M11.c: categorical mixtures/pies,
   multiple color panels, single-component filtering, directed transitions, file
   positions and GEXF export remain explicit unsupported cases. M14 owns font/global
   style parity and the native fixed dash pattern versus Matplotlib's per-width

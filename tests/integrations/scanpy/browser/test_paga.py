@@ -19,7 +19,24 @@ from tests.integrations.scanpy.helpers import leaf_marks
 
 @pytest.mark.parametrize(
     "case",
-    ["default", "supplied", "dashed", "sizing", "aliases", "empty", "asymmetric_csc"],
+    [
+        "default",
+        "supplied",
+        "dashed",
+        "sizing",
+        "aliases",
+        "empty",
+        "asymmetric_csc",
+        "obs_score",
+        "gene_raw",
+        "gene_x",
+        "degree_solid",
+        "degree_dashed",
+        "constant",
+        "constant_no_guide",
+        "gene_missing",
+        "no_guide",
+    ],
 )
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, case):
@@ -41,6 +58,9 @@ def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, c
             point.get_sizes(),
             point.get_facecolors(),
         )
+        visible = ~np.ma.getmaskarray(xy).any(axis=1)
+        xy, areas, colors = np.asarray(xy)[visible], areas[visible], colors[visible]
+        colorbar = len(fig.axes) > 1
         expected_lines = [c for c in ax.collections if isinstance(c, LineCollection)]
         domains = [ax.get_xlim(), ax.get_ylim()]
         labels = [t.get_text() for t in ax.texts]
@@ -68,15 +88,22 @@ def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, c
     )
     texts = [e.text for e in root.iter() if e.tag.endswith("text")]
     assert set(labels) <= set(texts)
+    assert any(e.tag.endswith("linearGradient") for e in root.iter()) == colorbar
     if "title" in options:
         assert options["title"] in texts
     centers = point_coordinates(page)[0]
+    # SVG uses rounded viewport bounds when color guides need fractional space.
+    clip = next(e for e in root.iter() if e.tag.endswith("clipPath"))[0]
+    viewport = {key: float(clip.get(key)) for key in ("x", "y", "width", "height")}
+    for key, value in viewport.items():
+        assert value == pytest.approx(bounds[key], abs=0.5)
     expected_centers = np.column_stack(
         [
-            bounds["x"]
-            + (xy[:, 0] - domains[0][0]) / np.ptp(domains[0]) * bounds["width"],
-            bounds["y"]
-            + (1 - (xy[:, 1] - domains[1][0]) / np.ptp(domains[1])) * bounds["height"],
+            viewport["x"]
+            + (xy[:, 0] - domains[0][0]) / np.ptp(domains[0]) * viewport["width"],
+            viewport["y"]
+            + (1 - (xy[:, 1] - domains[1][0]) / np.ptp(domains[1]))
+            * viewport["height"],
         ]
     )
     np.testing.assert_allclose(centers, expected_centers, atol=0.06)
@@ -140,9 +167,16 @@ def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, c
     page.screenshot(path=str(tmp_path / "complete.png"), full_page=True)
 
 
-def test_group_and_edge_hover_navigation_and_offline_html(page, tmp_path):
+@pytest.mark.parametrize("color", [None, "score", "g1", "degree_solid"])
+def test_group_and_edge_hover_navigation_and_offline_html(page, tmp_path, color):
     chart = gsc.pl.paga(
-        make_paga(), pos=POSITIONS, zoom=True, width=500, height=350, show=False
+        make_paga("obs_score") if color else make_paga(),
+        color=color,
+        pos=POSITIONS,
+        zoom=True,
+        width=500,
+        height=350,
+        show=False,
     )
     bounds = render(page, chart)
     centers = point_coordinates(page)[0]
@@ -158,9 +192,17 @@ def test_group_and_edge_hover_navigation_and_offline_html(page, tmp_path):
     )
     hover_at(page, *projected[0])
     page.locator("table.attributes").wait_for(state="visible")
-    assert [
+    values = [
         t.strip() for t in page.locator("table.attributes td").all_text_contents()
-    ] == ["A", "A", "9"]
+    ]
+    assert values[:3] == ["A", "A", "9"]
+    if color:
+        assert (
+            float(values[3].replace("−", "-"))
+            == {"score": -1, "g1": 12, "degree_solid": 0}[color]
+        )
+    else:
+        assert len(values) == 3
     # B--C is a visible, isolated stored edge whose midpoint is outside either node.
     hover_at(page, *(projected[1] + projected[2]) / 2)
     page.locator("table.attributes").get_by_text("Connectivity", exact=True).wait_for(
