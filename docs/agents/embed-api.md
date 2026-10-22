@@ -11,6 +11,10 @@ Run the Python blocks below as consecutive notebook cells. The four synthetic
 records need no data files or dataframe dependencies. Python filters the supplied
 records; GenomeSpy renders the results. Brush the upper plot and release: the
 lower plot receives the selected rows through a declared dataset.
+Interval brushes send ranges, not records. Retain the plotted table in Python
+and match the actual plotted fields, including any coordinate transformations.
+For point marks, use half-open bounds (`lower <= value < upper`) on every
+brushed channel, matching GenomeSpy's native selection predicate.
 
 ```python
 import genome_spy as gs
@@ -81,7 +85,7 @@ async def connect(previous_task, previous_widget):
             snapshot = await events.get()
             interval = snapshot["intervals"].get("x")
             selected_rows = (
-                [row for row in rows if min(interval) <= row["x"] <= max(interval)]
+                [row for row in rows if min(interval) <= row["x"] < max(interval)]
                 if snapshot["active"] and interval is not None
                 else []
             )
@@ -159,6 +163,33 @@ named owner. `widget.dataset_names` lists those names. Widget updates retain a
 synchronized payload; runtime calls operate directly on the live embed.
 An awaited runtime update confirms the setter returned, not that a new frame
 has rendered. Check the visible result separately.
+
+For separate widgets, attach to each displayed widget and call the target
+embed's dataset API. They have independent dataflows; a declarative selection
+filter in one embed does not update another embed.
+
+## Call from widget callbacks
+
+Continues after **Ready**. Widget callbacks can run on a different event loop
+from notebook cells. Schedule API work on the connection task's loop; using
+`asyncio.create_task()` inside the callback can select the wrong loop.
+
+```python
+def change_from_button(_):
+    global operation_future
+    operation_future = asyncio.run_coroutine_threadsafe(
+        change_chart(), connection_task.get_loop()
+    )
+
+
+button = widgets.Button(description="Change chart")
+button.on_click(change_from_button)
+display(button)
+```
+
+Keep the callback nonblocking. Inspect `operation_future.result()` after it
+finishes to surface errors. Subscription callbacks already run on the attaching
+loop; the queue in the roundtrip example keeps their asynchronous work ordered.
 
 ## Stop or reconnect
 
