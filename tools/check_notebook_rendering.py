@@ -12,6 +12,7 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import secrets
 import subprocess
 import sys
@@ -35,6 +36,9 @@ def _run_kernel(page, code: str) -> None:
 
 
 def _check_workflow(page, canvas, workflow: str) -> None:
+    if workflow == "agent-embed":
+        _check_agent_embed(page, canvas)
+        return
     if workflow in ("points", "sequence"):
         ready = (
             "0 genes selected."
@@ -125,16 +129,92 @@ assert exported.ensgene.tolist() == selected_genes.ensgene.tolist()
         )
 
 
+def _check_agent_embed(page, canvas) -> None:
+    page.get_by_text("Ready: 0 selected", exact=True).wait_for()
+    canvas.scroll_into_view_if_needed()
+    before = Image.open(io.BytesIO(canvas.screenshot())).convert("RGB")
+    bounds = canvas.bounding_box()
+    assert bounds is not None
+    page.mouse.move(bounds["x"] + bounds["width"] * 0.35, bounds["y"] + 80)
+    page.mouse.down()
+    page.mouse.move(bounds["x"] + bounds["width"] * 0.60, bounds["y"] + 100, steps=12)
+    # Commit delivery must leave Python untouched until release.
+    _run_kernel(page, "assert selected_rows == []")
+    page.mouse.up()
+    page.get_by_text("Ready: 2 selected", exact=True).wait_for()
+    _run_kernel(page, "assert [row['id'] for row in selected_rows] == ['b', 'c']")
+    after = Image.open(io.BytesIO(canvas.screenshot())).convert("RGB")
+    lower = (0, before.height // 2, before.width, before.height)
+    assert before.crop(lower).tobytes() != after.crop(lower).tobytes(), (
+        "The Python result did not change the lower plot"
+    )
+    _run_kernel(page, "operation_task = asyncio.create_task(change_chart())")
+    page.get_by_text("Ready: 0 selected", exact=True).wait_for()
+    _run_kernel(
+        page,
+        "assert operation_task.done()\nassert operation_task.result() == 90\n"
+        "assert selected_rows == []",
+    )
+    cleared = Image.open(io.BytesIO(canvas.screenshot())).convert("RGB")
+    assert before.crop(lower).tobytes() == cleared.crop(lower).tobytes(), (
+        "Clearing did not empty the lower plot"
+    )
+    _run_kernel(
+        page,
+        """async def set_range(interval):
+    async with asyncio.timeout(30):
+        parameter = await api.params.get('brush')
+        await parameter.set_value({'type': 'interval', 'intervals': {'x': interval}})
+        return await selection.get_value()
+empty_task = asyncio.create_task(set_range([4.5, 4.8]))
+""",
+    )
+    page.wait_for_timeout(200)
+    _run_kernel(
+        page,
+        "assert empty_task.done()\nassert empty_task.result()['intervals']['x'] == [4.5, 4.8]\n"
+        "assert empty_task.result()['active']\nassert selected_rows == []\n"
+        "select_task = asyncio.create_task(set_range([1.5, 3.5]))\n"
+        "old_connection_task = connection_task\nold_widget = widget\nold_api = api",
+    )
+    page.get_by_text("Ready: 2 selected", exact=True).wait_for()
+    _run_kernel(
+        page,
+        "assert select_task.done()\nselect_task.result()\n"
+        "assert [row['id'] for row in selected_rows] == ['b', 'c']",
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("notebook", type=Path)
     parser.add_argument("--screenshot", type=Path, required=True)
     parser.add_argument("--check-embed-interactions", action="store_true")
     parser.add_argument(
-        "--workflow", choices=["intervals", "genes", "points", "sequence"]
+        "--workflow",
+        choices=["intervals", "genes", "points", "sequence", "agent-embed"],
     )
     args = parser.parse_args()
-    notebook = json.loads(args.notebook.read_text())
+    if args.notebook.suffix == ".md":
+        import nbformat
+
+        blocks = re.findall(
+            r"```python\n(.*?)```", args.notebook.read_text(), re.DOTALL
+        )
+        if not blocks:
+            raise ValueError("The guide contains no Python examples")
+        notebook = nbformat.v4.new_notebook(
+            cells=[nbformat.v4.new_code_cell(block) for block in blocks],
+            metadata={
+                "kernelspec": {
+                    "name": "python3",
+                    "display_name": "Python 3",
+                    "language": "python",
+                }
+            },
+        )
+    else:
+        notebook = json.loads(args.notebook.read_text())
     # Test fresh execution, not saved outputs or widget state from another kernel.
     notebook["metadata"].pop("widgets", None)
     for cell in notebook["cells"]:
@@ -369,7 +449,29 @@ def main() -> None:
                             page.evaluate(
                                 "window.jupyterapp.commands.execute('notebook:run-all-cells')"
                             )
-                            if args.workflow == "intervals":
+                            if args.workflow == "agent-embed":
+                                page.get_by_text(
+                                    "Ready: 0 selected", exact=True
+                                ).wait_for()
+                                _run_kernel(
+                                    page,
+                                    "assert selected_rows == []\nassert old_connection_task.done()\n"
+                                    "assert widget is not old_widget and api is not old_api\n"
+                                    "assert not connection_task.done()",
+                                )
+                                canvas = page.locator(".jp-OutputArea canvas").last
+                                _check_agent_embed(page, canvas)
+                                _run_kernel(
+                                    page,
+                                    "cleanup_task = asyncio.create_task(stop_example())",
+                                )
+                                page.wait_for_timeout(200)
+                                _run_kernel(
+                                    page,
+                                    "assert cleanup_task.done()\ncleanup_task.result()\n"
+                                    "assert connection_task.cancelled()",
+                                )
+                            elif args.workflow == "intervals":
                                 page.get_by_text(
                                     "Ready — brush the chart, enter a name, then save.",
                                     exact=True,

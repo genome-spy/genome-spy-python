@@ -20,12 +20,18 @@ def test_all_indexed_pages_and_links_exist_with_correct_subpath(tmp_path: Path) 
     outputs = publish_agent_docs(ROOT, tmp_path, BASE)
     index = (tmp_path / "llms.txt").read_text()
     urls = re.findall(r"\]\(([^)]+)\)", index)
+    manifest = json.loads((ROOT / "docs/agents/manifest.json").read_text())
+    external_urls = {page["url"] for page in manifest if "url" in page}
+    local_urls = set(urls) - external_urls
     guides = list((ROOT / "docs/user-guide").rglob("*.md"))
     examples = list((ROOT / "docs/examples").glob("*.py"))
-    assert len(urls) == 14 + len(guides) + len(examples)
-    assert len(outputs) == len(urls) + 1
+    assert external_urls <= set(urls)
+    assert len(local_urls) == len(manifest) - len(external_urls) + 1 + len(
+        guides
+    ) + len(examples)
+    assert len(outputs) == len(local_urls) + 1
     assert "> Build:" not in index
-    for url in urls:
+    for url in local_urls:
         assert url.startswith(BASE)
         page = tmp_path / url.removeprefix(BASE)
         text = page.read_text()
@@ -42,9 +48,31 @@ def test_all_indexed_pages_and_links_exist_with_correct_subpath(tmp_path: Path) 
     assert f"Chart.save{inspect.signature(gs.Chart.save)}" in api
     assert "Chart.mark_point" in (tmp_path / "agents/api-chart.md").read_text()
     assert "focused subset" in api
+    from genome_spy.embed import ParamApi
+
+    embed_api = (tmp_path / "agents/api-embed.md").read_text()
+    assert (
+        f"JupyterChart.get_embed_api{inspect.signature(gs.JupyterChart.get_embed_api)}"
+        in embed_api
+    )
+    assert f"ParamApi.set_value{inspect.signature(ParamApi.set_value)}" in embed_api
     skill = (tmp_path / "agents/skill.md").read_text()
     assert BASE + "agents/grouped-charts.md" in skill
     assert "references/grouped-charts.md)" not in skill
+    assert BASE + "agents/embed-api.md" in skill
+
+
+@pytest.mark.parametrize(
+    "url", ["runtime-state/", "http://example.com/docs", "file:///tmp/docs"]
+)
+def test_external_index_entries_require_absolute_https(
+    tmp_path: Path, url: str
+) -> None:
+    (tmp_path / "docs/agents").mkdir(parents=True)
+    (tmp_path / "docs/agents/manifest.json").write_text(json.dumps([{"url": url}]))
+    with pytest.raises(ValueError, match="absolute HTTPS documentation URL"):
+        publish_agent_docs(tmp_path, tmp_path / "output", BASE)
+    assert not (tmp_path / "output").exists()
 
 
 def test_canonical_reference_edits_flow_into_published_pages(tmp_path: Path) -> None:

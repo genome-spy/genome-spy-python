@@ -11,6 +11,7 @@ from urllib.parse import urljoin, urlsplit
 from tools.agent_markdown import _documentation_pages, _plain_markdown
 
 import genome_spy as gs
+from genome_spy import embed
 
 __all__ = ["publish_agent_docs"]
 
@@ -47,6 +48,28 @@ def _api(section: str | None = None) -> str:
             f"Chart.{name}": getattr(gs.Chart, name)
             for name in ("to_dict", "to_json", "save", "display", "widget")
         },
+        "Live embed": {
+            **{
+                f"JupyterChart.{name}": getattr(gs.JupyterChart, name)
+                for name in ("get_embed_api", "set_dataset", "set_data")
+            },
+            **{
+                f"{cls.__name__}.{name}": getattr(cls, name)
+                for cls, names in (
+                    (embed.ParamNamespace, ("get", "get_selection")),
+                    (embed.ParamApi, ("get_value", "set_value", "subscribe")),
+                    (embed.PointSelectionApi, ("get_value", "subscribe", "clear")),
+                    (
+                        embed.IntervalSelectionApi,
+                        ("get_value", "subscribe", "clear", "contains"),
+                    ),
+                    (embed.DatasetApi, ("set", "reset")),
+                    (embed.ViewApi, ("get",)),
+                    (embed.EmbedResult, ("finalize",)),
+                )
+                for name in names
+            },
+        },
     }
     if section is None:
         return """# Python API reference
@@ -57,9 +80,11 @@ This is a focused subset of the library. Load the relevant page:
 - [Chart authoring](api-chart.md): charts, marks, properties, and composition scales.
 - [Encodings and guides](api-encodings.md): fields, channels, scales, axes, and legends.
 - [Validation and output](api-output.md): serialization, files, display, and widgets.
+- [Live Embed API](api-embed.md): notebook connection and live runtime operations.
 
 For semantics, read [encodings](encodings.md), [scales](scales-axes-legends.md),
-and [rendering](rendering.md). For other marks, transforms, genomic types, or full
+and [rendering](rendering.md). For callbacks and data updates, read the
+[Embed API guide](embed-api.md). For other marks, transforms, genomic types, or full
 option descriptions, use the [full API reference](../api.html) and installed signatures.
 """
     groups = {section: groups[section]}
@@ -129,11 +154,19 @@ def publish_agent_docs(root: Path, output: Path, base_url: str) -> list[Path]:
         raise ValueError(f"Expected an absolute documentation URL: {base_url}")
     pages = json.loads((root / "docs/agents/manifest.json").read_text(encoding="utf-8"))
     for page in pages:
-        page["destination"] = "agents/" + page["path"]
+        if "url" in page:
+            url = urlsplit(page["url"])
+            if url.scheme != "https" or not url.netloc:
+                raise ValueError(
+                    f"Expected an absolute HTTPS documentation URL: {page['url']}"
+                )
+        else:
+            page["destination"] = "agents/" + page["path"]
     pages.extend(_documentation_pages(root))
+    local_pages = [page for page in pages if "url" not in page]
     routes: dict[Path, str] = {}
     names: set[str] = set()
-    for page in pages:
+    for page in local_pages:
         path = Path(page["destination"])
         if (
             path.is_absolute()
@@ -150,7 +183,7 @@ def publish_agent_docs(root: Path, output: Path, base_url: str) -> list[Path]:
         for alias in page.get("aliases", []):
             routes[(root / alias).resolve()] = path.as_posix()
     rendered: dict[str, str] = {}
-    for page in pages:
+    for page in local_pages:
         source = (
             root / page.get("source", "docs/agents/" + page.get("path", ""))
         ).resolve()
@@ -211,10 +244,11 @@ def publish_agent_docs(root: Path, output: Path, base_url: str) -> list[Path]:
     index = [
         "# genome-spy-python",
         "",
-        "> Agent documentation for authoring, validating, and delivering GenomeSpy charts.",
+        "> Agent documentation for authoring, connecting, validating, and delivering GenomeSpy charts.",
         "",
-        "Read the relevant pages only. These are plain Markdown, separate from the human",
-        "HTML documentation. Start with a relevant gallery example and adapt its working",
+        "Read the relevant pages only. Local guides are plain Markdown; upstream JavaScript",
+        "references are labeled HTML and may expose features not wrapped in Python.",
+        "Start with a relevant gallery example and adapt its working",
         "data, encodings, composition, and rendering path before adding workarounds.",
         "Check installed signatures if an option is unavailable.",
         "",
@@ -223,9 +257,12 @@ def publish_agent_docs(root: Path, output: Path, base_url: str) -> list[Path]:
         index.extend([f"## {section}", ""])
         for page in pages:
             if page["section"] == section:
-                index.append(
-                    f"- [{page['title']}]({urljoin(base_url, page['destination'])}): {page['description']}"
+                href = (
+                    page["url"]
+                    if "url" in page
+                    else urljoin(base_url, page["destination"])
                 )
+                index.append(f"- [{page['title']}]({href}): {page['description']}")
         index.append("")
     written = []
     for name, text in {
