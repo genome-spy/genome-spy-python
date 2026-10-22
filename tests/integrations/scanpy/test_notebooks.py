@@ -254,6 +254,15 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         TopLevelSpec, "display", lambda chart, **kwargs: charts.append(chart)
     )
     namespace = {}
+    dpt_calls = []
+    for name, owner in [("neighbors", sc.pp), ("diffmap", sc.tl), ("dpt", sc.tl)]:
+        original = getattr(owner, name)
+
+        def analysis(*args, _name=name, _original=original, **kwargs):
+            dpt_calls.append((_name, kwargs))
+            return _original(*args, **kwargs)
+
+        monkeypatch.setattr(owner, name, analysis)
     ranking, calls = sc.tl.rank_genes_groups, []
 
     def prepare_ranking(*args, **kwargs):
@@ -300,7 +309,32 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["time_series_subplots"],
         namespace["simulation_points"],
         namespace["simulation_heatmap"],
+        namespace["dpt_groups_chart"],
     ]
+    assert dpt_calls == [
+        ("neighbors", {"n_neighbors": 10, "use_rep": "X", "random_state": 0}),
+        ("diffmap", {"random_state": 0}),
+        ("dpt", {"n_dcs": 10, "n_branchings": 1}),
+    ]
+    dpt_spec = namespace["dpt_groups_chart"].to_dict()
+    simulation = namespace["simulation"]
+    for i, field in enumerate(["dpt_groups", "dpt_pseudotime"]):
+        point = next(
+            m
+            for m in leaf_marks(dpt_spec["vconcat"][i])
+            if m["mark"]["type"] == "point"
+        )
+        rows = dpt_spec["datasets"][point["data"]["name"]]
+        positions = [r["_sample"] for r in rows]
+        expected = simulation.obs[field].cat.codes if i == 0 else simulation.obs[field]
+        np.testing.assert_allclose(
+            [r["_value"] for r in rows], expected.to_numpy()[positions]
+        )
+        np.testing.assert_array_equal(
+            [r["_time"] for r in rows],
+            simulation.obs["dpt_order"].to_numpy()[positions],
+        )
+        assert len(rows) == 640
     profiles = namespace["profiles"]
     simulation = namespace["simulation"]
     assert simulation.shape == (640, 11)

@@ -19,6 +19,33 @@ from genome_spy.integrations.scanpy._style import color_bounds, native_color
 CONTEXT = "gsc.pl.timeseries"
 
 
+def prepare_dpt_groups(adata: Any) -> tuple[pd.Series, np.ndarray, pd.Series, Any]:
+    """Read stored DPT groups, order, pseudotime and boundaries without expression access."""
+    from anndata import AnnData
+
+    context = "gsc.pl.dpt_groups_pseudotime"
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: adata must be AnnData.")
+    required = {"dpt_groups", "dpt_order", "dpt_pseudotime"}
+    missing = required - set(adata.obs)
+    if missing or "dpt_changepoints" not in adata.uns:
+        raise ValueError(
+            f"{context}: stored obs fields {sorted(required)} and uns['dpt_changepoints'] "
+            "are required; run sc.tl.dpt with n_branchings > 0 explicitly."
+        )
+    groups = adata.obs["dpt_groups"]
+    if not isinstance(groups.dtype, pd.CategoricalDtype):
+        raise TypeError(f"{context}: dpt_groups must be categorical.")
+    if groups.isna().any():
+        raise ValueError(f"{context}: missing dpt_groups are unsupported.")
+    order = numeric_values(adata.obs[["dpt_order"]], context=context).ravel()
+    if not np.array_equal(np.sort(order), np.arange(adata.n_obs)) or not adata.n_obs:
+        raise ValueError(f"{context}: dpt_order must be a permutation of 0..n_obs-1.")
+    # Scanpy's scatter masks disconnected infinite pseudotimes, without changing the stored result.
+    pseudotime = adata.obs["dpt_pseudotime"].replace([np.inf, -np.inf], np.nan)
+    return groups, order, pseudotime, adata.uns["dpt_changepoints"]
+
+
 def prepare_sim(
     adata: Any, tmax_realization: int | None, shuffle: bool
 ) -> tuple[Any, list[float], dict[float, str]]:

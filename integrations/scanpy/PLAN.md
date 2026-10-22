@@ -773,6 +773,18 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
 - M11.b: `dpt_groups_pseudotime` and `dpt_timeseries` consume stored DPT groups,
   order, pseudotime and highlights, with heatmap/series modes and exact alignment.
   Missing DPT analysis errors; no trajectory inference in plotting.
+  The groups increment composes two existing point panels: categorical codes
+  against stored order (sorted observed-group palette; explicit code ticks below
+  five categories), then pseudotime against that order with ticks at 0/1.
+  Keep unused category codes, mask nonfinite pseudotime only in its panel, and
+  preserve every supplied rank/boundary. Read observation/uns metadata only,
+  including from backed data, and reject a non-permutation order. Native hover,
+  independent navigation and 496 × 168-pixel per-panel defaults reuse the existing
+  helpers. Verify masks, category/paint order, palettes, markers, defaults, read-only
+  behavior, complete registered panels, observed navigation, workflow and resources.
+  The pinned parent entry fails on pandas Series indexing; use its public
+  time-series component calls with NumPy codes for baseline verification, and
+  retain the direct parent-entry comparison as an open upstream gate.
 - M11.c: `paga` consumes stored connectivities/transitions; Python graph layouts
   may be computed for plotting only when positions were not supplied. Preserve
   `pos`, threshold inclusion, roots, components, node-size powers, normalization,

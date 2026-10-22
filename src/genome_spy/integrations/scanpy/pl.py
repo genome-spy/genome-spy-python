@@ -27,6 +27,7 @@ __all__ = [
     "timeseries",
     "timeseries_subplot",
     "sim",
+    "dpt_groups_pseudotime",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2015,6 +2016,104 @@ def matrix(
         show_values=show_values,
         width=width,
         height=height,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def dpt_groups_pseudotime(
+    adata: AnnData,
+    *,
+    color_map: Any = None,
+    palette: Any = None,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    marker: str | Sequence[str] = ".",
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Compare stored DPT groups and pseudotime in two native time-series panels.
+
+    Description:
+        Read categorical dpt_groups, dpt_order, dpt_pseudotime and stored
+        dpt_changepoints without reading expression or running analysis. Preserve
+        category codes and supplied order coordinates. Palette assignment follows
+        Scanpy's sorted observed groups; the lower panel colors by pseudotime.
+        Missing or infinite pseudotimes are omitted from the lower panel only.
+
+    Args:
+        adata: AnnData with the stored DPT observation fields and boundaries.
+        color_map: Native lower-panel color scheme; None uses viridis.
+        palette: CSS color sequence for observed groups; None uses Scanpy's Vega 10.
+        show: Display according to Scanpy's autoshow when unset.
+        save: Only None/False; use native chart HTML/JSON saving.
+        marker: Supported shared point marker; differing per-group shapes reject.
+        hover: Show the existing time-series sample, order and value tooltips.
+        zoom: Enable independent native x/y zoom and pan in each panel.
+        width: Each panel's plot-area width in pixels, default 496.
+        height: Each panel's plot-area height in pixels, default 168.
+
+    Returns:
+        A native two-panel chart for show=False, otherwise displays and returns None.
+
+    Raises:
+        ImportError: If the optional Scanpy version is unavailable.
+        TypeError: If metadata types, flags or native styles are unsupported.
+        ValueError: If stored fields, order, values, palettes or dimensions are invalid.
+        NotImplementedError: If native rendering cannot preserve a plotting option.
+
+    Example:
+        >>> sc.tl.dpt(adata, n_branchings=1)
+        >>> chart = gsc.pl.dpt_groups_pseudotime(adata, zoom=True, show=False)
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.dpt_groups_pseudotime"
+    _check_point_options(
+        context=context,
+        width=width,
+        height=height,
+        frameon=None,
+        hover=hover,
+        zoom=zoom,
+    )
+    sc = _prepare_plot(show, save, context=context)
+    import genome_spy as gs
+    from genome_spy.integrations.scanpy._timeseries_data import prepare_dpt_groups
+    from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
+
+    groups, order, pseudotime, highlights = prepare_dpt_groups(adata)
+    options = dict(
+        time=order,
+        highlights_x=highlights,
+        marker=marker,
+        hover=hover,
+        zoom=zoom,
+        width=496 if width is None else width,
+        height=168 if height is None else height,
+        context=context,
+    )
+    group_chart = build_timeseries(
+        groups.cat.codes.to_numpy(),
+        color=groups.to_numpy(),
+        ylabel="dpt groups",
+        yticks=list(range(len(groups.cat.categories)))
+        if len(groups.cat.categories) < 5
+        else None,
+        palette=palette,
+        **options,
+    )
+    time_chart = build_timeseries(
+        pseudotime.to_frame(),
+        color=pseudotime,
+        xlabel="dpt order",
+        ylabel="pseudotime",
+        yticks=[0, 1],
+        color_map=color_map,
+        **options,
+    )
+    chart = gs.vconcat(group_chart, time_chart, spacing=10).resolve_scale(
+        default="independent"
     )
     return _finish_plot(chart, show, sc)
 

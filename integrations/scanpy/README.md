@@ -19,6 +19,8 @@ show stored gene-selection diagnostics without rerunning analysis.
 Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 `gsc.pl.sim(...)` displays stored simulation realizations using the time-series
 point and heatmap renderers; it never runs simulation.
+`gsc.pl.dpt_groups_pseudotime(...)` reuses the point renderer for stored DPT
+metadata, after explicit Scanpy preparation in the expression notebook.
 
 When resuming work in another chat, read [the current queue](STATUS.md#current-work-queue)
 and inspect recent commits and uncommitted changes first. STATUS owns the active

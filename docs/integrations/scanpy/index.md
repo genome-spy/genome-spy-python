@@ -970,6 +970,43 @@ colors and supported shared markers. Choose at most ten genes for the default
 point palette. Heatmaps also accept a single gene and repeated names. Explicit
 `show=False` returns a native chart; `save` has the shared HTML/JSON boundary.
 
+### Inspect stored DPT groups and pseudotime
+
+```python
+sc.pp.neighbors(simulation, n_neighbors=10, use_rep="X", random_state=0)
+sc.tl.diffmap(simulation, random_state=0)
+sc.tl.dpt(simulation, n_dcs=10, n_branchings=1)
+chart = gsc.pl.dpt_groups_pseudotime(
+    simulation, marker="o", zoom=True, width=480, height=180, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+Scanpy owns these explicit analysis calls; the packaged Krumsiek11 example
+already supplies `uns['iroot'] = 0`. Plotting only reads categorical
+`obs['dpt_groups']`, `obs['dpt_order']`, `obs['dpt_pseudotime']` and
+`uns['dpt_changepoints']`. It never accesses expression or reruns analysis, so
+read-only views and backed metadata work. Missing fields error with the required
+Scanpy preparation; `dpt_order` must be a permutation of `0..n_obs-1`.
+
+The two panels reuse the time-series renderer. The upper y values retain category
+codes, including unused category slots; palette colors follow sorted observed
+groups as in Scanpy. Integer group ticks are explicit below five categories.
+The lower values retain pseudotime, with explicit ticks at 0 and 1. Missing or
+infinite pseudotimes are blank in that panel only. Stored order coordinates and
+boundaries are preserved without sorting or rewriting observations.
+
+Native `color_map=None` uses viridis; palettes and markers have the existing
+time-series restrictions. Hover reports original row position, stored order and
+value. `zoom=True` enables independent x/y zoom and pan in each panel. Dimensions
+are per panel, defaulting to 496 × 168 pixels. No legend is added upstream or in
+the native plot. Native show/save rules apply.
+
+Reference limitation: Scanpy 1.11.5's parent plotting entry fails with installed
+pandas 2.3.3 because it indexes a Series as `X[:, None]`. Validation uses its two
+public `timeseries_subplot` calls with group codes supplied as a NumPy array.
+The direct parent-entry comparison remains open; no upstream code is patched.
+
 ## Clustermap compatibility
 
 ```python
@@ -1313,9 +1350,9 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
+| Trajectories and graphs | dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
@@ -1415,6 +1452,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.timeseries_subplot
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.sim
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.dpt_groups_pseudotime
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 

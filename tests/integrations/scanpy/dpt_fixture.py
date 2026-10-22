@@ -1,0 +1,88 @@
+"""Stored DPT metadata with unsorted ranks and category/code ordering differences."""
+
+import numpy as np
+import pandas as pd
+from anndata import AnnData
+
+
+def make_dpt(case="default"):
+    """Return eight observations with stored ranks, groups, times and boundaries."""
+    adata = AnnData(
+        np.zeros((8, 2)),
+        obs=pd.DataFrame(
+            {
+                "dpt_groups": pd.Categorical(
+                    ["beta", "alpha"] * 4, categories=["beta", "unused", "alpha"]
+                ),
+                "dpt_order": [4, 0, 6, 2, 7, 1, 5, 3],
+                "dpt_pseudotime": np.array(
+                    [0, 0.2, 0.4, 0.6, 0.8, 1, 0.5, 0.3], dtype=float
+                ),
+            },
+            index=[f"cell-{i}" for i in range(8)],
+        ),
+        uns={"dpt_changepoints": np.array([3, 6])},
+    )
+    if case == "many_groups":
+        adata.obs["dpt_groups"] = pd.Categorical(
+            ["a", "b", "c", "d", "e", "f", "a", "b"]
+        )
+    elif case == "missing":
+        adata.obs["dpt_pseudotime"] = [np.inf, 0.2, np.nan, 0.6, 0.8, 1, -np.inf, 0.3]
+    elif case == "integer_time":
+        adata.obs["dpt_pseudotime"] = np.arange(8) % 2
+    elif case == "single_group":
+        adata.obs["dpt_groups"] = pd.Categorical(["only"] * 8)
+        adata.uns["dpt_changepoints"] = np.array([], dtype=int)
+    return adata
+
+
+def dpt_cases():
+    """Cover categorical ticks, native colors, masked times and shared markers."""
+    return {
+        "default": {},
+        "many_groups": {"marker": "o"},
+        "missing": {"marker": "o"},
+        "integer_time": {},
+        "single_group": {},
+        "custom_colors": {
+            "palette": ["red", "blue"],
+            "color_map": "plasma",
+            "marker": "s",
+        },
+    }
+
+
+def dpt_reference(adata, *, color_map=None, palette=None, marker="."):
+    """Render Scanpy's two public component calls; its parent entry fails on pandas Series indexing."""
+    import matplotlib.pyplot as plt
+    import scanpy as sc
+
+    fig, (group_ax, time_ax) = plt.subplots(2, 1)
+    groups = adata.obs["dpt_groups"]
+    sc.pl.timeseries_subplot(
+        groups.cat.codes.to_numpy(),
+        time=adata.obs["dpt_order"].to_numpy(),
+        color=np.asarray(groups),
+        highlights_x=adata.uns["dpt_changepoints"],
+        ylabel="dpt groups",
+        yticks=np.arange(len(groups.cat.categories))
+        if len(groups.cat.categories) < 5
+        else None,
+        palette=palette,
+        ax=group_ax,
+        marker=marker,
+    )
+    sc.pl.timeseries_subplot(
+        adata.obs["dpt_pseudotime"].to_numpy(),
+        time=adata.obs["dpt_order"].to_numpy(),
+        color=adata.obs["dpt_pseudotime"].to_numpy(),
+        highlights_x=adata.uns["dpt_changepoints"],
+        xlabel="dpt order",
+        ylabel="pseudotime",
+        yticks=[0, 1],
+        color_map=color_map,
+        ax=time_ax,
+        marker=marker,
+    )
+    return fig
