@@ -66,7 +66,7 @@ def test_all_plots_share_native_display_and_autosave_rules(
     options = {"color": "group"} if family in EMBEDDINGS else {"groupby": "group"}
     if family in ("embedding", "scatter"):
         options["basis"] = "umap"
-    if family in ("matrix", "timeseries_as_heatmap"):
+    if family in ("matrix", "timeseries_as_heatmap", "timeseries"):
         a, options = [[0, 1], [2, 3]], {}
     if family == "clustermap":
         options = {"obs_keys": "group"}
@@ -139,6 +139,7 @@ def test_shared_display_validation_precedes_optional_imports(
     elif family not in EMBEDDINGS | {
         "matrix",
         "timeseries_as_heatmap",
+        "timeseries",
         "clustermap",
         "pca_loadings",
         "pca_variance_ratio",

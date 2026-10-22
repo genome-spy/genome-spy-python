@@ -26,6 +26,8 @@ maps, saved graph layouts, PCA and custom bases), cell/gene scatter plots, dotpl
 supplied numeric matrices, clustermaps, standalone dendrograms and correlation matrix development previews.
 Supplied time-series heatmaps reuse the numeric matrix renderer with transposed
 profiles, cropped limits, variable labels, highlights and shared grid interactions.
+Supplied time-series points preserve time coordinates, subset order and the three
+color modes, using shared numeric, marker, color, zoom and highlight helpers.
 Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
 Stored PCA loadings and variance ratios reuse the ranking preparation and native
@@ -72,15 +74,16 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and twenty expression/ranked/QC/profile code cells. Public availability does not mean
+code cells and twenty-one expression/ranked/QC/profile code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next work: M11.a, supplied time-series lines.** Review the pinned public
-`timeseries`/`timeseries_subplot` contracts and C04's released native rule/link
-paths before implementing their array, ordering, label and highlight semantics.
-The [supplied heatmap increment](#m11a-supplied-time-series-heatmaps) is closed;
+**Next: M11.a, the `timeseries_subplot` entry.** Reuse the native point builder
+with its pinned explicit signature and renderer boundary, and verify standalone
+native composition/delivery. The [supplied point preview](#m11a-supplied-time-series-points)
+and [supplied heatmap preview](#m11a-supplied-time-series-heatmaps) are closed.
+The pinned point helpers do not depend on C04 connected paths;
 simulation and the remaining M11 scope stay open. M08/M09 filled plots still
 require C01. Available functions remain bounded previews, not full-family compatibility.
 
@@ -136,7 +139,8 @@ C12 remains a separate upstream straight-link issue.
 | M07.d triangular marker audit | Closed (audit); support Blocked | [Native paths, paint and rejection checks](#m07d-triangular-marker-audit) | C14: native equilateral triangles cannot reproduce Scanpy's equal-width/height triangles through uniform sizing. |
 | M10.c Scrublet score distributions | Closed (stored-score linear/log preview) | [Contract, workflow and verification](#m10c-scrublet-score-distributions) | Broader axis modes and unused batch categories remain M14. |
 | M12.a embedding density | Closed (stored-density native preview) | [Shared embedding path, contract and verification](#m12a-stored-embedding-density) | Broader groups/missing densities and unsorted mixed color ranges remain M14; large JSON export costs are measured below. |
-| M11.a supplied heatmap | Closed (resident-profile preview) | [Shared matrix renderer, chart/workflow and resource evidence](#m11a-supplied-time-series-heatmaps) | Lines/subplots and simulation remain M11.a; broader storage/export/layout M14 and larger transport M05.d. |
+| M11.a supplied heatmap | Closed (resident-profile preview) | [Shared matrix renderer, chart/workflow and resource evidence](#m11a-supplied-time-series-heatmaps) | Subplot entry and simulation remain M11.a; broader storage/export/layout M14 and larger transport M05.d. |
+| M11.a supplied points | Closed (resident-profile preview) | [Shared helpers, pinned semantics, native chart/workflow and resources](#m11a-supplied-time-series-points) | Subplot entry and simulation remain M11.a; broader storage/markers/layout remain M14. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
@@ -171,7 +175,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
 | M10 QC diagnostics | In progress | M10.a/b/c bounded previews are verified; broader scale/option compatibility remains M14. This does not close the full family. |
-| M11 trajectories/graphs/series | In progress; supplied heatmap preview closed | Time-series lines/subplots, stored DPT/PAGA, graph layouts and simulation remain; evaluate C04 paths. |
+| M11 trajectories/graphs/series | In progress; supplied heatmap/point previews closed | Subplot entry, stored DPT/PAGA, graph layouts and simulation remain. C04 applies only where connected paths are required. |
 | M12 density/spatial | Planned; full spatial blocked | Density uses stored analysis; image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
 | M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
@@ -2520,14 +2524,72 @@ helper discards masks during array conversion, so explicit NaNs hide values;
 ordinary `matrix` retains its own masked-array behavior. Sparse/lazy sources,
 complex/infinite/all-missing inputs and color objects error. Broader storage,
 typography and exports remain M14; larger/chunked transport remains M05.d.
-M11 stays open for lines/subplots, simulation, DPT and PAGA. The live plan and
+M11 stays open for the point/subplot entry, simulation, DPT and PAGA. The live plan and
 ledger remain **retain**; no research plan is cleared by this increment.
+
+## M11.a supplied time-series points
+
+The resident-profile `timeseries` preview is closed on 2026-10-22. The pinned
+public helper delegates to `timeseries_subplot`, which uses **scatter points**,
+not connecting lines. This corrects the earlier connected-path assumption; C04
+is not a dependency of these two helpers. The
+[public contract](../../docs/integrations/scanpy/index.md#supplied-time-series-points)
+preserves `X, **kwargs` and the forwarded defaults while adding native delivery,
+dimensions, hover and both-axis navigation. No time ordering or analysis runs.
+
+Reuse: [pure profile preparation](../../src/genome_spy/integrations/scanpy/_timeseries_data.py)
+uses existing resident/numeric validation, coordinate margins, CSS colors and
+continuous bounds. The [chart module](../../src/genome_spy/integrations/scanpy/_timeseries_chart.py)
+uses the shared marker widths, point units, schemes and zoom helper. Dashed
+vertical rules now have one shared native helper, also used by the heatmap.
+The default palette comes from public `sc.pl.palettes.vega_10`; no private
+Scanpy computation, artist recovery, runtime Matplotlib call, dependency,
+custom geometry, browser listener or Core patch was added.
+
+Validation: **319 targeted Python/contract/workflow tests** and **18 browser
+tests** passed; the missing-first-point legend assertion also passed separately.
+[Semantic tests](../../tests/integrations/scanpy/test_timeseries.py) compare public
+Scanpy outputs for eleven fixtures: multiple variables, categorical and continuous
+colors, integer-first mixed numeric groups, unsorted/repeated times, masks, constant colors, singleton
+samples, inverted limits, highlights and explicit ticks. They check paint order,
+domains, colors, unchanged inputs and default signatures separately from charts.
+[Browser tests](../../tests/integrations/scanpy/browser/test_timeseries.py) register
+complete charts at 100 display / 150 export DPI, including point centers/areas,
+native labels and guides. The first masked continuous point keeps a transparent
+series key, matching upstream. No gradient colorbar is invented. Separate checks
+observe source-position hover, both-axis zoom, panning and offline HTML. The
+shared heatmap highlight/browser regressions pass unchanged.
+
+The canonical expression workflow now has 21 code cells and adds three existing
+PBMC markers against stored S-phase scores. It passes independently and ran in
+Jupyter without errors. The chart preserves all 2,100 points and supplied score
+positions; this is not measured time. Ruff formatting/lint and mypy pass. Test
+images/overlays, browser exports and executed notebook state remain outside Git.
+The full test suite and documentation build were not rerun.
+
+Resource observation: warm imports/schema, then supply
+`np.random.default_rng(0).lognormal(0, .4, size=(50000, 3)).astype("float32")`,
+three labels, `time=np.arange(50000)`, highlight 25,000, zoom and a 600 × 300-pixel
+area. With allocation tracing, preparation took 0.26 s, Arrow transport 0.74 s
+(5.55 MB), and validated compact JSON 8.31 s (13.15 MB); tracked Python peak was
+126 MB including both transports. Native inline HTML painted in 1.09 s; a paused
+hover appeared in 51 ms and reported the correct source value. Zoom changed its
+domain within a 0.74 s observation including a 700 ms wait. Browser heap after
+collection was 29.4 MB, with no page errors. These are local observations,
+not portable timing limits; JSON serialization remains a material cost.
+
+Remaining limits: bottom legend placement, native fonts/ticks and palette
+sampling follow GenomeSpy. Sparse/lazy data, repeated labels, differing per-subset
+marker shapes and global figure styling remain explicit M14 restrictions. The
+single-variable path requires `color` rather than exposing upstream's missing
+color failure. `timeseries_subplot` is the next public entry; simulation, DPT and
+PAGA remain M11. The live plan and ledger remain **retain**; no document is cleared.
 
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 29 functions are available as partial previews; 19 plot/builder
+helpers. 30 functions are available as partial previews; 18 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -2577,7 +2639,7 @@ No placeholder functions are exported for planned work.
 | `sim` | Not implemented | M11 |
 | `spatial` | Not implemented | M12; image capability C02 |
 | `stacked_violin` | Not implemented | M08 |
-| `timeseries` | Not implemented | M11 |
+| `timeseries` | Partial supplied-point preview available | M11.a; remaining storage/markers/layout M14 |
 | `timeseries_as_heatmap` | Partial supplied-profile preview available | M11.a heatmap; broader storage/layout M14; transport M05.d |
 | `timeseries_subplot` | Not implemented | M11 |
 | `tracksplot` | Not implemented | M09 |
@@ -2654,6 +2716,13 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Hover, y-only/xy zoom, fitted values and dimensions | Existing matrix/grid helpers and native quantitative bounds | M11.a heatmap preview retained |
 | Sparse/lazy inputs, full typography/global styles and image export | Explicit restrictions; no implicit analysis or materialization | M05.d/M14 |
 
+| Supplied time-series point parameters | Current support | Completion owner |
+| --- | --- | --- |
+| Resident profiles, supplied times/order, variable/category/continuous colors, masks, labels, limits, ticks and highlights | Tested bounded preview; no sorting, smoothing or analysis | M11.a point preview retained |
+| Hover, both-axis zoom, native guides, dimensions and HTML/JSON | Shared helpers and native points/rules | M11.a point preview retained |
+| Subplot public entry and simulation | Not implemented | M11.a |
+| Sparse/lazy inputs, repeated labels, differing per-subset shapes, global styles and image export | Explicit restrictions | M14; Matplotlib objects remain outside boundary |
+
 | Builder surface (all three classes) | Current state | Completion evidence required |
 | --- | --- | --- |
 | Constructor signatures/defaults and native result delivery | Not implemented | Pinned class signatures plus family semantic/chart tests, M13 |
@@ -2675,7 +2744,7 @@ affected slice.
 | C01 | No native filled-area/polygon primitive in bundled schema | Full violin/stacked/tracks M08/M09 | Released filled geometry and density/profile chart tests; no custom trial geometry promotion |
 | C02 | No native raster/image primitive | Full spatial M12 | Released image capability with crop/aspect/zoom registration tests |
 | C03 | No native 3D projection | 3D embedding options M07/M14 | Released capability or explicit product scope decision; keep unresolved until then |
-| C04 | No dedicated line/path mark in bundled mark inventory | Series/graph/path M11 | Verify native rule/link segments can preserve required semantics; otherwise upstream released capability |
+| C04 | No dedicated line/path mark in bundled mark inventory | Connected graph/path cases in M11; timeseries helpers are scatter points | Verify native rule/link segments only for functions that actually connect samples; otherwise upstream released capability |
 | C05 | Font/text-outline/normalization/NA-guide limits | Parameter closure M07/M14 | Per-option released API inspection and complete-chart tests |
 | C06 | Core 1.2 typed surround/facet APIs and native index gaps available; Scanpy migration remains open | Heatmap/clustermap side tracks, related grids, UMAP/repeated panels; M14.b | Use the published heatmap example; verify viewport/scale/guide ownership, required heatmap group gaps and existing navigation/selection contracts |
 | C07 | Python linkage + shared native orthogonal branches verified | Trees M04 and heatmap M05.a/b delivered; later families M08/M09 | Stored parent/child edges project into equal summary slots or unequal cell-group centers. Complete SVG elbows, four orientations, zero heights, resize and navigation pass; recheck later families. |

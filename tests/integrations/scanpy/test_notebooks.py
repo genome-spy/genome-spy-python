@@ -296,6 +296,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["highest_expression"],
         namespace["scrublet_scores"],
         namespace["timeseries_heatmap"],
+        namespace["time_series"],
     ]
     profiles = namespace["profiles"]
     expected_order = namespace["pbmc"].obs["S_score"].sort_values(kind="stable").index
@@ -314,6 +315,25 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert series["scales"]["y"]["domain"] == [0, 9]
     assert series["scales"]["x"]["zoom"] is True
     assert series["scales"]["y"]["zoom"] is True
+    points_spec = namespace["time_series"].to_dict()
+    records = next(
+        rows for rows in points_spec["datasets"].values() if "_sample" in rows[0]
+    )
+    assert len(records) == 2100
+    assert list(dict.fromkeys(r["_series"] for r in records)) == [
+        "CD79A",
+        "CD3D",
+        "GNLY",
+    ]
+    np.testing.assert_allclose(
+        np.array([r["_value"] for r in records]).reshape(3, 700),
+        profiles[["CD79A", "CD3D", "GNLY"]].to_numpy().T,
+    )
+    np.testing.assert_allclose(
+        [r["_time"] for r in records[:700]],
+        namespace["pbmc"].obs.loc[expected_order, "S_score"],
+    )
+    assert len({r["_id"] for r in records}) == len(records)
     assert scrublet_calls == [
         {
             "threshold": 0.25,

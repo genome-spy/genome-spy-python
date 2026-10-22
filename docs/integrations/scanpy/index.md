@@ -871,6 +871,41 @@ two-decimal matrix labels. Native show/save, return objects and offline HTML
 delivery follow the other plotting calls; these keywords extend the upstream
 helper, which has no show/save parameters.
 
+## Supplied time-series points
+
+```python
+chart = gsc.pl.timeseries(
+    profiles, time=times, var_names=genes, highlights_x=[0],
+    xlabel="Supplied time", marker="o", zoom=True,
+    width=600, height=300, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+Scanpy 1.11.5's `timeseries` draws **scatter points**, without connecting lines.
+The native version preserves supplied sample order and time coordinates, including
+unsorted or repeated times. It never sorts, smooths, normalizes or infers time.
+Resident numeric vectors and samples-by-variables arrays, sequences and DataFrames
+are supported. DataFrame labels are used only when supplied as `var_names`.
+
+| Input/options | Supported behavior |
+| --- | --- |
+| Multiple variables | Draw columns in supplied order, retaining sample order within each. `color` is unused, as upstream. Default colors use Scanpy's public Vega 10 palette; `palette` accepts a sufficient sequence of CSS colors. |
+| One variable | Requires a sample-length `color` vector. A floating first color selects continuous coloring; other sortable values, including integers, define sorted categorical subsets. Sample order within each category is retained. |
+| Continuous color | Finite jointly visible time/value/color entries determine linear limits. Constant colors use the start of the native scheme. `color_map="viridis"` is the default; None also uses viridis. Native schemes are supported. |
+| Labels/legend | `var_names` labels the variables or single-variable subsets. Nonempty names must cover all subsets and be distinct strings; extra names are unused. `legend=True` shows a native bottom series legend when names exist. Continuous coloring has a series key, without a gradient colorbar, as upstream. |
+| Limits/highlights | Default time is the sample position. Automatic limits use a 5% margin; highlights expand the x range. Dashed rules retain the original y endpoints even when explicit `yticks` expand the y view. `xlim` overrides x limits and may reverse the axis. |
+| Missing values | Jointly missing/masked time, value or continuous color hides the point and excludes it from automatic limits. Categorical colors cannot be missing; at least one visible point is required. |
+| Markers | Shared native `.`, `o`, `s` and `D` shapes, also as a singleton or identical per-subset list. The frozen default area is 6 points², with Scanpy's dot-path width and a one-point face-colored edge. |
+| Interaction/delivery | Hover reports series, original sample position, time, value and numeric color. `zoom=True` enables both axes, drag panning and native reset; both options use existing helpers. Native show/save and HTML/JSON delivery rules apply. |
+
+The default native plot area is 992 × 739.2 logical pixels. Fonts, numeric tick
+density, bottom legend layout, palette sampling and browser rasterization follow
+GenomeSpy rather than Matplotlib's figure system. Global Matplotlib settings,
+axes/cycler/colormap objects, sparse/lazy sources, complex/infinite values,
+repeated series labels and differing per-subset marker shapes fail clearly.
+The separate `timeseries_subplot` entry is not implemented yet.
+
 ## Clustermap compatibility
 
 ```python
@@ -1214,10 +1249,10 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Simulation | sim |
-| Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_subplot |
+| Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries_subplot |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
@@ -1311,6 +1346,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrix
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.timeseries_as_heatmap
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.timeseries
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 

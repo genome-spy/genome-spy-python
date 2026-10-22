@@ -24,6 +24,7 @@ __all__ = [
     "heatmap",
     "matrix",
     "timeseries_as_heatmap",
+    "timeseries",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2012,6 +2013,86 @@ def matrix(
         show_values=show_values,
         width=width,
         height=height,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def timeseries(
+    X: ArrayLike,
+    *,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **kwargs: Any,
+) -> TopLevelSpec | None:
+    """Plot supplied ordered profiles as points, as Scanpy's timeseries helper does.
+
+    Description:
+        Preserve supplied time coordinates, sample order and subset draw order.
+        No sorting by time, line interpolation, smoothing or analysis runs.
+        Multi-column inputs use palette colors; a single column requires color.
+        Floating color values are continuous; other sortable values define groups.
+
+    Args:
+        X: Resident numeric vector or samples-by-variables matrix/table.
+        show: Display according to Scanpy's autoshow when unset.
+        save: Only None/False; use the native chart's HTML/JSON export.
+        hover: Show series, source sample position, time, value and numeric color.
+        zoom: Enable native wheel zoom and drag panning on both axes.
+        width: Native plot-area width in pixels, default 992.
+        height: Native plot-area height in pixels, default 739.2.
+        **kwargs: Scanpy's time=None, color=None, var_names=(), highlights_x=(),
+            xlabel="", ylabel="gene expression", yticks=None, xlim=None,
+            legend=True, palette=None, color_map="viridis", marker=".".
+            Palette accepts CSS color sequences; color_map uses native schemes.
+            Markers reuse the supported embedding shapes; different per-subset
+            shapes, repeated labels and Matplotlib axes/cyclers are unsupported.
+
+    Returns:
+        A native chart for show=False, otherwise displays it and returns None.
+
+    Raises:
+        ImportError: If the optional Scanpy version is unavailable.
+        TypeError: If arguments, numeric sources or vectors are unsupported.
+        ValueError: If shapes, labels, colors, bounds or sizes are invalid.
+        NotImplementedError: If native rendering cannot preserve an option.
+
+    Example:
+        >>> chart = gsc.pl.timeseries(
+        ...     profiles, time=times, var_names=genes, zoom=True, show=False
+        ... )
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.timeseries"
+    for name, value in {"hover": hover, "zoom": zoom}.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    _check_kwargs(
+        kwargs,
+        {
+            "time",
+            "color",
+            "var_names",
+            "highlights_x",
+            "xlabel",
+            "ylabel",
+            "yticks",
+            "xlim",
+            "legend",
+            "palette",
+            "color_map",
+            "marker",
+        },
+        context=context,
+    )
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
+
+    chart = build_timeseries(
+        X, hover=hover, zoom=zoom, width=width, height=height, **kwargs
     )
     return _finish_plot(chart, show, sc)
 

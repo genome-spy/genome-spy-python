@@ -1,10 +1,31 @@
 """Native navigation and value labels for the expression grids."""
 
+from collections.abc import Collection
 from typing import Any, Literal
 
 import genome_spy as gs
 from genome_spy.schemapi import Undefined
-from genome_spy.integrations.scanpy._style import FONT
+from genome_spy.integrations.scanpy._style import FONT, POINTS_TO_PIXELS as PT
+
+
+def vertical_highlights(
+    positions: Collection[float], low: float, high: float
+) -> gs.Chart:
+    """Return clipped native dashed rules over the supplied vertical data range."""
+    return (
+        gs.Chart([{"position": value} for value in positions])
+        .mark_rule(
+            color="black",
+            size=1.5 * PT,
+            # Native dash lengths use whole pixels.
+            strokeDash=[round(value * 1.5 * PT) for value in (3.7, 1.6)],
+            clip=True,
+            tooltip=None,
+        )
+        .encode(
+            x="position:Q", y=gs.Y(datum=low, type="quantitative"), y2=gs.Y2(datum=high)
+        )
+    )
 
 
 def zoom_axes(

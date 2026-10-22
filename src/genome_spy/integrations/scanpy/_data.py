@@ -62,14 +62,19 @@ def numeric_values(table: pd.DataFrame, *, context: str) -> np.ndarray:
     return values
 
 
-def matrix_array(matrix: Any, *, context: str) -> Any:
-    """Return a resident nonempty 2D array/table without reading or densifying other sources."""
+def matrix_array(matrix: Any, *, context: str, allow_vector: bool = False) -> Any:
+    """Return resident 2D values, promoting a vector only when requested.
+
+    Reject other sources before reading or densifying them.
+    """
     import numpy as np
     import pandas as pd
 
     if not isinstance(matrix, (np.ndarray, pd.DataFrame, list, tuple)):
         raise TypeError(f"{context}: supply a resident 2D numeric array or table.")
     array = matrix if isinstance(matrix, pd.DataFrame) else np.asanyarray(matrix)
+    if allow_vector and array.ndim == 1:
+        array = array.reshape(-1, 1)
     if array.ndim != 2 or not all(array.shape):
         raise ValueError(f"{context}: matrix must have two nonempty dimensions.")
     return array

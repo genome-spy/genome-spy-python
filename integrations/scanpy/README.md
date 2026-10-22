@@ -42,6 +42,8 @@ not in this workspace or the documentation:
 | [_grouped_chart.py](../../src/genome_spy/integrations/scanpy/_grouped_chart.py) | Dotplot/matrixplot share index slots, labels, brackets, sizing, guides and attached-tree layout; correlation reuses index coordinates. |
 | [_matrixplot_chart.py](../../src/genome_spy/integrations/scanpy/_matrixplot_chart.py) | Native tiles, edge styling and summary hover; no AnnData access. |
 | [_matrix_chart.py](../../src/genome_spy/integrations/scanpy/_matrix_chart.py) | Supplied numeric matrix and time-series heatmap tiles, axes, labels and color guide; shared numeric validation and grid interactions, without AnnData access. |
+| [_timeseries_data.py](../../src/genome_spy/integrations/scanpy/_timeseries_data.py) | Supplied-profile point order, color subsets, masks and bounds; shared numeric/color checks, without analysis or chart authoring. |
+| [_timeseries_chart.py](../../src/genome_spy/integrations/scanpy/_timeseries_chart.py) | Native time-series points, axes and guides using shared marker, zoom and dashed-highlight helpers. |
 | [_clustermap_data.py](../../src/genome_spy/integrations/scanpy/_clustermap_data.py) | Bounded full-subset access, Seaborn-compatible scaling and color tracks, public SciPy or supplied row/column linkage. |
 | [_clustermap_chart.py](../../src/genome_spy/integrations/scanpy/_clustermap_chart.py) | Shared matrix tiles, labels, fitted values and native surround tracks; aligned trees, color strips and a native observation-category legend. |
 | [_heatmap_chart.py](../../src/genome_spy/integrations/scanpy/_heatmap_chart.py) | Cell tiles and native surround tracks with shared index gaps, category bands, centered labels and stored tree links; reuses grouped labels/brackets and fitted values, with optional aligned zoom (y-only by default). |
@@ -114,8 +116,8 @@ Both notebooks run independently on Scanpy's packaged `pbmc68k_reduced()` data:
   A final section reads packaged logreg scores and explicitly computes a separate
   ranking for statistic colors, reusing summaries, trees and interactions.
   Variable-gene QC panels then inspect the packaged stored selection and statistics.
-  Supplied time-series heatmaps reuse the PBMC markers, explicitly ordered by the
-  stored S-phase score; the chart does not infer time or pseudotime.
+  Supplied time-series heatmaps and point plots reuse the PBMC markers, explicitly
+  ordered by the stored S-phase score; neither chart infers time or pseudotime.
 
 These adapt supported portions of the official core and advanced tutorials.
 Keep related examples together within each workflow, without placeholder cells

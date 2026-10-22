@@ -726,12 +726,28 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   Acceptance: independent data/limit tests, complete registered reference charts
   including singleton axes, observed hover/zoom/pan/fitted values/offline HTML,
   the packaged-PBMC expression workflow and a measured resident-array resource check.
-  This increment does not close time-series lines or the full M11 milestone.
+  This increment does not close the point/subplot helpers or the full M11 milestone.
+- M11.a point increment: the pinned `timeseries` and `timeseries_subplot` call
+  scatter rather than line plotting. Preserve this behavior with native points;
+  C04's connected-path review is not a dependency of these two helpers. Support
+  multiple variables, categorical single-variable subsets and continuous single
+  variables, preserving supplied time/order, point masks, sorted category order,
+  finite color limits, labels, highlights, explicit x limits and y ticks. Default
+  native colors use Scanpy's public Vega 10 palette; global Matplotlib settings
+  are outside the rendering boundary. Use shared numeric, point-shape, color,
+  navigation and native dashed-highlight helpers. Verify data separately from
+  complete point footprints/guides, hover/zoom, the PBMC workflow and resources.
+  Preserve the 6-point² default area and one-point face-colored edge. Native
+  guides collect below the plot; fonts/ticks and global styles have the same
+  explicit renderer boundary as other previews. Completion evidence is retained
+  in [STATUS](STATUS.md#m11a-supplied-time-series-points).
+  Per-subset marker differences, repeated legend labels and broader storage
+  remain explicit M14 restrictions; subplot entry reuse is the next increment.
 - M11.a: `timeseries`, `timeseries_subplot`, `timeseries_as_heatmap` accept supplied
   matrices/time values, variable order, highlights, labels, color maps, limits and
-  markers. Use shared heatmap or dedicated line/time authoring as appropriate;
-  verify a supported released path primitive rather than disconnected point
-  approximations. `sim` reads supplied simulation outputs and preserves time
+  markers. Use shared heatmap or point authoring according to the pinned callable;
+  review connected paths only for functions that actually connect samples.
+  `sim` reads supplied simulation outputs and preserves time
   truncation, `shuffle`, markers and heatmap choice without rerunning simulation.
 - M11.b: `dpt_groups_pseudotime` and `dpt_timeseries` consume stored DPT groups,
   order, pseudotime and highlights, with heatmap/series modes and exact alignment.

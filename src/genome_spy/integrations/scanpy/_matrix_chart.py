@@ -10,6 +10,7 @@ import genome_spy as gs
 from genome_spy.integrations.scanpy._grid_interactions import (
     zoom_axes,
     with_values,
+    vertical_highlights,
 )
 from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._data import (
@@ -198,23 +199,7 @@ def build_matrix(
         )
     center = with_values(tiles, "_value") if show_values else tiles
     if len(highlights_x):
-        highlights = (
-            gs.Chart([{"position": h} for h in highlights_x])
-            .mark_rule(
-                color="black",
-                size=1.5 * PT,
-                # Native dash lengths use whole pixels.
-                strokeDash=[round(v * 1.5 * PT) for v in (3.7, 1.6)],
-                clip=True,
-                tooltip=None,
-            )
-            .encode(
-                x=gs.X("position:Q"),
-                y=gs.Y(datum=0, type="quantitative"),
-                y2=gs.Y2(datum=rows),
-            )
-        )
-        center = gs.layer(center, highlights)
+        center = gs.layer(center, vertical_highlights(highlights_x, 0, rows))
     center = center.properties(width=width, height=height, name=f"{name}-cells")
     chart = gs.surround(
         center, surround=gs.SurroundSides(**sides), spacing=0
