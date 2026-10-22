@@ -684,6 +684,7 @@ fidelity boundaries as dotplot. Complete-chart checks cover labels, brackets,
 plot and guide placement; registered tile comparisons use 150 export DPI and
 DPR 1.5. The production adapter never imports upstream plotting or Matplotlib.
 
+(shared-grid-interactions)=
 ## Shared grid interactions
 
 Dotplots retain a black frame around the matrix viewport, including across group
