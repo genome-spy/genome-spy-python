@@ -343,22 +343,23 @@ export compatibility remain in M14.
   backed AnnData. Read their correlations and geometry directly, including
   nondefault n_pcs/var_names/method results. Do not reimplement group profiles,
   correlations, linkage, layout or freshness detection in the adapter.
-- M04.c: a focused tree layout helper feeds native rule marks for top/right/left/
+- M04.c: a focused tree layout helper feeds native orthogonal links for top/right/left/
   bottom orientation. Use the same group permutation for dots, tiles, labels,
   brackets, totals and leaf centers. Implement standalone `dendrogram` labels and
   `remove_labels`, plus `correlation_matrix` numbers, bounds and attached tree.
 - M04.d: attach to dotplot/matrixplot and later heatmap/tracks/stacked violin;
   supplied coordinates/order are retained. Compare all orientations, ties, swaps
   and resize behavior. Pan/zoom cannot detach a tree from its rows/columns.
-  Dot/matrix trees now use native rule geometry projected into fixed index slots,
-  with excluded scales/axes. Grouped navigation is optional in M05.e; summary hover
-  and resize alignment are verified. No Core changes or prototype geometry are
+  All attached trees use the shared native orthogonal-link renderer and aligned
+  surround tracks, with viewport height fitting. Grouped navigation is optional
+  in M05.e; summary hover and resize alignment are verified. No Core changes or prototype geometry are
   required. Reuse these helpers when each later family is implemented.
 
 Targets: `gsc.pl.dotplot(pbmc, markers, "louvain", dendrogram=True, show=False)`
 and `gsc.pl.dendrogram(pbmc, "louvain", show=False)`.
 Acceptance: Python linkage/leaf geometry independently verified, released native
-rules suffice, exact cached results are honored, no analysis rerun or mutation.
+orthogonal links suffice, exact cached results are honored, no analysis rerun or
+mutation.
 Tree fallback requiring missing PCA remains an explicit contract limit to resolve
 in M14, not an excuse to declare full automatic compatibility.
 
@@ -770,8 +771,9 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   independently, prove input/global RNG preservation, register complete charts
   and observed hover/zoom/label alignment/offline export, run a packaged simulation
   notebook example and measure a realistic resident simulation workload.
-- M11.b: `dpt_groups_pseudotime` and `dpt_timeseries` consume stored DPT groups,
-  order, pseudotime and highlights, with heatmap/series modes and exact alignment.
+- M11.b: `dpt_groups_pseudotime` reads stored groups, rank coordinates,
+  pseudotime and highlights. `dpt_timeseries` indexes X using the distinct saved
+  `dpt_order_indices` vector, with heatmap/point modes and exact alignment.
   Missing DPT analysis errors; no trajectory inference in plotting.
   The groups increment composes two existing point panels: categorical codes
   against stored order (sorted observed-group palette; explicit code ticks below
@@ -786,6 +788,19 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   The pinned parent entry fails on pandas Series indexing; use its public
   time-series component calls with NumPy codes for baseline verification, and
   retain the direct parent-entry comparison as an open upstream gate.
+  The expression increment reads resident dense X only, never raw/layers, and
+  applies saved row indices verbatim using NumPy semantics. Missing fields,
+  invalid/stale indices and unsupported backed/lazy/sparse storage error; no
+  sorting, remapping or DPT recomputation runs. Gene-only views work with stored
+  indices. Both modes label x as "dpt order" and retain the saved boundaries.
+  Heatmaps reuse the transposed/cropped matrix renderer and requested native
+  scheme; points retain `[0, 1.3 * n_obs]` limits, native series guides and marker
+  semantics. `marker` is inactive in heatmap mode and `color_map` is inactive in
+  point mode, as upstream. Shared hover/navigation, fitted heatmap values and
+  dimensions add no new rendering path. Acceptance: direct public Scanpy
+  comparisons of values/order/limits/labels/colors, missing-input and mutation
+  guards, registered chart/overlay checks, observed hover/zoom/pan/offline HTML,
+  explicit-analysis notebook execution and measured resident-profile resources.
 - M11.c: `paga` consumes stored connectivities/transitions; Python graph layouts
   may be computed for plotting only when positions were not supplied. Preserve
   `pos`, threshold inclusion, roots, components, node-size powers, normalization,

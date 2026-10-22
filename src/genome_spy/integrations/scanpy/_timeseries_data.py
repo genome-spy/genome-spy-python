@@ -1,4 +1,4 @@
-"""Pure supplied-profile preparation for Scanpy time-series points."""
+"""Pure time-series preparation and stored simulation/DPT access, without analysis."""
 
 from collections.abc import Collection, Sequence
 from dataclasses import dataclass
@@ -17,6 +17,31 @@ from genome_spy.integrations.scanpy._data import (
 from genome_spy.integrations.scanpy._style import color_bounds, native_color
 
 CONTEXT = "gsc.pl.timeseries"
+
+
+def prepare_dpt_timeseries(adata: Any) -> tuple[np.ndarray, Any]:
+    """Read resident X in saved DPT row order, returning profiles and boundaries."""
+    from anndata import AnnData
+
+    context = "gsc.pl.dpt_timeseries"
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: adata must be AnnData.")
+    if "dpt_order_indices" not in adata.obs or "dpt_changepoints" not in adata.uns:
+        raise ValueError(
+            f"{context}: obs['dpt_order_indices'] and uns['dpt_changepoints'] "
+            "are required; run sc.tl.dpt with n_branchings > 0 explicitly."
+        )
+    values = matrix_array(
+        require_resident_expression(adata, False, None, context=context),
+        context=context,
+    )
+    try:
+        ordered = values[adata.obs["dpt_order_indices"].to_numpy()]
+    except IndexError as error:
+        raise ValueError(
+            f"{context}: dpt_order_indices must contain valid row indices for the supplied AnnData."
+        ) from error
+    return ordered, adata.uns["dpt_changepoints"]
 
 
 def prepare_dpt_groups(adata: Any) -> tuple[pd.Series, pd.Series, pd.Series, Any]:

@@ -310,6 +310,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["simulation_points"],
         namespace["simulation_heatmap"],
         namespace["dpt_groups_chart"],
+        namespace["dpt_expression"],
     ]
     assert dpt_calls == [
         ("neighbors", {"n_neighbors": 10, "use_rep": "X", "random_state": 0}),
@@ -340,6 +341,16 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
             dpt_cells.obs["dpt_order"].to_numpy()[positions],
         )
         assert len(rows) == dpt_cells.n_obs
+    dpt_profiles = namespace["dpt_profiles"]
+    assert dpt_profiles.is_view and dpt_profiles.n_obs == simulation.n_obs
+    expected = dpt_profiles.X[simulation.obs["dpt_order_indices"].to_numpy()].T
+    expression_spec = namespace["dpt_expression"].to_dict()
+    (rows,) = [
+        rows for rows in expression_spec["datasets"].values() if "_value" in rows[0]
+    ]
+    np.testing.assert_array_equal(
+        np.array([r["_value"] for r in rows]).reshape(expected.shape), expected
+    )
     profiles = namespace["profiles"]
     simulation = namespace["simulation"]
     assert simulation.shape == (640, 11)

@@ -1,8 +1,9 @@
-"""Stored DPT metadata with unsorted ranks and category/code ordering differences."""
+"""Stored DPT metadata/profiles with distinct rank, row-index and category orders."""
 
 import numpy as np
 import pandas as pd
 from anndata import AnnData
+from tests.integrations.scanpy.sim_fixture import make_sim
 
 
 def make_dpt(case="default"):
@@ -89,3 +90,32 @@ def dpt_reference(adata, *, color_map=None, palette=None, marker="."):
         marker=marker,
     )
     return fig
+
+
+def make_dpt_profiles(case="heatmap"):
+    """Return two nonconstant genes with a saved, non-self-inverse DPT ordering."""
+    adata = make_sim()
+    adata.obs["dpt_order_indices"] = [4, 0, 6, 2, 5, 1, 3]
+    adata.uns["dpt_changepoints"] = [2, 5]
+    if case == "repeated_indices":
+        adata.obs["dpt_order_indices"] = [4, 0, 4, -1, 2, 2, 3]
+    elif case == "single_gene":
+        adata = adata[:, :1]
+    elif case == "single_sample":
+        adata = adata[:1].copy()
+        adata.obs["dpt_order_indices"] = [0]
+        adata.uns["dpt_changepoints"] = []
+    return adata
+
+
+def dpt_profile_cases():
+    """Cover both renderers, inactive options, native schemes and NumPy row indexing."""
+    return {
+        "heatmap": {},
+        "points": {"as_heatmap": False, "marker": "o"},
+        "plasma": {"color_map": "plasma", "marker": "unused"},
+        "point_inactive_color": {"as_heatmap": False, "color_map": "unused"},
+        "repeated_indices": {},
+        "single_gene": {},
+        "single_sample": {},
+    }

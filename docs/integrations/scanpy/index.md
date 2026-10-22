@@ -1008,6 +1008,43 @@ pandas 2.3.3 because it indexes a Series as `X[:, None]`. Validation uses its tw
 public `timeseries_subplot` calls with group codes supplied as a NumPy array.
 The direct parent-entry comparison remains open; no upstream code is patched.
 
+### Plot expression in stored DPT order
+
+```python
+# Reuse the explicit DPT analysis above; select genes while retaining all cells.
+dpt_profiles = simulation[:, ["Gata2", "Gata1", "Cebpa", "Pu.1", "Gfi1"]]
+chart = gsc.pl.dpt_timeseries(
+    dpt_profiles, zoom="xy", show_values=True, width=600, height=240, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`dpt_timeseries` reads resident dense `X` and `var_names`, indexes rows using
+`obs['dpt_order_indices']`, and draws the stored `uns['dpt_changepoints']`.
+It uses neither raw/layers nor the distinct `dpt_order` rank coordinates.
+No neighbors, diffusion map, DPT, sorting, normalization or smoothing runs.
+Missing fields name the required explicit analysis. Indices use NumPy's row
+indexing semantics, including repeated/negative positions; invalid or stale
+indices fail clearly rather than being repaired. Gene-only views retain usable
+indices; slicing/reordering observations can make saved indices stale.
+
+The default heatmap reuses the transposed, center-cropped time-series matrix
+renderer with its first gene at the bottom, native colorbar and viridis default.
+`color_map` selects a native scheme; `marker` is inactive in this mode.
+`as_heatmap=False` uses the existing point renderer, preserving palette/variable
+order, the gene legend, marker semantics and `[0, 1.3 * n_obs]` x limits.
+`color_map` is inactive for points, as in Scanpy. Both label x as `dpt order`.
+
+Hover reports a variable, ordered sample position and value. Native navigation,
+fitted heatmap values, dimensions and HTML/JSON delivery reuse their parent paths.
+`zoom=True` navigates heatmap y or both point axes; `zoom="xy"` navigates both.
+`show_values=True` requires heatmap mode. Default plot areas are 372 × 616 pixels
+for heatmaps and 992 × 739.2 for points. Backed/lazy/sparse expression is rejected
+before loading or densification. Point mode inherits its requirement for at least
+two distinctly named genes and the ten-color default palette limit; heatmaps can
+show a single gene. The direct public Scanpy reference works for this entry;
+the Series-indexing limitation above affects the separate group diagnostic.
+
 ## Clustermap compatibility
 
 ```python
@@ -1351,9 +1388,9 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Trajectories and graphs | dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
+| Trajectories and graphs | paga, paga_adjacency, paga_compare, paga_path |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
@@ -1363,8 +1400,8 @@ work. Settings remain owned by Scanpy. The external.pl namespace is separate
 from this core inventory.
 
 Dendrograms belong with grouped-plot coverage. Read stored Scanpy results or
-delegate missing computation to `sc.tl.dendrogram`, then render native rule
-marks. A dedicated tree mark is unnecessary. This does
+delegate missing computation to `sc.tl.dendrogram`, then render native orthogonal links
+through the shared renderer. A dedicated tree mark is unnecessary. This does
 not authorize rerunning the user's UMAP or differential-expression analysis.
 Violin densities and track envelopes can likewise be prepared in Python, while
 their filled geometry needs appropriate native rendering support.
@@ -1455,6 +1492,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.sim
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.dpt_groups_pseudotime
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.dpt_timeseries
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 

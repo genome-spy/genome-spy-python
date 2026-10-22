@@ -117,6 +117,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.dpt_fixture import make_dpt
 
         a, options = make_dpt(), {}
+    if family == "dpt_timeseries":
+        from tests.integrations.scanpy.dpt_fixture import make_dpt_profiles
+
+        a, options = make_dpt_profiles(), {}
     monkeypatch.setattr(sc.settings, "_autoshow", autoshow)
     monkeypatch.setattr(sc.settings, "_autosave", False)
     displayed = []
@@ -156,6 +160,7 @@ def test_shared_display_validation_precedes_optional_imports(
         "timeseries_subplot",
         "sim",
         "dpt_groups_pseudotime",
+        "dpt_timeseries",
         "clustermap",
         "pca_loadings",
         "pca_variance_ratio",

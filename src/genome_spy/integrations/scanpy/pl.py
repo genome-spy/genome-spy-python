@@ -28,6 +28,7 @@ __all__ = [
     "timeseries_subplot",
     "sim",
     "dpt_groups_pseudotime",
+    "dpt_timeseries",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2017,6 +2018,105 @@ def matrix(
         width=width,
         height=height,
     )
+    return _finish_plot(chart, show, sc)
+
+
+def dpt_timeseries(
+    adata: AnnData,
+    *,
+    color_map: Any = None,
+    show: bool | None = None,
+    save: bool | None = None,
+    as_heatmap: bool = True,
+    marker: str | Sequence[str] = ".",
+    hover: bool = True,
+    zoom: bool | Literal["xy"] = False,
+    show_values: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Plot expression in saved DPT order using the existing time-series charts.
+
+    Description:
+        Index resident dense X with stored dpt_order_indices and retain saved
+        dpt_changepoints. No trajectory analysis, sorting, smoothing or scaling
+        runs. Heatmap and point modes reuse their existing preparation/renderers.
+        Raw and layers are unused, as in Scanpy.
+
+    Args:
+        adata: AnnData with resident dense X and stored DPT indices/boundaries.
+        color_map: Native heatmap scheme; None uses viridis. Unused for points.
+        show: Display according to Scanpy's autoshow when unset.
+        save: Only None/False; use the native chart's HTML/JSON saving.
+        as_heatmap: Draw a variable-by-ordered-observation heatmap; False uses points.
+        marker: Shared native point marker; unused in heatmap mode.
+        hover: Show variable, ordered sample position and value tooltips.
+        zoom: True navigates heatmap y or both point axes; 'xy' navigates both.
+        show_values: Fit values inside heatmap cells; points reject True.
+        width: Native plot-area width; defaults to the selected time-series chart.
+        height: Native plot-area height; defaults to the selected time-series chart.
+
+    Returns:
+        A native chart for show=False, otherwise displays it and returns None.
+
+    Raises:
+        ImportError: If the optional Scanpy version is unavailable.
+        TypeError: If flags, AnnData or expression storage are unsupported.
+        ValueError: If saved indices, profiles, boundaries or dimensions are invalid.
+        NotImplementedError: If native rendering cannot preserve a plotting option.
+
+    Example:
+        >>> sc.tl.dpt(adata, n_branchings=1)
+        >>> chart = gsc.pl.dpt_timeseries(adata[:, genes], zoom="xy", show=False)
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.dpt_timeseries"
+    for name, value in {
+        "as_heatmap": as_heatmap,
+        "hover": hover,
+        "show_values": show_values,
+    }.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    _check_grid_zoom(zoom, context=context)
+    if show_values and not as_heatmap:
+        raise NotImplementedError(f"{context}: show_values requires heatmap output.")
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._timeseries_data import prepare_dpt_timeseries
+
+    values, highlights = prepare_dpt_timeseries(adata)
+    if adata.n_vars > 100:
+        sc.logging.warning(
+            "Plotting more than 100 genes might take some while, "
+            "consider selecting only highly variable genes, for example."
+        )
+    options = dict(
+        var_names=adata.var_names,
+        highlights_x=highlights,
+        xlabel="dpt order",
+        hover=hover,
+        width=width,
+        height=height,
+        context=context,
+    )
+    if as_heatmap:
+        from genome_spy.integrations.scanpy._matrix_chart import (
+            build_timeseries_heatmap,
+        )
+
+        chart = build_timeseries_heatmap(
+            values, color_map=color_map, zoom=zoom, show_values=show_values, **options
+        )
+    else:
+        from genome_spy.integrations.scanpy._timeseries_chart import build_timeseries
+
+        chart = build_timeseries(
+            values,
+            xlim=[0, 1.3 * adata.n_obs],
+            marker=marker,
+            zoom=bool(zoom),
+            **options,
+        )
     return _finish_plot(chart, show, sc)
 
 

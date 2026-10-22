@@ -235,6 +235,7 @@ def build_timeseries_heatmap(
     height: float | None,
     context: str = "gsc.pl.timeseries_as_heatmap",
     xtick_labels: Mapping[float, str] | None = None,
+    xlabel: str | None = None,
 ) -> gs.TopLevelSpec:
     """Transpose supplied samples into variable rows, then reuse native matrix rendering."""
     array = matrix_array(X, context=context)
@@ -270,7 +271,7 @@ def build_timeseries_heatmap(
         array = numeric_values(array, context=context)
     return build_matrix(
         np.asarray(array).T,
-        xlabel=None,
+        xlabel=xlabel,
         ylabel=None,
         xticks=None,
         yticks=labels,

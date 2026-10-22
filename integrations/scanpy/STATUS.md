@@ -34,6 +34,8 @@ these renderers with realization boundaries, one-based run labels and a local
 seed-1 shuffle, without rerunning simulation.
 Stored DPT group/pseudotime diagnostics compose two of those panels from metadata
 alone, preserving category codes, saved order coordinates and branching boundaries.
+Stored DPT expression profiles index X by saved row indices and reuse the existing
+heatmap/point renderers without trajectory inference.
 Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
 Stored PCA loadings and variance ratios reuse the ranking preparation and native
@@ -80,13 +82,17 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and twenty-six expression/ranked/QC/profile/simulation/DPT code cells. Public availability does not mean
+code cells and twenty-seven expression/ranked/QC/profile/simulation/DPT code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next: M11.b, `dpt_timeseries`.** Reuse stored DPT order and the existing
-time-series renderers for expression profiles; missing analysis must fail clearly.
+**Next: M11.c, `paga` stored graph/layout audit.** Check public Scanpy thresholds,
+positions, node sizing and side effects against the released native grammar before
+implementing its chart. Plotting must not recompute DPT/PAGA analysis.
+The [DPT expression preview](#m11b-stored-dpt-expression-profiles) is closed for
+resident dense X with shared heatmap/point rendering, native interactions,
+workflow and resource verification.
 The [group/pseudotime increment](#m11b-stored-dpt-groups-and-pseudotime) is implemented
 with semantic, component-chart, interaction, workflow and resource checks verified.
 Its direct parent-entry comparison remains blocked by Scanpy 1.11.5 indexing a
@@ -152,7 +158,8 @@ C12 remains a separate upstream straight-link issue.
 | M11.a supplied points | Closed (resident-profile preview) | [Shared helpers, pinned semantics, native chart/workflow and resources](#m11a-supplied-time-series-points) | Simulation is delivered below; broader storage/markers/layout remain M14. |
 | M11.a simulation entry | Closed (stored dense-profile preview) | [Shared renderers, upstream semantics, chart/workflow and resources](#m11a-stored-simulation-plots) | Parent storage/markers/layout remain M14; DPT/PAGA keep M11 open. |
 | M11.a subplot entry | Closed (native panel preview) | [Explicit signature, shared renderer, independent composition and resource evidence](#m11a-native-time-series-subplots) | Simulation is delivered below; broader storage/markers/layout remain M14. |
-| M11.b group/pseudotime entry | Implemented; component/chart/workflow/resource checks verified | [Stored metadata, shared panels and verification](#m11b-stored-dpt-groups-and-pseudotime) | Direct parent-entry comparison blocked by the pinned Scanpy/pandas indexing error; dpt_timeseries remains separate. |
+| M11.b group/pseudotime entry | Implemented; component/chart/workflow/resource checks verified | `733b04e`, filtered-view fix `5219e3a`; [stored metadata, shared panels and verification](#m11b-stored-dpt-groups-and-pseudotime) | Direct parent-entry comparison blocked by the pinned Scanpy/pandas indexing error; expression entry is independently verified below. |
+| M11.b expression entry | Closed (resident dense-X heatmap/point preview) | [Direct public reference, shared renderers, workflow and resources](#m11b-stored-dpt-expression-profiles) | Parent storage/style/export limits remain M14; group-reference gate and PAGA keep M11 open. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
@@ -187,7 +194,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
 | M10 QC diagnostics | In progress | M10.a/b/c bounded previews are verified; broader scale/option compatibility remains M14. This does not close the full family. |
-| M11 trajectories/graphs/series | In progress; supplied heatmap/point/subplot/simulation previews closed | DPT groups implemented with direct-reference gate open; dpt_timeseries, PAGA and graph layouts remain. C04 applies only where connected paths are required. |
+| M11 trajectories/graphs/series | In progress; supplied-series/simulation and DPT-expression previews closed | DPT group direct-reference gate remains open; PAGA and graph layouts remain. C04 applies only where connected paths are required. |
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
 | M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
@@ -1377,7 +1384,7 @@ allocation 99.2/386.4 MB and browser first paint 4.18/12.80 s. Payloads were
 no graph sampling or full-matrix densification was used. These observations
 expose the cost of sending all edges; larger graph transport remains M14.
 
-Next: additional native embedding markers, starting with squares. C11/C13,
+Square/diamond markers are delivered below; further marker details stay M14. C11/C13,
 broader storage/export and other graph forms retain their existing owners.
 The full repository suite and docs build were not rerun. Clearance: retain;
 no plan is eligible for removal.
@@ -1389,7 +1396,7 @@ custom neighbor keys; nonfinite LIL values still raise a named validation error.
 **263 targeted Python checks**, Ruff and mypy pass. Earlier browser/workflow
 evidence is retained because graph conversion, serialization and rendering are
 unchanged; browser, notebook and resource runs were not repeated for this fix.
-Scope, next work and clearance remain unchanged.
+Scope and clearance remain unchanged; the current queue owns next work.
 
 ## M07.d square markers
 
@@ -1498,8 +1505,8 @@ square and diamond keys and widths for UMAP/scatter, compact collected guides,
 and existing outline hover/brush/zoom/HTML. All twenty-one live UMAP notebook
 cells complete without errors; its marker example visibly has square keys.
 No data preparation or point geometry changed, so the diamond resource workload
-above remains applicable. The full suite and docs build were not rerun. Next work
-remains the marker geometry audit above. Clearance: retain.
+above remains applicable. The full suite and docs build were not rerun. The
+triangle audit is retained under C14; further markers stay M14. Clearance: retain.
 
 ## M07.d triangular marker audit
 
@@ -1662,8 +1669,8 @@ Boundary: only linear/log scales; unsupported Matplotlib modes (including
 symlog/logit), unused batch categories, infinite scores and score vectors with no
 in-range values fail explicitly. The PBMC3k example computes Scrublet explicitly
 with Scanpy, seed 0 and a demonstration threshold of 0.25 on a copy of the counts.
-No datasets are vendored. Remaining compatibility stays M14. Next: M12.a stored
-embedding-density audit. Clearance: retain; no working plan is eligible for removal.
+No datasets are vendored. Remaining compatibility stays M14. The stored-density
+preview is delivered under M12.a above. Clearance: retain; no working plan is eligible for removal.
 
 ## M10.a highest-expression summaries
 
@@ -1718,8 +1725,8 @@ include allocation tracing and normalization. The final constant-domain refineme
 does not affect this nonconstant workload. These are local observations, not
 portable performance guarantees. Reports stay local.
 
-Next: M10.c Scrublet histograms. Broader compatibility remains M14; the QC family
-is not closed. Clearance: retain; no working document is eligible for removal.
+The Scrublet preview is delivered under M10.c above. Broader compatibility
+remains M14; the QC family is not closed. Clearance: retain; no working document is eligible for removal.
 
 ## M10.b variable-gene diagnostics
 
@@ -1773,8 +1780,8 @@ allocation and 53.5 MB reported JS heap. Imports/fixture are excluded; allocatio
 tracing is enabled during Python timings. This is one local observation, not a
 portable time limit or speedup claim. Generated reports/images remain local.
 
-Next: highest-expression summaries, then Scrublet histograms. Other QC families
-are not closed by this increment; remaining compatibility belongs to M14.
+Highest-expression and Scrublet previews are delivered under M10.a/c above.
+This increment does not close the full QC family; remaining compatibility belongs to M14.
 Clearance: retain; no working plan is eligible for removal.
 
 ## M07.d native colorbar placement
@@ -2716,7 +2723,8 @@ observations, not portable limits; JSON cost remains the parent transport limit.
 The preview rejects backed/lazy/sparse X before loading/densifying and inherits
 parent point marker, palette and distinct-name limits. Default point colors cover
 at most ten genes; heatmaps support single/repeated gene labels. Broader storage,
-style and export stay M14. DPT diagnostics are next; DPT/PAGA keep M11 open. The
+style and export stay M14. DPT increments are recorded below; the group-reference
+gate and PAGA keep M11 open. The
 live plan and ledger remain **retain**; no document is eligible for clearance.
 
 ## M11.b stored DPT groups and pseudotime
@@ -2778,8 +2786,8 @@ the source position/order/value in 0.48 s including five small pointer probes.
 No browser errors occurred. These are local observations, not portable limits;
 large JSON serialization retains the parent transport cost.
 
-Next: `dpt_timeseries`, using stored order with the existing expression/time-series
-helpers. Broader style/storage/export stay M14; DPT/PAGA keep M11 open. The full
+The DPT expression increment is recorded below. Broader style/storage/export
+stay M14; the group-reference gate and PAGA keep M11 open. The full
 repository suite and documentation build were not rerun. Clearance: **retain**;
 no plan is eligible for removal.
 
@@ -2798,11 +2806,78 @@ downstream of the removed validation, native rendering and transport are unchang
 measurements, the full suite and documentation build were not rerun. The direct
 parent-reference gate, next slice and clearance remain unchanged.
 
+## M11.b stored DPT expression profiles
+
+Closed for the resident dense-X preview on 2026-10-22. The
+[public entry](../../src/genome_spy/integrations/scanpy/pl.py) and existing
+[_timeseries_data.py](../../src/genome_spy/integrations/scanpy/_timeseries_data.py)
+preserve Scanpy 1.11.5's signature/defaults, adding native hover, navigation,
+fitted heatmap values and dimensions. No new production module is needed.
+The [contract](../../docs/integrations/scanpy/index.md#plot-expression-in-stored-dpt-order)
+uses X and var_names only, applies stored dpt_order_indices verbatim and retains
+dpt_changepoints. Missing/stale metadata errors; no analysis, sorting, rank
+reconstruction, smoothing or scaling runs. Gene-only views work; backed/lazy and
+sparse X reject before loading or densification. NumPy row-index semantics,
+including repeated/negative positions, are preserved without imposing a new
+permutation rule. Raw/layers and other DPT fields are unused.
+
+Heatmap mode reuses the transposed/cropped matrix path, native schemes/colorbar,
+hover, zoom and fitted values. Point mode reuses existing variable colors,
+markers, guides, hover and x/y navigation, retaining `[0, 1.3 * n_obs]` x limits.
+Inactive color_map/marker options follow Scanpy's mode-specific behavior.
+The shared heatmap renderer now accepts an axis title to supply "dpt order";
+its previous default is unchanged. Native points/tiles/rules/layout suffice;
+no Matplotlib runtime, custom event listener, Core patch or export rewriting is used.
+
+**433 targeted Python/contract/workflow checks and 58 browser checks passed**;
+Ruff formatting/lint and mypy pass. The
+[semantic tests](../../tests/integrations/scanpy/test_dpt_timeseries.py) compare
+seven cases directly with the public `sc.pl.dpt_timeseries` entry, including
+both modes, a native scheme, inactive options, repeated indices and singleton
+axes. They also guard X-only gene views, input mutation, missing analysis,
+invalid indices, unsupported storage and early flag validation. Unlike the
+separate group diagnostic, this direct parent-entry reference works.
+[Registered browser checks](../../tests/integrations/scanpy/browser/test_dpt_timeseries.py)
+compare complete labels/viewport sizes, boundary positions and sampled tile or
+point paint/footprints at 100 display/150 export DPI and DPR 1.5. They observe
+correct ordered-position hover, wheel zoom, panning, fitted values and offline
+HTML. Parent heatmap/point/simulation/group suites pass the shared-renderer change.
+The workflow assertion reads the shared tile dataset when value labels inherit
+their data, rather than assuming each leaf mark owns a separate data source.
+
+Both canonical workflow tests pass. The expression notebook now has 27 code
+cells and 22 charts; all 27 nonempty cells ran in Jupyter without errors and the
+new heatmap was inspected. It selects five genes in a fresh full-observation
+Krumsiek11 view and reuses the existing explicit neighbors/diffmap/DPT analysis.
+The earlier group diagnostic still demonstrates a filtered observation view.
+The packaged loader's duplicate-name warning remains explained; no data is vendored.
+Committed notebook source excludes outputs/widget state. Local outputs, screenshots,
+overlays, exports and measurement scripts remain outside Git.
+
+Resource observation: seed-0 float32 lognormal X with 10,000 observations × five
+genes, a seed-0 saved row permutation, boundaries at 2,000/6,000 and 500 × 280-pixel
+plots. Each mode retains 50,000 values. Warm point/heatmap preparation took
+0.102/0.705 s; Arrow took 0.760/0.793 s (1.85/1.85 MB). Validated JSON took
+3.26/4.45 s (4.27/3.74 MB); peak traced Python allocations were 42.01/39.95 MB.
+Chromium first paint took 1.39/1.45 s; paused hover verified source values through
+the saved indices in 0.47/0.46 s including five small pointer probes. Collected
+browser heaps were 14.71/37.86 MB with no page errors. This local Python 3.11/macOS
+arm64/Core 1.2.0 observation is not a portable limit; JSON remains the parent
+transport cost.
+
+Plan reconciliation: the current queue, milestone rows, callable/parameter
+inventory and notebook counts agree. Old checkpoint forecasts for marker work,
+QC, density and DPT now link delivered increments; M04 and the user guide describe
+the released orthogonal-link renderer. Broader storage/style/export remain M14;
+the group-reference gate and PAGA keep M11 open. The next audit is only in the
+current queue. The full repository suite and documentation build were not rerun.
+Clearance: **retain**; no live plan is eligible for removal.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 33 functions are available as partial previews; 15 plot/builder
+helpers. 34 functions are available as partial previews; 14 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
@@ -2818,7 +2893,7 @@ No placeholder functions are exported for planned work.
 | `diffmap` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `dotplot` | Partial plain-chart preview; limits above | M02; trees M04; methods M13 |
 | `dpt_groups_pseudotime` | Metadata-only preview; component/chart/workflow/resource checks verified | M11.b; direct parent-reference gate blocked upstream |
-| `dpt_timeseries` | Not implemented | M11 |
+| `dpt_timeseries` | Stored-X heatmap/point preview available | M11.b expression preview closed; broader storage/style/export M14 |
 | `draw_graph` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `embedding` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `embedding_density` | Partial stored-density preview available | M12.a; broader groups, missing values and unsorted mixed ranges M14 |
@@ -2936,6 +3011,7 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 | Subplot public entry and independent native composition | Shared point preparation/rendering with explicit defaults, contextual errors and ordinary native layout | M11.a subplot preview retained |
 | Simulation entry, metadata precedence, boundaries, one-based labels and exact local shuffle | Tested bounded preview; points/heatmaps reuse existing preparation/rendering | M11.a simulation preview retained; parent storage/markers/layout M14 |
 | DPT group/pseudotime panels, stored codes/ranks/boundaries and missing-time masking | Metadata-only composition with shared points, hover and independent navigation | M11.b implemented; direct parent-reference gate remains open |
+| DPT expression entry, saved row indices, X-only access, mode-specific colors/markers and native interactions | Shared heatmap/point preparation and rendering, with direct upstream verification | M11.b expression preview retained; broader storage/style/export M14 |
 | Sparse/lazy inputs, repeated labels, differing per-subset shapes, global styles and image export | Explicit restrictions | M14; Matplotlib objects remain outside boundary |
 
 | Builder surface (all three classes) | Current state | Completion evidence required |

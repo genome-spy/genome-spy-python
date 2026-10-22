@@ -21,6 +21,8 @@ Scanpy still owns preprocessing, embedding, clustering, and gene ranking.
 point and heatmap renderers; it never runs simulation.
 `gsc.pl.dpt_groups_pseudotime(...)` reuses the point renderer for stored DPT
 metadata, after explicit Scanpy preparation in the expression notebook.
+`gsc.pl.dpt_timeseries(...)` applies saved DPT row indices to X and reuses the
+heatmap/point renderers for expression profiles.
 
 When resuming work in another chat, read [the current queue](STATUS.md#current-work-queue)
 and inspect recent commits and uncommitted changes first. STATUS owns the active
