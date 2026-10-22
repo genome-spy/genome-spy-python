@@ -1065,6 +1065,8 @@ When pos=None, it reuses public `sc.pl.paga(plot=False)` on metadata-only AnnDat
 for **layout computation only**, without a Matplotlib figure. This recomputes the
 layout even when positions are cached, as upstream. Pass
 `pos=pbmc.uns['paga']['pos']` to reuse coordinates. Missing results fail clearly.
+CSR/CSC graphs keep their stored edge order. LIL graphs use the same layout path
+after SciPy prepares compatible sparse storage; stored graphs remain unchanged.
 
 | Parameters | Current behavior |
 | --- | --- |

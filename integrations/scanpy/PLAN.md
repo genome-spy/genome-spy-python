@@ -822,6 +822,8 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   overlays and point footprints; observed node/edge hover, zoom/pan, composition
   and offline HTML; independent packaged-data notebook execution and metadata-only
   resources. Keep Scanpy's PAGA extra optional and base imports lightweight.
+  Sparse regressions cover asymmetric CSC weights/order, computed LIL layouts,
+  custom solid-edge keys and preservation of stored matrix values and formats.
   This does not close M11.c: numeric/gene/degree colors, categorical mixtures/pies,
   multiple color panels, single-component filtering, directed transitions, file
   positions and GEXF export remain explicit unsupported cases. M14 owns font/global

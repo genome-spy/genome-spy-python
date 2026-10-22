@@ -1,6 +1,6 @@
 # Scanpy implementation status
 
-Updated: 2026-10-22. This is the current progress ledger; [PLAN.md](PLAN.md)
+Updated: 2026-10-23. This is the current progress ledger; [PLAN.md](PLAN.md)
 describes the work and acceptance criteria. Use the [shared lifecycle and
 clearance rules](../README.md#plan-lifecycle). Dates below record observations,
 not delivery promises.
@@ -168,7 +168,7 @@ C12 remains a separate upstream straight-link issue.
 | M11.a subplot entry | Closed (native panel preview) | [Explicit signature, shared renderer, independent composition and resource evidence](#m11a-native-time-series-subplots) | Simulation is delivered below; broader storage/markers/layout remain M14. |
 | M11.b group/pseudotime entry | Implemented; component/chart/workflow/resource checks verified | `733b04e`, filtered-view fix `5219e3a`; [stored metadata, shared panels and verification](#m11b-stored-dpt-groups-and-pseudotime) | Direct parent-entry comparison blocked by the pinned Scanpy/pandas indexing error; expression entry is independently verified below. |
 | M11.b expression entry | Closed (resident dense-X heatmap/point preview) | [Direct public reference, shared renderers, workflow and resources](#m11b-stored-dpt-expression-profiles) | Parent storage/style/export limits remain M14; group-reference gate and PAGA keep M11 open. |
-| M11.c undirected graph entry | Closed (bounded group/CSS-color preview) | [Public layout reuse, native charts and evidence](#m11c-stored-undirected-paga-graphs) | Full M11.c stays open for node-color modes, components, directed edges and file/export behavior. |
+| M11.c undirected graph entry | Closed (bounded group/CSS-color preview) | [Public layout reuse and native charts](#m11c-stored-undirected-paga-graphs); [sparse graph fixes](#paga-sparse-graph-corrections) | Full M11.c stays open for node-color modes, components, directed edges and file/export behavior. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
@@ -2900,7 +2900,7 @@ areas, while coordinates are shared. Group nodes use group IDs/counts, without a
 observation brush or generic graph framework. The Scanpy extra now includes
 Scanpy's PAGA/igraph extra; base dependencies and lightweight imports are unchanged.
 
-Verification: **413 targeted Python checks, two workflow tests and nine browser checks**
+Initial verification in `b642cbc`: **413 targeted Python checks, two workflow tests and nine browser checks**
 passed, along with Ruff formatting/lint and mypy. The full repository suite and
 documentation build were not rerun. Retained reproduction:
 
@@ -2911,7 +2911,8 @@ documentation build were not rerun. Retained reproduction:
   figure creation are guarded. CSR/CSC/LIL inputs validate without densifying;
   missing/stale/nonfinite/self-loop graphs fail clearly.
 - [Native browser checks](../../tests/integrations/scanpy/browser/test_paga.py) compare
-  six complete charts against Scanpy at display DPI 100, export DPI/DPR 150/1.5.
+  seven complete charts against Scanpy at display DPI 100, export DPI/DPR 150/1.5,
+  including the asymmetric CSC regression added below.
   They register positions, dimensions, labels and colored point footprints, and
   retain overlays only in temporary directories. Node/edge hover, both-axis zoom,
   pan, ordinary native composition, offline HTML, zero-size nodes and disabled
@@ -2945,6 +2946,35 @@ inventory, source map, optional dependency and user guide together. There are no
 35 partial plotting entries and 13 unimplemented plot/builder entries; availability
 is not full-family compatibility. Next is the PAGA node-color audit in the current
 queue. Clearance: **retain**; no live plan is eligible for removal.
+
+### PAGA sparse graph corrections
+
+Review found that converting CSC to CSR changed which asymmetric edge weight
+NetworkX retained, while LIL inputs reached Scanpy's layout path without a
+compatible sparse format. The existing storage-format test supplied positions,
+so it never exercised the failing LIL layout branch.
+
+The shared `_graph` helper now returns the layout source and thresholded native
+edge graph. A COO copy preserves stored edge order while filtering. Layout keeps
+CSR/CSC input or uses SciPy to prepare other storage, including LIL; Scanpy's
+public no-plot API still computes the layout and applies its own threshold. The
+layout source stays unfiltered, preserving tree-layout behavior when the solid
+edge key itself names the stored tree. Stored matrices remain unchanged. No
+renderer, core code, analysis implementation or new abstraction is needed.
+
+The regressions fail on the previous implementation and cover asymmetric CSC
+widths against public Scanpy, automatic/supplied positions for CSR/CSC/LIL,
+custom solid-edge keys, cache controls and source identity/format/values. Invalid
+weights still fail clearly; expression access, analysis and figure creation stay
+guarded. The native chart comparison now also includes asymmetric CSC edges.
+The expression notebook explains this storage behavior while retaining the
+packaged PBMC example. On 2026-10-23, **300 targeted Python checks, ten PAGA
+browser checks and both workflow tests passed**, along with Ruff formatting/lint
+and mypy. All 29 nonempty expression-notebook code cells ran in Jupyter without
+errors, producing the same 23 charts. Rendering, transport and workload dimensions
+are unchanged; the retained resource baseline above still covers those paths.
+The full repository suite, docs build and resource benchmark were not rerun.
+Scope, next work and clearance remain unchanged.
 
 ## Public callable coverage
 

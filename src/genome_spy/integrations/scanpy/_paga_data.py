@@ -12,8 +12,8 @@ from genome_spy.integrations.scanpy._style import _palette, native_color
 CONTEXT = "gsc.pl.paga"
 
 
-def _graph(adata: Any, key: str, count: int, threshold: float) -> Any:
-    """Return a thresholded undirected graph without modifying the stored sparse matrix."""
+def _graph(adata: Any, key: str, count: int, threshold: float) -> tuple[Any, Any]:
+    """Return a layout-ready sparse source and thresholded graph without changing stored data."""
     import networkx as nx
     from scipy import sparse
 
@@ -24,9 +24,11 @@ def _graph(adata: Any, key: str, count: int, threshold: float) -> Any:
         raise ValueError(
             f"{CONTEXT}: paga[{key!r}] must be a {count}-by-{count} SciPy sparse graph."
         )
-    if not np.isfinite(matrix.tocoo().data).all():
+    source = matrix if matrix.format in {"csr", "csc"} else matrix.tocsr()
+    # COO preserves stored edge order and gives every format the same filtering path.
+    matrix = matrix.tocoo(copy=True)
+    if not np.isfinite(matrix.data).all():
         raise ValueError(f"{CONTEXT}: graph weights must be finite.")
-    matrix = matrix.tocsr(copy=True)
     if threshold > 0:
         matrix.data[matrix.data < threshold] = 0
         matrix.eliminate_zeros()
@@ -35,7 +37,7 @@ def _graph(adata: Any, key: str, count: int, threshold: float) -> Any:
         raise NotImplementedError(f"{CONTEXT}: self-loops are unsupported.")
     if any(weight < 0 for _, _, weight in graph.edges(data="weight")):
         raise ValueError(f"{CONTEXT}: retained graph weights must be nonnegative.")
-    return graph
+    return source, graph
 
 
 def prepare_paga(
@@ -78,15 +80,15 @@ def prepare_paga(
         context=CONTEXT,
         minimum=-np.inf,
     )
-    solid = _graph(adata, solid_edges, count, threshold)
-    dashed = (
-        _graph(adata, dashed_edges, count, threshold)
-        if dashed_edges is not None
-        else None
-    )
+    source, solid = _graph(adata, solid_edges, count, threshold)
+    dashed = None
+    if dashed_edges is not None:
+        _, dashed = _graph(adata, dashed_edges, count, threshold)
     if pos is None:
         # Compute layout without copying expression or opening a figure.
-        graph_data = AnnData(obs=adata.obs[[key]], uns={"paga": dict(stored)})
+        graph_data = AnnData(
+            obs=adata.obs[[key]], uns={"paga": {**stored, solid_edges: source}}
+        )
         sc.pl.paga(
             graph_data,
             threshold=threshold,

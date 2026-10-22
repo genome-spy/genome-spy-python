@@ -43,8 +43,10 @@ def make_paga(case="default"):
     )
     if case == "empty":
         a.uns["paga"]["connectivities"] = csr_matrix((4, 4))
-    elif case == "asymmetric":
+    elif case in {"asymmetric", "asymmetric_csc"}:
         a.uns["paga"]["connectivities"][0, 1] = 0.7
+        if case == "asymmetric_csc":
+            a.uns["paga"]["connectivities"] = a.uns["paga"]["connectivities"].tocsc()
     elif case == "uniform_sizes":
         del a.uns["cluster_sizes"]
     return a
@@ -87,6 +89,7 @@ def paga_cases():
         },
         "empty": {"pos": POSITIONS},
         "asymmetric": {"pos": POSITIONS, "threshold": 0},
+        "asymmetric_csc": {"pos": POSITIONS, "threshold": 0},
         "uniform_sizes": {"pos": POSITIONS, "color": "purple"},
         "zero_sizes": {"pos": POSITIONS, "node_size_scale": 0},
     }

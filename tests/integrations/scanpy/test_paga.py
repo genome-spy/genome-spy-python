@@ -107,12 +107,16 @@ def test_nodes_edges_labels_bounds_and_cache_match_public_scanpy(case, monkeypat
 
 @pytest.mark.parametrize("plot", [False, True])
 @pytest.mark.parametrize("add_pos", [False, True])
-def test_layout_never_reads_expression_or_creates_a_figure(plot, add_pos, monkeypatch):
+@pytest.mark.parametrize("format", ["csr", "csc", "lil"])
+def test_layout_never_reads_expression_or_creates_a_figure(
+    plot, add_pos, format, monkeypatch
+):
     from anndata import AnnData
     import scanpy as sc
     import matplotlib.pyplot as plt
 
     a = make_paga()
+    a.uns["paga"]["connectivities"] = a.uns["paga"]["connectivities"].asformat(format)
     old = a.uns["paga"]["pos"].copy()
     for name in ("X", "raw", "layers"):
         original = inspect.getattr_static(AnnData, name)
@@ -210,11 +214,55 @@ def test_invalid_stored_graphs_are_not_recomputed(change, error):
 
 
 @pytest.mark.parametrize("format", ["csr", "csc", "lil"])
-def test_sparse_graph_validation_handles_storage_formats(format):
+@pytest.mark.parametrize("supplied_pos", [False, True])
+@pytest.mark.parametrize("solid_edges", ["connectivities", "weak"])
+def test_sparse_graph_validation_handles_storage_formats(
+    format, supplied_pos, solid_edges
+):
+    import scanpy as sc
+
     a = make_paga()
-    graph = a.uns["paga"]["connectivities"].asformat(format)
-    a.uns["paga"]["connectivities"] = graph
-    assert gsc.pl.paga(a, pos=POSITIONS, show=False) is not None
+    graph = a.uns["paga"][solid_edges].asformat(format)
+    a.uns["paga"][solid_edges] = graph
+    before = graph.copy()
+    options = {"pos": POSITIONS} if supplied_pos else {}
+    reference = a.copy()
+    # Scanpy needs compressed storage for layout; keep the source object untouched.
+    if format == "lil":
+        reference.uns["paga"][solid_edges] = graph.tocsr()
+    sc.pl.paga(reference, solid_edges=solid_edges, plot=False, show=False, **options)
+    spec = gsc.pl.paga(a, solid_edges=solid_edges, show=False, **options).to_dict()
+    mark = next(m for m in leaf_marks(spec) if m["mark"]["type"] == "point")
+    rows = spec["datasets"][mark["data"]["name"]]
+    np.testing.assert_allclose(
+        [[r["_x"], r["_y"]] for r in rows], reference.uns["paga"]["pos"]
+    )
+    assert a.uns["paga"][solid_edges] is graph and graph.format == format
+    assert (graph != before).nnz == 0
     graph[0, 1] = np.nan
     with pytest.raises(ValueError, match="graph weights must be finite"):
-        gsc.pl.paga(a, pos=POSITIONS, show=False)
+        gsc.pl.paga(a, solid_edges=solid_edges, show=False, **options)
+
+
+@pytest.mark.parametrize("format", ["csr", "csc", "lil"])
+def test_tree_layout_retains_the_unfiltered_source(format):
+    import scanpy as sc
+    from scipy.sparse.csgraph import minimum_spanning_tree
+
+    a = make_paga()
+    tree = minimum_spanning_tree(a.uns["paga"]["connectivities"])
+    a.uns["paga"]["connectivities_tree"] = tree.asformat(format)
+    reference = a.copy()
+    reference.uns["paga"]["connectivities_tree"] = tree
+    options = dict(
+        solid_edges="connectivities_tree",
+        layout="rt",
+        threshold=0.02,
+        plot=False,
+        show=False,
+    )
+    sc.pl.paga(reference, **options)
+    gsc.pl.paga(a, **options)
+    np.testing.assert_allclose(a.uns["paga"]["pos"], reference.uns["paga"]["pos"])
+    assert a.uns["paga"]["connectivities_tree"].format == format
+    assert (a.uns["paga"]["connectivities_tree"] != tree).nnz == 0

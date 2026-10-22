@@ -18,7 +18,8 @@ from tests.integrations.scanpy.helpers import leaf_marks
 
 
 @pytest.mark.parametrize(
-    "case", ["default", "supplied", "dashed", "sizing", "aliases", "empty"]
+    "case",
+    ["default", "supplied", "dashed", "sizing", "aliases", "empty", "asymmetric_csc"],
 )
 @pytest.mark.parametrize("page", [1.5], indirect=True)
 def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, case):
