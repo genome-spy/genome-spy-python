@@ -35,7 +35,32 @@ def _run_kernel(page, code: str) -> None:
     assert status["status"] == "ok", status
 
 
+def _wait_kernel(page, expression: str) -> None:
+    # Separate requests leave the kernel free to process widget replies.
+    page.evaluate(
+        """async expression => {
+        const kernel = window.jupyterapp.shell.currentWidget.sessionContext.session.kernel;
+        const deadline = Date.now() + 30000;
+        do {
+            const reply = await kernel.requestExecute({
+                code: '', store_history: false,
+                user_expressions: {ready: `bool(${expression})`}
+            }).done;
+            const result = reply.content.user_expressions.ready;
+            if (result.status !== 'ok') throw new Error(JSON.stringify(result));
+            if (result.data['text/plain'] === 'True') return;
+            await new Promise(resolve => setTimeout(resolve, 50));
+        } while (Date.now() < deadline);
+        throw new Error(`Timed out waiting for Python: ${expression}`);
+    }""",
+        expression,
+    )
+
+
 def _check_workflow(page, canvas, workflow: str) -> None:
+    if workflow == "python-rows":
+        _check_python_rows(page, canvas)
+        return
     if workflow == "agent-embed":
         _check_agent_embed(page, canvas)
         return
@@ -148,11 +173,11 @@ def _check_agent_embed(page, canvas) -> None:
     assert before.crop(lower).tobytes() != after.crop(lower).tobytes(), (
         "The Python result did not change the lower plot"
     )
-    _run_kernel(page, "operation_task = asyncio.create_task(change_chart())")
+    page.get_by_role("button", name="Change chart", exact=True).click()
     page.get_by_text("Ready: 0 selected", exact=True).wait_for()
     _run_kernel(
         page,
-        "assert operation_task.done()\nassert operation_task.result() == 90\n"
+        "assert operation_future.done()\nassert operation_future.result() == 90\n"
         "assert selected_rows == []",
     )
     cleared = Image.open(io.BytesIO(canvas.screenshot())).convert("RGB")
@@ -169,20 +194,90 @@ def _check_agent_embed(page, canvas) -> None:
 empty_task = asyncio.create_task(set_range([4.5, 4.8]))
 """,
     )
-    page.wait_for_timeout(200)
+    _wait_kernel(page, "empty_task.done()")
     _run_kernel(
         page,
         "assert empty_task.done()\nassert empty_task.result()['intervals']['x'] == [4.5, 4.8]\n"
         "assert empty_task.result()['active']\nassert selected_rows == []\n"
-        "select_task = asyncio.create_task(set_range([1.5, 3.5]))\n"
+        "select_task = asyncio.create_task(set_range([1, 3]))\n"
         "old_connection_task = connection_task\nold_widget = widget\nold_api = api",
     )
     page.get_by_text("Ready: 2 selected", exact=True).wait_for()
+    _wait_kernel(page, "select_task.done()")
     _run_kernel(
         page,
         "assert select_task.done()\nselect_task.result()\n"
-        "assert [row['id'] for row in selected_rows] == ['b', 'c']",
+        "assert [row['id'] for row in selected_rows] == ['a', 'b']",
     )
+
+
+def _check_python_rows(page, canvas) -> None:
+    page.get_by_text("Ready — 0 rows in Python", exact=False).wait_for()
+    source = page.locator(".jp-OutputArea canvas").first
+    source.scroll_into_view_if_needed()
+    before = Image.open(io.BytesIO(canvas.screenshot())).convert("RGB")
+    bounds = source.bounding_box()
+    assert bounds is not None
+    _run_kernel(page, "assert update_count == 1\nassert selected_rows == []")
+    page.mouse.move(bounds["x"] + 190, bounds["y"] + 100)
+    page.mouse.down()
+    page.mouse.move(bounds["x"] + 330, bounds["y"] + 230, steps=12)
+    _run_kernel(page, "assert update_count == 1\nassert selected_rows == []")
+    page.mouse.up()
+    page.wait_for_function("""() => [...document.querySelectorAll('.widget-label')]
+        .some(el => /Ready — [1-9][0-9]* rows in Python/.test(el.textContent))""")
+    _run_kernel(
+        page,
+        "assert 0 < len(selected_rows) < len(rows)\n"
+        "assert update_count == 2\nassert latest_snapshot['active']",
+    )
+    assert (
+        before.tobytes()
+        != Image.open(io.BytesIO(canvas.screenshot())).convert("RGB").tobytes()
+    )
+    page.get_by_role("button", name="Clear brush", exact=True).click()
+    page.get_by_text("Ready — 0 rows in Python", exact=False).wait_for()
+    _run_kernel(
+        page,
+        "clear_task.result()\nassert selected_rows == []\nassert not latest_snapshot['active']",
+    )
+    assert (
+        before.tobytes()
+        == Image.open(io.BytesIO(canvas.screenshot())).convert("RGB").tobytes()
+    )
+    _run_kernel(
+        page,
+        """async def set_range(x, y):
+    async with asyncio.timeout(30):
+        parameter = await source_api.params.get('brush')
+        await parameter.set_value({'type': 'interval', 'intervals': {'x': x, 'y': y}})
+        return await selection.get_value()
+empty_task = asyncio.create_task(set_range([30, 31], [12, 13]))
+""",
+    )
+    _wait_kernel(page, "empty_task.done() and update_count == 4")
+    _run_kernel(
+        page,
+        "assert empty_task.done()\nassert empty_task.result()['active']\n"
+        "assert selected_rows == []\nassert update_count == 4\n"
+        "select_task = asyncio.create_task(set_range([40, 50], [15, 19]))",
+    )
+    page.get_by_text("Ready — 103 rows in Python", exact=False).wait_for()
+    _wait_kernel(page, "select_task.done()")
+    _run_kernel(
+        page,
+        "assert len(selected_rows) == len({row['row_id'] for row in selected_rows}) == 103\n"
+        "assert selected_counts == {'Chinstrap': 32, 'Adelie': 32, 'Gentoo': 39}\n"
+        "assert all(40 <= row[x_field] < 50 and 15 <= row[y_field] < 19 for row in selected_rows)\n"
+        "assert update_count == 5\nselect_task.result()\n"
+        "old_connection_task = connection_task\nold_source_widget = source_widget\nold_target_widget = target_widget",
+    )
+    pixels = Image.open(io.BytesIO(canvas.screenshot())).convert("RGB")
+    palette = [(191, 92, 202), (255, 108, 2), (15, 117, 116)]
+    color_counts = {color: count for count, color in pixels.getcolors(1_000_000)}
+    areas = [color_counts.get(color, 0) for color in palette]
+    ratios = [area / count for area, count in zip(areas, [32, 32, 39], strict=True)]
+    assert min(ratios) > 0 and max(ratios) / min(ratios) < 1.05, (areas, ratios)
 
 
 def main() -> None:
@@ -192,7 +287,14 @@ def main() -> None:
     parser.add_argument("--check-embed-interactions", action="store_true")
     parser.add_argument(
         "--workflow",
-        choices=["intervals", "genes", "points", "sequence", "agent-embed"],
+        choices=[
+            "intervals",
+            "genes",
+            "points",
+            "sequence",
+            "agent-embed",
+            "python-rows",
+        ],
     )
     args = parser.parse_args()
     if args.notebook.suffix == ".md":
@@ -319,6 +421,8 @@ def main() -> None:
                                 .first.locator(".jp-OutputArea canvas")
                                 .first
                             )
+                        elif args.workflow == "python-rows":
+                            canvas = page.locator(".jp-OutputArea canvas").last
                         canvas.wait_for(state="visible", timeout=120_000)
                         page.wait_for_timeout(2000)
                         if page.locator(".jp-OutputArea-error").count() or errors:
@@ -449,7 +553,29 @@ def main() -> None:
                             page.evaluate(
                                 "window.jupyterapp.commands.execute('notebook:run-all-cells')"
                             )
-                            if args.workflow == "agent-embed":
+                            if args.workflow == "python-rows":
+                                page.get_by_text(
+                                    "Ready — 0 rows in Python", exact=False
+                                ).wait_for()
+                                _run_kernel(
+                                    page,
+                                    "assert selected_rows == []\nassert old_connection_task.done()\n"
+                                    "assert source_widget is not old_source_widget\n"
+                                    "assert target_widget is not old_target_widget\n"
+                                    "assert not connection_task.done()",
+                                )
+                                canvas = page.locator(".jp-OutputArea canvas").last
+                                _check_python_rows(page, canvas)
+                                _run_kernel(
+                                    page,
+                                    "cleanup_task = asyncio.create_task(stop_example())",
+                                )
+                                _wait_kernel(page, "cleanup_task.done()")
+                                _run_kernel(
+                                    page,
+                                    "cleanup_task.result()\nassert connection_task.cancelled()",
+                                )
+                            elif args.workflow == "agent-embed":
                                 page.get_by_text(
                                     "Ready: 0 selected", exact=True
                                 ).wait_for()
@@ -465,7 +591,7 @@ def main() -> None:
                                     page,
                                     "cleanup_task = asyncio.create_task(stop_example())",
                                 )
-                                page.wait_for_timeout(200)
+                                _wait_kernel(page, "cleanup_task.done()")
                                 _run_kernel(
                                     page,
                                     "assert cleanup_task.done()\ncleanup_task.result()\n"

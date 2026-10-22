@@ -78,6 +78,36 @@ def notebook_function(notebook, name, **namespace):
     return namespace[name]
 
 
+def test_python_row_roundtrip_matches_both_axes_and_preserves_source_records():
+    rows = [
+        {"id": "left", "x": 0, "y": 2},
+        {"id": "inside", "x": 1, "y": 2},
+        {"id": "above", "x": 1, "y": 4},
+        {"id": "x_upper", "x": 2, "y": 2},
+        {"id": "y_upper", "x": 1, "y": 3},
+        {"id": "lower", "x": 1, "y": 1},
+    ]
+    select = notebook_function(
+        "penguin_python_roundtrip", "matching_rows", rows=rows, x_field="x", y_field="y"
+    )
+    selected = select({"active": True, "intervals": {"x": [2, 1], "y": [3, 1]}})
+    assert [row["id"] for row in selected] == ["inside", "lower"]
+    assert selected[0] is rows[1]
+    assert select({"active": True, "intervals": {"x": [1, 1], "y": [1, 3]}}) == []
+    assert select({"active": True, "intervals": {"x": [1, 2], "y": [2, 2]}}) == []
+    assert select({"active": True, "intervals": {"x": [4, 5], "y": [1, 3]}}) == []
+    assert select({"active": False, "intervals": {"x": [1, 2], "y": [1, 3]}}) == []
+    assert select({"active": True, "intervals": {"x": None, "y": [1, 3]}}) == []
+    assert rows == [
+        {"id": "left", "x": 0, "y": 2},
+        {"id": "inside", "x": 1, "y": 2},
+        {"id": "above", "x": 1, "y": 4},
+        {"id": "x_upper", "x": 2, "y": 2},
+        {"id": "y_upper", "x": 1, "y": 3},
+        {"id": "lower", "x": 1, "y": 1},
+    ]
+
+
 def test_bed_preserves_zero_based_half_open_endpoints():
     convert = notebook_function("annotate_genomic_intervals", "bed_interval")
     snapshot = {
