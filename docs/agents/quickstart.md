@@ -76,6 +76,7 @@ specialized chart form. See [capability boundaries](grouped-charts.md#supplied-o
 | Fields, transforms, layers, panels | [Encodings and composition](encodings.md) |
 | Color, size, order, guides | [Scales, axes, legends](scales-axes-legends.md) |
 | Notebook display, export, recovery | [Rendering](rendering.md) |
+| Python callbacks and live chart updates | [Embed API](embed-api.md) |
 | Recreate an existing chart | [Reference checks](table-chart.md) |
 | Grouped summaries or matrices | [Grouped charts](grouped-charts.md) |
 | Install the skill | [Installation](skill-distribution.md) |

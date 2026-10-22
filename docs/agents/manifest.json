@@ -76,6 +76,20 @@
     "description": "Notebook and file-export examples, installed-signature inspection, and a recovery checklist."
   },
   {
+    "path": "embed-api.md",
+    "source": "docs/agents/embed-api.md",
+    "title": "Live charts and the Python Embed API",
+    "section": "Live charts",
+    "description": "Runnable notebook roundtrip, selections, parameters, data updates, cleanup, and Python versus JavaScript support."
+  },
+  {
+    "path": "api-embed.md",
+    "title": "Python Embed API signatures",
+    "section": "Live charts",
+    "api_section": "Live embed",
+    "description": "Generated widget connection, parameter, selection, dataset, scoped-view, and lifecycle signatures."
+  },
+  {
     "path": "table-chart.md",
     "source": "skills/create-genomespy-visualization/references/table-chart.md",
     "title": "Table charts and reference fidelity",
@@ -88,5 +102,23 @@
     "title": "Grouped summaries and matrices",
     "section": "Deliver and verify",
     "description": "Native summary-point and matrix examples; normalization, ordering, and capability limits."
+  },
+  {
+    "url": "https://genomespy.app/docs/api/embedding/",
+    "title": "JavaScript embedding",
+    "section": "Upstream JavaScript API (HTML)",
+    "description": "Official browser entry points and embed setup; JavaScript, not the Python connection API."
+  },
+  {
+    "url": "https://genomespy.app/docs/api/runtime-state/",
+    "title": "JavaScript runtime state",
+    "section": "Upstream JavaScript API (HTML)",
+    "description": "Named datasets, parameters, scale domains and programmatic zoom; check Python wrapper coverage before adapting."
+  },
+  {
+    "url": "https://genomespy.app/docs/api/views/",
+    "title": "JavaScript view hierarchy",
+    "section": "Upstream JavaScript API (HTML)",
+    "description": "Scoped views, mark interaction, layout bounds and mutations; Python currently wraps scoped parameter access only."
   }
 ]

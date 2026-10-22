@@ -13,6 +13,9 @@ with the end excluded: an interval from 10 to 20 contains 10 bases.
 Overlapping saved regions share one compact track.
 
 The Python connection API used here is experimental.
+For a compact notebook roundtrip, operation examples, and Python versus
+JavaScript support, see the
+[agent Embed API guide](https://genomespy.app/genome-spy-python/agents/embed-api.md).
 
 ## Try it in a notebook
 

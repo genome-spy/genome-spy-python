@@ -37,6 +37,8 @@ display(view)
 ```
 
 Creating a widget or running a notebook does not prove frontend rendering.
+To read selections, change parameters, or send data back, continue with the
+[live Embed API](embed-api.md); retaining the widget alone does not connect it.
 
 ## Inspect an unfamiliar option
 

@@ -134,6 +134,11 @@ jobs:
           "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
             notebooks/edit_sequence.ipynb --workflow sequence \
             --screenshot "$RUNNER_TEMP/edit-sequence.png"
+      - name: Verify the agent guide notebook roundtrip
+        run: |
+          "$RUNNER_TEMP/notebook-env/bin/python" tools/check_notebook_rendering.py \
+            docs/agents/embed-api.md --workflow agent-embed \
+            --screenshot "$RUNNER_TEMP/agent-embed.png"
       - uses: actions/upload-artifact@v7
         if: always()
         with:

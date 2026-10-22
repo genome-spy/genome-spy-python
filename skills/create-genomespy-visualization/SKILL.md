@@ -79,7 +79,9 @@ declarative transforms and interactions in the browser.
    report unverified checks. A canvas alone is not rendering evidence.
 
 Prefer existing rendering paths before adding JavaScript, servers or dependencies.
-This skill authors interaction; it cannot read a user's live zooms/selections.
+For Python callbacks or live chart updates, read the
+[Embed API guide](https://genomespy.app/genome-spy-python/agents/embed-api.md).
+It requires a host connection; Python wraps a subset of the JavaScript API.
 
 ## Recover
 
