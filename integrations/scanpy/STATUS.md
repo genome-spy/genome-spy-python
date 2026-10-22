@@ -2737,8 +2737,9 @@ Both panels retain observation row positions and use the stored rank coordinates
 without sorting. The lower panel masks missing/infinite pseudotimes without
 changing the source. Numeric values, marker shapes, colors, ticks, boundary rules
 and native composition reuse the time-series helpers. Required fields, categorical
-groups without missing labels, a complete rank permutation and valid boundaries
-are checked explicitly; unsupported marker/palette options retain parent limits.
+groups without missing labels and valid boundaries are checked explicitly;
+stored order uses shared time-series coordinate validation, including global
+ranks in filtered views. Unsupported marker/palette options retain parent limits.
 
 **The direct parent-reference gate remains open.** Scanpy 1.11.5 with pandas
 2.3.3 fails before drawing because its group-code Series is indexed as `X[:, None]`.
@@ -2781,6 +2782,21 @@ Next: `dpt_timeseries`, using stored order with the existing expression/time-ser
 helpers. Broader style/storage/export stay M14; DPT/PAGA keep M11 open. The full
 repository suite and documentation build were not rerun. Clearance: **retain**;
 no plan is eligible for removal.
+
+Filtered-view follow-up: the metadata reader now passes stored order directly
+to the existing time-series coordinate validation. The extra full-rank
+permutation check is removed; filtered/reordered views retain global ranks and
+saved boundaries without sorting, remapping or analysis. The regression first
+failed on the old check, then passed through the existing semantic and registered
+browser comparisons. Metadata-only guards now exercise that filtered view too.
+**335 targeted Python/contract/workflow checks and eight DPT browser checks passed**;
+Ruff formatting/lint and mypy pass. The notebook now explicitly analyzes all 640
+Krumsiek11 samples and plots a read-only 320-sample view, preserving its saved
+coordinates. All 26 nonempty cells ran in Jupyter without errors and the filtered
+DPT output was inspected. Prior resource evidence is retained: preparation
+downstream of the removed validation, native rendering and transport are unchanged. Resource
+measurements, the full suite and documentation build were not rerun. The direct
+parent-reference gate, next slice and clearance remain unchanged.
 
 ## Public callable coverage
 

@@ -122,7 +122,7 @@ def test_views_and_backed_metadata_work_without_expression_or_analysis(
         original.write_h5ad(tmp_path / "dpt.h5ad")
         adata = read_h5ad(tmp_path / "dpt.h5ad", backed="r")
     else:
-        adata = original[:]
+        adata = original[[6, 1, 4, 3]]
     before = adata.obs.copy(deep=True)
     try:
         for name in ("X", "raw", "layers"):
@@ -152,8 +152,7 @@ def test_missing_analysis_is_an_error(field):
     [
         ("dpt_groups", ["a"] * 8, TypeError),
         ("dpt_groups", pd.Categorical([None] + ["a"] * 7), ValueError),
-        ("dpt_order", [0] * 8, ValueError),
-        ("dpt_order", np.arange(8) + 1, ValueError),
+        ("dpt_order", ["bad"] * 8, TypeError),
         ("dpt_order", [np.inf] + list(range(7)), ValueError),
         ("dpt_pseudotime", [np.nan] * 8, ValueError),
         ("dpt_pseudotime", ["bad"] * 8, TypeError),

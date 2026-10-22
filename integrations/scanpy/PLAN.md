@@ -778,7 +778,8 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   five categories), then pseudotime against that order with ticks at 0/1.
   Keep unused category codes, mask nonfinite pseudotime only in its panel, and
   preserve every supplied rank/boundary. Read observation/uns metadata only,
-  including from backed data, and reject a non-permutation order. Native hover,
+  including from backed data. Reuse time-series coordinate validation, preserving
+  global ranks and saved boundaries in filtered/reordered views. Native hover,
   independent navigation and 496 × 168-pixel per-panel defaults reuse the existing
   helpers. Verify masks, category/paint order, palettes, markers, defaults, read-only
   behavior, complete registered panels, observed navigation, workflow and resources.

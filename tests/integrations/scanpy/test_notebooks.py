@@ -318,6 +318,11 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     ]
     dpt_spec = namespace["dpt_groups_chart"].to_dict()
     simulation = namespace["simulation"]
+    dpt_cells = namespace["dpt_cells"]
+    assert dpt_cells.is_view and dpt_cells.n_obs == 320
+    np.testing.assert_array_equal(
+        dpt_cells.obs["dpt_order"], simulation.obs["dpt_order"].iloc[::2]
+    )
     for i, field in enumerate(["dpt_groups", "dpt_pseudotime"]):
         point = next(
             m
@@ -326,15 +331,15 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         )
         rows = dpt_spec["datasets"][point["data"]["name"]]
         positions = [r["_sample"] for r in rows]
-        expected = simulation.obs[field].cat.codes if i == 0 else simulation.obs[field]
+        expected = dpt_cells.obs[field].cat.codes if i == 0 else dpt_cells.obs[field]
         np.testing.assert_allclose(
             [r["_value"] for r in rows], expected.to_numpy()[positions]
         )
         np.testing.assert_array_equal(
             [r["_time"] for r in rows],
-            simulation.obs["dpt_order"].to_numpy()[positions],
+            dpt_cells.obs["dpt_order"].to_numpy()[positions],
         )
-        assert len(rows) == 640
+        assert len(rows) == dpt_cells.n_obs
     profiles = namespace["profiles"]
     simulation = namespace["simulation"]
     assert simulation.shape == (640, 11)

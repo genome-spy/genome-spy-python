@@ -19,7 +19,7 @@ from genome_spy.integrations.scanpy._style import color_bounds, native_color
 CONTEXT = "gsc.pl.timeseries"
 
 
-def prepare_dpt_groups(adata: Any) -> tuple[pd.Series, np.ndarray, pd.Series, Any]:
+def prepare_dpt_groups(adata: Any) -> tuple[pd.Series, pd.Series, pd.Series, Any]:
     """Read stored DPT groups, order, pseudotime and boundaries without expression access."""
     from anndata import AnnData
 
@@ -38,9 +38,7 @@ def prepare_dpt_groups(adata: Any) -> tuple[pd.Series, np.ndarray, pd.Series, An
         raise TypeError(f"{context}: dpt_groups must be categorical.")
     if groups.isna().any():
         raise ValueError(f"{context}: missing dpt_groups are unsupported.")
-    order = numeric_values(adata.obs[["dpt_order"]], context=context).ravel()
-    if not np.array_equal(np.sort(order), np.arange(adata.n_obs)) or not adata.n_obs:
-        raise ValueError(f"{context}: dpt_order must be a permutation of 0..n_obs-1.")
+    order = adata.obs["dpt_order"]
     # Scanpy's scatter masks disconnected infinite pseudotimes, without changing the stored result.
     pseudotime = adata.obs["dpt_pseudotime"].replace([np.inf, -np.inf], np.nan)
     return groups, order, pseudotime, adata.uns["dpt_changepoints"]

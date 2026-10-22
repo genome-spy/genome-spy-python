@@ -6,7 +6,7 @@ from anndata import AnnData
 
 
 def make_dpt(case="default"):
-    """Return eight observations with stored ranks, groups, times and boundaries."""
+    """Return stored DPT metadata, optionally filtered without renumbering ranks."""
     adata = AnnData(
         np.zeros((8, 2)),
         obs=pd.DataFrame(
@@ -34,17 +34,20 @@ def make_dpt(case="default"):
     elif case == "single_group":
         adata.obs["dpt_groups"] = pd.Categorical(["only"] * 8)
         adata.uns["dpt_changepoints"] = np.array([], dtype=int)
+    elif case == "filtered_view":
+        return adata[[6, 1, 4, 3]]
     return adata
 
 
 def dpt_cases():
-    """Cover categorical ticks, native colors, masked times and shared markers."""
+    """Cover categorical ticks, colors, masked times, markers and filtered ranks."""
     return {
         "default": {},
         "many_groups": {"marker": "o"},
         "missing": {"marker": "o"},
         "integer_time": {},
         "single_group": {},
+        "filtered_view": {},
         "custom_colors": {
             "palette": ["red", "blue"],
             "color_map": "plasma",

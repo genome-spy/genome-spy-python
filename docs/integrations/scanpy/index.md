@@ -987,7 +987,8 @@ already supplies `uns['iroot'] = 0`. Plotting only reads categorical
 `obs['dpt_groups']`, `obs['dpt_order']`, `obs['dpt_pseudotime']` and
 `uns['dpt_changepoints']`. It never accesses expression or reruns analysis, so
 read-only views and backed metadata work. Missing fields error with the required
-Scanpy preparation; `dpt_order` must be a permutation of `0..n_obs-1`.
+Scanpy preparation. Stored order coordinates use the existing time-series numeric
+validation; filtered views retain their global ranks and saved boundaries.
 
 The two panels reuse the time-series renderer. The upper y values retain category
 codes, including unused category slots; palette colors follow sorted observed
