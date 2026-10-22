@@ -295,7 +295,25 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["variable_genes"],
         namespace["highest_expression"],
         namespace["scrublet_scores"],
+        namespace["timeseries_heatmap"],
     ]
+    profiles = namespace["profiles"]
+    expected_order = namespace["pbmc"].obs["S_score"].sort_values(kind="stable").index
+    assert profiles.index.equals(expected_order)
+    assert list(profiles.columns) == namespace["marker_names"]
+    series = namespace["timeseries_heatmap"].to_dict()
+    records = next(rows for rows in series["datasets"].values() if "_value" in rows[0])
+    np.testing.assert_allclose(
+        np.array([row["_value"] for row in records]).reshape(10, 700),
+        sc.get.obs_df(namespace["pbmc"], keys=namespace["marker_names"], use_raw=True)
+        .loc[expected_order]
+        .to_numpy()
+        .T,
+    )
+    assert series["scales"]["x"]["domain"] == [0, 699]
+    assert series["scales"]["y"]["domain"] == [0, 9]
+    assert series["scales"]["x"]["zoom"] is True
+    assert series["scales"]["y"]["zoom"] is True
     assert scrublet_calls == [
         {
             "threshold": 0.25,

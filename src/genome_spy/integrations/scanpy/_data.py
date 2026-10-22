@@ -62,6 +62,19 @@ def numeric_values(table: pd.DataFrame, *, context: str) -> np.ndarray:
     return values
 
 
+def matrix_array(matrix: Any, *, context: str) -> Any:
+    """Return a resident nonempty 2D array/table without reading or densifying other sources."""
+    import numpy as np
+    import pandas as pd
+
+    if not isinstance(matrix, (np.ndarray, pd.DataFrame, list, tuple)):
+        raise TypeError(f"{context}: supply a resident 2D numeric array or table.")
+    array = matrix if isinstance(matrix, pd.DataFrame) else np.asanyarray(matrix)
+    if array.ndim != 2 or not all(array.shape):
+        raise ValueError(f"{context}: matrix must have two nonempty dimensions.")
+    return array
+
+
 def resolve_use_raw(
     adata: Any, requested: bool | None, layer: str | None, *, context: str
 ) -> bool:

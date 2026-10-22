@@ -831,6 +831,46 @@ allocation including serialization was 344 MB. Browser first paint including
 dispatch took 10.3 s; paused hover was 113 ms. These local observations expose
 the current serialization cost; larger/chunked transport remains M05.d.
 
+## Supplied time-series heatmaps
+
+```python
+# Analysis owns the ordering; plotting preserves exactly these supplied profiles.
+chart = gsc.pl.timeseries_as_heatmap(
+    profiles, var_names=genes, highlights_x=[12.5], color_map="viridis",
+    zoom="xy", show_values=True, width=700, height=280, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`timeseries_as_heatmap` accepts resident numeric arrays, nested sequences and
+DataFrames with **samples in rows and variables in columns**. It transposes them
+for display and puts the first variable at the bottom, matching Scanpy 1.11.5.
+It never sorts, normalizes, smooths, infers time or recomputes analysis. Provide
+any time/pseudotime ordering explicitly before plotting. DataFrame labels are
+used only when passed as `var_names`; empty labels use numeric positions. Repeated
+names retain separate rows. Two-dimensional label arrays use their first column.
+Ordinary label sequences also work; the pinned upstream helper requires an array.
+
+The default center limits are `[0, samples - 1]` and `[0, variables - 1]`, cropping
+half of the outer cells as Scanpy does. Singleton axes use `[-0.05, 0.05]`.
+`highlights_x` accepts finite fractional, repeated or outside positions; dashed
+black rules are clipped to the supplied limits and never expand them. Native dash
+lengths round to whole pixels (8 on, 3 off). Values use finite-range linear color
+normalization and a native right-hand color guide at half the plot height.
+Missing entries stay blank. Scanpy's array conversion discards NumPy masks for
+this helper; explicit NaNs are needed to hide masked values.
+
+`color_map=None` uses native viridis. Global Matplotlib settings, color objects,
+sparse/lazy sources, complex/infinite values and all-missing inputs are unsupported.
+The default native plot area is 372 × 616 logical pixels; fonts, automatic tick
+density and outer colorbar allocation follow GenomeSpy. Native palette sampling
+and browser rasterization can differ slightly from the reference. Optional hover
+reports Row (variable), Column (sample position) and Value. `zoom=True` enables
+y-only navigation; `"xy"` enables both axes. `show_values=True` reuses fitted
+two-decimal matrix labels. Native show/save, return objects and offline HTML
+delivery follow the other plotting calls; these keywords extend the upstream
+helper, which has no show/save parameters.
+
 ## Clustermap compatibility
 
 ```python
@@ -1174,10 +1214,10 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Simulation | sim |
-| Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_as_heatmap, timeseries_subplot |
+| Trajectories and graphs | dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path, timeseries, timeseries_subplot |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
@@ -1269,6 +1309,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.dotplot
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrix
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.timeseries_as_heatmap
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.matrixplot
 

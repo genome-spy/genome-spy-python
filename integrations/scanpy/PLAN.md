@@ -713,6 +713,20 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
 
 ### M11 — trajectories, graph layouts, time series and simulation
 
+- M11.a heatmap increment: `timeseries_as_heatmap(X, *, var_names=(),
+  highlights_x=(), color_map=None)` reuses supplied numeric matrix validation,
+  native tiles/labels/color guide and shared zoom/value helpers. Preserve the
+  transpose, first variable at the bottom, center-cropped limits, fractional
+  highlight positions and singleton limits. No sorting, normalization, trajectory
+  inference or simulation runs. Native defaults use viridis and a 372 × 616-pixel
+  plot area; dash lengths round to native whole pixels. Resident 2D numeric arrays,
+  sequences and tables are supported; sparse/lazy inputs, infinities, all-missing
+  data and color objects error. Ordinary label sequences work in addition to the
+  pinned helper's array form. Added show/save follow the native chart contract.
+  Acceptance: independent data/limit tests, complete registered reference charts
+  including singleton axes, observed hover/zoom/pan/fitted values/offline HTML,
+  the packaged-PBMC expression workflow and a measured resident-array resource check.
+  This increment does not close time-series lines or the full M11 milestone.
 - M11.a: `timeseries`, `timeseries_subplot`, `timeseries_as_heatmap` accept supplied
   matrices/time values, variable order, highlights, labels, color maps, limits and
   markers. Use shared heatmap or dedicated line/time authoring as appropriate;

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 from collections.abc import Sequence
 
 import numpy as np
@@ -51,6 +51,7 @@ def _slot_labels(
     opposite: bool = False,
     positions: Sequence[float] | None = None,
     font_size: float = _TICK,
+    clip: bool | Literal["x", "y"] = True,
 ) -> gs.Chart:
     """Return a side view placing labels at the supplied row or column positions.
 
@@ -75,7 +76,7 @@ def _slot_labels(
             align="left" if opposite else "right",
             baseline="middle",
             yOffset=-8 if opposite else 8,
-            clip=True,
+            clip=clip,
             tooltip=None,
         ).encode(
             x=coordinate.field("slot"),
@@ -89,7 +90,7 @@ def _slot_labels(
         align="left" if opposite else "right",
         baseline="middle",
         xOffset=8 if opposite else -8,
-        clip=True,
+        clip=clip,
         tooltip=None,
     ).encode(
         x=gs.value(0 if opposite else 1),

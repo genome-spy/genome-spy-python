@@ -23,6 +23,7 @@ __all__ = [
     "dotplot",
     "heatmap",
     "matrix",
+    "timeseries_as_heatmap",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2005,6 +2006,78 @@ def matrix(
         yticks=yticks,
         title=title,
         colorbar_shrink=colorbar_shrink,
+        color_map=color_map,
+        hover=hover,
+        zoom=zoom,
+        show_values=show_values,
+        width=width,
+        height=height,
+    )
+    return _finish_plot(chart, show, sc)
+
+
+def timeseries_as_heatmap(
+    X: ArrayLike,
+    *,
+    var_names: Collection[str] = (),
+    highlights_x: Collection[float] = (),
+    color_map: Any = None,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    zoom: bool | Literal["xy"] = False,
+    show_values: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | None:
+    """Display supplied ordered profiles as a variable-by-sample heatmap.
+
+    Description:
+        Reuse the matrix renderer without sorting, normalizing or computing time.
+        Match Scanpy's transpose, first variable at the bottom, center-cropped
+        limits and dashed highlights. Missing values stay blank. Matplotlib
+        colormap objects and global figure settings are unsupported.
+
+    Args:
+        X: Resident numeric matrix with samples in rows and variables in columns.
+        var_names: Variable labels; empty uses positions, 2D uses the first column.
+        highlights_x: Finite sample positions for dashed vertical rules.
+        color_map: Native GenomeSpy scheme; None uses viridis.
+        show: Display according to Scanpy's autoshow when unset.
+        save: Only None/False; use the returned chart's HTML/JSON export.
+        hover: Include row (variable), column (sample position) and value tooltips.
+        zoom: True enables y-only zoom/panning; "xy" also enables x navigation.
+        show_values: Show values to two decimals when cells have enough room.
+        width: Native tile-area width in pixels, default 372.
+        height: Native tile-area height in pixels, default 616.
+
+    Returns:
+        A native chart for show=False, otherwise displays it and returns None.
+
+    Raises:
+        ImportError: If the optional Scanpy version is unavailable.
+        TypeError: If the source, labels or flags are unsupported.
+        ValueError: If values, shape, labels, highlights or sizes are invalid.
+        NotImplementedError: If saving or a nonnative color scheme is requested.
+
+    Example:
+        >>> chart = gsc.pl.timeseries_as_heatmap(
+        ...     profiles, var_names=genes, zoom="xy", show=False
+        ... )
+        >>> chart.display(inline=True)
+    """
+    context = "gsc.pl.timeseries_as_heatmap"
+    for name, value in {"hover": hover, "show_values": show_values}.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    _check_grid_zoom(zoom, context=context)
+    sc = _prepare_plot(show, save, context=context)
+    from genome_spy.integrations.scanpy._matrix_chart import build_timeseries_heatmap
+
+    chart = build_timeseries_heatmap(
+        X,
+        var_names=var_names,
+        highlights_x=highlights_x,
         color_map=color_map,
         hover=hover,
         zoom=zoom,
