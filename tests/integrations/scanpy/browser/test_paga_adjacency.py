@@ -211,3 +211,171 @@ def test_hover_false_disables_matrix_and_tree_tooltips(page):
             canvas["y"] + bounds["y"] + y * bounds["height"],
         )
         assert not page.locator("table.attributes").is_visible()
+
+
+@pytest.mark.parametrize(
+    "case",
+    ["default", "constant", "missing", "diagonal", "negative", "singleton_empty"],
+)
+@pytest.mark.parametrize("page", [1.5], indirect=True)
+def test_complete_stripplot_matches_public_scanpy(page, tmp_path, case):
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+    import scanpy as sc
+
+    plt.close("all")
+    with mpl.rc_context({"figure.dpi": 100}):
+        sc.pl.paga_adjacency(make_adjacency(case=case), as_heatmap=False, show=False)
+        fig, ax = plt.gcf(), plt.gcf().axes[0]
+        fig.canvas.draw()
+        bbox = ax.get_window_extent()
+        positions = np.ma.concatenate([c.get_offsets() for c in ax.collections])
+        colors = np.concatenate(
+            [
+                np.repeat(c.get_facecolors(), len(c.get_offsets()), axis=0)
+                for c in ax.collections
+            ]
+        )
+        visible = ~np.ma.getmaskarray(positions).any(axis=1)
+        positions, colors = np.asarray(positions)[visible], colors[visible]
+        domains = [ax.get_xlim(), ax.get_ylim()]
+        reference = tmp_path / "reference.png"
+        fig.savefig(reference, dpi=150)
+        full = Image.open(reference).convert("RGB")
+        expected = full.crop(
+            (
+                round(bbox.x0 * 1.5),
+                round(full.height - bbox.y1 * 1.5),
+                round(bbox.x1 * 1.5),
+                round(full.height - bbox.y0 * 1.5),
+            )
+        )
+        plt.close(fig)
+    chart = gsc.pl.paga_adjacency(
+        make_adjacency(case=case),
+        as_heatmap=False,
+        width=bbox.width,
+        height=bbox.height,
+        show=False,
+    )
+    bounds = render(page, chart)
+    assert bounds["width"] == pytest.approx(bbox.width, abs=0.5)
+    assert bounds["height"] == pytest.approx(bbox.height, abs=0.5)
+    groups = point_coordinates(page)
+    assert len(groups) == bool(len(positions))
+    centers = groups[0] if len(positions) else np.empty((0, 2))
+    normalized = (positions - np.array(domains)[:, 0]) / np.ptp(domains, axis=1)
+    expected_centers = np.column_stack(
+        [
+            bounds["x"] + normalized[:, 0] * bounds["width"],
+            bounds["y"] + (1 - normalized[:, 1]) * bounds["height"],
+        ]
+    )
+    np.testing.assert_allclose(centers, expected_centers, atol=0.6)
+    canvas = page.locator("canvas").first.bounding_box()
+    actual = Image.open(
+        BytesIO(
+            page.screenshot(
+                clip={
+                    "x": canvas["x"] + bounds["x"],
+                    "y": canvas["y"] + bounds["y"],
+                    "width": bounds["width"],
+                    "height": bounds["height"],
+                }
+            )
+        )
+    ).convert("RGB")
+    assert (
+        abs(actual.width - expected.width) <= 2
+        and abs(actual.height - expected.height) <= 2
+    )
+    last_colors = {
+        tuple(xy): color for xy, color in zip(normalized, colors, strict=True)
+    }
+    for (x, y), color in last_colors.items():
+        footprints = []
+        for image in (actual, expected):
+            cx, cy = int(x * image.width), int((1 - y) * image.height)
+            patch = np.asarray(image)[cy - 5 : cy + 6, cx - 5 : cx + 6].astype(int)
+            matches = np.max(np.abs(patch - color[:3] * 255), axis=2) < 20
+            footprints.append(np.count_nonzero(matches))
+        assert min(footprints) > 0 and abs(footprints[0] - footprints[1]) <= 8
+    root = svg_root(page)
+    assert not any(e.tag.endswith("linearGradient") for e in root.iter())
+    assert any(e.tag.endswith("text") for e in root.iter())
+    page.screenshot(path=str(tmp_path / "complete-stripplot.png"), full_page=True)
+    extent = (
+        0,
+        0,
+        min(actual.width, expected.width),
+        min(actual.height, expected.height),
+    )
+    Image.blend(actual.crop(extent), expected.crop(extent), 0.5).save(
+        tmp_path / "stripplot-overlay.png"
+    )
+
+
+@pytest.mark.parametrize("zoom", [True, "xy"])
+@pytest.mark.parametrize("hover", [True, False])
+def test_stripplot_hover_navigation_composition_and_html(page, tmp_path, zoom, hover):
+    chart = gsc.pl.paga_adjacency(
+        make_adjacency(),
+        as_heatmap=False,
+        hover=hover,
+        zoom=zoom,
+        width=360,
+        height=280,
+        show=False,
+    )
+    spec = chart.to_dict()
+    for axis in ("x", "y"):
+        spec["encoding"][axis]["scale"]["name"] = f"strip-{axis}"
+    bounds = render(page, spec)
+    domains = "['x','y'].map(a=>api.getScaleResolutionByName('strip-'+a).getDomain())"
+    before = page.evaluate(domains)
+    for value, target, kind in [(0.2, "1", "Adjacency"), (0.6, "2", "Tree")]:
+        x = bounds["x"] + (0 - before[0][0]) / np.ptp(before[0]) * bounds["width"]
+        y = (
+            bounds["y"]
+            + (1 - (value - before[1][0]) / np.ptp(before[1])) * bounds["height"]
+        )
+        hover_at(page, x, y)
+        table = page.locator("table.attributes")
+        if hover:
+            table.wait_for(state="visible")
+            values = [s.strip() for s in table.locator("td").all_text_contents()]
+            assert values[:2] == ["0", target] and values[3] == kind
+            assert float(values[2]) == pytest.approx(value)
+        else:
+            assert not table.is_visible()
+    px, py = pointer(page, bounds)
+    page.mouse.wheel(0, -150)
+    page.wait_for_timeout(700)
+    zoomed = page.evaluate(domains)
+    assert (zoomed[0] != before[0]) is (zoom == "xy")
+    assert np.ptp(zoomed[1]) < np.ptp(before[1])
+    page.mouse.down()
+    page.mouse.move(px + 10, py + 10, steps=5)
+    page.mouse.up()
+    page.wait_for_timeout(700)
+    assert page.evaluate(domains)[1] != zoomed[1]
+    combined = (
+        (chart | chart)
+        .resolve_scale(default="independent")
+        .resolve_legend(default="independent")
+    )
+    bounds = render(page, combined)
+    before_points = point_coordinates(page)
+    assert len(before_points) == 2
+    pointer(page, bounds)
+    page.mouse.wheel(0, -150)
+    page.wait_for_timeout(700)
+    after_points = point_coordinates(page)
+    assert not np.array_equal(after_points[0], before_points[0])
+    np.testing.assert_allclose(after_points[1], before_points[1], atol=0.1)
+    output = tmp_path / "stripplot.html"
+    combined.save(output, inline=True, controls=False)
+    page.context.set_offline(True)
+    page.goto(output.as_uri())
+    page.locator("canvas").first.wait_for(state="visible")
+    assert not page.locator(".message-box").count()

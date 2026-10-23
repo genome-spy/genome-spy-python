@@ -7,7 +7,7 @@ import pytest
 from scipy import sparse
 
 import genome_spy.integrations.scanpy as gsc
-from genome_spy.integrations.scanpy._paga_data import adjacency_values
+from genome_spy.integrations.scanpy._paga_data import adjacency_values, adjacency_points
 from tests.integrations.scanpy.helpers import leaf_marks
 from tests.integrations.scanpy.paga_fixture import make_adjacency
 
@@ -69,7 +69,10 @@ def test_values_and_tree_orientation_match_direct_public_scanpy(storage, case):
     plt.close("all")
 
 
-def test_custom_keys_and_tree_nonzeros_preserve_sources_without_analysis(monkeypatch):
+@pytest.mark.parametrize("as_heatmap", [True, False])
+def test_custom_keys_and_tree_nonzeros_preserve_sources_without_analysis(
+    monkeypatch, as_heatmap
+):
     import scanpy as sc
     import matplotlib.pyplot as plt
 
@@ -93,12 +96,15 @@ def test_custom_keys_and_tree_nonzeros_preserve_sources_without_analysis(monkeyp
         adjacency="weights",
         adjacency_tree="tree",
         hover=False,
-        show_values=True,
+        as_heatmap=as_heatmap,
+        show_values=as_heatmap,
         zoom="xy",
         show=False,
     )
     marks = leaf_marks(chart.to_dict())
-    assert [m["mark"]["type"] for m in marks] == ["rect", "text", "point"]
+    assert [m["mark"]["type"] for m in marks] == (
+        ["rect", "text", "point"] if as_heatmap else ["point"]
+    )
     assert all(m["mark"].get("tooltip") is None for m in marks)
     assert set(a.uns) == set(original)
     for key, (matrix, values) in original.items():
@@ -109,7 +115,11 @@ def test_custom_keys_and_tree_nonzeros_preserve_sources_without_analysis(monkeyp
 @pytest.mark.parametrize(
     "options,error,match",
     [
-        ({"as_heatmap": False}, NotImplementedError, "as_heatmap=False"),
+        (
+            {"as_heatmap": False, "show_values": True},
+            NotImplementedError,
+            "as_heatmap=True",
+        ),
         ({"as_heatmap": 1}, TypeError, "as_heatmap"),
         ({"hover": 1}, TypeError, "hover"),
         ({"show_values": "yes"}, TypeError, "show_values"),
@@ -165,3 +175,87 @@ def test_sparse_arrays_and_explicit_zeros_keep_the_same_point_orientation():
     _, points = adjacency_values(a, "connectivities", "connectivities_tree")
     assert points.to_dict("records") == [{"_x": 1, "_y": 2}, {"_x": 2, "_y": 1}]
     assert tree.nnz == 3
+
+
+@pytest.mark.parametrize("storage", ["csr", "csc", "lil", "coo", "dok", "bsr"])
+@pytest.mark.parametrize(
+    "case",
+    [
+        "default",
+        "empty_tree",
+        "constant",
+        "missing",
+        "singleton",
+        "singleton_empty",
+        "all_missing",
+        "row_missing",
+        "diagonal",
+        "negative",
+    ],
+)
+def test_stripplot_order_colors_and_limits_match_public_scanpy(storage, case):
+    import matplotlib.pyplot as plt
+    from matplotlib.colors import to_rgba
+    import scanpy as sc
+
+    plt.close("all")
+    sc.pl.paga_adjacency(make_adjacency("csr", case), as_heatmap=False, show=False)
+    ax = plt.gcf().axes[0]
+    positions = np.ma.concatenate([c.get_offsets() for c in ax.collections])
+    colors = np.concatenate(
+        [
+            np.repeat(c.get_facecolors(), len(c.get_offsets()), axis=0)
+            for c in ax.collections
+        ]
+    )
+    visible = ~np.ma.getmaskarray(positions).any(axis=1)
+    spec = gsc.pl.paga_adjacency(
+        make_adjacency(storage, case), as_heatmap=False, show=False
+    ).to_dict()
+    rows = spec["datasets"][spec["data"]["name"]]
+    drawn = [r for r in rows if r["_y"] is not None]
+    np.testing.assert_equal(
+        np.array([[r["_x"], r["_y"]] for r in drawn]).reshape(-1, 2),
+        np.asarray(positions)[visible],
+    )
+    actual_colors = np.array(
+        [to_rgba("black" if r["_kind"] == "Tree" else "gray") for r in drawn]
+    ).reshape(-1, 4)
+    np.testing.assert_allclose(actual_colors, colors[visible])
+    for axis, expected in (("x", ax.get_xlim()), ("y", ax.get_ylim())):
+        np.testing.assert_allclose(spec["encoding"][axis]["scale"]["domain"], expected)
+        assert "name" not in spec["encoding"][axis]["scale"]
+    assert spec["width"] == 496 and spec["height"] == 369.6
+    assert spec["encoding"]["fill"]["legend"] is None
+    plt.close("all")
+
+
+def test_stripplot_preserves_source_target_ids_and_black_diagonal_entries():
+    values, tree = adjacency_values(
+        make_adjacency(case="diagonal"), "connectivities", "connectivities_tree"
+    )
+    points = adjacency_points(values, tree)
+    assert points[["_x", "_target", "_kind"]].to_dict("records") == [
+        {"_x": source, "_target": target, "_kind": kind}
+        for source in range(3)
+        for target, kind in [(j, "Adjacency") for j in range(3) if j != source]
+        + [(source, "Tree")]
+    ]
+    np.testing.assert_equal(
+        points["_y"].to_numpy(), [0.2, 0.6, 0.9, 0.4, 0.8, 0.8, 0.7, 0.1, 0.7]
+    )
+
+
+def test_stripplot_keeps_inactive_colormap_and_disables_hover():
+    spec = gsc.pl.paga_adjacency(
+        make_adjacency(),
+        as_heatmap=False,
+        color_map=object(),
+        hover=False,
+        zoom=True,
+        show=False,
+    ).to_dict()
+    assert spec["mark"]["tooltip"] is None
+    assert "tooltip" not in spec["encoding"]
+    assert spec["encoding"]["x"]["scale"]["zoom"] is False
+    assert spec["encoding"]["y"]["scale"]["zoom"] is True

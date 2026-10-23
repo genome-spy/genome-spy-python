@@ -51,6 +51,29 @@ def adjacency_values(
     return source.toarray(), points
 
 
+def adjacency_points(values: np.ndarray, tree: pd.DataFrame) -> pd.DataFrame:
+    """Return off-diagonal values and selected tree values in Scanpy's per-row draw order."""
+    values = numeric_values(pd.DataFrame(values), context="gsc.pl.paga_adjacency")
+    rows, columns = np.where(~np.eye(len(values), dtype=bool))
+    background = pd.DataFrame(
+        {
+            "_x": rows,
+            "_y": values[rows, columns],
+            "_target": columns,
+            "_kind": "Adjacency",
+        }
+    )
+    selected = tree.assign(
+        _y=values[tree["_x"], tree["_y"]],
+        _target=tree["_y"],
+        _kind="Tree",
+    )
+    # Stable sorting retains gray-before-black order within each source group.
+    return pd.concat([background, selected], ignore_index=True).sort_values(
+        "_x", kind="stable", ignore_index=True
+    )
+
+
 def _graph(adata: Any, key: str, count: int, threshold: float) -> tuple[Any, Any]:
     """Return a layout-ready sparse source and thresholded graph without changing stored data."""
     import networkx as nx

@@ -44,7 +44,9 @@ automatic guide choices without creating Matplotlib figures.
 Largest-component views retain original node IDs and coordinates through the
 same renderer; their direct disconnected Scanpy reference is blocked by C15.
 PAGA adjacency heatmaps reuse the supplied-matrix renderer with native tree-edge
-points and the pinned legacy top-level uns keys, without reading expression.
+points. Connectivity strips reuse the same legacy-key access with gray/black
+native points, stored source/target indices and per-row draw order; neither reads
+expression or computes graph analysis.
 PAGA comparison composes stored embedding points and group graphs with shared
 coordinate limits/navigation, group-median or saved positions and independent
 color/size guides. On-data labels require explicit normal weight.
@@ -94,22 +96,23 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and thirty-six expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
+code cells and thirty-seven expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-`paga_compare` is closed as an independent bounded M11.d preview; its
-[comparison record](#m11d-paga-comparison) tracks verification and parent limits.
-Adjacency stripplot remains the next family increment.
+**Active next: M11.d PAGA comparison review corrections**, authorized in the
+coordinated chat. Reuse resolved category palettes in both parents; remove fixed
+global embedding scale names so zoomable comparisons compose independently.
+Move coordinate ownership into native parent authoring instead of private
+graph-layer rewriting. The [comparison record](#m11d-paga-comparison) retains prior
+delivery evidence and records the reopened checks.
 
-**Next: M11.d, `paga_adjacency(as_heatmap=False)` stripplot mode.** Audit public
-Scanpy's off-diagonal gray points, black tree points, draw order, limits and point
-footprints. Reuse stored adjacency access, native points and shared navigation;
-keep the matrix-specific value option explicit. Verify complete charts, hover,
-workflow and resources before closing that increment. The
-[adjacency heatmap preview](#m11d-paga-adjacency-heatmaps) is delivered within its
-declared bounds; full adjacency coverage and the path entry remain M11.d.
+The [adjacency heatmap](#m11d-paga-adjacency-heatmaps) and
+[stripplot](#m11d-paga-adjacency-strips) previews are delivered within their declared
+bounds. After the comparison corrections, audit the unstarted paga_path against
+public Scanpy and released native capabilities, including C04 for connected paths.
+Broader adjacency storage/styling/export coverage retains M14 owners.
 The
 [undirected group-graph preview](#m11c-stored-undirected-paga-graphs) is closed within its declared bounds;
 its acceptance evidence and deliberate limits are recorded below. The
@@ -119,8 +122,7 @@ is implemented with semantic, subsetted-reference, chart, interaction, workflow
 and resource checks verified; C15 blocks its direct parent reference.
 Mixtures/pies, directed transitions,
 multi-color panels and file/export behavior
-remain M11.c. The PAGA path audit follows adjacency in M11.d; compare is delivered
-within the bounds recorded below.
+remain M11.c. PAGA comparison corrections and the unstarted path entry keep M11.d open.
 Plotting must not recompute DPT/PAGA analysis.
 The [DPT expression preview](#m11b-stored-dpt-expression-profiles) is closed for
 resident dense X with shared heatmap/point rendering, native interactions,
@@ -197,8 +199,9 @@ C12 remains a separate upstream straight-link issue.
 | M11.c undirected graph entry | Closed (bounded group/CSS-color preview) | [Public layout reuse and native charts](#m11c-stored-undirected-paga-graphs); [sparse graph fixes](#paga-sparse-graph-corrections) | Full M11.c stays open for broader node-color modes, direct component reference, directed edges and file/export behavior. |
 | M11.c numeric node colors | Closed (numeric annotations, genes and weighted degrees) | [Shared computation and native color guides](#paga-numeric-gene-and-degree-colors) | Other categorical mixtures/pies, direct numeric vectors, CSS-name collisions and broader M11.c remain open. |
 | M11.c largest-component views | Implemented; semantic/subsetted-reference/chart/workflow/interaction/resource checks verified | [Shared filtering and retained evidence](#paga-single-component-filtering) | C15 blocks direct disconnected parent-call comparison in Scanpy 1.11.5; keep this gate open. |
-| M11.d adjacency heatmaps | Closed (bounded legacy-key heatmap preview) | [Shared matrix renderer and direct references](#m11d-paga-adjacency-heatmaps) | as_heatmap=False remains M11.d; shared font/tick/layout differences remain M14. Full M11.d stays open. |
-| M11.d comparison panels | Closed (bounded aligned-panel preview) | [Shared parent composition and direct references](#m11d-paga-comparison) | Regular on-data labels required. Parent restrictions remain M11/M14; paga_path remains M11.d. |
+| M11.d adjacency heatmaps | Closed (bounded legacy-key heatmap preview) | [Shared matrix renderer and direct references](#m11d-paga-adjacency-heatmaps) | Stripplot increment delivered below; shared font/tick/layout/storage differences remain M14. Full M11.d stays open. |
+| M11.d adjacency strips | Closed (bounded legacy-key stripplot preview) | [Shared data/native points and direct references](#m11d-paga-adjacency-strips) | Broader storage/styling/export limits remain M14; full M11.d stays open. |
+| M11.d comparison panels | Implemented; review corrections reopened | [Prior delivery and confirmed corrections](#m11d-paga-comparison) | Palette parity and independent zoomable composition are being fixed in the coordinated chat. Regular-label/parent restrictions remain M11/M14; paga_path remains M11.d. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
@@ -233,7 +236,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M08 violin/stacked/ranked | Planned; filled rendering blocked | Data/density work can proceed; full native filled geometry needs a released capability (C01). |
 | M09 tracks/ranked tracks | Planned; filled rendering blocked | Profile preparation can proceed; native filled geometry needs C01. |
 | M10 QC diagnostics | In progress | M10.a/b/c bounded previews are verified; broader scale/option compatibility remains M14. This does not close the full family. |
-| M11 trajectories/graphs/series | In progress; supplied-series/simulation, DPT-expression and adjacency-heatmap previews closed; undirected PAGA and compare available | DPT/PAGA direct-reference gates, adjacency strips and broader PAGA options/entries remain open. Native rules handle straight undirected edges; C04 is limited to unverified connected paths. |
+| M11 trajectories/graphs/series | In progress; supplied-series/simulation, DPT-expression and both adjacency previews closed; undirected PAGA and compare available | DPT/PAGA direct-reference gates, comparison corrections and broader PAGA options/entries remain open. Native rules handle straight undirected edges; C04 is limited to unverified connected paths. |
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
 | M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
 | M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
@@ -3135,9 +3138,14 @@ repository suite and docs build were not rerun. Clearance: **retain**.
 
 ## M11.d PAGA comparison
 
-Closed (2026-10-23) for the bounded aligned-panel preview. Semantic, chart,
-interaction, workflow and resource checks are verified. The packaged-data
-example is included in the combined expression workflow.
+Implemented; review corrections reopened (2026-10-23). The bounded delivery in
+a9f4d2b passed the semantic, chart, interaction, workflow and resource checks
+retained below. Later review reproduced custom-palette mismatch between parents
+and duplicate embedding scale names when independently composing zoomable
+comparisons. Those M11.d corrections are explicitly authorized and in progress
+in the coordinated chat, along with replacing private graph-layer rewriting by
+native coordinate ownership. Keep earlier evidence; reverify these cases and
+affected parent paths before closing the corrected slice.
 
 [`paga_compare`](../../src/genome_spy/integrations/scanpy/pl.py) composes the
 existing embedding and PAGA entries. No new renderer, graph layout, analysis,
@@ -3183,9 +3191,9 @@ not portable performance limits; JSON validation/dispatch retains parent costs.
 The pinned bold/on-data default remains explicitly unsupported with the bundled
 regular font atlas; use legend_fontweight="normal" as in the example. Parent
 storage/rendering restrictions, custom margins, multiple color/component pairs,
-plot=False and broader graph options retain M11/M14 owners. PAGA path and
-adjacency stripplots remain separate work. Full repository tests and the docs
-build were not rerun. Clearance: **retain**.
+plot=False and broader graph options retain M11/M14 owners. The unstarted PAGA
+path retains M11.d; adjacency stripplot delivery is recorded below. Full repository
+tests and the docs build were not rerun. Clearance: **retain**.
 
 ## M11.d PAGA adjacency heatmaps
 
@@ -3240,7 +3248,7 @@ JS heap was **54.17 MiB before explicit GC**. These are local observations, not
 portable limits. JSON expansion remains a material cost; the bounded load guard
 does not promise large-grid transport efficiency.
 
-as_heatmap=False remains M11.d and rejects clearly. C15's independent PAGA graph
+The stripplot increment is delivered below. C15's independent PAGA graph
 reference gate remains blocked. The full repository suite and docs build were
 not rerun. The current queue owns next work. Clearance: **retain**; full M11 and
 the integration roadmap remain open.
@@ -3270,8 +3278,51 @@ zoomed only the left matrix. Committed notebooks retain source only.
 Ruff formatting/full-repository lint and mypy pass. Data preparation, emitted
 records and transport are unchanged, so the retained adjacency resource checks
 still cover those workloads. The full repository suite and docs build were not
-rerun. The current queue owns next work; broader adjacency modes remain M11.d.
+rerun. The current queue owns next work; broader adjacency storage, styling and
+export options remain M14.
 Clearance: **retain**.
+
+## M11.d PAGA adjacency strips
+
+Closed (2026-10-23) for the bounded `as_heatmap=False` preview. The existing
+[`paga_adjacency`](../../src/genome_spy/integrations/scanpy/pl.py) entry reuses
+adjacency validation, sparse tree extraction, coordinate bounds, zoom and native
+points. Gray points show off-diagonal adjacency values; black points show the
+adjacency values at tree nonzeros, including selected diagonal entries. Stable
+per-source ordering preserves Scanpy's gray-before-black paint order. Neither
+expression nor analysis is read or recomputed; stored matrices remain unchanged.
+
+Default plot dimensions, point footprints and domains match the pinned public
+reference, including constant, missing and empty visible values. Native tooltips
+show source, target, connectivity and edge kind. Optional y-only/both-axis zoom
+and independent composition use the shared navigation helper. `color_map` is
+inactive in this mode, as upstream; fitted `show_values` requires heatmap mode.
+
+Verification: **394 targeted Python checks**, **18 adjacency browser checks**,
+both canonical workflows, full-repository Ruff lint and mypy pass. The
+[semantic references](../../tests/integrations/scanpy/test_paga_adjacency.py)
+cover six sparse formats, original indices/values, mutation guards and exact
+finite draw order. [Browser references](../../tests/integrations/scanpy/browser/test_paga_adjacency.py)
+register 100-display/150-export-DPI complete charts at DPR 1.5, including
+point centers, footprints, colors and numeric domains. Observed checks cover
+gray/black hover, disabled hover, y/both-axis zoom/pan, independent composed
+charts and offline HTML. Reference images and registered overlays stay temporary.
+The live expression notebook ran **37 code cells and 31 charts without Python
+errors**; committed notebook source contains no outputs or widget state.
+
+A seed-0 observation reuses the heatmap's unread 100,000-by-20,000 CSR expression
+fixture, 200-group adjacency and 199-edge chain tree. It emits **39,999 native
+points and 4,335,779 JSON bytes**. Preparation took **0.006 s**, validated JSON
+**2.516 s**, peak traced Python allocation **53.19 MiB**, and native 600-by-600
+browser rendering **2.941 s** with **42.63 MiB JS heap before explicit GC**.
+One separate browser resource check confirmed every point rendered. These are
+local observations, not portable guarantees; JSON expansion remains material.
+
+The resident 250,000-value bound, legacy top-level keys and broader storage,
+styling/export limits retain M14 owners. Comparison review corrections are
+active in the coordinated chat; the unstarted PAGA path remains M11.d. The full
+repository suite and docs build were not rerun. Clearance: **retain**; full M11
+and the integration roadmap remain open.
 
 ## Public callable coverage
 
@@ -3304,8 +3355,8 @@ No placeholder functions are exported for planned work.
 | `matrix` | Partial supplied-numeric preview available | M05.b preview; broader sources/layout M14; transport M05.d |
 | `matrixplot` | Partial preview available | M03 preview; trees M04; methods M13; normalization/options M14 |
 | `paga` | Stored undirected graphs with group/numeric/gene/degree colors and optional largest-component views | M11.c; C15 direct component reference and other color/directed/export modes open |
-| `paga_adjacency` | Partial legacy-key heatmap preview available | M11.d; stripplot mode remains open |
-| `paga_compare` | Partial aligned embedding/graph preview available | M11.d; regular on-data labels; broader parent options M14 |
+| `paga_adjacency` | Partial legacy-key heatmap/stripplot preview available | M11.d; broader storage/styling/export M14 |
+| `paga_compare` | Partial aligned preview; confirmed corrections open | M11.d palette/composition corrections; regular-label/parent limits M14 |
 | `paga_path` | Not implemented | M11 |
 | `pca` | Shared stored-2D preview | M07.a; remaining options M07.d/M14 |
 | `pca_loadings` | Stored-loadings preview available | M07.c loadings increment; shared ranking preparation/renderer |

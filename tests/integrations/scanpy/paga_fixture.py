@@ -22,6 +22,17 @@ def make_adjacency(storage="csr", case="default"):
         values[0, 1] = np.nan
     elif case == "singleton":
         values, tree = np.array([[0.5]]), np.array([[1.0]])
+    elif case == "singleton_empty":
+        values, tree = np.array([[0.5]]), np.array([[0.0]])
+    elif case == "all_missing":
+        values[:] = np.nan
+    elif case == "row_missing":
+        values[0] = np.nan
+    elif case == "diagonal":
+        tree = np.eye(3)
+        np.fill_diagonal(values, [0.9, 0.8, 0.7])
+    elif case == "negative":
+        values = values * 2 - 1
     factory = getattr(sparse, storage + "_matrix")
     return AnnData(
         sparse.csr_matrix((5, 20_000)),

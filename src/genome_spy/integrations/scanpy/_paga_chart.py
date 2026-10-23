@@ -22,6 +22,7 @@ def build_paga_adjacency(
     values: np.ndarray,
     points: pd.DataFrame,
     *,
+    as_heatmap: bool,
     color_map: Any,
     hover: bool,
     zoom: bool | Literal["xy"],
@@ -29,29 +30,80 @@ def build_paga_adjacency(
     width: float | None,
     height: float | None,
 ) -> gs.TopLevelSpec:
-    """Reuse the numeric matrix renderer, adding fixed-size native points for stored tree edges."""
+    """Render stored adjacency with shared matrix tiles or native fixed-size stripplot points."""
     from genome_spy.integrations.scanpy._matrix_chart import build_matrix
+    from genome_spy.integrations.scanpy._paga_data import adjacency_points
 
-    overlay = (
-        gs.Chart(points)
-        .mark_point(
-            filled=True,
-            color="black",
-            size=PT**2,
-            stroke="black",
-            strokeWidth=PT,
-            inwardStroke=False,
-            clip=True,
-            tooltip={"handler": "default"} if hover else None,
-        )
-        .encode(x="_x:I", y="_y:I")
+    context = "gsc.pl.paga_adjacency"
+    if not as_heatmap:
+        points = adjacency_points(values, points)
+    dots = gs.Chart(points).mark_point(
+        filled=True,
+        color="black",
+        size=PT**2,
+        stroke="black",
+        strokeWidth=PT,
+        inwardStroke=False,
+        clip=True,
+        tooltip={"handler": "default"} if hover else None,
     )
     if hover:
-        overlay = overlay.encode(
+        dots = dots.encode(
             tooltip=[
                 gs.Tooltip("_x:Q", title="Source group", format="d"),
-                gs.Tooltip("_y:Q", title="Target group", format="d"),
+                gs.Tooltip(
+                    "_y:Q" if as_heatmap else "_target:Q",
+                    title="Target group",
+                    format="d",
+                ),
             ]
+            + (
+                []
+                if as_heatmap
+                else [
+                    gs.Tooltip("_y:Q", title="Connectivity", format=".4g"),
+                    gs.Tooltip("_kind:N", title="Edge"),
+                ]
+            )
+        )
+    if not as_heatmap:
+        width = number(496 if width is None else width, "width", context=context)
+        height = number(369.6 if height is None else height, "height", context=context)
+        if not width or not height:
+            raise ValueError(f"{context}: width and height must be positive.")
+        visible = points.loc[np.isfinite(points["_y"])]
+        # Empty plots retain Matplotlib's default limits around zero.
+        extent = visible[["_x", "_y"]].to_numpy() if len(visible) else np.zeros((1, 2))
+        x = gs.X("_x:Q").scale(
+            domain=list(coordinate_domain(extent[:, 0], 0.05)), zero=False, nice=False
+        )
+        y = gs.Y("_y:Q").scale(
+            domain=list(coordinate_domain(extent[:, 1], 0.05)), zero=False, nice=False
+        )
+        x, y = zoom_axes(x, y, enabled=zoom, name=None)
+        colors = gs.Scale(
+            type="ordinal", domain=["Adjacency", "Tree"], range=["gray", "black"]
+        )
+        return (
+            dots.transform_filter("isValid(datum._y)")
+            .encode(
+                x=x.axis(title=None),
+                y=y.axis(title=None),
+                fill=gs.Fill("_kind:N", scale=colors).legend(None),
+                stroke=gs.Stroke("_kind:N", scale=colors).legend(None),
+            )
+            .properties(
+                width=width,
+                height=height,
+                view={"stroke": "black", "strokeWidth": 0.8 * PT},
+            )
+            .configure_axis(
+                labelFont=FONT,
+                titleFont=FONT,
+                labelFontSize=10 * PT,
+                titleFontSize=10 * PT,
+                titleFontWeight="normal",
+            )
         )
     return build_matrix(
         values,
@@ -68,7 +120,7 @@ def build_paga_adjacency(
         width=width,
         height=height,
         context="gsc.pl.paga_adjacency",
-        overlay=overlay,
+        overlay=dots.encode(x="_x:I", y="_y:I"),
     )
 
 

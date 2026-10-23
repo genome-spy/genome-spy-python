@@ -27,6 +27,8 @@ heatmap/point renderers for expression profiles.
 marks. `gsc.pl.paga_compare(...)` composes it with stored embedding points
 and shared coordinates, using explicit normal on-data labels. Scanpy computes PAGA explicitly; its public no-plot API supplies missing
 layout coordinates without reading expression or creating figures.
+`gsc.pl.paga_adjacency(...)` reads explicitly assigned top-level adjacency/tree
+matrices, showing native matrix tiles or connectivity strips with as_heatmap=False.
 
 When resuming work in another chat, read [the current queue](STATUS.md#current-work-queue)
 and inspect recent commits and uncommitted changes first. STATUS owns the active

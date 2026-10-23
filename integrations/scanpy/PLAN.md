@@ -866,8 +866,16 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   250,000 values; check shape/size before densification and never read expression.
   Direct public references cover tiles, points, missing/constant values, guide
   bins and export DPI; observe hover/navigation/HTML and measure a larger matrix.
-  as_heatmap=False remains a separate M11.d stripplot increment. This heatmap
-  preview does not close the full adjacency entry or M11.d.
+  as_heatmap=False reuses adjacency access and native point marks: gray points
+  exclude diagonal entries, black points use adjacency values at nonzero tree
+  entries (including selected diagonals). Preserve per-source gray-then-black
+  draw order and numeric indices. Missing points do not affect limits; preserve
+  Scanpy's five-percent margins and empty/constant limits through shared helpers.
+  color_map is inactive; show_values=True requires heatmap mode. Default strip
+  plot area is 496 by 369.6 pixels. Reuse native hover, y/both-axis navigation,
+  composition and HTML delivery; verify sparse formats, source/target IDs, points,
+  footprints, ordering and packaged workflows independently. Both modes remain
+  bounded by stored-data and native styling/export limits; full M11.d stays open.
   The comparison increment composes the existing embedding and PAGA entries.
   Preserve automatic basis priority (draw_graph_fa, umap, tsne, draw_graph_fr),
   selected-component group medians when color is the PAGA group key, cached
@@ -883,6 +891,11 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   aligned charts including out-of-range supplied positions, observed cell/node
   hover and shared navigation/offline HTML, packaged workflow and seeded resources.
   This bounded comparison does not close paga_path or the full M11.d milestone.
+  Review reopened two M11.d corrections: custom category palettes must reach both
+  parent plots, and independently composed zoomable comparisons must avoid global
+  embedding scale names. Resolve those at shared helper boundaries, with native
+  coordinate ownership replacing private graph-layer rewriting; retain the prior
+  delivery evidence and reverify affected parents, composition and the workflow.
 
 Acceptance: hand-sized graphs/path arrays cover thresholds, direction, duplicate
 edges, gaps and smoothing; saved coordinates/arrays are honored. No hidden PAGA

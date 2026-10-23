@@ -324,6 +324,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["paga_degree"],
         namespace["paga_component"],
         namespace["paga_adjacency"],
+        namespace["paga_stripplot"],
         namespace["adjacency_panels"],
         namespace["paga_comparison"],
     ]
@@ -424,6 +425,18 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     ]
     assert pbmc.uns["connectivities"] is pbmc.uns["paga"]["connectivities"]
     assert pbmc.uns["connectivities_tree"] is pbmc.uns["paga"]["connectivities_tree"]
+    strips = namespace["paga_stripplot"].to_dict()
+    rows = strips["datasets"][strips["data"]["name"]]
+    background = [r for r in rows if r["_kind"] == "Adjacency"]
+    assert len(background) == 10 * 9
+    assert all(r["_x"] != r["_target"] for r in background)
+    for row in rows:
+        assert row["_y"] == pbmc.uns["connectivities"][row["_x"], row["_target"]]
+    tree = [r for r in rows if r["_kind"] == "Tree"]
+    source, target = pbmc.uns["connectivities_tree"].nonzero()
+    assert [(r["_x"], r["_target"]) for r in tree] == list(
+        zip(source, target, strict=True)
+    )
     assert dpt_calls == [
         ("neighbors", {"n_neighbors": 10, "use_rep": "X", "random_state": 0}),
         ("diffmap", {"random_state": 0}),

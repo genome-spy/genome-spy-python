@@ -1170,9 +1170,26 @@ category reordering occurs. The axes retain numeric group indices.
 `zoom=True` navigates y; `zoom="xy"` navigates both axes. Points keep their pixel
 sizes and remain aligned with the tiles. `show_values=True` uses the shared fitted
 cell labels. `width` and `height` set the matrix area; defaults fit square cells
-within 400 pixels. Standard native display and HTML/JSON delivery apply. The
-`as_heatmap=False` stripplot mode rejects clearly and remains planned; fonts,
+within 400 pixels. Standard native display and HTML/JSON delivery apply. Fonts,
 automatic tick density and outer spacing retain the shared matrix preview's limits.
+
+For connectivity strips, reuse the same stored matrices:
+
+```python
+strips = gsc.pl.paga_adjacency(pbmc, as_heatmap=False, zoom=True, show=False)
+strips.display(inline=True, controls=False)
+```
+
+X is the source group index; y is its stored adjacency value to a target group.
+Gray points exclude the diagonal. Black points select nonzero tree entries,
+including selected diagonals; their y values come from adjacency, not tree weights.
+Draw order follows Scanpy: gray points, then black points for each source row.
+Missing values stay undrawn and do not affect automatic limits. Constant or empty
+plots retain Scanpy's expanded limits. Hover reports source/target indices,
+connectivity and edge type. Both zoom modes and independent composition work for
+strips too. `color_map` is inactive, and `show_values=True` requires heatmap mode.
+The stripplot area defaults to 496 by 369.6 pixels, with fixed-size native points
+and no color guide.
 
 Zoomable matrix charts can use independent native panels and guides:
 
@@ -1531,7 +1548,7 @@ remain visible. Function coverage and parameter coverage are separate.
 | --- | --- |
 | Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Trajectories and graphs | paga_compare, paga_path; adjacency stripplot and broader paga options |
+| Trajectories and graphs | paga_path; comparison review corrections and broader paga options |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
