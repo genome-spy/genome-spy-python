@@ -33,6 +33,7 @@ __all__ = [
     "paga",
     "paga_adjacency",
     "paga_compare",
+    "paga_path",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2266,6 +2267,178 @@ def paga_compare(
     if common_title:
         chart = chart.properties(title=common_title)
     return _finish_plot(chart, show, sc)
+
+
+def paga_path(
+    adata: AnnData,
+    nodes: Sequence[str | int],
+    keys: Sequence[str],
+    *,
+    use_raw: bool = True,
+    annotations: Sequence[str] = ("dpt_pseudotime",),
+    color_map: Any = None,
+    color_maps_annotations: Mapping[str, Any] = MappingProxyType(
+        dict(dpt_pseudotime="Greys")
+    ),
+    palette_groups: Sequence[str] | None = None,
+    n_avg: int = 1,
+    groups_key: str | None = None,
+    xlim: tuple[int | None, int | None] = (None, None),
+    title: str | None = None,
+    left_margin: Any = None,
+    ytick_fontsize: int | None = None,
+    title_fontsize: int | None = None,
+    show_node_names: bool = True,
+    show_yticks: bool = True,
+    show_colorbar: bool = True,
+    legend_fontsize: Any = None,
+    legend_fontweight: Any = None,
+    normalize_to_zero_one: bool = False,
+    as_heatmap: bool = True,
+    return_data: bool = False,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    hover: bool = True,
+    zoom: bool | Literal["xy"] = False,
+    show_values: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+) -> TopLevelSpec | tuple[TopLevelSpec, pd.DataFrame] | pd.DataFrame | None:
+    """Show expression along supplied PAGA groups using stored DPT pseudotime.
+
+    Description:
+        Order cells within each requested group, smooth the concatenated values,
+        then optionally normalize each key. Reuse shared Scanpy data access and
+        native matrix tiles with original group bands and numeric annotations.
+        Analysis remains explicit; no embeddings, PAGA or DPT are recomputed.
+        This preview requires two keys and two smoothed cells. Native Greys
+        differs from Scanpy's white-to-black annotation palette.
+
+    Args:
+        adata: AnnData with categorical groups and stored dpt_pseudotime.
+        nodes: Ordered group names or integer category indices; repeats are kept.
+        keys: Gene or numeric observation keys, retaining supplied order.
+        use_raw: Use raw when available, otherwise X, as in Scanpy.
+        annotations: Numeric observation tracks; at most one in this preview.
+        color_map: Native GenomeSpy scheme; None uses viridis.
+        color_maps_annotations: Native schemes by annotation key; defaults to Greys.
+        palette_groups: CSS colors in full category order; None reuses saved/default colors.
+        n_avg: Full-window running average across concatenated cells.
+        groups_key: Group column; None reads uns['paga']['groups'].
+        xlim: Inactive for heatmaps, as in Scanpy.
+        title: Optional chart title.
+        left_margin: Only None; native layout reserves label space automatically.
+        ytick_fontsize: Gene and track label size in points.
+        title_fontsize: Title size in points.
+        show_node_names: Label the supplied groups on their color band.
+        show_yticks: Show key and track names.
+        show_colorbar: Show the native expression color guide.
+        legend_fontsize: Inactive for heatmaps, as in Scanpy.
+        legend_fontweight: Inactive for heatmaps, as in Scanpy.
+        normalize_to_zero_one: Normalize each smoothed profile to zero through one.
+        as_heatmap: Only True; connected-line mode needs a separate native audit.
+        return_data: Return the prepared table with the chart, or after display.
+        show: Use Scanpy autoshow when unset; False returns the native chart.
+        save: Only None/False; use native HTML/JSON export.
+        hover: Include value and annotation tooltips.
+        zoom: True navigates y; "xy" navigates both axes and aligned tracks.
+        show_values: Show numeric values when tiles have enough room.
+        width: Native heatmap area width in pixels.
+        height: Native heatmap area height in pixels.
+
+    Returns:
+        A chart for show=False, otherwise None. With return_data=True, return
+        (chart, table) for show=False, otherwise the table after displaying.
+
+    Raises:
+        ImportError: If the optional supported Scanpy version is unavailable.
+        TypeError: If option types, groups or values are unsupported.
+        ValueError: If metadata, node indices, bounds or window size are invalid.
+        NotImplementedError: If line mode, categorical/multiple annotation tracks,
+            custom margins, image saving or nonnative colors are requested.
+
+    Example:
+        >>> chart = gsc.pl.paga_path(adata, nodes=[0, 1], keys=["CD3D", "CD79A"], show=False)
+    """
+    context = "gsc.pl.paga_path"
+    for name, value in {
+        "use_raw": use_raw,
+        "show_node_names": show_node_names,
+        "show_yticks": show_yticks,
+        "show_colorbar": show_colorbar,
+        "normalize_to_zero_one": normalize_to_zero_one,
+        "as_heatmap": as_heatmap,
+        "return_data": return_data,
+        "hover": hover,
+        "show_values": show_values,
+    }.items():
+        if not isinstance(value, bool):
+            raise TypeError(f"{context}: {name} must be boolean.")
+    _check_grid_zoom(zoom, context=context)
+    sc = _prepare_plot(show, save, context=context)
+    if not as_heatmap:
+        raise NotImplementedError(f"{context}: as_heatmap=False is not supported yet.")
+    if left_margin is not None:
+        raise NotImplementedError(
+            f"{context}: left_margin is unsupported; use native layout."
+        )
+    if title is not None and not isinstance(title, str):
+        raise TypeError(f"{context}: title must be a string or None.")
+    if not isinstance(color_maps_annotations, Mapping):
+        raise TypeError(f"{context}: color_maps_annotations must be a mapping.")
+    from genome_spy.integrations.scanpy._paga_path_data import (
+        prepare_paga_path,
+        running_average,
+    )
+    from genome_spy.integrations.scanpy._paga_path_chart import build_paga_path
+    from genome_spy.integrations.scanpy._style import _palette
+
+    prepared = prepare_paga_path(
+        adata,
+        nodes,
+        keys,
+        use_raw=use_raw,
+        annotations=annotations,
+        n_avg=n_avg,
+        groups_key=groups_key,
+        normalize_to_zero_one=normalize_to_zero_one,
+    )
+    categories = adata.obs[prepared.group_key].cat.categories
+    if palette_groups is not None and (
+        isinstance(palette_groups, str) or len(palette_groups) < len(categories)
+    ):
+        raise ValueError(
+            f"{context}: palette_groups needs CSS colors for all categories."
+        )
+    palette, _ = _palette(
+        adata, prepared.group_key, categories, palette_groups, context=context
+    )
+    chart = build_paga_path(
+        prepared,
+        categories=list(map(str, categories)),
+        palette=palette,
+        color_map=color_map,
+        color_maps_annotations=color_maps_annotations,
+        title=title,
+        ytick_fontsize=ytick_fontsize,
+        title_fontsize=title_fontsize,
+        show_node_names=show_node_names,
+        show_yticks=show_yticks,
+        show_colorbar=show_colorbar,
+        hover=hover,
+        zoom=zoom,
+        show_values=show_values,
+        width=width,
+        height=height,
+    )
+    shown = _finish_plot(chart, show, sc)
+    if not return_data:
+        return shown
+    frame = prepared.values.copy()
+    frame["groups"] = running_average(prepared.groups, n_avg)
+    if "dpt_pseudotime" in prepared.annotations:
+        frame["distance"] = prepared.annotations["dpt_pseudotime"].to_numpy()
+    return frame if shown is None else (shown, frame)
 
 
 def paga_adjacency(

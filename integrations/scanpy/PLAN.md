@@ -902,11 +902,26 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   colors, independent pair zoom/pan/offline composition, parent regression checks,
   and a packaged notebook palette/composition example.
   This bounded comparison does not close paga_path or the full M11.d milestone.
-  Review reopened two M11.d corrections: custom category palettes must reach both
-  parent plots, and independently composed zoomable comparisons must avoid global
-  embedding scale names. Resolve those at shared helper boundaries, with native
-  coordinate ownership replacing private graph-layer rewriting; retain the prior
-  delivery evidence and reverify affected parents, composition and the workflow.
+  The path heatmap increment orders each supplied node's cells by stored
+  dpt_pseudotime, concatenates nodes including repeats, applies full-window
+  cumulative averages and then optional per-key zero–one normalization. Reuse
+  grouped_expression/public obs_df and native matrix_tiles, fitted values,
+  slot labels, palettes, zoom and surround. Read raw when present or fall back to
+  X; never recompute PAGA/DPT. Original group bands span the full plot width even
+  after smoothing shortens profiles/annotations. Keep numeric annotation tracks
+  aligned and return (chart, frame) for show=False/return_data=True, or frame
+  after display. The preview requires two keys/two smoothed cells, at most one
+  numeric annotation and 250,000 selected cell–key/annotation values. Reject
+  line mode, categorical/multiple annotation tracks and custom margins clearly;
+  xlim and legend font options are inactive in heatmap mode as upstream.
+  Verify ordered/normalized/raw/sparse values, repeated nodes, annotations,
+  native return shapes, analysis/mutation guards, complete registered charts,
+  observed hover/navigation/HTML, packaged workflow and resource behavior.
+  Scanpy 1.11.5 return_data fails for the default n_avg=1 annotation; retain a
+  strict regression check and separate that parent gate from chart verification.
+  Retain native Greys as an accepted fidelity limit: assert its 226/30 endpoints
+  separately from Scanpy's 255/0 endpoints, while checking identical annotation
+  values/domains, geometry and native pixel mapping. Do not substitute a palette.
 
 Acceptance: hand-sized graphs/path arrays cover thresholds, direction, duplicate
 edges, gaps and smoothing; saved coordinates/arrays are honored. No hidden PAGA

@@ -129,6 +129,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.test_paga_compare import make_compare
 
         a, options = make_compare(), {"legend_fontweight": "normal"}
+    if family == "paga_path":
+        from tests.integrations.scanpy.paga_path_fixture import make_path
+
+        a, options = make_path(), {"nodes": ["beta", "alpha"], "keys": ["g1", "g2"]}
     if family == "paga_adjacency":
         from tests.integrations.scanpy.paga_fixture import make_adjacency
 
@@ -161,7 +165,9 @@ def test_shared_display_validation_precedes_optional_imports(
 ):
     monkeypatch.setattr(pl, "_require_scanpy", lambda *a: pytest.fail("Loaded Scanpy"))
     args = (object(),)
-    if family == "embedding":
+    if family == "paga_path":
+        args += ([0, 1], ["g1", "g2"])
+    elif family == "embedding":
         args += ("umap",)
     elif family in ("dotplot", "matrixplot", "heatmap"):
         args += (["g1"], "group")

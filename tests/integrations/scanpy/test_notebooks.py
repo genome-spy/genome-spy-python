@@ -328,8 +328,23 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["adjacency_panels"],
         namespace["paga_comparison"],
         namespace["independent_comparisons"],
+        namespace["paga_path_chart"],
     ]
     assert paga_calls == [{"groups": "bulk_labels"}]
+    path_values = namespace["path_values"]
+    assert list(path_values.columns) == [
+        "LYZ",
+        "FCER1A",
+        "CST3",
+        "FCGR3A",
+        "NKG7",
+        "CD3D",
+        "groups",
+        "distance",
+    ]
+    assert len(path_values) == 358
+    np.testing.assert_allclose(path_values.iloc[:, :6].min(), 0)
+    np.testing.assert_allclose(path_values.iloc[:, :6].max(), 1)
     pbmc = namespace["pbmc"]
     matrix_panels = namespace["adjacency_panels"].to_dict()
     assert len(matrix_panels["hconcat"]) == 2
@@ -449,6 +464,8 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         ("neighbors", {"n_neighbors": 10, "use_rep": "X", "random_state": 0}),
         ("diffmap", {"random_state": 0}),
         ("dpt", {"n_dcs": 10, "n_branchings": 1}),
+        ("diffmap", {"random_state": 0}),
+        ("dpt", {}),
     ]
     dpt_spec = namespace["dpt_groups_chart"].to_dict()
     simulation = namespace["simulation"]

@@ -206,3 +206,7 @@ Reference regeneration is a deliberate compatibility update, not a prerequisite
 for using the integration. Notebook examples use real packaged data; synthetic
 fixtures remain useful for independently checking missing values, duplicate
 labels/coordinates, raw/layer differences, sparse allocation, and exact edges.
+
+The expression workflow also includes PAGA path heatmaps: Scanpy explicitly
+computes pseudotime, then native tiles and side tracks display a supplied group
+order. Plotting reuses stored data and does not infer a trajectory.

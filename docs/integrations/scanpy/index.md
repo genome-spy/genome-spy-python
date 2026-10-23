@@ -1161,6 +1161,60 @@ margins, `plot=False`, outlines, directed graphs and the other parent rendering
 restrictions remain unsupported. Native layout and fonts retain the existing
 renderer boundary; this is not full `paga_compare` parameter compatibility.
 
+### PAGA path heatmaps
+
+Use a supplied sequence of groups and explicitly computed pseudotime:
+
+```python
+import numpy as np
+
+# Scanpy owns this analysis; run it explicitly before plotting.
+sc.tl.diffmap(pbmc, random_state=0)
+pbmc.uns["iroot"] = int(np.flatnonzero(pbmc.obs["bulk_labels"] == "CD34+")[0])
+sc.tl.dpt(pbmc)
+path_cells = pbmc[np.isfinite(pbmc.obs["dpt_pseudotime"])]
+chart, values = gsc.pl.paga_path(
+    path_cells,
+    nodes=["CD34+", "CD14+ Monocyte", "Dendritic"],
+    keys=["LYZ", "FCER1A", "CST3", "FCGR3A", "NKG7", "CD3D"],
+    n_avg=25,
+    normalize_to_zero_one=True,
+    return_data=True,
+    zoom="xy",
+    show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+`groups_key=None` reads `uns['paga']['groups']`; an explicit categorical
+`groups_key` also works. Names or integer category indices set the path order.
+Repeated nodes repeat their cells. Plotting reads stored pseudotime and never
+runs PAGA/DPT. Cells sort within each node, then complete windows average the
+combined path before optional per-key zero–one normalization. Constant normalized
+profiles fail clearly. Raw expression is used when available; `use_raw=False`
+selects X. Numeric observation keys use the same rows. Only requested genes are
+densified; the limit is 250,000 selected cell–key/annotation values.
+
+The original group band keeps all cells after smoothing. Numeric annotation
+tracks use the smoothed values. All tracks share native sample coordinates and
+follow x navigation. `zoom=True` navigates y; `zoom="xy"` also navigates x.
+`show_values=True` reveals fitted tile values. Hover reports plotted values and
+group/annotation values. A smoothed window does not represent one cell ID.
+
+`return_data=True` returns `(chart, table)` with `show=False`, or the table after
+display. Columns contain the plotted keys, averaged numeric group codes, and
+`distance` when pseudotime is an annotation. Scanpy 1.11.5's default unsmoothed
+`return_data` call fails on a Python list; a strict parent-reference check tracks
+that failure separately from the plotted data.
+
+This preview requires two keys and two smoothed samples, with at most one numeric
+annotation. Categorical/multiple annotation tracks, custom margins and connected
+lines reject clearly. `xlim` and legend font options are inactive in heatmap mode,
+matching Scanpy. Native CSS group colors and color schemes use shared helpers.
+Native Greys uses RGB 226 through 30; Scanpy's Greys uses white through black.
+This native palette difference is an accepted preview limit. Values and color
+normalization retain Scanpy's behavior.
+
 ### PAGA adjacency matrices
 
 `paga_adjacency` retains Scanpy's legacy top-level `uns` keys. Make modern PAGA
@@ -1567,9 +1621,9 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
-| Trajectories and graphs | paga_path; comparison review corrections and broader paga options |
+| Trajectories and graphs | Broader paga/path/adjacency/compare options |
 | Spatial | spatial |
 | Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
