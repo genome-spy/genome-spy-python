@@ -34,6 +34,7 @@ def test_matrix_tracks_share_contiguous_scales_without_copying_values():
         assert spec["scales"][axis]["domain"] == [0, count - 1]
         assert spec["scales"][axis]["gapPositions"] == []
         assert spec["scales"][axis]["zoom"] is True
+        assert "name" not in spec["scales"][axis]
     for mark in leaf_marks(spec):
         for axis in ("x", "y"):
             assert "scale" not in mark.get("encoding", {}).get(axis, {})

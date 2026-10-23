@@ -165,7 +165,10 @@ def test_hover_values_labels_and_highlights_follow_native_zoom(page, tmp_path, z
         height=260,
         show=False,
     )
-    bounds = render(page, chart)
+    spec = chart.to_dict()
+    for axis in ("x", "y"):
+        spec["scales"][axis]["name"] = f"timeseries_as_heatmap-{axis}"
+    bounds = render(page, spec)
     initial = {
         axis: page.evaluate(
             "a=>api.getScaleResolutionByName(`timeseries_as_heatmap-${a}`).getDomain()",

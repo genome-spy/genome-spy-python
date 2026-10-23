@@ -169,13 +169,16 @@ def test_hover_zoom_pan_values_and_offline_delivery_use_shared_paths(
         height=300,
         show=False,
     )
-    bounds = render(page, chart)
+    spec = chart.to_dict()
+    if heatmap:
+        for axis in ("x", "y"):
+            spec["scales"][axis]["name"] = f"dpt_timeseries-{axis}"
+    bounds = render(page, spec)
     x = (
         bounds["x"] + bounds["width"] * 10 / 29
         if heatmap
         else bounds["x"] + bounds["width"] * 10 / 39
     )
-    spec = chart.to_dict()
     if heatmap:
         y = bounds["y"] + bounds["height"] * 0.8
     else:

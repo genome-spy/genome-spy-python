@@ -128,7 +128,10 @@ def test_tree_points_follow_matrix_zoom_pan_with_hover_and_values(page, tmp_path
     chart = gsc.pl.paga_adjacency(
         make_adjacency(), zoom=zoom, show_values=True, width=360, height=360, show=False
     )
-    bounds = render(page, chart)
+    spec = chart.to_dict()
+    for axis in ("x", "y"):
+        spec["scales"][axis]["name"] = f"paga_adjacency-{axis}"
+    bounds = render(page, spec)
     xname, yname = "paga_adjacency-x", "paga_adjacency-y"
     xbefore = page.evaluate(
         "name=>api.getScaleResolutionByName(name).getDomain()", xname

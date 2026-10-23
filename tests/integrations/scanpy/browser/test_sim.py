@@ -215,8 +215,11 @@ def test_hover_navigation_realization_labels_and_offline_delivery(page, tmp_path
         height=300,
         show=False,
     )
-    bounds = render(page, chart)
     spec = chart.to_dict()
+    if mode == "heatmap":
+        for axis in ("x", "y"):
+            spec["scales"][axis]["name"] = f"sim-{axis}"
+    bounds = render(page, spec)
     mark = next(
         m
         for m in leaf_marks(spec)

@@ -1138,6 +1138,18 @@ within 400 pixels. Standard native display and HTML/JSON delivery apply. The
 `as_heatmap=False` stripplot mode rejects clearly and remains planned; fonts,
 automatic tick density and outer spacing retain the shared matrix preview's limits.
 
+Zoomable matrix charts can use independent native panels and guides:
+
+```python
+panels = (chart | chart).resolve_scale(default="independent")
+panels = panels.resolve_legend(default="independent")
+panels.display(inline=True, controls=False)
+```
+
+This works for both `matrix` and `paga_adjacency`. Wheel zoom and drag pan affect
+only the panel under the pointer. The expression notebook shows two native color
+schemes side by side.
+
 ## Clustermap compatibility
 
 ```python

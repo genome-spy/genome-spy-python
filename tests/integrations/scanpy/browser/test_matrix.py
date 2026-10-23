@@ -19,9 +19,86 @@ from tests.integrations.scanpy.browser.test_grid_interactions import (
     svg_root,
 )
 from tests.integrations.scanpy.matrix_fixture import matrix_cases
+from tests.integrations.scanpy.paga_fixture import make_adjacency
+from tests.integrations.scanpy.browser.test_heatmap import hover_at
 
 FIXTURES = Path(__file__).parents[1] / "fixtures"
 REFERENCE = json.loads((FIXTURES / "matrix.json").read_text())["cases"]
+
+
+@pytest.mark.parametrize("family", ["matrix", "paga_adjacency"])
+@pytest.mark.parametrize("zoom", [True, "xy"])
+def test_composition_keeps_native_matrix_navigation_independent(
+    page, tmp_path, family, zoom
+):
+    source = make_adjacency()
+    if family == "matrix":
+        source = source.uns["connectivities"].toarray()
+    chart = getattr(gsc.pl, family)(
+        source, zoom=zoom, show_values=True, width=280, height=240, show=False
+    )
+    combined = (
+        (chart | chart)
+        .resolve_scale(default="independent")
+        .resolve_legend(default="independent")
+    )
+    bounds = render(page, combined)
+
+    def rectangles():
+        """Read tile geometry relative to each panel so guide resizing cannot mimic zoom."""
+        groups = [
+            g
+            for g in svg_root(page).iter()
+            if g.get("data-mark-type") == "rect" and g.get("clip-path")
+        ]
+        assert len(groups) == 2
+        result = []
+        for i, group in enumerate(groups):
+            panel = page.evaluate(
+                "i=>api.views.getLayoutBounds({scope:[],view:`panel-${i}`})", i
+            )
+            values = np.array(
+                [
+                    [float(e.get(k)) for k in ("x", "y", "width", "height")]
+                    for e in group
+                ]
+            )
+            values[:, :2] -= [panel["x"], panel["y"]]
+            result.append(values)
+        return result
+
+    before = rectangles()
+    assert all(len(rows) == 9 for rows in before)
+    px, py = pointer(page, bounds)
+    page.mouse.wheel(0, -120)
+    page.wait_for_timeout(700)
+    zoomed = rectangles()
+    assert not np.array_equal(zoomed[0], before[0])
+    np.testing.assert_allclose(zoomed[1], before[1], atol=0.01)
+    assert bool(zoomed[0][0, 2] > before[0][0, 2] + 1) is (zoom == "xy")
+    assert zoomed[0][0, 3] > before[0][0, 3] + 1
+    page.mouse.down()
+    page.mouse.move(px + 8, py + 8, steps=5)
+    page.mouse.up()
+    page.wait_for_timeout(700)
+    panned = rectangles()
+    assert not np.array_equal(panned[0], zoomed[0])
+    np.testing.assert_allclose(panned[1], before[1], atol=0.01)
+    other = page.evaluate("api.views.getLayoutBounds({scope:[],view:'panel-1'})")
+    hover_at(
+        page, other["x"] + other["width"] * 5 / 6, other["y"] + other["height"] / 6
+    )
+    values = [
+        v.strip() for v in page.locator("table.attributes td").all_text_contents()
+    ]
+    assert values[:2] == ["0", "2"]
+    assert float(values[2]) == pytest.approx(0.6)
+    output = tmp_path / f"{family}-composition.html"
+    combined.save(output, inline=True, controls=False)
+    page.context.set_offline(True)
+    page.goto(output.as_uri())
+    page.locator("canvas").first.wait_for(state="visible")
+    assert not page.locator(".message-box").count()
 
 
 @pytest.mark.parametrize("page", [1, 2], indirect=True)
@@ -36,6 +113,8 @@ def test_matrix_side_labels_follow_zoom_pan_and_resize(page, zoom):
     ).to_dict()
     for side in ("bottom", "left"):
         spec["surround"][side][0]["name"] = f"test-{side}"
+    for axis in ("x", "y"):
+        spec["scales"][axis]["name"] = f"matrix-{axis}"
     for width, height in ((240, 200), (400, 280)):
         spec["spec"].update(width=width, height=height)
         bounds = render(page, gs.TopLevelSpec.from_dict(spec))

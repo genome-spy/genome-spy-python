@@ -146,7 +146,11 @@ def test_default_zoom_and_pan_change_only_y(page, family):
                 ),
                 **common,
             )
-    bounds = render(page, chart)
+    spec = chart.to_dict()
+    if family == "matrix":
+        for axis in ("x", "y"):
+            spec["scales"][axis]["name"] = f"matrix-{axis}"
+    bounds = render(page, spec)
     domains = f"['{family}-x','{family}-y'].map(n=>api.getScaleResolutionByName(n).getDomain())"
     before = page.evaluate(domains)
     px, py = pointer(page, bounds)

@@ -100,7 +100,8 @@ def build_matrix(
             nice=False,
         )
     name = context.rsplit(".", 1)[-1]
-    x, y = zoom_axes(x, y, enabled=zoom, name=name)
+    # Unnamed scales let independent panels compose without global name collisions.
+    x, y = zoom_axes(x, y, enabled=zoom, name=None)
     if limits is None:
         scales = index_scales(x, y)
         x, y = gs.X("_x:I"), gs.Y("_y:I")

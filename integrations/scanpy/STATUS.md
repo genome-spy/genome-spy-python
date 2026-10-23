@@ -91,7 +91,7 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and thirty-four expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
+code cells and thirty-five expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
@@ -3181,6 +3181,34 @@ as_heatmap=False remains M11.d and rejects clearly. C15's independent PAGA graph
 reference gate remains blocked. The full repository suite and docs build were
 not rerun. The current queue owns next work. Clearance: **retain**; full M11 and
 the integration roadmap remain open.
+
+### Independent matrix composition correction
+
+The shared numeric matrix renderer now leaves x/y scales unnamed. GenomeSpy
+resolves their identity through native composition instead of conflicting global
+names when two zoomable matrix or adjacency charts appear together. This is one
+shared call change, using the existing zoom_axes helper; native zoom, values,
+labels, guides and tree points retain their existing behavior. No name generator,
+Core patch or runtime listener is added. Time-series, simulation and DPT heatmaps
+reuse the same corrected path.
+
+Verification (2026-10-23): **171 targeted Python checks and 47 browser checks
+passed**, including four new matrix/adjacency × y-only/both-axis composition
+regressions. They render unmodified generated charts, observe tile geometry while
+zooming/panning one panel, verify the other stays unchanged, then check hover and
+offline HTML. Existing standalone tests explicitly name their test scales where
+inspection needs names; production specs remain unnamed. Both canonical workflows
+pass, including an isolated output-free source copy for this fix. The independent
+matrix example adds one expression cell/chart (35 code cells, 29 charts in this
+slice). A coordinated live Jupyter run with the parallel PAGA comparison example
+completed 36 cells and 30 charts without Python errors; a wheel gesture visibly
+zoomed only the left matrix. Committed notebooks retain source only.
+
+Ruff formatting/full-repository lint and mypy pass. Data preparation, emitted
+records and transport are unchanged, so the retained adjacency resource checks
+still cover those workloads. The full repository suite and docs build were not
+rerun. The current queue owns next work; broader adjacency modes remain M11.d.
+Clearance: **retain**.
 
 ## Public callable coverage
 

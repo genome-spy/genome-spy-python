@@ -324,9 +324,15 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["paga_degree"],
         namespace["paga_component"],
         namespace["paga_adjacency"],
+        namespace["adjacency_panels"],
     ]
     assert paga_calls == [{"groups": "bulk_labels"}]
     pbmc = namespace["pbmc"]
+    matrix_panels = namespace["adjacency_panels"].to_dict()
+    assert len(matrix_panels["hconcat"]) == 2
+    assert matrix_panels["resolve"]["scale"]["default"] == "independent"
+    for panel in matrix_panels["hconcat"]:
+        assert all("name" not in panel["scales"][axis] for axis in ("x", "y"))
     paga_spec = namespace["paga_graph"].to_dict()
     nodes = next(rows for rows in paga_spec["datasets"].values() if "_cells" in rows[0])
     assert [r["_group"] for r in nodes] == list(pbmc.obs["bulk_labels"].cat.categories)
