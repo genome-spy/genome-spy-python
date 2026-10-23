@@ -125,6 +125,10 @@ def test_all_plots_share_native_display_and_autosave_rules(
         from tests.integrations.scanpy.paga_fixture import make_paga
 
         a, options = make_paga(), {}
+    if family == "paga_compare":
+        from tests.integrations.scanpy.test_paga_compare import make_compare
+
+        a, options = make_compare(), {"legend_fontweight": "normal"}
     if family == "paga_adjacency":
         from tests.integrations.scanpy.paga_fixture import make_adjacency
 
@@ -171,6 +175,7 @@ def test_shared_display_validation_precedes_optional_imports(
         "dpt_timeseries",
         "paga",
         "paga_adjacency",
+        "paga_compare",
         "clustermap",
         "pca_loadings",
         "pca_variance_ratio",

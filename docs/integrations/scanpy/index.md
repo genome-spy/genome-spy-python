@@ -1104,6 +1104,42 @@ the same stored coordinates.
 The broader PAGA milestone remains open; see the maintained
 [status and remaining scope](../../../integrations/scanpy/STATUS.md#current-work-queue).
 
+### Compare cells and their PAGA graph
+
+`paga_compare` places a stored embedding beside the stored group graph. Both
+panels share the embedding's coordinate limits and optional zoom/pan, while
+colors, point sizes and guides remain independent:
+
+```python
+chart = gsc.pl.paga_compare(
+    pbmc, basis="umap", legend_fontweight="normal",
+    threshold=0.03, add_pos=False, zoom=True, show=False,
+)
+chart.display(inline=True, controls=False)
+```
+
+With the default group color, omitted positions are group medians in the selected
+embedding components, in Scanpy's group order. With another observation key or
+gene, omitted positions read `uns["paga"]["pos"]`; a missing cache errors instead
+of computing a layout. Explicit `pos` is retained. `add_pos=True` updates the
+position cache after successful parent construction, as in Scanpy; False keeps
+it unchanged. No embedding or PAGA analysis runs.
+
+When `basis=None`, selection prefers stored `X_draw_graph_fa`, `X_umap`, `X_tsne`,
+then `X_draw_graph_fr`. A missing embedding requires explicit preparation.
+`components` selects one pair. `groups` highlights embedding categories without
+filtering graph nodes. `groups_graph` provides node labels; `labels` overrides it.
+When `title_graph=None`, `title` (or the color key) is the common title; otherwise
+the two titles belong to their respective panels. `width` and `height` size each
+plot area, defaulting to 300 pixels.
+
+This bounded preview requires `legend_fontweight="normal"` for on-data labels.
+The pinned bold default remains an explicit unsupported case because only the
+regular font atlas is bundled. One color/component pair is supported. Custom
+margins, `plot=False`, outlines, directed graphs and the other parent rendering
+restrictions remain unsupported. Native layout and fonts retain the existing
+renderer boundary; this is not full `paga_compare` parameter compatibility.
+
 ### PAGA adjacency matrices
 
 `paga_adjacency` retains Scanpy's legacy top-level `uns` keys. Make modern PAGA
@@ -1493,7 +1529,7 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency |
+| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Trajectories and graphs | paga_compare, paga_path; adjacency stripplot and broader paga options |
 | Spatial | spatial |
@@ -1601,6 +1637,8 @@ renders both workflow notebooks through JupyterLab. Local validation used Python
 .. autofunction:: genome_spy.integrations.scanpy.pl.dpt_timeseries
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.paga
+
+.. autofunction:: genome_spy.integrations.scanpy.pl.paga_compare
 
 .. autofunction:: genome_spy.integrations.scanpy.pl.paga_adjacency
 

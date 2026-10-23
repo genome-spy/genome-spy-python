@@ -32,6 +32,7 @@ __all__ = [
     "dpt_timeseries",
     "paga",
     "paga_adjacency",
+    "paga_compare",
     "matrixplot",
     "ranking",
     "rank_genes_groups",
@@ -2028,6 +2029,246 @@ def matrix(
         width=width,
         height=height,
     )
+    return _finish_plot(chart, show, sc)
+
+
+def paga_compare(
+    adata: AnnData,
+    basis: str | None = None,
+    *,
+    edges: bool = False,
+    color: str | None = None,
+    alpha: float | None = None,
+    groups: str | Sequence[str] | None = None,
+    components: str | Sequence[str] | None = None,
+    projection: Literal["2d", "3d"] = "2d",
+    legend_loc: str | None = "on data",
+    legend_fontsize: float | str | None = None,
+    legend_fontweight: int | str = "bold",
+    legend_fontoutline: int | None = None,
+    color_map: Any = None,
+    palette: Any = None,
+    frameon: bool = False,
+    size: float | Sequence[float] | None = None,
+    title: str | None = None,
+    right_margin: float | None = None,
+    left_margin: float = 0.05,
+    show: bool | None = None,
+    save: bool | str | None = None,
+    title_graph: str | None = None,
+    groups_graph: Sequence[str] | None = None,
+    pos: Any = None,
+    hover: bool = True,
+    zoom: bool = False,
+    width: float | None = None,
+    height: float | None = None,
+    **paga_graph_params: Any,
+) -> TopLevelSpec | None:
+    """Compare a stored embedding and its PAGA graph in aligned native panels.
+
+    Description:
+        Reuse the embedding and PAGA plotting entries without computing analysis.
+        With the PAGA group color, omitted positions are group medians in the
+        selected embedding components. Other colors use cached PAGA positions.
+        Both panels share the embedding limits and optional navigation; colors,
+        point sizes and guides remain independent.
+
+    Args:
+        adata: AnnData with stored embedding coordinates and PAGA results.
+        basis: Stored basis; None prefers draw_graph_fa, umap, tsne, draw_graph_fr.
+        edges: Show the stored observation-neighbor graph in the embedding panel.
+        color: One observation key or gene; None uses the stored PAGA group key.
+        alpha: Embedding point opacity; None uses the shared embedding default.
+        groups: Categories highlighted in the embedding; graph groups are unchanged.
+        components: One one-based coordinate pair, for example "2,3".
+        projection: Only the default two-dimensional projection is supported.
+        legend_loc: Embedding guide location, defaulting to group-median labels.
+        legend_fontsize: Shared label size in points or a supported named size.
+        legend_fontweight: On-data labels require normal/400; the bold default
+            remains unsupported with the bundled regular font atlas.
+        legend_fontoutline: Unsupported label outlines.
+        color_map: Native continuous embedding scheme; graph cmap is independent.
+        palette: Embedding category palette; graph uses its saved group palette.
+        frameon: Draw the native panel frames.
+        size: Embedding point areas in square points.
+        title: Common title when title_graph is None; otherwise embedding title.
+        right_margin: Only None; native composition places the guides.
+        left_margin: Only the pinned default; native composition sets spacing.
+        show: Display once, return the chart when False, or use Scanpy autoshow.
+        save: None or False; use native chart.save for HTML/JSON.
+        title_graph: Graph title; None selects a common title instead.
+        groups_graph: Graph node labels, overridden by labels in paga_graph_params.
+        pos: Supplied graph coordinates; None uses medians or cached positions.
+        hover: Enable the existing observation, node and edge tooltips.
+        zoom: Enable shared native x/y zoom and pan across the two panels.
+        width: Per-panel plot width in pixels, default 300.
+        height: Per-panel plot height in pixels, default 300.
+        **paga_graph_params: Supported paga options, including threshold and add_pos.
+            Parent rendering restrictions apply; plot=False is unsupported here.
+
+    Returns:
+        A horizontal native composition when show=False, otherwise None.
+
+    Raises:
+        ImportError: If the supported optional dependencies are unavailable.
+        TypeError: If the data or requested options have invalid types.
+        ValueError: If required stored results or components are invalid.
+        NotImplementedError: If a parent rendering option or panel mode is unsupported.
+
+    Example:
+        >>> sc.tl.paga(adata, groups="cell_type")
+        >>> chart = gsc.pl.paga_compare(
+        ...     adata, basis="umap", legend_fontweight="normal", zoom=True, show=False
+        ... )
+    """
+    context = "gsc.pl.paga_compare"
+    sc = _prepare_plot(show, save, context=context)
+    _check_point_options(
+        context=context,
+        width=width,
+        height=height,
+        frameon=frameon,
+        hover=hover,
+        zoom=zoom,
+    )
+    if right_margin is not None or left_margin != 0.05:
+        raise NotImplementedError(f"{context}: custom margins are unsupported.")
+    if paga_graph_params.get("plot", True) is not True:
+        raise NotImplementedError(f"{context}: plot=False is unsupported.")
+    for name, value in (("title", title), ("title_graph", title_graph)):
+        if value is not None and not isinstance(value, str):
+            raise TypeError(f"{context}: {name} must be a string or None.")
+    from anndata import AnnData
+    import genome_spy as gs
+    import pandas as pd
+    from genome_spy.integrations.scanpy._embedding_data import (
+        embedding_key,
+        dimensions_for,
+    )
+    from genome_spy.integrations.scanpy._style import _font_size, POINTS_TO_PIXELS
+
+    if not isinstance(adata, AnnData):
+        raise TypeError(f"{context}: adata must be AnnData.")
+    stored = adata.uns.get("paga", {})
+    key = stored.get("groups") if isinstance(stored, Mapping) else None
+    if not isinstance(key, str) or key not in adata.obs:
+        raise ValueError(
+            f"{context}: stored PAGA results are required; run sc.tl.paga explicitly."
+        )
+    color = key if color is None else color
+    if not isinstance(color, str):
+        raise NotImplementedError(
+            f"{context}: color must be a single observation key or gene."
+        )
+    if basis is None:
+        basis = next(
+            (
+                name
+                for name in ("draw_graph_fa", "umap", "tsne", "draw_graph_fr")
+                if f"X_{name}" in adata.obsm
+            ),
+            "umap",
+        )
+    coordinate_key = embedding_key(adata, basis, context=context)
+    dimensions = dimensions_for(components, None, adata.obsm[coordinate_key].shape[1])
+    if len(dimensions) != 1:
+        raise NotImplementedError(
+            f"{context}: components must select one coordinate pair."
+        )
+    common_title = (color if title is None else title) if title_graph is None else None
+    embedding_chart = _embedding(
+        adata,
+        basis,
+        context,
+        False,
+        color=color,
+        edges=edges,
+        alpha=alpha,
+        groups=groups,
+        components=components,
+        projection=projection,
+        legend_loc=legend_loc,
+        legend_fontsize=legend_fontsize,
+        legend_fontweight=legend_fontweight,
+        legend_fontoutline=legend_fontoutline,
+        color_map=color_map,
+        palette=palette,
+        frameon=frameon,
+        size=size,
+        title="" if title_graph is None else title,
+        hover=hover,
+        zoom=zoom,
+        width=width,
+        height=height,
+        show=False,
+        save=False,
+    )
+    if pos is None:
+        if color == key:
+            coordinates = pd.DataFrame(
+                adata.obsm[coordinate_key][:, list(dimensions[0])],
+                columns=["x", "y"],
+                index=adata.obs_names,
+            )
+            pos = (
+                coordinates.groupby(adata.obs[key], observed=True)
+                .median()
+                .sort_index()
+                .to_numpy()
+            )
+        else:
+            pos = stored.get("pos")
+            if pos is None:
+                raise ValueError(
+                    f"{context}: non-group colors require supplied or cached PAGA positions."
+                )
+    labels = paga_graph_params.pop("labels", groups_graph)
+    if legend_fontsize is not None:
+        paga_graph_params["fontsize"] = _font_size(legend_fontsize) / POINTS_TO_PIXELS
+    if legend_fontweight is not None:
+        paga_graph_params["fontweight"] = {
+            400: "normal",
+            700: "bold",
+            "regular": "normal",
+        }.get(legend_fontweight, legend_fontweight)
+    graph = paga(
+        adata,
+        colors=color,
+        labels=labels,
+        pos=pos,
+        frameon=frameon,
+        title="" if title_graph is None else title_graph,
+        hover=hover,
+        zoom=False,
+        width=300 if width is None else width,
+        height=300 if height is None else height,
+        show=False,
+        save=False,
+        **paga_graph_params,
+    )
+    assert embedding_chart is not None and isinstance(graph, gs.LayerChart)
+    # Only the embedding contributes coordinate limits to the shared native scales.
+    graph = graph._copy(
+        deep=False,
+        layer=[
+            mark.encode(x=gs.X("_x:Q").axis(None), y=gs.Y("_y:Q").axis(None))
+            for mark in graph._kwds["layer"]
+        ],
+    )
+    chart = (
+        gs.hconcat(embedding_chart, graph)
+        .resolve_scale(
+            x="shared",
+            y="shared",
+            color="independent",
+            fill="independent",
+            stroke="independent",
+            size="independent",
+        )
+        .resolve_legend(default="independent")
+    )
+    if common_title:
+        chart = chart.properties(title=common_title)
     return _finish_plot(chart, show, sc)
 
 

@@ -24,7 +24,8 @@ metadata, after explicit Scanpy preparation in the expression notebook.
 `gsc.pl.dpt_timeseries(...)` applies saved DPT row indices to X and reuses the
 heatmap/point renderers for expression profiles.
 `gsc.pl.paga(...)` renders stored undirected group connectivity with native graph
-marks. Scanpy computes PAGA explicitly; its public no-plot API supplies missing
+marks. `gsc.pl.paga_compare(...)` composes it with stored embedding points
+and shared coordinates, using explicit normal on-data labels. Scanpy computes PAGA explicitly; its public no-plot API supplies missing
 layout coordinates without reading expression or creating figures.
 
 When resuming work in another chat, read [the current queue](STATUS.md#current-work-queue)

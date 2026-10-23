@@ -868,6 +868,21 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   bins and export DPI; observe hover/navigation/HTML and measure a larger matrix.
   as_heatmap=False remains a separate M11.d stripplot increment. This heatmap
   preview does not close the full adjacency entry or M11.d.
+  The comparison increment composes the existing embedding and PAGA entries.
+  Preserve automatic basis priority (draw_graph_fa, umap, tsne, draw_graph_fr),
+  selected-component group medians when color is the PAGA group key, cached
+  positions for other colors, supplied positions, title/label precedence and
+  add_pos behavior. Both native panels share the embedding limits and optional
+  x/y navigation; color, size and guides stay independent. Never infer an embedding
+  or recompute PAGA. Retain the existing parent rendering restrictions: on-data
+  labels require explicit legend_fontweight="normal" with the bundled regular
+  atlas; the pinned bold default errors. Support one color/component pair and
+  reject custom margins, plot=False and unsupported parent options explicitly.
+  Acceptance: pinned signatures and direct public-call medians/cache/domain/title
+  comparisons, native parent reuse, mutation/expression/analysis guards, complete
+  aligned charts including out-of-range supplied positions, observed cell/node
+  hover and shared navigation/offline HTML, packaged workflow and seeded resources.
+  This bounded comparison does not close paga_path or the full M11.d milestone.
 
 Acceptance: hand-sized graphs/path arrays cover thresholds, direction, duplicate
 edges, gaps and smoothing; saved coordinates/arrays are honored. No hidden PAGA

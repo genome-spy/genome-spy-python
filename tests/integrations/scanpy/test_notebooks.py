@@ -325,6 +325,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["paga_component"],
         namespace["paga_adjacency"],
         namespace["adjacency_panels"],
+        namespace["paga_comparison"],
     ]
     assert paga_calls == [{"groups": "bulk_labels"}]
     pbmc = namespace["pbmc"]
@@ -333,6 +334,25 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
     assert matrix_panels["resolve"]["scale"]["default"] == "independent"
     for panel in matrix_panels["hconcat"]:
         assert all("name" not in panel["scales"][axis] for axis in ("x", "y"))
+    comparison = namespace["paga_comparison"].to_dict()
+    assert len(comparison["hconcat"]) == 2
+    assert comparison["resolve"]["scale"]["x"] == "shared"
+    assert comparison["resolve"]["scale"]["y"] == "shared"
+    comparison_nodes = next(
+        rows for rows in comparison["datasets"].values() if rows and "_cells" in rows[0]
+    )
+    import pandas as pd
+
+    expected_positions = (
+        pd.DataFrame(pbmc.obsm["X_umap"], index=pbmc.obs_names)
+        .groupby(pbmc.obs["bulk_labels"], observed=True)
+        .median()
+        .sort_index()
+        .to_numpy()
+    )
+    np.testing.assert_allclose(
+        [[r["_x"], r["_y"]] for r in comparison_nodes], expected_positions
+    )
     paga_spec = namespace["paga_graph"].to_dict()
     nodes = next(rows for rows in paga_spec["datasets"].values() if "_cells" in rows[0])
     assert [r["_group"] for r in nodes] == list(pbmc.obs["bulk_labels"].cat.categories)
