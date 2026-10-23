@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 import genome_spy as gs
+from genome_spy.schemapi import Undefined
 from genome_spy.integrations.scanpy._grid_interactions import zoom_axes
 from genome_spy.integrations.scanpy._grouped_data import FeatureGroup
 from genome_spy.integrations.scanpy._data import number
@@ -21,9 +22,11 @@ from genome_spy.integrations.scanpy._grouped_chart import (
     summary_records,
 )
 from genome_spy.integrations.scanpy._style import (
+    FONT,
     POINTS_TO_PIXELS as _PT,
     color_bounds,
     native_scheme,
+    native_color,
 )
 
 if TYPE_CHECKING:
@@ -31,16 +34,25 @@ if TYPE_CHECKING:
 
 
 def dot_size_scale(
-    fractions: np.ndarray, dot_min: float | None, dot_max: float | None, smallest: float
+    fractions: np.ndarray,
+    dot_min: float | None,
+    dot_max: float | None,
+    smallest: float,
+    largest: float = 200,
+    exponent: float = 1.5,
 ) -> tuple[list[float], list[float], list[float]]:
     """Return percentage positions, dot areas and legend ticks from cell fractions.
 
     Apply Scanpy's clipping and size curve once so dots and legend symbols agree.
     """
     smallest = number(smallest, "smallest_dot", context="gsc.pl.dotplot")
-    if smallest > 200:
+    largest = number(largest, "largest_dot", context="gsc.pl.dotplot")
+    exponent = number(exponent, "size_exponent", context="gsc.pl.dotplot")
+    if exponent == 0:
+        raise ValueError("gsc.pl.dotplot: size_exponent must be positive.")
+    if smallest > largest:
         raise ValueError(
-            "gsc.pl.dotplot: smallest_dot cannot exceed the largest dot (200)."
+            f"gsc.pl.dotplot: smallest_dot cannot exceed the largest dot ({largest:g})."
         )
     valid = fractions[np.isfinite(fractions)]
     if not valid.size:
@@ -70,8 +82,8 @@ def dot_size_scale(
     ticks = np.round(ticks * 100, 10) / 100
     # Use the same percentage-to-area lookup for dots and legend symbols.
     domain = np.unique(np.concatenate([fractions[np.isfinite(fractions)], ticks]))
-    areas = smallest + ((np.clip(domain, low, high) - low) / difference) ** 1.5 * (
-        200 - smallest
+    areas = smallest + ((np.clip(domain, low, high) - low) / difference) ** exponent * (
+        largest - smallest
     )
     return (domain * 100).tolist(), (areas * _PT**2).tolist(), (ticks * 100).tolist()
 
@@ -83,24 +95,35 @@ def build_dotplot(
     *,
     swap_axes: bool,
     title: str | None,
-    colorbar_title: str | None,
-    size_title: str | None,
+    colorbar_title: str | None = "Mean expression\nin group",
+    size_title: str | None = "Fraction of cells\nin group (%)",
     cmap: Any,
     vmin: float | None,
     vmax: float | None,
-    dot_min: float | None,
-    dot_max: float | None,
-    smallest_dot: float,
+    dot_min: float | None = None,
+    dot_max: float | None = None,
+    smallest_dot: float = 0,
     hover: bool,
     zoom: bool | Literal["xy"],
     highlight: bool,
     value_title: str,
-    linewidth: float,
+    linewidth: float | None,
     rotation: float | None,
     width: float | None,
     height: float | None,
     figsize: tuple[float, float] | None,
     tree: DendrogramData | None = None,
+    tree_size: float = 80,
+    totals: pd.DataFrame | None = None,
+    largest_dot: float = 200,
+    size_exponent: float = 1.5,
+    edge_color: str | None = "black",
+    grid: bool = False,
+    x_padding: float = 0.8,
+    y_padding: float = 1,
+    show_size_legend: bool = True,
+    show_colorbar: bool = True,
+    legend_width: float = 150,
 ) -> gs.TopLevelSpec:
     """Build a native dotplot from displayed colors, cell fractions and marker groups.
 
@@ -111,7 +134,24 @@ def build_dotplot(
     scheme = native_scheme(
         "viridis" if cmap is None else cmap, "cmap", context="gsc.pl.dotplot"
     )
-    linewidth = number(linewidth, "linewidth", context="gsc.pl.dotplot")
+    linewidth = number(
+        0 if linewidth is None else linewidth, "linewidth", context="gsc.pl.dotplot"
+    )
+    no_edge = edge_color is None or edge_color == "none"
+    edge_color = (
+        "black"
+        if no_edge
+        else native_color(edge_color, "dot_edge_color", context="gsc.pl.dotplot")
+    )
+    for name, flag in {
+        "grid": grid,
+        "show_size_legend": show_size_legend,
+        "show_colorbar": show_colorbar,
+    }.items():
+        if not isinstance(flag, bool):
+            raise TypeError(f"gsc.pl.dotplot: {name} must be boolean.")
+    x_padding = number(x_padding, "x_padding", minimum=0.5, context="gsc.pl.dotplot")
+    y_padding = number(y_padding, "y_padding", minimum=0.5, context="gsc.pl.dotplot")
     if rotation is not None:
         rotation = number(
             rotation, "var_group_rotation", minimum=-360, context="gsc.pl.dotplot"
@@ -124,6 +164,7 @@ def build_dotplot(
         height=height,
         figsize=figsize,
         context="gsc.pl.dotplot",
+        legend_width=legend_width,
     )
     for name, value in {
         "title": title,
@@ -138,15 +179,27 @@ def build_dotplot(
         values, vmin, vmax, context="gsc.pl.dotplot"
     )
     domain, areas, ticks = dot_size_scale(
-        fractions.to_numpy(dtype=float, na_value=np.nan), dot_min, dot_max, smallest_dot
+        fractions.to_numpy(dtype=float, na_value=np.nan),
+        dot_min,
+        dot_max,
+        smallest_dot,
+        largest_dot,
+        size_exponent,
     )
     table = summary_records(colors, swap_axes=swap_axes, context="gsc.pl.dotplot")
     table["_percent"] = fractions.to_numpy(dtype=float, na_value=np.nan).ravel() * 100
     if constant_color:
         # Scanpy freezes dot colors before its colorbar expands constant bounds.
         table["_paint"] = low
-    x, y = grouped_axes(rows, columns, xpadding=0.3, ypadding=0.5)
-    x, y = zoom_axes(x, y, enabled=zoom, name="dotplot")
+    x, y = grouped_axes(
+        rows, columns, xpadding=x_padding - 0.5, ypadding=y_padding - 0.5
+    )
+    if grid:
+        x, y = (
+            axis.axis(grid=True, gridColor="gray", gridWidth=0.1 * _PT)
+            for axis in (x, y)
+        )
+    x, y = zoom_axes(x, y, enabled=zoom, name=None)
     gaps = feature_gaps(feature_groups, rows if swap_axes else columns)
     scales = index_scales(
         x, y, xgaps=[] if swap_axes else gaps, ygaps=gaps if swap_axes else []
@@ -161,8 +214,9 @@ def build_dotplot(
         .transform_filter("isValid(datum._mean) && isValid(datum._percent)")
         .mark_point(
             filled=True,
-            stroke="black",
+            stroke=edge_color,
             strokeWidth=linewidth * _PT,
+            strokeOpacity=0 if no_edge else Undefined,
             inwardStroke=False,
             tooltip={"handler": "default"} if hover else None,
         )
@@ -178,7 +232,11 @@ def build_dotplot(
                 clamp=True,
                 scheme=scheme,
             )
-            .legend(color_legend(colorbar_title)),
+            .legend(
+                color_legend(colorbar_title).gradientLength(legend_width)
+                if show_colorbar
+                else None
+            ),
             size=gs.Size("_percent:Q")
             .scale(type="ordinal", domain=domain, range=areas)
             .legend(
@@ -193,6 +251,8 @@ def build_dotplot(
                     symbolStrokeWidth=linewidth * _PT,
                     offset=12,
                 )
+                if show_size_legend
+                else None
             ),
         )
     )
@@ -241,5 +301,85 @@ def build_dotplot(
         name="dotplot",
         tree=tree,
         zoom=bool(zoom),
+        tree_size=tree_size,
+        group_track=_totals_track(
+            totals, swapped=swap_axes, size=tree_size, hover=hover
+        )
+        if totals is not None
+        else None,
     )
     return chart
+
+
+def _totals_track(
+    totals: pd.DataFrame, *, swapped: bool, size: float, hover: bool
+) -> gs.LayerChart:
+    """Draw detached group counts on the same native index scale as the dots."""
+    table = [
+        {
+            "slot": i,
+            "count": int(row["count"]),
+            "color": row["color"],
+            "group": str(group),
+            "label": f"{round(row['count'] / 1000, 1)}k"
+            if row["count"] >= 1000
+            else str(int(row["count"])),
+        }
+        for i, (group, row) in enumerate(totals.iterrows())
+    ]
+    chart = gs.Chart(table)
+    bars = chart.mark_rect(
+        stroke="black",
+        strokeWidth=_PT,
+        tooltip={"handler": "default"} if hover else None,
+    ).encode(
+        color=gs.Color("group:N")
+        .scale(
+            type="ordinal",
+            domain=[row["group"] for row in table],
+            range=totals["color"].tolist(),
+        )
+        .legend(None),
+    )
+    text = chart.encode(text="label:N")
+    if hover:
+        bars = bars.encode(
+            tooltip=[
+                gs.Tooltip("group:N", title="Group"),
+                gs.Tooltip("count:Q", title="Cells"),
+            ]
+        )
+    high = float(totals["count"].max()) * 1.4
+    if swapped:
+        count = (
+            gs.Y("count:Q").scale(domain=[0, high], nice=False, zoom=False).axis(None)
+        )
+        bars = bars.encode(
+            x=gs.X("slot:I", band=0.65).axis(None),
+            y=count,
+            y2=gs.datum(0),
+        )
+        text = text.mark_text(
+            font=FONT,
+            size=8 * _PT,
+            tooltip=None,
+            align="center",
+            baseline="bottom",
+            yOffset=-4,
+        ).encode(x=gs.X("slot:I").axis(None), y=count)
+        return gs.layer(bars, text).properties(height=size, name="dotplot-totals")
+    count_x = gs.X("count:Q").scale(domain=[0, high], nice=False, zoom=False).axis(None)
+    bars = bars.encode(
+        y=gs.Y("slot:I", band=0.65).axis(None),
+        x=count_x,
+        x2=gs.datum(0),
+    )
+    text = text.mark_text(
+        font=FONT,
+        size=8 * _PT,
+        tooltip=None,
+        align="left",
+        baseline="middle",
+        xOffset=4,
+    ).encode(y=gs.Y("slot:I").axis(None), x=count_x)
+    return gs.layer(bars, text).properties(width=size, name="dotplot-totals")

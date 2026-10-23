@@ -31,8 +31,8 @@ standalone dendrograms, correlation matrices, stored rank/score panels and ranke
 dotplot/matrixplot/heatmap wrappers.
 Full public Scanpy plotting coverage is the destination; the inventory below
 records remaining work. Stored PCA loadings and variance ratios share the ranking panels;
-PCA overview composes these with the existing embedding chart. Native
-plot builders remain planned.
+PCA overview composes these with the existing embedding chart. The native
+`DotPlot` builder supports the documented chains below; other builders remain planned.
 
 ## Shared 2D embeddings
 
@@ -634,7 +634,7 @@ ranking, palette write, or cached-result mutation occurs.
 | `hover` | Enabled by default. Tooltips show gene, group, displayed mean/color value and actual expressing-cell percentage, before dot-size clipping. Use `hover=False` to disable them. Scaled means and supplied color values are labeled explicitly. |
 | `figsize` | Explicit native layout budget at 100 logical pixels/inch: subtract a fixed 150-pixel guide allowance from width; height sizes the plot area. Labels and renderer padding add space, so this does not fix the outer canvas dimensions. Conflicts with `width`/`height` error. |
 | `show`, `save`, `ax`, `return_fig` | Same native return/display/export boundary as UMAP. No Axes dictionaries or fake builders. |
-| `dendrogram`, `norm`, `vcenter`, other forwarded kwargs | Trees accept True or a stored key; see the tree contract below. Nondefault norm/vcenter and other kwargs error; `DotPlot`, supplied `dot_size_df`, and builder styling are M13. Only scalar `linewidth` is accepted from scatter kwargs. |
+| `dendrogram`, `norm`, `vcenter`, other forwarded kwargs | Trees accept True or a stored key; see the tree contract below. Nondefault norm/vcenter and other kwargs error. Only scalar `linewidth` is accepted from scatter kwargs; the builder below supports separate style chains and supplied fractions. |
 
 Rows and columns use integer index-scale slots with padding that preserves the
 initial Scanpy spacing. Marker blocks that partition the genes have four-pixel
@@ -651,6 +651,41 @@ including a darker low end; no Matplotlib colors are sampled or imported. Use
 `cmap="viridis"` for the shared-palette reference comparisons. Browser tests
 register plot areas at the recorded export DPI and check positions, sizes and
 paint with renderer-specific tolerances; they do not claim identical full figures.
+
+### DotPlot builder
+
+```python
+plot = gsc.pl.DotPlot(pbmc, marker_genes, "bulk_labels", zoom="xy")
+plot.add_dendrogram().swap_axes().style(
+    cmap="viridis", dot_edge_color="black", largest_dot=140,
+).legend(colorbar_title="Mean expression")
+chart = plot.to_chart()
+chart.display()
+chart.save("markers.html", inline=True)
+```
+
+The constructor reads selected expression once. It shares the functional
+dotplot's summaries, scaling, ordering and native renderer. Chaining mutates the
+builder and returns it. `.to_chart()` creates a detached native chart each time;
+later chains and edits to expression or supplied tables do not change earlier
+charts. `.show()` displays once through anywidget and returns None. Construction
+and explicit `.show()` do not consult Scanpy's autoshow/autosave settings.
+
+| Method/input | Supported behavior |
+| --- | --- |
+| Constructor | Same expression/grouping/storage boundary as dotplot. `ax` is omitted. `dot_color_df` follows the functional contract; `dot_size_df` supplies finite fractions in [0, 1], with exactly the plotted feature slots and group labels. Sizes are copied and group rows aligned. |
+| `.swap_axes(swap_axes=True)` | Set the orientation; repeated calls do not toggle it. False/None restores features on x. |
+| `.add_dendrogram(show=True, dendrogram_key=None, size=0.8)` | Reuse the shared stored/public Scanpy tree path and marker permutations. Replace totals with a native tree track. Hiding a decoration retains its established ordering. |
+| `.add_totals(show=True, sort=None, size=0.8, color=None)` | Native group-count bars and labels replace the tree track. Optional ascending/descending count sorting keeps dots and labels aligned. A CSS color or one per displayed group is supported; the default is Scanpy 1.11.5's effective salmon fallback. Track size uses 100 logical pixels/inch. |
+| `.style(...)` | Native scheme, clipped fraction limits, minimum/maximum dot areas, positive size exponent, CSS edge color/width, grid and x/y padding. Omitted arguments retain their previous values; explicit None resets nullable settings. Padding must be at least 0.5 slot units. Only `color_on="dot"` is supported; square backgrounds error explicitly. |
+| `.legend(...)` | Shared `show`, separate `show_size_legend`/`show_colorbar`, titles and `width`. Visibility changes guides without changing scales. Width sets the native gradient length and figsize guide allowance at 100 logical pixels/inch; automatic native symbol-guide layout may extend beyond it. |
+| Native delivery | `.to_chart()` supports normal chart composition, configuration and HTML/JSON saving. Independent charts retain native scale identity when composed. `.show(return_axes=True)` errors with the native alternative. Matplotlib `get_axes`, figure/artist attributes, `make_figure` and `savefig` are unavailable; use `.to_chart()`, `.display()` and `.save()` instead. |
+
+Changing the decoration after hiding it preserves the last category/marker
+ordering, as in Scanpy. Builder summaries are snapshots; attaching a tree later
+still reads the current stored tree through the shared helper. Construct a new
+builder after changing the underlying grouping or expression. Existing native
+palette, typography and layout differences above apply to builders too.
 
 ## Matrixplot compatibility
 
@@ -1621,11 +1656,11 @@ remain visible. Function coverage and parameter coverage are separate.
 
 | Delivery | Public entries |
 | --- | --- |
-| Available as partial previews | umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
+| Available as partial previews | DotPlot, umap, dotplot, matrixplot, heatmap, matrix, clustermap, dendrogram, correlation_matrix, ranking, rank_genes_groups, rank_genes_groups_dotplot, rank_genes_groups_matrixplot, rank_genes_groups_heatmap, embedding, tsne, diffmap, draw_graph, pca, pca_scatter, scatter, pca_loadings, pca_variance_ratio, pca_overview, highest_expr_genes, highly_variable_genes, filter_genes_dispersion, scrublet_score_distribution, embedding_density, timeseries_as_heatmap, timeseries, timeseries_subplot, sim, dpt_groups_pseudotime, dpt_timeseries, paga, paga_adjacency, paga_compare, paga_path |
 | Distributions and tracks | violin, stacked_violin, tracksplot, rank_genes_groups_violin, rank_genes_groups_stacked_violin, rank_genes_groups_tracksplot |
 | Trajectories and graphs | Broader paga/path/adjacency/compare options |
 | Spatial | spatial |
-| Plot builders and useful semantic methods | DotPlot, MatrixPlot, StackedViolin |
+| Remaining builders and methods | MatrixPlot, StackedViolin; DotPlot square-background styling and broader native parameter closure |
 | Settings helpers retained in Scanpy | set_rcParams_defaults, set_rcParams_scanpy |
 
 All entries except the available plotting previews and settings helpers remain required future integration

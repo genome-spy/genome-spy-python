@@ -27,9 +27,12 @@ def fixture():
         return make_adata()
 
 
-def render(page, chart, *, renderer="webgl"):
+def render(page, chart, *, renderer="webgl", scale_prefix=None):
     """Render a chart or prepared spec; return its first panel's native bounds."""
     spec = chart if isinstance(chart, dict) else chart.to_dict()
+    if scale_prefix is not None:
+        for axis in ("x", "y"):
+            spec["scales"][axis]["name"] = f"{scale_prefix}-{axis}"
     for i, panel in enumerate(units(spec)):
         panel["name"] = f"panel-{i}"
     page.set_content(

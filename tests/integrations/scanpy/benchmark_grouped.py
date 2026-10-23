@@ -25,7 +25,14 @@ def main() -> None:
     )
     parser.add_argument("--dendrogram", action="store_true")
     parser.add_argument("--ranked", action="store_true")
+    parser.add_argument(
+        "--builder",
+        action="store_true",
+        help="Measure DotPlot construction and three native chart snapshots.",
+    )
     args = parser.parse_args()
+    if args.builder and (args.plot != "dotplot" or args.ranked):
+        parser.error("--builder requires --plot dotplot without --ranked")
     import anndata as ad
     import numpy as np
     import pandas as pd
@@ -96,15 +103,30 @@ def main() -> None:
             options.update(groups=["0"], n_genes=markers, zoom=True)
             if args.plot != "heatmap":
                 options["values_to_plot"] = "scores"
-        chart = getattr(gsc.pl, family)(
-            adata,
-            *positional,
-            show=False,
-            width=1400,
-            height=1600,
-            dendrogram=args.dendrogram,
-            **options,
-        )
+        if args.builder:
+            family = "DotPlot"
+            plot = gsc.pl.DotPlot(
+                adata, *positional, width=1400, height=1600, zoom=True
+            )
+            if args.dendrogram:
+                plot.add_dendrogram()
+            snapshots = [plot.to_chart()]
+            snapshots.append(plot.swap_axes().to_chart())
+            snapshots.append(
+                plot.swap_axes(swap_axes=False).add_totals(color="steelblue").to_chart()
+            )
+            chart = snapshots[-1]
+            assert shapes == [[cells, markers]]
+        else:
+            chart = getattr(gsc.pl, family)(
+                adata,
+                *positional,
+                show=False,
+                width=1400,
+                height=1600,
+                dendrogram=args.dendrogram,
+                **options,
+            )
     finally:
         sparse.csr_matrix.toarray = original
     prepared = perf_counter()
@@ -141,6 +163,7 @@ def main() -> None:
             "expression_tiles": cells * markers if args.plot == "heatmap" else None,
             "dendrogram": args.dendrogram,
             "resident_pca_components": 20 if args.dendrogram else None,
+            "builder_snapshots": 3 if args.builder else None,
         },
         "densified_shapes": shapes,
         "seconds": {
@@ -226,7 +249,7 @@ def main() -> None:
                 == hover_gene
             )
             zoom_elapsed = None
-            if args.ranked:
+            if args.ranked or args.builder:
                 domain = page.evaluate(
                     f"api.getScaleResolutionByName('{args.plot}-y').getDomain()"
                 )

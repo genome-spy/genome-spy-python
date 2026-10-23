@@ -369,19 +369,19 @@ def matrixplot_statistics(
     return means.T if swap_axes else means
 
 
-def dotplot_statistics(
+def dotplot_summaries(
     values: pd.DataFrame,
     *,
     expression_cutoff: float,
     mean_only_expressed: bool,
     standard_scale: Literal["var", "group"] | None,
     dot_color_df: pd.DataFrame | None,
-    swap_axes: bool,
+    dot_size_df: pd.DataFrame | None = None,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Return displayed color values and cell fractions from grouped cell values.
+    """Return detached color summaries and fractions in their original orientation.
 
-    Honor supplied colors, expressed-only means and Scanpy's scaling order;
-    transpose both tables together when axes are swapped.
+    Honor supplied values, expressed-only means and Scanpy's first scaling pass;
+    rendering applies the second pass after ordering and optional transposition.
     """
     # Dot sizes always describe the cells, even when colors are supplied.
     fractions = expression_fractions(values, expression_cutoff=expression_cutoff)
@@ -392,6 +392,24 @@ def dotplot_statistics(
             "gsc.pl.dotplot: unused categories have no statistics; "
             "remove unused categories explicitly before plotting."
         )
+
+    if dot_size_df is not None:
+        if not isinstance(dot_size_df, pd.DataFrame):
+            raise TypeError("gsc.pl.DotPlot: dot_size_df must be a pandas DataFrame.")
+        if (
+            not dot_size_df.index.is_unique
+            or set(dot_size_df.index) != set(fractions.index)
+            or list(dot_size_df.columns) != list(fractions.columns)
+        ):
+            raise ValueError(
+                "gsc.pl.DotPlot: dot_size_df needs exactly the plotted groups and feature slots."
+            )
+        fractions = dot_size_df.loc[fractions.index].copy()
+        sizes = numeric_values(fractions, context="gsc.pl.DotPlot: dot_size_df")
+        if not np.isfinite(sizes).all() or (sizes < 0).any() or (sizes > 1).any():
+            raise ValueError(
+                "gsc.pl.DotPlot: dot_size_df fractions must be finite and between zero and one."
+            )
 
     # Supplied colors skip the first scaling pass, as in Scanpy.
     if dot_color_df is None:
@@ -414,10 +432,7 @@ def dotplot_statistics(
         unique = dot_color_df.loc[:, ~dot_color_df.columns.duplicated()]
         colors = unique.loc[fractions.index, fractions.columns].copy()
         numeric_values(colors, context="gsc.pl.dotplot: dot_color_df")
-    if swap_axes:
-        colors, fractions = colors.T, fractions.T
-    # Scanpy also scales the displayed table after a possible transpose.
-    return scale_values(colors, standard_scale), fractions
+    return colors, fractions
 
 
 def heatmap_values(

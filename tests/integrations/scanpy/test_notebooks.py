@@ -329,7 +329,20 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["paga_comparison"],
         namespace["independent_comparisons"],
         namespace["paga_path_chart"],
+        namespace["builder_tree_chart"],
+        namespace["builder_totals_chart"],
     ]
+    builder_tree = namespace["builder_tree_chart"].to_dict()
+    builder_totals = namespace["builder_totals_chart"].to_dict()
+    assert builder_tree["surround"]["top"][0]["name"] == "dotplot-tree"
+    assert builder_totals["surround"]["top"][0]["name"] == "dotplot-totals"
+    totals_track = builder_totals["surround"]["top"][0]["layer"][0]
+    totals = builder_totals["datasets"][totals_track["data"]["name"]]
+    counts = namespace["pbmc"].obs["bulk_labels"].value_counts()
+    assert [row["group"] for row in totals] == list(counts.index)
+    assert [row["count"] for row in totals] == list(counts)
+    assert sum(row["count"] for row in totals) == 700
+    assert namespace["dotplot_builder"].to_chart().to_dict() == builder_totals
     assert paga_calls == [{"groups": "bulk_labels"}]
     path_values = namespace["path_values"]
     assert list(path_values.columns) == [

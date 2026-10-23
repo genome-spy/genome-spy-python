@@ -225,7 +225,7 @@ def test_ranked_expression_uses_existing_y_navigation_and_guides(page, family):
         show=False,
         **options,
     )
-    bounds = render(page, chart)
+    bounds = render(page, chart, scale_prefix=family)
     domains = f"['x','y'].map(axis=>api.getScaleResolutionByName('{family}-'+axis).getDomain())"
     before = page.evaluate(domains)
     pointer(page, bounds)
@@ -354,7 +354,7 @@ def test_statistic_hover_zoom_and_offline_delivery(page, family, tmp_path):
         show=False,
         **options,
     )
-    bounds = render(page, chart)
+    bounds = render(page, chart, scale_prefix=family)
     x = 0.5
     y = 1 / 5 if family == "dotplot" else 1 / 8
     px, py = pointer(page, bounds, x=x, y=y)

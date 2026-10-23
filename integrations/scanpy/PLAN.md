@@ -966,7 +966,26 @@ upstream methods; no placeholder base class or generic method dispatcher.
 | Native delivery | Document chart extraction/display/HTML/JSON methods and mutation versus snapshot timing; test repeated rendering and further chaining. |
 | Matplotlib-only methods/attributes | `get_axes`, figure/Axes attributes and artist styling fail with guidance. Decide `make_figure`, `show(return_axes=...)` and `savefig` boundaries explicitly; do not make empty no-op methods. |
 
-Target shape (future): `gsc.pl.DotPlot(pbmc, markers, "louvain").add_dendrogram().swap_axes().style(dot_edge_color="black")`.
+M13.a implements `DotPlot` first: detached selected-expression summaries shared
+with functional `dotplot`, tree/totals replacement and ordering, axis swapping,
+native dot limits/areas/exponent/edges/grid/padding, and native guide
+visibility/titles/width. Constructor-only `dot_size_df` supplies labeled fractions.
+Only dot coloring ships in this bounded slice; square-background styling remains
+a separate M13 increment with its own contrast/geometry/guide checks. Padding
+below 0.5 and broader Matplotlib color/normalization forms remain explicit limits.
+There is no generic builder base, method dispatcher or chart-spec rewriting.
+
+Delivery uses mutable chains returning self and fresh `.to_chart()` snapshots
+for native composition, display and HTML/JSON saving. `.show()` displays once;
+Matplotlib axes/figures, `make_figure`, `get_axes` and `savefig` are omitted in favor
+of those native methods. Show with `return_axes=True` rejects the request explicitly.
+Verify actual upstream chains, supplied/repeated slots, no expression rereads,
+tree/totals replacement, navigation, independent composition, offline output and
+both canonical workflows. Reuse parent resource evidence only with an explicit
+account of the unchanged workload; measure constructor retention/render snapshots.
+`MatrixPlot` is the next independent builder; `StackedViolin` follows M08/C01.
+
+Target shape: `gsc.pl.DotPlot(pbmc, markers, "louvain").add_dendrogram().swap_axes().style(dot_edge_color="black")`.
 Acceptance: chained and equivalent functional plots share statistics/chart code,
 identical supported semantics, and explicit renderer boundaries. Record method
 coverage separately from the three constructor entries in STATUS.

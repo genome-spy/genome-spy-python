@@ -72,7 +72,7 @@ def test_tree_height_fits_visible_branches_after_zoom(
         min(edge["leaf"], edge["leaf2"]) - 0.05,
         max(edge["leaf"], edge["leaf2"]) + 0.05,
     ]
-    render(page, gs.TopLevelSpec.from_dict(spec))
+    render(page, gs.TopLevelSpec.from_dict(spec), scale_prefix=family)
     before = page.evaluate(
         "api.getScaleResolutionByName('test-tree-height').getDomain()"
     )

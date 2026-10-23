@@ -43,12 +43,19 @@ def test_progress_inventory_matches_the_pinned_api_and_available_exports():
     }
     assert available == set(pl.__all__)
     assert (
-        f"{len(available)} functions are available as partial previews; {len(rows) - len(available) - 2} plot/builder"
+        f"{len(available)} plotting functions/builders are available as partial previews; {len(rows) - len(available) - 2} plot/builder"
         in inventory
     )
 
 
-@pytest.mark.parametrize("family", [name for name in pl.__all__ if name != "ranking"])
+@pytest.mark.parametrize(
+    "family",
+    [
+        name
+        for name in pl.__all__
+        if name != "ranking" and inspect.isfunction(getattr(pl, name))
+    ],
+)
 @pytest.mark.parametrize(
     "show,autoshow", [(False, True), (True, False), (None, True), (None, False)]
 )
@@ -155,7 +162,14 @@ def test_all_plots_share_native_display_and_autosave_rules(
     )
 
 
-@pytest.mark.parametrize("family", [name for name in pl.__all__ if name != "ranking"])
+@pytest.mark.parametrize(
+    "family",
+    [
+        name
+        for name in pl.__all__
+        if name != "ranking" and inspect.isfunction(getattr(pl, name))
+    ],
+)
 @pytest.mark.parametrize(
     "options,error",
     [({"show": 1}, TypeError), ({"save": "figure.png"}, NotImplementedError)],

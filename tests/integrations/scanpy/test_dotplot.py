@@ -89,7 +89,7 @@ def test_displayed_geometry_matches_frozen_scanpy_exports(adata, case):
         encoding = unit["encoding"][channel]
         assert encoding["type"] == "index"
         assert spec["scales"][channel]["domain"] == [0, int(data[f"_{channel}"].max())]
-        assert spec["scales"][channel]["paddingOuter"] == padding
+        assert spec["scales"][channel]["paddingOuter"] == pytest.approx(padding)
         assert spec["scales"][channel]["zoom"] is False
     assert spec["scales"]["y"]["reverse"] is True
     size_labels = [

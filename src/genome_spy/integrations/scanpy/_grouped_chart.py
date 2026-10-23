@@ -229,6 +229,7 @@ def plot_dimensions(
     height: float | None,
     figsize: tuple[float, float] | None,
     context: str,
+    legend_width: float = 150,
 ) -> tuple[float, float]:
     """Return plot width and height from table shape and optional size overrides.
 
@@ -242,7 +243,9 @@ def plot_dimensions(
         if len(figsize) != 2:
             raise ValueError(f"{context}: figsize needs (width, height) inches.")
         # The overall figure width also includes space for the guides.
-        width = number(figsize[0], "figsize width", context=context) * 100 - 150
+        width = (
+            number(figsize[0], "figsize width", context=context) * 100 - legend_width
+        )
         height = number(figsize[1], "figsize height", context=context) * 100
     width = (
         columns * (35 if swap_axes else 37)
@@ -379,6 +382,8 @@ def finish_grouped_chart(
     name: str,
     tree: DendrogramData | None = None,
     zoom: bool = False,
+    tree_size: float = 80,
+    group_track: gs.TopLevelSpec | None = None,
 ) -> gs.TopLevelSpec:
     """Combine summary marks, table labels and optional brackets/tree into a chart.
 
@@ -415,9 +420,15 @@ def finish_grouped_chart(
         count = len(xlabels) if swap_axes else len(ylabels)
         sides["top" if swap_axes else "right"] = [
             tree_track(
-                tree, list(range(count)), horizontal=swap_axes, size=80
+                tree, list(range(count)), horizontal=swap_axes, size=tree_size
             ).properties(name=f"{name}-tree")
         ]
+    if group_track is not None:
+        if tree is not None:
+            raise ValueError(
+                "Grouped plotting: a tree and totals occupy the same track."
+            )
+        sides["top" if swap_axes else "right"] = [group_track]
     chart = gs.surround(
         center, surround=gs.SurroundSides(**sides), spacing=0
     ).properties(scales=scales)

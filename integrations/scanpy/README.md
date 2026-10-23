@@ -11,6 +11,8 @@ Stored embedding density uses `gsc.pl.embedding_density(...)` after explicit
 Highest-expression QC uses `gsc.pl.highest_expr_genes(...)` on count data.
 Stored rankings add `gsc.pl.rank_genes_groups(...)`, `gsc.pl.ranking(...)`, and
 the ranked dotplot/matrixplot/heatmap wrappers.
+`gsc.pl.DotPlot(...)` chains tree/totals, axes, dot styles and native guides on
+the existing dotplot path. Use `.to_chart()` for native composition and saving.
 `gsc.pl.pca_loadings(...)` and `gsc.pl.pca_variance_ratio(...)` reuse the ranking
 panels for stored PCA results.
 `gsc.pl.pca_overview(...)` composes these diagnostics with the existing PCA scatter.
@@ -44,6 +46,7 @@ not in this workspace or the documentation:
 | --- | --- |
 | [__init__.py](../../src/genome_spy/integrations/scanpy/__init__.py) | Lightweight explicit namespace exports. |
 | [pl.py](../../src/genome_spy/integrations/scanpy/pl.py) | Public signatures and plot-specific validation; common kwargs checks, optional dependency/version setup and native display/save handling. |
+| [_dotplot_builder.py](../../src/genome_spy/integrations/scanpy/_dotplot_builder.py) | Mutable DotPlot chains over detached summaries, shared tree/layout helpers and the native dotplot renderer. |
 | [_ranked_data.py](../../src/genome_spy/integrations/scanpy/_ranked_data.py) | Stored ranking checks, public Scanpy result selection, statistic color tables and detached rank-label positions. No expression access or analysis. |
 | [_ranking_chart.py](../../src/genome_spy/integrations/scanpy/_ranking_chart.py) | Native score labels, axes and multi-panel layout shared by ranking, PCA loadings/variance and rank_genes_groups. Ranked expression wrappers reuse their existing parent charts. |
 | [_data.py](../../src/genome_spy/integrations/scanpy/_data.py) | Shared scalar/numeric-table validation, raw/layer resolution and resident-expression checks; reused by preparation and chart modules. |

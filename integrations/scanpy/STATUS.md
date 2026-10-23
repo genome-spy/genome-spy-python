@@ -96,13 +96,17 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and forty expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
+code cells and forty-two expression/ranked/QC/profile/simulation/DPT/PAGA/builder code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Active in the coordinated chat: M13 DotPlot builder**, reusing the existing
-family preparation and native renderer. The [PAGA path heatmap](#m11d-paga-path-heatmaps)
+**Next independent builder: M13.b MatrixPlot**, reusing the existing matrixplot
+summaries, ordering and native tile renderer. The [M13.a DotPlot builder preview](#m13a-native-dotplot-builder)
+is verified within its documented scope. Square-background dot styling remains
+a separate M13 increment; StackedViolin follows M08/C01. Coordinate shared
+plan/export/notebook edits with the other chat before starting another slice.
+The [PAGA path heatmap](#m11d-paga-path-heatmaps)
 preview is implemented; native data/chart/workflow/interaction/resource checks
 are verified, with C16 retaining the broken upstream default return_data gate.
 Native Greys is an explicitly accepted fidelity limit. The next independent
@@ -241,7 +245,7 @@ The completed structural update is M00.c/d, not a new plotting milestone.
 | M10 QC diagnostics | In progress | M10.a/b/c bounded previews are verified; broader scale/option compatibility remains M14. This does not close the full family. |
 | M11 trajectories/graphs/series | In progress; supplied-series/simulation, DPT-expression and both adjacency previews closed; PAGA/compare available and path heatmap implemented | DPT/PAGA direct-reference gates, comparison corrections and broader PAGA options/entries remain open. Native rules handle straight undirected edges; C04 is limited to unverified connected paths. |
 | M12 density/spatial | In progress; density preview closed, full spatial blocked | Stored-density preview evidence is retained under M12.a; broader parameters remain M14 and image-backed spatial requires C02. |
-| M13 builders | Planned | DotPlot/MatrixPlot/StackedViolin semantic chains are not implemented; develop them with their parent families and track method coverage separately. |
+| M13 builders | In progress; DotPlot preview closed | DotPlot constructor and documented chains share the functional path, with upstream/native/workflow/resource checks. MatrixPlot/StackedViolin and remaining DotPlot style forms stay open; method coverage is recorded separately. |
 | M14 compatibility/docs/release | In progress; Core 1.2 adopted | M14.b.1/b.2 native layout and shared orthogonal trees are closed; M14.b.3 native tracks are closed for all three numeric/clustered families. Parameter/capability closure, workflow publication and full API evidence remain open. |
 
 ## M05.e shared grid interactions
@@ -3424,18 +3428,89 @@ M14 owners. Connected-line mode remains the next separate native audit under
 C04. Full repository tests and docs build were not rerun. Clearance: **retain**;
 the native preview does not close the full path family or M11.d.
 
+## M13.a native DotPlot builder
+
+The bounded builder preview is **Closed**. The
+[builder](../../src/genome_spy/integrations/scanpy/_dotplot_builder.py) keeps
+detached group summaries and small explicit chain state; functional `dotplot`
+delegates the same path. Both reuse grouped expression/statistics, stored/public
+Scanpy tree preparation, marker permutations, native grouped layout and the
+existing dot/guide renderer. No generic builder base, upstream plotting object,
+private chart rewriting or custom renderer is introduced.
+
+Constructor defaults match the pinned class except omitted `ax` and the documented
+native hover/navigation/dimensions. Supplied `dot_size_df` is copied and checked
+against group labels, repeated feature slots and finite [0, 1] fractions.
+Methods return self: swap_axes sets orientation; add_dendrogram/add_totals replace
+the same native track and retain established ordering when hidden; totals sort
+counts and accept scalar/per-displayed-group CSS colors. Dot styles cover native
+schemes, fraction limits, both area bounds, exponent, edges, grid and padding;
+legend controls cover shared/separate visibility, titles and native gradient
+width. Width also controls the figsize guide allowance. Native symbol-guide
+layout and typography keep the parent family's documented differences.
+
+Each to_chart call creates a detached native snapshot without rereading
+expression. Later chains do not change earlier charts. show displays once with
+the existing widget, independently of Scanpy autoshow/autosave; return_axes=True
+errors with the native alternative. Matplotlib figure/artist methods are omitted;
+use the native chart's configuration/composition/display and HTML/JSON saving.
+Automatic fixed dotplot scale names were removed so independent native
+compositions do not collide. Validation assigns names only to inspected scales.
+
+Verification (2026-10-23):
+
+- [39 builder tests](../../tests/integrations/scanpy/test_dotplot_builder.py)
+  compare actual Scanpy chains for ordering, positions, areas, padding and totals
+  in both orientations, plus supplied/repeated slots, no expression rereads,
+  snapshots, guide controls and errors. Existing functional/frozen references
+  continue through the shared path.
+- The integration Python run passed **2,011 cases**, with **two known upstream
+  expected failures** (C15/C16). Its single workflow assertion mismatch reflects
+  preserved local zoom edits, not the canonical source. **Both canonical workflow
+  tests pass separately**, including the new tree/totals builder examples: 42
+  expression code cells and 35 charts. Local edits and execution state remain
+  untouched; the committed notebook contains source only.
+- **133 distinct headless browser cases are verified**, with the two existing
+  C12/C13 expected failures retained. The parent run passed 127 cases; one
+  initial-pixel check's antialiasing mask now derives its margin from the native
+  frame width, and all five initial-pixel cases pass on rerun. The five
+  [new builder cases](../../tests/integrations/scanpy/browser/test_dotplot_builder.py)
+  verify complete tree/guide/style output, totals paint/hover/navigation, independent
+  composition and offline HTML. Exact SVG dot geometry and interior pixel checks
+  remain in place. All browser tests use headless Chromium, without desktop apps.
+- [The retained resource generator](../../tests/integrations/scanpy/benchmark_grouped.py)
+  accepts `--plot dotplot --builder --dendrogram --browser`. Its seed-0 workload
+  has 100,000 cells × 20,000 sparse genes, 40 selected genes, 50 groups and 2,000
+  summary marks. Construction plus three retained snapshots densifies exactly
+  one 100,000 × 40 selection. Observed cold preparation is 3.27 s, serialization
+  0.30 s, traced peak/retention 142/79 MiB (including optional imports and all three
+  snapshots), process RSS 505 MiB and final JSON 199 KiB. Native first paint is
+  1.83 s including dispatch; hover/wheel response is about 0.20 s each, with
+  9.3 MB JS heap after collection. These are laptop observations, not portable
+  timing limits. Parent frozen/data/layout evidence is reused for unchanged
+  storage/statistics/mark paths; this new workload covers builder retention and
+  repeated snapshots directly.
+- Ruff formatting/lint and mypy pass. Full repository tests, docs build and a
+  visible notebook/browser session were not run for this slice.
+
+Remaining M13 scope: square-background dot coloring, padding below 0.5,
+public constant customization, broader style forms and the MatrixPlot/StackedViolin
+builders. Parent storage/palette/typography/export restrictions retain M14 owners.
+The next independent builder is MatrixPlot; this bounded preview does not close
+M13. Clearance: **retain**.
+
 ## Public callable coverage
 
 The [pinned inventory](../../tests/integrations/scanpy/fixtures/api.json) has 50
 entries: 45 plotting functions including aliases, three builders, two settings
-helpers. 38 functions are available as partial previews; 10 plot/builder
+helpers. 39 plotting functions/builders are available as partial previews; 9 plot/builder
 entries remain unimplemented. The two settings helpers are external renderer
 exceptions. This count measures entry availability, not parameter completeness.
 No placeholder functions are exported for planned work.
 
 | Public entry | Availability | Delivery milestone |
 | --- | --- | --- |
-| `DotPlot` | Not implemented | M13 (after M02/M04) |
+| `DotPlot` | Partial native builder available; bounded preview verified | M13.a; square-background styling and broader options remain M13/M14 |
 | `MatrixPlot` | Not implemented | M13 (after M03/M04) |
 | `StackedViolin` | Not implemented | M13 (after M08) |
 | `clustermap` | Partial bounded preview available | M05.c; remaining options/transport M05.d/M14 |
@@ -3568,11 +3643,11 @@ The frozen API inventory supplies names/defaults; passing signatures is not enou
 
 | Builder surface (all three classes) | Current state | Completion evidence required |
 | --- | --- | --- |
-| Constructor signatures/defaults and native result delivery | Not implemented | Pinned class signatures plus family semantic/chart tests, M13 |
-| add_dendrogram/add_totals/swap_axes | Not implemented | Chain return behavior, leaf/order/totals alignment, M04/M13 |
-| style/legend and useful public defaults/constants | Not implemented | Family-specific option and chain tests, M13 |
-| get_axes/figure/artist access | Intentional renderer boundary; builders do not yet exist | Explicit errors and native alternative, M13 |
-| make_figure/show(return_axes)/savefig | Contract to resolve before builders ship | Native delivery/export decision and tests, M13/M14 |
+| Constructor signatures/defaults and native result delivery | DotPlot implemented with pinned defaults, native keyword additions and detached to_chart snapshots | [Constructor/chain tests](../../tests/integrations/scanpy/test_dotplot_builder.py); other classes remain M13 |
+| add_dendrogram/add_totals/swap_axes | DotPlot implemented; native aligned tree or count track, sorting/colors and orientation | [Actual upstream chains and native browser checks](../../tests/integrations/scanpy/browser/test_dotplot_builder.py); other classes remain M13 |
+| style/legend and useful public defaults/constants | DotPlot dot styles and native guide controls implemented; square backgrounds and public constant customization remain open | Shared native renderer and chain tests; other classes remain M13 |
+| get_axes/figure/artist access | Intentional renderer boundary; no Matplotlib objects are offered | Use DotPlot.to_chart for native configuration/composition; other classes remain M13 |
+| make_figure/show(return_axes)/savefig | DotPlot omits Matplotlib make_figure/savefig; show(return_axes=True) errors with the native alternative | Native to_chart, show and chart.save contract/tests; other classes remain M13 |
 
 ## Native capability ledger
 

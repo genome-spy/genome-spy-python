@@ -9,6 +9,8 @@ from numbers import Integral, Real
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
+from genome_spy.integrations.scanpy._dotplot_builder import DotPlot
+
 if TYPE_CHECKING:
     from anndata import AnnData
     from numpy.typing import ArrayLike
@@ -18,6 +20,7 @@ if TYPE_CHECKING:
     from genome_spy import Parameter, TopLevelSpec
 
 __all__ = [
+    "DotPlot",
     "clustermap",
     "correlation_matrix",
     "dendrogram",
@@ -1309,46 +1312,26 @@ def dotplot(
         >>> chart = gsc.pl.dotplot(pbmc, ["CD79A", "CD3D"], "louvain", show=False)
         >>> chart.save("markers.html", inline=True)
     """
-    # Reject unsupported options before reading AnnData.
     _check_kwargs(kwds, {"linewidth"}, context="gsc.pl.dotplot")
     if not isinstance(dendrogram, (bool, str)) or dendrogram == "":
         raise TypeError(
             "gsc.pl.dotplot: dendrogram must be False, True, or a nonempty cache key."
         )
-    for name, rejected in {
-        "vcenter": vcenter is not None,
-        "norm": norm is not None,
-    }.items():
-        if rejected:
-            raise NotImplementedError(f"gsc.pl.dotplot: {name} is not supported yet.")
-    for name, value in {
-        "log": log,
-        "mean_only_expressed": mean_only_expressed,
-        "hover": hover,
-        "highlight": highlight,
-    }.items():
-        if not isinstance(value, bool):
-            raise TypeError(f"gsc.pl.dotplot: {name} must be boolean.")
     if swap_axes is not None and not isinstance(swap_axes, bool):
         raise TypeError("gsc.pl.dotplot: swap_axes must be boolean or None.")
-    if standard_scale not in (None, "var", "group"):
-        raise ValueError(
-            "gsc.pl.dotplot: standard_scale must be 'var', 'group', or None."
-        )
+    _check_point_options(
+        context="gsc.pl.dotplot",
+        width=width,
+        height=height,
+        frameon=None,
+        log=log,
+        mean_only_expressed=mean_only_expressed,
+        hover=hover,
+        highlight=highlight,
+    )
     _check_grid_zoom(zoom, context="gsc.pl.dotplot")
     sc = _prepare_plot(show, save, context="gsc.pl.dotplot")
-    from genome_spy.integrations.scanpy._dendrogram_data import (
-        attached_dendrogram,
-        reorder_grouped,
-    )
-    from genome_spy.integrations.scanpy._grouped_data import (
-        dotplot_statistics,
-        grouped_expression,
-    )
-    from genome_spy.integrations.scanpy._dotplot_chart import build_dotplot
-
-    # Read only the requested genes and group labels.
-    prepared = grouped_expression(
+    plot = DotPlot(
         adata,
         var_names,
         groupby,
@@ -1356,66 +1339,37 @@ def dotplot(
         log=log,
         num_categories=num_categories,
         categories_order=categories_order,
-        gene_symbols=gene_symbols,
-        layer=layer,
-        var_group_positions=var_group_positions,
-        var_group_labels=var_group_labels,
-    )
-
-    # Dot color and area use different summaries of the same cells.
-    colors, fractions = dotplot_statistics(
-        prepared.values,
         expression_cutoff=expression_cutoff,
         mean_only_expressed=mean_only_expressed,
         standard_scale=standard_scale,
-        dot_color_df=dot_color_df,
-        swap_axes=bool(swap_axes),
-    )
-
-    # Keep colors, sizes and marker brackets in the tree's leaf order.
-    feature_groups = prepared.feature_groups
-    count = colors.shape[1] if swap_axes else colors.shape[0]
-    tree = attached_dendrogram(adata, groupby, dendrogram, count)
-    if tree is not None:
-        colors, feature_groups, slots = reorder_grouped(
-            tree, colors, feature_groups, swapped=bool(swap_axes)
-        )
-        fractions = (
-            fractions.loc[:, list(tree.order)].iloc[slots, :]
-            if swap_axes
-            else fractions.loc[list(tree.order)].iloc[:, slots]
-        )
-
-    # Describe the displayed values accurately when means are replaced or scaled.
-    value_title = "Color value" if dot_color_df is not None else "Mean expression"
-    if standard_scale is not None:
-        value_title += " (scaled)"
-    chart = build_dotplot(
-        colors,
-        fractions,
-        feature_groups,
-        swap_axes=bool(swap_axes),
         title=title,
-        colorbar_title=colorbar_title,
-        size_title=size_title,
-        cmap=cmap,
+        figsize=figsize,
+        gene_symbols=gene_symbols,
+        var_group_positions=var_group_positions,
+        var_group_labels=var_group_labels,
+        var_group_rotation=var_group_rotation,
+        layer=layer,
+        dot_color_df=dot_color_df,
         vmin=vmin,
         vmax=vmax,
-        dot_min=dot_min,
-        dot_max=dot_max,
-        smallest_dot=smallest_dot,
+        vcenter=vcenter,
+        norm=norm,
         hover=hover,
         zoom=zoom,
         highlight=highlight,
-        value_title=value_title,
-        linewidth=kwds.get("linewidth", 0.2),
-        rotation=var_group_rotation,
         width=width,
         height=height,
-        figsize=figsize,
-        tree=tree,
+        cmap=cmap,
+        **kwds,
     )
-    return _finish_plot(chart, show, sc)
+    plot.swap_axes(swap_axes=swap_axes).style(
+        dot_max=dot_max, dot_min=dot_min, smallest_dot=smallest_dot
+    ).legend(colorbar_title=colorbar_title, size_title=size_title)
+    if dendrogram:
+        plot.add_dendrogram(
+            dendrogram_key=dendrogram if isinstance(dendrogram, str) else None
+        )
+    return _finish_plot(plot.to_chart(), show, sc)
 
 
 def matrixplot(

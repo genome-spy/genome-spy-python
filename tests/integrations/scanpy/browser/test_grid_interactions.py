@@ -150,7 +150,7 @@ def test_default_zoom_and_pan_change_only_y(page, family):
     if family == "matrix":
         for axis in ("x", "y"):
             spec["scales"][axis]["name"] = f"matrix-{axis}"
-    bounds = render(page, spec)
+    bounds = render(page, spec, scale_prefix=family)
     domains = f"['{family}-x','{family}-y'].map(n=>api.getScaleResolutionByName(n).getDomain())"
     before = page.evaluate(domains)
     px, py = pointer(page, bounds)
@@ -232,7 +232,12 @@ def test_enabling_navigation_keeps_initial_pixels(page, family, swapped):
     assert images[0].shape == images[1].shape
     assert circles[0] == circles[1]
     assert rectangles[0] == rectangles[1]
-    difference = np.abs(images[0][2:-2, 2:-2] - images[1][2:-2, 2:-2]).max(axis=2)
+    frame = chart.to_dict().get("spec", {}).get("view", {}).get("strokeWidth", 0)
+    margin = max(2, int(np.ceil(frame / 2)) + 1)
+    difference = np.abs(
+        images[0][margin:-margin, margin:-margin]
+        - images[1][margin:-margin, margin:-margin]
+    ).max(axis=2)
     # Native clipped marks can rasterize differently along their antialiased edges.
     edges = np.zeros(difference.shape, dtype=bool)
     yy, xx = np.indices(difference.shape)
@@ -240,7 +245,8 @@ def test_enabling_navigation_keeps_initial_pixels(page, family, swapped):
         edges |= (
             np.abs(
                 np.hypot(
-                    xx + 2 + bounds["x"] - float(cx), yy + 2 + bounds["y"] - float(cy)
+                    xx + margin + bounds["x"] - float(cx),
+                    yy + margin + bounds["y"] - float(cy),
                 )
                 - float(radius)
             )
@@ -248,7 +254,7 @@ def test_enabling_navigation_keeps_initial_pixels(page, family, swapped):
         )
     for left, top, width, height, _ in rectangles[0]:
         left, top, width, height = map(float, (left, top, width, height))
-        px, py = xx + 2 + bounds["x"], yy + 2 + bounds["y"]
+        px, py = xx + margin + bounds["x"], yy + margin + bounds["y"]
         edges |= (
             (px >= left - 2)
             & (px <= left + width + 2)
@@ -396,7 +402,7 @@ def test_summary_zoom_and_pan_keep_tree_leaves_and_labels_aligned(
             show=False,
             **({"highlight": True} if family == "dotplot" else {"show_values": True}),
         )
-    bounds = render(page, chart)
+    bounds = render(page, chart, scale_prefix=family)
     px, py = pointer(page, bounds)
     page.mouse.wheel(0, -220)
     page.wait_for_timeout(160)
@@ -448,7 +454,7 @@ def test_dot_highlight_follows_slots_clears_and_preserves_size_guides(
             height=260,
             show=False,
         )
-    bounds = render(page, chart)
+    bounds = render(page, chart, scale_prefix="dotplot")
     coordinates = (
         "['x','y'].map(axis => api.getParam('grid_cursor').getValue().values[axis])"
     )
@@ -562,7 +568,7 @@ def test_summary_feature_spacing_survives_navigation(page, family, swapped):
             show=False,
             **({"highlight": True} if family == "dotplot" else {"show_values": True}),
         )
-    bounds = render(page, chart)
+    bounds = render(page, chart, scale_prefix=family)
     axis = "y" if swapped else "x"
     extent = "height" if swapped else "width"
     for navigated in (False, True):
