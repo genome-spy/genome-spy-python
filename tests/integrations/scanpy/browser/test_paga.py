@@ -13,7 +13,12 @@ from tests.integrations.scanpy.browser.test_umap import render
 from tests.integrations.scanpy.browser.test_heatmap import hover_at
 from tests.integrations.scanpy.browser.test_grid_interactions import svg_root
 from tests.integrations.scanpy.browser.test_timeseries import point_coordinates
-from tests.integrations.scanpy.paga_fixture import POSITIONS, make_paga, paga_cases
+from tests.integrations.scanpy.paga_fixture import (
+    POSITIONS,
+    make_paga,
+    paga_cases,
+    paga_reference,
+)
 from tests.integrations.scanpy.helpers import leaf_marks
 
 
@@ -36,6 +41,12 @@ from tests.integrations.scanpy.helpers import leaf_marks
         "constant_no_guide",
         "gene_missing",
         "no_guide",
+        "component",
+        "component_tie",
+        "component_empty",
+        "component_score",
+        "component_gene",
+        "component_degree",
     ],
 )
 @pytest.mark.parametrize("page", [1.5], indirect=True)
@@ -45,10 +56,11 @@ def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, c
     from matplotlib.collections import PathCollection, LineCollection
     import scanpy as sc
 
-    adata, options = make_paga(case), paga_cases()[case]
+    adata, reference_options = paga_reference(case)
+    options = paga_cases()[case]
     with mpl.rc_context({"figure.dpi": 100}), warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        ax = sc.pl.paga(adata, show=False, **options)
+        ax = sc.pl.paga(adata, show=False, **reference_options)
         fig = ax.figure
         fig.canvas.draw()
         bbox = ax.get_window_extent()
@@ -168,10 +180,15 @@ def test_complete_native_graph_matches_scanpy_paint_and_labels(page, tmp_path, c
 
 
 @pytest.mark.parametrize("color", [None, "score", "g1", "degree_solid"])
-def test_group_and_edge_hover_navigation_and_offline_html(page, tmp_path, color):
+@pytest.mark.parametrize("component", [False, True])
+def test_group_and_edge_hover_navigation_and_offline_html(
+    page, tmp_path, color, component
+):
     chart = gsc.pl.paga(
         make_paga("obs_score") if color else make_paga(),
         color=color,
+        single_component=component,
+        threshold=0.2 if component else None,
         pos=POSITIONS,
         zoom=True,
         width=500,
@@ -190,17 +207,19 @@ def test_group_and_edge_hover_navigation_and_offline_html(page, tmp_path, color)
             + (1 - (POSITIONS[:, 1] - dy[0]) / np.ptp(dy)) * bounds["height"],
         ]
     )
-    hover_at(page, *projected[0])
+    hover_at(page, *projected[1 if component else 0])
     page.locator("table.attributes").wait_for(state="visible")
     values = [
         t.strip() for t in page.locator("table.attributes td").all_text_contents()
     ]
-    assert values[:3] == ["A", "A", "9"]
+    assert values[:3] == (["B", "B", "4"] if component else ["A", "A", "9"])
     if color:
-        assert (
-            float(values[3].replace("−", "-"))
-            == {"score": -1, "g1": 12, "degree_solid": 0}[color]
+        expected = (
+            {"score": 5.5, "g1": 31.5, "degree_solid": 1}
+            if component
+            else {"score": -1, "g1": 12, "degree_solid": 0}
         )
+        assert float(values[3].replace("−", "-")) == expected[color]
     else:
         assert len(values) == 3
     # B--C is a visible, isolated stored edge whose midpoint is outside either node.

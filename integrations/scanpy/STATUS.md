@@ -41,6 +41,8 @@ and native rules, points and labels, with node/edge hover and optional x/y zoom.
 Numeric annotation/gene means reuse grouped data access; solid/dashed weighted
 degrees use the displayed thresholded graphs. Native color guides follow Scanpy's
 automatic guide choices without creating Matplotlib figures.
+Largest-component views retain original node IDs and coordinates through the
+same renderer; their direct disconnected Scanpy reference is blocked by C15.
 Stored ranking/score panels and ranked dotplot/matrixplot/heatmap previews now
 reuse Scanpy's public result getter and the existing expression plot functions.
 Stored PCA loadings and variance ratios reuse the ranking preparation and native
@@ -87,18 +89,23 @@ matrixplot and heatmap share the expression workflow’s data/marker setup; the
 supplied matrix displays the same stored group correlations.
 
 The current canonical workflows contain twenty-three UMAP/embedding/scatter/PCA/density
-code cells and thirty-two expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
+code cells and thirty-three expression/ranked/QC/profile/simulation/DPT/PAGA code cells. Public availability does not mean
 all slice gates or full-family compatibility are closed.
 
 ### Current work queue
 
-**Next: M11.c, PAGA single-component filtering audit.** The
+**Next: M11.d, `paga_adjacency` audit and bounded native implementation.** Trace
+the pinned public call and its return shape, then reuse existing matrix helpers
+for stored adjacency without analysis. Validate its ordering, thresholds, labels,
+hover/navigation, packaged workflow and resource behavior before closing a slice.
+The
 [undirected group-graph preview](#m11c-stored-undirected-paga-graphs) is closed within its declared bounds;
 its acceptance evidence and deliberate limits are recorded below. The
 [numeric/gene/degree color increment](#paga-numeric-gene-and-degree-colors) reuses
-shared grouped access and color bounds. Audit single_component=True against public
-Scanpy's largest-component/tie, node-order, size and position behavior before
-extending the existing graph path. Mixtures/pies, directed transitions,
+shared grouped access and color bounds. The [component increment](#paga-single-component-filtering)
+is implemented with semantic, subsetted-reference, chart, interaction, workflow
+and resource checks verified; C15 blocks its direct parent reference.
+Mixtures/pies, directed transitions,
 multi-color panels and file/export behavior
 remain M11.c; subsequent PAGA adjacency/compare/path entries remain M11.d.
 Plotting must not recompute DPT/PAGA analysis.
@@ -111,7 +118,7 @@ Its direct parent-entry comparison remains blocked by Scanpy 1.11.5 indexing a
 pandas Series as a NumPy array; carry that gate forward independently.
 The [simulation preview](#m11a-stored-simulation-plots), supplied heatmap/point
 previews and native subplot preview are closed within their declared bounds.
-The DPT parent-reference gate and broader PAGA options keep M11 open. C04
+The DPT/PAGA parent-reference gates and broader PAGA options keep M11 open. C04
 does not block native straight undirected rule segments; connected-path audits
 remain plot-specific; M08/M09 filled plots still require C01.
 
@@ -174,8 +181,9 @@ C12 remains a separate upstream straight-link issue.
 | M11.a subplot entry | Closed (native panel preview) | [Explicit signature, shared renderer, independent composition and resource evidence](#m11a-native-time-series-subplots) | Simulation is delivered below; broader storage/markers/layout remain M14. |
 | M11.b group/pseudotime entry | Implemented; component/chart/workflow/resource checks verified | `733b04e`, filtered-view fix `5219e3a`; [stored metadata, shared panels and verification](#m11b-stored-dpt-groups-and-pseudotime) | Direct parent-entry comparison blocked by the pinned Scanpy/pandas indexing error; expression entry is independently verified below. |
 | M11.b expression entry | Closed (resident dense-X heatmap/point preview) | [Direct public reference, shared renderers, workflow and resources](#m11b-stored-dpt-expression-profiles) | Parent storage/style/export limits remain M14; group-reference gate and PAGA keep M11 open. |
-| M11.c undirected graph entry | Closed (bounded group/CSS-color preview) | [Public layout reuse and native charts](#m11c-stored-undirected-paga-graphs); [sparse graph fixes](#paga-sparse-graph-corrections) | Full M11.c stays open for node-color modes, components, directed edges and file/export behavior. |
+| M11.c undirected graph entry | Closed (bounded group/CSS-color preview) | [Public layout reuse and native charts](#m11c-stored-undirected-paga-graphs); [sparse graph fixes](#paga-sparse-graph-corrections) | Full M11.c stays open for broader node-color modes, direct component reference, directed edges and file/export behavior. |
 | M11.c numeric node colors | Closed (numeric annotations, genes and weighted degrees) | [Shared computation and native color guides](#paga-numeric-gene-and-degree-colors) | Other categorical mixtures/pies, direct numeric vectors, CSS-name collisions and broader M11.c remain open. |
+| M11.c largest-component views | Implemented; semantic/subsetted-reference/chart/workflow/interaction/resource checks verified | [Shared filtering and retained evidence](#paga-single-component-filtering) | C15 blocks direct disconnected parent-call comparison in Scanpy 1.11.5; keep this gate open. |
 | M10.a highest-expression summaries | Closed (count-percentage preview) | [Contract and evidence](#m10a-highest-expression-summaries) | Broader Seaborn styling, ambiguous labels and backed/lazy counts remain M14. |
 | M10.b variable-gene diagnostics | Closed (stored-statistic preview) | [Data, chart, interaction, notebook and resource checks](#m10b-variable-gene-diagnostics) | Remaining input/typography/export limits stay M14; marker details are deferred. M10.a and M10.c are delivered separately. |
 | M07.d colorbar placement increment | Closed (bounded increment) | `730f9ce`; [contract, browser/workflow checks and resource reuse](#m07d-native-colorbar-placement) | Four sides/None supported; remaining embedding options stay M07.d/M14 and categorical default fitting stays C11. |
@@ -412,7 +420,7 @@ The live notebook, full repository suite, docs build and resource benchmark were
 not rerun. Existing workflow delivery and resource evidence above remain valid:
 measurement tables, data access, transport and chart structure are unchanged;
 only native scale gap widths vary. Other grids retain their defaults. The next
-queue item remains M11.c PAGA node colors. Clearance: retain.
+queue owns next work. Clearance: retain.
 
 ## M14.b.2 native grouped layout
 
@@ -3056,9 +3064,59 @@ the earlier group-graph resource evidence remains applicable to those paths.
 
 CSS names that also name genes/annotations, ambiguous getter names, direct numeric
 vectors, all-missing colors, other categorical mixtures/pies and broader PAGA
-options remain explicit limits. Next is the single-component audit above; M11
-stays open. The full repository suite and docs build were not rerun. Clearance:
+options remain explicit limits. The current queue owns next work; M11 stays
+open. The full repository suite and docs build were not rerun. Clearance:
 **retain**; no live plan is eligible for removal.
+
+### PAGA single-component filtering
+
+Implemented (2026-10-23); semantic, explicitly subsetted reference, complete-chart,
+interaction, workflow and resource checks are verified. The direct disconnected
+parent-entry comparison remains blocked by **C15**, so this increment is not closed.
+
+[`_paga_data`](../../src/genome_spy/integrations/scanpy/_paga_data.py) uses
+NetworkX's connected components on the existing thresholded solid graph. Select
+the most nodes, choosing the first component in original group order on ties.
+The existing node table keeps original IDs, labels and coordinates; colors and
+degrees are computed before filtering. Areas use the displayed count and median
+group sizes. The existing edge table reads a graph subview, retaining original
+edge/node IDs. Chart construction is unchanged. Layout and its position cache
+retain every group; plot=False retains its existing behavior. When filtering is
+needed, dashed_edges must be None, matching upstream's restriction. No expression
+copy, analysis rerun, new chart layer or Core patch is introduced.
+
+Scanpy 1.11.5 subsets colors/labels but keeps full coordinates, raising a shape
+error on disconnected graphs. A strict expected-failure check asserts this exact
+failure and will fail on a future upstream fix. Independent known component IDs
+and public Scanpy on explicitly subsetted inputs validate the native intended
+view; they do not substitute for the blocked direct parent gate.
+
+Verification: **343 targeted Python checks passed, one expected upstream failure**;
+**32 PAGA browser checks** and both canonical workflows passed. Ruff formatting,
+full-repository lint and mypy pass. [Semantics](../../tests/integrations/scanpy/test_paga.py)
+cover thresholding, isolated nodes, ties independent of cell counts, CSR/CSC/LIL,
+supplied/computed positions, full caches and error/mutation guards.
+[Browser checks](../../tests/integrations/scanpy/browser/test_paga.py) register
+complete categorical/numeric/gene/degree charts against subsetted public references,
+including footprints, labels and guides. They observe original-ID hover, edge
+hover, zoom/pan, independent composition and offline HTML. Generated files remain
+temporary. The live expression notebook completed **33 code cells and 27 charts
+without Python errors**, including a visible eight-of-ten-node PBMC component at
+threshold 0.2. Committed notebook source has no outputs or widget state; local
+edits are preserved.
+
+A seed-0 workload uses 100,000 observations, an unread empty 20,000-gene CSR matrix,
+100 equally sized groups, 500 symmetric weighted edges in connected components
+of 70 and 30 nodes, normal observation scores and supplied unit-circle positions.
+Warm preparation took **0.016 s**, validated JSON **0.792 s**, and peak traced
+allocation **2.67 MiB**. It emitted **70 nodes and 102,023 JSON bytes**, retaining
+the full 100-by-2 cache. Rendering and transport use unchanged code with fewer
+rows; the earlier 100-node/500-edge browser resource observation remains applicable
+to those paths. These measurements are local observations, not portable limits.
+
+C15 owns the direct parent-reference recheck; broader PAGA color/directed/export
+options remain M11.c. The current queue owns independent next work. The full
+repository suite and docs build were not rerun. Clearance: **retain**.
 
 ## Public callable coverage
 
@@ -3090,7 +3148,7 @@ No placeholder functions are exported for planned work.
 | `highly_variable_genes` | Partial stored-results preview available | M10.b; remaining compatibility M14 |
 | `matrix` | Partial supplied-numeric preview available | M05.b preview; broader sources/layout M14; transport M05.d |
 | `matrixplot` | Partial preview available | M03 preview; trees M04; methods M13; normalization/options M14 |
-| `paga` | Stored undirected graphs with group, numeric, gene and degree colors | M11.c; other color/component/directed/export modes open |
+| `paga` | Stored undirected graphs with group/numeric/gene/degree colors and optional largest-component views | M11.c; C15 direct component reference and other color/directed/export modes open |
 | `paga_adjacency` | Not implemented | M11 |
 | `paga_compare` | Not implemented | M11 |
 | `paga_path` | Not implemented | M11 |
@@ -3234,6 +3292,7 @@ affected slice.
 | C12 | Core 1.2 SVG export bends `linkShape="line"` control points. | Upstream straight-link export; adapter trees now use verified orthogonal links. | The minimal straight-link SVG check in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) still strictly xfails. No local bundle patch; recheck on a released fix. The [orthogonal renderer](#shared-native-orthogonal-dendrograms) passes complete-path SVG checks independently. |
 | C13 | A viewport containing only zero-height merges gives a degenerate `[0, 0]` height domain, centering zero in the track. | Native fitting of tied subtrees within larger trees | Minimal native regression in [browser/test_dendrogram.py](../../tests/integrations/scanpy/browser/test_dendrogram.py) strictly xfails on Core 1.2.0. Whole zero-height trees retain their previous nonzero range. Recheck a released native solution; no custom browser logic or patched bundle. |
 | C14 | Native equilateral triangles differ from Scanpy's equal-width/height triangles; uniform sizing cannot match both dimensions. | Triangular markers in M07.d | [Native SVG/WebGL comparison](../../tests/integrations/scanpy/browser/test_native_triangles.py) strictly xfails for four orientations, with/without strokes. Recheck a released matching shape or native aspect control, including guides and outlines, before enabling support; no custom geometry. |
+| C15 | Scanpy 1.11.5's disconnected single_component=True call subsets colors but retains full coordinates and raises a shape error. | M11.c direct parent-reference gate | [Strict expected-failure check](../../tests/integrations/scanpy/test_paga.py) detects a fixed upstream entry. Intended native filtering is independently checked against explicitly subsetted public Scanpy inputs; recheck a compatible release before closing this gate. |
 
 Python computation alone does not close a renderer gap. Local Core patches are
 excluded. Historical violin, filled-track and tree recipes are experimental

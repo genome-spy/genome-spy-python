@@ -2096,7 +2096,8 @@ def paga(
         init_pos: Initial layout coordinates; unused when pos is supplied.
         root: Scanpy tree-layout root; unused when pos is supplied.
         labels: One string per node; None uses category labels.
-        single_component: Only False in this undirected preview.
+        single_component: Show only the largest thresholded solid component;
+            ties keep the first group order. Filtering requires dashed_edges=None.
         solid_edges: Stored PAGA matrix key for black solid edges.
         dashed_edges: Optional stored matrix key for gray dashed edges.
         transitions: Unsupported directed-edge mode.
@@ -2172,7 +2173,6 @@ def paga(
     if colorbar is not None and not isinstance(colorbar, bool):
         raise TypeError(f"{context}: colorbar must be boolean or None.")
     unsupported = {
-        "single_component": single_component,
         "transitions": transitions is not None,
         "fontoutline": fontoutline is not None,
         "text_kwds": bool(text_kwds),
@@ -2189,6 +2189,7 @@ def paga(
         prepare_paga,
         paga_nodes,
         paga_edges,
+        largest_component,
     )
 
     key, positions, solid, dashed = prepare_paga(
@@ -2217,6 +2218,15 @@ def paga(
             sc.logging.warning(
                 "`groups` is deprecated in `pl.paga`: use `labels` instead"
             )
+        indices = None
+        if single_component:
+            kept = largest_component(solid)
+            if len(kept) < len(positions):
+                if dashed is not None:
+                    raise ValueError(
+                        f"{context}: single_component requires dashed_edges=None on disconnected graphs."
+                    )
+                indices = kept
         nodes, automatic_colorbar = paga_nodes(
             adata,
             key,
@@ -2228,7 +2238,10 @@ def paga(
             solid=solid,
             dashed=dashed,
             use_raw=use_raw,
+            indices=indices,
         )
+        if indices is not None:
+            solid = solid.subgraph(indices)
         solid_table = paga_edges(
             solid,
             positions,

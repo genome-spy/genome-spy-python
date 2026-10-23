@@ -322,6 +322,7 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         namespace["paga_numeric"],
         namespace["paga_gene"],
         namespace["paga_degree"],
+        namespace["paga_component"],
     ]
     assert paga_calls == [{"groups": "bulk_labels"}]
     pbmc = namespace["pbmc"]
@@ -365,6 +366,21 @@ def test_expression_workflow_runs_independently_with_summary_hover(monkeypatch):
         np.testing.assert_array_equal(
             [[row["_x"], row["_y"]] for row in rows], pbmc.uns["paga"]["pos"]
         )
+    from scipy.sparse.csgraph import connected_components
+
+    adjacency = pbmc.uns["paga"]["connectivities"].copy()
+    adjacency.data[adjacency.data < 0.2] = 0
+    adjacency.eliminate_zeros()
+    _, components = connected_components(adjacency)
+    keep = np.flatnonzero(components == np.argmax(np.bincount(components)))
+    spec = namespace["paga_component"].to_dict()
+    rows = next(rows for rows in spec["datasets"].values() if "_cells" in rows[0])
+    assert len(rows) == len(keep) == 8
+    assert [r["_id"] for r in rows] == keep.tolist()
+    np.testing.assert_array_equal(
+        [[r["_x"], r["_y"]] for r in rows], pbmc.uns["paga"]["pos"][keep]
+    )
+    assert pbmc.uns["paga"]["pos"].shape == (10, 2)
     assert dpt_calls == [
         ("neighbors", {"n_neighbors": 10, "use_rep": "X", "random_state": 0}),
         ("diffmap", {"random_state": 0}),

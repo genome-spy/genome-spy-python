@@ -1079,19 +1079,28 @@ after SciPy prepares compatible sparse storage; stored graphs remain unchanged.
 | use_raw | Gene colors default to raw when present, otherwise X; False uses X. No layer or gene-symbol option is added. Reuse the grouped public getter and mean helpers; only the selected gene column is materialized. Resident dense/CSR/CSC and views follow the shared getter's limits. Ambiguous observation/gene names and CSS colors that also name annotations/genes reject. |
 | cmap, colorbar | Native continuous scheme, default viridis. colorbar=None automatically adds a guide for numeric observation and gene colors. Degree colors have no default guide. Explicit True or False both suppress the guide, matching Scanpy 1.11.5's behavior. Constant numeric means match Scanpy's first palette color without a guide and midpoint with a guide. All-missing/nonfinite color data reject; no values are filled in. |
 | labels, groups | One string label per node, defaulting to category names. The deprecated groups alias overrides labels with Scanpy's warning. |
-| node_size_scale, node_size_power | Preserve Scanpy's areas from stored group sizes divided by their median. Missing sizes use ones. Nodes retain fixed pixel sizes while zooming. |
+| single_component | True shows the largest thresholded solid component by node count; ties choose the first component in original group order. Keep original node IDs and coordinates. Filtering a disconnected graph requires dashed_edges=None. Inactive when plot=False. |
+| node_size_scale, node_size_power | Preserve Scanpy's areas from stored group sizes divided by their median. With component filtering, the node count and median use displayed groups. Missing sizes use ones. Nodes retain fixed pixel sizes while zooming. |
 | edge_width_scale, min_edge_width, max_edge_width | Preserve the default 7.5-point weight multiplier; solid edges clamp both bounds, dashed edges clamp only the maximum. Native dashed rules are gray at half opacity. Their fixed pixel dash pattern differs from Matplotlib's width-scaled dashes; widths and weights remain faithful. |
 | add_pos, plot | add_pos=True stores successful coordinates, the only caller mutation. False leaves the cache untouched. plot=False computes/caches layout and returns None without a chart. Errors do not write positions. |
 | fontsize, fontweight, title, frameon | Native Lato labels use 10 points and bold by default; normal/bold and a string title are supported. frameon=None follows Scanpy's frame setting. Global Matplotlib styling and exact font metrics are outside this preview. |
 | Native delivery | hover=True shows group/label/cell counts, numeric color values and edge indices/weights. zoom=False by default; True enables both-axis wheel zoom and drag pan. width/height set plot area (default 548 by 384 pixels). Native charts compose and save to HTML/JSON. show/save follow the shared contract; ax/cax are omitted and reject. |
 
-single_component=True, transitions, label outlines/text kwargs, nondefault
+Scanpy 1.11.5's direct single_component=True call fails for disconnected graphs:
+it trims node colors but retains all coordinates. This native preview implements
+the intended component view and is checked against an explicitly subsetted public
+Scanpy input; direct parent-call fidelity remains blocked. Numeric means and
+normalized degrees are computed before filtering, then the native color domain
+uses displayed values. The full position cache is retained, including hidden nodes.
+
+transitions, label outlines/text kwargs, nondefault
 left_margin, colorbar kwargs and export_to_gexf=True reject clearly.
 normalize_to_color and arrowsize are inactive in the supported undirected modes,
 as upstream; cmap is inactive for CSS colors. Native guide ticks, fonts and outer
 spacing can differ from Matplotlib. No cell-selection brush is attached to
 aggregated group nodes. The expression notebook compares group, numeric, gene
-and degree colors on packaged PBMC data using the same stored coordinates.
+and degree colors, plus a largest-component view, on packaged PBMC data using
+the same stored coordinates.
 The broader PAGA milestone remains open; see the maintained
 [status and remaining scope](../../../integrations/scanpy/STATUS.md#current-work-queue).
 

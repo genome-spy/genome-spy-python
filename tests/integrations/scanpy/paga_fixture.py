@@ -47,7 +47,7 @@ def make_paga(case="default"):
             "cluster_sizes": np.array(sizes),
         },
     )
-    if case == "empty":
+    if case in {"empty", "component_empty"}:
         a.uns["paga"]["connectivities"] = csr_matrix((4, 4))
     elif case in {"asymmetric", "asymmetric_csc"}:
         a.uns["paga"]["connectivities"][0, 1] = 0.7
@@ -55,6 +55,10 @@ def make_paga(case="default"):
             a.uns["paga"]["connectivities"] = a.uns["paga"]["connectivities"].tocsc()
     elif case == "uniform_sizes":
         del a.uns["cluster_sizes"]
+    elif case == "component_tie":
+        a.uns["paga"]["connectivities"] = csr_matrix(
+            [[0, 0.8, 0, 0], [0.8, 0, 0, 0], [0, 0, 0, 0.6], [0, 0, 0.6, 0]]
+        )
     if case in paga_color_cases():
         a.obs["score"] = np.arange(a.n_obs, dtype=float) - 5
         if case == "obs_missing":
@@ -91,6 +95,17 @@ def paga_color_cases():
         "constant": {"color": "score"},
         "constant_no_guide": {"color": "score", "colorbar": False},
         "numeric_alias": {"color": "red", "colors": "score"},
+        "component_score": {
+            "color": "score",
+            "single_component": True,
+            "threshold": 0.2,
+        },
+        "component_gene": {"color": "g1", "single_component": True, "threshold": 0.2},
+        "component_degree": {
+            "color": "degree_solid",
+            "single_component": True,
+            "threshold": 0.2,
+        },
     }
 
 
@@ -134,8 +149,40 @@ def paga_cases():
         "asymmetric_csc": {"pos": POSITIONS, "threshold": 0},
         "uniform_sizes": {"pos": POSITIONS, "color": "purple"},
         "zero_sizes": {"pos": POSITIONS, "node_size_scale": 0},
+        "component": {"pos": POSITIONS, "threshold": 0.2, "single_component": True},
+        "component_tie": {"pos": POSITIONS, "single_component": True},
+        "component_empty": {"pos": POSITIONS, "single_component": True},
+        "component_connected": {"pos": POSITIONS, "single_component": True},
         **{
             key: {"pos": POSITIONS, **options}
             for key, options in paga_color_cases().items()
         },
     }
+
+
+def paga_reference(case):
+    """Return a public Scanpy reference; explicitly subset disconnected component cases.
+
+    Scanpy 1.11.5's direct single_component call keeps full positions and fails.
+    """
+    a, options = make_paga(case), paga_cases()[case].copy()
+    if not case.startswith("component") or case == "component_connected":
+        return a, options
+    keep = (
+        [0]
+        if case == "component_empty"
+        else [0, 1]
+        if case == "component_tie"
+        else [1, 2, 3]
+    )
+    labels = a.obs["cluster"].cat.categories[keep]
+    subset = a[a.obs["cluster"].isin(labels)].copy()
+    subset.uns["paga"]["connectivities"] = a.uns["paga"]["connectivities"][keep][
+        :, keep
+    ]
+    subset.uns["cluster_sizes"] = a.uns["cluster_sizes"][keep]
+    subset.uns["cluster_colors"] = [a.uns["cluster_colors"][i] for i in keep]
+    options.update(pos=POSITIONS[keep], single_component=False)
+    if case == "component_degree":
+        options.update(color=[1, 5 / 7, 2 / 7], colorbar=False)
+    return subset, options

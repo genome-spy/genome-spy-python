@@ -836,11 +836,17 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   data and equal-degree normalization fail clearly instead of inventing values.
   CSS/annotation-name collisions, numeric vectors and other categorical colors
   remain explicit limits. Packaged-data examples reuse supplied positions.
-  The next bounded increment audits single_component=True against public Scanpy:
-  retain the largest component with its tie/order, position and size semantics,
-  using the existing graph/data/rendering paths and no hidden analysis.
+  single_component=True retains the largest thresholded solid component by node
+  count, choosing the first on ties and preserving original node IDs/coordinates.
+  Compute colors/degrees before filtering; size areas use the displayed count and
+  median sizes. Keep full layout/cache coordinates and leave plot=False unchanged.
+  Filtering disconnected graphs requires dashed_edges=None, as upstream.
+  Scanpy 1.11.5's direct disconnected call fails because colors are subsetted but
+  coordinates are not. Semantic, subsetted-public-reference, chart, workflow and
+  resource checks cover the native intended behavior; the direct parent-reference
+  gate stays blocked by C15, with a strict expected-failure test to detect a fix.
   This does not close M11.c: categorical mixtures/pies,
-  multiple color panels, single-component filtering, directed transitions, file
+  multiple color panels, directed transitions, file
   positions and GEXF export remain explicit unsupported cases. M14 owns font/global
   style parity and the native fixed dash pattern versus Matplotlib's per-width
   dash lengths. Audit these before claiming full PAGA compatibility. C04's missing

@@ -1,7 +1,7 @@
 """Stored PAGA graphs and node tables, with layout computation owned by Scanpy."""
 
-from collections.abc import Mapping, Sequence
-from typing import Any
+from collections.abc import Iterable, Mapping, Sequence
+from typing import Any, cast
 
 import numpy as np
 import pandas as pd
@@ -126,6 +126,7 @@ def paga_nodes(
     solid: Any,
     dashed: Any,
     use_raw: bool,
+    indices: np.ndarray | None = None,
 ) -> tuple[pd.DataFrame, bool]:
     """Return node values, labels and areas, plus Scanpy's automatic colorbar choice."""
     categories = adata.obs[key].cat.categories
@@ -144,15 +145,21 @@ def paga_nodes(
     sizes = numeric_values(
         pd.DataFrame(adata.uns.get(f"{key}_sizes", np.ones(count))), context=CONTEXT
     ).ravel()
-    if (
-        len(sizes) != count
-        or not np.isfinite(sizes).all()
-        or (sizes < 0).any()
-        or np.median(sizes) <= 0
-    ):
+    if len(sizes) != count or not np.isfinite(sizes).all() or (sizes < 0).any():
         raise ValueError(
             f"{CONTEXT}: stored group sizes require nonnegative values and a positive median."
         )
+    slots = np.arange(count)
+    if indices is not None:
+        slots = indices
+        categories = categories[slots]
+        positions = positions[slots]
+        labels = np.asarray(labels)[slots]
+        colors = np.asarray(colors)[slots]
+        sizes = sizes[slots]
+        count = len(slots)
+    if np.median(sizes) <= 0:
+        raise ValueError(f"{CONTEXT}: displayed group sizes require a positive median.")
     scale = number(node_size_scale, "node_size_scale", context=CONTEXT)
     power = number(node_size_power, "node_size_power", context=CONTEXT, minimum=-np.inf)
     with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
@@ -163,7 +170,7 @@ def paga_nodes(
         raise ValueError(f"{CONTEXT}: node sizing must produce finite areas.")
     nodes = pd.DataFrame(
         {
-            "_id": np.arange(count),
+            "_id": slots,
             "_group": list(map(str, categories)),
             "_label": list(labels),
             "_x": positions[:, 0],
@@ -177,6 +184,15 @@ def paga_nodes(
         }
     )
     return nodes, colorbar
+
+
+def largest_component(graph: Any) -> np.ndarray:
+    """Return original node indices of the largest component, choosing the first on ties."""
+    import networkx as nx
+
+    components = cast(Iterable[set[int]], nx.connected_components(graph))
+    largest = max(components, key=len)
+    return np.array(sorted(largest), dtype=int)
 
 
 def _node_colors(

@@ -9,7 +9,12 @@ import pytest
 
 import genome_spy.integrations.scanpy as gsc
 from tests.integrations.scanpy.helpers import leaf_marks
-from tests.integrations.scanpy.paga_fixture import POSITIONS, make_paga, paga_cases
+from tests.integrations.scanpy.paga_fixture import (
+    POSITIONS,
+    make_paga,
+    paga_cases,
+    paga_reference,
+)
 
 
 def test_signature_retains_scanpy_defaults_except_omitted_matplotlib_axes():
@@ -41,10 +46,10 @@ def test_nodes_edges_labels_bounds_and_cache_match_public_scanpy(case, monkeypat
 
     a = make_paga(case)
     options = paga_cases()[case]
-    reference = a.copy()
+    reference, reference_options = paga_reference(case)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        ax = sc.pl.paga(reference, show=False, **options)
+        ax = sc.pl.paga(reference, show=False, **reference_options)
         ax.figure.canvas.draw()
     point = next(c for c in ax.collections if isinstance(c, PathCollection))
     positions = np.asarray(point.get_offsets())
@@ -118,7 +123,8 @@ def test_nodes_edges_labels_bounds_and_cache_match_public_scanpy(case, monkeypat
         )
         np.testing.assert_allclose([r["_width"] for r in edges], widths)
     np.testing.assert_allclose(
-        a.uns["paga"]["pos"], positions if options.get("add_pos", True) else old_pos
+        a.uns["paga"]["pos"],
+        options.get("pos", positions) if options.get("add_pos", True) else old_pos,
     )
     pd.testing.assert_frame_equal(a.obs, before)
     assert (a.uns["paga"]["connectivities"] != stored).nnz == 0
@@ -176,7 +182,6 @@ def test_supplied_positions_skip_layout_and_failures_leave_caches_unchanged(
     "option",
     [
         {"transitions": "velocity"},
-        {"single_component": True},
         {"export_to_gexf": True},
         {"fontoutline": 2},
         {"text_kwds": {"color": "red"}},
@@ -407,3 +412,94 @@ def test_unsupported_color_collisions_and_categorical_mixtures_fail_clearly(colo
     a.obs["other_category"] = a.obs["cluster"]
     with pytest.raises(NotImplementedError, match="gsc.pl.paga:.*unsupported"):
         gsc.pl.paga(a, color=color, pos=POSITIONS, show=False)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=ValueError,
+    reason="Scanpy 1.11.5 trims component colors but keeps full coordinates; recheck on an upstream fix.",
+)
+def test_direct_scanpy_component_entry_detects_an_upstream_fix():
+    import scanpy as sc
+    import matplotlib.pyplot as plt
+    from matplotlib.collections import PathCollection
+
+    a = make_paga("component")
+    try:
+        ax = sc.pl.paga(
+            a, pos=POSITIONS, threshold=0.2, single_component=True, show=False
+        )
+    except ValueError as error:
+        assert (
+            str(error)
+            == "'c' argument has 3 elements, which is inconsistent with 'x' and 'y' with size 4."
+        )
+        raise
+    else:
+        point = next(c for c in ax.collections if isinstance(c, PathCollection))
+        assert len(point.get_offsets()) == 3
+    finally:
+        plt.close("all")
+
+
+@pytest.mark.parametrize("storage", ["csr", "csc", "lil"])
+@pytest.mark.parametrize("supplied", [False, True])
+def test_component_preserves_ids_sources_and_full_coordinate_cache(
+    storage, supplied, monkeypatch
+):
+    import scanpy as sc
+    import matplotlib.pyplot as plt
+
+    a = make_paga("component_score")
+    matrix = a.uns["paga"]["connectivities"].asformat(storage)
+    a.uns["paga"]["connectivities"] = matrix
+    before = matrix.copy()
+    obs = a.obs.copy(deep=True)
+    reference = a.copy()
+    reference.uns["paga"]["connectivities"] = matrix.tocsr()
+    options = {"pos": POSITIONS} if supplied else {}
+    sc.pl.paga(reference, threshold=0.2, plot=False, show=False, **options)
+    monkeypatch.setattr(sc.tl, "paga", lambda *a, **k: pytest.fail("Reran PAGA"))
+    monkeypatch.setattr(plt, "figure", lambda *a, **k: pytest.fail("Created figure"))
+    spec = gsc.pl.paga(
+        a, single_component=True, threshold=0.2, color="score", show=False, **options
+    ).to_dict()
+    rows = next(rows for rows in spec["datasets"].values() if "_cells" in rows[0])
+    assert [r["_id"] for r in rows] == [1, 2, 3]
+    assert [r["_group"] for r in rows] == ["B", "C", "D"]
+    np.testing.assert_allclose(
+        [[r["_x"], r["_y"]] for r in rows], reference.uns["paga"]["pos"][[1, 2, 3]]
+    )
+    assert a.uns["paga"]["pos"].shape == (4, 2)
+    np.testing.assert_allclose(a.uns["paga"]["pos"], reference.uns["paga"]["pos"])
+    assert a.uns["paga"]["connectivities"] is matrix and (matrix != before).nnz == 0
+    pd.testing.assert_frame_equal(a.obs, obs)
+
+
+@pytest.mark.parametrize("plot", [True, False])
+def test_dashed_component_restriction_only_applies_when_plotting_a_disconnected_graph(
+    plot,
+):
+    a = make_paga()
+    kwargs = dict(
+        single_component=True, dashed_edges="weak", pos=POSITIONS, show=False, plot=plot
+    )
+    before = a.uns["paga"]["pos"].copy()
+    # Connected graphs and no-plot layout still use the ordinary public behavior.
+    assert (gsc.pl.paga(a, **kwargs) is not None) is plot
+    if plot:
+        a.uns["paga"]["pos"] = before
+        with pytest.raises(ValueError, match="single_component.*dashed_edges=None"):
+            gsc.pl.paga(a, threshold=0.2, **kwargs)
+        np.testing.assert_array_equal(a.uns["paga"]["pos"], before)
+    else:
+        assert gsc.pl.paga(a, threshold=0.2, **kwargs) is None
+
+
+def test_tied_components_use_node_count_and_original_order_not_cell_counts():
+    a = make_paga("component_tie")
+    a.uns["cluster_sizes"] = np.array([1, 1, 100, 100])
+    spec = gsc.pl.paga(a, pos=POSITIONS, single_component=True, show=False).to_dict()
+    rows = next(rows for rows in spec["datasets"].values() if "_cells" in rows[0])
+    assert [r["_id"] for r in rows] == [0, 1]
+    assert [r["_area"] for r in rows] == pytest.approx([2000 / (np.sqrt(2) + 10)] * 2)
