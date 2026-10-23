@@ -128,9 +128,13 @@ def prepare_paga_path(
                 f"{CONTEXT}: categorical annotation tracks are not supported yet."
             )
 
-    # Shared Scanpy access selects only requested columns, with raw falling back to X.
+    # Select columns before path rows so AnnData cannot copy unrequested genes.
     table = grouped_expression(
-        adata[order], keys, groups_key, use_raw=use_raw and adata.raw is not None
+        adata,
+        keys,
+        groups_key,
+        use_raw=use_raw and adata.raw is not None,
+        observation_positions=order,
     ).values
     values = numeric_values(table, context=CONTEXT)
     annotation_values = numeric_values(

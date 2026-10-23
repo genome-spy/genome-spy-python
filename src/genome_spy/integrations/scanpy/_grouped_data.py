@@ -152,12 +152,14 @@ def grouped_expression(
     var_group_positions: Sequence[tuple[int, int]] | None = None,
     value_limit: int | None = None,
     read_values: bool = True,
+    observation_positions: np.ndarray | None = None,
 ) -> GroupedExpression:
     """Return requested AnnData values in a separate grouped table with marker brackets.
 
     Preserve cell order and repeated genes; value_limit rejects oversized requests
     before expression access, without changing AnnData. read_values=False returns
     only category/slot metadata after zero-row feature validation.
+    observation_positions selects/reorders rows after column access, before validation.
     """
     from anndata import AnnData
     from scanpy.get import obs_df
@@ -223,6 +225,8 @@ def grouped_expression(
     if not read_values:
         # Zero rows validate feature lookup; only group annotations need cell rows.
         frame = obs_df(adata, keys=columns, use_raw=use_raw)
+    if observation_positions is not None:
+        frame = frame.iloc[observation_positions]
 
     # Convert strings on this separate table so AnnData stays unchanged.
     adata.strings_to_categoricals(frame)

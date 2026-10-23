@@ -198,6 +198,76 @@ def test_selected_sparse_genes_only_are_densified_without_mutation(monkeypatch):
     assert repr(a.uns) == before_uns
 
 
+@pytest.mark.parametrize("use_raw", [False, True], ids=["X", "raw"])
+def test_dense_path_reads_selected_columns_before_reordering_rows(use_raw):
+    copied_widths = []
+
+    class SelectedColumnsOnly(np.ndarray):
+        def __getitem__(self, index):
+            result = super().__getitem__(index)
+            if (
+                isinstance(result, np.ndarray)
+                and result.ndim == 2
+                and not np.shares_memory(self, result)
+            ):
+                copied_widths.append(result.shape[1])
+                assert result.shape[1] == 2, "Copied unrequested genes"
+            return result
+
+    a = make_path(case="raw_fallback")
+    original = a.X.copy()
+    a.X = original.view(SelectedColumnsOnly)
+    if use_raw:
+        a.raw = a
+        a.X = original * 3
+    _, frame = gsc.pl.paga_path(
+        a,
+        ["beta", "alpha", "beta"],
+        ["g2", "g1"],
+        use_raw=use_raw,
+        return_data=True,
+        show=False,
+    )
+    assert copied_widths and set(copied_widths) == {2}
+    np.testing.assert_array_equal(
+        frame[["g2", "g1"]], original[[3, 0, 4, 1, 3, 0]][:, [1, 0]]
+    )
+
+
+@pytest.mark.parametrize("use_raw", [False, True], ids=["X", "raw"])
+def test_expression_validation_only_checks_cells_in_the_path(use_raw):
+    a = make_path()
+    matrix = a.raw.X if use_raw else a.X
+    matrix[2, 0] = np.inf
+    prepared = prepare_paga_path(
+        a,
+        ["beta", "alpha"],
+        ["g1", "score"],
+        use_raw=use_raw,
+        annotations=(),
+        n_avg=1,
+        groups_key=None,
+        normalize_to_zero_one=False,
+    )
+    factor = 1 if use_raw else 3
+    np.testing.assert_array_equal(
+        prepared.values,
+        [[8 * factor, 5], [2 * factor, 10], [3 * factor, 0], [6 * factor, 20]],
+    )
+    matrix[3, 0] = np.inf
+    with pytest.raises(ValueError, match="finite or missing"):
+        prepare_paga_path(
+            a,
+            ["beta", "alpha"],
+            ["g1", "score"],
+            use_raw=use_raw,
+            annotations=(),
+            n_avg=1,
+            groups_key=None,
+            normalize_to_zero_one=False,
+        )
+
+
 def test_large_path_rejects_before_expression_access(monkeypatch):
     from anndata import AnnData
     from scipy import sparse

@@ -3421,6 +3421,22 @@ with **357.79 MiB peak traced allocation** and **29,983,240 JSON bytes**. Native
 explicit GC**. These are local observations; serialization/transport remains a
 material cost and the value budget is not a large-grid efficiency guarantee.
 
+**Memory correction (2026-10-23):** the shared reader now accepts observation
+positions after public Scanpy column extraction, before grouping and numeric
+validation. PAGA path no longer creates a row-indexed AnnData, eliminating its
+full-width dense X/raw copies while preserving repeated nodes, mixed obs/gene
+keys and path-only validation. Dense X/raw tests intercept column copies and
+both failed on the previous implementation. A separate regression ignores
+infinite expression outside the path and still rejects it inside the path.
+For 1,000 cells by 10,000 float32 genes, selecting two genes now peaks at
+**0.54 MiB extra for X / 0.52 MiB for raw**, versus **76.69 / 38.69 MiB** before
+the fix (imports and source allocation excluded). Column extraction still spans
+the supplied observations; this does not introduce streaming or change Scanpy's
+handling of caller-created views. **394 relevant Python tests, eleven PAGA path
+browser tests and both clean workflow tests pass**, with the existing C16
+expected failure. The updated live expression notebook ran all 42 nonempty code
+cells without Python errors. Ruff and mypy pass. Native chart construction is unchanged.
+
 The preview requires two keys/two smoothed samples, at most one numeric track,
 finite stored pseudotime and resident expression. Categorical/multiple tracks,
 singular shapes, custom margins and broader source/style/export options retain

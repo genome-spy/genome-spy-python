@@ -907,7 +907,11 @@ upstream deprecation is not a reason to silently drop a pinned public entry.
   cumulative averages and then optional per-key zero–one normalization. Reuse
   grouped_expression/public obs_df and native matrix_tiles, fitted values,
   slot labels, palettes, zoom and surround. Read raw when present or fall back to
-  X; never recompute PAGA/DPT. Original group bands span the full plot width even
+  X; never recompute PAGA/DPT. Select columns through the shared reader before
+  applying path row order; do not create a row-indexed AnnData that copies all
+  genes. Validate only path values, including repeated nodes and mixed obs/gene
+  keys; dense X/raw tests must detect copies of unrequested gene columns.
+  Original group bands span the full plot width even
   after smoothing shortens profiles/annotations. Keep numeric annotation tracks
   aligned and return (chart, frame) for show=False/return_data=True, or frame
   after display. The preview requires two keys/two smoothed cells, at most one
